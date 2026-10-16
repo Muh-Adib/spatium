@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Unimasi">
+  <rect width="64" height="64" rx="14" fill="#060E1F" />
+  <path d="M14 44V20h7.2v15.2c0 3.1 1.6 4.8 4.4 4.8s4.4-1.7 4.4-4.8V20H37v24h-7.2v-3.4c-1.6 2.4-4.2 3.9-7.6 3.9-5 0-8.2-3.3-8.2-9.1Z" fill="#FFFFFF"
+  />
+  <path d="M40 44V20h7l7 13.4V20h4.6v24H52l-7.4-13.9V44H40Z" fill="#FFD400" />
+</svg>

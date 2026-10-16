@@ -1,0 +1,126 @@
+.services-compare {
+  position: relative;
+  background: var(--navy-900);
+}
+
+.compare-table-wrap {
+  overflow-x: auto;
+  border-radius: var(--r-lg);
+  border: 1px solid var(--line);
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.012));
+}
+
+.compare-table {
+  width: 100%;
+  min-width: 720px;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.compare-table th,
+.compare-table td {
+  padding: 1.15rem 1.3rem;
+  vertical-align: top;
+  border-bottom: 1px solid var(--line);
+}
+
+.compare-table thead th {
+  background: rgba(255, 255, 255, 0.04);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.05rem;
+}
+
+.compare-table thead th:first-child {
+  font-family: var(--font-mono);
+  font-size: 0.64rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  font-weight: 500;
+}
+
+.compare-table thead a {
+  display: block;
+  margin-top: 0.3rem;
+  color: var(--white);
+  transition: color var(--dur-fast) var(--ease-out);
+}
+
+.compare-table thead a:hover {
+  color: var(--yellow);
+}
+
+.compare-table__index {
+  display: block;
+  color: var(--yellow);
+  font-size: 0.58rem;
+}
+
+.compare-table tbody th {
+  font-family: var(--font-mono);
+  font-size: 0.64rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  font-weight: 500;
+  width: 190px;
+}
+
+.compare-table tbody td {
+  color: var(--text-muted);
+  font-size: 0.92rem;
+}
+
+.compare-table tbody tr:last-child th,
+.compare-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.compare-table__list {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.compare-table__list li {
+  position: relative;
+  padding-left: 1rem;
+}
+
+.compare-table__list li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.6em;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--yellow);
+}
+
+.compare-table__tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.services-industries {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem 1.6rem;
+  margin-top: 2.2rem;
+  padding-top: 1.8rem;
+  border-top: 1px solid var(--line);
+}
+
+.services-industries li {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-muted);
+  font-size: 0.88rem;
+}
+
+.services-industries svg {
+  color: var(--yellow);
+}

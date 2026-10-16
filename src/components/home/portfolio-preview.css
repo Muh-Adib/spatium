@@ -1,0 +1,99 @@
+.portfolio-preview {
+  position: relative;
+  background: var(--navy-900);
+}
+
+.portfolio-preview__filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: clamp(1.5rem, 3vw, 2.4rem);
+  padding-bottom: 0.2rem;
+}
+
+.filter-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.62rem 1.05rem;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--line);
+  background: var(--surface-1);
+  color: var(--text-muted);
+  font-family: var(--font-display);
+  font-size: 0.86rem;
+  font-weight: 500;
+  transition: background-color var(--dur) var(--ease-out), border-color var(--dur) var(--ease-out),
+    color var(--dur) var(--ease-out), transform var(--dur) var(--ease-out);
+}
+
+.filter-btn:hover {
+  border-color: var(--line-strong);
+  color: var(--text);
+  transform: translateY(-2px);
+}
+
+.filter-btn.is-active {
+  background: var(--yellow);
+  border-color: var(--yellow);
+  color: var(--navy-900);
+  font-weight: 600;
+}
+
+.filter-btn__count {
+  display: inline-grid;
+  place-items: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  border-radius: var(--r-pill);
+  background: rgba(255, 255, 255, 0.12);
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+}
+
+.filter-btn.is-active .filter-btn__count {
+  background: rgba(10, 23, 48, 0.16);
+}
+
+.portfolio-preview__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+  gap: clamp(1rem, 2.2vw, 1.6rem);
+  animation: gridIn 0.45s var(--ease-out);
+}
+
+@keyframes gridIn {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+}
+
+.portfolio-preview__item {
+  display: flex;
+}
+
+.portfolio-preview__item > * {
+  width: 100%;
+}
+
+.portfolio-preview__note {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  margin-top: 2rem;
+  padding: 0.9rem 1.1rem;
+  border-radius: var(--r-md);
+  border: 1px dashed var(--line-strong);
+  background: rgba(255, 212, 0, 0.05);
+  color: var(--text-dim);
+  font-size: 0.82rem;
+  max-width: 76ch;
+}
+
+.portfolio-preview__note svg {
+  color: var(--yellow);
+  flex: none;
+  margin-top: 2px;
+}

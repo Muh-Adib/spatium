@@ -1,0 +1,22 @@
+.journal-preview {
+  position: relative;
+  background: linear-gradient(180deg, var(--navy-900), var(--navy-950));
+}
+
+.journal-preview__featured {
+  margin-bottom: clamp(1rem, 2.2vw, 1.6rem);
+}
+
+.journal-preview__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+  gap: clamp(1rem, 2.2vw, 1.6rem);
+}
+
+.journal-preview__item {
+  display: flex;
+}
+
+.journal-preview__item > * {
+  width: 100%;
+}

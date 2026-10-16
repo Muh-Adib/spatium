@@ -1,0 +1,219 @@
+.inquiry {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.inquiry__form {
+  display: grid;
+  gap: 1.15rem;
+}
+
+.inquiry__row {
+  display: grid;
+  gap: 1.15rem;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+@media (min-width: 700px) {
+  .inquiry__row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.field {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.field label {
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.field label span {
+  color: var(--yellow);
+}
+
+.field input,
+.field select,
+.field textarea {
+  width: 100%;
+  padding: 0.85rem 1rem;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--line);
+  background: rgba(4, 9, 26, 0.55);
+  color: var(--text);
+  font-size: 0.95rem;
+  transition: border-color var(--dur-fast) var(--ease-out), background-color var(--dur-fast) var(--ease-out);
+}
+
+.field textarea {
+  resize: vertical;
+  min-height: 130px;
+  line-height: 1.6;
+}
+
+.field select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23ffd400' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  padding-right: 2.5rem;
+}
+
+.field input::placeholder,
+.field textarea::placeholder {
+  color: rgba(238, 242, 250, 0.32);
+}
+
+.field input:hover,
+.field select:hover,
+.field textarea:hover {
+  border-color: var(--line-strong);
+}
+
+.field input:focus,
+.field select:focus,
+.field textarea:focus {
+  outline: none;
+  border-color: var(--yellow);
+  background: rgba(4, 9, 26, 0.8);
+  box-shadow: 0 0 0 3px rgba(255, 212, 0, 0.16);
+}
+
+.field [aria-invalid='true'] {
+  border-color: var(--danger);
+}
+
+.field [aria-invalid='true']:focus {
+  box-shadow: 0 0 0 3px rgba(255, 95, 86, 0.18);
+}
+
+.field__error {
+  color: var(--danger);
+  font-size: 0.8rem;
+}
+
+.field__hint {
+  color: var(--text-dim);
+  font-size: 0.8rem;
+}
+
+.field__foot {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.field__count {
+  color: var(--text-dim);
+  font-size: 0.58rem;
+  flex: none;
+}
+
+.inquiry__honeypot {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.inquiry__alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  padding: 0.85rem 1rem;
+  border-radius: var(--r-sm);
+  font-size: 0.88rem;
+}
+
+.inquiry__alert--error {
+  border: 1px solid rgba(255, 95, 86, 0.4);
+  background: rgba(255, 95, 86, 0.1);
+  color: #ffb3ae;
+}
+
+.inquiry__alert svg {
+  flex: none;
+  margin-top: 3px;
+}
+
+.inquiry__submit {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  flex-wrap: wrap;
+  margin-top: 0.4rem;
+}
+
+.inquiry__submit-note {
+  color: var(--text-dim);
+  font-size: 0.8rem;
+  max-width: 40ch;
+}
+
+.inquiry__submit-note span {
+  color: var(--yellow);
+}
+
+/* --- Success --- */
+.inquiry__success {
+  display: grid;
+  gap: 1rem;
+  padding: clamp(1.4rem, 3vw, 2rem);
+  border-radius: var(--r-lg);
+  border: 1px solid rgba(255, 212, 0, 0.35);
+  background: linear-gradient(150deg, rgba(255, 212, 0, 0.1), rgba(255, 212, 0, 0.02));
+  animation: panelPop 0.45s var(--ease-out);
+}
+
+@keyframes panelPop {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+
+.inquiry__success-icon {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--yellow);
+  color: var(--navy-900);
+}
+
+.inquiry__success h3 {
+  font-size: var(--fs-h3);
+}
+
+.inquiry__success p {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  max-width: 62ch;
+}
+
+.inquiry__summary {
+  padding: 1rem 1.1rem;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--line);
+  background: rgba(4, 9, 26, 0.6);
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  line-height: 1.7;
+  white-space: pre-wrap;
+  overflow-x: auto;
+}
+
+.inquiry__success-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+}
