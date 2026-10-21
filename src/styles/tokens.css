@@ -5,67 +5,68 @@
 
 :root {
   /* --- Core palette ----------------------------------------------------- */
-  --navy-950: #04091a;
-  --navy-900: #060e1f;
-  --navy-850: #08142b;
-  --navy-800: #0a1730;
-  --navy-700: #0f2044;
-  --navy-600: #16305f;
-  --navy-500: #1e3e77;
-  --navy-400: #2f5596;
+  --navy-950: #030611;
+  --navy-900: #060a17;
+  --navy-850: #0a1124;
+  --navy-800: #0f1932;
+  --navy-700: #162444;
+  --navy-600: #1e315b;
+  --navy-500: #2a437a;
+  --navy-400: #3b5fa3;
 
-  --yellow: #ffd400;
-  --yellow-500: #f5c400;
-  --yellow-600: #e0ad00;
-  --yellow-soft: #ffe566;
+  --yellow: #ffde00;
+  --yellow-500: #f5cf00;
+  --yellow-600: #e0bc00;
+  --yellow-soft: #ffe855;
 
   --white: #ffffff;
-  --paper: #f5f6f8;
-  --paper-2: #eceef2;
-  --ink: #0a1730;
-  --ink-soft: #3d4a63;
+  --paper: #f8fafc;
+  --paper-2: #edf2f7;
+  --ink: #070e1e;
+  --ink-soft: #334155;
 
-  --danger: #ff5f56;
-  --success: #2ec27e;
+  --danger: #ff5252;
+  --success: #22c55e;
 
   /* --- Surfaces --------------------------------------------------------- */
   --bg: var(--navy-900);
   --bg-deep: var(--navy-950);
-  --surface-1: rgba(255, 255, 255, 0.035);
-  --surface-2: rgba(255, 255, 255, 0.06);
-  --surface-3: rgba(255, 255, 255, 0.09);
-  --line: rgba(255, 255, 255, 0.12);
-  --line-strong: rgba(255, 255, 255, 0.22);
+  --surface-1: #0a1224;
+  --surface-2: #0e1a33;
+  --surface-3: #142345;
+  --surface-translucent: rgba(14, 26, 51, 0.75);
+  --line: rgba(255, 255, 255, 0.08);
+  --line-strong: rgba(255, 255, 255, 0.16);
 
   /* --- Text ------------------------------------------------------------- */
-  --text: #f4f6fb;
-  --text-muted: rgba(238, 242, 250, 0.66);
-  --text-dim: rgba(238, 242, 250, 0.44);
+  --text: #f8fafc;
+  --text-muted: #94a3b8;
+  --text-dim: #64748b;
   --text-ink: var(--ink);
-  --text-ink-muted: rgba(10, 23, 48, 0.66);
+  --text-ink-muted: rgba(7, 14, 30, 0.65);
 
   /* --- Typography ------------------------------------------------------- */
-  --font-display: 'Space Grotesk', 'Segoe UI', system-ui, -apple-system, sans-serif;
-  --font-body: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
-  --font-mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+  --font-display: 'Syne', system-ui, -apple-system, sans-serif;
+  --font-body: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  --font-mono: 'DM Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
 
-  --fs-display-xl: clamp(3.1rem, 9.2vw, 8.4rem);
-  --fs-display-lg: clamp(2.4rem, 5.6vw, 4.6rem);
-  --fs-display-md: clamp(1.9rem, 3.8vw, 3.1rem);
-  --fs-h3: clamp(1.35rem, 2.1vw, 1.85rem);
-  --fs-h4: clamp(1.1rem, 1.5vw, 1.28rem);
-  --fs-body-lg: clamp(1.02rem, 1.25vw, 1.16rem);
-  --fs-body: 1rem;
+  --fs-display-xl: clamp(3.2rem, 8.5vw, 7.8rem);
+  --fs-display-lg: clamp(2.35rem, 5.2vw, 4.4rem);
+  --fs-display-md: clamp(1.85rem, 3.5vw, 2.9rem);
+  --fs-h3: clamp(1.3rem, 2vw, 1.75rem);
+  --fs-h4: clamp(1.08rem, 1.4vw, 1.25rem);
+  --fs-body-lg: clamp(1.02rem, 1.2vw, 1.14rem);
+  --fs-body: 0.98rem;
   --fs-small: 0.875rem;
   --fs-micro: 0.75rem;
 
-  --lh-tight: 0.98;
-  --lh-heading: 1.06;
-  --lh-body: 1.68;
+  --lh-tight: 0.94;
+  --lh-heading: 1.05;
+  --lh-body: 1.65;
 
-  --tracking-tight: -0.028em;
-  --tracking-wide: 0.14em;
-  --tracking-eyebrow: 0.22em;
+  --tracking-tight: -0.035em;
+  --tracking-wide: 0.12em;
+  --tracking-eyebrow: 0.18em;
 
   /* --- Space ------------------------------------------------------------ */
   --space-1: 0.25rem;
