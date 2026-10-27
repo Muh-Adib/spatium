@@ -1,5 +1,7 @@
+'use client'
+
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { useLocation } from 'react-router-dom'
+import { usePathname } from 'next/navigation'
 
 /**
  * Observes every [data-reveal] element in the document and adds `.is-visible`
@@ -10,9 +12,10 @@ import { useLocation } from 'react-router-dom'
  * hidden at opacity 0.
  */
 export function useScrollReveal() {
-  const { pathname } = useLocation()
+  const pathname = usePathname()
 
   useEffect(() => {
+    if (typeof window === 'undefined') return
     if (typeof IntersectionObserver === 'undefined') {
       document
         .querySelectorAll<HTMLElement>('[data-reveal]:not(.is-visible)')
@@ -60,9 +63,11 @@ export function useScrollReveal() {
 
 /** Resets scroll position on navigation (except when a hash target is present). */
 export function useScrollToTopOnNavigate() {
-  const { pathname, hash } = useLocation()
+  const pathname = usePathname()
 
   useEffect(() => {
+    if (typeof window === 'undefined') return
+    const hash = window.location.hash
     if (hash) {
       const el = document.getElementById(hash.slice(1))
       if (el) {
@@ -71,12 +76,13 @@ export function useScrollToTopOnNavigate() {
       }
     }
     window.scrollTo({ top: 0, left: 0, behavior: 'auto' })
-  }, [pathname, hash])
+  }, [pathname])
 }
 
 /** Locks body scroll (mobile nav, modals). */
 export function useBodyScrollLock(locked: boolean) {
   useEffect(() => {
+    if (typeof document === 'undefined') return
     const { body } = document
     if (locked) {
       const prev = body.style.overflow
@@ -96,7 +102,7 @@ export function useReducedMotion() {
   const [reduced, setReduced] = useState(false)
 
   useEffect(() => {
-    if (!window.matchMedia) return
+    if (typeof window === 'undefined' || !window.matchMedia) return
     const query = window.matchMedia('(prefers-reduced-motion: reduce)')
     const update = () => setReduced(query.matches)
     update()
@@ -142,7 +148,7 @@ export function useActiveAnchor(ids: string[]) {
   const [active, setActive] = useState(ids[0] ?? '')
 
   useEffect(() => {
-    if (typeof IntersectionObserver === 'undefined') return
+    if (typeof window === 'undefined' || typeof IntersectionObserver === 'undefined') return
     const nodes = ids
       .map((id) => document.getElementById(id))
       .filter((node): node is HTMLElement => Boolean(node))

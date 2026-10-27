@@ -1,5 +1,8 @@
+'use client'
+
 import { useEffect, useId, useRef, useState } from 'react'
-import { Link, NavLink, useLocation } from 'react-router-dom'
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { NAV } from '@/data/site'
 import { Icon } from '@/components/Icon'
 import { useBodyScrollLock } from '@/hooks'
@@ -7,7 +10,7 @@ import './header.css'
 
 function Logo() {
   return (
-    <Link to="/" className="brand" aria-label="UNIMASI — home">
+    <Link href="/" className="brand" aria-label="UNIMASI — home">
       <span className="brand__mark" aria-hidden="true">
         <svg viewBox="0 0 40 40" width="34" height="34">
           <rect width="40" height="40" rx="10" fill="var(--yellow)" />
@@ -30,7 +33,7 @@ export function Header() {
   const [scrolled, setScrolled] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const [openMenu, setOpenMenu] = useState<string | null>(null)
-  const location = useLocation()
+  const pathname = usePathname()
   const menuId = useId()
   const closeTimer = useRef<number | null>(null)
 
@@ -46,7 +49,7 @@ export function Header() {
   useEffect(() => {
     setMobileOpen(false)
     setOpenMenu(null)
-  }, [location.pathname])
+  }, [pathname])
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
@@ -69,7 +72,7 @@ export function Header() {
   }
 
   const isActive = (to: string) =>
-    to === '/' ? location.pathname === '/' : location.pathname.startsWith(to)
+    to === '/' ? pathname === '/' : Boolean(pathname?.startsWith(to))
 
   return (
     <>
@@ -84,14 +87,15 @@ export function Header() {
             <ul className="nav-desktop__list">
               {NAV.map((item) => {
                 if (!item.children) {
+                  const active = isActive(item.to)
                   return (
                     <li key={item.to}>
-                      <NavLink
-                        to={item.to}
-                        className={({ isActive: a }) => `nav-link${a ? ' is-active' : ''}`}
+                      <Link
+                        href={item.to}
+                        className={`nav-link${active ? ' is-active' : ''}`}
                       >
                         {item.label}
-                      </NavLink>
+                      </Link>
                     </li>
                   )
                 }
@@ -123,7 +127,7 @@ export function Header() {
                       <ul>
                         {item.children.map((child) => (
                           <li key={child.to + child.label}>
-                            <Link to={child.to} className="nav-dropdown__link">
+                            <Link href={child.to} className="nav-dropdown__link">
                               <span className="nav-dropdown__label">{child.label}</span>
                               {child.blurb ? (
                                 <span className="nav-dropdown__blurb">{child.blurb}</span>
@@ -140,7 +144,7 @@ export function Header() {
           </nav>
 
           <div className="site-header__actions">
-            <Link to="/contact" className="btn btn--primary btn--sm header-cta">
+            <Link href="/contact" className="btn btn--primary btn--sm header-cta">
               Start a Project
               <span className="btn__icon">
                 <Icon name="arrow-right" size={16} />
@@ -175,7 +179,7 @@ export function Header() {
                     <ul className="mobile-nav__sublist">
                       {item.children.map((child) => (
                         <li key={child.to + child.label}>
-                          <Link to={child.to} className="mobile-nav__sublink">
+                          <Link href={child.to} className="mobile-nav__sublink">
                             {child.label}
                           </Link>
                         </li>
@@ -184,7 +188,7 @@ export function Header() {
                   </details>
                 ) : (
                   <Link
-                    to={item.to}
+                    href={item.to}
                     className={`mobile-nav__link${isActive(item.to) ? ' is-active' : ''}`}
                   >
                     {item.label}
@@ -195,14 +199,14 @@ export function Header() {
           </ul>
         </nav>
         <div className="mobile-nav__footer">
-          <Link to="/contact" className="btn btn--primary btn--block">
+          <Link href="/contact" className="btn btn--primary btn--block">
             Start a Project
             <span className="btn__icon">
               <Icon name="arrow-right" size={16} />
             </span>
           </Link>
           <p className="mobile-nav__note">
-            Or email <a href={`mailto:${'hello@unimasi.studio'}`}>hello@unimasi.studio</a>
+            Or email <a href="mailto:hello@unimasi.studio">hello@unimasi.studio</a>
           </p>
         </div>
       </div>

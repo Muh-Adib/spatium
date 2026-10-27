@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
-import { Link, Navigate, useParams } from 'react-router-dom'
-import { Seo, SITE_URL } from '@/components/Seo'
+import type { Metadata } from 'next'
+import Link from 'next/link'
+import { notFound } from 'next/navigation'
 import { Breadcrumbs } from '@/components/ui/PageHero'
 import { StudioArt } from '@/components/art/StudioArt'
 import { ArticleCard } from '@/components/journal/ArticleCard'
@@ -8,8 +9,53 @@ import { CTASection } from '@/components/ui/CTASection'
 import { Reveal } from '@/components/ui/Reveal'
 import { SectionHead } from '@/components/ui/SectionHead'
 import { Icon } from '@/components/Icon'
-import { formatDate, getArticle, getRelatedArticles, type Block } from '@/data/articles'
-import './article.css'
+import {
+  SORTED_ARTICLES,
+  formatDate,
+  getArticle,
+  getRelatedArticles,
+  type Block,
+} from '@/data/articles'
+import '@/pages/article.css'
+
+const SITE_URL = 'https://unimasi.studio'
+
+export function generateStaticParams() {
+  return SORTED_ARTICLES.map((article) => ({
+    slug: article.slug,
+  }))
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>
+}): Promise<Metadata> {
+  const { slug } = await params
+  const article = getArticle(slug)
+  if (!article) return { title: 'Article Not Found' }
+
+  return {
+    title: article.title,
+    description: article.metaDescription,
+    alternates: {
+      canonical: `${SITE_URL}/journal/${article.slug}`,
+    },
+    openGraph: {
+      type: 'article',
+      title: `${article.title} · UNIMASI`,
+      description: article.metaDescription,
+      publishedTime: article.date,
+      authors: [article.author],
+      url: `${SITE_URL}/journal/${article.slug}`,
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: article.title,
+      description: article.metaDescription,
+    },
+  }
+}
 
 function slugify(text: string): string {
   return text
@@ -42,7 +88,7 @@ function renderInline(text: string): ReactNode[] {
         const [, label, href] = link
         out.push(
           href.startsWith('/') ? (
-            <Link key={key++} to={href}>
+            <Link key={key++} href={href}>
               {label}
             </Link>
           ) : (
@@ -109,11 +155,15 @@ function BlockRenderer({ block }: { block: Block }) {
   }
 }
 
-export default function ArticleDetail() {
-  const { slug = '' } = useParams()
+export default async function ArticleDetailPage({
+  params,
+}: {
+  params: Promise<{ slug: string }>
+}) {
+  const { slug } = await params
   const article = getArticle(slug)
 
-  if (!article) return <Navigate to="/journal" replace />
+  if (!article) notFound()
 
   const related = getRelatedArticles(article)
   const headings = article.body.filter((b): b is Extract<Block, { type: 'h2' }> => b.type === 'h2')
@@ -151,12 +201,9 @@ export default function ArticleDetail() {
 
   return (
     <>
-      <Seo
-        title={article.title}
-        description={article.metaDescription}
-        path={`/journal/${article.slug}`}
-        type="article"
-        jsonLd={jsonLd}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
       <article className="article">
@@ -245,7 +292,7 @@ export default function ArticleDetail() {
                 <p className="mono article__service-cta-label">Related service</p>
                 <h2>{article.serviceCta.label}</h2>
                 <p>{article.serviceCta.blurb}</p>
-                <Link to={article.serviceCta.to} className="btn btn--primary">
+                <Link href={article.serviceCta.to} className="btn btn--primary">
                   Explore
                   <span className="btn__icon">
                     <Icon name="arrow-right" size={16} />
@@ -259,7 +306,7 @@ export default function ArticleDetail() {
               <ul>
                 {article.relatedLinks.map((link) => (
                   <li key={link.to + link.label}>
-                    <Link to={link.to} className="link-arrow">
+                    <Link href={link.to} className="link-arrow">
                       {link.label}
                       <Icon name="arrow-right" size={15} />
                     </Link>
@@ -269,7 +316,7 @@ export default function ArticleDetail() {
             </nav>
 
             <p className="article__back">
-              <Link to="/journal" className="link-arrow">
+              <Link href="/journal" className="link-arrow">
                 <Icon name="arrow-left" size={15} />
                 All articles
               </Link>

@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import Link from 'next/link'
 import { CONTACT, SOCIALS } from '@/data/site'
 import { SERVICES } from '@/data/services'
 import { Icon } from '@/components/Icon'
@@ -13,14 +13,14 @@ export function Footer() {
       <div className="container container--wide site-footer__inner">
         <div className="site-footer__top">
           <div className="site-footer__brand">
-            <Link to="/" className="footer-logo" aria-label="UNIMASI — home">
+            <Link href="/" className="footer-logo" aria-label="UNIMASI — home">
               UNIMASI<span className="footer-logo__dot">.</span>
             </Link>
             <p className="footer-tagline">
               We make ideas move. An animation and motion design studio for teams that need complex
               subjects understood.
             </p>
-            <Link to="/contact" className="btn btn--primary">
+            <Link href="/contact" className="btn btn--primary">
               Start a project
               <span className="btn__icon">
                 <Icon name="arrow-right" size={16} />
@@ -33,7 +33,7 @@ export function Footer() {
             <ul>
               {SERVICES.map((service) => (
                 <li key={service.slug}>
-                  <Link to={`/services/${service.slug}`}>{service.name}</Link>
+                  <Link href={`/services/${service.slug}`}>{service.name}</Link>
                 </li>
               ))}
             </ul>
@@ -43,19 +43,19 @@ export function Footer() {
             <h2 className="site-footer__heading">Studio</h2>
             <ul>
               <li>
-                <Link to="/about">About Unimasi</Link>
+                <Link href="/about">About Unimasi</Link>
               </li>
               <li>
-                <Link to="/portfolio">Portfolio</Link>
+                <Link href="/portfolio">Portfolio</Link>
               </li>
               <li>
-                <Link to="/journal">Journal</Link>
+                <Link href="/journal">Journal</Link>
               </li>
               <li>
-                <Link to="/contact">Contact</Link>
+                <Link href="/contact">Contact</Link>
               </li>
               <li>
-                <Link to="/services">All services</Link>
+                <Link href="/services">All services</Link>
               </li>
             </ul>
           </nav>

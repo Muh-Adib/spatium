@@ -1,10 +1,21 @@
-import { Seo, SITE_URL } from '@/components/Seo'
+import type { Metadata } from 'next'
 import { PageHero } from '@/components/ui/PageHero'
 import { InquiryForm } from '@/components/forms/InquiryForm'
 import { Reveal } from '@/components/ui/Reveal'
 import { Icon } from '@/components/Icon'
 import { CONTACT, SOCIALS } from '@/data/site'
-import './contact.css'
+import '@/pages/contact.css'
+
+const SITE_URL = 'https://unimasi.studio'
+
+export const metadata: Metadata = {
+  title: 'Contact',
+  description:
+    'Start a project with UNIMASI. Send your brief, service interest, budget range and timeline and the studio will respond within two working days.',
+  alternates: {
+    canonical: `${SITE_URL}/contact`,
+  },
+}
 
 const EXPECTATIONS = [
   {
@@ -48,29 +59,27 @@ const FAQS = [
   },
 ]
 
-export default function Contact() {
-  const jsonLd = [
-    {
-      '@context': 'https://schema.org',
-      '@type': 'ContactPage',
-      name: 'Contact UNIMASI',
-      url: `${SITE_URL}/contact`,
-      mainEntity: {
-        '@type': 'Organization',
-        name: 'UNIMASI',
-        url: SITE_URL,
-        email: CONTACT.email,
-      },
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'ContactPage',
+    name: 'Contact UNIMASI',
+    url: `${SITE_URL}/contact`,
+    mainEntity: {
+      '@type': 'Organization',
+      name: 'UNIMASI',
+      url: SITE_URL,
+      email: CONTACT.email,
     },
-  ]
+  },
+]
 
+export default function ContactPage() {
   return (
     <>
-      <Seo
-        title="Contact"
-        description="Start a project with UNIMASI. Send your brief, service interest, budget range and timeline and the studio will respond within two working days."
-        path="/contact"
-        jsonLd={jsonLd}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
       <PageHero

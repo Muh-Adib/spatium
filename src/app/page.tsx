@@ -1,4 +1,4 @@
-import { Seo, SITE_NAME, SITE_URL } from '@/components/Seo'
+import type { Metadata } from 'next'
 import { Hero } from '@/components/home/Hero'
 import { ServicesShowcase } from '@/components/home/ServicesShowcase'
 import { Capabilities } from '@/components/home/Capabilities'
@@ -11,11 +11,22 @@ import { InquirySection } from '@/components/home/InquirySection'
 import { SERVICES } from '@/data/services'
 import { STUDIO_EMAIL } from '@/data/site'
 
+const SITE_URL = 'https://unimasi.studio'
+
+export const metadata: Metadata = {
+  title: 'UNIMASI — Animation & Motion Design Studio',
+  description:
+    'UNIMASI is an animation studio specialising in 2D animation, 3D animation and visual production, and motion graphics. We make ideas move.',
+  alternates: {
+    canonical: SITE_URL,
+  },
+}
+
 const jsonLd = [
   {
     '@context': 'https://schema.org',
     '@type': 'Organization',
-    name: SITE_NAME,
+    name: 'UNIMASI',
     url: SITE_URL,
     description:
       'Animation and motion design studio specialising in 2D animation, 3D animation and visual production, and motion graphics.',
@@ -31,7 +42,7 @@ const jsonLd = [
   {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
-    name: SITE_NAME,
+    name: 'UNIMASI',
     url: SITE_URL,
   },
   {
@@ -47,14 +58,12 @@ const jsonLd = [
   },
 ]
 
-export default function Home() {
+export default function HomePage() {
   return (
     <>
-      <Seo
-        title="UNIMASI — Animation & Motion Design Studio"
-        description="UNIMASI is an animation studio specialising in 2D animation, 3D animation and visual production, and motion graphics. We make ideas move."
-        path="/"
-        jsonLd={jsonLd}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <Hero />
       <ServicesShowcase />

@@ -1,3 +1,5 @@
+'use client'
+
 import { useId, useMemo, useRef, useState } from 'react'
 import { SERVICES } from '@/data/services'
 import { BUDGET_RANGES, CONTACT, TIMELINES } from '@/data/site'
@@ -26,7 +28,7 @@ const EMPTY: Fields = {
   brief: '',
 }
 
-const ENDPOINT = import.meta.env.VITE_INQUIRY_ENDPOINT?.trim() || ''
+const ENDPOINT = process.env.NEXT_PUBLIC_INQUIRY_ENDPOINT?.trim() || ''
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i
 
 function validate(values: Fields): Errors {

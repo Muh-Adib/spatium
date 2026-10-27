@@ -1,6 +1,7 @@
+'use client'
+
 import { useEffect, useMemo, useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
-import { Seo, SITE_URL } from '@/components/Seo'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { PageHero } from '@/components/ui/PageHero'
 import { ArticleCard } from '@/components/journal/ArticleCard'
 import { CTASection } from '@/components/ui/CTASection'
@@ -12,27 +13,30 @@ import {
   formatDate,
   type ArticleCategory,
 } from '@/data/articles'
-import './journal.css'
+import '@/pages/journal.css'
 
 type Filter = 'all' | ArticleCategory
 
-export default function Journal() {
-  const [params, setParams] = useSearchParams()
-  const raw = params.get('category')
+export function JournalClient() {
+  const searchParams = useSearchParams()
+  const router = useRouter()
+  const raw = searchParams ? searchParams.get('category') : null
   const initial: Filter = raw && (ARTICLE_CATEGORIES as string[]).includes(raw) ? (raw as Filter) : 'all'
   const [category, setCategory] = useState<Filter>(initial)
   const [query, setQuery] = useState('')
 
   useEffect(() => {
-    const next = params.get('category')
+    const next = searchParams ? searchParams.get('category') : null
     setCategory(next && (ARTICLE_CATEGORIES as string[]).includes(next) ? (next as Filter) : 'all')
-  }, [params])
+  }, [searchParams])
 
   const setCategoryParam = (value: Filter) => {
     setCategory(value)
-    if (value === 'all') params.delete('category')
-    else params.set('category', value)
-    setParams(params, { replace: true })
+    const nextParams = new URLSearchParams(searchParams ? searchParams.toString() : '')
+    if (value === 'all') nextParams.delete('category')
+    else nextParams.set('category', value)
+    const q = nextParams.toString()
+    router.replace(q ? `/journal?${q}` : '/journal', { scroll: false })
   }
 
   const filtered = useMemo(() => {
@@ -53,33 +57,8 @@ export default function Journal() {
   const featured = SORTED_ARTICLES.find((a) => a.featured) ?? SORTED_ARTICLES[0]
   const list = isFiltering ? filtered : filtered.filter((a) => a.slug !== featured.slug)
 
-  const jsonLd = [
-    {
-      '@context': 'https://schema.org',
-      '@type': 'Blog',
-      name: 'UNIMASI Journal',
-      url: `${SITE_URL}/journal`,
-      description:
-        'Practical writing on animation briefs, storyboards, production pipelines and motion design.',
-      blogPost: SORTED_ARTICLES.map((article) => ({
-        '@type': 'BlogPosting',
-        headline: article.title,
-        url: `${SITE_URL}/journal/${article.slug}`,
-        datePublished: article.date,
-        author: { '@type': 'Organization', name: 'UNIMASI' },
-      })),
-    },
-  ]
-
   return (
     <>
-      <Seo
-        title="Journal"
-        description="Articles on animation briefs, storyboards, 2D and 3D pipelines, motion design systems and AI-assisted production — written by the UNIMASI studio."
-        path="/journal"
-        jsonLd={jsonLd}
-      />
-
       <PageHero
         eyebrow="Journal"
         title={

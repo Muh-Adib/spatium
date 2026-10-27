@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import Link from 'next/link'
 import { StudioArt } from '@/components/art/StudioArt'
 import { Icon } from '@/components/Icon'
 import type { Project, ProjectCategory } from '@/data/projects'
@@ -20,7 +20,7 @@ type ProjectCardProps = {
 export function ProjectCard({ project, featured = false }: ProjectCardProps) {
   return (
     <article className={`project-card card card--hover${featured ? ' project-card--featured' : ''}`}>
-      <Link to={`/portfolio/${project.slug}`} className="project-card__link" aria-label={`${project.title} — view case study`}>
+      <Link href={`/portfolio/${project.slug}`} className="project-card__link" aria-label={`${project.title} — view case study`}>
         <div className="project-card__media">
           <StudioArt variant={project.variant} />
           <span className="project-card__overlay" aria-hidden="true">

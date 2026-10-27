@@ -1,5 +1,6 @@
-import { Link, Navigate, useParams } from 'react-router-dom'
-import { Seo, SITE_URL } from '@/components/Seo'
+import type { Metadata } from 'next'
+import Link from 'next/link'
+import { notFound } from 'next/navigation'
 import { PageHero } from '@/components/ui/PageHero'
 import { ServiceVisual } from '@/components/services/ServiceVisual'
 import { ProjectCard } from '@/components/portfolio/ProjectCard'
@@ -10,7 +11,9 @@ import { Icon } from '@/components/Icon'
 import { PROCESS } from '@/data/site'
 import { getService, SERVICES } from '@/data/services'
 import { PROJECTS, type ProjectCategory } from '@/data/projects'
-import './service-detail.css'
+import '@/pages/service-detail.css'
+
+const SITE_URL = 'https://unimasi.studio'
 
 const CATEGORY_BY_SERVICE: Record<string, ProjectCategory> = {
   '2d-animation': '2d',
@@ -19,11 +22,44 @@ const CATEGORY_BY_SERVICE: Record<string, ProjectCategory> = {
   'digital-assets-ai': 'assets',
 }
 
-export default function ServiceDetail() {
-  const { slug = '' } = useParams()
+export function generateStaticParams() {
+  return SERVICES.map((service) => ({
+    slug: service.slug,
+  }))
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>
+}): Promise<Metadata> {
+  const { slug } = await params
+  const service = getService(slug)
+  if (!service) return { title: 'Service Not Found' }
+
+  return {
+    title: service.name,
+    description: service.metaDescription,
+    alternates: {
+      canonical: `${SITE_URL}/services/${service.slug}`,
+    },
+    openGraph: {
+      title: `${service.name} · UNIMASI`,
+      description: service.metaDescription,
+      url: `${SITE_URL}/services/${service.slug}`,
+    },
+  }
+}
+
+export default async function ServiceDetailPage({
+  params,
+}: {
+  params: Promise<{ slug: string }>
+}) {
+  const { slug } = await params
   const service = getService(slug)
 
-  if (!service) return <Navigate to="/services" replace />
+  if (!service) notFound()
 
   const relatedProjects = PROJECTS.filter(
     (project) => project.category === CATEGORY_BY_SERVICE[service.slug],
@@ -77,11 +113,9 @@ export default function ServiceDetail() {
 
   return (
     <>
-      <Seo
-        title={service.name}
-        description={service.metaDescription}
-        path={`/services/${service.slug}`}
-        jsonLd={jsonLd}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
       <PageHero
@@ -236,7 +270,7 @@ export default function ServiceDetail() {
               eyebrow="Related work"
               title={`${service.shortName} capability studies`}
               aside={
-                <Link to={`/portfolio?category=${CATEGORY_BY_SERVICE[service.slug]}`} className="link-arrow">
+                <Link href={`/portfolio?category=${CATEGORY_BY_SERVICE[service.slug]}`} className="link-arrow">
                   See all {service.shortName} work
                   <Icon name="arrow-right" size={16} />
                 </Link>
@@ -257,7 +291,7 @@ export default function ServiceDetail() {
           <ul className="detail-next__grid">
             {otherServices.map((item) => (
               <Reveal as="li" key={item.slug}>
-                <Link to={`/services/${item.slug}`} className="detail-next__card card card--hover">
+                <Link href={`/services/${item.slug}`} className="detail-next__card card card--hover">
                   <span className="detail-next__index mono">{item.index}</span>
                   <h3>{item.name}</h3>
                   <p>{item.tagline}</p>

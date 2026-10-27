@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import Link from 'next/link'
 import { Icon } from '@/components/Icon'
 import { Reveal } from '@/components/ui/Reveal'
 import './cta.css'
@@ -31,14 +31,14 @@ export function CTASection({
           </h2>
           {body ? <p className="lede cta__body">{body}</p> : null}
           <div className="cta__actions">
-            <Link to={primary.to} className="btn btn--primary">
+            <Link href={primary.to} className="btn btn--primary">
               {primary.label}
               <span className="btn__icon">
                 <Icon name="arrow-right" size={17} />
               </span>
             </Link>
             {secondary ? (
-              <Link to={secondary.to} className="btn btn--ghost">
+              <Link href={secondary.to} className="btn btn--ghost">
                 {secondary.label}
               </Link>
             ) : null}

@@ -1,5 +1,7 @@
+'use client'
+
 import { useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
+import Link from 'next/link'
 import { PROJECTS, PROJECT_CATEGORIES, type ProjectCategory } from '@/data/projects'
 import { ProjectCard } from '@/components/portfolio/ProjectCard'
 import { Icon } from '@/components/Icon'
@@ -32,7 +34,7 @@ export function PortfolioPreview() {
                 A selection of studio capability studies across 2D, 3D and motion. Every entry opens a
                 full case study with brief, approach and deliverables.
               </p>
-              <Link to="/portfolio" className="link-arrow">
+              <Link href="/portfolio" className="link-arrow">
                 View the full portfolio
                 <Icon name="arrow-right" size={17} />
               </Link>

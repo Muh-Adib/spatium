@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import Link from 'next/link'
 import { getService } from '@/data/services'
 import { ServiceVisual } from '@/components/services/ServiceVisual'
 import { Icon } from '@/components/Icon'
@@ -20,7 +20,7 @@ export function Capabilities() {
             {service.name}
           </h2>
           <p className="lede capabilities__lede">{service.summary}</p>
-          <Link to={`/services/${service.slug}`} className="btn btn--primary">
+          <Link href={`/services/${service.slug}`} className="btn btn--primary">
             Explore assets &amp; AI
             <span className="btn__icon">
               <Icon name="arrow-right" size={16} />

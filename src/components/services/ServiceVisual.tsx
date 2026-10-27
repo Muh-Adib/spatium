@@ -1,3 +1,5 @@
+'use client'
+
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Icon } from '@/components/Icon'
 import { useReducedMotion } from '@/hooks'

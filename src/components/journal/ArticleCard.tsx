@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import Link from 'next/link'
 import { StudioArt } from '@/components/art/StudioArt'
 import { Icon } from '@/components/Icon'
 import { formatDate, type Article } from '@/data/articles'
@@ -12,7 +12,7 @@ type ArticleCardProps = {
 export function ArticleCard({ article, featured = false }: ArticleCardProps) {
   return (
     <article className={`article-card${featured ? ' article-card--featured' : ''}`}>
-      <Link to={`/journal/${article.slug}`} className="article-card__link">
+      <Link href={`/journal/${article.slug}`} className="article-card__link">
         <div className="article-card__media">
           <StudioArt variant={article.artVariant} />
         </div>

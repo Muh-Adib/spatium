@@ -1,5 +1,5 @@
-import { Link } from 'react-router-dom'
-import { Seo, SITE_URL } from '@/components/Seo'
+import type { Metadata } from 'next'
+import Link from 'next/link'
 import { PageHero } from '@/components/ui/PageHero'
 import { ProcessTimeline } from '@/components/home/ProcessTimeline'
 import { WhyUnimasi } from '@/components/home/WhyUnimasi'
@@ -10,7 +10,18 @@ import { SectionHead } from '@/components/ui/SectionHead'
 import { ServiceVisual } from '@/components/services/ServiceVisual'
 import { Icon } from '@/components/Icon'
 import { CORE_SERVICES } from '@/data/services'
-import './about.css'
+import '@/pages/about.css'
+
+const SITE_URL = 'https://unimasi.studio'
+
+export const metadata: Metadata = {
+  title: 'About',
+  description:
+    'UNIMASI is an animation and motion design studio built to make complex subjects understandable through 2D animation, 3D animation and motion graphics.',
+  alternates: {
+    canonical: `${SITE_URL}/about`,
+  },
+}
 
 const PRINCIPLES = [
   {
@@ -52,14 +63,12 @@ const jsonLd = [
   },
 ]
 
-export default function About() {
+export default function AboutPage() {
   return (
     <>
-      <Seo
-        title="About"
-        description="UNIMASI is an animation and motion design studio built to make complex subjects understandable through 2D animation, 3D animation and motion graphics."
-        path="/about"
-        jsonLd={jsonLd}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
       <PageHero
@@ -136,7 +145,7 @@ export default function About() {
                 <h3 className="about-discipline__title">{service.name}</h3>
                 <p className="about-discipline__tagline">{service.tagline}</p>
                 <p className="about-discipline__body">{service.summary}</p>
-                <Link to={`/services/${service.slug}`} className="link-arrow">
+                <Link href={`/services/${service.slug}`} className="link-arrow">
                   Explore {service.shortName}
                   <Icon name="arrow-right" size={15} />
                 </Link>

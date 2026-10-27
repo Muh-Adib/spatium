@@ -1,37 +1,41 @@
+'use client'
+
 import { useEffect, useMemo, useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
-import { Seo, SITE_URL } from '@/components/Seo'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { PageHero } from '@/components/ui/PageHero'
 import { ProjectCard } from '@/components/portfolio/ProjectCard'
 import { CTASection } from '@/components/ui/CTASection'
 import { Reveal } from '@/components/ui/Reveal'
 import { Icon } from '@/components/Icon'
 import { PROJECTS, PROJECT_CATEGORIES, type ProjectCategory } from '@/data/projects'
-import './portfolio.css'
+import '@/pages/portfolio.css'
 
 type Filter = 'all' | ProjectCategory
 
 const VALID: Filter[] = ['all', '2d', '3d', 'motion', 'assets']
 
-export default function Portfolio() {
-  const [params, setParams] = useSearchParams()
-  const raw = params.get('category') as Filter | null
+export function PortfolioClient() {
+  const searchParams = useSearchParams()
+  const router = useRouter()
+  const raw = searchParams ? (searchParams.get('category') as Filter | null) : null
   const initial: Filter = raw && VALID.includes(raw) ? raw : 'all'
   const [filter, setFilter] = useState<Filter>(initial)
 
   useEffect(() => {
-    const next = params.get('category') as Filter | null
+    const next = searchParams ? (searchParams.get('category') as Filter | null) : null
     setFilter(next && VALID.includes(next) ? next : 'all')
-  }, [params])
+  }, [searchParams])
 
   const setCategory = (value: Filter) => {
     setFilter(value)
+    const nextParams = new URLSearchParams(searchParams ? searchParams.toString() : '')
     if (value === 'all') {
-      params.delete('category')
+      nextParams.delete('category')
     } else {
-      params.set('category', value)
+      nextParams.set('category', value)
     }
-    setParams(params, { replace: true })
+    const query = nextParams.toString()
+    router.replace(query ? `/portfolio?${query}` : '/portfolio', { scroll: false })
   }
 
   const visible = useMemo(
@@ -39,32 +43,8 @@ export default function Portfolio() {
     [filter],
   )
 
-  const jsonLd = [
-    {
-      '@context': 'https://schema.org',
-      '@type': 'CollectionPage',
-      name: 'UNIMASI portfolio',
-      url: `${SITE_URL}/portfolio`,
-      isPartOf: { '@type': 'WebSite', name: 'UNIMASI', url: SITE_URL },
-      hasPart: PROJECTS.map((project) => ({
-        '@type': 'CreativeWork',
-        name: project.title,
-        description: project.tagline,
-        url: `${SITE_URL}/portfolio/${project.slug}`,
-        genre: project.discipline,
-      })),
-    },
-  ]
-
   return (
     <>
-      <Seo
-        title="Portfolio"
-        description="Selected 2D animation, 3D animation, motion graphics and digital asset work from the UNIMASI studio, presented as capability case studies."
-        path="/portfolio"
-        jsonLd={jsonLd}
-      />
-
       <PageHero
         eyebrow="Portfolio"
         title={

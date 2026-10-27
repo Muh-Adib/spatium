@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { Link } from 'react-router-dom'
+import Link from 'next/link'
 import { Icon } from '@/components/Icon'
 import { Reveal } from '@/components/ui/Reveal'
 import './page-hero.css'
@@ -15,7 +15,7 @@ export function Breadcrumbs({ items }: { items: Crumb[] }) {
           return (
             <li key={`${item.label}-${i}`}>
               {item.to && !last ? (
-                <Link to={item.to}>{item.label}</Link>
+                <Link href={item.to}>{item.label}</Link>
               ) : (
                 <span aria-current={last ? 'page' : undefined}>{item.label}</span>
               )}

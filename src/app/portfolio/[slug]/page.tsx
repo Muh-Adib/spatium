@@ -1,5 +1,6 @@
-import { Link, Navigate, useParams } from 'react-router-dom'
-import { Seo, SITE_URL } from '@/components/Seo'
+import type { Metadata } from 'next'
+import Link from 'next/link'
+import { notFound } from 'next/navigation'
 import { PageHero } from '@/components/ui/PageHero'
 import { StudioArt } from '@/components/art/StudioArt'
 import { ProjectCard, CATEGORY_LABEL } from '@/components/portfolio/ProjectCard'
@@ -8,13 +9,49 @@ import { Reveal } from '@/components/ui/Reveal'
 import { SectionHead } from '@/components/ui/SectionHead'
 import { Icon } from '@/components/Icon'
 import { getProject, PROJECTS } from '@/data/projects'
-import './project-detail.css'
+import '@/pages/project-detail.css'
 
-export default function ProjectDetail() {
-  const { slug = '' } = useParams()
+const SITE_URL = 'https://unimasi.studio'
+
+export function generateStaticParams() {
+  return PROJECTS.map((project) => ({
+    slug: project.slug,
+  }))
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>
+}): Promise<Metadata> {
+  const { slug } = await params
+  const project = getProject(slug)
+  if (!project) return { title: 'Project Not Found' }
+
+  return {
+    title: project.title,
+    description: `${project.tagline} — a ${CATEGORY_LABEL[project.category].toLowerCase()} capability study from the UNIMASI studio.`,
+    alternates: {
+      canonical: `${SITE_URL}/portfolio/${project.slug}`,
+    },
+    openGraph: {
+      type: 'article',
+      title: `${project.title} · UNIMASI`,
+      description: project.tagline,
+      url: `${SITE_URL}/portfolio/${project.slug}`,
+    },
+  }
+}
+
+export default async function ProjectDetailPage({
+  params,
+}: {
+  params: Promise<{ slug: string }>
+}) {
+  const { slug } = await params
   const project = getProject(slug)
 
-  if (!project) return <Navigate to="/portfolio" replace />
+  if (!project) notFound()
 
   const related = PROJECTS.filter((p) => p.category === project.category && p.slug !== project.slug).slice(0, 3)
 
@@ -46,12 +83,9 @@ export default function ProjectDetail() {
 
   return (
     <>
-      <Seo
-        title={project.title}
-        description={`${project.tagline} — a ${CATEGORY_LABEL[project.category].toLowerCase()} capability study from the UNIMASI studio.`}
-        path={`/portfolio/${project.slug}`}
-        type="article"
-        jsonLd={jsonLd}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
       <PageHero
@@ -180,14 +214,14 @@ export default function ProjectDetail() {
                 </div>
               </dl>
 
-              <Link to="/contact" className="btn btn--primary btn--block">
+              <Link href="/contact" className="btn btn--primary btn--block">
                 Start a project like this
                 <span className="btn__icon">
                   <Icon name="arrow-right" size={16} />
                 </span>
               </Link>
 
-              <Link to={`/portfolio?category=${project.category}`} className="project-facts__back link-arrow">
+              <Link href={`/portfolio?category=${project.category}`} className="project-facts__back link-arrow">
                 <Icon name="arrow-left" size={15} />
                 Back to portfolio
               </Link>

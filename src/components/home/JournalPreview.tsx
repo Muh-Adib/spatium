@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import Link from 'next/link'
 import { SORTED_ARTICLES } from '@/data/articles'
 import { ArticleCard } from '@/components/journal/ArticleCard'
 import { Icon } from '@/components/Icon'
@@ -27,7 +27,7 @@ export function JournalPreview() {
                 Practical writing on briefs, storyboards, pipelines and the decisions that make
                 animation land — written by the people who do the work.
               </p>
-              <Link to="/journal" className="link-arrow">
+              <Link href="/journal" className="link-arrow">
                 Browse all articles
                 <Icon name="arrow-right" size={17} />
               </Link>

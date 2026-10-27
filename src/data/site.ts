@@ -1,4 +1,4 @@
-export const STUDIO_EMAIL = import.meta.env.VITE_STUDIO_EMAIL || 'hello@unimasi.studio'
+export const STUDIO_EMAIL = process.env.NEXT_PUBLIC_STUDIO_EMAIL || 'hello@unimasi.studio'
 
 export const CONTACT = {
   email: STUDIO_EMAIL,

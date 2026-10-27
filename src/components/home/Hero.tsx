@@ -1,5 +1,7 @@
+'use client'
+
 import { useEffect, useRef } from 'react'
-import { Link } from 'react-router-dom'
+import Link from 'next/link'
 import { Icon } from '@/components/Icon'
 import { usePointerParallax, useReducedMotion } from '@/hooks'
 import './hero.css'
@@ -66,13 +68,13 @@ export function Hero() {
           </p>
 
           <div className="hero__actions" data-reveal="up" style={{ ['--reveal-delay' as string]: '360ms' }}>
-            <Link to="/portfolio" className="btn btn--primary">
+            <Link href="/portfolio" className="btn btn--primary">
               Explore Our Work
               <span className="btn__icon">
                 <Icon name="arrow-right" size={17} />
               </span>
             </Link>
-            <Link to="/contact" className="btn btn--ghost">
+            <Link href="/contact" className="btn btn--ghost">
               Start a Project
             </Link>
           </div>

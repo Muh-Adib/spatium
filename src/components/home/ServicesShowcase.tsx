@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import Link from 'next/link'
 import { CORE_SERVICES } from '@/data/services'
 import { ServiceVisual } from '@/components/services/ServiceVisual'
 import { Icon } from '@/components/Icon'
@@ -24,7 +24,7 @@ export function ServicesShowcase() {
                 Each discipline has its own pipeline, its own visual language and its own reasons for
                 existing. Most projects combine two or three.
               </p>
-              <Link to="/services" className="link-arrow">
+              <Link href="/services" className="link-arrow">
                 Compare all services
                 <Icon name="arrow-right" size={17} />
               </Link>
@@ -50,7 +50,7 @@ export function ServicesShowcase() {
                   </div>
 
                   <h3 className="service-block__title display-md">
-                    <Link to={`/services/${service.slug}`}>{service.name}</Link>
+                    <Link href={`/services/${service.slug}`}>{service.name}</Link>
                   </h3>
 
                   <p className="service-block__tagline">{service.tagline}</p>
@@ -65,7 +65,7 @@ export function ServicesShowcase() {
                     ))}
                   </ul>
 
-                  <Link to={`/services/${service.slug}`} className="btn btn--ghost">
+                  <Link href={`/services/${service.slug}`} className="btn btn--ghost">
                     Explore {service.shortName}
                     <span className="btn__icon">
                       <Icon name="arrow-right" size={16} />

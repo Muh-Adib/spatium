@@ -1,3 +1,5 @@
+'use client'
+
 import { useState } from 'react'
 import { PROCESS } from '@/data/site'
 import { Icon } from '@/components/Icon'

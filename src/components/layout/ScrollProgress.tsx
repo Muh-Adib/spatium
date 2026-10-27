@@ -1,13 +1,12 @@
-import { useEffect, useState } from 'react'
-import { Outlet, useLocation } from 'react-router-dom'
-import { Header } from './Header'
-import { Footer } from './Footer'
-import { useScrollReveal, useScrollToTopOnNavigate } from '@/hooks'
-import './layout.css'
+'use client'
 
-function ScrollProgress() {
+import { useEffect, useState } from 'react'
+import { usePathname } from 'next/navigation'
+import { useScrollReveal, useScrollToTopOnNavigate } from '@/hooks'
+
+export function ScrollProgress() {
   const [progress, setProgress] = useState(0)
-  const { pathname } = useLocation()
+  const pathname = usePathname()
 
   useEffect(() => {
     const update = () => {
@@ -31,20 +30,8 @@ function ScrollProgress() {
   )
 }
 
-export function Layout() {
+export function ClientLayoutEffects() {
   useScrollReveal()
   useScrollToTopOnNavigate()
-
-  return (
-    <div className="app-shell">
-      <Header />
-      <ScrollProgress />
-      <main id="main" className="app-main">
-        <Outlet />
-      </main>
-      <Footer />
-    </div>
-  )
+  return null
 }
-
-export default Layout

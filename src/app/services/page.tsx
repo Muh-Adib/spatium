@@ -1,5 +1,5 @@
-import { Link } from 'react-router-dom'
-import { Seo, SITE_URL } from '@/components/Seo'
+import type { Metadata } from 'next'
+import Link from 'next/link'
 import { PageHero } from '@/components/ui/PageHero'
 import { ServicesShowcase } from '@/components/home/ServicesShowcase'
 import { Capabilities } from '@/components/home/Capabilities'
@@ -10,7 +10,18 @@ import { SectionHead } from '@/components/ui/SectionHead'
 import { Icon } from '@/components/Icon'
 import { CORE_SERVICES, SERVICES } from '@/data/services'
 import { INDUSTRIES } from '@/data/site'
-import './services.css'
+import '@/pages/services.css'
+
+const SITE_URL = 'https://unimasi.studio'
+
+export const metadata: Metadata = {
+  title: 'Services',
+  description:
+    '2D animation, 3D animation and visual production, motion graphics, and digital visual assets with AI-assisted production — the four capabilities of the UNIMASI studio.',
+  alternates: {
+    canonical: `${SITE_URL}/services`,
+  },
+}
 
 const jsonLd = SERVICES.map((service) => ({
   '@context': 'https://schema.org',
@@ -22,14 +33,12 @@ const jsonLd = SERVICES.map((service) => ({
   provider: { '@type': 'Organization', name: 'UNIMASI', url: SITE_URL },
 }))
 
-export default function Services() {
+export default function ServicesPage() {
   return (
     <>
-      <Seo
-        title="Services"
-        description="2D animation, 3D animation and visual production, motion graphics, and digital visual assets with AI-assisted production — the four capabilities of the UNIMASI studio."
-        path="/services"
-        jsonLd={jsonLd}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
       <PageHero
@@ -81,7 +90,7 @@ export default function Services() {
                   {CORE_SERVICES.map((service) => (
                     <th scope="col" key={service.slug}>
                       <span className="compare-table__index mono">{service.index}</span>
-                      <Link to={`/services/${service.slug}`}>{service.shortName}</Link>
+                      <Link href={`/services/${service.slug}`}>{service.shortName}</Link>
                     </th>
                   ))}
                 </tr>
@@ -135,7 +144,7 @@ export default function Services() {
                   <th scope="row">&nbsp;</th>
                   {CORE_SERVICES.map((service) => (
                     <td key={service.slug}>
-                      <Link to={`/services/${service.slug}`} className="link-arrow">
+                      <Link href={`/services/${service.slug}`} className="link-arrow">
                         Detail page
                         <Icon name="arrow-right" size={15} />
                       </Link>
