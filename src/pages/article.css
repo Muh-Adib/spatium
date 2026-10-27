@@ -376,3 +376,61 @@
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
   gap: clamp(1rem, 2.2vw, 1.6rem);
 }
+
+/* --- WordPress Rendered HTML Content --- */
+.article__rendered-content {
+  display: grid;
+  gap: 1.35rem;
+  max-width: 76ch;
+}
+
+.article__rendered-content p {
+  color: var(--text-muted);
+  font-size: 1.05rem;
+  line-height: var(--lh-body);
+}
+
+.article__rendered-content h2 {
+  font-size: clamp(1.4rem, 2.6vw, 1.85rem);
+  margin-top: 1.6rem;
+  scroll-margin-top: calc(var(--header-h) + 24px);
+  color: var(--text);
+}
+
+.article__rendered-content h3 {
+  font-size: 1.25rem;
+  margin-top: 1.2rem;
+  color: var(--text);
+}
+
+.article__rendered-content strong {
+  color: var(--text);
+}
+
+.article__rendered-content a {
+  color: var(--yellow);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+}
+
+.article__rendered-content a:hover {
+  text-decoration-thickness: 2px;
+}
+
+.article__rendered-content ul,
+.article__rendered-content ol {
+  display: grid;
+  gap: 0.6rem;
+  padding-left: 1.4rem;
+  color: var(--text-muted);
+  line-height: var(--lh-body);
+}
+
+.article__rendered-content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--r-md);
+  margin-block: 1rem;
+  border: 1px solid var(--line);
+}
