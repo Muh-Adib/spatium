@@ -15,7 +15,7 @@ export function JournalPreview() {
       <div className="container container--wide">
         <SectionHead
           id="journal-title"
-          eyebrow="Journal"
+          eyebrow="Articles"
           title={
             <>
               Notes from the <span className="accent">production floor</span>.

@@ -59,22 +59,31 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.6,
   }))
 
-  // Fetch all 1,147+ articles from Supabase
+  // Fetch all 1,147+ articles from Supabase with range pagination
   let postRoutes: MetadataRoute.Sitemap = []
   if (process.env.NEXT_PUBLIC_SUPABASE_URL) {
-    const { data: posts } = await supabase
-      .from('posts')
-      .select('slug, published_at')
-      .eq('status', 'publish')
-      .order('published_at', { ascending: false })
+    let from = 0
+    const pageSize = 1000
+    while (true) {
+      const { data: posts, error } = await supabase
+        .from('posts')
+        .select('slug, published_at')
+        .eq('status', 'publish')
+        .order('published_at', { ascending: false })
+        .range(from, from + pageSize - 1)
 
-    if (posts) {
-      postRoutes = posts.map((post) => ({
+      if (error || !posts || posts.length === 0) break
+
+      const mapped = posts.map((post) => ({
         url: `${SITE_URL}/${post.slug}/`,
         lastModified: post.published_at ? new Date(post.published_at) : new Date(),
-        changeFrequency: 'yearly',
+        changeFrequency: 'yearly' as const,
         priority: 0.7,
       }))
+      postRoutes = postRoutes.concat(mapped)
+
+      if (posts.length < pageSize) break
+      from += pageSize
     }
   }
 

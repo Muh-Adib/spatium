@@ -521,7 +521,8 @@ p {
   transform: scale(0.94);
 }
 
-[data-reveal].is-visible {
+[data-reveal].is-visible,
+[data-reveal][data-visible='true'] {
   opacity: 1;
   transform: none;
 }

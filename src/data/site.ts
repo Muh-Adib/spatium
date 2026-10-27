@@ -26,7 +26,7 @@ export const NAV: NavItem[] = [
   },
   { label: 'Portfolio', to: '/portfolio' },
   { label: 'About', to: '/about' },
-  { label: 'Journal', to: '/journal' },
+  { label: 'Articles', to: '/journal' },
   { label: 'Contact', to: '/contact' },
 ]
 

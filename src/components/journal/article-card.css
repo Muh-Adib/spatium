@@ -24,6 +24,15 @@
   border-bottom: 1px solid var(--line);
 }
 
+.article-card__media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform var(--dur) var(--ease-out);
+}
+
+.article-card:hover .article-card__media img,
 .article-card:hover .studio-art svg {
   transform: scale(1.05);
 }

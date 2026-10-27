@@ -1,8 +1,6 @@
 import type { Metadata, Viewport } from 'next'
 import { Syne, Plus_Jakarta_Sans, DM_Mono } from 'next/font/google'
-import { Header } from '@/components/layout/Header'
-import { Footer } from '@/components/layout/Footer'
-import { ScrollProgress, ClientLayoutEffects } from '@/components/layout/ScrollProgress'
+import { SiteShell } from '@/components/layout/SiteShell'
 import '@/styles/tokens.css'
 import '@/styles/globals.css'
 import '@/components/layout/layout.css'
@@ -71,15 +69,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${syne.variable} ${plusJakartaSans.variable} ${dmMono.variable}`}>
       <body>
-        <div className="app-shell">
-          <ClientLayoutEffects />
-          <Header />
-          <ScrollProgress />
-          <main id="main" className="app-main">
-            {children}
-          </main>
-          <Footer />
-        </div>
+        <SiteShell>{children}</SiteShell>
       </body>
     </html>
   )

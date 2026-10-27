@@ -49,7 +49,7 @@ export function Footer() {
                 <Link href="/portfolio">Portfolio</Link>
               </li>
               <li>
-                <Link href="/journal">Journal</Link>
+                <Link href="/journal">Articles</Link>
               </li>
               <li>
                 <Link href="/contact">Contact</Link>

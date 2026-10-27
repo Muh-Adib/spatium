@@ -47,7 +47,7 @@ export default function NotFound() {
               <Link href="/portfolio">Portfolio</Link>
             </li>
             <li>
-              <Link href="/journal">Journal</Link>
+              <Link href="/journal">Articles</Link>
             </li>
             <li>
               <Link href="/about">About</Link>

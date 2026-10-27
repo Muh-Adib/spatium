@@ -1,84 +1,126 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useEffect, useState, useTransition } from 'react'
+import { useRouter } from 'next/navigation'
 import { PageHero } from '@/components/ui/PageHero'
-import { ArticleCard } from '@/components/journal/ArticleCard'
+import { ArticleCard, type ArticleCardItem } from '@/components/journal/ArticleCard'
 import { CTASection } from '@/components/ui/CTASection'
 import { Reveal } from '@/components/ui/Reveal'
 import { Icon } from '@/components/Icon'
-import {
-  ARTICLE_CATEGORIES,
-  SORTED_ARTICLES,
-  formatDate,
-  type ArticleCategory,
-} from '@/data/articles'
 import '@/pages/journal.css'
 
-type Filter = 'all' | ArticleCategory
+export type JournalCategory = {
+  name: string
+  count: number
+}
 
-export function JournalClient() {
-  const searchParams = useSearchParams()
+interface JournalClientProps {
+  posts: ArticleCardItem[]
+  totalCount: number
+  totalAllCount: number
+  currentPage: number
+  totalPages: number
+  currentCategory: string
+  currentQuery: string
+  categories: JournalCategory[]
+}
+
+function getPaginationRange(current: number, total: number) {
+  if (total <= 7) {
+    return Array.from({ length: total }, (_, i) => i + 1)
+  }
+  const delta = 2
+  const range: (number | string)[] = []
+  const left = Math.max(2, current - delta)
+  const right = Math.min(total - 1, current + delta)
+
+  range.push(1)
+  if (left > 2) range.push('...')
+  for (let i = left; i <= right; i++) {
+    range.push(i)
+  }
+  if (right < total - 1) range.push('...')
+  range.push(total)
+  return range
+}
+
+export function JournalClient({
+  posts,
+  totalCount,
+  totalAllCount,
+  currentPage,
+  totalPages,
+  currentCategory,
+  currentQuery,
+  categories,
+}: JournalClientProps) {
   const router = useRouter()
-  const raw = searchParams ? searchParams.get('category') : null
-  const initial: Filter = raw && (ARTICLE_CATEGORIES as string[]).includes(raw) ? (raw as Filter) : 'all'
-  const [category, setCategory] = useState<Filter>(initial)
-  const [query, setQuery] = useState('')
+  const [isPending, startTransition] = useTransition()
+  const [searchInput, setSearchInput] = useState(currentQuery)
 
   useEffect(() => {
-    const next = searchParams ? searchParams.get('category') : null
-    setCategory(next && (ARTICLE_CATEGORIES as string[]).includes(next) ? (next as Filter) : 'all')
-  }, [searchParams])
+    setSearchInput(currentQuery)
+  }, [currentQuery])
 
-  const setCategoryParam = (value: Filter) => {
-    setCategory(value)
-    const nextParams = new URLSearchParams(searchParams ? searchParams.toString() : '')
-    if (value === 'all') nextParams.delete('category')
-    else nextParams.set('category', value)
-    const q = nextParams.toString()
-    router.replace(q ? `/journal?${q}` : '/journal', { scroll: false })
+  const navigate = (newCat: string, newQ: string, newPage: number) => {
+    const params = new URLSearchParams()
+    if (newCat && newCat !== 'all') params.set('category', newCat)
+    if (newQ && newQ.trim()) params.set('q', newQ.trim())
+    if (newPage > 1) params.set('page', String(newPage))
+
+    const qStr = params.toString()
+    startTransition(() => {
+      router.push(qStr ? `/journal?${qStr}` : '/journal', { scroll: false })
+      if (typeof window !== 'undefined') {
+        const el = document.getElementById('journal-index-title')
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        }
+      }
+    })
   }
 
-  const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase()
-    return SORTED_ARTICLES.filter((article) => {
-      const matchesCategory = category === 'all' || article.category === category
-      if (!matchesCategory) return false
-      if (!q) return true
-      return (
-        article.title.toLowerCase().includes(q) ||
-        article.excerpt.toLowerCase().includes(q) ||
-        article.tags.some((tag) => tag.toLowerCase().includes(q))
-      )
-    })
-  }, [category, query])
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    navigate(currentCategory, searchInput, 1)
+  }
 
-  const isFiltering = category !== 'all' || query.trim().length > 0
-  const featured = SORTED_ARTICLES.find((a) => a.featured) ?? SORTED_ARTICLES[0]
-  const list = isFiltering ? filtered : filtered.filter((a) => a.slug !== featured.slug)
+  const handleCategorySelect = (catName: string) => {
+    navigate(catName, searchInput, 1)
+  }
+
+  const handlePageSelect = (pageNumber: number) => {
+    if (pageNumber === currentPage) return
+    navigate(currentCategory, searchInput, pageNumber)
+  }
+
+  const isPageOneWithoutSearch = currentPage === 1 && !currentQuery
+  const featured = isPageOneWithoutSearch && posts.length > 0 ? posts[0] : null
+  const gridPosts = featured ? posts.slice(1) : posts
+
+  const paginationRange = getPaginationRange(currentPage, totalPages)
 
   return (
     <>
       <PageHero
-        eyebrow="Journal"
+        eyebrow="Articles & Archive"
         title={
           <>
-            Notes from the <span className="accent">production floor</span>.
+            Insights from the <span className="accent">production floor</span>.
           </>
         }
-        lede="Practical writing about how animation actually gets made — briefs, storyboards, pipelines, accessibility and the decisions behind the work."
-        crumbs={[{ label: 'Home', to: '/' }, { label: 'Journal' }]}
+        lede="Explore practical writing, case analyses, and production insights covering 3D CGI animation, videotron production, motion design, and visual technology."
+        crumbs={[{ label: 'Home', to: '/' }, { label: 'Articles' }]}
         meta={
           <>
             <span className="pill">
-              <Icon name="pen" size={13} /> {SORTED_ARTICLES.length} articles
+              <Icon name="pen" size={13} /> {totalAllCount.toLocaleString()} articles
             </span>
             <span className="pill">
-              <Icon name="grid" size={13} /> {ARTICLE_CATEGORIES.length} topics
+              <Icon name="grid" size={13} /> {categories.length} topics
             </span>
             <span className="pill">
-              <Icon name="calendar" size={13} /> Latest{' '}
-              {formatDate(SORTED_ARTICLES[0].date)}
+              <Icon name="calendar" size={13} /> Page {currentPage} of {Math.max(1, totalPages)}
             </span>
           </>
         }
@@ -91,84 +133,159 @@ export function JournalClient() {
           </h2>
 
           <div className="journal-index__controls">
-            <div className="journal-search">
+            <form className="journal-search" onSubmit={handleSearchSubmit}>
               <Icon name="search" size={18} />
-              <label className="sr-only" htmlFor="journal-search">
+              <label className="sr-only" htmlFor="journal-search-input">
                 Search articles
               </label>
               <input
-                id="journal-search"
+                id="journal-search-input"
                 type="search"
-                placeholder="Search articles, topics or tags…"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search across 1,100+ articles, topics or keywords…"
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
               />
-              {query ? (
-                <button type="button" onClick={() => setQuery('')} aria-label="Clear search">
+              {searchInput ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearchInput('')
+                    navigate(currentCategory, '', 1)
+                  }}
+                  aria-label="Clear search"
+                >
                   <Icon name="close" size={16} />
                 </button>
               ) : null}
-            </div>
+            </form>
 
-            <div className="journal-index__filters" role="tablist" aria-label="Filter articles by topic">
+            <div
+              className="journal-index__filters"
+              role="tablist"
+              aria-label="Filter articles by topic"
+            >
               <button
                 type="button"
                 role="tab"
-                aria-selected={category === 'all'}
-                className={`filter-btn${category === 'all' ? ' is-active' : ''}`}
-                onClick={() => setCategoryParam('all')}
+                aria-selected={currentCategory === 'all'}
+                className={`filter-btn${currentCategory === 'all' ? ' is-active' : ''}`}
+                onClick={() => handleCategorySelect('all')}
               >
                 All topics
-                <span className="filter-btn__count">{SORTED_ARTICLES.length}</span>
+                <span className="filter-btn__count">{totalAllCount.toLocaleString()}</span>
               </button>
-              {ARTICLE_CATEGORIES.map((cat) => (
+              {categories.map((cat) => (
                 <button
-                  key={cat}
+                  key={cat.name}
                   type="button"
                   role="tab"
-                  aria-selected={category === cat}
-                  className={`filter-btn${category === cat ? ' is-active' : ''}`}
-                  onClick={() => setCategoryParam(cat)}
+                  aria-selected={currentCategory === cat.name}
+                  className={`filter-btn${currentCategory === cat.name ? ' is-active' : ''}`}
+                  onClick={() => handleCategorySelect(cat.name)}
                 >
-                  {cat}
-                  <span className="filter-btn__count">
-                    {SORTED_ARTICLES.filter((a) => a.category === cat).length}
-                  </span>
+                  {cat.name}
+                  <span className="filter-btn__count">{cat.count}</span>
                 </button>
               ))}
             </div>
           </div>
 
-          <p className="journal-index__count mono" aria-live="polite">
-            {filtered.length} article{filtered.length === 1 ? '' : 's'}
-            {category !== 'all' ? ` in ${category}` : ''}
-            {query.trim() ? ` matching “${query.trim()}”` : ''}
-          </p>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '1.6rem' }}>
+            <p className="journal-index__count mono" style={{ margin: 0 }} aria-live="polite">
+              {totalCount.toLocaleString()} article{totalCount === 1 ? '' : 's'}
+              {currentCategory !== 'all' ? ` in ${currentCategory}` : ''}
+              {currentQuery ? ` matching “${currentQuery}”` : ''}
+              {totalPages > 1 ? ` — Showing page ${currentPage} of ${totalPages}` : ''}
+            </p>
+            {isPending ? (
+              <span className="mono" style={{ color: 'var(--yellow)', fontSize: '0.75rem' }}>
+                Updating...
+              </span>
+            ) : null}
+          </div>
 
-          {!isFiltering ? (
+          {featured ? (
             <Reveal className="journal-index__featured" variant="scale">
               <ArticleCard article={featured} featured />
             </Reveal>
           ) : null}
 
-          {list.length > 0 ? (
-            <div className="journal-index__grid" key={`${category}-${query}`}>
-              {list.map((article, i) => (
-                <Reveal key={article.slug} delay={i * 55} className="journal-index__item">
-                  <ArticleCard article={article} />
-                </Reveal>
-              ))}
-            </div>
+          {posts.length > 0 ? (
+            <>
+              <div
+                className="journal-index__grid"
+                key={`${currentCategory}-${currentQuery}-${currentPage}`}
+              >
+                {gridPosts.map((article, i) => (
+                  <Reveal key={article.slug} delay={i * 35} className="journal-index__item">
+                    <ArticleCard article={article} />
+                  </Reveal>
+                ))}
+              </div>
+
+              {totalPages > 1 ? (
+                <nav
+                  className="journal-pagination"
+                  aria-label="Article list pagination"
+                >
+                  <button
+                    type="button"
+                    className="journal-pagination__btn"
+                    disabled={currentPage <= 1 || isPending}
+                    onClick={() => handlePageSelect(currentPage - 1)}
+                    aria-label="Previous page"
+                  >
+                    <Icon name="arrow-left" size={14} />
+                    Prev
+                  </button>
+
+                  {paginationRange.map((item, idx) => {
+                    if (item === '...') {
+                      return (
+                        <span key={`ellipsis-${idx}`} className="journal-pagination__ellipsis">
+                          …
+                        </span>
+                      )
+                    }
+                    const pageNum = item as number
+                    const isActive = pageNum === currentPage
+                    return (
+                      <button
+                        key={pageNum}
+                        type="button"
+                        className={`journal-pagination__btn mono${isActive ? ' is-active' : ''}`}
+                        onClick={() => handlePageSelect(pageNum)}
+                        disabled={isPending}
+                        aria-current={isActive ? 'page' : undefined}
+                      >
+                        {pageNum}
+                      </button>
+                    )
+                  })}
+
+                  <button
+                    type="button"
+                    className="journal-pagination__btn"
+                    disabled={currentPage >= totalPages || isPending}
+                    onClick={() => handlePageSelect(currentPage + 1)}
+                    aria-label="Next page"
+                  >
+                    Next
+                    <Icon name="arrow-right" size={14} />
+                  </button>
+                </nav>
+              ) : null}
+            </>
           ) : (
             <div className="journal-index__empty">
-              <Icon name="search" size={22} />
-              <p>No articles match that search yet.</p>
+              <Icon name="search" size={24} />
+              <p>No articles found matching that filter or search term.</p>
               <button
                 type="button"
                 className="btn btn--ghost"
                 onClick={() => {
-                  setQuery('')
-                  setCategoryParam('all')
+                  setSearchInput('')
+                  navigate('all', '', 1)
                 }}
               >
                 Reset filters
@@ -186,7 +303,7 @@ export function JournalClient() {
             Have a question we have not <span className="accent">written about</span>?
           </>
         }
-        body="Send it over. We answer real questions about pipelines, scope and what is realistically achievable."
+        body="Send it over. We answer real questions about animation pipelines, scope, videotron production, and what is realistically achievable."
         secondary={{ label: 'See services', to: '/services' }}
       />
     </>

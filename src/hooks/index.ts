@@ -18,8 +18,8 @@ export function useScrollReveal() {
     if (typeof window === 'undefined') return
     if (typeof IntersectionObserver === 'undefined') {
       document
-        .querySelectorAll<HTMLElement>('[data-reveal]:not(.is-visible)')
-        .forEach((node) => node.classList.add('is-visible'))
+        .querySelectorAll<HTMLElement>('[data-reveal]:not([data-visible="true"])')
+        .forEach((node) => node.setAttribute('data-visible', 'true'))
       return
     }
 
@@ -27,8 +27,9 @@ export function useScrollReveal() {
       (entries) => {
         entries.forEach((entry) => {
           if (!entry.isIntersecting) return
-          entry.target.classList.add('is-visible')
-          observer.unobserve(entry.target)
+          const el = entry.target as HTMLElement
+          el.setAttribute('data-visible', 'true')
+          observer.unobserve(el)
         })
       },
       { rootMargin: '0px 0px -8% 0px', threshold: 0.12 },
@@ -36,7 +37,7 @@ export function useScrollReveal() {
 
     const observePending = () => {
       document
-        .querySelectorAll<HTMLElement>('[data-reveal]:not(.is-visible)')
+        .querySelectorAll<HTMLElement>('[data-reveal]:not([data-visible="true"])')
         .forEach((node) => observer.observe(node))
     }
 

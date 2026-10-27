@@ -20,7 +20,13 @@ export function Reveal({ children, as: Tag = 'div', variant = 'up', delay = 0, c
   const mergedStyle: CSSProperties = delay ? { ...style, ['--reveal-delay' as string]: `${delay}ms` } : { ...style }
 
   return (
-    <Tag data-reveal={variant} className={className} style={mergedStyle} id={id}>
+    <Tag
+      data-reveal={variant}
+      className={className}
+      style={mergedStyle}
+      id={id}
+      suppressHydrationWarning
+    >
       {children}
     </Tag>
   )
