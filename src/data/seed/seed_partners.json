@@ -1,0 +1,240 @@
+[
+  {
+    "id": "mandiri",
+    "name": "Bank Mandiri",
+    "logo": "/images/clients/unified-gray/mandiri.svg",
+    "alt": "Bank Mandiri",
+    "tier": "enterprise"
+  },
+  {
+    "id": "danone",
+    "name": "Danone Indonesia",
+    "logo": "/images/clients/unified-gray/danone.webp",
+    "alt": "Danone Indonesia",
+    "tier": "enterprise"
+  },
+  {
+    "id": "pertamina",
+    "name": "Pertamina",
+    "logo": "/images/clients/unified-gray/pertamina.svg",
+    "alt": "Pertamina",
+    "tier": "enterprise"
+  },
+  {
+    "id": "toyota",
+    "name": "Toyota Astra Motor",
+    "logo": "/images/clients/unified-gray/toyota.svg",
+    "alt": "Toyota Astra Motor",
+    "tier": "enterprise"
+  },
+  {
+    "id": "telkomsel",
+    "name": "Telkomsel",
+    "logo": "/images/clients/unified-gray/telkomsel.svg",
+    "alt": "Telkomsel",
+    "tier": "enterprise"
+  },
+  {
+    "id": "bsi",
+    "name": "Bank Syariah Indonesia",
+    "logo": "/images/clients/unified-gray/bsi.webp",
+    "alt": "Bank Syariah Indonesia",
+    "tier": "enterprise"
+  },
+  {
+    "id": "bulog",
+    "name": "Perum BULOG",
+    "logo": "/images/clients/unified-gray/bulog.svg",
+    "alt": "Perum BULOG",
+    "tier": "institution"
+  },
+  {
+    "id": "castrol",
+    "name": "Castrol",
+    "logo": "/images/clients/unified-gray/castrol.svg",
+    "alt": "Castrol",
+    "tier": "enterprise"
+  },
+  {
+    "id": "denso",
+    "name": "Denso",
+    "logo": "/images/clients/unified-gray/denso.svg",
+    "alt": "Denso",
+    "tier": "enterprise"
+  },
+  {
+    "id": "formula",
+    "name": "Formula Oral Care",
+    "logo": "/images/clients/unified-gray/formula.webp",
+    "alt": "Formula Oral Care",
+    "tier": "brand"
+  },
+  {
+    "id": "bocorocco",
+    "name": "Bocorocco",
+    "logo": "/images/clients/unified-gray/bocorocco.webp",
+    "alt": "Bocorocco",
+    "tier": "brand"
+  },
+  {
+    "id": "kadin",
+    "name": "KADIN Indonesia",
+    "logo": "/images/clients/unified-gray/kadin.webp",
+    "alt": "KADIN Indonesia",
+    "tier": "institution"
+  },
+  {
+    "id": "kominfo",
+    "name": "Kementerian Kominfo RI",
+    "logo": "/images/clients/unified-gray/kominfo.svg",
+    "alt": "Kementerian Kominfo RI",
+    "tier": "government"
+  },
+  {
+    "id": "kemenperin",
+    "name": "Kementerian Perindustrian",
+    "logo": "/images/clients/unified-gray/kemenperin.svg",
+    "alt": "Kementerian Perindustrian RI",
+    "tier": "government"
+  },
+  {
+    "id": "kemdikdasmen",
+    "name": "Kemdikdasmen RI",
+    "logo": "/images/clients/unified-gray/kemdikdasmen.webp",
+    "alt": "Kemdikdasmen RI",
+    "tier": "government"
+  },
+  {
+    "id": "itb",
+    "name": "Institut Teknologi Bandung",
+    "logo": "/images/clients/unified-gray/itb.webp",
+    "alt": "Institut Teknologi Bandung",
+    "tier": "institution"
+  },
+  {
+    "id": "ugm",
+    "name": "Universitas Gadjah Mada",
+    "logo": "/images/clients/unified-gray/ugm.svg",
+    "alt": "Universitas Gadjah Mada",
+    "tier": "institution"
+  },
+  {
+    "id": "wilmar",
+    "name": "Wilmar International",
+    "logo": "/images/clients/unified-gray/wilmar.svg",
+    "alt": "Wilmar International",
+    "tier": "enterprise"
+  },
+  {
+    "id": "prochiz",
+    "name": "Prochiz",
+    "logo": "/images/clients/unified-gray/prochiz.webp",
+    "alt": "Prochiz",
+    "tier": "brand"
+  },
+  {
+    "id": "apindo",
+    "name": "APINDO",
+    "logo": "/images/clients/unified-gray/apindo.webp",
+    "alt": "APINDO",
+    "tier": "institution"
+  },
+  {
+    "id": "al-azhar",
+    "name": "Al Azhar",
+    "logo": "/images/clients/unified-gray/al-azhar.webp",
+    "alt": "Yayasan Al Azhar",
+    "tier": "institution"
+  },
+  {
+    "id": "fotile",
+    "name": "Fotile",
+    "logo": "/images/clients/unified-gray/fotile.webp",
+    "alt": "Fotile",
+    "tier": "brand"
+  },
+  {
+    "id": "kommo",
+    "name": "Kommo CRM",
+    "logo": "/images/clients/unified-gray/kommo.webp",
+    "alt": "Kommo CRM",
+    "tier": "tech"
+  },
+  {
+    "id": "atmi",
+    "name": "ATMI Cikarang",
+    "logo": "/images/clients/unified-gray/atmi.webp",
+    "alt": "Politeknik ATMI",
+    "tier": "institution"
+  },
+  {
+    "id": "bpsdmi",
+    "name": "BPSDMI",
+    "logo": "/images/clients/unified-gray/bpsdmi.webp",
+    "alt": "BPSDMI Kemenperin",
+    "tier": "government"
+  },
+  {
+    "id": "grebe",
+    "name": "GREBE",
+    "logo": "/images/clients/unified-gray/grebe.webp",
+    "alt": "GREBE Retail Innovation",
+    "tier": "brand"
+  },
+  {
+    "id": "nu",
+    "name": "Nahdlatul Ulama",
+    "logo": "/images/clients/unified-gray/nu.webp",
+    "alt": "Nahdlatul Ulama",
+    "tier": "institution"
+  },
+  {
+    "id": "pt-inti-beton",
+    "name": "PT Inti Beton",
+    "logo": "/images/clients/unified-gray/pt-inti-beton.webp",
+    "alt": "PT Inti Beton",
+    "tier": "enterprise"
+  },
+  {
+    "id": "pt-itokoh",
+    "name": "PT Itokoh Ceperindo",
+    "logo": "/images/clients/unified-gray/pt-itokoh.webp",
+    "alt": "PT Inti Beton",
+    "tier": "enterprise"
+  },
+  {
+    "id": "pt-yoshino-gypsum",
+    "name": "PT Yoshino Gypsum",
+    "logo": "/images/clients/unified-gray/pt-yoshino-gypsum.webp",
+    "alt": "PT Yoshino Gypsum",
+    "tier": "enterprise"
+  },
+  {
+    "id": "pt-ypti",
+    "name": "PT YPTI",
+    "logo": "/images/clients/unified-gray/pt-ypti.webp",
+    "alt": "PT Yogya Presisi Tehnikatama Industri",
+    "tier": "enterprise"
+  },
+  {
+    "id": "rs-bethesda",
+    "name": "RS Bethesda",
+    "logo": "/images/clients/unified-gray/rs-bethesda.webp",
+    "alt": "Rumah Sakit Bethesda",
+    "tier": "health"
+  },
+  {
+    "id": "rs-sardjito",
+    "name": "RSUP Dr. Sardjito",
+    "logo": "/images/clients/unified-gray/rs-sardjito.webp",
+    "alt": "RSUP Dr. Sardjito",
+    "tier": "health"
+  },
+  {
+    "id": "zwsoft",
+    "name": "ZWSOFT",
+    "logo": "/images/clients/unified-gray/zwsoft.webp",
+    "alt": "ZWSOFT CAD/CAM Solutions",
+    "tier": "tech"
+  }
+]

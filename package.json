@@ -3,29 +3,45 @@
   "private": true,
   "version": "1.0.0",
   "type": "module",
-  "description": "UNIMASI — Animation & Motion Design Studio. Premium interactive studio website.",
+  "description": "UNIMASI — Animation & Motion Design Studio. Premium interactive studio website with integrated WebShift Core Backend & Studio Admin.",
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev -p 3001",
     "build": "next build",
-    "start": "next start",
-    "typecheck": "tsc --noEmit"
+    "start": "next start -p 3001",
+    "typecheck": "tsc --noEmit",
+    "type-check": "tsc --noEmit",
+    "db:push": "prisma db update",
+    "db:seed": "tsx --conditions=react-server scripts/seed.ts"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.118.0",
-    "@tiptap/extension-image": "^3.32.0",
-    "@tiptap/extension-link": "^3.32.0",
-    "@tiptap/pm": "^3.32.0",
-    "@tiptap/react": "^3.32.0",
-    "@tiptap/starter-kit": "^3.32.0",
+    "@gsap/react": "^2.1.0",
+    "@prisma/orm-postgres": "^8.0.0-rc.20",
+    "@types/sanitize-html": "^2.16.2",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "dotenv": "^18.0.9",
+    "gsap": "^3.12.5",
     "lucide-react": "^1.62.0",
     "next": "^16.4.2",
+    "next-auth": "^5.0.0-beta.32",
+    "qs": "^6.13.0",
     "react": "^19.3.1",
-    "react-dom": "^19.3.1"
+    "react-dom": "^19.3.1",
+    "sanitize-html": "^2.18.1",
+    "server-only": "^0.0.1",
+    "tailwind-merge": "^2.5.2",
+    "zod": "^4.6.7"
   },
   "devDependencies": {
-    "@types/node": "20.17.6",
+    "@types/node": "^22",
+    "@types/qs": "^6.9.16",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.47",
+    "prisma": "^8.0.0-rc.27",
+    "tailwindcss": "^3.4.12",
+    "tsx": "^4.23.15",
     "typescript": "^5.6.3"
   }
 }

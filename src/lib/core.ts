@@ -328,3 +328,73 @@ export async function getCoreCategories(): Promise<{ name: string; count: number
     .sort((a, b) => b[1] - a[1])
     .map(([name, count]) => ({ name, count }))
 }
+
+export interface CoreServiceItem {
+  id: number | string
+  name: string
+  title?: string
+  slug: string
+  shortDescription?: string
+  summary?: string
+  fullDescription?: string
+  deliverables?: string[]
+}
+
+export interface CorePortfolioItem {
+  id: number | string
+  title: string
+  slug: string
+  client?: string
+  year?: string | number
+  category?: string
+  summary?: string
+  coverImage?: string
+  technologies?: string[]
+}
+
+export interface CorePartnerItem {
+  id: string
+  name: string
+  logo: string
+  alt: string
+  tier?: string
+}
+
+export async function getCoreServices(): Promise<CoreServiceItem[]> {
+  const res = await coreFetch<{ services: CoreServiceItem[] }>('/api/v1/delivery/services')
+  if (res && Array.isArray(res.services) && res.services.length > 0) {
+    return res.services
+  }
+  try {
+    const seed = require('@/data/services')
+    return seed.SERVICES || []
+  } catch {
+    return []
+  }
+}
+
+export async function getCorePortfolios(): Promise<CorePortfolioItem[]> {
+  const res = await coreFetch<{ portfolios: CorePortfolioItem[] }>('/api/v1/delivery/portfolios')
+  if (res && Array.isArray(res.portfolios) && res.portfolios.length > 0) {
+    return res.portfolios
+  }
+  try {
+    const seed = require('@/data/projects')
+    return seed.PROJECTS || []
+  } catch {
+    return []
+  }
+}
+
+export async function getCorePartners(): Promise<CorePartnerItem[]> {
+  const res = await coreFetch<{ data: CorePartnerItem[] }>('/api/v1/delivery/partners')
+  if (res && Array.isArray(res.data) && res.data.length > 0) {
+    return res.data
+  }
+  try {
+    const seed = require('@/data/clients')
+    return seed.PARTNER_LOGOS || []
+  } catch {
+    return []
+  }
+}

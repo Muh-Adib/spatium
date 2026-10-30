@@ -112,3 +112,60 @@
   --z-overlay: 200;
   --z-modal: 300;
 }
+
+
+/* ==========================================================================
+   LAYER 2 & 3: SEMANTIC & COMPONENT DESIGN TOKENS
+   UNIMASI Studio & CMS Studio Admin Tokens
+   ========================================================================== */
+:root {
+  /* Brand Semantic */
+  --color-brand-primary: var(--yellow);
+  --color-brand-primary-hover: var(--yellow-soft);
+  --color-brand-primary-active: var(--yellow-600);
+  --color-brand-primary-subtle: rgba(255, 222, 0, 0.12);
+
+  /* Surface Semantic */
+  --color-surface-base: var(--bg);
+  --color-surface-elevated: var(--surface-1);
+  --color-surface-overlay: var(--surface-2);
+  --color-surface-float: var(--surface-translucent);
+
+  /* Text Semantic */
+  --color-text-primary: var(--text);
+  --color-text-secondary: var(--text-muted);
+  --color-text-muted: var(--text-dim);
+  --color-text-inverse: var(--ink);
+  --color-text-accent: var(--yellow);
+
+  /* Border Semantic */
+  --color-border: var(--line);
+  --color-border-subtle: rgba(255, 255, 255, 0.04);
+  --color-border-strong: rgba(255, 222, 0, 0.25);
+
+  /* Status */
+  --color-success: var(--success);
+  --color-danger: var(--danger);
+  --color-warning: var(--yellow-500);
+  --color-info: #3B82F6;
+
+  /* Component Layer: Studio Admin */
+  --studio-bg: var(--navy-950);
+  --studio-sidebar-bg: #030814;
+  --studio-topbar-bg: rgba(6, 10, 23, 0.85);
+  --studio-accent: var(--yellow);
+  --studio-accent-hover: var(--yellow-soft);
+  --studio-border: rgba(255, 222, 0, 0.10);
+  --studio-text: var(--text);
+  --studio-text-muted: var(--text-muted);
+  --studio-nav-active: rgba(255, 222, 0, 0.10);
+  --studio-nav-active-indicator: var(--yellow);
+
+  /* Radius Scale */
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-2xl: 1.5rem;
+  --radius-full: 9999px;
+}

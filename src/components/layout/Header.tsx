@@ -11,20 +11,14 @@ import './header.css'
 function Logo() {
   return (
     <Link href="/" className="brand" aria-label="UNIMASI — home">
-      <span className="brand__mark" aria-hidden="true">
-        <svg viewBox="0 0 40 40" width="34" height="34">
-          <rect width="40" height="40" rx="10" fill="var(--yellow)" />
-          <path
-            d="M9 28V13h4.6v9.6c0 2 1 3 2.8 3s2.8-1 2.8-3V13h4.6v15h-4.6v-2.1c-1 1.5-2.7 2.4-4.8 2.4-3.2 0-5.2-2.1-5.2-5.8Z"
-            fill="var(--navy-900)"
-          />
-          <path d="M25.5 28V13h4.4l3.6 7.4V13h4v15h-4.3l-3.7-7.6V28h-4Z" fill="var(--navy-900)" />
-        </svg>
-      </span>
-      <span className="brand__word">
-        UNIMASI
-        <em>Animation &amp; Motion Design</em>
-      </span>
+      <img
+        src="/logo/unimasi-coloured.webp"
+        alt="UNIMASI — Animation & Motion Design"
+        width={130}
+        height={45}
+        className="brand__img"
+        style={{ height: '36px', width: 'auto', objectFit: 'contain' }}
+      />
     </Link>
   )
 }

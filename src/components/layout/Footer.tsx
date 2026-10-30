@@ -14,7 +14,13 @@ export function Footer() {
         <div className="site-footer__top">
           <div className="site-footer__brand">
             <Link href="/" className="footer-logo" aria-label="UNIMASI — home">
-              UNIMASI<span className="footer-logo__dot">.</span>
+              <img
+                src="/logo/unimasi-white.webp"
+                alt="UNIMASI — Animation & Motion Design"
+                width={140}
+                height={54}
+                style={{ height: '36px', width: 'auto', objectFit: 'contain' }}
+              />
             </Link>
             <p className="footer-tagline">
               We make ideas move. An animation and motion design studio for teams that need complex

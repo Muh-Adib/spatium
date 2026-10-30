@@ -42,8 +42,11 @@ export const metadata: Metadata = {
   description:
     'UNIMASI is an animation and motion design studio crafting 2D animation, 3D animation and visual production, and motion graphics that make complex ideas move.',
   icons: {
-    icon: '/favicon.svg',
-    apple: '/favicon.svg',
+    icon: [
+      { url: '/favicon.ico', sizes: 'any' },
+      { url: '/favicon.svg', type: 'image/svg+xml' },
+    ],
+    apple: '/apple-touch-icon.png',
   },
   openGraph: {
     type: 'website',

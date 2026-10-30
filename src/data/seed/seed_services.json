@@ -1,0 +1,86 @@
+[
+  {
+    "id": 1,
+    "documentId": "svc-2d-animation",
+    "title": "2D Animation",
+    "name": "2D Animation",
+    "slug": "2d-animation",
+    "index": "01",
+    "shortName": "2D Animation",
+    "tagline": "Clear narratives, expressive character motion, and stylized storytelling.",
+    "shortDescription": "Animasi 2D frame-by-frame, karakter naratif, explainer video, dan visualisasi konsep berkarakter kuat.",
+    "summary": "Animasi 2D frame-by-frame, karakter naratif, explainer video, dan visualisasi konsep berkarakter kuat.",
+    "fullDescription": "UNIMASI menghadirkan animasi 2D berstandar studio internasional. Dari sketsa awal, desain karakter orisinal, hingga animasi frame-by-frame yang luwes untuk mengomunikasikan pesan rumit secara emosional dan berkesan.",
+    "deliverables": [
+      "Frame-by-frame Character Animation",
+      "Vector Explainer Videos",
+      "Storyboard & Animatic Development",
+      "Social & Campaign Short Videos"
+    ],
+    "order": 1,
+    "isActive": true
+  },
+  {
+    "id": 2,
+    "documentId": "svc-3d-animation-visual-production",
+    "title": "3D Animation & Visual Production",
+    "name": "3D Animation & Visual Production",
+    "slug": "3d-animation-visual-production",
+    "index": "02",
+    "shortName": "3D Animation",
+    "tagline": "Cinematic CGI, architectural wireframes, and mechanical precision.",
+    "shortDescription": "Produksi visual 3D CGI sinematik, wireframe produk kompleks, visualisasi arsitektur, dan simulasi industri.",
+    "summary": "Produksi visual 3D CGI sinematik, wireframe produk kompleks, visualisasi arsitektur, dan simulasi industri.",
+    "fullDescription": "Spesialisasi kami dalam CGI photorealistic dan animasi mekanikal memungkinkan perusahaan memperlihatkan cara kerja mesin rumit, rancangan arsitektur megah, atau produk inovatif sebelum fisik aslinya diproduksi massal.",
+    "deliverables": [
+      "Cinematic 3D Product Renders & Wireframes",
+      "Architectural & Industrial Walkthroughs",
+      "Mechanical Exploded-View Animations",
+      "Look Development & Photorealistic Texturing"
+    ],
+    "order": 2,
+    "isActive": true
+  },
+  {
+    "id": 3,
+    "documentId": "svc-motion-graphic",
+    "title": "Motion Graphic",
+    "name": "Motion Graphic",
+    "slug": "motion-graphic",
+    "index": "03",
+    "shortName": "Motion Graphics",
+    "tagline": "Kinetic typography, dynamic data infographics, and brand ident packages.",
+    "shortDescription": "Desain grafis bergerak, tipografi kinetik, infografis data animasi, dan paket identitas gerak korporat.",
+    "summary": "Desain grafis bergerak, tipografi kinetik, infografis data animasi, dan paket identitas gerak korporat.",
+    "fullDescription": "Mengubah data statistik dan laporan korporat yang kaku menjadi infografis animasi dinamis yang memikat perhatian penonton dalam hitungan detik. Cocok untuk presentasi investor, kampanye media sosial, dan video profil korporat.",
+    "deliverables": [
+      "Animated Infographics & Data Visualization",
+      "Kinetic Typography & Broadcast Packages",
+      "Brand Identity Motion & Bumper Idents",
+      "UI Interaction & Micro-Animations"
+    ],
+    "order": 3,
+    "isActive": true
+  },
+  {
+    "id": 4,
+    "documentId": "svc-digital-visual-assets-ai-assisted-production",
+    "title": "Digital Visual Assets & AI-Assisted Production",
+    "name": "Digital Visual Assets & AI-Assisted Production",
+    "slug": "digital-visual-assets-ai-assisted-production",
+    "index": "04",
+    "shortName": "Visual Assets & AI",
+    "tagline": "Scalable visual asset pipelines assisted by generative AI and real-time engines.",
+    "shortDescription": "Pipeline aset visual digital skala besar yang dipercepat dengan teknologi AI generatif dan engine real-time.",
+    "summary": "Pipeline aset visual digital skala besar yang dipercepat dengan teknologi AI generatif dan engine real-time.",
+    "fullDescription": "Memadukan keahlian artist senior dengan akselerasi alat kecerdasan buatan untuk eksplorasi konsep gaya (style frames), pembuatan variasi aset visual massal, dan rendering real-time dengan efisiensi waktu hingga 60%.",
+    "deliverables": [
+      "AI-Assisted Concept Art & Style Frames",
+      "Massive Asset Production Pipelines",
+      "Real-time Unreal Engine / Blender Visuals",
+      "Digital Brand Asset Libraries"
+    ],
+    "order": 4,
+    "isActive": true
+  }
+]
