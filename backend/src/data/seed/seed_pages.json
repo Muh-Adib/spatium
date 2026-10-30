@@ -1,0 +1,128 @@
+[
+  {
+    "title": "Jasa Pembuatan Website Surabaya",
+    "slug": "jasa-pembuatan-website-surabaya-profesional",
+    "excerpt": "Layanan resmi SegiaTech untuk Jasa Pembuatan Website Surabaya",
+    "template": "landing",
+    "seo": {
+      "metaTitle": "Jasa Pembuatan Website Surabaya - Profesional - Berkualitas - SEGIA Tech",
+      "metaDescription": "Jasa pembuatan website Surabaya profesional, cepat, dan SEO-friendly. Wujudkan website bisnis yang menarik, responsif, dan berkualitas.",
+      "canonicalUrl": "https://www.segiatech.com/jasa-pembuatan-website-surabaya-profesional/",
+      "robotsIndex": true,
+      "robotsFollow": true
+    },
+    "publishedAt": "2025-02-13T15:30:00"
+  },
+  {
+    "title": "Jasa Pembuatan Website Semarang",
+    "slug": "jasa-pembuatan-website-semarang-profesional",
+    "excerpt": "Layanan resmi SegiaTech untuk Jasa Pembuatan Website Semarang",
+    "template": "landing",
+    "seo": {
+      "metaTitle": "Jasa Pembuatan Website Semarang - Profesional - Berkualitas - SEGIA Tech",
+      "metaDescription": "Jasa pembuatan website Semarang profesional, cepat, dan SEO-friendly. Dapatkan website bisnis yang responsif, menarik, dan berkualitas.",
+      "canonicalUrl": "https://www.segiatech.com/jasa-pembuatan-website-semarang-profesional/",
+      "robotsIndex": true,
+      "robotsFollow": true
+    },
+    "publishedAt": "2025-02-13T13:41:00"
+  },
+  {
+    "title": "Jasa Pembuatan Website Medan",
+    "slug": "jasa-pembuatan-website-medan-profesional",
+    "excerpt": "Layanan resmi SegiaTech untuk Jasa Pembuatan Website Medan",
+    "template": "landing",
+    "seo": {
+      "metaTitle": "Jasa Pembuatan Website Medan - Profesional - Berkualitas - SEGIA Tech",
+      "metaDescription": "Jasa pembuatan website Medan profesional, cepat, dan SEO-friendly. Buat website bisnis yang responsif, menarik, dan berkualitas.",
+      "canonicalUrl": "https://www.segiatech.com/jasa-pembuatan-website-medan-profesional/",
+      "robotsIndex": true,
+      "robotsFollow": true
+    },
+    "publishedAt": "2025-02-13T09:50:00"
+  },
+  {
+    "title": "Jasa Pembuatan Website Jakarta",
+    "slug": "jasa-pembuatan-website-jakarta-profesional",
+    "excerpt": "Layanan resmi SegiaTech untuk Jasa Pembuatan Website Jakarta",
+    "template": "landing",
+    "seo": {
+      "metaTitle": "Jasa Pembuatan Website Jakarta - Profesional - Berkualitas - SEGIA Tech",
+      "metaDescription": "Jasa pembuatan website Jakarta profesional dan SEO-friendly untuk bisnis Anda. Tingkatkan visibilitas online dengan website berkualitas",
+      "canonicalUrl": "https://www.segiatech.com/jasa-pembuatan-website-jakarta-profesional/",
+      "robotsIndex": true,
+      "robotsFollow": true
+    },
+    "publishedAt": "2025-02-12T21:17:00"
+  },
+  {
+    "title": "Jasa Pembuatan Website Jogja",
+    "slug": "jasa-pembuatan-website-jogja-profesional",
+    "excerpt": "Layanan resmi SegiaTech untuk Jasa Pembuatan Website Jogja",
+    "template": "landing",
+    "seo": {
+      "metaTitle": "Jasa Pembuatan Website Jogja - Profesional - Berkualitas - SEGIA Tech",
+      "metaDescription": "Jasa pembuatan website Jogja profesional dan SEO-friendly. Buat website bisnis yang responsif, cepat, dan berkualitas.",
+      "canonicalUrl": "https://www.segiatech.com/jasa-pembuatan-website-jogja-profesional/",
+      "robotsIndex": true,
+      "robotsFollow": true
+    },
+    "publishedAt": "2025-02-12T18:51:00"
+  },
+  {
+    "title": "Jasa Pembuatan Website Bali",
+    "slug": "jasa-pembuatan-website-bali-profesional",
+    "excerpt": "Layanan resmi SegiaTech untuk Jasa Pembuatan Website Bali",
+    "template": "landing",
+    "seo": {
+      "metaTitle": "Jasa Pembuatan Website Bali - Profesional - Berkualitas - SEGIA Tech",
+      "metaDescription": "Jasa pembuatan website Bali profesional, cepat, dan SEO-friendly. Dapatkan website bisnis yang menarik, responsif, dan berkualitas.",
+      "canonicalUrl": "https://www.segiatech.com/jasa-pembuatan-website-bali-profesional/",
+      "robotsIndex": true,
+      "robotsFollow": true
+    },
+    "publishedAt": "2025-02-12T15:46:00"
+  },
+  {
+    "title": "Jasa Pembuatan Website Bandung",
+    "slug": "jasa-pembuatan-website-bandung-profesional",
+    "excerpt": "Layanan resmi SegiaTech untuk Jasa Pembuatan Website Bandung",
+    "template": "landing",
+    "seo": {
+      "metaTitle": "Jasa Pembuatan Website Bandung - Profesional - Berkualitas - SEGIA Tech",
+      "metaDescription": "Jasa pembuatan website Bandung profesional, cepat, dan SEO-friendly. Dapatkan website bisnis responsif dan fitur berkualitas harga terjangkau",
+      "canonicalUrl": "https://www.segiatech.com/jasa-pembuatan-website-bandung-profesional/",
+      "robotsIndex": true,
+      "robotsFollow": true
+    },
+    "publishedAt": "2025-02-12T14:52:08"
+  },
+  {
+    "title": "Artikel",
+    "slug": "artikel",
+    "excerpt": "Layanan resmi SegiaTech untuk Artikel",
+    "template": "default",
+    "seo": {
+      "metaTitle": "Artikel - SEGIA Tech",
+      "metaDescription": "",
+      "canonicalUrl": "https://www.segiatech.com/artikel/",
+      "robotsIndex": true,
+      "robotsFollow": true
+    },
+    "publishedAt": "2025-01-07T14:25:04"
+  },
+  {
+    "title": "Home",
+    "slug": "home",
+    "excerpt": "Layanan resmi SegiaTech untuk Home",
+    "template": "home",
+    "seo": {
+      "metaTitle": "Jasa Pembuatan Website - SEGIA Tech",
+      "metaDescription": "Jasa pembuatan website terbaik dengan desain responsif, SEO teroptimasi, dan solusi UI/UX yang intuitif. Website murah dan berkualitas",
+      "canonicalUrl": "https://www.segiatech.com/",
+      "robotsIndex": true,
+      "robotsFollow": true
+    },
+    "publishedAt": "2024-11-06T02:28:31"
+  }
+]

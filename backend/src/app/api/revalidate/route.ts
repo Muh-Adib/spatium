@@ -1,0 +1,145 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { revalidateTag, revalidatePath } from 'next/cache'
+import crypto from 'crypto'
+
+/**
+ * Timing-safe string comparison to prevent timing side-channel attacks.
+ */
+function secureCompare(a: string, b: string): boolean {
+  try {
+    const bufA = Buffer.from(a, 'utf-8')
+    const bufB = Buffer.from(b, 'utf-8')
+    if (bufA.length !== bufB.length) {
+      return false
+    }
+    return crypto.timingSafeEqual(bufA, bufB)
+  } catch {
+    return false
+  }
+}
+
+export interface GenericRevalidatePayload {
+  tag?: string | string[]
+  tags?: string[]
+  path?: string | string[]
+  entity?: 'article' | 'service' | 'portfolio' | 'page' | 'setting' | 'redirect' | string
+  slug?: string
+}
+
+export async function POST(request: NextRequest) {
+  // 1. Authenticate via pre-shared secret using timingSafeEqual
+  const expectedSecret = process.env.REVALIDATE_SECRET || process.env.WEBHOOK_SECRET
+  if (!expectedSecret) {
+    console.error('[Revalidate API] REVALIDATE_SECRET is not configured on the server.')
+    return NextResponse.json(
+      { error: 'Unauthorized', message: 'Revalidation endpoint is not configured.' },
+      { status: 401 }
+    )
+  }
+
+  const { searchParams } = new URL(request.url)
+  const incomingSecret =
+    request.headers.get('x-revalidate-secret') ||
+    request.headers.get('x-webhook-secret') ||
+    request.headers.get('authorization')?.replace(/^Bearer\s+/i, '') ||
+    searchParams.get('secret') ||
+    ''
+
+  if (!incomingSecret || !secureCompare(incomingSecret, expectedSecret)) {
+    return NextResponse.json(
+      { error: 'Unauthorized', message: 'Kunci rahasia revalidasi tidak valid atau tidak disertakan.' },
+      { status: 401 }
+    )
+  }
+
+  // 2. Process generic revalidation payload
+  try {
+    const body: GenericRevalidatePayload = await request.json().catch(() => ({}))
+    const revalidatedTags: string[] = []
+    const revalidatedPaths: string[] = []
+
+    // A. Revalidate explicit tags
+    const directTags = body.tags || (body.tag ? (Array.isArray(body.tag) ? body.tag : [body.tag]) : [])
+    for (const tag of directTags) {
+      if (typeof tag === 'string' && tag.trim()) {
+        try {
+          revalidateTag(tag.trim(), { expire: 0 })
+          revalidatedTags.push(tag.trim())
+        } catch {}
+      }
+    }
+
+    // B. Revalidate explicit paths
+    const directPaths = body.path ? (Array.isArray(body.path) ? body.path : [body.path]) : []
+    for (const p of directPaths) {
+      if (typeof p === 'string' && p.trim()) {
+        try {
+          revalidatePath(p.trim())
+          revalidatedPaths.push(p.trim())
+        } catch {}
+      }
+    }
+
+    // C. Revalidate by entity & slug
+    if (body.entity) {
+      const slug = body.slug ? String(body.slug).trim() : ''
+      const safeTag = (t: string) => {
+        try { revalidateTag(t, { expire: 0 }) } catch {}
+        revalidatedTags.push(t)
+      }
+      const safePath = (p: string) => {
+        try { revalidatePath(p) } catch {}
+        revalidatedPaths.push(p)
+      }
+
+      switch (body.entity) {
+        case 'article':
+          safeTag('articles')
+          if (slug) {
+            safeTag(`article-${slug}`)
+            safePath(`/artikel/${slug}`)
+          }
+          break
+        case 'service':
+          safeTag('services')
+          if (slug) {
+            safeTag(`service-${slug}`)
+            safePath(`/layanan/${slug}`)
+          }
+          break
+        case 'portfolio':
+          safeTag('portfolio')
+          if (slug) {
+            safeTag(`portfolio-${slug}`)
+            safePath(`/portofolio/${slug}`)
+          }
+          break
+        case 'page':
+          safeTag('pages')
+          if (slug) {
+            safePath(`/${slug}`)
+          }
+          break
+        case 'setting':
+          safeTag('site-settings')
+          break
+        case 'redirect':
+          safeTag('redirects')
+          break
+      }
+    }
+
+    return NextResponse.json({
+      success: true,
+      revalidated: true,
+      revalidatedTags,
+      revalidatedPaths,
+      timestamp: new Date().toISOString(),
+    })
+  } catch (err: any) {
+    return NextResponse.json(
+      { error: 'Gagal memproses revalidasi cache', details: err.message },
+      { status: 500 }
+    )
+  }
+}

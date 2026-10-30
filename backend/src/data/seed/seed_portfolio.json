@@ -1,0 +1,889 @@
+[
+  {
+    "title": "Interactive 3D Aquarium & Live Fish Scanner",
+    "slug": "interactive-3d-aquarium-edutainment",
+    "summary": "Sistem edutainment akuarium 3D interaktif bertenaga WebGL dengan stasiun pemindai fisik ke virtual real-time untuk museum dan pusat sains keluarga.",
+    "challenge": "<p>Pusat edutainment dan museum edukasi menghadapi penurunan antusiasme generasi muda terhadap display akuarium kaca konvensional yang statis dan minim interaksi. Pengelola membutuhkan atraksi digital imersif yang mampu melibatkan anak-anak dan keluarga secara langsung, menggabungkan motorik mewarnai fisik tradisional dengan kemegahan animasi 3D modern.</p>",
+    "solution": "<p>Pengembangan software akuarium 3D WebGL full-screen 4K dengan simulasi kawanan ikan (boids flocking algorithm), deteksi gerakan sentuh layar interaktif, dan stasiun pemindai kertas fisik yang memproses pewarnaan menjadi tekstur 3D dinamis dalam hitungan detik.</p>",
+    "seo": {
+      "metaTitle": "Interactive 3D Aquarium & Live Fish Scanner - SegiaTech",
+      "metaDescription": "Software akuarium interaktif 3D dengan optical scan fish untuk edutainment, museum, mall, dan event keluarga.",
+      "canonicalUrl": "https://www.segiatech.com/portofolio/interactive-3d-aquarium-edutainment",
+      "robotsIndex": true,
+      "robotsFollow": true,
+      "ogTitle": "Interactive 3D Aquarium & Live Fish Scanner - SegiaTech",
+      "ogDescription": "Sistem akuarium digital 3D interaktif di mana pengunjung memindai ikan hasil gambarnya dan melihatnya berenang hidup secara real-time."
+    },
+    "publishedAt": "2026-05-10T10:00:00",
+    "client": "Oceanic Science & Edutainment Center",
+    "year": 2026,
+    "industry": {
+      "id": 5,
+      "documentId": "ind-immersive",
+      "name": "Immersive Software & Edutainment",
+      "slug": "immersive-apps"
+    },
+    "projectType": "Interactive 3D & Hardware Scanner",
+    "videoUrl": "https://assets.mixkit.co/videos/preview/mixkit-underwater-view-of-colorful-fish-swimming-in-an-aquarium-41584-large.mp4",
+    "heroMedia": {
+      "id": 201,
+      "documentId": "media-3d-aquarium",
+      "name": "Interactive 3D Aquarium Fish Scanner",
+      "alternativeText": "Instalasi Akuarium 3D Interaktif dengan Live Scanner Ikan",
+      "url": "/images/portfolio/interactive-3d-aquarium.png",
+      "width": 1400,
+      "height": 900
+    },
+    "metrics": [
+      {
+        "label": "Peningkatan Kunjungan",
+        "value": "+220%",
+        "detail": "Durasi interaksi keluarga di area pameran"
+      },
+      {
+        "label": "Kecepatan Scan-to-3D",
+        "value": "< 2s",
+        "detail": "Transformasi kertas fisik ke ikan 3D hidup"
+      },
+      {
+        "label": "Performa Visual",
+        "value": "60 FPS",
+        "detail": "Render 3D WebGL 4K stabil real-time"
+      },
+      {
+        "label": "Kepuasan Pengunjung",
+        "value": "99%",
+        "detail": "Indeks kepuasan keluarga & anak-anak"
+      }
+    ],
+    "approach": "<p>SegiaTech merancang ekosistem edutainment berbasis Three.js dan WebGL yang menjembatani aktivitas fisik dan virtual. Kertas gambar fisik yang diwarnai oleh anak-anak dipindai melalui stasiun Optical Scanner berkecepatan tinggi, kemudian secara instan ditransformasikan menjadi model 3D hidup di akuarium virtual raksasa 4K tanpa hambatan.</p>",
+    "result": "<p>Durasi kunjungan rata-rata keluarga meningkat hingga 220%, lonjakan interaksi edukasi sebesar 185%, serta memperoleh respon positif dari 99% pengunjung. Sistem beroperasi stabil selama ribuan jam tanpa crash.</p>"
+  },
+  {
+    "title": "Interactive Sensing Wall & Projection Mapping",
+    "slug": "interactive-wall-projection-museum",
+    "summary": "Instalasi sensor laser LiDAR dan proyeksi pemetaan interaktif multitouch untuk pameran budaya interaktif di galeri seni terkemuka.",
+    "challenge": "<p>Ruang pameran budaya dan galeri seni menghadapi tantangan kebosanan pengunjung terhadap pameran statis satu arah. Pengunjung menginginkan pengalaman visual yang imersif, interaktif, dan merespons sentuhan fisik secara langsung pada bidang dinding raksasa.</p>",
+    "solution": "<p>Pengembangan arsitektur proyeksi interaktif multi-sensor dengan deteksi hingga 32 titik sentuh simultan, visualisasi kisah sejarah yang dinamis sesuai interaksi pengunjung, dan kalibrasi optik otomatis.</p>",
+    "seo": {
+      "metaTitle": "Interactive Sensing Wall & Projection Mapping - SegiaTech",
+      "metaDescription": "Instalasi dinding proyeksi interaktif bersensor LiDAR untuk museum, pameran seni, dan brand experience.",
+      "canonicalUrl": "https://www.segiatech.com/portofolio/interactive-wall-projection-museum",
+      "robotsIndex": true,
+      "robotsFollow": true,
+      "ogTitle": "Interactive Sensing Wall & Projection Mapping - SegiaTech",
+      "ogDescription": "Instalasi proyeksi dinding interaktif bersensor gerak real-time untuk galeri dan museum modern."
+    },
+    "publishedAt": "2026-05-15T11:00:00",
+    "client": "Pusat Kebudayaan & Galeri Nusantara",
+    "year": 2026,
+    "industry": {
+      "id": 5,
+      "documentId": "ind-immersive",
+      "name": "Immersive Software & Installation",
+      "slug": "immersive-apps"
+    },
+    "projectType": "LiDAR Sensor & Motion Graphics",
+    "videoUrl": "https://assets.mixkit.co/videos/preview/mixkit-hands-touching-and-swiping-a-digital-screen-42352-large.mp4",
+    "heroMedia": {
+      "id": 202,
+      "documentId": "media-interactive-wall",
+      "name": "Interactive Sensing Wall Projection",
+      "alternativeText": "Instalasi Proyeksi Dinding Interaktif Sensorik",
+      "url": "/images/portfolio/interactive-wall-projection.webp",
+      "width": 1400,
+      "height": 900
+    },
+    "metrics": [
+      {
+        "label": "Lonjakan Interaksi",
+        "value": "+300%",
+        "detail": "Tingkat partisipasi pengunjung pameran"
+      },
+      {
+        "label": "Multitouch Tracking",
+        "value": "32 Titik",
+        "detail": "Sentuhan simultan presisi tinggi"
+      },
+      {
+        "label": "Latensi Sensor",
+        "value": "< 15ms",
+        "detail": "Respon instan visual terhadap sentuhan"
+      },
+      {
+        "label": "Retensi Edukasi",
+        "value": "4x Lipat",
+        "detail": "Daya ingat materi sejarah kebudayaan"
+      }
+    ],
+    "approach": "<p>Kami mengintegrasikan sistem sensor gerak optik dan laser LiDAR yang memetakan seluruh permukaan dinding museum, dipadukan dengan software rendering real-time beresolusi tinggi dan tata suara spasial terarah.</p>",
+    "result": "<p>Partisipasi pengunjung museum melonjak hingga 300%, interaksi edukasi sejarah meningkat 4x lipat, dan instalasi ini menjadi atraksi paling banyak diulas di platform digital.</p>"
+  },
+  {
+    "title": "Website SMK PB Soedirman 2",
+    "slug": "website-smk-pb-soedirman-2",
+    "summary": "Transformasi portal digital modern SMK PB Soedirman 2 Jakarta dengan navigasi ramah calon siswa, showcase kejuruan, dan sistem PMB online berkecepatan tinggi.",
+    "challenge": "<p>Website lama SMK PB Soedirman 2 Jakarta memiliki struktur navigasi yang kompleks, lambat diakses melalui perangkat smartphone, dan belum optimal dalam mengomunikasikan keunggulan laboratorium, fasilitas kejuruan, serta alur pendaftaran siswa baru.</p>",
+    "solution": "<p>Pengembangan website berbasis Next.js dengan desain editorial yang bersih, katalog jurusan interaktif, galeri foto sarana prasarana asli, serta integrasi formulir penerimaan siswa baru online dengan optimasi Core Web Vitals berkecepatan tinggi.</p>",
+    "seo": {
+      "metaTitle": "Website SMK PB Soedirman 2 - SEGIA Tech",
+      "metaDescription": "Di era digital saat ini, website bukan lagi sekadar pelengkap bagi institusi pendidikan, melainkan menjadi aset utama dalam membangun citra dan kepercayaan",
+      "canonicalUrl": "https://www.segiatech.com/website-smk-pb-soedirman-2/",
+      "robotsIndex": true,
+      "robotsFollow": true,
+      "ogTitle": "Website SMK PB Soedirman 2 - SEGIA Tech",
+      "ogDescription": "Di era digital saat ini, website bukan lagi sekadar pelengkap bagi institusi pendidikan, melainkan menjadi aset utama dalam membangun citra dan kepercayaan. Hal inilah yang menjadi dasar dalam pengembangan website SMK PB Soedirman 2 Jakarta, di mana kebutuhan akan platform informasi yang profesional dipadukan dengan strategi komunikasi digital yang lebih terarah."
+    },
+    "publishedAt": "2026-04-20T09:57:45",
+    "client": "SMK PB Soedirman 2 Jakarta",
+    "year": 2024,
+    "industry": {
+      "id": 1,
+      "documentId": "ind-pendidikan",
+      "name": "Sekolah & Kejuruan",
+      "slug": "pendidikan"
+    },
+    "projectType": "School Portal & Information Architecture",
+    "heroMedia": {
+      "id": 100,
+      "documentId": "media-website-smk-pb-soedirman-2",
+      "name": "Gedung SMK PB Soedirman 2 Jakarta",
+      "alternativeText": "Foto Gedung Utama SMK PB Soedirman 2 Jakarta",
+      "url": "/images/schools/smk-pb-soedirman-gedung.jpg",
+      "width": 1400,
+      "height": 900
+    },
+    "approach": "<p>SegiaTech merancang ulang hierarki informasi dengan pendekatan mobile-first. Kami memprioritaskan kemudahan akses profil jurusan, tur fasilitas kampus nyata, dan integrasi tombol pendaftaran yang intuitif bagi calon siswa dan orang tua.</p>",
+    "result": "<p>Pendaftaran siswa baru secara online meningkat sebesar 165%, waktu muat halaman berkurang signifikan menjadi 0.7 detik, dan website meraih peringkat teratas Google untuk pencarian SMK unggulan di Jakarta Timur.</p>",
+    "metrics": [
+      {
+        "label": "Kenaikan Pendaftaran",
+        "value": "+165%",
+        "detail": "Registrasi calon siswa baru secara online"
+      },
+      {
+        "label": "Kecepatan LCP",
+        "value": "0.7s",
+        "detail": "Metrik Core Web Vitals ramah smartphone"
+      },
+      {
+        "label": "Peringkat SEO",
+        "value": "#1 Google",
+        "detail": "Pencarian SMK unggulan Jakarta Timur"
+      },
+      {
+        "label": "Akses Mobile",
+        "value": "98%",
+        "detail": "Skor kenyamanan antarmuka di ponsel pintar"
+      }
+    ]
+  },
+  {
+    "title": "Website SMK Mahanaim",
+    "slug": "website-smk-mahanaim",
+    "summary": "Pengembangan portal representasi keunggulan akademik, sarana kejuruan, dan kemitraan industri modern untuk SMK Mahanaim Bekasi.",
+    "challenge": "<p>Reputasi akademik dan kejuruan sekolah yang unggul belum terkomunikasikan secara optimal di ranah digital. Calon wali murid kesulitan mengakses informasi sarana laboratorium modern dan prospek karier lulusan secara transparan.</p>",
+    "solution": "<p>Website profil institusi berkinerja tinggi dengan tata letak editorial clean, navigasi cepat ke jurusan kejuruan, sistem FAQ interaktif seputar beasiswa, dan galeri sarana belajar kejuruan beresolusi tinggi.</p>",
+    "seo": {
+      "metaTitle": "Website SMK Mahanaim - SEGIA Tech",
+      "metaDescription": "Di era digital saat ini, institusi pendidikan tidak hanya bersaing dalam kualitas akademik, tetapi juga dalam bagaimana mereka membangun persepsi melalui p",
+      "canonicalUrl": "https://www.segiatech.com/website-smk-mahanaim/",
+      "robotsIndex": true,
+      "robotsFollow": true,
+      "ogTitle": "Website SMK Mahanaim - SEGIA Tech",
+      "ogDescription": "Di era digital saat ini, institusi pendidikan tidak hanya bersaing dalam kualitas akademik, tetapi juga dalam bagaimana mereka membangun persepsi melalui platform digital. Melalui pengembangan website SMK Mahanaim, pendekatan yang dihadirkan tidak sekadar menyampaikan informasi sekolah, tetapi juga memperkuat identitas sebagai institusi yang menekankan keseimbangan antara keterampilan dan pembentukan karakter."
+    },
+    "publishedAt": "2026-04-20T09:49:29",
+    "client": "SMK Mahanaim Bekasi",
+    "year": 2024,
+    "industry": {
+      "id": 1,
+      "documentId": "ind-pendidikan",
+      "name": "Sekolah & Kejuruan",
+      "slug": "pendidikan"
+    },
+    "projectType": "Vocational High School Web Platform",
+    "heroMedia": {
+      "id": 101,
+      "documentId": "media-website-smk-mahanaim",
+      "name": "Gedung Bahtera SMK Mahanaim Bekasi",
+      "alternativeText": "Foto Gedung Bahtera Karakter SMK Mahanaim Bekasi",
+      "url": "/images/schools/smk-mahanaim-kampus.jpg",
+      "width": 1080,
+      "height": 1080
+    },
+    "approach": "<p>Perancangan visual modern dengan storytelling berfokus pada prestasi siswa, sarana laboratorium canggih, dan kemitraan industri nyata. Kami menata ulang struktur navigasi agar informatif dan mudah dipahami dalam sekali pandang.</p>",
+    "result": "<p>Traffic pengunjung meningkat sebesar 190%, kemudahan konsultasi via WhatsApp naik 2.5x lipat, dan sekolah berhasil memperkuat positioning sebagai institusi kejuruan modern terpercaya di Bekasi.</p>",
+    "metrics": [
+      {
+        "label": "Pertumbuhan Traffic",
+        "value": "+190%",
+        "detail": "Kunjungan calon wali murid dan siswa"
+      },
+      {
+        "label": "Lead Konsultasi",
+        "value": "2.5x Lipat",
+        "detail": "Pertanyaan pendaftaran via integrasi WA"
+      },
+      {
+        "label": "Kecepatan Muat",
+        "value": "< 0.8s",
+        "detail": "Performa rendering instan tanpa hambatan"
+      },
+      {
+        "label": "Kesesuaian Mobile",
+        "value": "100%",
+        "detail": "Tampilan sempurna di semua ukuran layar"
+      }
+    ]
+  },
+  {
+    "title": "Website PMB UMBY",
+    "slug": "website-pmb-umby",
+    "summary": "Platform Penerimaan Mahasiswa Baru (PMB) Universitas Mercu Buana Yogyakarta dengan alur pendaftaran frictionless dan kalkulator estimasi beasiswa.",
+    "challenge": "<p>Persaingan penerimaan mahasiswa baru perguruan tinggi sangat ketat. Portal pendaftaran lama mengalami penurunan konversi karena formulir pendaftaran yang terlalu panjang, tidak fleksibel diakses dari ponsel pintar, dan minim panduan alur biaya.</p>",
+    "solution": "<p>Pengembangan portal PMB terintegrasi dengan database pendaftaran kampus, kalkulator estimasi biaya kuliah per semester, sistem tracking berkas real-time, dan optimasi kecepatan ekstrem untuk menangani lonjakan traffic di masa puncak registrasi.</p>",
+    "seo": {
+      "metaTitle": "Website PMB UMBY - SEGIA Tech",
+      "metaDescription": "Di tengah meningkatnya persaingan antar perguruan tinggi, kehadiran website penerimaan mahasiswa baru tidak lagi sekadar menjadi media informasi, melainkan",
+      "canonicalUrl": "https://www.segiatech.com/website-pmb-umby/",
+      "robotsIndex": true,
+      "robotsFollow": true,
+      "ogTitle": "Website PMB UMBY - SEGIA Tech",
+      "ogDescription": "Di tengah meningkatnya persaingan antar perguruan tinggi, kehadiran website penerimaan mahasiswa baru tidak lagi sekadar menjadi media informasi, melainkan berperan sebagai titik awal interaksi antara institusi dan calon mahasiswa. Melalui pengembangan website PMB Universitas Mercu Buana Yogyakarta, sebuah pendekatan digital yang lebih terarah dihadirkan untuk menjawab kebutuhan akses informasi yang cepat, jelas, dan terintegrasi dalam satu platform."
+    },
+    "publishedAt": "2026-04-20T09:14:34",
+    "client": "Universitas Mercu Buana Yogyakarta",
+    "year": 2024,
+    "industry": {
+      "id": 1,
+      "documentId": "ind-pendidikan",
+      "name": "Pendidikan Tinggi",
+      "slug": "pendidikan"
+    },
+    "projectType": "Portal PMB & Pendaftaran Mahasiswa Baru",
+    "heroMedia": {
+      "id": 102,
+      "documentId": "media-website-pmb-umby",
+      "name": "Gedung Rektorat UMBY",
+      "alternativeText": "Foto Gedung Rektorat Universitas Mercu Buana Yogyakarta",
+      "url": "/images/schools/umby-gedung-rektorat.jpg",
+      "width": 1400,
+      "height": 900
+    },
+    "approach": "<p>Kami menerapkan metodologi Frictionless UX untuk menyederhanakan alur pendaftaran mahasiswa baru, menghadirkan kalkulator beasiswa interaktif, dan membangun visualisasi jalur seleksi yang mudah dipahami calon mahasiswa.</p>",
+    "result": "<p>Konversi pendaftaran mahasiswa baru melonjak 175%, tingkat pembatalan pengisian form (drop-off) turun hingga 45%, dan portal berhasil melayani lebih dari 100.000 pengunjung per semester dengan uptime 99.9%.</p>",
+    "metrics": [
+      {
+        "label": "Konversi Pendaftaran",
+        "value": "+175%",
+        "detail": "Kenaikan penyelesaian formulir registrasi"
+      },
+      {
+        "label": "Penurunan Drop-off",
+        "value": "-45%",
+        "detail": "Reduksi pendaftaran terbengkalai pada form"
+      },
+      {
+        "label": "Skor PageSpeed",
+        "value": "99/100",
+        "detail": "Kecepatan muat mobile Google PageSpeed"
+      },
+      {
+        "label": "Volume Pengunjung",
+        "value": "100K+",
+        "detail": "Kapasitas layanan pendaftar per semester"
+      }
+    ]
+  },
+  {
+    "title": "Virtual Exhibition UGM",
+    "slug": "virtual-exhibition-ugm",
+    "summary": "Ruang pameran virtual 3D WebGL untuk expo riset dan inovasi Universitas Gadjah Mada yang dapat diakses ribuan pengunjung global via browser.",
+    "challenge": "<p>Kebutuhan menyelenggarakan expo inovasi dan riset tahunan berskala global terbentur kendala geografis. Presentasi via video conference konvensional terasa monoton dan tidak memberikan sensasi kunjungan ruang pameran interaktif.</p>",
+    "solution": "<p>Lingkungan virtual pameran 3D dengan booth riset interaktif, pemutaran video karya di dalam ruang 3D, direktori inovator, fitur live chat interaktif, dan navigasi kamera sudut pandang orang pertama (first-person walk).</p>",
+    "seo": {
+      "metaTitle": "Virtual Exhibition UGM - SEGIA Tech",
+      "metaDescription": "Di tengah perubahan cara orang mengakses informasi, pengalaman tidak lagi harus selalu terjadi secara fisik. Melalui pengembangan website virtual tour UGM ",
+      "canonicalUrl": "https://www.segiatech.com/virtual-exhibition-ugm/",
+      "robotsIndex": true,
+      "robotsFollow": true,
+      "ogTitle": "Virtual Exhibition UGM - SEGIA Tech",
+      "ogDescription": "Di tengah perubahan cara orang mengakses informasi, pengalaman tidak lagi harus selalu terjadi secara fisik. Melalui pengembangan website virtual tour UGM Virtual Tour, pendekatan digital dibawa ke level yang lebih imersif—di mana pengguna tidak hanya melihat, tetapi seolah diajak “berjalan” langsung di dalam lingkungan kampus."
+    },
+    "publishedAt": "2026-04-20T10:40:04",
+    "client": "Universitas Gadjah Mada (UGM)",
+    "year": 2024,
+    "industry": {
+      "id": 1,
+      "documentId": "ind-pendidikan",
+      "name": "Pendidikan Tinggi",
+      "slug": "pendidikan"
+    },
+    "projectType": "360° Virtual Campus Experience",
+    "heroMedia": {
+      "id": 103,
+      "documentId": "media-virtual-exhibition-ugm",
+      "name": "Boulevard Kampus UGM",
+      "alternativeText": "Foto Boulevard & Gerbang Kampus Utama UGM",
+      "url": "/images/schools/ugm-kampus-boulevard.jpg",
+      "width": 1400,
+      "height": 900
+    },
+    "approach": "<p>SegiaTech merekayasa platform pameran virtual 3D WebGL yang berjalan langsung di peramban web tanpa perlu instalasi aplikasi apapun, dengan optimasi aset 3D agar ringan diakses koneksi internet mobile.</p>",
+    "result": "<p>Pameran sukses dihadiri lebih dari 35.000 pengunjung dari 18 negara, memangkas biaya logistik fisik hingga 70%, dan menjadi percontohan pameran virtual akademik di Indonesia.</p>",
+    "metrics": [
+      {
+        "label": "Total Pengunjung",
+        "value": "35.000+",
+        "detail": "Kunjungan unik selama periode pameran"
+      },
+      {
+        "label": "Jangkauan Global",
+        "value": "18 Negara",
+        "detail": "Partisipasi audiens akademik internasional"
+      },
+      {
+        "label": "Instalasi Aplikasi",
+        "value": "0 MB",
+        "detail": "Berjalan 100% langsung di web browser"
+      },
+      {
+        "label": "Efisiensi Biaya",
+        "value": "70%",
+        "detail": "Penghematan anggaran logistik pameran fisik"
+      }
+    ]
+  },
+  {
+    "title": "Website ITSKes ICME",
+    "slug": "website-itskes-icme",
+    "summary": "Portal institusi kesehatan ITSKes ICMe Jombang dengan penyajian standar akreditasi, sarana klinis, dan pendaftaran profesi kesehatan modern.",
+    "challenge": "<p>Institusi pendidikan tinggi kesehatan membutuhkan website yang dapat menampilkan legalitas akreditasi, sarana rumah sakit jejaring, serta alur pendaftaran program keperawatan dan kebidanan secara kredibel dan transparan.</p>",
+    "solution": "<p>Pengembangan website institusi kesehatan modern dengan katalog program studi terakreditasi, direktori dosen dan fasilitas praktikum, sistem unduhan panduan akademik, dan integrasi layanan bantuan mahasiswa.</p>",
+    "seo": {
+      "metaTitle": "Website ITSKes ICME - SEGIA Tech",
+      "metaDescription": "Di tengah perkembangan pendidikan tinggi yang semakin kompetitif, kehadiran website tidak lagi hanya berfungsi sebagai media informasi, tetapi menjadi repr",
+      "canonicalUrl": "https://www.segiatech.com/website-itskes-icme/",
+      "robotsIndex": true,
+      "robotsFollow": true,
+      "ogTitle": "Website ITSKes ICME - SEGIA Tech",
+      "ogDescription": "Di tengah perkembangan pendidikan tinggi yang semakin kompetitif, kehadiran website tidak lagi hanya berfungsi sebagai media informasi, tetapi menjadi representasi utama kualitas dan kredibilitas institusi. Melalui pengembangan website ITSKes ICMe Jombang, Segia Tech menghadirkan sebuah platform digital yang mampu menyampaikan identitas kampus secara lebih terstruktur, modern, dan mudah diakses oleh calon mahasiswa maupun publik luas."
+    },
+    "publishedAt": "2026-04-20T10:32:21",
+    "client": "ITSKes ICMe Jombang",
+    "year": 2024,
+    "industry": {
+      "id": 1,
+      "documentId": "ind-pendidikan",
+      "name": "Pendidikan Tinggi",
+      "slug": "pendidikan"
+    },
+    "projectType": "Portal Kampus & Informasi Akademik",
+    "heroMedia": {
+      "id": 104,
+      "documentId": "media-website-itskes-icme",
+      "name": "Kampus ITSKes ICMe Jombang",
+      "alternativeText": "Foto Gedung Kampus Kesehatan ITSKes ICMe Jombang",
+      "url": "/images/companies/itskes-health-campus.jpg",
+      "width": 1400,
+      "height": 900
+    },
+    "approach": "<p>Perancangan antarmuka bergaya healthcare profesional yang bersih, terpercaya, dan mengedepankan informasi legalitas, direktori laboratorium klinis, serta alur registrasi yang jelas bagi calon tenaga kesehatan.</p>",
+    "result": "<p>Pendaftaran calon mahasiswa tenaga kesehatan meningkat sebesar 140%, kecepatan respons tim administrasi naik 3x lipat, dan reputasi institusi semakin kokoh di tingkat regional.</p>",
+    "metrics": [
+      {
+        "label": "Kenaikan Registrasi",
+        "value": "+140%",
+        "detail": "Pendaftaran calon mahasiswa kesehatan"
+      },
+      {
+        "label": "Kecepatan Respon",
+        "value": "3x Lipat",
+        "detail": "Efisiensi layanan informasi akademik"
+      },
+      {
+        "label": "Ketersediaan Server",
+        "value": "99.8%",
+        "detail": "Uptime portal informasi institusi"
+      },
+      {
+        "label": "Akreditasi Kampus",
+        "value": "Terakreditasi",
+        "detail": "Transparansi status legalitas profesi"
+      }
+    ]
+  },
+  {
+    "title": "Website YSPI",
+    "slug": "website-yspi",
+    "summary": "Sistem portal terpadu Yayasan Sekolah Pendidikan Islam (YSPI) yang mengintegrasikan jenjang TK, SD, dan SMP dalam satu platform modern.",
+    "challenge": "<p>Yayasan mengelola beberapa jenjang pendidikan mulai dari TK hingga SMP Islam, namun informasi terpisah-pisah di berbagai channel tanpa ada satu portal resmi yang terintegrasi dan mencerminkan nilai islami modern.</p>",
+    "solution": "<p>Portal sentral YSPI dengan estetika islami kontemporer, transparansi kurikulum unggulan, sistem pendaftaran online satu pintu untuk semua jenjang, dan galeri kegiatan santri yang dinamis.</p>",
+    "seo": {
+      "metaTitle": "Website YSPI - SEGIA Tech",
+      "metaDescription": "Segia Tech menghadirkan Website YSPI, platform digital modern yang efisien, user-friendly, responsif, dan mendukung kebutuhan YSPI.",
+      "canonicalUrl": "https://www.segiatech.com/website-yspi/",
+      "robotsIndex": true,
+      "robotsFollow": true,
+      "ogTitle": "Website YSPI - SEGIA Tech",
+      "ogDescription": "Segia Tech menghadirkan Website YSPI, platform digital modern yang efisien, user-friendly, responsif, dan mendukung kebutuhan YSPI."
+    },
+    "publishedAt": "2025-01-22T12:15:26",
+    "client": "Yayasan Sekolah Pendidikan Islam (YSPI)",
+    "year": 2023,
+    "industry": {
+      "id": 1,
+      "documentId": "ind-pendidikan",
+      "name": "Sekolah & Yayasan",
+      "slug": "pendidikan"
+    },
+    "projectType": "Islamic Foundation & Integrated School Portal",
+    "heroMedia": {
+      "id": 105,
+      "documentId": "media-website-yspi",
+      "name": "Kompleks Kampus YSPI",
+      "alternativeText": "Foto Kompleks Kampus Yayasan Sekolah Pendidikan Islam",
+      "url": "/images/companies/yspi-islamic-school.jpg",
+      "width": 1400,
+      "height": 900
+    },
+    "approach": "<p>Kami membangun arsitektur portal yayasan terpusat dengan sub-portal dinamis untuk masing-masing jenjang sekolah, dilengkapi kalender akademik digital dan sistem informasi program tahfidz terstruktur.</p>",
+    "result": "<p>Seluruh jenjang pendidikan berhasil terintegrasi dalam 1 payung digital, efisiensi administrasi meningkat 60%, dan pendaftaran siswa baru meningkat sebesar 155%.</p>",
+    "metrics": [
+      {
+        "label": "Kenaikan Siswa Baru",
+        "value": "+155%",
+        "detail": "Pendaftaran terintegrasi tahun ajaran baru"
+      },
+      {
+        "label": "Integrasi Jenjang",
+        "value": "1 Portal",
+        "detail": "Sentralisasi data TK, SD, dan SMP"
+      },
+      {
+        "label": "Efisiensi Dokumen",
+        "value": "60%",
+        "detail": "Reduksi biaya dan waktu verifikasi manual"
+      },
+      {
+        "label": "Program Tahfidz",
+        "value": "100% Rapi",
+        "detail": "Publikasi target hafalan santri transparan"
+      }
+    ]
+  },
+  {
+    "title": "Website Pundsae",
+    "slug": "website-pundsae",
+    "summary": "Website agensi kreatif Pundsae Studio dengan visual-first layout, animasi mikro interaktif GSAP, dan showcase portofolio sinematik.",
+    "challenge": "<p>Sebagai studio agensi kreatif, Pundsae membutuhkan website yang mencerminkan standar estetika tinggi mereka, bebas dari template pasaran, dan mampu menampilkan portofolio visual secara sinematik tanpa hambatan performa.</p>",
+    "solution": "<p>Pengembangan website portofolio kreatif berbasis Next.js App Router dengan showcase karya berbasis filter kategori, transisi halaman halus, dan integrasi form konsultasi agensi yang elegan.</p>",
+    "seo": {
+      "metaTitle": "Website Pundsae - SEGIA Tech",
+      "metaDescription": "Di era di mana kehadiran digital menjadi representasi utama sebuah brand, website tidak lagi hanya berfungsi sebagai media informasi, tetapi juga sebagai w",
+      "canonicalUrl": "https://www.segiatech.com/website-pundsae/",
+      "robotsIndex": true,
+      "robotsFollow": true,
+      "ogTitle": "Website Pundsae - SEGIA Tech",
+      "ogDescription": "Di era di mana kehadiran digital menjadi representasi utama sebuah brand, website tidak lagi hanya berfungsi sebagai media informasi, tetapi juga sebagai wajah pertama yang menentukan kesan audiens. Melalui pengembangan website Pundsae, pendekatan yang diambil tidak sekadar menampilkan profil, melainkan membangun pengalaman visual yang kuat dan berkarakter sejak interaksi pertama."
+    },
+    "publishedAt": "2026-04-20T09:41:12",
+    "client": "Pundsae Studio",
+    "year": 2024,
+    "industry": {
+      "id": 2,
+      "documentId": "ind-kreatif",
+      "name": "Kreatif & Agensi",
+      "slug": "kreatif"
+    },
+    "projectType": "Creative Portfolio & Agency Branding",
+    "heroMedia": {
+      "id": 106,
+      "documentId": "media-website-pundsae",
+      "name": "Kantor Studio Pundsae",
+      "alternativeText": "Foto Kantor & Studio Desain Pundsae",
+      "url": "/images/companies/pundsae-creative-agency.jpg",
+      "width": 1400,
+      "height": 900
+    },
+    "approach": "<p>Menerapkan pendekatan desain editorial modern dengan animasi mikro menggunakan GSAP, tipografi display berani, dan tata letak grid asimetris yang responsif.</p>",
+    "result": "<p>Inbound lead dari klien korporat melonjak 210%, waktu retensi pengunjung meningkat dari 45 detik menjadi 3 menit 20 detik, dan closing deal agensi naik sebesar 40%.</p>",
+    "metrics": [
+      {
+        "label": "Inbound Leads",
+        "value": "+210%",
+        "detail": "Kontak konsultasi proyek dari brand korporat"
+      },
+      {
+        "label": "Waktu Kunjungan",
+        "value": "3m 20s",
+        "detail": "Rata-rata durasi eksplorasi portofolio"
+      },
+      {
+        "label": "Performa Animasi",
+        "value": "60 FPS",
+        "detail": "Transisi mikro GSAP mulus di peramban"
+      },
+      {
+        "label": "Closing Deal",
+        "value": "+40%",
+        "detail": "Konversi penawaran agensi ke kontrak kerja"
+      }
+    ]
+  },
+  {
+    "title": "Website KIT Taekwondo",
+    "slug": "pembuatan-website-kit-taekwondo",
+    "summary": "Portal resmi KIT Taekwondo Indonesia untuk manajemen kejuaraan bela diri nasional, pendaftaran atlet digital, dan direktori dojang.",
+    "challenge": "<p>Manajemen klub dan kejuaraan Taekwondo menghadapi kendala koordinasi pendaftaran atlet, publikasi bagan tanding, dan update jadwal latihan yang sebelumnya dikelola manual lewat grup chat tidak terstruktur.</p>",
+    "solution": "<p>Sistem portal olahraga modern dengan modul pendaftaran turnamen online, upload dokumen atlet, bagan pertandingan real-time, dan galeri turnamen nasional.</p>",
+    "seo": {
+      "metaTitle": "Website KIT Taekwondo - SEGIA Tech",
+      "metaDescription": "Pembuatan Website KIT Taekwondo dengan desain menarik, responsif, SEO efektif, dan navigasi mudah untuk pengalaman pengguna.",
+      "canonicalUrl": "https://www.segiatech.com/pembuatan-website-kit-taekwondo/",
+      "robotsIndex": true,
+      "robotsFollow": true,
+      "ogTitle": "Website KIT Taekwondo - SEGIA Tech",
+      "ogDescription": "Pembuatan Website KIT Taekwondo dengan desain menarik, responsif, SEO efektif, dan navigasi mudah untuk pengalaman pengguna."
+    },
+    "publishedAt": "2025-01-20T07:45:37",
+    "client": "KIT Taekwondo Indonesia",
+    "year": 2023,
+    "industry": {
+      "id": 3,
+      "documentId": "ind-olahraga",
+      "name": "Olahraga & Komunitas",
+      "slug": "olahraga"
+    },
+    "projectType": "Martial Arts Academy & Registration Platform",
+    "heroMedia": {
+      "id": 107,
+      "documentId": "media-pembuatan-website-kit-taekwondo",
+      "name": "Arena KIT Taekwondo",
+      "alternativeText": "Foto Training Hall & Arena KIT Taekwondo Indonesia",
+      "url": "/images/companies/kit-taekwondo-academy.jpg",
+      "width": 1400,
+      "height": 900
+    },
+    "approach": "<p>Perancangan portal olahraga dinamis dengan modul event kejuaraan online, verifikasi dokumen atlet, direktori dojang/cabang latihan resmi, dan profil atlet berprestasi.</p>",
+    "result": "<p>Pendaftaran atlet turnamen 100% digital tanpa berkas fisik, melayani lebih dari 1.200 atlet dari 24 provinsi, dan meniadakan kesalahan data input atlet hingga 0%.</p>",
+    "metrics": [
+      {
+        "label": "Atlet Terdaftar",
+        "value": "1.200+",
+        "detail": "Peserta turnamen nasional per gelaran"
+      },
+      {
+        "label": "Jangkauan Wilayah",
+        "value": "24 Provinsi",
+        "detail": "Klub dan dojang cabang yang terhubung"
+      },
+      {
+        "label": "Akurasi Data",
+        "value": "100%",
+        "detail": "Eliminasi kesalahan dokumen pendaftaran"
+      },
+      {
+        "label": "Paperless System",
+        "value": "100%",
+        "detail": "Transisi menyeluruh ke sistem berbasis cloud"
+      }
+    ]
+  },
+  {
+    "title": "Website Erfo Multimedia",
+    "slug": "pembuatan-website-erfo-multimedia",
+    "summary": "Website showcase rumah produksi Erfo Multimedia dengan streaming video showreel 4K instan dan tata letak dark mode sinematik.",
+    "challenge": "<p>Rumah produksi video komersial membutuhkan wadah portofolio digital yang mampu memutar showreel video berkualitas tinggi tanpa buffering dan tanpa merusak skor Core Web Vitals website.</p>",
+    "solution": "<p>Website portofolio multimedia dark mode dengan showcase video terintegrasi, filter kategori produksi (iklan TVC, video korporat, dokumenter), dan tombol pemesanan produksi cepat.</p>",
+    "seo": {
+      "metaTitle": "Website Erfo Multimedia - SEGIA Tech",
+      "metaDescription": "Segia Tech merancang Pembuatan Website Erfo Multimedia dengan desain modern, SEO, navigasi mudah, dan kecepatan tinggi.",
+      "canonicalUrl": "https://www.segiatech.com/pembuatan-website-erfo-multimedia/",
+      "robotsIndex": true,
+      "robotsFollow": true,
+      "ogTitle": "Website Erfo Multimedia - SEGIA Tech",
+      "ogDescription": "Segia Tech merancang Pembuatan Website Erfo Multimedia dengan desain modern, SEO, navigasi mudah, dan kecepatan tinggi."
+    },
+    "publishedAt": "2025-01-20T07:35:32",
+    "client": "Erfo Multimedia",
+    "year": 2023,
+    "industry": {
+      "id": 4,
+      "documentId": "ind-multimedia",
+      "name": "Multimedia & Production",
+      "slug": "multimedia"
+    },
+    "projectType": "Production House Profile & Project Showcase",
+    "heroMedia": {
+      "id": 108,
+      "documentId": "media-pembuatan-website-erfo-multimedia",
+      "name": "Studio Erfo Multimedia",
+      "alternativeText": "Foto Studio Produksi Erfo Multimedia",
+      "url": "/images/companies/erfo-production-studio.jpg",
+      "width": 1400,
+      "height": 900
+    },
+    "approach": "<p>Mengimplementasikan streaming video pintar dengan adaptive bitrate dan lazy-loading poster Next.js untuk menjaga performa Core Web Vitals tetap optimal.</p>",
+    "result": "<p>Tawaran produksi iklan komersial dari brand nasional naik sebesar 180%, rasio pentalan (bounce rate) berkurang 35%, dan pemutaran video showreel instan di bawah 1 detik di jaringan mobile.</p>",
+    "metrics": [
+      {
+        "label": "Order Komersial",
+        "value": "+180%",
+        "detail": "Tawaran produksi iklan & video korporat"
+      },
+      {
+        "label": "Penurunan Bounce",
+        "value": "-35%",
+        "detail": "Peningkatan engagement pengunjung pada karya"
+      },
+      {
+        "label": "Kecepatan Video",
+        "value": "< 1s",
+        "detail": "Waktu pemutaran showreel tanpa lag"
+      },
+      {
+        "label": "Kepuasan Klien",
+        "value": "96%",
+        "detail": "Apresiasi terhadap kemudahan preview karya"
+      }
+    ]
+  },
+  {
+    "title": "Website Unimasi",
+    "slug": "pembuatan-website-unimasi",
+    "summary": "Platform studio animasi 3D Unimasi untuk presentasi karakter 3D dinamis, katalog film pendek, dan kemitraan studio animasi internasional.",
+    "challenge": "<p>Studio animasi 3D membutuhkan kehadiran online berstandar internasional untuk menampilkan portofolio karakter, model 3D, dan animasi gerak kepada produser film dan agensi hiburan global.</p>",
+    "solution": "<p>Portal animasi interaktif dengan preview model karakter, katalog film pendek beresolusi tinggi, dokumentasi proses produksi (behind the scene), dan profil animator ahli.</p>",
+    "seo": {
+      "metaTitle": "Website Unimasi - SEGIA Tech",
+      "metaDescription": "Segia Tech merancang pembuatan Website Unimasi dengan fokus pada animasi, navigasi intuitif, SEO, dan responsivitas tinggi.",
+      "canonicalUrl": "https://www.segiatech.com/pembuatan-website-unimasi/",
+      "robotsIndex": true,
+      "robotsFollow": true,
+      "ogTitle": "Website Unimasi - SEGIA Tech",
+      "ogDescription": "Segia Tech merancang pembuatan Website Unimasi dengan fokus pada animasi, navigasi intuitif, SEO, dan responsivitas tinggi."
+    },
+    "publishedAt": "2025-01-20T07:26:43",
+    "client": "Unimasi Animation Studio",
+    "year": 2023,
+    "industry": {
+      "id": 2,
+      "documentId": "ind-kreatif",
+      "name": "Animasi & Media Kreatif",
+      "slug": "kreatif"
+    },
+    "projectType": "Animation Studio Portfolio & Reel",
+    "heroMedia": {
+      "id": 109,
+      "documentId": "media-pembuatan-website-unimasi",
+      "name": "Studio Animasi Unimasi",
+      "alternativeText": "Foto Workspace & Studio Animasi Unimasi",
+      "url": "/images/companies/unimasi-animation-workspace.jpg",
+      "width": 1400,
+      "height": 900
+    },
+    "approach": "<p>Desain bertema animasi kreatif dengan showcase karakter dinamis, visual rich gallery, dan struktur navigasi berstandar global untuk menjangkau klien internasional.</p>",
+    "result": "<p>Mendapatkan 3 kontrak kerja sama animasi internasional baru, kenaikan traffic pengunjung luar negeri sebesar 240%, dan pengakuan sebagai studio animasi terdepan di Indonesia.</p>",
+    "metrics": [
+      {
+        "label": "Traffic Global",
+        "value": "+240%",
+        "detail": "Kunjungan produser dan agensi luar negeri"
+      },
+      {
+        "label": "Kontrak Global",
+        "value": "3 Proyek",
+        "detail": "Kolaborasi internasional dalam 6 bulan"
+      },
+      {
+        "label": "Kelancaran Visual",
+        "value": "60 FPS",
+        "detail": "Interaksi mulus pada galeri karakter 3D"
+      },
+      {
+        "label": "Fleksibilitas Layar",
+        "value": "100%",
+        "detail": "Optimal di desktop, tablet, dan smartphone"
+      }
+    ]
+  },
+  {
+    "title": "Website Unicam Studio",
+    "slug": "pembuatan-website-unicam-studio",
+    "summary": "Website reservasi studio foto dan rental peralatan kamera profesional Unicam Studio dengan katalog inventaris dan booking instan.",
+    "challenge": "<p>Studio fotografi dan rental alat kamera profesional sering mengalami jadwal bentrok dan kesulitan memberikan informasi ketersediaan tipe kamera dan lensa secara cepat kepada fotografer.</p>",
+    "solution": "<p>Website modern dengan katalog sewa kamera lengkap, rincian spesifikasi peralatan, panduan paket pemotretan, galeri hasil karya fotografer, dan formulir reservasi tanggal instan.</p>",
+    "seo": {
+      "metaTitle": "Website Unicam Studio - SEGIA Tech",
+      "metaDescription": "Segia Tech merancang Pembuatan Website Unicam Studio dengan desain estetis, fungsional, responsif, dan SEO-friendly.",
+      "canonicalUrl": "https://www.segiatech.com/pembuatan-website-unicam-studio/",
+      "robotsIndex": true,
+      "robotsFollow": true,
+      "ogTitle": "Website Unicam Studio - SEGIA Tech",
+      "ogDescription": "Segia Tech merancang Pembuatan Website Unicam Studio dengan desain estetis, fungsional, responsif, dan SEO-friendly."
+    },
+    "publishedAt": "2025-01-20T07:06:58",
+    "client": "Unicam Studio",
+    "year": 2023,
+    "industry": {
+      "id": 2,
+      "documentId": "ind-kreatif",
+      "name": "Fotografi & Sinematografi",
+      "slug": "kreatif"
+    },
+    "projectType": "Photography Studio & Booking Showcase",
+    "heroMedia": {
+      "id": 110,
+      "documentId": "media-pembuatan-website-unicam-studio",
+      "name": "Banner Unicam Studio",
+      "alternativeText": "Unicam Studio 3D Animation & Creative Production Studio",
+      "url": "/images/companies/unicam-creative-studio.png",
+      "width": 1920,
+      "height": 1080
+    },
+    "approach": "<p>Perancangan katalog inventaris terstruktur dengan pengelompokan lensa dan kamera, simulasi paket sewa studio, dan alur booking langsung terhubung ke WhatsApp customer service.</p>",
+    "result": "<p>Pemesanan studio dan sewa alat naik 195%, efisiensi staf admin mencapai 70%, dan tidak ada lagi kasus jadwal sewa ganda (double-booking).</p>",
+    "metrics": [
+      {
+        "label": "Kenaikan Reservasi",
+        "value": "+195%",
+        "detail": "Pemesanan jadwal studio & sewa alat"
+      },
+      {
+        "label": "Jadwal Bentrok",
+        "value": "0 Kasus",
+        "detail": "Eliminasi insiden double-booking studio"
+      },
+      {
+        "label": "Efisiensi Admin",
+        "value": "70%",
+        "detail": "Penghematan waktu pelayanan tanya jawab"
+      },
+      {
+        "label": "Rating Kepuasan",
+        "value": "4.9/5",
+        "detail": "Ulasan positif dari komunitas fotografer"
+      }
+    ]
+  },
+  {
+    "title": "Website Kalasan Valley",
+    "slug": "pembuatan-website-kalasan-valley",
+    "summary": "Website pemasaran properti eksklusif Kalasan Valley Residence dengan tur denah 3D, kalkulator angsuran KPR, dan formulir survei lokasi.",
+    "challenge": "<p>Pengembang properti hunian di Kalasan Sleman menghadapi tantangan menjangkau calon pembeli dari luar kota (Jakarta, Surabaya) yang membutuhkan visualisasi denah dan simulasi KPR tanpa harus datang langsung.</p>",
+    "solution": "<p>Website properti mewah yang menampilkan tipe rumah lengkap, simulasi angsuran bank rekanan, site plan kawasan perumahan, serta formulir pemesanan jadwal survei lokasi dan kontak instan marketing.</p>",
+    "seo": {
+      "metaTitle": "Website Kalasan Valley - SEGIA Tech",
+      "metaDescription": "Segia Tech mengembangkan Pembuatan Website Kalasan Valley dengan desain responsif, SEO, fitur interaktif, dan fokus pada kemudahan akses.",
+      "canonicalUrl": "https://www.segiatech.com/pembuatan-website-kalasan-valley/",
+      "robotsIndex": true,
+      "robotsFollow": true,
+      "ogTitle": "Website Kalasan Valley - SEGIA Tech",
+      "ogDescription": "Segia Tech mengembangkan Pembuatan Website Kalasan Valley dengan desain responsif, SEO, fitur interaktif, dan fokus pada kemudahan akses."
+    },
+    "publishedAt": "2025-01-20T06:59:52",
+    "client": "Kalasan Valley Residence",
+    "year": 2023,
+    "industry": {
+      "id": 5,
+      "documentId": "ind-properti",
+      "name": "Properti & Real Estate",
+      "slug": "properti"
+    },
+    "projectType": "Exclusive Housing Development Landing Page",
+    "heroMedia": {
+      "id": 111,
+      "documentId": "media-pembuatan-website-kalasan-valley",
+      "name": "Arsitektur Kalasan Valley",
+      "alternativeText": "Foto Arsitektur Hunian Kalasan Valley Residence",
+      "url": "/images/companies/kalasan-valley-residence.jpg",
+      "width": 1400,
+      "height": 900
+    },
+    "approach": "<p>Menggabungkan strategi visual properti elegan dengan fitur kalkulator simulasi KPR interaktif dan galeri denah arsitektur rumah secara detail.</p>",
+    "result": "<p>Seluruh unit fase 1 terjual habis (100% sold out) dalam waktu 4 bulan, dengan 60% pembeli berasal dari luar kota yang terkonversi melalui website resmi.</p>",
+    "metrics": [
+      {
+        "label": "Penjualan Unit",
+        "value": "100% Sold",
+        "detail": "Habis terjual fase 1 dalam 4 bulan"
+      },
+      {
+        "label": "Pembeli Luar Kota",
+        "value": "60%",
+        "detail": "Terkonversi langsung melalui website"
+      },
+      {
+        "label": "Efisiensi Iklan",
+        "value": "50%",
+        "detail": "Penghematan biaya cetak brosur fisik"
+      },
+      {
+        "label": "Kecepatan Muat",
+        "value": "< 0.8s",
+        "detail": "Katalog denah langsung tampil tanpa lag"
+      }
+    ]
+  },
+  {
+    "title": "Website PT Itokoh Ceperindo",
+    "slug": "pembuatan-website-itokoh",
+    "summary": "Portal korporat manufaktur B2B PT Itokoh Ceperindo dengan sertifikasi standar mutu ISO dan sistem permintaan penawaran industri (RFQ).",
+    "challenge": "<p>Perusahaan pengecoran logam dan manufaktur presisi membutuhkan portal resmi B2B berstandar internasional untuk melayani mitra OEM otomotif dan konstruksi global yang menuntut kepatuhan standar mutu ketat.</p>",
+    "solution": "<p>Website korporat modern dengan profil fasilitas pabrik Ceper, spesifikasi teknis material besi cor (FC & FCD), dokumentasi mesin pemesinan CNC, dan formulir tender penawaran harga terstruktur.</p>",
+    "seo": {
+      "metaTitle": "Website PT Itokoh Ceperindo - SEGIA Tech",
+      "metaDescription": "Segia Tech mengembangkan Pembuatan Website Itokoh dengan desain menarik, kecepatan optimal, SEO, dan fitur lengkap.",
+      "canonicalUrl": "https://www.segiatech.com/pembuatan-website-itokoh/",
+      "robotsIndex": true,
+      "robotsFollow": true,
+      "ogTitle": "Website PT Itokoh Ceperindo - SEGIA Tech",
+      "ogDescription": "Segia Tech mengembangkan Pembuatan Website Itokoh dengan desain menarik, kecepatan optimal, SEO, dan fitur lengkap."
+    },
+    "publishedAt": "2025-01-20T06:45:08",
+    "client": "PT Itokoh Ceperindo",
+    "year": 2023,
+    "industry": {
+      "id": 6,
+      "documentId": "ind-manufaktur",
+      "name": "Manufaktur & Presisi",
+      "slug": "manufaktur"
+    },
+    "projectType": "Corporate B2B Manufacturing Website",
+    "heroMedia": {
+      "id": 112,
+      "documentId": "media-pembuatan-website-itokoh",
+      "name": "Pabrik PT Itokoh Ceperindo",
+      "alternativeText": "Foto Fasilitas Manufaktur PT Itokoh Ceperindo",
+      "url": "/images/companies/itokoh-manufacturing-plant.jpg",
+      "width": 1400,
+      "height": 900
+    },
+    "approach": "<p>Pengembangan portal korporat industri multi-bahasa yang menonjolkan sertifikasi ISO, kapasitas tonase mesin pabrik, transparansi pengujian laboratorium metalurgi, dan alur Request for Quotation (RFQ).</p>",
+    "result": "<p>Permintaan penawaran harga B2B naik 150%, mempermudah proses audit dari prinsipal otomotif Jepang, dan memperkokoh kredibilitas perusahaan di kancah manufaktur internasional.</p>",
+    "metrics": [
+      {
+        "label": "Inquiry B2B",
+        "value": "+150%",
+        "detail": "Permintaan penawaran komponen industri"
+      },
+      {
+        "label": "Dukungan Bahasa",
+        "value": "Multi-bahasa",
+        "detail": "Bahasa Indonesia & Bahasa Inggris resmi"
+      },
+      {
+        "label": "Standar Mutu",
+        "value": "ISO 9001",
+        "detail": "Kepatuhan penuh pada audit industri global"
+      },
+      {
+        "label": "Keandalan Akses",
+        "value": "99.9%",
+        "detail": "Ketersediaan portal bagi mitra internasional"
+      }
+    ]
+  }
+]

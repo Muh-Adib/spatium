@@ -1,0 +1,617 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* --- CSS Custom Properties (SegiaTech Semantic Color System) --------------- */
+
+@layer base {
+  :root {
+    /* Semantic Token Variables */
+    --color-bg-primary: #2B2B2B;
+    --color-bg-secondary: #242424;
+    --color-bg-surface: #191919;
+    --color-border: #383838;
+    --color-border-hover: #D3AD8D;
+    --color-border-active: #F2C7A0;
+    
+    --color-text-primary: #FFFFFF;
+    --color-text-secondary: #DBD7D5;
+    --color-text-muted: #999898;
+    
+    --color-action: #F2C7A0;
+    --color-action-hover: #D3AD8D;
+    --color-action-active: #B25D10;
+    --color-action-deep: #917664;
+
+    --color-warm-brown: #917664;
+    --color-warm-taupe: #B29279;
+    --color-warm-beige: #D3AD8D;
+    --color-warm-peach: #F2C7A0;
+
+    /* Base theme */
+    --background: 0 0% 100%;
+    --foreground: 0 0% 0%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 0%;
+
+    --primary: 29 78% 79%;
+    /* #F2C7A0 Soft Peach */
+    --primary-foreground: 0 0% 17%;
+    /* #2B2B2B */
+
+    --secondary: 30 7% 85%;
+    /* #DBD7D5 Light Neutral */
+    --secondary-foreground: 0 0% 0%;
+
+    --muted: 30 7% 85%;
+    --muted-foreground: 0 1% 60%;
+    /* #999898 Muted Gray */
+
+    --border: 30 7% 85%;
+    --input: 30 7% 85%;
+    --ring: 29 78% 79%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --radius: 0.5rem;
+
+    /* Typography */
+    --font-sans: 'Plus Jakarta Sans', system-ui, sans-serif;
+    --font-display: 'Outfit', system-ui, sans-serif;
+    --font-mono: 'Commissioner', sans-serif;
+
+    /* Transitions */
+    --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-in-out-expo: cubic-bezier(0.87, 0, 0.13, 1);
+
+    /* Z-index scale */
+    --z-below: -1;
+    --z-base: 0;
+    --z-raised: 10;
+    --z-dropdown: 20;
+    --z-sticky: 30;
+    --z-overlay: 40;
+    --z-modal: 50;
+    --z-toast: 60;
+    --z-tooltip: 70;
+  }
+
+  .dark {
+    /* Semantic Dark Foundation (#2B2B2B Dark Background) */
+    --background: 0 0% 17%;
+    /* #2B2B2B */
+    --foreground: 0 0% 100%;
+    /* #FFFFFF */
+
+    --card: 0 0% 10%;
+    /* #191919 Dark Surface */
+    --card-foreground: 0 0% 100%;
+
+    --primary: 29 78% 79%;
+    /* #F2C7A0 Soft Peach */
+    --primary-foreground: 0 0% 17%;
+    /* #2B2B2B */
+
+    --secondary: 0 0% 10%;
+    /* #191919 */
+    --secondary-foreground: 30 7% 85%;
+    /* #DBD7D5 */
+
+    --muted: 0 0% 10%;
+    --muted-foreground: 0 1% 60%;
+    /* #999898 */
+
+    --border: 0 0% 22%;
+    /* #383838 Dark Border */
+    --input: 0 0% 22%;
+    --ring: 29 78% 79%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+  }
+}
+
+/* --- Base Styles ---------------------------------------------------------- */
+
+@layer base {
+  * {
+    @apply border-border;
+    box-sizing: border-box;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    font-feature-settings: "kern" 1, "liga" 1, "calt" 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans;
+    min-height: 100dvh;
+    overflow-x: hidden;
+  }
+
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-ring rounded-sm;
+  }
+
+  :focus:not(:focus-visible) {
+    outline: none;
+  }
+
+  ::selection {
+    background-color: #F2C7A0;
+    color: #2B2B2B;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-sans font-semibold tracking-tight;
+    text-wrap: balance;
+  }
+
+  p {
+    @apply leading-relaxed;
+    text-wrap: pretty;
+  }
+
+  a {
+    @apply text-inherit no-underline;
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background-color: #f5f5f5;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background-color: #a3a3a3;
+    border-radius: 9999px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: #D3AD8D;
+  }
+}
+
+/* --- Component Utilities -------------------------------------------------- */
+
+@layer components {
+  .section-py {
+    @apply py-16 md:py-20 lg:py-24 xl:py-28;
+  }
+
+  .section-py-sm {
+    @apply py-10 md:py-12 lg:py-16;
+  }
+
+  .section-py-lg {
+    @apply py-20 md:py-28 lg:py-36 xl:py-40;
+  }
+
+  .text-editorial {
+    @apply font-display italic;
+  }
+
+  .gradient-text-italic {
+    @apply inline-block font-display italic bg-clip-text text-transparent;
+    padding-right: 0.24em;
+    padding-bottom: 0.12em;
+    padding-top: 0.05em;
+    margin-right: 0.25em;
+    overflow: visible;
+  }
+
+  .badge {
+    @apply inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-body-xs font-semibold;
+  }
+
+  /* Thematic Surface Card */
+  .midnight-card {
+    background-color: #191919;
+    color: #ffffff;
+    border: 1px solid #2B2B2B;
+  }
+
+  /* Apple-like Glass Card */
+  .apple-card {
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 1.75rem;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .apple-card:hover {
+    border-color: #D3AD8D;
+    background: rgba(255, 255, 255, 0.05);
+    box-shadow: 0 16px 40px -10px rgba(242, 199, 160, 0.15);
+    transform: translateY(-2px);
+  }
+
+  /* Apple-like Pill */
+  .apple-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.375rem 0.875rem;
+    border-radius: 9999px;
+    background: rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    font-size: 0.75rem;
+    font-weight: 500;
+  }
+
+  /* --- Glassmorphism Effect for Canvas & Containers (DevTools Spec) --------- */
+  .glass-canvas,
+  canvas.glass-canvas,
+  #ijsk canvas,
+  #ijsk.glass-canvas {
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 16px;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  }
+
+  .dark .glass-canvas,
+  .dark canvas.glass-canvas,
+  .dark #ijsk canvas,
+  .dark #ijsk.glass-canvas {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.25);
+  }
+
+  .glass-container {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 16px;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  }
+
+  .dark .glass-container {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.18);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.25);
+  }
+
+  /* --- Glassmorphism Capsule Label Style (DevTools Spec) -------------------- */
+  .glass-label {
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 6px 14px;
+    border-radius: 50px;
+    display: inline-flex;
+    align-items: center;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  }
+
+  .dark .glass-label {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.25);
+  }
+
+  /* --- Glass Linear / Fluted Stripes Utility (Latar Belakang Bergaris Glass) - */
+  .bg-glass-lines {
+    background-image: repeating-linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.035) 0px,
+      rgba(255, 255, 255, 0.035) 1px,
+      transparent 1px,
+      transparent 32px
+    );
+    background-size: 32px 100%;
+  }
+
+  .glass-card-fluted {
+    background: rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 16px;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+  }
+
+  .dark .glass-card-fluted {
+    background: rgba(43, 43, 43, 0.85);
+    border-color: #383838;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.35);
+  }
+
+  /* --- Medium-style Article Reading Typography (Max 700px) ----------------- */
+  .article-container {
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .article-content {
+    font-size: 1.1875rem;
+    /* ~19px */
+    line-height: 1.8;
+    color: inherit;
+    word-break: break-word;
+  }
+
+  .article-content p {
+    font-size: 1.1875rem;
+    /* ~19px */
+    line-height: 1.8;
+    margin-bottom: 1.875rem;
+    /* ~30px */
+    color: rgba(var(--foreground), 0.88);
+  }
+
+  .article-content h2,
+  .article-content .article-h2 {
+    font-size: 1.875rem;
+    /* 30px */
+    font-weight: 700;
+    line-height: 1.25;
+    margin-top: 2.75rem;
+    margin-bottom: 1.125rem;
+    letter-spacing: -0.02em;
+    color: var(--foreground);
+  }
+
+  .article-content h3,
+  .article-content .article-h3 {
+    font-size: 1.4rem;
+    /* ~22px */
+    font-weight: 600;
+    line-height: 1.35;
+    margin-top: 2.25rem;
+    margin-bottom: 0.875rem;
+    letter-spacing: -0.01em;
+    color: var(--foreground);
+  }
+
+  .article-content blockquote,
+  .article-content .article-quote {
+    margin: 2rem 0;
+    padding: 1.25rem 1.75rem;
+    border-left: 3px solid #F2C7A0;
+    background-color: rgba(242, 199, 160, 0.08);
+    border-radius: 0 1rem 1rem 0;
+    font-style: italic;
+    font-size: 1.25rem;
+    line-height: 1.6;
+    color: var(--foreground);
+  }
+
+  .dark .article-content blockquote,
+  .dark .article-content .article-quote {
+    border-left-color: #F2C7A0;
+    background-color: rgba(242, 199, 160, 0.12);
+  }
+
+  .article-content ul,
+  .article-content ol {
+    margin: 1.5rem 0 2rem 1.5rem;
+    padding-left: 0.5rem;
+  }
+
+  .article-content ul {
+    list-style-type: disc;
+  }
+
+  .article-content ol {
+    list-style-type: decimal;
+  }
+
+  .article-content li {
+    font-size: 1.125rem;
+    line-height: 1.75;
+    margin-bottom: 0.625rem;
+  }
+
+  /* Scoped Link Styling ala Medium */
+  .article-content a {
+    color: inherit;
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-decoration-color: #F2C7A0;
+    text-underline-offset: 4px;
+    transition: all 0.3s ease;
+    border-radius: 2px;
+    padding: 0.1em 0.25em;
+    margin: 0 -0.25em;
+  }
+
+  .article-content a:hover {
+    background-color: rgba(242, 199, 160, 0.15);
+    color: #F2C7A0;
+  }
+
+  .dark .article-content a {
+    color: #f8fafc;
+    text-decoration-color: #F2C7A0;
+  }
+
+  .dark .article-content a:hover {
+    background-color: rgba(242, 199, 160, 0.18);
+    color: #F2C7A0;
+  }
+
+  .article-content img {
+    border-radius: 1rem;
+    margin: 2.25rem 0;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08);
+    width: 100%;
+    height: auto;
+  }
+
+  .article-content figure figcaption {
+    text-align: center;
+    font-size: 0.875rem;
+    color: #64748b;
+    margin-top: -1.5rem;
+    margin-bottom: 2rem;
+    font-style: italic;
+  }
+
+  /* Collapsible Semantic Internal SEO Links Container */
+  .article-internal-seo-links details {
+    transition: all 0.25s ease-in-out;
+  }
+
+  .article-internal-seo-links details[open] {
+    background: rgba(255, 255, 255, 0.04);
+  }
+
+  .article-internal-seo-links summary {
+    list-style: none;
+  }
+
+  .article-internal-seo-links summary::-webkit-details-marker {
+    display: none;
+  }
+}
+
+/* --- Animated Thematic Gradient Wave (Seamless Linear Infinite Flow) --- */
+
+@keyframes waveSlow {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+
+  100% {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+@keyframes waveMedium {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+
+  100% {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+.animate-wave-slow {
+  animation: waveSlow 25s linear infinite;
+  will-change: transform;
+}
+
+.animate-wave-medium {
+  animation: waveMedium 17s linear infinite;
+  will-change: transform;
+}
+
+.animate-mesh-1 {
+  animation: meshPulse 16s ease-in-out infinite;
+}
+
+.animate-mesh-2 {
+  animation: meshPulse2 22s ease-in-out infinite;
+}
+
+.animate-aurora {
+  animation: auroraGlow 14s ease-in-out infinite;
+}
+
+/* --- Premium Moving Perimeter Beam Animation --- */
+@keyframes perimeterBeamSpin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-perimeter-beam {
+  animation: perimeterBeamSpin 3.5s linear infinite;
+  will-change: transform;
+}
+
+/* --- City Landing Editorial Retouching --- */
+.city-landing-editorial {
+  color: hsl(var(--foreground));
+}
+
+.city-landing-editorial * {
+  max-width: 100%;
+}
+
+.city-landing-editorial h2,
+.city-landing-editorial h3,
+.city-landing-editorial h4 {
+  color: hsl(var(--foreground)) !important;
+  font-family: var(--font-display, sans-serif);
+}
+
+.city-landing-editorial p,
+.city-landing-editorial li,
+.city-landing-editorial span {
+  color: hsl(var(--muted-foreground));
+  line-height: 1.8;
+}
+
+.city-landing-editorial strong,
+.city-landing-editorial b {
+  color: hsl(var(--foreground)) !important;
+}
+
+.city-landing-editorial a {
+  color: hsl(var(--primary));
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.city-landing-editorial .elementor-element,
+.city-landing-editorial .e-con,
+.city-landing-editorial .e-con-inner {
+  display: block !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  position: static !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.city-landing-editorial img {
+  border-radius: 1rem;
+  border: 1px solid hsl(var(--border) / 0.6);
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.1);
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+}
+
+/* --- Reduced Motion ------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

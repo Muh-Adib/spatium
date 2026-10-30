@@ -1,0 +1,855 @@
+// use prisma-8
+
+model Category {
+  id          Int       @id @default(autoincrement())
+  name        String
+  slug        String    @unique
+  description String?
+  wpTermId    Int?      @map("wp_term_id")
+  createdAt   TimestamptzString @default(now()) @map("created_at")
+  articles    Article[]
+
+  @@map("categories")
+}
+
+model Tag {
+  id          Int          @id @default(autoincrement())
+  name        String
+  slug        String       @unique
+  createdAt   TimestamptzString @default(now()) @map("created_at")
+  articleTags ArticleTag[]
+
+  @@map("tags")
+}
+
+model Author {
+  id        Int       @id @default(autoincrement())
+  name      String
+  slug      String    @unique
+  email     String?
+  bio       String?
+  avatar    String?
+  createdAt TimestamptzString @default(now()) @map("created_at")
+  articles  Article[]
+
+  @@map("authors")
+}
+
+model Article {
+  id                 Int          @id @default(autoincrement())
+  documentId         String?      @map("document_id")
+  slug               String       @unique
+  title              String
+  excerpt            String?
+  content            String?
+  status             String       @default("published")
+  featuredImage      String?      @map("featured_image")
+  coverUrl           String?      @map("cover_url")
+  readingTime        Int?         @default(3) @map("reading_time")
+  publishedAt        String?      @map("published_at")
+  scheduledAt        String?      @map("scheduled_at")
+  publicationTimezone String?     @map("publication_timezone")
+  scheduledBy        String?      @map("scheduled_by")
+  scheduleError      String?      @map("schedule_error")
+  createdAt          TimestamptzString @default(now()) @map("created_at")
+  updatedAt          temporal.updatedAtString() @map("updated_at")
+
+  wpPostId           Int?         @map("wp_post_id")
+  wpSourceUrl        String?      @map("wp_source_url")
+
+  metaTitle          String?      @map("meta_title")
+  metaDescription    String?      @map("meta_description")
+  canonicalUrl       String?      @map("canonical_url")
+  robots             String?      @default("index, follow")
+  ogImage            String?      @map("og_image")
+
+  categoryId         Int?         @map("category_id")
+  category           Category?    @relation(fields: [categoryId], references: [id])
+  authorId           Int?         @map("author_id")
+  author             Author?      @relation(fields: [authorId], references: [id])
+
+  primaryKeyword     String?      @map("primary_keyword")
+  targetLocation     String?      @map("target_location")
+  targetCity         String?      @map("target_city")
+  faqs               String?
+  tags               String?
+  tagsParagraph      String?      @map("tags_paragraph")
+  imageMetadata      String?      @map("image_metadata")
+
+  locale             String       @default("id")
+  translationGroupId String?      @map("translation_group_id")
+  focusKeyphrase     String?      @map("focus_keyphrase")
+  relatedKeyphrases  String?      @map("related_keyphrases")
+  seoData            String?      @map("seo_data")
+  primaryCategory    String?      @map("primary_category")
+  isCornerstone      Boolean?     @default(false) @map("is_cornerstone")
+
+  articleTags        ArticleTag[]
+  seoAudits          SeoAudit[]
+  aiDrafts           AiDraft[]
+
+  @@map("articles")
+}
+
+model ArticleTag {
+  articleId Int     @map("article_id")
+  article   Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  tagId     Int     @map("tag_id")
+  tag       Tag     @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([articleId, tagId])
+  @@map("article_tags")
+}
+
+model Portfolio {
+  id                 Int                 @id @default(autoincrement())
+  documentId         String?             @map("document_id")
+  slug               String              @unique
+  title              String
+  client             String?
+  year               Int?
+  category           String?
+  summary            String?
+  challenge          String?
+  approach           String?
+  solution           String?
+  process            String?
+  result             String?
+  heroImage          String?             @map("hero_image")
+  liveUrl            String?             @map("live_url")
+  featured           Boolean?            @default(false)
+  status             String?             @default("published")
+  metrics            String?
+  technologies       String?
+  gallery            String?
+  blocks             String?
+  metaTitle          String?             @map("meta_title")
+  metaDescription    String?             @map("meta_description")
+  canonicalUrl       String?             @map("canonical_url")
+  robots             String?             @default("index, follow")
+  ogImage            String?             @map("og_image")
+  createdAt          TimestamptzString   @default(now()) @map("created_at")
+  updatedAt          temporal.updatedAtString() @map("updated_at")
+
+  locale             String              @default("id")
+  translationGroupId String?             @map("translation_group_id")
+  focusKeyphrase     String?             @map("focus_keyphrase")
+  relatedKeyphrases  String?             @map("related_keyphrases")
+  seoData            String?             @map("seo_data")
+
+  servicePortfolios  ServicePortfolio[]
+  solutionPortfolios SolutionPortfolio[]
+
+  @@map("portfolios")
+}
+
+model ServiceCategory {
+  id                 Int       @id @default(autoincrement())
+  slug               String    @unique
+  title              String
+  tag                String?
+  shortDescription   String?   @map("short_description")
+  heroImage          String?   @map("hero_image")
+  themePreset        String?   @default("charcoal") @map("theme_preset")
+  keyOutcomes        String?   @map("key_outcomes")
+  blocks             String?
+  order              Int?      @default(0)
+  status             String    @default("published")
+  showInNav          Boolean?  @default(true) @map("show_in_nav")
+  createdAt          TimestamptzString @default(now()) @map("created_at")
+  updatedAt          temporal.updatedAtString() @map("updated_at")
+
+  locale             String    @default("id")
+  translationGroupId String?   @map("translation_group_id")
+  focusKeyphrase     String?   @map("focus_keyphrase")
+  relatedKeyphrases  String?   @map("related_keyphrases")
+  metaTitle          String?   @map("meta_title")
+  metaDescription    String?   @map("meta_description")
+  canonicalUrl       String?   @map("canonical_url")
+  robots             String?   @default("index, follow")
+  ogImage            String?   @map("og_image")
+  seoData            String?   @map("seo_data")
+
+  services           Service[]
+
+  @@map("service_categories")
+}
+
+model Service {
+  id                 Int                @id @default(autoincrement())
+  documentId         String?            @map("document_id")
+  slug               String             @unique
+  name               String
+  categoryId         Int?               @map("category_id")
+  category           ServiceCategory?   @relation(fields: [categoryId], references: [id])
+  indexNumber        String?            @map("index_number")
+  categoryBadge      String?            @map("category_badge")
+  highlightWord      String?            @map("highlight_word")
+  shortDescription   String?            @map("short_description")
+  longDescription    String?            @map("long_description")
+  description        String?
+  whatsappPrompt     String?            @map("whatsapp_prompt")
+  icon               String?
+  heroImage          String?            @map("hero_image")
+  primaryMedia       String?            @map("primary_media")
+  metrics            String?
+  features           String?
+  deliverables       String?
+  technologies       String?
+  faq                String?
+  blocks             String?
+  order              Int?               @default(0)
+  featured           Boolean?           @default(false)
+  status             String             @default("published")
+  metaTitle          String?            @map("meta_title")
+  metaDescription    String?            @map("meta_description")
+  canonicalUrl       String?            @map("canonical_url")
+  robots             String?            @default("index, follow")
+  ogImage            String?            @map("og_image")
+  createdAt          TimestamptzString  @default(now()) @map("created_at")
+  updatedAt          temporal.updatedAtString() @map("updated_at")
+
+  locale             String             @default("id")
+  translationGroupId String?            @map("translation_group_id")
+  focusKeyphrase     String?            @map("focus_keyphrase")
+  relatedKeyphrases  String?            @map("related_keyphrases")
+  seoData            String?            @map("seo_data")
+
+  servicePortfolios  ServicePortfolio[]
+  solutionServices   SolutionService[]
+
+  @@map("services")
+}
+
+model ServicePortfolio {
+  serviceId    Int       @map("service_id")
+  service      Service   @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  portfolioId  Int       @map("portfolio_id")
+  portfolio    Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+  displayOrder Int?      @default(0) @map("display_order")
+
+  @@id([serviceId, portfolioId])
+  @@map("service_portfolios")
+}
+
+model Solution {
+  id                 Int                 @id @default(autoincrement())
+  slug               String              @unique
+  title              String
+  category           String?
+  shortDescription   String?             @map("short_description")
+  description        String?
+  heroImage          String?             @map("hero_image")
+  blocks             String?
+  keyBenefits        String?             @map("key_benefits")
+  technologies       String?
+  order              Int?                @default(0)
+  featured           Boolean?            @default(false)
+  status             String              @default("published")
+  createdAt          TimestamptzString   @default(now()) @map("created_at")
+  updatedAt          temporal.updatedAtString() @map("updated_at")
+
+  locale             String              @default("id")
+  translationGroupId String?             @map("translation_group_id")
+  focusKeyphrase     String?             @map("focus_keyphrase")
+  relatedKeyphrases  String?             @map("related_keyphrases")
+  metaTitle          String?             @map("meta_title")
+  metaDescription    String?             @map("meta_description")
+  canonicalUrl       String?             @map("canonical_url")
+  robots             String?             @default("index, follow")
+  ogImage            String?             @map("og_image")
+  seoData            String?             @map("seo_data")
+
+  solutionPortfolios SolutionPortfolio[]
+  solutionServices   SolutionService[]
+
+  @@map("solutions")
+}
+
+model SolutionPortfolio {
+  solutionId   Int       @map("solution_id")
+  solution     Solution  @relation(fields: [solutionId], references: [id], onDelete: Cascade)
+  portfolioId  Int       @map("portfolio_id")
+  portfolio    Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+  displayOrder Int?      @default(0) @map("display_order")
+
+  @@id([solutionId, portfolioId])
+  @@map("solution_portfolios")
+}
+
+model SolutionService {
+  solutionId Int      @map("solution_id")
+  solution   Solution @relation(fields: [solutionId], references: [id], onDelete: Cascade)
+  serviceId  Int      @map("service_id")
+  service    Service  @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+
+  @@id([solutionId, serviceId])
+  @@map("solution_services")
+}
+
+model SolutionFinderConfig {
+  id                   Int       @id @default(autoincrement())
+  configKey            String    @unique @default("default") @map("config_key")
+  businessGoals        String?   @map("business_goals")
+  industries           String?
+  questions            String?
+  recommendationMatrix String?   @map("recommendation_matrix")
+  updatedAt            temporal.updatedAtString() @map("updated_at")
+
+  @@map("solution_finder_configs")
+}
+
+model PageTemplate {
+  id             Int       @id @default(autoincrement())
+  name           String
+  targetType     String    @map("target_type")
+  description    String?
+  previewImage   String?   @map("preview_image")
+  blocks         String
+  variationPools String?   @map("variation_pools")
+  createdAt      TimestamptzString @default(now()) @map("created_at")
+  updatedAt      temporal.updatedAtString() @map("updated_at")
+
+  @@map("page_templates")
+}
+
+model Page {
+  id                 Int       @id @default(autoincrement())
+  documentId         String?   @map("document_id")
+  slug               String    @unique
+  title              String
+  excerpt            String?
+  content            String?
+  blocks             String?
+  metaTitle          String?   @map("meta_title")
+  metaDescription    String?   @map("meta_description")
+  createdAt          TimestamptzString @default(now()) @map("created_at")
+  updatedAt          temporal.updatedAtString() @map("updated_at")
+
+  locale             String    @default("id")
+  translationGroupId String?   @map("translation_group_id")
+  focusKeyphrase     String?   @map("focus_keyphrase")
+  relatedKeyphrases  String?   @map("related_keyphrases")
+  seoData            String?   @map("seo_data")
+
+  kind               String    @default("standard")
+  status             String    @default("published")
+  robots             String?   @default("index, follow")
+  canonical          String?
+  publishedAt        String?   @map("published_at")
+  clusterId          String?   @map("cluster_id")
+  location           String?
+
+  @@map("pages")
+}
+
+model Redirect {
+  id              Int       @id @default(autoincrement())
+  documentId      String?   @map("document_id")
+  sourcePath      String    @unique @map("source_path")
+  destinationPath String    @map("destination_path")
+  statusCode      Int       @default(301) @map("status_code")
+  reason          String?
+  hitCount        Int?      @default(0) @map("hit_count")
+  active          Boolean?  @default(true)
+  createdAt       TimestamptzString @default(now()) @map("created_at")
+
+  @@map("redirects")
+}
+
+model SiteConfig {
+  id                      Int       @id @default(1)
+  name                    String    @default("SegiaTech")
+  tagline                 String?
+  description             String?
+  url                     String    @default("https://www.segiatech.com")
+  whatsapp                String?
+  email                   String?
+  phone                   String?
+  address                 String?
+  logoUrl                 String?   @map("logo_url")
+  faviconUrl              String?   @map("favicon_url")
+  socialLinks             String?   @map("social_links")
+  updatedAt               temporal.updatedAtString() @map("updated_at")
+
+  brandVoice              String?   @map("brand_voice")
+  hqLocation              String?   @map("hq_location")
+  revisionGuarantee       String?   @map("revision_guarantee")
+  outputSpec              String?   @map("output_spec")
+  primaryPersona          String?   @map("primary_persona")
+  defaultLocale           String    @default("id") @map("default_locale")
+  targetCities            String?   @map("target_cities")
+
+  defaultSeoTitleTemplate String?   @default("%title% %sep% %sitename%") @map("default_seo_title_template")
+  titleSeparator          String?   @default("|") @map("title_separator")
+  indexNowKey             String?   @map("indexnow_key")
+  bingVerification        String?   @map("bing_verification")
+  googleVerification      String?   @map("google_verification")
+
+  @@map("site_configs")
+}
+
+model Site {
+  id            Int       @id @default(autoincrement())
+  slug          String    @unique
+  name          String
+  domain        String?
+  apiKey        String    @unique @map("api_key")
+  webhookUrl    String?   @map("webhook_url")
+  webhookSecret String?   @map("webhook_secret")
+  isActive      Boolean   @default(true) @map("is_active")
+  settings      String?
+  createdAt     TimestamptzString @default(now()) @map("created_at")
+  updatedAt     temporal.updatedAtString() @map("updated_at")
+
+  @@map("sites")
+}
+
+model ThemeToken {
+  id        Int       @id @default(autoincrement())
+  name      String
+  tokens    String
+  active    Boolean?  @default(true)
+  version   Int       @default(1)
+  createdAt TimestamptzString @default(now()) @map("created_at")
+  updatedAt temporal.updatedAtString() @map("updated_at")
+
+  @@map("theme_tokens")
+}
+
+model Location {
+  id        Int       @id @default(autoincrement())
+  name      String
+  slug      String    @unique
+  region    String?
+  image     String?
+  createdAt TimestamptzString @default(now()) @map("created_at")
+
+  @@map("locations")
+}
+
+model Cluster {
+  id           Int           @id @default(autoincrement())
+  name         String
+  slug         String        @unique
+  kind         String        @default("topic")
+  pillarNodeId Int?          @map("pillar_node_id")
+  description  String?
+  createdAt    TimestamptzString @default(now()) @map("created_at")
+  contentNodes ContentNode[]
+
+  @@map("clusters")
+}
+
+model ContentNode {
+  id             Int           @id @default(autoincrement())
+  type           String
+  refId          String        @map("ref_id")
+  url            String
+  title          String
+  summary        String?
+  primaryKeyword String?       @map("primary_keyword")
+  location       String?
+  clusterId      Int?          @map("cluster_id")
+  cluster        Cluster?      @relation(fields: [clusterId], references: [id])
+  image          String?
+  status         String        @default("published")
+  indexable      Boolean?      @default(true)
+  updatedAt      temporal.updatedAtString() @map("updated_at")
+
+  sourceLinks    ContentLink[] @relation("SourceNode")
+  targetLinks    ContentLink[] @relation("TargetNode")
+
+  @@map("content_nodes")
+}
+
+model ContentLink {
+  id           Int         @id @default(autoincrement())
+  sourceNodeId Int         @map("source_node_id")
+  sourceNode   ContentNode @relation("SourceNode", fields: [sourceNodeId], references: [id], onDelete: Cascade)
+  targetNodeId Int         @map("target_node_id")
+  targetNode   ContentNode @relation("TargetNode", fields: [targetNodeId], references: [id], onDelete: Cascade)
+  kind         String
+  anchor       String
+  position     Int?        @default(0)
+  origin       String      @default("system")
+  createdAt    TimestamptzString @default(now()) @map("created_at")
+
+  @@map("content_links")
+}
+
+model VoiceProfile {
+  id          Int       @id @default(autoincrement())
+  name        String    @default("Default Editorial Voice")
+  version     Int       @default(1)
+  stylometry  String
+  guide       String
+  lexicon     String?
+  structure   String?
+  exemplarIds String?   @map("exemplar_ids")
+  active      Boolean?  @default(true)
+  createdAt   TimestamptzString @default(now()) @map("created_at")
+  updatedAt   temporal.updatedAtString() @map("updated_at")
+
+  @@map("voice_profiles")
+}
+
+model ImportJob {
+  id          String    @id
+  source      String
+  sourceUrl   String?   @map("source_url")
+  status      String    @default("pending")
+  totalPosts  Int?      @default(0) @map("total_posts")
+  imported    Int?      @default(0)
+  skipped     Int?      @default(0)
+  errors      Int?      @default(0)
+  report      String?
+  startedAt   String?   @map("started_at")
+  finishedAt  String?   @map("finished_at")
+  createdAt   TimestamptzString @default(now()) @map("created_at")
+
+  @@map("import_jobs")
+}
+
+model GscCache {
+  id        String   @id
+  siteUrl   String   @map("site_url")
+  dataType  String   @map("data_type")
+  dateRange String   @map("date_range")
+  payload   String
+  cachedAt  TimestamptzString @default(now()) @map("cached_at")
+  expiresAt String   @map("expires_at")
+
+  @@map("gsc_caches")
+}
+
+model SeoAudit {
+  id              String   @id
+  articleId       Int?     @map("article_id")
+  article         Article? @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  score           Int
+  issues          String
+  recommendations String?
+  createdAt       TimestamptzString @default(now()) @map("created_at")
+
+  @@map("seo_audits")
+}
+
+model AiDraft {
+  id            String   @id
+  articleId     Int?     @map("article_id")
+  article       Article? @relation(fields: [articleId], references: [id])
+  title         String?
+  prompt        String
+  content       String
+  targetKeyword String?  @map("target_keyword")
+  model         String?  @default("gemini-1.5-flash")
+  status        String?  @default("draft")
+  createdAt     TimestamptzString @default(now()) @map("created_at")
+
+  @@map("ai_drafts")
+}
+
+model User {
+  id           String   @id
+  email        String   @unique
+  name         String
+  role         String   @default("editor")
+  passwordHash String?  @map("password_hash")
+  createdAt    TimestamptzString @default(now()) @map("created_at")
+
+  aiSessions   AiSession[]
+  aiMemories   AiUserMemory[]
+
+  @@map("users")
+}
+
+model AiSession {
+  id           String            @id
+  userId       String            @map("user_id")
+  user         User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title        String            @default("Obrolan Baru")
+  model        String?           @default("gemini-2.5-flash")
+  systemPrompt String?           @map("system_prompt")
+  summary      String?
+  pinned       Boolean           @default(false)
+  createdAt    TimestamptzString @default(now()) @map("created_at")
+  updatedAt    TimestamptzString @default(now()) @map("updated_at")
+
+  messages     AiSessionMessage[]
+
+  @@index([userId, updatedAt])
+  @@map("ai_sessions")
+}
+
+model AiSessionMessage {
+  id            String            @id
+  sessionId     String            @map("session_id")
+  session       AiSession         @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  role          String
+  content       String
+  model         String?
+  toolCalls     String?           @map("tool_calls")
+  agenticReport String?           @map("agentic_report")
+  tokenCount    Int?              @map("token_count")
+  createdAt     TimestamptzString @default(now()) @map("created_at")
+
+  @@index([sessionId, createdAt])
+  @@map("ai_session_messages")
+}
+
+model AiUserMemory {
+  id        String            @id
+  userId    String            @map("user_id")
+  user      User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  key       String
+  content   String
+  enabled   Boolean           @default(true)
+  createdAt TimestamptzString @default(now()) @map("created_at")
+  updatedAt TimestamptzString @default(now()) @map("updated_at")
+
+  @@unique([userId, key])
+  @@index([userId])
+  @@map("ai_user_memories")
+}
+
+model MediaItem {
+  id          Int       @id @default(autoincrement())
+  fileName    String    @map("file_name")
+  url         String    @unique
+  altText     String?   @map("alt_text")
+  title       String?
+  caption     String?
+  description String?
+  decorative  Boolean?  @default(false)
+  focalPoint  String?   @map("focal_point")
+  credit      String?
+  width       Int?
+  height      Int?
+  size        Int?
+  mimeType    String?   @map("mime_type")
+  blurHash    String?   @map("blur_hash")
+  usedIn      String?   @map("used_in")
+  uploadedBy  String?   @map("uploaded_by")
+  createdAt   TimestamptzString @default(now()) @map("created_at")
+  updatedAt   temporal.updatedAtString() @map("updated_at")
+
+  @@map("media_items")
+}
+
+model CtaPreset {
+  id        Int       @id @default(autoincrement())
+  name      String
+  slug      String    @unique
+  locale    String    @default("id")
+  content   String
+  style     String
+  placement String?
+  active    Boolean?  @default(true)
+  createdAt TimestamptzString @default(now()) @map("created_at")
+  updatedAt temporal.updatedAtString() @map("updated_at")
+
+  @@map("cta_presets")
+}
+
+model GscDaily {
+  id          Int       @id @default(autoincrement())
+  date        String
+  page        String
+  query       String
+  country     String?
+  device      String?
+  locale      String?   @default("id")
+  clicks      Int?      @default(0)
+  impressions Int?      @default(0)
+  ctr         Float?    @default(0)
+  position    Float?    @default(0)
+  createdAt   TimestamptzString @default(now()) @map("created_at")
+
+  @@map("gsc_daily")
+}
+
+model KeywordBank {
+  id                Int       @id @default(autoincrement())
+  keyword           String
+  locale            String    @default("id")
+  intent            String?   @default("informational")
+  status            String?   @default("planned")
+  targetContentType String?   @map("target_content_type")
+  targetContentId   Int?      @map("target_content_id")
+  targetSlug        String?   @map("target_slug")
+  tags              String?
+  notes             String?
+  gscImpressions    Int?      @default(0) @map("gsc_impressions")
+  gscClicks         Int?      @default(0) @map("gsc_clicks")
+  gscPosition       Float?    @default(0) @map("gsc_position")
+  priorityScore     Float?    @default(0) @map("priority_score")
+  createdAt         TimestamptzString @default(now()) @map("created_at")
+  updatedAt         temporal.updatedAtString() @map("updated_at")
+
+  @@map("keyword_bank")
+}
+
+model SiteAudit {
+  id               String           @id
+  type             String
+  status           String
+  summary          String
+  diffFromPrevious String?          @map("diff_from_previous")
+  startedAt        TimestamptzString @default(now()) @map("started_at")
+  finishedAt       String?          @map("finished_at")
+  issues           SiteAuditIssue[]
+
+  @@map("site_audits")
+}
+
+model SiteAuditIssue {
+  id             Int       @id @default(autoincrement())
+  auditId        String    @map("audit_id")
+  audit          SiteAudit @relation(fields: [auditId], references: [id], onDelete: Cascade)
+  severity       String
+  category       String
+  urlOrPath      String?   @map("url_or_path")
+  contentType    String?   @map("content_type")
+  contentId      Int?      @map("content_id")
+  title          String
+  description    String
+  recommendation String
+  resolved       Boolean?  @default(false)
+  createdAt      TimestamptzString @default(now()) @map("created_at")
+
+  @@map("site_audit_issues")
+}
+
+model PagespeedSnapshot {
+  id                  Int       @id @default(autoincrement())
+  url                 String
+  device              String
+  performanceScore    Int?      @map("performance_score")
+  seoScore            Int?      @map("seo_score")
+  accessibilityScore  Int?      @map("accessibility_score")
+  bestPracticesScore  Int?      @map("best_practices_score")
+  lcpMs               Float?    @map("lcp_ms")
+  fidOrInpMs          Float?    @map("fid_or_inp_ms")
+  cls                 Float?
+  fcpMs               Float?    @map("fcp_ms")
+  cruxData            String?   @map("crux_data")
+  rawMetrics          String?   @map("raw_metrics")
+  capturedAt          TimestamptzString @default(now()) @map("captured_at")
+
+  @@map("pagespeed_snapshots")
+}
+
+model RumVital {
+  id         Int       @id @default(autoincrement())
+  path       String
+  metricName String    @map("metric_name")
+  value      Float
+  rating     String?
+  userAgent  String?   @map("user_agent")
+  recordedAt TimestamptzString @default(now()) @map("recorded_at")
+
+  @@map("rum_vitals")
+}
+
+model SeoAuditLog {
+  id         Int       @id @default(autoincrement())
+  entityType String    @map("entity_type")
+  entityId   String    @map("entity_id")
+  action     String
+  actor      String
+  diff       String?
+  timestamp  TimestamptzString @default(now())
+
+  @@map("seo_audit_logs")
+}
+
+model LegacyUrl {
+  id                Int       @id @default(autoincrement())
+  legacyUrl         String    @unique @map("legacy_url")
+  targetUrl         String?   @map("target_url")
+  migrationStatus   String    @default("unmapped") @map("migration_status")
+  postType          String?   @default("post") @map("post_type")
+  legacyTitle       String?   @map("legacy_title")
+  clicksBefore      Int?      @default(0) @map("clicks_before")
+  impressionsBefore Int?      @default(0) @map("impressions_before")
+  lastSyncedAt      String?   @map("last_synced_at")
+  createdAt         TimestamptzString @default(now()) @map("created_at")
+
+  @@map("legacy_urls")
+}
+
+model SiteStat {
+  id           Int       @id @default(autoincrement())
+  key          String    @unique
+  label        String
+  value        String
+  source       String?
+  sourceDate   String?   @map("source_date")
+  active       Boolean?  @default(true)
+  displayOrder Int?      @default(0) @map("display_order")
+  createdAt    TimestamptzString @default(now()) @map("created_at")
+  updatedAt    temporal.updatedAtString() @map("updated_at")
+
+  @@map("site_stats")
+}
+
+model FaqItem {
+  id        Int       @id @default(autoincrement())
+  scope     String
+  question  String
+  answer    String
+  position  Int?      @default(0)
+  active    Boolean?  @default(true)
+  createdAt TimestamptzString @default(now()) @map("created_at")
+  updatedAt temporal.updatedAtString() @map("updated_at")
+
+  @@map("faq_items")
+}
+
+// Lossless source archives are separate from editable local content.
+model WordPressSnapshot {
+  id          Int @id @default(autoincrement())
+  sourceUrl   String @map("source_url")
+  entityType  String @map("entity_type")
+  wpId        Int @map("wp_id")
+  targetId    Int? @map("target_id")
+  payload     String
+  sourceHash  String @map("source_hash")
+  localHash   String? @map("local_hash")
+  status      String @default("pending")
+  error       String?
+  syncedAt    TimestamptzString @default(now()) @map("synced_at")
+  @@unique([sourceUrl, entityType, wpId])
+  @@map("wordpress_snapshots")
+}
+
+model ContentRevision {
+  id          Int @id @default(autoincrement())
+  entityType  String @map("entity_type")
+  entityId    String @map("entity_id")
+  actor       String
+  action      String
+  snapshot    String
+  createdAt   TimestamptzString @default(now()) @map("created_at")
+  @@map("content_revisions")
+}
+
+model IndexingSubmission {
+  id              Int               @id @default(autoincrement())
+  url             String
+  entityType      String?           @map("entity_type")
+  entityId        Int?              @map("entity_id")
+  provider        String
+  status          String
+  httpStatus      Int?              @map("http_status")
+  responsePayload String?           @map("response_payload")
+  trigger         String            @default("auto")
+  actor           String?
+  submittedAt     TimestamptzString @default(now()) @map("submitted_at")
+
+  @@index([url, provider, submittedAt])
+  @@index([entityType, entityId])
+  @@map("indexing_submissions")
+}
+
