@@ -6,6 +6,8 @@
  */
 
 export const ALLOWED_EMBED_DOMAINS = [
+  'unimasi.studio',
+  'www.unimasi.studio',
   'segiatech.com',
   'www.segiatech.com',
   'unicamstudio.com',

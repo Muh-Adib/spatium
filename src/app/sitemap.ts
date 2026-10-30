@@ -3,7 +3,7 @@ import { SERVICES } from '@/data/services'
 import { PROJECTS } from '@/data/projects'
 import { getCoreArticles } from '@/lib/core'
 
-const SITE_URL = 'https://unimasi.studio'
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://unimasi.studio'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticRoutes: MetadataRoute.Sitemap = [
@@ -64,7 +64,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   try {
     const { articles } = await getCoreArticles({ page: 1, pageSize: 100 })
     postRoutes = articles.map((post) => ({
-      url: `${SITE_URL}/${post.slug}/`,
+      url: `${SITE_URL}/journal/${post.slug}`,
       lastModified: post.publishedAt || post.createdAt ? new Date(post.publishedAt || post.createdAt!) : new Date(),
       changeFrequency: 'yearly' as const,
       priority: 0.7,

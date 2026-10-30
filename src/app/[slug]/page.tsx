@@ -45,7 +45,7 @@ export async function generateMetadata({
     post.seo?.metaDescription ||
     post.seoData?.metaDescription ||
     (post.excerpt ? post.excerpt.replace(/<[^>]+>/g, '').slice(0, 160) : '')
-  const canonical = post.seo?.canonicalUrl || `${SITE_URL}/${post.slug}/`
+  const canonical = post.seo?.canonicalUrl || `${SITE_URL}/journal/${post.slug}`
   const ogImageUrl = getMediaUrl(post.featuredImage, post.coverUrl)
 
   return {

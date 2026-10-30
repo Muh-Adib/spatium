@@ -1,6 +1,7 @@
 import { getSiteSettings } from '@/lib/content/queries'
 import { normalizeGoogleModel } from '@/lib/ai/model-capabilities'
 import { blockOntology } from '@/lib/blocks/ontology'
+import { siteConfig } from '@/config/site'
 
 export interface ChatMessage {
   role: 'user' | 'assistant' | 'system' | 'tool' | 'model' | 'function'
@@ -680,8 +681,8 @@ export async function callLlm(options: LlmCallOptions): Promise<LlmCallResult> {
           headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${apiKey}`,
-            'HTTP-Referer': 'https://www.segiatech.com',
-            'X-Title': 'SegiaTech Digital Studio',
+            'HTTP-Referer': siteConfig.url,
+            'X-Title': siteConfig.name,
           },
           body: JSON.stringify(payload),
         })
@@ -709,8 +710,8 @@ export async function callLlm(options: LlmCallOptions): Promise<LlmCallResult> {
                 headers: {
                   'Content-Type': 'application/json',
                   Authorization: `Bearer ${apiKey}`,
-                  'HTTP-Referer': 'https://www.segiatech.com',
-                  'X-Title': 'SegiaTech Digital Studio',
+                  'HTTP-Referer': siteConfig.url,
+                  'X-Title': siteConfig.name,
                 },
                 body: JSON.stringify(payload),
               })
@@ -839,9 +840,9 @@ export async function buildSystemPrompt(context?: {
   sessionSummary?: string
   article?: Record<string, any>
 }): Promise<string> {
-  let siteName = 'SegiaTech'
-  let siteTagline = 'Creative Technology & Immersive Software Engineering House'
-  let siteUrl = 'https://www.segiatech.com'
+  let siteName: string = siteConfig.name
+  let siteTagline: string = siteConfig.tagline
+  let siteUrl: string = siteConfig.url
 
   try {
     const settings = await getSiteSettings()
@@ -854,19 +855,19 @@ export async function buildSystemPrompt(context?: {
 
   const art = context?.article
 
-  return `Anda adalah SegiaTech AI Studio Assistant, asisten kecerdasan rekayasa web dan editorial resmi dari ${siteName} (${siteUrl}).
+  return `Anda adalah UNIMASI AI Studio Assistant, asisten kecerdasan animasi dan editorial resmi dari ${siteName} (${siteUrl}).
 
 PROFIL & IDENTITAS BRAND:
 - Nama: ${siteName}
 - Tagline: ${siteTagline}
-- Posisi: Digital Product Studio & Creative Technology House berbasis di Yogyakarta. Spesialis Next.js 16 App Router, simulasi interaktif WebGL/Three.js (seperti Interactive 3D Aquarium & Projection Mapping), dan platform digital institusi (kampus, sekolah, museum, perusahaan).
-- Gaya Komunikasi: Editorial berkelas, presisi teknis, percaya diri, informatif, dan menginspirasi. Hindari bahasa berlebihan/hiperbola tanpa dasar data.
+- Posisi: Studio Animasi 2D, 3D, Motion Graphics, dan Visual Production berbasis di Yogyakarta. Spesialis produksi video explainer, animasi karakter, CGI, pipeline 3D Blender/After Effects, dan konten visual videotron.
+- Gaya Komunikasi: Kreatif, terstruktur, inspiratif, ringkas, dan fokus pada kejelasan pesan visual. Hindari klaim palsu atau jargon berlebihan tanpa dasar teknis animasi.
 
 ATURAN REKAYASA & KEAMANAN (AGENTS.md & ZERO-MOCK):
 1. ZERO-MOCK POLICY: DILARANG mengarang angka metrik, data trafik palsu, atau skor buatan. Jika data tidak ada atau integrasi belum terhubung, sampaikan status faktual secara jujur.
 2. DATABASE SEBAGAI SUMBER TUNGGAL: Seluruh konten tersimpan dalam basis data PostgreSQL via Prisma 8 ORM.
 3. PRINSIP DRAF HANYA (Rule 8): Agen AI HANYA diizinkan membuat draf konten, analisis SEO, atau saran perbaikan. Agen DILARANG mempublikasikan konten secara sepihak tanpa persetujuan editor manusia.
-4. SINGLE-BRAND SEGIATECH (ADR-0007): Platform ini 100% didedikasikan untuk ekosistem SegiaTech.
+4. SINGLE-BRAND UNIMASI (ADR-0007): Platform ini 100% didedikasikan untuk ekosistem UNIMASI Studio.
 5. PROTOKOL PENALARAN (REASONING & THINKING FIRST):
    - Sebelum memutuskan mengambil tindakan, memilih tool, atau merumuskan perubahan, lakukan penalaran logis terlebih dahulu:
      * Analisis maksud pengguna secara semantik.
@@ -916,17 +917,17 @@ DATA LENGKAP ARTIKEL AKTIF DI EDITOR STUDIO SAAT INI:
 =====================================================
 - Judul Halaman: "${art.title || '(Belum diberi judul)'}"
 - Slug: /artikel/${art.slug || '(draf-baru)'}
-- Kategori: ${art.category || 'Website Development'}
+- Kategori: ${art.category || 'Process'}
 - Status: ${art.status || 'draft'}
 - Bahasa / Locale: ${art.locale || 'id'}
-- Penulis: ${art.author || context?.actorName || 'Tim SegiaTech'}
+- Penulis: ${art.author || context?.actorName || 'Tim UNIMASI'}
 - Focus Keyphrase: "${art.focusKeyphrase || art.targetKeyword || '(Belum diset)'}"
 - Related Keyphrases: ${art.relatedKeyphrases?.length ? art.relatedKeyphrases.join(', ') : '(Belum ada)'}
 - SEO Meta Title: "${art.seoTitle || art.title || '(Belum diset)'}"
 - SEO Meta Description: "${art.metaDescription || art.excerpt || '(Belum diset)'}"
 - Cover Image: ${art.coverUrl ? `Ada (${art.coverUrl})` : 'Belum ada'} | Alt Text: "${art.coverAlt || '(KOSONG)'}"
 - Total Kata: ${art.wordCount || 0} kata (~${art.readingTimeMinutes || 1} menit baca)
-- Tautan Internal SegiaTech: ${art.internalLinksCount || 0} tautan
+- Tautan Internal UNIMASI: ${art.internalLinksCount || 0} tautan
 
 SKOR & EVALUASI ANALYZER REAL-TIME (YOAST-PARITY):
 - Skor SEO Saat Ini: ${art.seoScore ?? 'N/A'}/100
@@ -973,7 +974,7 @@ PETUNJUK PENGGUNAAN TOOLS & REKOMENDASI PERUBAHAN:
 \`\`\`json:article-changes
 {
   "title": "<Judul artikel riil yang telah dioptimalkan 40-70 karakter>",
-  "seoTitle": "<Judul SEO 40-70 Karakter — SegiaTech>",
+  "seoTitle": "<Judul SEO 40-70 Karakter — UNIMASI Studio>",
   "metaDescription": "<Deskripsi meta 120-160 karakter memikat dan memuat kata kunci fokus>",
   "focusKeyphrase": "<kata kunci fokus riil artikel>",
   "coverAlt": "<Deskripsi alternatif gambar cover yang mendeskripsikan subjek artikel>",

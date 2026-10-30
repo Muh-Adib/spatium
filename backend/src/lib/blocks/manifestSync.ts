@@ -39,7 +39,7 @@ export function ingestRemoteBlockManifest(manifest: RemoteBlockManifest): {
   const registeredTypes: string[] = []
 
   for (const block of manifest.blocks) {
-    const inputs = Object.entries(block.dataSchema || {}).map(([key, field]) => ({
+    const inputs: any[] = Object.entries(block.dataSchema || {}).map(([key, field]) => ({
       name: key,
       type: (field.type as any) || 'string',
       label: key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1'),

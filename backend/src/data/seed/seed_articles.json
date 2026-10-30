@@ -1,1 +1,352 @@
-[]
+[
+  {
+    "id": 1,
+    "documentId": "unimasi-art-brief-that-animation-can-actually-answer",
+    "slug": "brief-that-animation-can-actually-answer",
+    "title": "Writing a brief that animation can actually answer",
+    "excerpt": "Most animation projects that go sideways were ambiguous before a single frame was drawn. Here is the brief structure we ask for instead.",
+    "content": "<p>A brief is not a description of the video you want. It is a description of the problem the video has to solve. When those two get confused, the project still looks fine on the storyboard and falls apart in the review.</p>\n<h2>One message per film</h2>\n<p>If you cannot write the film's single message in one sentence, the audience will not be able to either. We ask clients to complete the sentence: *After watching this, the viewer will understand that ______.* Everything that does not serve that sentence becomes an optional extra — and optional extras are the first casualties of a review round.</p>\n<blockquote><p>If the brief contains four key messages, you have written a proposal for four films.</p></blockquote>\n<h2>Name the audience precisely</h2>\n<p>“Everyone” is not an audience. Neither is “stakeholders”. The level of assumed knowledge in your audience sets the entire visual language — how much on-screen labelling you need, whether a metaphor will help or patronise, how fast the pacing can go.</p>\n<ul><li>What does the audience already know, and what is genuinely new to them?</li><li>Where will they watch this — a meeting room, a phone in a queue, a classroom?</li><li>What do you want them to do immediately after watching?</li></ul>\n<h2>Separate mandatory content from wishlist content</h2>\n<p>Compliance text, legal language, a specific product name and a required call to action are mandatory. A particular colour, a favourite stock track and an idea someone had in 2019 are wishlist. Both lists are legitimate — they just behave differently when runtime gets tight. Labelling them up front makes the cut in the edit room a decision rather than an argument.</p>\n<div class=\"callout\"><h4>A brief we can start from</h4><p>Audience · single message · mandatory content · channel and aspect ratios · runtime range · what happens after the film. Six lines is enough to scope a project properly.</p></div>\n<h3>Runtime is a design decision, not a constraint</h3>\n<p>A three-minute film with four messages will feel rushed. A forty-second film with one message will feel generous. When a client asks for both length and density, we show them the arithmetic early — it is far cheaper to have that conversation in week one than at the final review.</p>\n<h2>Decide who approves, and how</h2>\n<p>The most expensive sentence in animation production is “I'll need to run this past a few people.” Agree your decision-maker, your reviewer group and your feedback format before production. We standardise feedback into a single timestamped document so notes are resolved rather than re-litigated.</p>\n<p>Once a brief covers these five things, the [concept and storyboard stage](/services) tends to move in days rather than weeks — and the first animatic usually looks like the film you imagined.</p>",
+    "status": "published",
+    "locale": "id",
+    "readingTime": 6,
+    "coverUrl": "/favicon.svg",
+    "featuredImage": "/favicon.svg",
+    "publishedAt": "2026-09-18T00:00:00.000Z",
+    "createdAt": "2026-09-18T00:00:00.000Z",
+    "updatedAt": "2026-09-18T00:00:00.000Z",
+    "category": {
+      "name": "Process",
+      "slug": "process",
+      "description": "Articles and insights about Process in animation & motion design."
+    },
+    "author": {
+      "name": "UNIMASI Studio",
+      "slug": "unimasi-studio",
+      "email": "unimasi-studio@unimasi.studio"
+    },
+    "tags": [
+      {
+        "name": "Concept",
+        "slug": "concept"
+      },
+      {
+        "name": "Pre-production",
+        "slug": "pre-production"
+      },
+      {
+        "name": "Strategy",
+        "slug": "strategy"
+      }
+    ],
+    "seo": {
+      "metaTitle": "Writing a brief that animation can actually answer | UNIMASI Studio",
+      "metaDescription": "A practical brief structure for animation projects: audience, single message, mandatory content, channel and success criteria — from the UNIMASI studio process.",
+      "canonicalUrl": "https://unimasi.studio/journal/brief-that-animation-can-actually-answer",
+      "robotsIndex": true,
+      "robotsFollow": true,
+      "ogTitle": "Writing a brief that animation can actually answer · UNIMASI Studio",
+      "ogDescription": "A practical brief structure for animation projects: audience, single message, mandatory content, channel and success criteria — from the UNIMASI studio process.",
+      "ogImage": "/favicon.svg"
+    }
+  },
+  {
+    "id": 2,
+    "documentId": "unimasi-art-storyboard-to-animatic",
+    "slug": "storyboard-to-animatic",
+    "title": "From storyboard to animatic: where a film is really made",
+    "excerpt": "The animatic is the cheapest place to discover a problem and the most common stage to skip. Here is what we review at that stage and why.",
+    "content": "<p>An animatic is your storyboard cut to real time with scratch dialogue, music and sound effects. It is ugly on purpose. Its job is to prove the film works before the expensive parts begin.</p>\n<h2>Why timing cannot be judged on a storyboard</h2>\n<p>A storyboard shows sequence. It cannot show rhythm. A gesture that reads perfectly as a still panel can feel rushed or sluggish once it has to happen in 1.5 seconds. The animatic is where the film stops being a plan and starts being a film.</p>\n<ul><li>Does the story land without any finished art? If not, better animation will not save it.</li><li>Is each beat long enough to be read at normal viewing speed?</li><li>Does the narration carry the meaning, or is it competing with the visuals?</li><li>Where does attention drift? That is usually where a beat is doing two jobs.</li></ul>\n<h2>Cut the narration first</h2>\n<p>We record a scratch voice track before animating a single movement. Spoken language has a natural pace, and animation that ignores it ends up either clipped or padded. Cutting to the voice early means the animation serves the sentence rather than the sentence being squeezed to fit the animation.</p>\n<blockquote><p>Every frame you cut in the animatic saves a week in production. Every frame you cut in production saves nothing.</p></blockquote>\n<h2>Running a useful animatic review</h2>\n<ol><li>Watch it once all the way through without pausing. Note only the moments you lose the thread.</li><li>Then review with timestamps, one note per beat, written not spoken.</li><li>Separate “this is unclear” from “this is not to my taste”. The first is a defect, the second is a conversation.</li><li>Approve timing explicitly before art production begins.</li></ol>\n<div class=\"callout\"><h4>A note on lock-in</h4><p>Approving an animatic is approving structure and timing — not the final look. Art direction is still open, but the sequence is not. Changing sequence after animation starts is the single largest cause of budget overrun.</p></div>\n<p>When you are ready to see how this fits into a full production, our [process timeline](/about#process) shows where the animatic sits and who signs it off.</p>",
+    "status": "published",
+    "locale": "id",
+    "readingTime": 7,
+    "coverUrl": "/favicon.svg",
+    "featuredImage": "/favicon.svg",
+    "publishedAt": "2026-08-27T00:00:00.000Z",
+    "createdAt": "2026-08-27T00:00:00.000Z",
+    "updatedAt": "2026-08-27T00:00:00.000Z",
+    "category": {
+      "name": "Process",
+      "slug": "process",
+      "description": "Articles and insights about Process in animation & motion design."
+    },
+    "author": {
+      "name": "UNIMASI Studio",
+      "slug": "unimasi-studio",
+      "email": "unimasi-studio@unimasi.studio"
+    },
+    "tags": [
+      {
+        "name": "Storyboard",
+        "slug": "storyboard"
+      },
+      {
+        "name": "Timing",
+        "slug": "timing"
+      },
+      {
+        "name": "Pre-production",
+        "slug": "pre-production"
+      }
+    ],
+    "seo": {
+      "metaTitle": "From storyboard to animatic: where a film is really made | UNIMASI Studio",
+      "metaDescription": "Why the animatic is the most important review point in animation production, what to look for in timing, clarity and story, and how to run the review well.",
+      "canonicalUrl": "https://unimasi.studio/journal/storyboard-to-animatic",
+      "robotsIndex": true,
+      "robotsFollow": true,
+      "ogTitle": "From storyboard to animatic: where a film is really made · UNIMASI Studio",
+      "ogDescription": "Why the animatic is the most important review point in animation production, what to look for in timing, clarity and story, and how to run the review well.",
+      "ogImage": "/favicon.svg"
+    }
+  },
+  {
+    "id": 3,
+    "documentId": "unimasi-art-choosing-between-2d-and-3d",
+    "slug": "choosing-between-2d-and-3d",
+    "title": "Choosing between 2D and 3D (and when the answer is both)",
+    "excerpt": "The decision is rarely about which looks better. It is about what the subject needs to prove, and how often you need to reuse it.",
+    "content": "<p>Clients often arrive with a format already chosen. Usually the choice was made aesthetically, when the real question is structural: what does this subject need to demonstrate?</p>\n<h2>2D wins on clarity and control</h2>\n<p>Two-dimensional animation lets you decide exactly what the viewer sees in every panel. You can simplify without explaining a camera, annotate freely, and build a visual metaphor that would be impossible to model. For concepts, processes and anything where the message matters more than the object, 2D is usually faster and clearer.</p>\n<h2>3D wins on spatial truth</h2>\n<p>If the audience has to understand a volume, a mechanism, an assembly or a space, 3D does something 2D cannot fake: it maintains consistency from an unlimited number of viewpoints. Once modelled, you can orbit, cut away, explode and relight without redrawing.</p>\n<ul><li>Does the audience need to understand an object or a concept? Objects lean 3D.</li><li>Will the same subject appear in multiple films or camera angles? 3D amortises.</li><li>Is the visual style illustrative, diagrammatic or hand-drawn? That leans 2D.</li><li>Will you need cutaways, exploded views or interiors? 3D is the honest choice.</li></ul>\n<h2>The hybrid answer</h2>\n<p>Most of our strongest work is neither purely 2D nor purely 3D. We frequently animate 3D renders with 2D annotation layers, or set 2D characters inside a 3D environment so the camera can move while the illustration style stays graphic. The pipeline choice should follow the storyboard, not precede it.</p>\n<blockquote><p>Pick the format that makes the message unmissable. Everything else is a preference.</p></blockquote>\n<div class=\"callout\"><h4>A useful test</h4><p>Write the single sentence the film has to land. Then ask which format a viewer would need in order to believe it. The answer is usually obvious once the sentence exists.</p></div>\n<p>If you are weighing this up for a live project, look at [2D Animation](/services/2d-animation) and [3D Animation & Visual Production](/services/3d-animation) side by side, or send us the brief and we will recommend a pipeline with the trade-offs stated.</p>",
+    "status": "published",
+    "locale": "id",
+    "readingTime": 8,
+    "coverUrl": "/favicon.svg",
+    "featuredImage": "/favicon.svg",
+    "publishedAt": "2026-07-30T00:00:00.000Z",
+    "createdAt": "2026-07-30T00:00:00.000Z",
+    "updatedAt": "2026-07-30T00:00:00.000Z",
+    "category": {
+      "name": "2D Animation",
+      "slug": "2d-animation",
+      "description": "Articles and insights about 2D Animation in animation & motion design."
+    },
+    "author": {
+      "name": "UNIMASI Studio",
+      "slug": "unimasi-studio",
+      "email": "unimasi-studio@unimasi.studio"
+    },
+    "tags": [
+      {
+        "name": "Art direction",
+        "slug": "art-direction"
+      },
+      {
+        "name": "Comparison",
+        "slug": "comparison"
+      },
+      {
+        "name": "Pipeline",
+        "slug": "pipeline"
+      }
+    ],
+    "seo": {
+      "metaTitle": "Choosing between 2D and 3D (and when the answer is both) | UNIMASI Studio",
+      "metaDescription": "How to decide between 2D and 3D animation for a project: transparency, spatial understanding, repeatability, budget and hybrid pipelines.",
+      "canonicalUrl": "https://unimasi.studio/journal/choosing-between-2d-and-3d",
+      "robotsIndex": true,
+      "robotsFollow": true,
+      "ogTitle": "Choosing between 2D and 3D (and when the answer is both) · UNIMASI Studio",
+      "ogDescription": "How to decide between 2D and 3D animation for a project: transparency, spatial understanding, repeatability, budget and hybrid pipelines.",
+      "ogImage": "/favicon.svg"
+    }
+  },
+  {
+    "id": 4,
+    "documentId": "unimasi-art-pbr-materials-that-read",
+    "slug": "pbr-materials-that-read",
+    "title": "Building PBR materials that read on a small screen",
+    "excerpt": "Physically-based rendering rewards accuracy, but a phone screen punishes subtlety. Here is how we balance the two.",
+    "content": "<p>A material that looks perfect on a calibrated studio monitor can turn to mush on a phone at 40% brightness. For product and industrial work, legibility beats physical accuracy every time — but only where the two actually conflict.</p>\n<h2>Contrast does the work, not resolution</h2>\n<p>Viewers read form through contrast boundaries. If a brushed metal surface and a matte plastic sit at similar luminance, the object flattens regardless of how much detail is baked in. We separate materials by value first, then refine roughness and reflection.</p>\n<ul><li>Define a value hierarchy for every material in the shot before texturing begins.</li><li>Push edge highlight contrast slightly beyond physical accuracy to hold silhouette.</li><li>Limit yourself to three dominant materials per hero object.</li></ul>\n<h2>Light the form, not the texture</h2>\n<p>Most “bad render” complaints are lighting complaints. A large soft key establishes the form; a hard rim separates it from the background; a subtle fill stops shadows going to pure black. We build this rig once and reuse it, which is also why our product work stays visually consistent project to project.</p>\n<blockquote><p>If you can read the shape of the object with the materials removed, the lighting is doing its job.</p></blockquote>\n<h3>Test at output size, not at working size</h3>\n<p>We export a still at the exact pixel dimensions the final video will use and review it on a phone before committing to a full render. It is a five-minute check that prevents a very expensive conversation.</p>\n<div class=\"callout\"><h4>Reusability</h4><p>Every material set we build is catalogued with its parameters documented, so the same product can be re-lit for the next launch without redoing look development from scratch.</p></div>\n<p>This is the same discipline behind our [3D asset libraries](/services/digital-assets-ai) — the difference between a render and a repeatable pipeline.</p>",
+    "status": "published",
+    "locale": "id",
+    "readingTime": 7,
+    "coverUrl": "/favicon.svg",
+    "featuredImage": "/favicon.svg",
+    "publishedAt": "2026-06-12T00:00:00.000Z",
+    "createdAt": "2026-06-12T00:00:00.000Z",
+    "updatedAt": "2026-06-12T00:00:00.000Z",
+    "category": {
+      "name": "3D Animation",
+      "slug": "3d-animation",
+      "description": "Articles and insights about 3D Animation in animation & motion design."
+    },
+    "author": {
+      "name": "UNIMASI Studio",
+      "slug": "unimasi-studio",
+      "email": "unimasi-studio@unimasi.studio"
+    },
+    "tags": [
+      {
+        "name": "Look development",
+        "slug": "look-development"
+      },
+      {
+        "name": "Materials",
+        "slug": "materials"
+      },
+      {
+        "name": "Lighting",
+        "slug": "lighting"
+      }
+    ],
+    "seo": {
+      "metaTitle": "Building PBR materials that read on a small screen | UNIMASI Studio",
+      "metaDescription": "A practical guide to PBR material design for product and industrial 3D animation that stays legible on mobile screens without looking plasticky.",
+      "canonicalUrl": "https://unimasi.studio/journal/pbr-materials-that-read",
+      "robotsIndex": true,
+      "robotsFollow": true,
+      "ogTitle": "Building PBR materials that read on a small screen · UNIMASI Studio",
+      "ogDescription": "A practical guide to PBR material design for product and industrial 3D animation that stays legible on mobile screens without looking plasticky.",
+      "ogImage": "/favicon.svg"
+    }
+  },
+  {
+    "id": 5,
+    "documentId": "unimasi-art-modular-motion-systems",
+    "slug": "modular-motion-systems",
+    "title": "Why motion graphics should be a system, not a video",
+    "excerpt": "If the second video costs as much as the first, you were sold a film instead of a system. Here is the difference in practice.",
+    "content": "<p>Corporate teams rarely need one video. They need a dozen, spread across a year, produced by people who are not animators. The difference between a one-off film and a motion system is the difference between buying a car and buying a workshop.</p>\n<h2>What a motion system actually contains</h2>\n<ul><li>A defined set of transitions with rules for when each is used.</li><li>Type scales and safe areas that survive platform crops.</li><li>Chart and data components that accept new numbers.</li><li>Editable templates with named controls, not a mystery timeline.</li><li>A written and video guide for the team who will use it.</li></ul>\n<h2>Rules prevent drift</h2>\n<p>The value of a system is not that it constrains creativity — it is that it prevents accidental divergence. Without rules, five regional teams produce five visual dialects and the brand looks inconsistent across a single campaign.</p>\n<blockquote><p>A template is only a system if the person who did not design it can use it correctly.</p></blockquote>\n<h2>Bind the data where you can</h2>\n<p>For recurring reports, we connect chart graphics to structured data so numbers update on load rather than being re-keyed and silently mistyped. It is usually a small amount of setup that removes an entire category of error.</p>\n<div class=\"callout\"><h4>What to ask for in the proposal</h4><p>Template files · named controls · a style guide · a handover session · a stated revision process. If a quote includes none of these, you are buying a video, not a system.</p></div>\n<p>We scope [motion graphics packages](/services/motion-graphics) with all of the above as standard, because an asset your team cannot use is not really delivered.</p>",
+    "status": "published",
+    "locale": "id",
+    "readingTime": 6,
+    "coverUrl": "/favicon.svg",
+    "featuredImage": "/favicon.svg",
+    "publishedAt": "2026-05-21T00:00:00.000Z",
+    "createdAt": "2026-05-21T00:00:00.000Z",
+    "updatedAt": "2026-05-21T00:00:00.000Z",
+    "category": {
+      "name": "Motion Graphics",
+      "slug": "motion-graphics",
+      "description": "Articles and insights about Motion Graphics in animation & motion design."
+    },
+    "author": {
+      "name": "UNIMASI Studio",
+      "slug": "unimasi-studio",
+      "email": "unimasi-studio@unimasi.studio"
+    },
+    "tags": [
+      {
+        "name": "Systems",
+        "slug": "systems"
+      },
+      {
+        "name": "Templates",
+        "slug": "templates"
+      },
+      {
+        "name": "Brand",
+        "slug": "brand"
+      }
+    ],
+    "seo": {
+      "metaTitle": "Why motion graphics should be a system, not a video | UNIMASI Studio",
+      "metaDescription": "How to commission motion graphics as a reusable design system: templates, rules, data binding and documentation that make the next video cheap.",
+      "canonicalUrl": "https://unimasi.studio/journal/modular-motion-systems",
+      "robotsIndex": true,
+      "robotsFollow": true,
+      "ogTitle": "Why motion graphics should be a system, not a video · UNIMASI Studio",
+      "ogDescription": "How to commission motion graphics as a reusable design system: templates, rules, data binding and documentation that make the next video cheap.",
+      "ogImage": "/favicon.svg"
+    }
+  },
+  {
+    "id": 6,
+    "documentId": "unimasi-art-using-ai-responsibly",
+    "slug": "using-ai-responsibly",
+    "title": "Using AI in animation production without losing the plot",
+    "excerpt": "AI is genuinely useful in narrow, unglamorous places. It is also a fast route to inconsistent work. Here is where we draw the line.",
+    "content": "<p>AI tooling arrived in animation the way it arrives everywhere: enthusiastically, and with very little regard for what a production actually needs. Having used it across real projects, we have a fairly specific view of where it earns its place.</p>\n<h2>Where it genuinely helps</h2>\n<ul><li>Exploration: generating a wide field of visual references before committing to a direction.</li><li>Variation: producing texture and background options for an artist to refine.</li><li>Clean-up: rotoscoping, matte extraction and upscaling plates that would otherwise be tedious.</li><li>Pre-viz: roughing out story beats before storyboard time is spent.</li></ul>\n<h2>Where it does not</h2>\n<p>Anything requiring consistency across time — a character staying on-model, a brand mark staying exact, a mechanism staying mechanically true. Generative tools are probabilistic; production needs determinism. We do not put an unreliable component on the critical path of a delivery.</p>\n<blockquote><p>AI is a lever, not a replacement for art direction. Someone still has to know what good looks like.</p></blockquote>\n<h2>Disclosure and licensing</h2>\n<p>We disclose where AI has been used in a project, and we do not train on client material without written permission. Where a deliverable must be fully human-made — for legal, brand or regulatory reasons — we will say so clearly rather than quietly using tooling anyway.</p>\n<div class=\"callout\"><h4>Our working rule</h4><p>AI may propose. Artists decide. Nothing reaches a client review that has not passed human art direction.</p></div>\n<p>This combines with the asset pipeline work covered under [Digital Visual Assets & AI](/services/digital-assets-ai), where documented, reusable assets are the real efficiency gain.</p>",
+    "status": "published",
+    "locale": "id",
+    "readingTime": 8,
+    "coverUrl": "/favicon.svg",
+    "featuredImage": "/favicon.svg",
+    "publishedAt": "2026-04-09T00:00:00.000Z",
+    "createdAt": "2026-04-09T00:00:00.000Z",
+    "updatedAt": "2026-04-09T00:00:00.000Z",
+    "category": {
+      "name": "AI & Production",
+      "slug": "ai-production",
+      "description": "Articles and insights about AI & Production in animation & motion design."
+    },
+    "author": {
+      "name": "UNIMASI Studio",
+      "slug": "unimasi-studio",
+      "email": "unimasi-studio@unimasi.studio"
+    },
+    "tags": [
+      {
+        "name": "AI",
+        "slug": "ai"
+      },
+      {
+        "name": "Workflow",
+        "slug": "workflow"
+      },
+      {
+        "name": "Ethics",
+        "slug": "ethics"
+      }
+    ],
+    "seo": {
+      "metaTitle": "Using AI in animation production without losing the plot | UNIMASI Studio",
+      "metaDescription": "Where AI-assisted production helps animation workflows — ideation, variation, rotoscoping and clean-up — and where human art direction must stay in control.",
+      "canonicalUrl": "https://unimasi.studio/journal/using-ai-responsibly",
+      "robotsIndex": true,
+      "robotsFollow": true,
+      "ogTitle": "Using AI in animation production without losing the plot · UNIMASI Studio",
+      "ogDescription": "Where AI-assisted production helps animation workflows — ideation, variation, rotoscoping and clean-up — and where human art direction must stay in control.",
+      "ogImage": "/favicon.svg"
+    }
+  },
+  {
+    "id": 7,
+    "documentId": "unimasi-art-accessibility-in-motion",
+    "slug": "accessibility-in-motion",
+    "title": "Accessibility in motion design: small decisions, big difference",
+    "excerpt": "Captions, contrast, pacing and reduced-motion support are not extras. They are part of what makes a film legible to more of your audience.",
+    "content": "<p>Accessibility work in animation is mostly invisible when it is done well. It is also the fastest way to make a film more useful to every viewer, not just those with a stated access need.</p>\n<h2>Captions are a design decision</h2>\n<p>Burned-in captions that fight the visuals are worse than none. We reserve space in the composition for caption safe areas, keep text on an opaque backing where the background is busy, and export both open and closed caption versions.</p>\n<h2>Contrast and type size</h2>\n<ul><li>Aim for a contrast ratio of at least 4.5:1 for on-screen text.</li><li>Avoid placing critical text over moving imagery without a backing plate.</li><li>Keep a minimum on-screen dwell time so text can actually be read.</li><li>Avoid relying on colour alone to distinguish meaning.</li></ul>\n<h2>Pacing is an accessibility property</h2>\n<p>Cuts, flashes and rapid camera movement are harder to process for some viewers, and for everyone on a small screen. We avoid unnecessary flashing, cap the frequency of hard cuts in a sequence, and resist the urge to fill every second.</p>\n<div class=\"callout\"><h4>Reduced-motion alternatives</h4><p>For interactive and web-delivered motion, we ship a reduced-motion path that preserves information while removing large movement. It is a CSS media query away, and it is the right default.</p></div>\n<blockquote><p>If the film only works for viewers who can read fast, hear perfectly and sit close to a large screen, it does not work.</p></blockquote>\n<p>Accessibility passes are included in our standard [review and refinement stage](/about#process) rather than billed as an add-on.</p>",
+    "status": "published",
+    "locale": "id",
+    "readingTime": 6,
+    "coverUrl": "/favicon.svg",
+    "featuredImage": "/favicon.svg",
+    "publishedAt": "2026-02-26T00:00:00.000Z",
+    "createdAt": "2026-02-26T00:00:00.000Z",
+    "updatedAt": "2026-02-26T00:00:00.000Z",
+    "category": {
+      "name": "Motion Graphics",
+      "slug": "motion-graphics",
+      "description": "Articles and insights about Motion Graphics in animation & motion design."
+    },
+    "author": {
+      "name": "UNIMASI Studio",
+      "slug": "unimasi-studio",
+      "email": "unimasi-studio@unimasi.studio"
+    },
+    "tags": [
+      {
+        "name": "Accessibility",
+        "slug": "accessibility"
+      },
+      {
+        "name": "Typography",
+        "slug": "typography"
+      },
+      {
+        "name": "Inclusion",
+        "slug": "inclusion"
+      }
+    ],
+    "seo": {
+      "metaTitle": "Accessibility in motion design: small decisions, big difference | UNIMASI Studio",
+      "metaDescription": "Practical accessibility practices for animation and motion design: captioning, contrast ratios, pacing, legible typography and reduced-motion alternatives.",
+      "canonicalUrl": "https://unimasi.studio/journal/accessibility-in-motion",
+      "robotsIndex": true,
+      "robotsFollow": true,
+      "ogTitle": "Accessibility in motion design: small decisions, big difference · UNIMASI Studio",
+      "ogDescription": "Practical accessibility practices for animation and motion design: captioning, contrast ratios, pacing, legible typography and reduced-motion alternatives.",
+      "ogImage": "/favicon.svg"
+    }
+  }
+]

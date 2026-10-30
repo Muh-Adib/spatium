@@ -38,22 +38,22 @@ export interface ThemeTokensEntity {
 
 export const DEFAULT_THEME_TOKENS: ThemeTokensPayload = {
   colors: {
-    background: '#1A1A1A',
-    foreground: '#FFFFFF',
-    card: '#222222',
-    cardForeground: '#FFFFFF',
-    accent: '#F2C7A0',
-    accentForeground: '#000000',
-    border: 'rgba(255, 255, 255, 0.1)',
-    muted: '#2B2B2B',
-    mutedForeground: '#999898',
+    background: '#060A17',
+    foreground: '#F8FAFC',
+    card: '#0E1A33',
+    cardForeground: '#F8FAFC',
+    accent: '#FFDE00',
+    accentForeground: '#070E1E',
+    border: 'rgba(255, 255, 255, 0.08)',
+    muted: '#142345',
+    mutedForeground: '#94A3B8',
   },
   typography: {
-    displayFont: 'var(--font-outfit), sans-serif',
-    bodyFont: 'var(--font-plus-jakarta-sans), sans-serif',
-    monoFont: 'monospace',
+    displayFont: 'var(--font-syne), "Syne", sans-serif',
+    bodyFont: 'var(--font-plus-jakarta), "Plus Jakarta Sans", sans-serif',
+    monoFont: 'var(--font-dm-mono), "DM Mono", monospace',
   },
-  radius: '1rem',
+  radius: '0.75rem',
   motion: 'full',
 }
 

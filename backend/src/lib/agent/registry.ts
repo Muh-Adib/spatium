@@ -469,7 +469,7 @@ toolRegistry.register({
 toolRegistry.register({
   name: 'system_status',
   label: 'Status Sistem & Diagnostik Database',
-  description: 'Gunakan untuk mendapatkan status kesehatan sistem platform SegiaTech, latensi database PostgreSQL via Prisma 8, dan jumlah record aktif.',
+  description: 'Gunakan untuk mendapatkan status kesehatan sistem platform UNIMASI Studio, latensi database PostgreSQL via Prisma 8, dan jumlah record aktif.',
   category: 'system',
   scope: 'read',
   mutates: false,
@@ -566,7 +566,7 @@ toolRegistry.register({
 toolRegistry.register({
   name: 'validate_page_blocks',
   label: 'Validasi Skema Blok Halaman JSON',
-  description: 'Gunakan untuk memvalidasi array blok JSON halaman terhadap skema resmi SegiaTech Zod v1 sebelum disimpan ke database.',
+  description: 'Gunakan untuk memvalidasi array blok JSON halaman terhadap skema resmi UNIMASI Studio Zod v1 sebelum disimpan ke database.',
   category: 'landing',
   scope: 'read',
   mutates: false,
@@ -708,7 +708,7 @@ toolRegistry.register({
 toolRegistry.register({
   name: 'get_voice_profile',
   label: 'Dapatkan Profil Brand Voice Editorial',
-  description: 'Gunakan untuk melihat pedoman gaya tone suara aktif, stylometri target, frasa terlarang, dan istilah wajib SegiaTech.',
+  description: 'Gunakan untuk melihat pedoman gaya tone suara aktif, stylometri target, frasa terlarang, dan istilah wajib UNIMASI Studio.',
   category: 'tone',
   scope: 'read',
   mutates: false,
@@ -734,7 +734,7 @@ toolRegistry.register({
 toolRegistry.register({
   name: 'check_voice_match',
   label: 'Evaluasi Kecocokan Tone Brand Konten',
-  description: 'Gunakan untuk memeriksa kecocokan draf tulisan terhadap stylometri editorial SegiaTech, mendeteksi pelanggaran email mentah, dan klaim terlarang.',
+  description: 'Gunakan untuk memeriksa kecocokan draf tulisan terhadap stylometri editorial UNIMASI Studio, mendeteksi pelanggaran email mentah, dan klaim terlarang.',
   category: 'tone',
   scope: 'read',
   mutates: false,

@@ -1,8 +1,8 @@
 /**
- * Internal Linking & Content Relationship Engine
+ * Internal Linking & Content Relationship Engine — UNIMASI Studio
  *
- * Maps content entities (Articles, Services, Portfolios, Solutions)
- * to prevent orphan pages and ensure topical clustering across the 10-Brand ecosystem.
+ * Maps content entities (Articles, Services, Portfolios)
+ * to ensure topical clustering across the UNIMASI animation ecosystem.
  */
 
 export interface LinkRecommendation {
@@ -13,110 +13,83 @@ export interface LinkRecommendation {
   anchorText?: string
 }
 
-const SEGIATECH_SERVICES = [
+const UNIMASI_SERVICES = [
   {
-    name: 'Website Development',
-    pillarUrl: 'https://www.segiatech.com/layanan/website-development',
-    anchorVariations: ['jasa pembuatan website', 'website development', 'pengembangan website', 'bikin website'],
+    name: '2D Animation',
+    pillarUrl: 'https://unimasi.studio/services/2d-animation',
+    anchorVariations: ['animasi 2d', '2d animation', 'explainer video', 'storyboard', 'animasi edukasi'],
   },
   {
-    name: 'AI Application & LLM Integration',
-    pillarUrl: 'https://www.segiatech.com/layanan/cloud-data-ai',
-    anchorVariations: ['integrasi AI', 'aplikasi AI', 'kecerdasan buatan', 'otomasi AI'],
+    name: '3D Animation & Visual Production',
+    pillarUrl: 'https://unimasi.studio/services/3d-animation',
+    anchorVariations: ['animasi 3d', '3d animation', 'visual production', 'cgi', 'character rig', 'blender'],
   },
   {
-    name: 'Custom Web Application',
-    pillarUrl: 'https://www.segiatech.com/layanan/software-product',
-    anchorVariations: ['aplikasi web custom', 'custom web application', 'rekayasa perangkat lunak web'],
+    name: 'Motion Graphics',
+    pillarUrl: 'https://unimasi.studio/services/motion-graphics',
+    anchorVariations: ['motion graphics', 'motion design', 'grafis gerak', 'kinetic typography'],
   },
   {
-    name: 'Mobile First Application',
-    pillarUrl: 'https://www.segiatech.com/layanan/software-product',
-    anchorVariations: ['aplikasi mobile', 'mobile app development', 'pembuatan aplikasi Android'],
+    name: 'Videotron & Digital Signage',
+    pillarUrl: 'https://unimasi.studio/services/videotron',
+    anchorVariations: ['videotron', 'digital signage', 'led display', 'billboard 3d', 'anamorphic'],
   },
 ]
 
-// Topic-to-service mapping dictionary for SegiaTech internal ecosystem
+// Topic-to-service mapping dictionary for UNIMASI internal ecosystem
 const TOPIC_SERVICE_MAP: Record<string, { serviceSlug: string; serviceTitle: string; pillarUrl: string; portfolioSlug?: string; portfolioTitle?: string }> = {
-  crm: {
-    serviceSlug: 'crm-development',
-    serviceTitle: 'CRM Development',
-    pillarUrl: 'https://www.segiatech.com/layanan/business-systems',
+  '2d': {
+    serviceSlug: '2d-animation',
+    serviceTitle: '2D Animation & Explainers',
+    pillarUrl: 'https://unimasi.studio/services/2d-animation',
+    portfolioSlug: 'explainer-series-concept',
+    portfolioTitle: 'Explainer Series Concept',
   },
-  pmb: {
-    serviceSlug: 'pmb-sistem-akademik',
-    serviceTitle: 'PMB & Sistem Akademik',
-    pillarUrl: 'https://www.segiatech.com/layanan/business-systems',
-    portfolioSlug: 'website-pmb-umby',
-    portfolioTitle: 'Website PMB UMBY',
+  explainer: {
+    serviceSlug: '2d-animation',
+    serviceTitle: '2D Explainer Video',
+    pillarUrl: 'https://unimasi.studio/services/2d-animation',
+    portfolioSlug: 'explainer-series-concept',
+    portfolioTitle: 'Explainer Series Concept',
   },
-  sekolah: {
-    serviceSlug: 'website-development',
-    serviceTitle: 'Website Development Sekolah & Yayasan',
-    pillarUrl: 'https://www.segiatech.com/layanan/website-development',
-    portfolioSlug: 'website-smk-pb-soedirman-2',
-    portfolioTitle: 'Website SMK PB Soedirman 2',
-  },
-  umkm: {
-    serviceSlug: 'website-development',
-    serviceTitle: 'Jasa Pembuatan Website Bisnis & UMKM',
-    pillarUrl: 'https://www.segiatech.com/layanan/website-development',
-    portfolioSlug: 'website-yspi',
-    portfolioTitle: 'Website YSPI',
-  },
-  'virtual-tour': {
-    serviceSlug: 'virtual-tour',
-    serviceTitle: 'Virtual Tour & 360 Interactive',
-    pillarUrl: 'https://www.segiatech.com/layanan/software-product',
-    portfolioSlug: 'virtual-exhibition-ugm',
-    portfolioTitle: 'Virtual Exhibition UGM',
-  },
-  ai: {
-    serviceSlug: 'ai-application',
-    serviceTitle: 'AI Application & LLM Integration',
-    pillarUrl: 'https://www.segiatech.com/layanan/cloud-data-ai',
-  },
-  'ui-ux': {
-    serviceSlug: 'ui-ux-design',
-    serviceTitle: 'UI/UX Design Studio',
-    pillarUrl: 'https://www.segiatech.com/layanan/ui-ux-design',
+  storyboard: {
+    serviceSlug: '2d-animation',
+    serviceTitle: 'Storyboard & Concepting',
+    pillarUrl: 'https://unimasi.studio/services/2d-animation',
   },
   '3d': {
-    serviceSlug: 'interactive-3d-web',
-    serviceTitle: 'Interactive 3D Web & Three.js',
-    pillarUrl: 'https://www.segiatech.com/layanan/software-product',
-    portfolioSlug: 'interactive-3d-aquarium-edutainment',
-    portfolioTitle: 'Interactive 3D Aquarium',
+    serviceSlug: '3d-animation',
+    serviceTitle: '3D Animation & Visual Production',
+    pillarUrl: 'https://unimasi.studio/services/3d-animation',
+    portfolioSlug: 'character-rig-study',
+    portfolioTitle: 'Character Rig Study',
   },
-  animasi: {
-    serviceSlug: 'interactive-3d-web',
-    serviceTitle: 'Animasi Web & Visualisasi Interaktif',
-    pillarUrl: 'https://www.segiatech.com/layanan/software-product',
+  cgi: {
+    serviceSlug: '3d-animation',
+    serviceTitle: 'CGI & 3D Production',
+    pillarUrl: 'https://unimasi.studio/services/3d-animation',
+    portfolioSlug: 'character-rig-study',
+    portfolioTitle: 'Character Rig Study',
   },
-  video: {
-    serviceSlug: 'software-product',
-    serviceTitle: 'Media & Digital Showcase Experience',
-    pillarUrl: 'https://www.segiatech.com/layanan/software-product',
+  blender: {
+    serviceSlug: '3d-animation',
+    serviceTitle: '3D Modeling & Animation',
+    pillarUrl: 'https://unimasi.studio/services/3d-animation',
   },
-  streaming: {
-    serviceSlug: 'cloud-data-ai',
-    serviceTitle: 'Realtime Infrastructure & Streaming Systems',
-    pillarUrl: 'https://www.segiatech.com/layanan/cloud-data-ai',
+  motion: {
+    serviceSlug: 'motion-graphics',
+    serviceTitle: 'Motion Graphics Studio',
+    pillarUrl: 'https://unimasi.studio/services/motion-graphics',
   },
-  branding: {
-    serviceSlug: 'ui-ux-design',
-    serviceTitle: 'Brand Identity & Digital Design System',
-    pillarUrl: 'https://www.segiatech.com/layanan/ui-ux-design',
+  videotron: {
+    serviceSlug: 'videotron',
+    serviceTitle: 'Videotron & LED Display Production',
+    pillarUrl: 'https://unimasi.studio/services/videotron',
   },
-  manufaktur: {
-    serviceSlug: 'business-systems',
-    serviceTitle: 'Industrial Systems & Enterprise Automation',
-    pillarUrl: 'https://www.segiatech.com/layanan/business-systems',
-  },
-  kesehatan: {
-    serviceSlug: 'business-systems',
-    serviceTitle: 'Sistem Informasi & Manajemen Terintegrasi',
-    pillarUrl: 'https://www.segiatech.com/layanan/business-systems',
+  billboard: {
+    serviceSlug: 'videotron',
+    serviceTitle: '3D Anamorphic & Videotron',
+    pillarUrl: 'https://unimasi.studio/services/videotron',
   },
 }
 
@@ -132,8 +105,8 @@ export function getRecommendedLinks(textOrSlug: string, _unusedBrandId?: string)
       recommendations.push({
         type: 'service',
         title: mapping.serviceTitle,
-        url: mapping.pillarUrl.startsWith('http') ? mapping.pillarUrl : `/layanan/${mapping.serviceSlug}`,
-        reason: `Relevansi topik kata kunci "${key}" dengan layanan inti SegiaTech.`,
+        url: mapping.pillarUrl.startsWith('http') ? mapping.pillarUrl : `/services/${mapping.serviceSlug}`,
+        reason: `Relevansi topik kata kunci "${key}" dengan layanan inti UNIMASI Studio.`,
         anchorText: mapping.serviceTitle,
       })
 
@@ -141,72 +114,60 @@ export function getRecommendedLinks(textOrSlug: string, _unusedBrandId?: string)
         recommendations.push({
           type: 'portfolio',
           title: mapping.portfolioTitle,
-          url: `/portofolio/${mapping.portfolioSlug}`,
-          reason: `Studi kasus pembuktian (proof layer) untuk ${mapping.serviceTitle}.`,
+          url: `/portfolio/${mapping.portfolioSlug}`,
+          reason: `Studi kasus animasi terbukti untuk topik "${key}".`,
           anchorText: mapping.portfolioTitle,
         })
       }
     }
   }
 
-  // Default fallback if no specific match
+  // Fallback default recommendation
   if (recommendations.length === 0) {
     recommendations.push({
       type: 'service',
-      title: 'Website Development',
-      url: '/layanan/website-development',
-      reason: 'Layanan pilar utama SegiaTech.',
-      anchorText: 'jasa pembuatan website',
+      title: 'Animation & Motion Services',
+      url: 'https://unimasi.studio/services',
+      reason: 'Layanan pilar utama UNIMASI Studio.',
+      anchorText: 'Layanan Animasi UNIMASI',
     })
   }
 
-  // Deduplicate by URL
-  const seen = new Set<string>()
-  return recommendations.filter((r) => {
-    if (seen.has(r.url)) return false
-    seen.add(r.url)
-    return true
-  })
+  return recommendations
 }
 
 /**
- * Automatically inject internal links into content paragraphs contextually
- * Ensures links to pillar URLs with natural anchor texts (max 2-3 links per article)
+ * Finds natural anchor opportunities in text for internal linking
  */
-export function injectContextualInternalLinks(
-  htmlContent: string,
-  _unusedBrandId?: string,
-  _primaryKeyword?: string
-): string {
-  if (!htmlContent) return ''
+export function findAnchorOpportunities(htmlContent: string): {
+  matchedAnchor: string
+  targetUrl: string
+  serviceName: string
+}[] {
+  const cleanText = htmlContent.replace(/<[^>]+>/g, ' ').toLowerCase()
+  const opportunities: { matchedAnchor: string; targetUrl: string; serviceName: string }[] = []
 
-  let content = htmlContent
-  let injectedCount = 0
-  const maxInjections = 3
+  // Check existing links to avoid over-linking
+  const existingLinks = new Set<string>()
+  const hrefMatches = htmlContent.matchAll(/href=["']([^"']+)["']/g)
+  for (const m of hrefMatches) {
+    existingLinks.add(m[1].toLowerCase())
+  }
 
-  // Search each service anchor of SegiaTech
-  for (const svc of SEGIATECH_SERVICES) {
-    if (injectedCount >= maxInjections) break
+  for (const svc of UNIMASI_SERVICES) {
+    if (existingLinks.has(svc.pillarUrl.toLowerCase())) continue
 
     for (const anchor of svc.anchorVariations) {
-      if (injectedCount >= maxInjections) break
-
-      // Only link if the anchor text is present in a <p> tag and not already linked inside <a>
-      const regex = new RegExp(`(<p[^>]*>(?:(?!<\\/p>)[\\s\\S])*?)(?<!<a[^>]*>)(${escapeRegExp(anchor)})(?![^<]*<\\/a>)((?:(?!<\\/p>)[\\s\\S])*?<\\/p>)`, 'i')
-
-      if (regex.test(content)) {
-        content = content.replace(regex, (match, prefix, matchedText, suffix) => {
-          return `${prefix}<a href="${svc.pillarUrl}" class="text-accent-400 hover:underline font-medium" title="${svc.name}">${matchedText}</a>${suffix}`
+      if (cleanText.includes(anchor.toLowerCase())) {
+        opportunities.push({
+          matchedAnchor: anchor,
+          targetUrl: svc.pillarUrl,
+          serviceName: svc.name,
         })
-        injectedCount++
         break
       }
     }
   }
 
-  return content
-}
-
-function escapeRegExp(string: string) {
-  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  return opportunities
 }

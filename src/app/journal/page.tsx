@@ -50,7 +50,7 @@ export default async function JournalPage({
 
   const items: ArticleCardItem[] = articlesData.articles.map((p) => ({
     slug: p.slug,
-    href: `/${p.slug}/`,
+    href: `/journal/${p.slug}`,
     title: p.title,
     category: getCategoryName(p.category),
     excerpt:

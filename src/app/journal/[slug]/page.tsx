@@ -14,13 +14,84 @@ import {
   formatDate,
   getArticle,
   getRelatedArticles,
+  type Article,
   type Block,
 } from '@/data/articles'
+import { getCoreArticleBySlug, getCoreArticles } from '@/lib/core'
 import '@/pages/article.css'
 
 const SITE_URL = 'https://unimasi.studio'
 
-export function generateStaticParams() {
+async function resolveArticle(slug: string): Promise<{
+  article: Article
+  htmlContent?: string
+} | null> {
+  const local = getArticle(slug)
+  const core = await getCoreArticleBySlug(slug)
+
+  if (local) {
+    return {
+      article: local,
+      htmlContent: core?.content,
+    }
+  }
+
+  if (core) {
+    const categoryName =
+      typeof core.category === 'string'
+        ? core.category
+        : core.category?.name || 'Process'
+    const authorName =
+      typeof core.author === 'string'
+        ? core.author
+        : core.author?.name || 'UNIMASI'
+    const tagNames = core.tags
+      ? core.tags.map((t) => (typeof t === 'string' ? t : t.name || ''))
+      : []
+
+    const fallbackArticle: Article = {
+      slug: core.slug,
+      title: core.title,
+      category: categoryName as any,
+      excerpt: core.excerpt || '',
+      metaDescription: core.seo?.metaDescription || core.excerpt || '',
+      date: core.publishedAt || core.createdAt || new Date().toISOString(),
+      author: authorName,
+      readMinutes: core.readingTime || 5,
+      tags: tagNames.filter(Boolean),
+      artVariant: 1,
+      body: [],
+      serviceCta: {
+        label: 'Need Animation Production?',
+        to: '/contact',
+        blurb: 'From explainer videos to 3D cinematics, we help brands move.',
+      },
+      relatedLinks: [
+        { label: 'View our portfolio', to: '/portfolio' },
+        { label: 'Browse services', to: '/services' },
+      ],
+      relatedSlugs: [],
+    }
+
+    return {
+      article: fallbackArticle,
+      htmlContent: core.content,
+    }
+  }
+
+  return null
+}
+
+export async function generateStaticParams() {
+  try {
+    const core = await getCoreArticles({ pageSize: 50 })
+    if (core && core.articles && core.articles.length > 0) {
+      return core.articles.map((article) => ({
+        slug: article.slug,
+      }))
+    }
+  } catch {}
+
   return SORTED_ARTICLES.map((article) => ({
     slug: article.slug,
   }))
@@ -32,11 +103,12 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>
 }): Promise<Metadata> {
   const { slug } = await params
-  const article = getArticle(slug)
-  if (!article) return { title: 'Article Not Found' }
+  const resolved = await resolveArticle(slug)
+  if (!resolved) return { title: 'Article Not Found' }
+  const { article } = resolved
 
   return {
-    title: article.title,
+    title: `${article.title} · UNIMASI`,
     description: article.metaDescription,
     alternates: {
       canonical: `${SITE_URL}/journal/${article.slug}`,
@@ -48,11 +120,13 @@ export async function generateMetadata({
       publishedTime: article.date,
       authors: [article.author],
       url: `${SITE_URL}/journal/${article.slug}`,
+      images: [{ url: `${SITE_URL}/favicon.svg` }],
     },
     twitter: {
       card: 'summary_large_image',
       title: article.title,
       description: article.metaDescription,
+      images: [`${SITE_URL}/favicon.svg`],
     },
   }
 }
@@ -161,9 +235,10 @@ export default async function ArticleDetailPage({
   params: Promise<{ slug: string }>
 }) {
   const { slug } = await params
-  const article = getArticle(slug)
+  const resolved = await resolveArticle(slug)
 
-  if (!article) notFound()
+  if (!resolved) notFound()
+  const { article, htmlContent } = resolved
 
   const related = getRelatedArticles(article)
   const headings = article.body.filter((b): b is Extract<Block, { type: 'h2' }> => b.type === 'h2')
@@ -283,9 +358,16 @@ export default async function ArticleDetailPage({
           </aside>
 
           <div className="article__body">
-            {article.body.map((block, i) => (
-              <BlockRenderer key={i} block={block} />
-            ))}
+            {article.body && article.body.length > 0 ? (
+              article.body.map((block, i) => (
+                <BlockRenderer key={i} block={block} />
+              ))
+            ) : htmlContent ? (
+              <div
+                className="article-rendered-body"
+                dangerouslySetInnerHTML={{ __html: htmlContent }}
+              />
+            ) : null}
 
             <Reveal className="article__service-cta">
               <div className="article__service-cta-inner">

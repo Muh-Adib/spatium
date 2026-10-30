@@ -1,4 +1,6 @@
 node_modules/
+backend/node_modules
+backend/node_modules/
 dist/
 .logs/
 .env
@@ -7,5 +9,7 @@ dist/
 *.local
 .DS_Store
 .next/
+backend/.next/
+backend/.next
 out/
 *.tsbuildinfo

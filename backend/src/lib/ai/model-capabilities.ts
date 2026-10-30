@@ -217,3 +217,78 @@ export const DEFAULT_SELECTED_MODELS: AiModelItem[] = [
     description: 'Model agentic code generation teroptimasi dari Poolside dengan konteks 200k.',
   },
 ]
+
+export const RECOMMENDED_FREE_HIGH_CONTEXT_MODELS = [
+  {
+    id: 'nvidia/nemotron-3-super-120b-a12b:free',
+    name: 'Nvidia Nemotron 3 Super 120B (Free)',
+    provider: 'openrouter',
+    contextLength: 1048576, // 1M
+    isFree: true,
+    hasThinking: true,
+    hasVision: false,
+    capabilities: ['text', 'thinking'],
+    tag: 'Free · 1M Context · Reasoning',
+    description: 'Nvidia Nemotron-3 Super model dengan konteks 1M dan kapabilitas reasoning mendalam.',
+  },
+  {
+    id: 'cohere/north-mini-code:free',
+    name: 'Cohere North Mini Code (Free)',
+    provider: 'openrouter',
+    contextLength: 262144, // 256k
+    isFree: true,
+    hasThinking: false,
+    hasVision: false,
+    capabilities: ['text', 'code'],
+    tag: 'Free · 256k Context · Coding',
+    description: 'Model khusus pembuat kode & refactoring cepat dari Cohere dengan konteks 256k.',
+  },
+  {
+    id: 'nvidia/nemotron-3-ultra-550b-a55b:free',
+    name: 'Nvidia Nemotron 3 Ultra 550B (Free)',
+    provider: 'openrouter',
+    contextLength: 1048576, // 1M
+    isFree: true,
+    hasThinking: true,
+    hasVision: false,
+    capabilities: ['text', 'thinking'],
+    tag: 'Free · 1M Context · Flagship',
+    description: 'Model ultra 550B parameter kelas enterprise untuk penalaran kode dan analisis sistem.',
+  },
+  {
+    id: 'nvidia/nemotron-3.5-lightning:free',
+    name: 'Nvidia Nemotron 3.5 Lightning (Free)',
+    provider: 'openrouter',
+    contextLength: 524288, // 512k
+    isFree: true,
+    hasThinking: false,
+    hasVision: false,
+    capabilities: ['text'],
+    tag: 'Free · 512k Context · Ultra-Fast',
+    description: 'Model inferensi kilat dengan konteks 512k, ideal untuk chat studio berlatensi rendah.',
+  },
+  {
+    id: 'poolside/laguna-xs-2.1:free',
+    name: 'Poolside Laguna XS 2.1 (Free)',
+    provider: 'openrouter',
+    contextLength: 200000, // 200k
+    isFree: true,
+    hasThinking: false,
+    hasVision: false,
+    capabilities: ['text', 'code'],
+    tag: 'Free · 200k Context · Agentic',
+    description: 'Model agentic code generation teroptimasi dari Poolside dengan konteks 200k.',
+  },
+  {
+    id: 'google/gemini-2.0-flash-exp:free',
+    name: 'Google Gemini 2.0 Flash Exp (Free)',
+    provider: 'openrouter',
+    contextLength: 1048576, // 1M
+    isFree: true,
+    hasThinking: true,
+    hasVision: true,
+    capabilities: ['text', 'vision', 'thinking'],
+    tag: 'Free · 1M Context · Multimodal',
+    description: 'Gemini 2.0 Flash eksperimental dengan jendela konteks 1 juta token gratis dan multimodal vision.',
+  },
+]

@@ -194,6 +194,7 @@ export async function getCoreArticles(params: {
 
   const queryParams = new URLSearchParams({
     page: String(page),
+    pageSize: String(pageSize),
     limit: String(pageSize),
   })
 
@@ -295,7 +296,7 @@ export async function getCoreArticleBySlug(slug: string): Promise<CoreArticle | 
       seo: {
         metaTitle: localMatch.title,
         metaDescription: localMatch.metaDescription,
-        canonicalUrl: `https://unimasi.studio/${localMatch.slug}/`,
+        canonicalUrl: `https://unimasi.studio/journal/${localMatch.slug}`,
       },
     }
   }

@@ -2,6 +2,7 @@ import { prisma } from '@/lib/db/prisma'
 import { querySearchAnalytics, GscSearchAnalyticsRow } from './client'
 import { keywordDatasetKey, type KeywordDataset } from './keyword-data'
 import { Integration, connectedResult, notConnected } from '../integration/result'
+import { siteConfig } from '@/config/site'
 
 export interface GscSyncResult {
   syncedRows: number
@@ -16,7 +17,7 @@ export interface GscSyncResult {
  * (ADR-0010 / L11-T2)
  */
 export async function syncGscDaily(
-  siteUrl = 'https://www.segiatech.com',
+  siteUrl = siteConfig.url,
   daysBack = 3
 ): Promise<Integration<GscSyncResult>> {
   const serviceEmail = process.env.GSC_CLIENT_EMAIL

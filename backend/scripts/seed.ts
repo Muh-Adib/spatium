@@ -57,8 +57,8 @@ async function seed() {
         const inserted = await prisma.orm.public.Author.create({
           name: authorName,
           slug: authorSlug,
-          email: `${authorSlug}@segiatech.com`,
-          bio: 'Penulis & Kontributor Tim Editorial',
+          email: `${authorSlug}@unimasi.studio`,
+          bio: 'Penulis & Kontributor Tim Editorial UNIMASI',
         })
         authorMap.set(inserted.slug, inserted.id)
       }
@@ -216,19 +216,19 @@ async function seed() {
   if (!existingConfig) {
     await prisma.orm.public.SiteConfig.create({
       id: 1,
-      name: 'SegiaTech',
-      tagline: 'Solusi Digital untuk Masa Depan Bisnis Anda',
+      name: 'UNIMASI Studio',
+      tagline: 'We Make Ideas Move — 2D & 3D Animation, Motion Graphics & Videotron',
       description:
-        'SegiaTech adalah studio teknologi digital yang membangun website, aplikasi, dan sistem bisnis modern. Kami membantu UMKM, institusi pendidikan, dan perusahaan bertransformasi secara digital.',
-      url: 'https://www.segiatech.com',
-      whatsapp: '6285227702811',
-      email: 'contact@segiatech.com',
-      phone: '+62 852-2770-2811',
+        'UNIMASI adalah studio animasi 2D, 3D, motion graphics, dan visual production untuk edukasi, industri, dan brands.',
+      url: 'https://unimasi.studio',
+      whatsapp: '6283121138821',
+      email: 'hello@unimasi.studio',
+      phone: '+62 831-2113-8821',
       address: 'Yogyakarta, Indonesia',
       socialLinks: JSON.stringify({
-        instagram: 'https://instagram.com/segiatech',
-        linkedin: 'https://linkedin.com/company/segiatech',
-        github: 'https://github.com/segiatech',
+        instagram: 'https://instagram.com/unimasi.studio',
+        linkedin: 'https://linkedin.com/company/unimasi',
+        github: 'https://github.com/unimasi',
       }),
     })
   }

@@ -1,28 +1,28 @@
 // -----------------------------------------------------------------------------
-// Site Configuration
+// Site Configuration — UNIMASI Studio
 // -----------------------------------------------------------------------------
 
 export const siteConfig = {
-  name: 'SegiaTech',
-  tagline: 'Solusi Digital untuk Masa Depan Bisnis Anda',
+  name: 'UNIMASI Studio',
+  tagline: 'We Make Ideas Move — 2D & 3D Animation, Motion Graphics & Videotron',
   description:
-    'SegiaTech adalah studio teknologi digital yang membangun website, aplikasi, dan sistem bisnis modern. Kami membantu UMKM, institusi pendidikan, dan perusahaan bertransformasi secara digital.',
-  url: process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.segiatech.com',
+    'UNIMASI adalah studio animasi 2D, 3D, motion graphics, dan visual production untuk edukasi, industri, dan brands.',
+  url: process.env.NEXT_PUBLIC_SITE_URL ?? 'https://unimasi.studio',
   cmsUrl: process.env.CMS_URL ?? '/admin',
-  whatsapp: process.env.NEXT_PUBLIC_WHATSAPP ?? '6285227702811',
-  email: 'contact@segiatech.com',
-  phone: '+62 852-2770-2811',
+  whatsapp: process.env.NEXT_PUBLIC_WHATSAPP ?? '6283121138821',
+  email: 'hello@unimasi.studio',
+  phone: '+62 831-2113-8821',
   address: 'Yogyakarta, Indonesia',
   social: {
-    instagram: 'https://instagram.com/segiatech',
-    linkedin: 'https://linkedin.com/company/segiatech',
-    github: 'https://github.com/segiatech',
+    instagram: 'https://instagram.com/unimasi.studio',
+    linkedin: 'https://linkedin.com/company/unimasi',
+    github: 'https://github.com/unimasi',
   },
   analytics: {
     gaId: process.env.NEXT_PUBLIC_GA_ID,
     gtmId: process.env.NEXT_PUBLIC_GTM_ID,
   },
-  defaultOgImage: '/images/og-default.jpg',
+  defaultOgImage: '/favicon.svg',
   locale: 'id_ID',
   alternateLocale: 'en_US',
 } as const

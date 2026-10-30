@@ -129,7 +129,7 @@ import {
 import { Tooltip } from '@/components/ui/Tooltip'
 import { IconButton, Panel, StatusPill, Segmented, SearchField, fieldCls } from '@/components/admin/AdminUi'
 import { useAuth } from '@/lib/auth/AuthContext'
-import { RECOMMENDED_FREE_HIGH_CONTEXT_MODELS } from '@/app/api/ai/models/route'
+import { RECOMMENDED_FREE_HIGH_CONTEXT_MODELS } from '@/lib/ai/model-capabilities'
 
 export const SUGGESTED_FREE_MODELS = [
   'inkling-small:free',

@@ -25,7 +25,7 @@ type ArticleCardProps = {
 export function ArticleCard({ article, featured = false }: ArticleCardProps) {
   const linkHref =
     article.href ||
-    (article.slug.startsWith('/') ? article.slug : `/${article.slug}/`)
+    (article.slug.startsWith('/') ? article.slug : `/journal/${article.slug}`)
 
   const formattedDate = article.date
     ? new Date(article.date).toLocaleDateString('en-US', {

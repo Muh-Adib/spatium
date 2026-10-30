@@ -19,13 +19,21 @@ export async function POST(req: NextRequest) {
     const body = await req.json().catch(() => ({}))
     const { slug, tag, path } = body
 
+    const safeTag = (t: string) => {
+      try {
+        (revalidateTag as any)(t, { expire: 0 })
+      } catch {
+        try {
+          (revalidateTag as any)(t)
+        } catch {}
+      }
+    }
+
     if (tag) {
-      // Revalidate by ISR tag
-      revalidateTag(tag)
+      safeTag(tag)
     } else {
-      // Revalidate default tags
-      revalidateTag('core-content')
-      revalidateTag('core-articles')
+      safeTag('core-content')
+      safeTag('core-articles')
     }
 
     if (path) {
