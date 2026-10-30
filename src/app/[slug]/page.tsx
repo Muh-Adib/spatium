@@ -4,25 +4,29 @@ import { notFound } from 'next/navigation'
 import { Breadcrumbs } from '@/components/ui/PageHero'
 import { CTASection } from '@/components/ui/CTASection'
 import { Icon } from '@/components/Icon'
-import { supabase } from '@/lib/supabase'
+import {
+  getCoreArticleBySlug,
+  getCoreArticles,
+  getAuthorName,
+  getCategoryName,
+  getMediaUrl,
+  type CoreTag,
+} from '@/lib/core'
 import '@/pages/article.css'
 
 const SITE_URL = 'https://unimasi.studio'
 
-export const revalidate = 3600
+export const revalidate = 3600 // Cache for 1 hour, revalidates on-demand via ISR
 
 export async function generateStaticParams() {
-  if (!process.env.NEXT_PUBLIC_SUPABASE_URL) return []
-  const { data } = await supabase
-    .from('posts')
-    .select('slug')
-    .eq('status', 'publish')
-    .order('published_at', { ascending: false })
-    .limit(50)
-
-  return (data || []).map((post) => ({
-    slug: post.slug,
-  }))
+  try {
+    const { articles } = await getCoreArticles({ page: 1, pageSize: 50 })
+    return (articles || []).map((post) => ({
+      slug: post.slug,
+    }))
+  } catch (e) {
+    return []
+  }
 }
 
 export async function generateMetadata({
@@ -31,19 +35,18 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>
 }): Promise<Metadata> {
   const { slug } = await params
-
-  const { data: post } = await supabase
-    .from('posts')
-    .select('*')
-    .eq('slug', slug)
-    .eq('status', 'publish')
-    .single()
+  const post = await getCoreArticleBySlug(slug)
 
   if (!post) return { title: 'Article Not Found' }
 
-  const title = post.yoast_title || post.title
-  const description = post.yoast_description || post.excerpt
-  const canonical = post.yoast_canonical || `${SITE_URL}/${post.slug}/`
+  const title =
+    post.seo?.metaTitle || post.seoData?.seoTitle || post.title
+  const description =
+    post.seo?.metaDescription ||
+    post.seoData?.metaDescription ||
+    (post.excerpt ? post.excerpt.replace(/<[^>]+>/g, '').slice(0, 160) : '')
+  const canonical = post.seo?.canonicalUrl || `${SITE_URL}/${post.slug}/`
+  const ogImageUrl = getMediaUrl(post.featuredImage, post.coverUrl)
 
   return {
     title,
@@ -53,101 +56,70 @@ export async function generateMetadata({
     },
     openGraph: {
       type: 'article',
-      title: post.yoast_og_title || title,
-      description: post.yoast_og_description || description,
+      title: post.seo?.ogTitle || title,
+      description: post.seo?.ogDescription || description,
       url: canonical,
-      publishedTime: post.published_at,
-      modifiedTime: post.modified_at,
-      images: post.yoast_og_image ? [post.yoast_og_image] : [],
-      authors: [post.author_name || 'UNIMASI'],
+      publishedTime: post.publishedAt || post.createdAt,
+      images: ogImageUrl ? [{ url: ogImageUrl }] : undefined,
     },
-    twitter: {
-      card: 'summary_large_image',
-      title: post.yoast_og_title || title,
-      description: post.yoast_og_description || description,
+    robots: {
+      index: post.seo?.robotsIndex ?? true,
+      follow: post.seo?.robotsFollow ?? true,
     },
   }
 }
 
-function decodeHtmlEntities(str: string): string {
-  return str
-    .replace(/&#8211;/g, '–')
-    .replace(/&#8212;/g, '—')
-    .replace(/&#8217;/g, "'")
-    .replace(/&#8216;/g, "'")
-    .replace(/&#8220;/g, '"')
-    .replace(/&#8221;/g, '"')
-    .replace(/&amp;/g, '&')
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    .replace(/&quot;/g, '"')
-    .replace(/&#039;/g, "'")
-    .replace(/&nbsp;/g, ' ')
-}
+/**
+ * Parses article HTML into structured headings for TOC and injects anchor IDs.
+ */
+function processArticleContent(
+  rawHtml: string,
+  articleTitle: string
+): { html: string; toc: Array<{ id: string; text: string; level: number }> } {
+  const toc: Array<{ id: string; text: string; level: number }> = []
+  const usedSlugs = new Set<string>()
 
-interface TocItem {
-  id: string
-  text: string
-  level: number
-}
+  let content = rawHtml
 
-function processArticleContent(rawContent: string, pageTitle: string): {
-  html: string
-  toc: TocItem[]
-} {
-  let content = rawContent || ''
-
-  // 1. Remove duplicate first heading if it repeats the article title
-  const titleNorm = decodeHtmlEntities(pageTitle)
-    .toLowerCase()
-    .replace(/[^\w]/g, '')
-
-  content = content.replace(/^\s*<h2[^>]*>(.*?)<\/h2>/i, (match, headingText) => {
-    const headingNorm = decodeHtmlEntities(headingText.replace(/<[^>]+>/g, ''))
-      .toLowerCase()
-      .replace(/[^\w]/g, '')
-    if (headingNorm === titleNorm || (headingNorm.length > 10 && titleNorm.includes(headingNorm))) {
-      return ''
+  // Auto-fix relative or broken image links
+  content = content.replace(/<img([^>]*)\bsrc=["'](\/[^"']+)["']/gi, (match, before, srcPath) => {
+    if (srcPath.startsWith('/images/')) {
+      const coreUrl = process.env.CORE_API_URL || 'http://localhost:3000'
+      return `<img${before}src="${coreUrl.replace(/\/$/, '')}${srcPath}"`
     }
     return match
   })
 
-  // 2. Normalize internal domain links to root-relative paths
-  content = content.replace(/https?:\/\/(www\.)?unimasi\.com\//gi, '/')
+  // Extract h2 and h3 headings for Table of Contents
+  content = content.replace(
+    /<h([2-3])([^>]*)>(.*?)<\/h\1>/gi,
+    (_full, levelStr, attrs, innerText) => {
+      const level = parseInt(levelStr, 10)
+      const cleanText = innerText.replace(/<[^>]+>/g, '').trim()
 
-  // 3. Extract TOC headings and inject unique IDs
-  const toc: TocItem[] = []
-  const seenSlugs = new Set<string>()
+      let baseSlug = cleanText
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-|-$/g, '')
 
-  content = content.replace(/<h([2-3])([^>]*)>(.*?)<\/h\1>/gi, (match, levelStr, attrs, innerText) => {
-    const rawText = decodeHtmlEntities(innerText.replace(/<[^>]+>/g, '')).trim()
-    if (!rawText) return match
+      if (!baseSlug) baseSlug = `section-${toc.length + 1}`
 
-    let slug = rawText
-      .toLowerCase()
-      .replace(/[^a-z0-9\s-]/g, '')
-      .trim()
-      .replace(/\s+/g, '-')
-      .slice(0, 60)
+      let uniqueSlug = baseSlug
+      let counter = 1
+      while (usedSlugs.has(uniqueSlug)) {
+        uniqueSlug = `${baseSlug}-${counter++}`
+      }
+      usedSlugs.add(uniqueSlug)
 
-    if (!slug) slug = 'section'
-    let uniqueSlug = slug
-    let counter = 1
-    while (seenSlugs.has(uniqueSlug)) {
-      uniqueSlug = `${slug}-${counter++}`
+      toc.push({ id: uniqueSlug, text: cleanText, level })
+
+      const hasId = /\bid=["'][^"']*["']/i.test(attrs)
+      if (hasId) {
+        return `<h${level}${attrs.replace(/\bid=["'][^"']*["']/i, `id="${uniqueSlug}"`)}>${innerText}</h${level}>`
+      }
+      return `<h${level} id="${uniqueSlug}"${attrs}>${innerText}</h${level}>`
     }
-    seenSlugs.add(uniqueSlug)
-
-    const level = parseInt(levelStr, 10)
-    toc.push({
-      id: uniqueSlug,
-      text: rawText,
-      level,
-    })
-
-    const cleanedAttrs = attrs.replace(/\sid="[^"]*"/gi, '')
-    return `<h${levelStr} id="${uniqueSlug}"${cleanedAttrs}>${innerText}</h${levelStr}>`
-  })
+  )
 
   return { html: content, toc }
 }
@@ -158,30 +130,32 @@ export default async function BlogPostPage({
   params: Promise<{ slug: string }>
 }) {
   const { slug } = await params
+  const post = await getCoreArticleBySlug(slug)
 
-  const { data: post, error } = await supabase
-    .from('posts')
-    .select('*')
-    .eq('slug', slug)
-    .eq('status', 'publish')
-    .single()
-
-  if (error || !post) {
+  if (!post) {
     notFound()
   }
 
+  const categoryName = getCategoryName(post.category)
+  const authorName = getAuthorName(post.author)
+  const featuredImageUrl = getMediaUrl(post.featuredImage, post.coverUrl)
+
   const { html: processedContent, toc } = processArticleContent(post.content || '', post.title)
   const headerExcerpt =
-    post.yoast_description || (post.excerpt && post.excerpt.length <= 250 ? post.excerpt : '')
+    post.seo?.metaDescription ||
+    post.seoData?.metaDescription ||
+    (post.excerpt && post.excerpt.length <= 250 ? post.excerpt.replace(/<[^>]+>/g, '') : '')
 
-  const hasAside = toc.length > 0 || (post.tags && post.tags.length > 0)
+  const rawTags = (post.tags || []) as (CoreTag | string)[]
+  const hasAside = toc.length > 0 || rawTags.length > 0
   const minHeadingLevel = toc.length > 0 ? Math.min(...toc.map((t) => t.level)) : 2
 
   const words = (post.content || '').replace(/<[^>]+>/g, '').split(/\s+/).length
-  const readMinutes = Math.max(1, Math.round(words / 200))
+  const readMinutes = post.readingTime || Math.max(1, Math.round(words / 200))
 
-  const dateStr = post.published_at
-    ? new Date(post.published_at).toLocaleDateString('en-US', {
+  const dateValue = post.publishedAt || post.createdAt
+  const dateStr = dateValue
+    ? new Date(dateValue).toLocaleDateString('en-US', {
         year: 'numeric',
         month: 'short',
         day: 'numeric',
@@ -190,11 +164,18 @@ export default async function BlogPostPage({
 
   return (
     <>
-      {post.yoast_schema ? (
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(post.yoast_schema) }}
-        />
+      {post.yoastSchema ? (
+        typeof post.yoastSchema === 'string' ? (
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: post.yoastSchema }}
+          />
+        ) : (
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(post.yoastSchema) }}
+          />
+        )
       ) : null}
 
       <article className="article">
@@ -205,13 +186,13 @@ export default async function BlogPostPage({
               items={[
                 { label: 'Home', to: '/' },
                 { label: 'Articles', to: '/journal' },
-                { label: post.category_name || 'Articles' },
+                { label: categoryName },
                 { label: post.title },
               ]}
             />
 
             <div className="article__header-top">
-              <span className="pill pill--accent">{post.category_name || 'Articles'}</span>
+              <span className="pill pill--accent">{categoryName}</span>
               <span className="mono article__read">{readMinutes} min read</span>
             </div>
 
@@ -222,16 +203,16 @@ export default async function BlogPostPage({
               <div>
                 <dt>Published</dt>
                 <dd>
-                  <time dateTime={post.published_at}>{dateStr}</time>
+                  <time dateTime={dateValue || ''}>{dateStr}</time>
                 </dd>
               </div>
               <div>
                 <dt>Author</dt>
-                <dd>{post.author_name || 'UNIMASI'}</dd>
+                <dd>{authorName}</dd>
               </div>
               <div>
                 <dt>Topic</dt>
-                <dd>{post.category_name || 'Articles'}</dd>
+                <dd>{categoryName}</dd>
               </div>
             </dl>
           </div>
@@ -258,15 +239,17 @@ export default async function BlogPostPage({
                             <li
                               key={item.id}
                               className={`article-toc__item ${
-                                isTop ? 'article-toc__item--primary' : 'article-toc__item--sub'
+                                item.level > minHeadingLevel ? 'article-toc__item--sub' : ''
                               }`}
                             >
-                              <a href={`#${item.id}`}>
-                                {num !== null ? (
-                                  <span className="mono article-toc__num">
-                                    {String(num).padStart(2, '0')}
+                              <a href={`#${item.id}`} className="article-toc__link">
+                                {num ? (
+                                  <span className="article-toc__num mono">
+                                    {String(num).padStart(2, '0')}.
                                   </span>
-                                ) : null}
+                                ) : (
+                                  <span className="article-toc__bullet" />
+                                )}
                                 <span className="article-toc__text">{item.text}</span>
                               </a>
                             </li>
@@ -277,15 +260,19 @@ export default async function BlogPostPage({
                   </>
                 ) : null}
 
-                {post.tags && post.tags.length > 0 ? (
+                {rawTags.length > 0 ? (
                   <div className="article-toc__tags">
                     <p className="mono article-toc__label">Tags</p>
                     <ul className="article__tags">
-                      {post.tags.map((tag: string) => (
-                        <li key={tag}>
-                          <span className="pill">{tag}</span>
-                        </li>
-                      ))}
+                      {rawTags.map((tag) => {
+                        const tagName = typeof tag === 'string' ? tag : tag.name || tag.slug || ''
+                        const tagKey = typeof tag === 'string' ? tag : tag.id || tag.slug || tagName
+                        return (
+                          <li key={tagKey}>
+                            <span className="pill">{tagName}</span>
+                          </li>
+                        )
+                      })}
                     </ul>
                   </div>
                 ) : null}
@@ -305,12 +292,12 @@ export default async function BlogPostPage({
           ) : null}
 
           <div className="article__body">
-            {post.featured_image_url ? (
+            {featuredImageUrl ? (
               <figure className="article__featured-media">
                 <div className="article__featured-frame">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src={post.featured_image_url}
+                    src={featuredImageUrl}
                     alt={post.title}
                     loading="eager"
                   />

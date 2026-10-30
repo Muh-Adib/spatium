@@ -1,7 +1,7 @@
 import type { MetadataRoute } from 'next'
 import { SERVICES } from '@/data/services'
 import { PROJECTS } from '@/data/projects'
-import { supabase } from '@/lib/supabase'
+import { getCoreArticles } from '@/lib/core'
 
 const SITE_URL = 'https://unimasi.studio'
 
@@ -59,32 +59,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.6,
   }))
 
-  // Fetch all 1,147+ articles from Supabase with range pagination
+  // Fetch articles from SegiaTech Core Delivery API
   let postRoutes: MetadataRoute.Sitemap = []
-  if (process.env.NEXT_PUBLIC_SUPABASE_URL) {
-    let from = 0
-    const pageSize = 1000
-    while (true) {
-      const { data: posts, error } = await supabase
-        .from('posts')
-        .select('slug, published_at')
-        .eq('status', 'publish')
-        .order('published_at', { ascending: false })
-        .range(from, from + pageSize - 1)
-
-      if (error || !posts || posts.length === 0) break
-
-      const mapped = posts.map((post) => ({
-        url: `${SITE_URL}/${post.slug}/`,
-        lastModified: post.published_at ? new Date(post.published_at) : new Date(),
-        changeFrequency: 'yearly' as const,
-        priority: 0.7,
-      }))
-      postRoutes = postRoutes.concat(mapped)
-
-      if (posts.length < pageSize) break
-      from += pageSize
-    }
+  try {
+    const { articles } = await getCoreArticles({ page: 1, pageSize: 100 })
+    postRoutes = articles.map((post) => ({
+      url: `${SITE_URL}/${post.slug}/`,
+      lastModified: post.publishedAt || post.createdAt ? new Date(post.publishedAt || post.createdAt!) : new Date(),
+      changeFrequency: 'yearly' as const,
+      priority: 0.7,
+    }))
+  } catch (e) {
+    console.warn('[Sitemap] Failed to fetch articles for sitemap:', e)
   }
 
   return [...staticRoutes, ...serviceRoutes, ...projectRoutes, ...postRoutes]

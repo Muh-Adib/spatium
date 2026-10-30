@@ -1,6 +1,12 @@
 import { Suspense } from 'react'
 import type { Metadata } from 'next'
-import { supabase } from '@/lib/supabase'
+import {
+  getCoreArticles,
+  getCoreCategories,
+  getAuthorName,
+  getCategoryName,
+  getMediaUrl,
+} from '@/lib/core'
 import { JournalClient, type JournalCategory } from './JournalClient'
 import type { ArticleCardItem } from '@/components/journal/ArticleCard'
 
@@ -28,84 +34,32 @@ export default async function JournalPage({
   const page = Math.max(1, parseInt(params.page || '1', 10) || 1)
   const pageSize = 12
 
-  let dbQuery = supabase
-    .from('posts')
-    .select(
-      'id, slug, title, category_name, excerpt, yoast_description, published_at, author_name, featured_image_url',
-      { count: 'exact' }
-    )
-    .eq('status', 'publish')
+  // Fetch articles from SegiaTech Core Delivery API
+  const [articlesData, categoriesData] = await Promise.all([
+    getCoreArticles({
+      page,
+      pageSize,
+      category,
+      search: query,
+    }),
+    getCoreCategories(),
+  ])
 
-  if (category !== 'all') {
-    dbQuery = dbQuery.eq('category_name', category)
-  }
+  const total = articlesData.total
+  const totalPages = Math.max(1, articlesData.pageCount)
 
-  if (query) {
-    dbQuery = dbQuery.or(
-      `title.ilike.%${query}%,slug.ilike.%${query}%,yoast_description.ilike.%${query}%`
-    )
-  }
-
-  const isPageOneWithoutSearch = page === 1 && !query
-
-  let from = 0
-  let to = pageSize - 1
-
-  if (isPageOneWithoutSearch) {
-    from = 0
-    to = pageSize // 0 to 12 = 13 items (1 featured + 12 in grid)
-  } else if (!query) {
-    from = (pageSize + 1) + (page - 2) * pageSize
-    to = from + pageSize - 1
-  } else {
-    from = (page - 1) * pageSize
-    to = from + pageSize - 1
-  }
-
-  const { data: posts, count: totalCount } = await dbQuery
-    .order('published_at', { ascending: false })
-    .range(from, to)
-
-  // Fetch exact total count & category counts across full dataset
-  const [{ data: catBatch1 }, { data: catBatch2 }, { count: exactTotalPublished }] =
-    await Promise.all([
-      supabase.from('posts').select('category_name').eq('status', 'publish').range(0, 999),
-      supabase.from('posts').select('category_name').eq('status', 'publish').range(1000, 1999),
-      supabase.from('posts').select('*', { count: 'exact', head: true }).eq('status', 'publish'),
-    ])
-
-  const allCategoriesData = [...(catBatch1 || []), ...(catBatch2 || [])]
-  const categoryCounts: Record<string, number> = {}
-  allCategoriesData.forEach((row) => {
-    const cat = row.category_name || 'Artikel'
-    categoryCounts[cat] = (categoryCounts[cat] || 0) + 1
-  })
-
-  const sortedCategories: JournalCategory[] = Object.entries(categoryCounts)
-    .sort((a, b) => b[1] - a[1])
-    .map(([name, count]) => ({ name, count }))
-
-  const totalAll = exactTotalPublished || allCategoriesData.length || 1147
-
-  const total = totalCount || 0
-  let totalPages = 1
-  if (!query) {
-    totalPages = total <= 13 ? 1 : 1 + Math.ceil((total - 13) / pageSize)
-  } else {
-    totalPages = Math.ceil(total / pageSize)
-  }
-
-  const items: ArticleCardItem[] = (posts || []).map((p) => ({
+  const items: ArticleCardItem[] = articlesData.articles.map((p) => ({
     slug: p.slug,
     href: `/${p.slug}/`,
     title: p.title,
-    category: p.category_name || 'Artikel',
+    category: getCategoryName(p.category),
     excerpt:
-      p.yoast_description ||
+      p.seoData?.metaDescription ||
+      p.seo?.metaDescription ||
       (p.excerpt ? p.excerpt.replace(/<[^>]+>/g, '').slice(0, 160) + '…' : ''),
-    date: p.published_at || '',
-    author: p.author_name || 'UNIMASI',
-    featuredImageUrl: p.featured_image_url,
+    date: p.publishedAt || p.createdAt || '',
+    author: getAuthorName(p.author),
+    featuredImageUrl: getMediaUrl(p.featuredImage, p.coverUrl),
   }))
 
   const jsonLd = [
@@ -142,12 +96,12 @@ export default async function JournalPage({
         <JournalClient
           posts={items}
           totalCount={total}
-          totalAllCount={totalAll}
+          totalAllCount={total}
           currentPage={page}
           totalPages={totalPages}
           currentCategory={category}
           currentQuery={query}
-          categories={sortedCategories}
+          categories={categoriesData}
         />
       </Suspense>
     </>
