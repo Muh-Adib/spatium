@@ -74,46 +74,46 @@ export function HeroDepartmentBlock({ block }: { block: any }) {
 
   if (variant === 'showcase') {
     return (
-      <section className="pt-32 pb-20 sm:pt-40 sm:pb-28 lg:pt-44 lg:pb-36 relative overflow-hidden text-white border-b border-white/[0.08] bg-[#0A0A0A]">
+      <section className="pt-32 pb-20 sm:pt-40 sm:pb-28 lg:pt-44 lg:pb-36 relative overflow-hidden text-white border-b border-[var(--card-border)] bg-[var(--color-background)]">
         <ThematicWave opacity={0.55} showBottomWave={true} />
-        <div className="pointer-events-none absolute -left-20 top-1/4 w-[600px] h-[600px] rounded-full bg-[#FFD600]/[0.05] blur-[160px]" />
+        <div className="pointer-events-none absolute -left-20 top-1/4 w-[600px] h-[600px] rounded-full bg-accent/[0.05] blur-[160px]" />
         <div className="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full bg-[#0F3A79]/[0.04] blur-[150px]" />
 
         <div className="container relative z-10 max-w-6xl mx-auto px-4 sm:px-6">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
             <div className="lg:col-span-7">
               {badge && (
-                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.04] text-[#FFD600] border border-[#FFD600]/30 text-xs font-mono mb-6 backdrop-blur-md shadow-[0_0_20px_rgba(255, 214, 0,0.12)]">
-                  <Layers className="w-3.5 h-3.5 text-[#FFD600]" />
+                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.04] text-accent border border-accent/30 text-xs font-mono mb-6 backdrop-blur-md shadow-yellow">
+                  <Layers className="w-3.5 h-3.5 text-accent" />
                   <span>{badge}</span>
                 </div>
               )}
-              <h1 className="font-syne text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-white leading-[1.14]">
+              <h1 className="font-heading text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-white leading-[1.14]">
                 {titleParts[0]?.trim()}{' '}
                 {titleParts.length > 1 && (
-                  <span className="gradient-text-italic bg-gradient-to-r from-[#FFFFFF] via-[#DBD7D5] to-[#FFD600]">
+                  <span className="gradient-text-italic bg-gradient-to-r from-white via-[var(--text-muted)] to-accent">
                     & {titleParts[1]?.trim()}
                   </span>
                 )}
               </h1>
               {description && (
-                <p className="mt-6 text-body-lg sm:text-body-xl text-[#DBD7D5] leading-relaxed font-normal">
+                <p className="mt-6 text-body-lg sm:text-body-xl text-[var(--text-muted)] leading-relaxed font-normal">
                   {description}
                 </p>
               )}
             </div>
 
             <div className="lg:col-span-5">
-              <div className="rounded-3xl border border-white/10 bg-[#141414]/90 p-6 sm:p-8 backdrop-blur-xl shadow-2xl relative overflow-hidden group hover:border-[#FFD600]/40 transition-colors">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-[#FFD600]/10 rounded-full blur-2xl pointer-events-none" />
-                <div className="flex items-center justify-between border-b border-white/10 pb-4 mb-6">
+              <div className="rounded-3xl border border-[var(--card-border)] bg-[var(--surface-translucent)] p-6 sm:p-8 backdrop-blur-xl shadow-2xl relative overflow-hidden group hover:border-accent/40 transition-colors">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-accent/10 rounded-full blur-2xl pointer-events-none" />
+                <div className="flex items-center justify-between border-b border-[var(--card-border)] pb-4 mb-6">
                   <div className="flex items-center gap-2">
                     <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
-                    <span className="font-mono text-xs uppercase tracking-wider text-neutral-300 font-semibold">
+                    <span className="font-mono text-xs uppercase tracking-wider text-[var(--text-muted)] font-semibold">
                       Keunggulan Solusi
                     </span>
                   </div>
-                  <span className="font-mono text-xs text-[#FFD600]">{imageBadge}</span>
+                  <span className="font-mono text-xs text-accent">{imageBadge}</span>
                 </div>
 
                 <div className="space-y-4">
@@ -122,8 +122,8 @@ export function HeroDepartmentBlock({ block }: { block: any }) {
                       key={mIdx}
                       className="p-3.5 rounded-xl bg-white/[0.02] border border-white/5 flex items-center justify-between"
                     >
-                      <span className="font-mono text-xs text-neutral-300">{metric.label}</span>
-                      <span className="font-syne text-lg sm:text-xl font-bold text-[#FFD600]">
+                      <span className="font-mono text-xs text-[var(--text-muted)]">{metric.label}</span>
+                      <span className="font-heading text-lg sm:text-xl font-bold text-accent">
                         {metric.value}
                       </span>
                     </div>
@@ -135,15 +135,15 @@ export function HeroDepartmentBlock({ block }: { block: any }) {
 
           {/* Clean Immersive Media Showcase */}
           {heroImage && (
-            <div className="mt-14 rounded-3xl border border-white/10 bg-[#121212] overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.8)] relative group hover:border-[#FFD600]/30 transition-all">
-              <div className="flex items-center justify-between px-6 py-3.5 bg-[#161616]/80 backdrop-blur-md border-b border-white/[0.06]">
+            <div className="mt-14 rounded-3xl border border-[var(--card-border)] bg-[var(--color-surface)] overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.8)] relative group hover:border-accent/40 transition-all">
+              <div className="flex items-center justify-between px-6 py-3.5 bg-[var(--surface-translucent)] backdrop-blur-md border-b border-white/[0.06]">
                 <div className="flex items-center gap-2.5">
-                  <span className="w-2 h-2 rounded-full bg-[#FFD600]" />
-                  <span className="font-mono text-xs text-neutral-300 font-medium truncate max-w-sm">
+                  <span className="w-2 h-2 rounded-full bg-accent" />
+                  <span className="font-mono text-xs text-[var(--text-muted)] font-medium truncate max-w-sm">
                     {imageCaption}
                   </span>
                 </div>
-                <span className="font-mono text-xs text-[#FFD600] hidden sm:inline-block">
+                <span className="font-mono text-xs text-accent hidden sm:inline-block">
                   {imageBadge}
                 </span>
               </div>
@@ -156,7 +156,7 @@ export function HeroDepartmentBlock({ block }: { block: any }) {
                   className="object-cover object-top group-hover:scale-[1.02] transition-transform duration-700"
                   sizes="(max-width: 1200px) 100vw, 1200px"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0A]/70 via-transparent to-transparent pointer-events-none" />
+                <div className="absolute inset-0 bg-gradient-to-t from-navy-900/70 via-transparent to-transparent pointer-events-none" />
               </div>
             </div>
           )}
@@ -167,31 +167,31 @@ export function HeroDepartmentBlock({ block }: { block: any }) {
 
   // Default: cinematic variant with rich atmospheric depth + clean visual showcase
   return (
-    <section className="pt-32 pb-20 sm:pt-40 sm:pb-28 lg:pt-44 lg:pb-36 relative overflow-hidden text-white border-b border-white/[0.08] bg-[#0A0A0A]">
+    <section className="pt-32 pb-20 sm:pt-40 sm:pb-28 lg:pt-44 lg:pb-36 relative overflow-hidden text-white border-b border-[var(--card-border)] bg-[var(--color-background)]">
       <ThematicWave opacity={0.65} showBottomWave={true} />
-      <div className="pointer-events-none absolute left-1/2 top-1/3 -translate-x-1/2 -translate-y-1/2 w-[850px] h-[550px] rounded-full bg-[#FFD600]/[0.08] blur-[180px]" />
+      <div className="pointer-events-none absolute left-1/2 top-1/3 -translate-x-1/2 -translate-y-1/2 w-[850px] h-[550px] rounded-full bg-accent/[0.08] blur-[180px]" />
       <div className="pointer-events-none absolute right-1/4 top-1/4 w-[450px] h-[450px] rounded-full bg-[#0F3A79]/[0.06] blur-[160px]" />
 
       <div className="container relative z-10 max-w-6xl mx-auto px-4 sm:px-6">
         <div className="max-w-4xl">
           {badge && (
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#181818]/90 text-[#FFD600] border border-[#FFD600]/30 text-xs font-mono mb-6 backdrop-blur-md shadow-[0_0_20px_rgba(255, 214, 0,0.15)]">
-              <Layers className="w-3.5 h-3.5 text-[#FFD600]" />
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[var(--surface-translucent)] text-accent border border-accent/30 text-xs font-mono mb-6 backdrop-blur-md shadow-yellow">
+              <Layers className="w-3.5 h-3.5 text-accent" />
               <span>{badge}</span>
             </div>
           )}
 
-          <h1 className="font-syne text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold tracking-tight text-white leading-[1.12]">
+          <h1 className="font-heading text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold tracking-tight text-white leading-[1.12]">
             {titleParts[0]?.trim()}{' '}
             {titleParts.length > 1 && (
-              <span className="gradient-text-italic bg-gradient-to-r from-[#FFFFFF] via-[#DBD7D5] to-[#FFD600]">
+              <span className="gradient-text-italic bg-gradient-to-r from-white via-[var(--text-muted)] to-accent">
                 & {titleParts[1]?.trim()}
               </span>
             )}
           </h1>
 
           {description && (
-            <p className="mt-6 max-w-3xl text-body-lg sm:text-body-xl text-[#DBD7D5] leading-relaxed font-normal">
+            <p className="mt-6 max-w-3xl text-body-lg sm:text-body-xl text-[var(--text-muted)] leading-relaxed font-normal">
               {description}
             </p>
           )}
@@ -201,12 +201,12 @@ export function HeroDepartmentBlock({ block }: { block: any }) {
               {keyOutcomes.map((metric: any, mIdx: number) => (
                 <div
                   key={mIdx}
-                  className="rounded-2xl border border-white/10 bg-[#161616]/80 p-4.5 backdrop-blur-md text-left hover:border-[#FFD600]/40 transition-all hover:-translate-y-0.5 shadow-lg group"
+                  className="rounded-2xl border border-[var(--card-border)] bg-[var(--surface-translucent)] p-4.5 backdrop-blur-md text-left hover:border-accent/40 transition-all hover:-translate-y-0.5 shadow-lg group"
                 >
-                  <span className="font-mono text-xs text-neutral-400 block truncate group-hover:text-neutral-300">
+                  <span className="font-mono text-xs text-[var(--text-dim)] block truncate group-hover:text-[var(--text-muted)]">
                     {metric.label}
                   </span>
-                  <span className="font-syne text-xl sm:text-2xl font-bold text-[#FFD600] mt-1 block tracking-tight">
+                  <span className="font-heading text-xl sm:text-2xl font-bold text-accent mt-1 block tracking-tight">
                     {metric.value}
                   </span>
                 </div>
@@ -217,16 +217,16 @@ export function HeroDepartmentBlock({ block }: { block: any }) {
 
         {/* Clean Immersive Media Showcase */}
         {heroImage && (
-          <div className="mt-14 sm:mt-16 rounded-3xl border border-white/15 bg-[#121212] overflow-hidden shadow-[0_25px_80px_rgba(0,0,0,0.85)] relative group hover:border-[#FFD600]/30 transition-all">
-            <div className="flex items-center justify-between px-6 py-3.5 bg-[#161616]/90 backdrop-blur-md border-b border-white/[0.06]">
+          <div className="mt-14 sm:mt-16 rounded-3xl border border-[var(--card-border)] bg-[var(--color-surface)] overflow-hidden shadow-[0_25px_80px_rgba(0,0,0,0.85)] relative group hover:border-accent/40 transition-all">
+            <div className="flex items-center justify-between px-6 py-3.5 bg-[var(--surface-translucent)] backdrop-blur-md border-b border-white/[0.06]">
               <div className="flex items-center gap-2.5">
-                <span className="w-2 h-2 rounded-full bg-[#FFD600]" />
-                <span className="font-mono text-xs text-neutral-300 font-medium truncate max-w-sm">
+                <span className="w-2 h-2 rounded-full bg-accent" />
+                <span className="font-mono text-xs text-[var(--text-muted)] font-medium truncate max-w-sm">
                   {imageCaption}
                 </span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="font-mono text-xs text-[#FFD600] px-2.5 py-0.5 rounded-full bg-[#FFD600]/10 border border-[#FFD600]/20 hidden sm:inline-block">
+                <span className="font-mono text-xs text-accent px-2.5 py-0.5 rounded-full bg-accent/10 border border-accent/20 hidden sm:inline-block">
                   {imageBadge}
                 </span>
               </div>
@@ -241,7 +241,7 @@ export function HeroDepartmentBlock({ block }: { block: any }) {
                 className="object-cover object-top group-hover:scale-[1.015] transition-transform duration-700"
                 sizes="(max-width: 1200px) 100vw, 1200px"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0A]/70 via-transparent to-transparent pointer-events-none" />
+              <div className="absolute inset-0 bg-gradient-to-t from-navy-900/70 via-transparent to-transparent pointer-events-none" />
 
               {/* Floating Live Badge Overlays */}
               <div className="absolute bottom-4 left-4 sm:bottom-6 sm:left-6 flex flex-wrap gap-2.5 pointer-events-none">
@@ -251,7 +251,7 @@ export function HeroDepartmentBlock({ block }: { block: any }) {
                   return (
                     <div
                       key={fIdx}
-                      className="px-3.5 py-1.5 rounded-xl bg-black/80 backdrop-blur-md border border-white/15 text-xs font-mono text-neutral-200 flex items-center gap-2 shadow-lg"
+                      className="px-3.5 py-1.5 rounded-xl bg-black/80 backdrop-blur-md border border-[var(--card-border)] text-xs font-mono text-[var(--text)] flex items-center gap-2 shadow-lg"
                     >
                       <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
                       <span>{label}</span>
@@ -308,43 +308,43 @@ export function HeroServiceBlock({ block }: { block: any }) {
   const whatsappPrompt = block?.whatsappPrompt || data.whatsappPrompt
 
   return (
-    <section className="pt-28 pb-20 sm:pt-36 sm:pb-24 lg:pt-40 lg:pb-32 relative overflow-hidden bg-[#0A0A0A] text-white border-b border-white/[0.08] w-full">
+    <section className="pt-28 pb-20 sm:pt-36 sm:pb-24 lg:pt-40 lg:pb-32 relative overflow-hidden bg-[var(--color-background)] text-white border-b border-[var(--card-border)] w-full">
       <ThematicWave opacity={0.65} showBottomWave={true} />
-      <div className="pointer-events-none absolute -right-20 top-1/4 w-[650px] h-[650px] rounded-full bg-[#FFD600]/[0.06] blur-[160px]" />
+      <div className="pointer-events-none absolute -right-20 top-1/4 w-[650px] h-[650px] rounded-full bg-accent/[0.06] blur-[160px]" />
       <div className="pointer-events-none absolute -left-20 bottom-10 w-[500px] h-[500px] rounded-full bg-[#0F3A79]/[0.04] blur-[140px]" />
 
       <div className="container relative z-10 max-w-5xl mx-auto px-4 sm:px-6">
         {badge && (
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#181818]/90 text-[#FFD600] border border-[#FFD600]/30 text-xs font-mono mb-6 backdrop-blur-md shadow-[0_0_15px_rgba(255, 214, 0,0.12)]">
-            <Zap className="w-3.5 h-3.5 text-[#FFD600]" />
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[var(--surface-translucent)] text-accent border border-accent/30 text-xs font-mono mb-6 backdrop-blur-md shadow-yellow">
+            <Zap className="w-3.5 h-3.5 text-accent" />
             <span>{badge}</span>
           </div>
         )}
 
-        <h1 className="font-syne text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-white leading-[1.15]">
+        <h1 className="font-heading text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-white leading-[1.15]">
           {title}{' '}
           {highlightWord && (
-            <span className="gradient-text-italic bg-gradient-to-r from-[#FFFFFF] via-[#DBD7D5] to-[#FFD600]">
+            <span className="gradient-text-italic bg-gradient-to-r from-white via-[var(--text-muted)] to-accent">
               {highlightWord}
             </span>
           )}
         </h1>
 
         {subtitle && (
-          <p className="mt-3 text-sm sm:text-base font-mono text-[#FFD600]/90">
+          <p className="mt-3 text-sm sm:text-base font-mono text-accent/90">
             {subtitle}
           </p>
         )}
 
         {client && (
-          <p className="mt-3 text-sm sm:text-base text-[#DBD7D5] font-mono flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-[#FFD600] animate-pulse" />
+          <p className="mt-3 text-sm sm:text-base text-[var(--text-muted)] font-mono flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-accent animate-pulse" />
             <span>Mitra Klien: <strong className="text-white">{client}</strong></span>
           </p>
         )}
 
         {description && (
-          <p className="mt-6 max-w-3xl text-body-lg sm:text-body-xl text-[#DBD7D5] leading-relaxed font-normal">
+          <p className="mt-6 max-w-3xl text-body-lg sm:text-body-xl text-[var(--text-muted)] leading-relaxed font-normal">
             {description}
           </p>
         )}
@@ -356,9 +356,11 @@ export function HeroServiceBlock({ block }: { block: any }) {
               href={`https://wa.me/${siteConfig.whatsapp || '6281234567890'}?text=${encodeURIComponent(whatsappPrompt)}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-[#FFD600] text-[#191919] font-medium text-sm hover:bg-[#FFE855] transition-all shadow-[0_0_25px_rgba(255, 214, 0,0.25)] hover:scale-[1.02]"
+              className="btn btn--primary"
             >
-              <MessageSquare className="w-4 h-4" />
+              <span className="btn__icon">
+                <MessageSquare className="w-4 h-4" />
+              </span>
               <span>Konsultasikan Spesifikasi</span>
             </Link>
           </div>
@@ -366,7 +368,7 @@ export function HeroServiceBlock({ block }: { block: any }) {
 
         {/* Primary Media & Metrics */}
         {(heroImageUrl || primaryMedia?.videoUrl || metrics.length > 0) && (
-          <div className="mt-12 rounded-3xl overflow-hidden border border-white/10 bg-[#141414] p-3 shadow-2xl relative group">
+          <div className="mt-12 rounded-3xl overflow-hidden border border-[var(--card-border)] bg-[var(--color-surface)] p-3 shadow-2xl relative group">
             {primaryMedia?.type === 'video' && primaryMedia?.videoUrl ? (
               <div className="relative aspect-video rounded-2xl overflow-hidden">
                 <IframeEmbed url={primaryMedia.videoUrl} title={title} aspectRatio="16/9" />
@@ -386,33 +388,33 @@ export function HeroServiceBlock({ block }: { block: any }) {
                 />
               </div>
             ) : (
-              <div className="relative aspect-[16/10] sm:aspect-video rounded-2xl overflow-hidden bg-gradient-to-br from-[#060A17] via-[#0F3A79]/40 to-[#060A17] p-6 flex flex-col justify-between border border-white/10">
+              <div className="relative aspect-[16/10] sm:aspect-video rounded-2xl overflow-hidden bg-gradient-to-br from-[var(--color-background)] via-[#0F3A79]/40 to-[var(--color-background)] p-6 flex flex-col justify-between border border-[var(--card-border)]">
                 <div className="flex items-center justify-between">
-                  <span className="px-2.5 py-1 rounded text-[10px] font-mono font-bold bg-[#FFD600]/15 text-[#FFD600] border border-[#FFD600]/30 uppercase tracking-wider">
+                  <span className="px-2.5 py-1 rounded text-[10px] font-mono font-bold bg-accent/15 text-accent border border-accent/30 uppercase tracking-wider">
                     UNIMASI SHOWREEL
                   </span>
-                  <span className="text-xs font-mono text-sky-300">16:9 4K DCI</span>
+                  <span className="text-xs font-mono text-[var(--text-muted)]">16:9 4K DCI</span>
                 </div>
                 <div className="text-center my-auto py-4">
-                  <div className="w-12 h-12 rounded-2xl bg-[#FFD600]/10 border border-[#FFD600]/30 mx-auto flex items-center justify-center text-[#FFD600] font-syne font-bold text-lg mb-2">
+                  <div className="w-12 h-12 rounded-2xl bg-accent/10 border border-accent/30 mx-auto flex items-center justify-center text-accent font-heading font-bold text-lg mb-2">
                     ▶
                   </div>
-                  <p className="text-sm font-syne font-bold text-white/90">{title}</p>
+                  <p className="text-sm font-heading font-bold text-white/90">{title}</p>
                 </div>
-                <div className="flex items-center justify-between text-[10px] font-mono text-neutral-400 border-t border-white/5 pt-2">
+                <div className="flex items-center justify-between text-[10px] font-mono text-[var(--text-dim)] border-t border-white/5 pt-2">
                   <span>ANIMATION &amp; 3D CGI</span>
-                  <span className="text-[#FFD600]">MASTER RENDER</span>
+                  <span className="text-accent">MASTER RENDER</span>
                 </div>
               </div>
             )}
 
             {metrics.length > 0 && (
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-4 bg-[#141414] border-t border-white/[0.08]">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-4 bg-[var(--color-surface)] border-t border-[var(--card-border)]">
                 {metrics.map((m: any, idx: number) => (
-                  <div key={idx} className="p-3.5 rounded-xl bg-white/[0.03] border border-white/5 hover:border-[#FFD600]/30 transition-colors">
-                    <p className="font-mono text-xs text-neutral-400">{m.label}</p>
-                    <p className="font-syne text-xl font-bold text-[#FFD600] mt-1">{m.value}</p>
-                    {m.detail && <p className="text-xs text-neutral-400 mt-0.5">{m.detail}</p>}
+                  <div key={idx} className="p-3.5 rounded-xl bg-white/[0.03] border border-white/5 hover:border-accent/40 transition-colors">
+                    <p className="font-mono text-xs text-[var(--text-dim)]">{m.label}</p>
+                    <p className="font-heading text-xl font-bold text-accent mt-1">{m.value}</p>
+                    {m.detail && <p className="text-xs text-[var(--text-dim)] mt-0.5">{m.detail}</p>}
                   </div>
                 ))}
               </div>
@@ -440,19 +442,19 @@ export function FeatureBentoGridBlock({ block }: { block: any }) {
     const [leadFeature, ...otherFeatures] = features
 
     return (
-      <section className="py-20 sm:py-24 bg-[#111111] text-white border-b border-white/[0.08] relative overflow-hidden">
-        <div className="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 w-96 h-96 rounded-full bg-[#FFD600]/[0.03] blur-3xl" />
+      <section className="py-20 sm:py-24 bg-[var(--color-surface)] text-white border-b border-[var(--card-border)] relative overflow-hidden">
+        <div className="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 w-96 h-96 rounded-full bg-accent/[0.03] blur-3xl" />
         <div className="container max-w-5xl mx-auto px-4 sm:px-6 relative z-10">
           {title && (
             <div className="mb-12">
-              <span className="font-mono text-xs uppercase tracking-widest text-[#FFD600] block mb-2 font-semibold">
+              <span className="font-mono text-xs uppercase tracking-widest text-accent block mb-2 font-semibold">
                 Core Capabilities
               </span>
-              <h2 className="font-syne text-2xl sm:text-3xl font-bold tracking-tight text-white">
+              <h2 className="font-heading text-2xl sm:text-3xl font-bold tracking-tight text-white">
                 {title}
               </h2>
               {description && (
-                <p className="mt-3 text-[#DBD7D5] max-w-2xl text-body-md sm:text-body-lg">
+                <p className="mt-3 text-[var(--text-muted)] max-w-2xl text-body-md sm:text-body-lg">
                   {description}
                 </p>
               )}
@@ -461,20 +463,20 @@ export function FeatureBentoGridBlock({ block }: { block: any }) {
 
           <div className="grid grid-cols-1 md:grid-cols-3 cq-cols-3 gap-5">
             {/* Lead Feature Card (Spans 2 columns on desktop) with High-Res Interface Mockup */}
-            <div className="md:col-span-2 rounded-3xl bg-gradient-to-br from-[#1A1A1A] to-[#141414] border border-[#FFD600]/30 relative overflow-hidden group shadow-xl flex flex-col justify-between">
-              <div className="absolute top-0 right-0 w-48 h-48 bg-[#FFD600]/10 rounded-full blur-2xl pointer-events-none group-hover:scale-125 transition-transform duration-700" />
+            <div className="md:col-span-2 rounded-3xl bg-gradient-to-br from-[var(--surface-2)] to-[var(--color-surface)] border border-accent/30 relative overflow-hidden group shadow-xl flex flex-col justify-between">
+              <div className="absolute top-0 right-0 w-48 h-48 bg-accent/10 rounded-full blur-2xl pointer-events-none group-hover:scale-125 transition-transform duration-700" />
               <div className="p-7 sm:p-8">
-                <div className="w-12 h-12 rounded-2xl bg-[#FFD600]/15 border border-[#FFD600]/40 flex items-center justify-center text-[#FFD600] mb-6">
+                <div className="w-12 h-12 rounded-2xl bg-accent/15 border border-accent/40 flex items-center justify-center text-accent mb-6">
                   <Sparkles className="w-6 h-6" />
                 </div>
-                <span className="font-mono text-xs uppercase tracking-wider text-[#FFD600] font-semibold block mb-2">
+                <span className="font-mono text-xs uppercase tracking-wider text-accent font-semibold block mb-2">
                   Solusi Unggulan
                 </span>
-                <h3 className="font-syne text-xl sm:text-2xl font-bold text-white mb-3">
+                <h3 className="font-heading text-xl sm:text-2xl font-bold text-white mb-3">
                   {leadFeature.title}
                 </h3>
                 {(leadFeature.description || leadFeature.desc) && (
-                  <p className="text-body-md text-[#DBD7D5] leading-relaxed max-w-xl">
+                  <p className="text-body-md text-[var(--text-muted)] leading-relaxed max-w-xl">
                     {leadFeature.description || leadFeature.desc}
                   </p>
                 )}
@@ -483,15 +485,15 @@ export function FeatureBentoGridBlock({ block }: { block: any }) {
               {/* Clean Immersive Visual Preview in Bento */}
               {leadFeature.image && (
                 <div className="mt-4 px-6 sm:px-8 pb-6 sm:pb-8">
-                  <div className="rounded-2xl border border-white/10 overflow-hidden bg-black/60 relative group-hover:border-[#FFD600]/40 transition-all shadow-2xl">
-                    <div className="flex items-center justify-between px-4 py-2.5 bg-[#161616]/90 border-b border-white/[0.06] text-xs font-mono text-neutral-400">
-                      <span className="text-[#FFD600] font-medium flex items-center gap-2">
+                  <div className="rounded-2xl border border-[var(--card-border)] overflow-hidden bg-black/60 relative group-hover:border-accent/40 transition-all shadow-2xl">
+                    <div className="flex items-center justify-between px-4 py-2.5 bg-[var(--surface-translucent)] border-b border-white/[0.06] text-xs font-mono text-[var(--text-dim)]">
+                      <span className="text-accent font-medium flex items-center gap-2">
                         <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
                         {leadFeature.badge || 'Pratinjau Multi-Perangkat'}
                       </span>
-                      <span className="text-[11px] text-neutral-400 hidden sm:inline">Responsif Desktop &amp; Mobile</span>
+                      <span className="text-[11px] text-[var(--text-dim)] hidden sm:inline">Responsif Desktop &amp; Mobile</span>
                     </div>
-                    <div className="relative aspect-[16/9] w-full overflow-hidden bg-neutral-950">
+                    <div className="relative aspect-[16/9] w-full overflow-hidden bg-[var(--color-background)]">
                       <Image
                         src={leadFeature.image}
                         alt={leadFeature.title}
@@ -510,20 +512,20 @@ export function FeatureBentoGridBlock({ block }: { block: any }) {
             {otherFeatures.map((feat: any, idx: number) => (
               <div
                 key={idx}
-                className="p-6 rounded-2xl bg-[#161616] border border-white/[0.08] hover:border-[#FFD600]/40 transition-all hover:-translate-y-1 group shadow-lg flex flex-col justify-between"
+                className="p-6 rounded-2xl bg-[var(--color-surface)] border border-[var(--card-border)] hover:border-accent/40 transition-all hover:-translate-y-1 group shadow-lg flex flex-col justify-between"
               >
                 <div>
-                  <div className="w-10 h-10 rounded-xl bg-white/[0.04] border border-white/10 flex items-center justify-center text-[#FFD600] mb-4 group-hover:scale-105 group-hover:bg-[#FFD600]/10 transition-all">
+                  <div className="w-10 h-10 rounded-xl bg-white/[0.04] border border-[var(--card-border)] flex items-center justify-center text-accent mb-4 group-hover:scale-105 group-hover:bg-accent/10 transition-all">
                     <CheckCircle2 className="w-5 h-5" />
                   </div>
-                  <h3 className="font-syne text-lg font-bold text-white mb-2">{feat.title}</h3>
+                  <h3 className="font-heading text-lg font-bold text-white mb-2">{feat.title}</h3>
                   {(feat.description || feat.desc) && (
-                    <p className="text-sm text-[#DBD7D5] leading-relaxed">{feat.description || feat.desc}</p>
+                    <p className="text-sm text-[var(--text-muted)] leading-relaxed">{feat.description || feat.desc}</p>
                   )}
                 </div>
-                <div className="mt-5 pt-3 border-t border-white/5 flex items-center justify-between text-xs font-mono text-neutral-400">
+                <div className="mt-5 pt-3 border-t border-white/5 flex items-center justify-between text-xs font-mono text-[var(--text-dim)]">
                   <span>Keunggulan 0{idx + 2}</span>
-                  <span className="text-[#FFD600]">Teruji</span>
+                  <span className="text-accent">Teruji</span>
                 </div>
               </div>
             ))}
@@ -535,15 +537,15 @@ export function FeatureBentoGridBlock({ block }: { block: any }) {
 
   // Uniform 3-column variant
   return (
-    <section className="py-20 sm:py-24 bg-[#111111] text-white border-b border-white/[0.08]">
+    <section className="py-20 sm:py-24 bg-[var(--color-surface)] text-white border-b border-[var(--card-border)]">
       <div className="container max-w-5xl mx-auto px-4 sm:px-6">
         {title && (
           <div className="mb-12">
-            <h2 className="font-syne text-2xl sm:text-3xl font-bold tracking-tight text-white">
+            <h2 className="font-heading text-2xl sm:text-3xl font-bold tracking-tight text-white">
               {title}
             </h2>
             {description && (
-              <p className="mt-3 text-[#DBD7D5] max-w-2xl text-body-md sm:text-body-lg">
+              <p className="mt-3 text-[var(--text-muted)] max-w-2xl text-body-md sm:text-body-lg">
                 {description}
               </p>
             )}
@@ -554,14 +556,14 @@ export function FeatureBentoGridBlock({ block }: { block: any }) {
           {features.map((feat: any, idx: number) => (
             <div
               key={idx}
-              className="p-6 rounded-2xl bg-[#181818] border border-white/[0.08] hover:border-[#FFD600]/40 transition-colors group shadow-md"
+              className="p-6 rounded-2xl bg-[var(--color-surface)] border border-[var(--card-border)] hover:border-accent/40 transition-colors group shadow-md"
             >
-              <div className="w-10 h-10 rounded-xl bg-[#FFD600]/10 border border-[#FFD600]/20 flex items-center justify-center text-[#FFD600] mb-4 group-hover:scale-105 transition-transform">
+              <div className="w-10 h-10 rounded-xl bg-accent/10 border border-accent/20 flex items-center justify-center text-accent mb-4 group-hover:scale-105 transition-transform">
                 <CheckCircle2 className="w-5 h-5" />
               </div>
-              <h3 className="font-syne text-lg font-bold text-white">{feat.title}</h3>
+              <h3 className="font-heading text-lg font-bold text-white">{feat.title}</h3>
               {(feat.description || feat.desc) && (
-                <p className="mt-2 text-sm text-[#DBD7D5] leading-relaxed">{feat.description || feat.desc}</p>
+                <p className="mt-2 text-sm text-[var(--text-muted)] leading-relaxed">{feat.description || feat.desc}</p>
               )}
             </div>
           ))}
@@ -599,15 +601,15 @@ export function TechStackChipsBlock({ block }: { block: any }) {
   }
 
   return (
-    <section className="py-16 bg-[#0E0E0E] text-white border-b border-white/[0.08]">
+    <section className="py-16 bg-[var(--color-background)] text-white border-b border-[var(--card-border)]">
       <div className="container max-w-5xl mx-auto px-4 sm:px-6">
         {title && (
-          <h2 className="font-mono text-xs uppercase tracking-widest text-[#FFD600] mb-2 font-semibold">
+          <h2 className="font-mono text-xs uppercase tracking-widest text-accent mb-2 font-semibold">
             {title}
           </h2>
         )}
         {subtitle && (
-          <p className="text-sm text-[#DBD7D5] mb-6 max-w-2xl leading-relaxed">
+          <p className="text-sm text-[var(--text-muted)] mb-6 max-w-2xl leading-relaxed">
             {subtitle}
           </p>
         )}
@@ -622,11 +624,11 @@ export function TechStackChipsBlock({ block }: { block: any }) {
             return (
               <span
                 key={idx}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#181818] border border-white/10 text-xs sm:text-sm font-mono text-[#DBD7D5] hover:text-[#FFD600] hover:border-[#FFD600]/30 transition-colors shadow-sm"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[var(--color-surface)] border border-[var(--card-border)] text-xs sm:text-sm font-mono text-[var(--text-muted)] hover:text-accent hover:border-accent/40 transition-colors shadow-sm"
               >
                 <span>{name || category}</span>
                 {category && name && (
-                  <span className="text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded bg-white/5 text-[#FFD600]/80 border border-[#FFD600]/20">
+                  <span className="text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded bg-white/5 text-accent/80 border border-accent/20">
                     {category}
                   </span>
                 )}
@@ -648,17 +650,17 @@ export function ExecutiveQuoteCardBlock({ block }: { block: any }) {
   const company = block?.company || data.company || ''
 
   return (
-    <section className="py-16 bg-[#131313] text-white border-b border-white/[0.08] relative overflow-hidden">
+    <section className="py-16 bg-[var(--color-surface)] text-white border-b border-[var(--card-border)] relative overflow-hidden">
       <div className="container max-w-4xl mx-auto px-4 sm:px-6">
-        <div className="relative p-8 sm:p-12 rounded-3xl bg-[#181818] border border-white/10 overflow-hidden shadow-2xl">
-          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-[#FFD600] to-transparent opacity-80" />
-          <p className="font-syne text-lg sm:text-xl md:text-2xl italic text-white leading-relaxed">
+        <div className="relative p-8 sm:p-12 rounded-3xl bg-[var(--color-surface)] border border-[var(--card-border)] overflow-hidden shadow-2xl">
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-accent to-transparent opacity-80" />
+          <p className="font-heading text-lg sm:text-xl md:text-2xl italic text-white leading-relaxed">
             &ldquo;{quote}&rdquo;
           </p>
           <div className="mt-6 flex items-center gap-3">
             <div>
               <p className="font-bold text-sm text-white">{author}</p>
-              <p className="text-xs font-mono text-[#FFD600]">
+              <p className="text-xs font-mono text-accent">
                 {role} {company ? `— ${company}` : ''}
               </p>
             </div>
@@ -681,18 +683,18 @@ export function EngineeringPillarsBlock({ block }: { block: any }) {
   const description = block?.description || data.description
 
   return (
-    <section className="py-20 sm:py-24 bg-[#0F0F0F] text-white border-b border-white/[0.08] relative overflow-hidden">
+    <section className="py-20 sm:py-24 bg-[var(--color-background)] text-white border-b border-[var(--card-border)] relative overflow-hidden">
       <div className="container max-w-5xl mx-auto px-4 sm:px-6">
         {title && (
           <div className="mb-12">
-            <span className="font-mono text-xs uppercase tracking-widest text-[#FFD600] block mb-2 font-semibold">
+            <span className="font-mono text-xs uppercase tracking-widest text-accent block mb-2 font-semibold">
               Engineering Disciplines
             </span>
-            <h2 className="font-syne text-2xl sm:text-3xl font-bold tracking-tight text-white">
+            <h2 className="font-heading text-2xl sm:text-3xl font-bold tracking-tight text-white">
               {title}
             </h2>
             {description && (
-              <p className="mt-3 text-[#DBD7D5] max-w-2xl text-body-md sm:text-body-lg">
+              <p className="mt-3 text-[var(--text-muted)] max-w-2xl text-body-md sm:text-body-lg">
                 {description}
               </p>
             )}
@@ -703,14 +705,14 @@ export function EngineeringPillarsBlock({ block }: { block: any }) {
           {pillars.map((pil: any, idx: number) => (
             <div
               key={idx}
-              className="p-7 rounded-3xl bg-[#161616] border border-white/10 hover:border-[#FFD600]/40 transition-all hover:-translate-y-1 shadow-lg relative group overflow-hidden"
+              className="p-7 rounded-3xl bg-[var(--color-surface)] border border-[var(--card-border)] hover:border-accent/40 transition-all hover:-translate-y-1 shadow-lg relative group overflow-hidden"
             >
-              <div className="absolute -right-8 -top-8 w-24 h-24 bg-[#FFD600]/5 rounded-full blur-xl pointer-events-none group-hover:scale-150 transition-transform" />
-              <div className="w-11 h-11 rounded-2xl bg-white/[0.04] border border-white/10 flex items-center justify-center text-[#FFD600] mb-5 group-hover:bg-[#FFD600]/10 transition-colors">
+              <div className="absolute -right-8 -top-8 w-24 h-24 bg-accent/5 rounded-full blur-xl pointer-events-none group-hover:scale-150 transition-transform" />
+              <div className="w-11 h-11 rounded-2xl bg-white/[0.04] border border-[var(--card-border)] flex items-center justify-center text-accent mb-5 group-hover:bg-accent/10 transition-colors">
                 {idx === 0 ? <Cpu className="w-5 h-5" /> : idx === 1 ? <ShieldCheck className="w-5 h-5" /> : <Zap className="w-5 h-5" />}
               </div>
-              <h3 className="font-syne text-lg font-bold text-white mb-2">{pil.title}</h3>
-              <p className="text-sm text-[#DBD7D5] leading-relaxed">{pil.description || pil.desc}</p>
+              <h3 className="font-heading text-lg font-bold text-white mb-2">{pil.title}</h3>
+              <p className="text-sm text-[var(--text-muted)] leading-relaxed">{pil.description || pil.desc}</p>
             </div>
           ))}
         </div>
@@ -731,18 +733,18 @@ export function WorkflowPhasesBlock({ block }: { block: any }) {
   const description = block?.description || data.description
 
   return (
-    <section className="py-20 sm:py-24 bg-[#141414] text-white border-b border-white/[0.08] relative overflow-hidden">
+    <section className="py-20 sm:py-24 bg-[var(--color-surface)] text-white border-b border-[var(--card-border)] relative overflow-hidden">
       <div className="container max-w-5xl mx-auto px-4 sm:px-6">
         {title && (
           <div className="mb-14">
-            <span className="font-mono text-xs uppercase tracking-widest text-[#FFD600] block mb-2 font-semibold">
+            <span className="font-mono text-xs uppercase tracking-widest text-accent block mb-2 font-semibold">
               Execution Methodology
             </span>
-            <h2 className="font-syne text-2xl sm:text-3xl font-bold tracking-tight text-white">
+            <h2 className="font-heading text-2xl sm:text-3xl font-bold tracking-tight text-white">
               {title}
             </h2>
             {description && (
-              <p className="mt-3 text-[#DBD7D5] max-w-2xl text-body-md sm:text-body-lg">
+              <p className="mt-3 text-[var(--text-muted)] max-w-2xl text-body-md sm:text-body-lg">
                 {description}
               </p>
             )}
@@ -753,16 +755,16 @@ export function WorkflowPhasesBlock({ block }: { block: any }) {
           {phases.map((ph: any, idx: number) => (
             <div
               key={idx}
-              className="p-6 rounded-2xl bg-[#1A1A1A] border border-white/10 hover:border-[#FFD600]/50 transition-all hover:-translate-y-1 relative group shadow-lg"
+              className="p-6 rounded-2xl bg-[var(--color-surface)] border border-[var(--card-border)] hover:border-accent/40 transition-all hover:-translate-y-1 relative group shadow-lg"
             >
               <div className="flex items-center justify-between mb-4">
-                <span className="font-mono text-2xl font-bold text-[#FFD600] block">
+                <span className="font-mono text-2xl font-bold text-accent block">
                   {ph.step || `0${idx + 1}`}
                 </span>
-                <span className="w-2 h-2 rounded-full bg-[#FFD600]/40 group-hover:bg-[#FFD600] transition-colors" />
+                <span className="w-2 h-2 rounded-full bg-accent/40 group-hover:bg-accent transition-colors" />
               </div>
-              <h3 className="font-syne text-base font-bold text-white mb-2">{ph.title}</h3>
-              <p className="text-xs text-[#DBD7D5] leading-relaxed">{ph.description}</p>
+              <h3 className="font-heading text-base font-bold text-white mb-2">{ph.title}</h3>
+              <p className="text-xs text-[var(--text-muted)] leading-relaxed">{ph.description}</p>
             </div>
           ))}
         </div>
@@ -790,35 +792,35 @@ export function ComparisonMatrixBlock({ block }: { block: any }) {
   const description = block?.description || data.description
 
   return (
-    <section className="py-20 sm:py-24 bg-[#0E0E0E] text-white border-b border-white/[0.08] relative overflow-hidden">
-      <div className="pointer-events-none absolute left-1/2 -top-24 -translate-x-1/2 w-[700px] h-[350px] bg-[#FFD600]/[0.05] rounded-full blur-[140px]" />
+    <section className="py-20 sm:py-24 bg-[var(--color-background)] text-white border-b border-[var(--card-border)] relative overflow-hidden">
+      <div className="pointer-events-none absolute left-1/2 -top-24 -translate-x-1/2 w-[700px] h-[350px] bg-accent/[0.05] rounded-full blur-[140px]" />
 
       <div className="container max-w-5xl mx-auto px-4 sm:px-6 relative z-10">
         <div className="text-center max-w-2xl mx-auto mb-14">
-          <span className="font-mono text-xs uppercase tracking-widest text-[#FFD600] font-semibold block mb-2">
+          <span className="font-mono text-xs uppercase tracking-widest text-accent font-semibold block mb-2">
             Perbandingan Nilai
           </span>
-          <h2 className="font-syne text-2xl sm:text-3xl font-bold tracking-tight text-white">
+          <h2 className="font-heading text-2xl sm:text-3xl font-bold tracking-tight text-white">
             {title}
           </h2>
           {description && (
-            <p className="mt-3 text-body-md text-[#DBD7D5]">
+            <p className="mt-3 text-body-md text-[var(--text-muted)]">
               {description}
             </p>
           )}
         </div>
 
-        <div className="rounded-3xl border border-white/10 bg-[#141414] overflow-hidden shadow-2xl">
+        <div className="rounded-3xl border border-[var(--card-border)] bg-[var(--color-surface)] overflow-hidden shadow-2xl">
           {/* Header row */}
-          <div className="grid grid-cols-1 md:grid-cols-12 border-b border-white/10 bg-[#181818] text-xs font-mono">
-            <div className="p-4 md:col-span-4 text-neutral-400 font-semibold uppercase tracking-wider">
+          <div className="grid grid-cols-1 md:grid-cols-12 border-b border-[var(--card-border)] bg-[var(--color-surface)] text-xs font-mono">
+            <div className="p-4 md:col-span-4 text-[var(--text-dim)] font-semibold uppercase tracking-wider">
               Kebutuhan Bisnis Anda
             </div>
-            <div className="p-4 md:col-span-4 bg-[#FFD600]/10 text-[#FFD600] font-bold uppercase tracking-wider flex items-center gap-2 border-l border-r border-[#FFD600]/20">
-              <Check className="w-4 h-4 text-[#FFD600]" />
+            <div className="p-4 md:col-span-4 bg-accent/10 text-accent font-bold uppercase tracking-wider flex items-center gap-2 border-l border-r border-accent/20">
+              <Check className="w-4 h-4 text-accent" />
               <span>Standar Enterprise</span>
             </div>
-            <div className="p-4 md:col-span-4 text-neutral-300 font-semibold uppercase tracking-wider">
+            <div className="p-4 md:col-span-4 text-[var(--text-muted)] font-semibold uppercase tracking-wider">
               Agensi Konvensional
             </div>
           </div>
@@ -831,15 +833,15 @@ export function ComparisonMatrixBlock({ block }: { block: any }) {
                 className="grid grid-cols-1 md:grid-cols-12 items-center hover:bg-white/[0.02] transition-colors"
               >
                 <div className="p-4 md:col-span-4 font-medium text-white flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#FFD600]/60" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-accent/60" />
                   <span>{row.feature}</span>
                 </div>
-                <div className="p-4 md:col-span-4 bg-[#FFD600]/[0.04] border-l border-r border-[#FFD600]/15 font-mono text-xs text-[#FFD600] flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-[#FFD600] shrink-0" />
+                <div className="p-4 md:col-span-4 bg-accent/[0.04] border-l border-r border-accent/15 font-mono text-xs text-accent flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-accent shrink-0" />
                   <span>{row.segia}</span>
                 </div>
-                <div className="p-4 md:col-span-4 font-mono text-xs text-neutral-400 flex items-center gap-2">
-                  <XCircle className="w-4 h-4 text-neutral-500 shrink-0" />
+                <div className="p-4 md:col-span-4 font-mono text-xs text-[var(--text-dim)] flex items-center gap-2">
+                  <XCircle className="w-4 h-4 text-[var(--text-dim)] shrink-0" />
                   <span>{row.traditional}</span>
                 </div>
               </div>
@@ -879,20 +881,20 @@ export function ArchitectureBlueprintBlock({ block }: { block: any }) {
   const description = block?.description || data.description
 
   return (
-    <section className="py-20 sm:py-24 bg-[#0A0A0A] text-white border-b border-white/[0.08] relative overflow-hidden">
+    <section className="py-20 sm:py-24 bg-[var(--color-background)] text-white border-b border-[var(--card-border)] relative overflow-hidden">
       <div className="pointer-events-none absolute right-0 top-1/3 w-[600px] h-[600px] bg-[#0F3A79]/[0.05] rounded-full blur-[180px]" />
-      <div className="pointer-events-none absolute left-0 bottom-10 w-[450px] h-[450px] bg-[#FFD600]/[0.04] rounded-full blur-[160px]" />
+      <div className="pointer-events-none absolute left-0 bottom-10 w-[450px] h-[450px] bg-accent/[0.04] rounded-full blur-[160px]" />
 
       <div className="container max-w-6xl mx-auto px-4 sm:px-6 relative z-10">
         <div className="mb-14">
-          <span className="font-mono text-xs uppercase tracking-widest text-[#FFD600] font-semibold block mb-2">
+          <span className="font-mono text-xs uppercase tracking-widest text-accent font-semibold block mb-2">
             {badge}
           </span>
-          <h2 className="font-syne text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-white">
+          <h2 className="font-heading text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-white">
             {title}
           </h2>
           {description && (
-            <p className="mt-3 text-body-md text-[#DBD7D5] max-w-2xl">
+            <p className="mt-3 text-body-md text-[var(--text-muted)] max-w-2xl">
               {description}
             </p>
           )}
@@ -901,15 +903,15 @@ export function ArchitectureBlueprintBlock({ block }: { block: any }) {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           {/* Left Column: Authentic Client Showcase Preview */}
           {architectureImage && (
-            <div className="lg:col-span-5 rounded-3xl border border-white/10 bg-[#121212] overflow-hidden shadow-2xl relative group hover:border-[#FFD600]/40 transition-colors">
-              <div className="flex items-center justify-between px-5 py-3.5 bg-[#161616] border-b border-white/[0.08]">
+            <div className="lg:col-span-5 rounded-3xl border border-[var(--card-border)] bg-[var(--color-surface)] overflow-hidden shadow-2xl relative group hover:border-accent/40 transition-colors">
+              <div className="flex items-center justify-between px-5 py-3.5 bg-[var(--color-surface)] border-b border-[var(--card-border)]">
                 <div className="flex items-center gap-2">
                   <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
-                  <span className="font-mono text-xs text-neutral-300 font-semibold truncate max-w-[220px]">
+                  <span className="font-mono text-xs text-[var(--text-muted)] font-semibold truncate max-w-[220px]">
                     {imageLabel}
                   </span>
                 </div>
-                <span className="font-mono text-[11px] text-[#FFD600] px-2 py-0.5 rounded bg-[#FFD600]/10 border border-[#FFD600]/20 shrink-0">
+                <span className="font-mono text-[11px] text-accent px-2 py-0.5 rounded bg-accent/10 border border-accent/20 shrink-0">
                   {imageBadge}
                 </span>
               </div>
@@ -922,16 +924,16 @@ export function ArchitectureBlueprintBlock({ block }: { block: any }) {
                   className="object-cover object-top group-hover:scale-105 transition-transform duration-700"
                   sizes="(max-width: 1024px) 100vw, 450px"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#121212] via-transparent to-transparent opacity-70 pointer-events-none" />
+                <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-surface)] via-transparent to-transparent opacity-70 pointer-events-none" />
 
                 {/* Technical HUD Badges */}
                 <div className="absolute bottom-4 left-4 right-4 space-y-2 pointer-events-none">
-                  <div className="p-3.5 rounded-xl bg-black/85 backdrop-blur-md border border-white/10 text-xs font-mono text-neutral-300 shadow-xl">
+                  <div className="p-3.5 rounded-xl bg-black/85 backdrop-blur-md border border-[var(--card-border)] text-xs font-mono text-[var(--text-muted)] shadow-xl">
                     <div className="flex items-center justify-between mb-1">
                       <span className="text-white font-semibold">{hudTitle}</span>
                       <span className="text-emerald-400">{hudMetric}</span>
                     </div>
-                    <p className="text-[11px] text-neutral-400 truncate">
+                    <p className="text-[11px] text-[var(--text-dim)] truncate">
                       {hudDesc}
                     </p>
                   </div>
@@ -945,25 +947,25 @@ export function ArchitectureBlueprintBlock({ block }: { block: any }) {
             {layers.map((layer: any, idx: number) => (
               <div
                 key={idx}
-                className="p-5 sm:p-6 rounded-2xl bg-[#141414] border border-white/10 hover:border-[#FFD600]/40 transition-all hover:bg-[#181818] shadow-xl group"
+                className="p-5 sm:p-6 rounded-2xl bg-[var(--color-surface)] border border-[var(--card-border)] hover:border-accent/40 transition-all hover:bg-[var(--surface-2)] shadow-xl group"
               >
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 mb-2.5">
                   <div className="flex items-center gap-3">
-                    <span className="font-mono text-xs px-2.5 py-1 rounded-lg bg-white/5 border border-white/10 text-neutral-300 font-semibold">
+                    <span className="font-mono text-xs px-2.5 py-1 rounded-lg bg-white/5 border border-[var(--card-border)] text-[var(--text-muted)] font-semibold">
                       {layer.level}
                     </span>
-                    <h3 className="font-syne text-base sm:text-lg font-bold text-white group-hover:text-[#FFD600] transition-colors">
+                    <h3 className="font-heading text-base sm:text-lg font-bold text-white group-hover:text-accent transition-colors">
                       {layer.title}
                     </h3>
                   </div>
-                  <span className="inline-flex items-center font-mono text-[11px] px-2.5 py-0.5 rounded-full bg-[#FFD600]/10 border border-[#FFD600]/30 text-[#FFD600] w-fit">
+                  <span className="inline-flex items-center font-mono text-[11px] px-2.5 py-0.5 rounded-full bg-accent/10 border border-accent/30 text-accent w-fit">
                     {layer.badge}
                   </span>
                 </div>
-                <p className="text-sm text-[#DBD7D5] leading-relaxed mb-3">{layer.desc}</p>
+                <p className="text-sm text-[var(--text-muted)] leading-relaxed mb-3">{layer.desc}</p>
                 <div className="flex items-center gap-2 pt-2.5 border-t border-white/5">
                   <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                  <span className="font-mono text-xs text-[#FFD600] truncate">{layer.tech}</span>
+                  <span className="font-mono text-xs text-accent truncate">{layer.tech}</span>
                 </div>
               </div>
             ))}
@@ -994,19 +996,19 @@ export function ClientStatsImpactBlock({ block }: { block: any }) {
   const description = block?.description || data.description
 
   return (
-    <section className="py-20 sm:py-24 bg-[#121212] text-white border-b border-white/[0.08] relative overflow-hidden">
-      <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[750px] h-[400px] bg-[#FFD600]/[0.06] rounded-full blur-[170px]" />
+    <section className="py-20 sm:py-24 bg-[var(--color-surface)] text-white border-b border-[var(--card-border)] relative overflow-hidden">
+      <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[750px] h-[400px] bg-accent/[0.06] rounded-full blur-[170px]" />
 
       <div className="container max-w-5xl mx-auto px-4 sm:px-6 relative z-10">
         <div className="text-center max-w-2xl mx-auto mb-14">
-          <span className="font-mono text-xs uppercase tracking-widest text-[#FFD600] font-semibold block mb-2">
+          <span className="font-mono text-xs uppercase tracking-widest text-accent font-semibold block mb-2">
             Proven Metrics
           </span>
-          <h2 className="font-syne text-2xl sm:text-3xl font-bold tracking-tight text-white">
+          <h2 className="font-heading text-2xl sm:text-3xl font-bold tracking-tight text-white">
             {title}
           </h2>
           {description && (
-            <p className="mt-3 text-body-md text-[#DBD7D5]">
+            <p className="mt-3 text-body-md text-[var(--text-muted)]">
               {description}
             </p>
           )}
@@ -1016,15 +1018,15 @@ export function ClientStatsImpactBlock({ block }: { block: any }) {
           {stats.map((s: any, idx: number) => (
             <div
               key={idx}
-              className="p-6 rounded-3xl bg-[#181818] border border-white/10 hover:border-[#FFD600]/40 transition-all hover:-translate-y-1 shadow-xl text-center group"
+              className="p-6 rounded-3xl bg-[var(--color-surface)] border border-[var(--card-border)] hover:border-accent/40 transition-all hover:-translate-y-1 shadow-xl text-center group"
             >
-              <span className="font-syne text-3xl sm:text-4xl font-extrabold text-[#FFD600] tracking-tight block group-hover:scale-105 transition-transform">
+              <span className="font-heading text-3xl sm:text-4xl font-extrabold text-accent tracking-tight block group-hover:scale-105 transition-transform">
                 {s.value}
               </span>
               <span className="font-mono text-xs font-semibold uppercase tracking-wider text-white block mt-3 mb-1">
                 {s.label}
               </span>
-              <p className="text-xs text-neutral-400 leading-relaxed">{s.detail}</p>
+              <p className="text-xs text-[var(--text-dim)] leading-relaxed">{s.detail}</p>
             </div>
           ))}
         </div>
@@ -1053,17 +1055,17 @@ export function DeliverablesChecklistBlock({ block }: { block: any }) {
   const description = block?.description || data.description
 
   return (
-    <section className="py-20 sm:py-24 bg-[#0F0F0F] text-white border-b border-white/[0.08] relative overflow-hidden">
+    <section className="py-20 sm:py-24 bg-[var(--color-background)] text-white border-b border-[var(--card-border)] relative overflow-hidden">
       <div className="container max-w-5xl mx-auto px-4 sm:px-6 relative z-10">
         <div className="mb-14">
-          <span className="font-mono text-xs uppercase tracking-widest text-[#FFD600] font-semibold block mb-2">
+          <span className="font-mono text-xs uppercase tracking-widest text-accent font-semibold block mb-2">
             Scope & Handover Guarantee
           </span>
-          <h2 className="font-syne text-2xl sm:text-3xl font-bold tracking-tight text-white">
+          <h2 className="font-heading text-2xl sm:text-3xl font-bold tracking-tight text-white">
             {title}
           </h2>
           {description && (
-            <p className="mt-3 text-body-md text-[#DBD7D5] max-w-2xl">
+            <p className="mt-3 text-body-md text-[var(--text-muted)] max-w-2xl">
               {description}
             </p>
           )}
@@ -1073,14 +1075,14 @@ export function DeliverablesChecklistBlock({ block }: { block: any }) {
           {items.map((it: any, idx: number) => (
             <div
               key={idx}
-              className="p-6 rounded-3xl bg-[#161616] border border-white/10 hover:border-[#FFD600]/40 transition-all shadow-xl flex gap-4"
+              className="p-6 rounded-3xl bg-[var(--color-surface)] border border-[var(--card-border)] hover:border-accent/40 transition-all shadow-xl flex gap-4"
             >
-              <div className="w-10 h-10 rounded-xl bg-[#FFD600]/10 border border-[#FFD600]/30 flex items-center justify-center text-[#FFD600] shrink-0">
+              <div className="w-10 h-10 rounded-xl bg-accent/10 border border-accent/30 flex items-center justify-center text-accent shrink-0">
                 <CheckCircle2 className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="font-syne text-base font-bold text-white mb-1.5">{it.title}</h3>
-                <p className="text-xs sm:text-sm text-[#DBD7D5] leading-relaxed">{it.desc}</p>
+                <h3 className="font-heading text-base font-bold text-white mb-1.5">{it.title}</h3>
+                <p className="text-xs sm:text-sm text-[var(--text-muted)] leading-relaxed">{it.desc}</p>
               </div>
             </div>
           ))}
@@ -1110,17 +1112,17 @@ export function InteractiveTechMatrixBlock({ block }: { block: any }) {
   const description = block?.description || data.description
 
   return (
-    <section className="py-20 sm:py-24 bg-[#111111] text-white border-b border-white/[0.08] relative overflow-hidden">
+    <section className="py-20 sm:py-24 bg-[var(--color-surface)] text-white border-b border-[var(--card-border)] relative overflow-hidden">
       <div className="container max-w-5xl mx-auto px-4 sm:px-6 relative z-10">
         <div className="mb-14">
-          <span className="font-mono text-xs uppercase tracking-widest text-[#FFD600] font-semibold block mb-2">
+          <span className="font-mono text-xs uppercase tracking-widest text-accent font-semibold block mb-2">
             Standar Kualitas
           </span>
-          <h2 className="font-syne text-2xl sm:text-3xl font-bold tracking-tight text-white">
+          <h2 className="font-heading text-2xl sm:text-3xl font-bold tracking-tight text-white">
             {title}
           </h2>
           {description && (
-            <p className="mt-3 text-body-md text-[#DBD7D5] max-w-2xl">
+            <p className="mt-3 text-body-md text-[var(--text-muted)] max-w-2xl">
               {description}
             </p>
           )}
@@ -1130,11 +1132,11 @@ export function InteractiveTechMatrixBlock({ block }: { block: any }) {
           {categories.map((cat: any, idx: number) => (
             <div
               key={idx}
-              className="p-6 sm:p-7 rounded-3xl bg-[#181818] border border-white/10 hover:border-[#FFD600]/30 transition-all shadow-xl"
+              className="p-6 sm:p-7 rounded-3xl bg-[var(--color-surface)] border border-[var(--card-border)] hover:border-accent/40 transition-all shadow-xl"
             >
               <div className="flex items-center justify-between mb-4">
-                <h3 className="font-syne text-lg font-bold text-white">{cat.name}</h3>
-                <span className="font-mono text-xs px-2.5 py-0.5 rounded-full bg-white/5 border border-white/10 text-[#FFD600]">
+                <h3 className="font-heading text-lg font-bold text-white">{cat.name}</h3>
+                <span className="font-mono text-xs px-2.5 py-0.5 rounded-full bg-white/5 border border-[var(--card-border)] text-accent">
                   {cat.badge}
                 </span>
               </div>
@@ -1145,7 +1147,7 @@ export function InteractiveTechMatrixBlock({ block }: { block: any }) {
                   return (
                     <span
                       key={tIdx}
-                      className="px-3 py-1.5 rounded-xl bg-white/[0.03] border border-white/10 text-xs font-mono text-[#DBD7D5] hover:text-[#FFD600] hover:border-[#FFD600]/30 transition-colors"
+                      className="px-3 py-1.5 rounded-xl bg-white/[0.03] border border-[var(--card-border)] text-xs font-mono text-[var(--text-muted)] hover:text-accent hover:border-accent/40 transition-colors"
                     >
                       {label}
                     </span>
@@ -1202,20 +1204,20 @@ export function PortfolioProofGridBlock({
   const description = block?.description || data.description
 
   return (
-    <section className="py-20 sm:py-24 bg-[#131313] text-white border-b border-white/[0.08]">
+    <section className="py-20 sm:py-24 bg-[var(--color-surface)] text-white border-b border-[var(--card-border)]">
       <div className="container max-w-5xl mx-auto px-4 sm:px-6">
         <div className="mb-12 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
           <div>
-            <h2 className="font-syne text-2xl sm:text-3xl font-bold tracking-tight text-white">
+            <h2 className="font-heading text-2xl sm:text-3xl font-bold tracking-tight text-white">
               {title}
             </h2>
             {description && (
-              <p className="mt-2 text-[#DBD7D5] text-body-md max-w-xl">{description}</p>
+              <p className="mt-2 text-[var(--text-muted)] text-body-md max-w-xl">{description}</p>
             )}
           </div>
           <Link
             href="/portofolio"
-            className="inline-flex items-center gap-1.5 text-xs font-mono text-[#FFD600] hover:underline"
+            className="inline-flex items-center gap-1.5 text-xs font-mono text-accent hover:underline"
           >
             <span>Semua Portofolio</span>
             <ChevronRight className="w-3.5 h-3.5" />
@@ -1227,7 +1229,7 @@ export function PortfolioProofGridBlock({
             <Link
               key={idx}
               href={`/portofolio/${p.slug}`}
-              className="group block rounded-2xl overflow-hidden bg-[#181818] border border-white/10 hover:border-[#FFD600]/50 transition-all shadow-lg"
+              className="group block rounded-2xl overflow-hidden bg-[var(--color-surface)] border border-[var(--card-border)] hover:border-accent/40 transition-all shadow-lg"
             >
               {p.heroImage ? (
                 <div className="relative aspect-[16/10] overflow-hidden">
@@ -1238,21 +1240,21 @@ export function PortfolioProofGridBlock({
                     className="object-cover group-hover:scale-105 transition-transform duration-500"
                     sizes="(max-width: 640px) 100vw, 50vw"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#181818] via-transparent to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-surface)] via-transparent to-transparent" />
                 </div>
               ) : (
-                <div className="relative aspect-[16/10] bg-neutral-900 border-b border-white/5 flex items-center justify-center text-neutral-500">
+                <div className="relative aspect-[16/10] bg-[var(--color-surface)] border-b border-white/5 flex items-center justify-center text-[var(--text-dim)]">
                   <Eye className="w-8 h-8 opacity-40" />
                 </div>
               )}
               <div className="p-5">
-                <div className="flex items-center justify-between text-xs font-mono text-neutral-400 mb-2">
+                <div className="flex items-center justify-between text-xs font-mono text-[var(--text-dim)] mb-2">
                   <span>{p.category || 'Case Study'}</span>
                   {p.client && <span>{p.client}</span>}
                 </div>
-                <h3 className="font-syne text-lg font-bold text-white group-hover:text-[#FFD600] transition-colors flex items-center justify-between">
+                <h3 className="font-heading text-lg font-bold text-white group-hover:text-accent transition-colors flex items-center justify-between">
                   <span>{p.title}</span>
-                  <ArrowUpRight className="w-4 h-4 text-neutral-400 group-hover:text-[#FFD600] transition-colors" />
+                  <ArrowUpRight className="w-4 h-4 text-[var(--text-dim)] group-hover:text-accent transition-colors" />
                 </h3>
               </div>
             </Link>
@@ -1285,24 +1287,24 @@ export function FaqAccordionBlock({ block }: { block: any }) {
   const title = block?.title || data.title || 'Pertanyaan Umum'
 
   return (
-    <section className="py-20 sm:py-24 bg-[#0E0E0E] text-white border-b border-white/[0.08]">
+    <section className="py-20 sm:py-24 bg-[var(--color-background)] text-white border-b border-[var(--card-border)]">
       <div className="container max-w-4xl mx-auto px-4 sm:px-6">
-        <h2 className="font-syne text-2xl sm:text-3xl font-bold tracking-tight text-white mb-8">
+        <h2 className="font-heading text-2xl sm:text-3xl font-bold tracking-tight text-white mb-8">
           {title}
         </h2>
         <div className="space-y-4">
           {faqs.map((faq: any, idx: number) => (
             <details
               key={idx}
-              className="group p-5 rounded-2xl bg-[#161616] border border-white/10 transition-colors"
+              className="group p-5 rounded-2xl bg-[var(--color-surface)] border border-[var(--card-border)] transition-colors"
             >
-              <summary className="cursor-pointer font-syne font-medium text-base sm:text-lg text-white flex items-center justify-between list-none">
+              <summary className="cursor-pointer font-heading font-medium text-base sm:text-lg text-white flex items-center justify-between list-none">
                 <span>{faq.question}</span>
-                <span className="text-[#FFD600] transition-transform group-open:rotate-45 font-mono text-xl">
+                <span className="text-accent transition-transform group-open:rotate-45 font-mono text-xl">
                   +
                 </span>
               </summary>
-              <p className="mt-4 text-sm sm:text-base text-[#DBD7D5] leading-relaxed pl-1 border-t border-white/5 pt-3">
+              <p className="mt-4 text-sm sm:text-base text-[var(--text-muted)] leading-relaxed pl-1 border-t border-white/5 pt-3">
                 {faq.answer}
               </p>
             </details>
@@ -1330,15 +1332,15 @@ export function StudioCTA({
   const whatsappUrl = `https://wa.me/${siteConfig.whatsapp}?text=Halo,%20saya%20ingin%20berkonsultasi%20mengenai%20proyek%20rekayasa%20digital.`
 
   return (
-    <section className="section-py relative overflow-hidden bg-gradient-to-b from-[#2B2B2B] via-[#242424] to-[#2B2B2B] text-white border-t border-[#2B2B2B]" aria-label="Ajakan Bertindak">
-      <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-[550px] w-[900px] rounded-full bg-gradient-to-r from-[#FFD600]/12 via-[#B29279]/08 to-[#FFD600]/12 blur-[150px]" />
+    <section className="section-py relative overflow-hidden bg-[var(--surface-2)] text-white border-t border-[var(--card-border)]" aria-label="Ajakan Bertindak">
+      <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-[550px] w-[900px] rounded-full bg-gradient-to-r from-accent/[0.12] via-[#0F3A79]/[0.08] to-accent/[0.12] blur-[150px]" />
       <div className="container relative z-10 max-w-5xl mx-auto px-4 sm:px-6">
-        <div className="rounded-[32px] sm:rounded-[40px] border border-[#2B2B2B] bg-[#191919] p-8 sm:p-14 lg:p-16 text-center shadow-[0_20px_60px_rgba(0,0,0,0.6)] backdrop-blur-2xl relative overflow-hidden">
-          <div className="absolute top-0 left-1/4 right-1/4 h-[1px] bg-gradient-to-r from-transparent via-[#FFD600]/40 to-transparent" />
-          <h2 className="font-syne text-display-md sm:text-display-lg lg:text-display-xl font-bold tracking-tight text-white max-w-3xl mx-auto leading-tight">
+        <div className="rounded-[32px] sm:rounded-[40px] border border-[var(--card-border)] bg-[var(--color-surface)] p-8 sm:p-14 lg:p-16 text-center shadow-[0_20px_60px_rgba(0,0,0,0.6)] backdrop-blur-2xl relative overflow-hidden">
+          <div className="absolute top-0 left-1/4 right-1/4 h-[1px] bg-gradient-to-r from-transparent via-accent/40 to-transparent" />
+          <h2 className="font-heading text-display-md sm:text-display-lg lg:text-display-xl font-bold tracking-tight text-white max-w-3xl mx-auto leading-tight">
             {headline}
           </h2>
-          <p className="mt-6 text-body-lg sm:text-body-xl text-[#DBD7D5] max-w-2xl mx-auto leading-relaxed font-normal">
+          <p className="mt-6 text-body-lg sm:text-body-xl text-[var(--text-muted)] max-w-2xl mx-auto leading-relaxed font-normal">
             {subheadline}
           </p>
           <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-5">
@@ -1346,36 +1348,40 @@ export function StudioCTA({
               href={whatsappUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 rounded-full bg-[#FFD600] hover:bg-[#FFE855] active:bg-[#B29279] px-8 py-4 font-sans text-sm sm:text-base font-bold text-[#000000] shadow-[0_4px_25px_rgba(255, 214, 0,0.35)] transition-all duration-300 hover:scale-[1.03] active:scale-95"
+              className="btn btn--primary w-full sm:w-auto"
             >
-              <MessageSquare className="w-4 h-4 fill-[#000000] text-[#000000]" />
+              <span className="btn__icon">
+                <MessageSquare className="w-4 h-4" />
+              </span>
               <span>Konsultasi Proyek (WhatsApp)</span>
             </a>
             <Link
               href={secondaryHref}
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-full border border-[#2B2B2B] bg-transparent px-8 py-4 font-sans text-sm sm:text-base font-semibold text-white backdrop-blur-md transition-all duration-300 hover:border-[#B29279] hover:text-[#FFD600] active:scale-95"
+              className="btn btn--ghost w-full sm:w-auto"
             >
               <span>{secondaryLabel}</span>
-              <ArrowRight className="w-4 h-4" />
+              <span className="btn__icon">
+                <ArrowRight className="w-4 h-4" />
+              </span>
             </Link>
           </div>
-          <div className="mt-8 text-xs font-mono text-[#999898]">
+          <div className="mt-8 text-xs font-mono text-[var(--text-dim)]">
             Atau kirimkan brief sistem via email ke{' '}
-            <a href={`mailto:${siteConfig.email}`} className="text-[#FFD600] hover:underline font-semibold">
+            <a href={`mailto:${siteConfig.email}`} className="text-accent hover:underline font-semibold">
               {siteConfig.email}
             </a>
           </div>
-          <div className="mt-10 pt-8 border-t border-[#2B2B2B] grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs font-mono text-[#DBD7D5] max-w-2xl mx-auto">
+          <div className="mt-10 pt-8 border-t border-[var(--card-border)] grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs font-mono text-[var(--text-muted)] max-w-2xl mx-auto">
             <div className="flex items-center justify-center gap-2">
-              <Clock className="w-4 h-4 text-[#FFD600] shrink-0" />
+              <Clock className="w-4 h-4 text-accent shrink-0" />
               <span>Respon Cepat &lt; 24 Jam</span>
             </div>
             <div className="flex items-center justify-center gap-2">
-              <FileCode className="w-4 h-4 text-[#FFD600] shrink-0" />
+              <FileCode className="w-4 h-4 text-accent shrink-0" />
               <span>Arsitektur &amp; Estimasi Gratis</span>
             </div>
             <div className="flex items-center justify-center gap-2">
-              <ShieldCheck className="w-4 h-4 text-[#FFD600] shrink-0" />
+              <ShieldCheck className="w-4 h-4 text-accent shrink-0" />
               <span>Perjanjian NDA Resmi</span>
             </div>
           </div>
@@ -1402,8 +1408,8 @@ export function EditorialParagraphBlock({ block }: { block: any }) {
   const data = block?.data || block || {}
   const text = block?.text || data.text || block?.content || data.content || ''
   return (
-    <section className="py-8 bg-[#0D0D0D] text-white">
-      <div className="container max-w-3xl mx-auto px-4 sm:px-6 text-base sm:text-lg leading-relaxed text-[#DBD7D5]">
+    <section className="py-8 bg-[var(--color-background)] text-white">
+      <div className="container max-w-3xl mx-auto px-4 sm:px-6 text-base sm:text-lg leading-relaxed text-[var(--text-muted)]">
         <p>{text}</p>
       </div>
     </section>
@@ -1415,14 +1421,14 @@ export function EditorialHeadingBlock({ block }: { block: any }) {
   const isH2 = (block?.type || data.type) === 'heading2'
   const text = block?.text || data.text || block?.content || data.content || block?.title || data.title || ''
   return (
-    <section className="pt-10 pb-4 bg-[#0D0D0D] text-white">
+    <section className="pt-10 pb-4 bg-[var(--color-background)] text-white">
       <div className="container max-w-3xl mx-auto px-4 sm:px-6">
         {isH2 ? (
-          <h2 className="font-syne text-2xl sm:text-3xl font-bold tracking-tight text-white">
+          <h2 className="font-heading text-2xl sm:text-3xl font-bold tracking-tight text-white">
             {text}
           </h2>
         ) : (
-          <h3 className="font-syne text-xl sm:text-2xl font-bold tracking-tight text-white">
+          <h3 className="font-heading text-xl sm:text-2xl font-bold tracking-tight text-white">
             {text}
           </h3>
         )}
@@ -1496,20 +1502,20 @@ export function DepartmentServiceListBlock({
   const description = block?.description || data.description
 
   return (
-    <section className="py-20 sm:py-28 bg-[#0D0D0D] text-white border-b border-white/[0.08] relative overflow-hidden">
-      <div className="pointer-events-none absolute right-0 top-1/4 w-[500px] h-[500px] bg-[#FFD600]/[0.04] rounded-full blur-[160px]" />
+    <section className="py-20 sm:py-28 bg-[var(--color-background)] text-white border-b border-[var(--card-border)] relative overflow-hidden">
+      <div className="pointer-events-none absolute right-0 top-1/4 w-[500px] h-[500px] bg-accent/[0.04] rounded-full blur-[160px]" />
       <div className="pointer-events-none absolute left-0 bottom-10 w-[450px] h-[450px] bg-[#0F3A79]/[0.03] blur-[150px]" />
 
       <div className="container max-w-6xl mx-auto px-4 sm:px-6 relative z-10">
         <div className="mb-14 max-w-3xl">
-          <span className="font-mono text-xs uppercase tracking-widest text-[#FFD600] font-semibold block mb-2">
+          <span className="font-mono text-xs uppercase tracking-widest text-accent font-semibold block mb-2">
             Pilihan Solusi Digital
           </span>
-          <h2 className="font-syne text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-white leading-tight">
+          <h2 className="font-heading text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-white leading-tight">
             {title}
           </h2>
           {description && (
-            <p className="mt-3 text-body-md text-[#DBD7D5] leading-relaxed">
+            <p className="mt-3 text-body-md text-[var(--text-muted)] leading-relaxed">
               {description}
             </p>
           )}
@@ -1522,12 +1528,12 @@ export function DepartmentServiceListBlock({
               <Link
                 key={idx}
                 href={`/layanan/${item.slug}`}
-                className="group rounded-3xl bg-[#141414] border border-white/10 hover:border-[#FFD600]/50 transition-all duration-300 hover:-translate-y-1 overflow-hidden shadow-xl flex flex-col justify-between"
+                className="group rounded-3xl bg-[var(--color-surface)] border border-[var(--card-border)] hover:border-accent/40 transition-all duration-300 hover:-translate-y-1 overflow-hidden shadow-xl flex flex-col justify-between"
               >
                 <div>
                   {/* Visual Thumbnail Image */}
                   {finalImg ? (
-                    <div className="relative aspect-[16/9] w-full overflow-hidden bg-neutral-900 border-b border-white/5">
+                    <div className="relative aspect-[16/9] w-full overflow-hidden bg-[var(--color-surface)] border-b border-white/5">
                       <Image
                         src={finalImg}
                         alt={item.name}
@@ -1535,16 +1541,16 @@ export function DepartmentServiceListBlock({
                         className="object-cover object-top group-hover:scale-105 transition-transform duration-700"
                         sizes="(max-width: 768px) 100vw, 550px"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-[#141414] via-transparent to-transparent opacity-60" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-surface)] via-transparent to-transparent opacity-60" />
                       <div className="absolute top-4 left-4">
-                        <span className="font-mono text-[11px] px-3 py-1 rounded-full bg-black/75 backdrop-blur-md border border-white/15 text-[#FFD600] font-medium shadow-md">
+                        <span className="font-mono text-[11px] px-3 py-1 rounded-full bg-black/75 backdrop-blur-md border border-[var(--card-border)] text-accent font-medium shadow-md">
                           {item.badge}
                         </span>
                       </div>
                     </div>
                   ) : (
                     <div className="p-6 pb-0 flex items-center justify-between">
-                      <span className="font-mono text-[11px] px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[#FFD600] font-medium shadow-md">
+                      <span className="font-mono text-[11px] px-3 py-1 rounded-full bg-white/5 border border-[var(--card-border)] text-accent font-medium shadow-md">
                         {item.badge}
                       </span>
                     </div>
@@ -1553,15 +1559,15 @@ export function DepartmentServiceListBlock({
                   {/* Content Details */}
                   <div className="p-6 sm:p-7">
                     <div className="flex items-start justify-between gap-4 mb-3">
-                      <h3 className="font-syne text-xl font-bold text-white group-hover:text-[#FFD600] transition-colors leading-snug">
+                      <h3 className="font-heading text-xl font-bold text-white group-hover:text-accent transition-colors leading-snug">
                         {item.name}
                       </h3>
-                      <div className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-neutral-400 group-hover:bg-[#FFD600] group-hover:text-[#191919] group-hover:border-[#FFD600] transition-all shrink-0">
+                      <div className="w-8 h-8 rounded-full bg-white/5 border border-[var(--card-border)] flex items-center justify-center text-[var(--text-dim)] group-hover:bg-accent group-hover:text-[var(--color-primaryForeground)] group-hover:border-accent transition-all shrink-0">
                         <ArrowUpRight className="w-4 h-4" />
                       </div>
                     </div>
 
-                    <p className="text-sm text-[#DBD7D5] leading-relaxed line-clamp-3 mb-6">
+                    <p className="text-sm text-[var(--text-muted)] leading-relaxed line-clamp-3 mb-6">
                       {item.description}
                     </p>
                   </div>
@@ -1575,14 +1581,14 @@ export function DepartmentServiceListBlock({
                       return (
                         <span
                           key={tIdx}
-                          className="text-[11px] font-mono px-2.5 py-1 rounded-md bg-white/[0.04] border border-white/10 text-neutral-300"
+                          className="text-[11px] font-mono px-2.5 py-1 rounded-md bg-white/[0.04] border border-[var(--card-border)] text-[var(--text-muted)]"
                         >
                           {tagLabel}
                         </span>
                       )
                     })}
                   </div>
-                  <span className="text-xs font-mono text-[#FFD600] group-hover:translate-x-1 transition-transform inline-flex items-center gap-1 pt-3">
+                  <span className="text-xs font-mono text-accent group-hover:translate-x-1 transition-transform inline-flex items-center gap-1 pt-3">
                     Detail Layanan &rarr;
                   </span>
                 </div>
@@ -1633,19 +1639,19 @@ export function VisualShowcaseGalleryBlock({ block }: { block: any }) {
   const description = block?.description || data.description
 
   return (
-    <section className="py-20 sm:py-28 bg-[#090909] text-white border-b border-white/[0.08] relative overflow-hidden">
-      <div className="pointer-events-none absolute left-1/2 -top-20 -translate-x-1/2 w-[800px] h-[400px] bg-[#FFD600]/[0.04] blur-[160px] rounded-full" />
+    <section className="py-20 sm:py-28 bg-[var(--color-background)] text-white border-b border-[var(--card-border)] relative overflow-hidden">
+      <div className="pointer-events-none absolute left-1/2 -top-20 -translate-x-1/2 w-[800px] h-[400px] bg-accent/[0.04] blur-[160px] rounded-full" />
 
       <div className="container max-w-6xl mx-auto px-4 sm:px-6 relative z-10">
         <div className="text-center max-w-2xl mx-auto mb-14">
-          <span className="font-mono text-xs uppercase tracking-widest text-[#FFD600] font-semibold block mb-2">
+          <span className="font-mono text-xs uppercase tracking-widest text-accent font-semibold block mb-2">
             {badge}
           </span>
-          <h2 className="font-syne text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-white">
+          <h2 className="font-heading text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-white">
             {title}
           </h2>
           {description && (
-            <p className="mt-3 text-body-md text-[#DBD7D5]">
+            <p className="mt-3 text-body-md text-[var(--text-muted)]">
               {description}
             </p>
           )}
@@ -1655,7 +1661,7 @@ export function VisualShowcaseGalleryBlock({ block }: { block: any }) {
           {items.map((item: any, idx: number) => (
             <div
               key={idx}
-              className="rounded-3xl bg-[#141414] border border-white/10 hover:border-[#FFD600]/40 transition-all duration-300 hover:-translate-y-1.5 overflow-hidden shadow-2xl group flex flex-col justify-between"
+              className="rounded-3xl bg-[var(--color-surface)] border border-[var(--card-border)] hover:border-accent/40 transition-all duration-300 hover:-translate-y-1.5 overflow-hidden shadow-2xl group flex flex-col justify-between"
             >
               <div>
                 <div className="relative aspect-[16/10] w-full overflow-hidden bg-black">
@@ -1668,14 +1674,14 @@ export function VisualShowcaseGalleryBlock({ block }: { block: any }) {
                       sizes="(max-width: 1024px) 100vw, 400px"
                     />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-neutral-900 text-neutral-600">
+                    <div className="w-full h-full flex items-center justify-center bg-[var(--color-surface)] text-[var(--text-dim)]">
                       <Eye className="w-8 h-8 opacity-40" />
                     </div>
                   )}
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#141414] via-transparent to-transparent opacity-60" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-surface)] via-transparent to-transparent opacity-60" />
                   {item.metric && (
                     <div className="absolute top-3.5 right-3.5">
-                      <span className="font-mono text-[11px] px-2.5 py-1 rounded-full bg-black/80 backdrop-blur-md border border-white/10 text-emerald-400 font-semibold shadow-md">
+                      <span className="font-mono text-[11px] px-2.5 py-1 rounded-full bg-black/80 backdrop-blur-md border border-[var(--card-border)] text-emerald-400 font-semibold shadow-md">
                         {item.metric}
                       </span>
                     </div>
@@ -1684,15 +1690,15 @@ export function VisualShowcaseGalleryBlock({ block }: { block: any }) {
 
                 <div className="p-6">
                   {item.category && (
-                    <span className="font-mono text-xs uppercase tracking-wider text-[#FFD600] font-semibold block mb-2">
+                    <span className="font-mono text-xs uppercase tracking-wider text-accent font-semibold block mb-2">
                       {item.category}
                     </span>
                   )}
-                  <h3 className="font-syne text-lg font-bold text-white mb-2 group-hover:text-[#FFD600] transition-colors">
+                  <h3 className="font-heading text-lg font-bold text-white mb-2 group-hover:text-accent transition-colors">
                     {item.title}
                   </h3>
                   {item.desc && (
-                    <p className="text-sm text-[#DBD7D5] leading-relaxed">
+                    <p className="text-sm text-[var(--text-muted)] leading-relaxed">
                       {item.desc}
                     </p>
                   )}
@@ -1700,12 +1706,12 @@ export function VisualShowcaseGalleryBlock({ block }: { block: any }) {
               </div>
 
               <div className="px-6 pb-6 pt-2">
-                <div className="pt-3 border-t border-white/5 flex items-center justify-between text-xs font-mono text-neutral-400">
+                <div className="pt-3 border-t border-white/5 flex items-center justify-between text-xs font-mono text-[var(--text-dim)]">
                   <span className="flex items-center gap-1.5">
-                    <Eye className="w-3.5 h-3.5 text-neutral-500" />
+                    <Eye className="w-3.5 h-3.5 text-[var(--text-dim)]" />
                     <span>Karya Produksi Aktif</span>
                   </span>
-                  <span className="text-[#FFD600]">Terverifikasi</span>
+                  <span className="text-accent">Terverifikasi</span>
                 </div>
               </div>
             </div>
@@ -1748,24 +1754,24 @@ export function MediaShowcaseBlock({ block }: { block: any }) {
   }
 
   return (
-    <section className="py-16 sm:py-24 bg-[#0A0A0A] text-white border-b border-white/[0.08] relative overflow-hidden">
-      <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[350px] bg-[#FFD600]/[0.03] blur-[150px] rounded-full" />
+    <section className="py-16 sm:py-24 bg-[var(--color-background)] text-white border-b border-[var(--card-border)] relative overflow-hidden">
+      <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[350px] bg-accent/[0.03] blur-[150px] rounded-full" />
 
       <div className="container max-w-6xl mx-auto px-4 sm:px-6 relative z-10">
         {(title || badge) && (
           <div className="text-center max-w-3xl mx-auto mb-10">
             {badge && (
-              <span className="font-mono text-xs uppercase tracking-widest text-[#FFD600] font-semibold block mb-2">
+              <span className="font-mono text-xs uppercase tracking-widest text-accent font-semibold block mb-2">
                 {badge}
               </span>
             )}
             {title && (
-              <h2 className="font-syne text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-white">
+              <h2 className="font-heading text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-white">
                 {title}
               </h2>
             )}
             {subtitle && (
-              <p className="mt-3 text-body-md text-[#DBD7D5]">
+              <p className="mt-3 text-body-md text-[var(--text-muted)]">
                 {subtitle}
               </p>
             )}
@@ -1775,21 +1781,21 @@ export function MediaShowcaseBlock({ block }: { block: any }) {
         {/* Clean, Minimalist Media Frame Container */}
         <div className={`mx-auto max-w-5xl ${
           frameStyle === 'immersive'
-            ? 'rounded-3xl border border-white/10 bg-[#121212] overflow-hidden shadow-[0_25px_70px_rgba(0,0,0,0.85)] group hover:border-[#FFD600]/30 transition-all'
+            ? 'rounded-3xl border border-[var(--card-border)] bg-[var(--color-surface)] overflow-hidden shadow-[0_25px_70px_rgba(0,0,0,0.85)] group hover:border-accent/40 transition-all'
             : frameStyle === 'floating-card'
-            ? 'rounded-3xl border border-white/10 bg-[#141414] overflow-hidden shadow-2xl p-2.5 sm:p-3 hover:border-[#FFD600]/30 transition-all'
+            ? 'rounded-3xl border border-[var(--card-border)] bg-[var(--color-surface)] overflow-hidden shadow-2xl p-2.5 sm:p-3 hover:border-accent/40 transition-all'
             : 'overflow-hidden rounded-2xl shadow-xl'
         }`}>
           {/* Minimalist Context Bar for Immersive style */}
           {frameStyle === 'immersive' && (imageLabel || badge) && (
-            <div className="flex items-center justify-between px-6 py-3 bg-[#161616]/80 backdrop-blur-md border-b border-white/[0.06]">
+            <div className="flex items-center justify-between px-6 py-3 bg-[var(--surface-translucent)] backdrop-blur-md border-b border-white/[0.06]">
               <div className="flex items-center gap-2.5">
                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                <span className="font-mono text-xs text-neutral-300 font-medium truncate max-w-sm sm:max-w-md">
+                <span className="font-mono text-xs text-[var(--text-muted)] font-medium truncate max-w-sm sm:max-w-md">
                   {imageLabel}
                 </span>
               </div>
-              <span className="font-mono text-[11px] text-[#FFD600] px-2.5 py-0.5 rounded-full bg-[#FFD600]/10 border border-[#FFD600]/20 hidden sm:inline-block">
+              <span className="font-mono text-[11px] text-accent px-2.5 py-0.5 rounded-full bg-accent/10 border border-accent/20 hidden sm:inline-block">
                 {badge}
               </span>
             </div>
@@ -1806,14 +1812,14 @@ export function MediaShowcaseBlock({ block }: { block: any }) {
                 sizes="(max-width: 1200px) 100vw, 1100px"
               />
             ) : (
-              <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-b from-[#1a1a1a] to-[#111111] border border-dashed border-white/20 p-6 text-center">
-                <div className="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-[#FFD600] mb-3">
+              <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-b from-[var(--surface-2)] to-[var(--color-surface)] border border-dashed border-[var(--line-strong)] p-6 text-center">
+                <div className="w-16 h-16 rounded-2xl bg-white/5 border border-[var(--card-border)] flex items-center justify-center text-accent mb-3">
                   <Eye className="w-8 h-8 opacity-70" />
                 </div>
-                <p className="font-syne text-sm font-semibold text-white mb-1">
+                <p className="font-heading text-sm font-semibold text-white mb-1">
                   Placeholder Showcase Media
                 </p>
-                <p className="text-xs text-[#DBD7D5] max-w-sm">
+                <p className="text-xs text-[var(--text-muted)] max-w-sm">
                   Masukkan URL gambar atau pilih dari Media Manager pada pengaturan blok ini.
                 </p>
               </div>
@@ -1829,7 +1835,7 @@ export function MediaShowcaseBlock({ block }: { block: any }) {
                   return (
                     <div
                       key={fIdx}
-                      className="px-3.5 py-1.5 rounded-xl bg-black/80 backdrop-blur-md border border-white/15 text-xs font-mono text-neutral-200 flex items-center gap-2 shadow-lg"
+                      className="px-3.5 py-1.5 rounded-xl bg-black/80 backdrop-blur-md border border-[var(--card-border)] text-xs font-mono text-[var(--text)] flex items-center gap-2 shadow-lg"
                     >
                       <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
                       <span>{label}</span>
@@ -1843,7 +1849,7 @@ export function MediaShowcaseBlock({ block }: { block: any }) {
 
         {/* Caption */}
         {caption && (
-          <p className="mt-4 text-center text-xs text-neutral-400 font-mono max-w-2xl mx-auto leading-relaxed">
+          <p className="mt-4 text-center text-xs text-[var(--text-dim)] font-mono max-w-2xl mx-auto leading-relaxed">
             {caption}
           </p>
         )}

@@ -24,7 +24,7 @@ export function HeroCinemaBlock({ block }: { block: HeroCinemaBlockInstance | an
   const secondaryCta = block?.secondaryCta || data.secondaryCta
 
   return (
-    <section className={`hero relative flex items-center ${heightClass} overflow-hidden bg-black text-white py-24`}>
+    <section className={`hero relative flex items-center ${heightClass} overflow-hidden bg-[var(--color-background)] text-white py-24`}>
       <div className="bg-grid hero__grid" aria-hidden="true" />
       <div className="container container--wide relative z-10">
         <div className={`max-w-4xl ${isCenter ? 'mx-auto text-center' : ''}`}>
@@ -39,7 +39,7 @@ export function HeroCinemaBlock({ block }: { block: HeroCinemaBlockInstance | an
           </h1>
 
           {subheadline ? (
-            <p className="hero__lede text-lg sm:text-xl text-neutral-400 mb-10 leading-relaxed max-w-2xl">
+            <p className="hero__lede text-lg sm:text-xl text-[var(--text-muted)] mb-10 leading-relaxed max-w-2xl">
               {subheadline}
             </p>
           ) : null}

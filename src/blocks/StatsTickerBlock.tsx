@@ -24,7 +24,7 @@ export function StatsTickerBlock({ block }: { block: StatsTickerBlockInstance | 
     : []
 
   return (
-    <section className="py-20 bg-neutral-900 border-y border-neutral-800 text-white">
+    <section className="py-20 bg-[var(--color-surface)] border-y border-[var(--card-border)] text-white">
       <div className="container container--wide">
         {title ? (
           <div className="mb-12 text-center max-w-2xl mx-auto">
@@ -41,11 +41,11 @@ export function StatsTickerBlock({ block }: { block: StatsTickerBlockInstance | 
             const label = typeof metric === 'object' && metric ? (metric.label ?? metric.title ?? '') : ''
             const detail = typeof metric === 'object' && metric ? (metric.detail ?? metric.desc ?? '') : ''
             return (
-              <div key={idx} className="p-8 border border-neutral-800/80 rounded-lg bg-neutral-950/40">
+              <div key={idx} className="p-8 border border-[var(--card-border)] rounded-2xl bg-[var(--color-background)]">
                 <div className="display-lg font-bold text-accent mb-2 mono">{value}</div>
                 <div className="text-base font-semibold text-white mb-1">{label}</div>
                 {detail ? (
-                  <div className="text-xs text-neutral-400">{detail}</div>
+                  <div className="text-xs text-[var(--text-dim)]">{detail}</div>
                 ) : null}
               </div>
             )

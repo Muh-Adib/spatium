@@ -39,7 +39,7 @@ export function InteractiveCtaBlock({ block }: { block: InteractiveCtaBlockInsta
         <h2 className="display-md font-bold mb-6">{headline}</h2>
 
         {body ? (
-          <p className="text-neutral-300 text-lg mb-10 leading-relaxed">{body}</p>
+          <p className="text-[var(--text-muted)] text-lg mb-10 leading-relaxed">{body}</p>
         ) : null}
 
         <div className="flex flex-wrap items-center justify-center gap-4">
@@ -73,7 +73,7 @@ export function TextEditorialBlock({ block }: { block: TextEditorialBlockInstanc
   const asideNote = block?.asideNote || data.asideNote || ''
 
   return (
-    <section className="py-20 bg-black text-white">
+    <section className="py-20 bg-[var(--color-background)] text-white">
       <div className="container container--wide">
         <div className={isSplit ? 'grid grid-cols-1 lg:grid-cols-12 gap-12' : 'max-w-3xl mx-auto'}>
           <div className={isSplit ? 'lg:col-span-5' : 'mb-8'}>
@@ -82,7 +82,7 @@ export function TextEditorialBlock({ block }: { block: TextEditorialBlockInstanc
             ) : null}
             <h2 className="display-sm font-bold">{headline}</h2>
             {asideNote ? (
-              <div className="p-4 mt-6 rounded border border-neutral-800 bg-neutral-900/50 text-xs text-neutral-400">
+              <div className="p-4 mt-6 rounded border border-[var(--card-border)] bg-[var(--surface-translucent)] text-xs text-[var(--text-dim)]">
                 {asideNote}
               </div>
             ) : null}
