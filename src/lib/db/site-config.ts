@@ -11,9 +11,9 @@ export async function getSiteSetting(): Promise<SiteSetting> {
   }
 
   let socialLinks: Record<string, string> = {
-    instagram: 'https://instagram.com/segiatech',
-    linkedin: 'https://linkedin.com/company/segiatech',
-    github: 'https://github.com/segiatech',
+    instagram: 'https://instagram.com/unimasi',
+    linkedin: 'https://linkedin.com/company/unimasi',
+    github: 'https://github.com/unimasi',
   }
 
   if (row?.socialLinks) {
@@ -25,9 +25,9 @@ export async function getSiteSetting(): Promise<SiteSetting> {
   return {
     id: row?.id || 1,
     documentId: 'site-config-1',
-    siteName: row?.name || 'SegiaTech',
+    siteName: row?.name || 'UNIMASI',
     siteDescription: row?.description || undefined,
-    siteUrl: row?.url || 'https://www.segiatech.com',
+    siteUrl: row?.url || 'https://www.unimasi.com',
     whatsapp: row?.whatsapp || undefined,
     email: row?.email || undefined,
     phone: row?.phone || undefined,

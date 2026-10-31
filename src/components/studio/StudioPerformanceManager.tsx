@@ -97,7 +97,7 @@ export function StudioPerformanceManager() {
   const [psHistory, setPsHistory] = useState<PageSpeedReport[]>([])
   const [psLoading, setPsLoading] = useState<boolean>(true)
   const [runningAudit, setRunningAudit] = useState<boolean>(false)
-  const [targetUrl, setTargetUrl] = useState<string>('https://www.segiatech.com')
+  const [targetUrl, setTargetUrl] = useState<string>('https://www.unimasi.com')
   const [device, setDevice] = useState<'mobile' | 'desktop'>('mobile')
   const [latestReport, setLatestReport] = useState<PageSpeedReport | null>(null)
   const [auditError, setAuditError] = useState<{ reason: string; howToConnect?: string } | null>(null)
@@ -438,7 +438,7 @@ export function StudioPerformanceManager() {
                   value={submitUrl}
                   onChange={(e) => setSubmitUrl(e.target.value)}
                   onBlur={() => checkUrlStatus(submitUrl)}
-                  placeholder="https://www.segiatech.com/artikel/judul-artikel"
+                  placeholder="https://www.unimasi.com/artikel/judul-artikel"
                   className="flex-1 bg-transparent text-xs text-neutral-200 focus:outline-none font-mono"
                 />
               </div>
@@ -779,7 +779,7 @@ export function StudioPerformanceManager() {
                 type="text"
                 value={targetUrl}
                 onChange={(e) => setTargetUrl(e.target.value)}
-                placeholder="https://www.segiatech.com"
+                placeholder="https://www.unimasi.com"
                 className="flex-1 bg-transparent text-xs text-neutral-200 focus:outline-none font-mono"
               />
             </div>

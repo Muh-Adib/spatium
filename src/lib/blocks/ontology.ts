@@ -2,7 +2,7 @@
  * Dynamic Block Ontology & Capability Registry (ADR-0012)
  *
  * Provides a dynamic, extensible, schema-driven source of truth for all
- * editorial and visual blocks in SegiaTech Studio.
+ * editorial and visual blocks in UNIMASI Studio.
  *
  * The LLM learns about blocks dynamically from this registry (types, purposes,
  * narrative sequence, input parameters, and visual effects) without hardcoding.
@@ -261,7 +261,7 @@ blockOntology.register({
   generateDefault: () => ({
     type: 'table',
     id: generateBlockId('tbl'),
-    headers: ['Kriteria', 'Standar SegiaTech', 'Metode Konvensional'],
+    headers: ['Kriteria', 'Standar UNIMASI', 'Metode Konvensional'],
     rows: [
       ['Kualitas', 'Enterprise Grade', 'Standar'],
       ['Kecepatan', 'Sub-second LCP', '3-5 detik'],
@@ -371,7 +371,7 @@ blockOntology.register({
   type: 'studio-cta',
   label: 'Studio CTA Banner (Ajakan Bertindak)',
   category: 'conversion',
-  purpose: 'Mendorong pembaca melakukan konsultasi, pemesanan layanan, atau membuka kontak WhatsApp resmi SegiaTech.',
+  purpose: 'Mendorong pembaca melakukan konsultasi, pemesanan layanan, atau membuka kontak WhatsApp resmi UNIMASI.',
   idealHierarchyIndex: 80,
   supportedPageKinds: ['all'],
   inputs: [
@@ -411,14 +411,14 @@ blockOntology.register({
   examplePayload: {
     type: 'studio-cta',
     headline: 'Siap Mentransformasi Pengalaman Digital Bisnis Anda?',
-    subline: 'Diskusikan arsitektur sistem, simulasi WebGL, dan integrasi Next.js dengan tim rekayasa SegiaTech.',
+    subline: 'Diskusikan arsitektur sistem, simulasi WebGL, dan integrasi Next.js dengan tim rekayasa UNIMASI.',
     buttonLabel: 'Mulai Konsultasi Rekayasa',
     buttonUrl: '/kontak',
   },
   generateDefault: () => ({
     type: 'studio-cta',
     id: generateBlockId('cta'),
-    headline: 'Diskusikan Kebutuhan Proyek Anda Bersama SegiaTech',
+    headline: 'Diskusikan Kebutuhan Proyek Anda Bersama UNIMASI',
     subline: 'Tim rekayasa kami siap merancang solusi arsitektur web modern berkinerja tinggi.',
     buttonLabel: 'Hubungi Tim Rekayasa',
     buttonUrl: '/kontak',
@@ -430,7 +430,7 @@ blockOntology.register({
   type: 'internal-links',
   label: 'Tautan Internal Kontekstual',
   category: 'editorial',
-  purpose: 'Menautkan pembaca ke 3-5 layanan, artikel terkait, atau portofolio resmi SegiaTech untuk memperkuat PageRank internal.',
+  purpose: 'Menautkan pembaca ke 3-5 layanan, artikel terkait, atau portofolio resmi UNIMASI untuk memperkuat PageRank internal.',
   idealHierarchyIndex: 75,
   supportedPageKinds: ['article', 'all'],
   inputs: [
@@ -453,7 +453,7 @@ blockOntology.register({
   ],
   examplePayload: {
     type: 'internal-links',
-    title: 'Layanan Terkait SegiaTech',
+    title: 'Layanan Terkait UNIMASI',
     links: [
       { title: 'Jasa Pembuatan Website Next.js 16', slug: 'website-development', url: '/layanan/website-development' },
       { title: 'Simulasi Interaktif WebGL & Three.js', slug: 'interactive-3d-aquarium', url: '/layanan/interactive-3d-aquarium' },

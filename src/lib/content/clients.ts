@@ -22,7 +22,7 @@ export async function getClientLogos(): Promise<ClientLogoItem[]> {
     if (clientMedia && clientMedia.length > 0) {
       return clientMedia.map((m: any) => ({
         id: String(m.id),
-        name: m.title || m.altText || 'Klien Institusi SegiaTech',
+        name: m.title || m.altText || 'Klien Institusi UNIMASI',
         src: m.url,
         alt: m.altText || m.title || 'Logo Klien',
       }))

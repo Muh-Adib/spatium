@@ -57,7 +57,7 @@ export function ArticleLinkModal({
               type="text"
               value={linkTextInput}
               onChange={(e) => onChangeLinkTextInput(e.target.value)}
-              placeholder="Contoh: Layanan Web Development SegiaTech"
+              placeholder="Contoh: Layanan Web Development UNIMASI"
               className="w-full rounded-xl bg-black/40 border border-white/15 p-2.5 text-xs text-white placeholder:text-neutral-500 focus:outline-none focus:border-accent-400"
             />
           </div>

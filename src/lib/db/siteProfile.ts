@@ -122,8 +122,8 @@ export async function updateSiteProfile(data: Partial<SiteProfileEntity>): Promi
         update: payload,
         create: {
           id: 1,
-          name: payload.name || 'SegiaTech',
-          url: payload.url || 'https://www.segiatech.com',
+          name: payload.name || 'UNIMASI',
+          url: payload.url || 'https://www.unimasi.com',
           ...payload,
         },
       }

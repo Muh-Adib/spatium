@@ -107,11 +107,11 @@ export function refineArticleContent(input: RefineArticleInput): RefineArticleRe
   const kwPos = optimizedTitle.toLowerCase().indexOf(kw)
   if (kwPos < 0 || kwPos > 15 || optimizedTitle.length > 65 || calculateTitlePixelWidth(optimizedTitle) > 580) {
     const candidate = isGraphics
-      ? `${focusKeyphrase}: Rekayasa WebGL SegiaTech`
-      : `${focusKeyphrase}: Panduan Rekayasa SegiaTech`
+      ? `${focusKeyphrase}: Rekayasa WebGL UNIMASI`
+      : `${focusKeyphrase}: Panduan Rekayasa UNIMASI`
     optimizedTitle = (candidate.length <= 60 && calculateTitlePixelWidth(candidate) <= 560)
       ? candidate
-      : `${focusKeyphrase}: Panduan SegiaTech`.slice(0, 58)
+      : `${focusKeyphrase}: Panduan UNIMASI`.slice(0, 58)
   }
   const optimizedMetaTitle = optimizedTitle
 
@@ -119,10 +119,10 @@ export function refineArticleContent(input: RefineArticleInput): RefineArticleRe
   let optimizedMetaDesc = (input.metaDescription || '').trim()
   if (optimizedMetaDesc.length < 120 || optimizedMetaDesc.length > 160 || !optimizedMetaDesc.toLowerCase().includes(kw)) {
     let candidateDesc = isGraphics
-      ? `Panduan ${focusKeyphrase} modern dengan WebGL dan sistem interaktif. Tinjau implementasi performa grafis tinggi dan arsitektur edutainment terdepan SegiaTech.`
-      : `Pelajari panduan implementasi ${focusKeyphrase} terdepan dari SegiaTech. Temukan arsitektur teknis modern, performa tinggi, dan solusi rekayasa terbaik kami.`
+      ? `Panduan ${focusKeyphrase} modern dengan WebGL dan sistem interaktif. Tinjau implementasi performa grafis tinggi dan arsitektur edutainment terdepan UNIMASI.`
+      : `Pelajari panduan implementasi ${focusKeyphrase} terdepan dari UNIMASI. Temukan arsitektur teknis modern, performa tinggi, dan solusi rekayasa terbaik kami.`
     if (candidateDesc.length < 120) {
-      candidateDesc = `Pelajari panduan implementasi ${focusKeyphrase} terdepan dari SegiaTech. Temukan arsitektur teknis modern, performa tinggi, dan solusi rekayasa terbaik kami.`
+      candidateDesc = `Pelajari panduan implementasi ${focusKeyphrase} terdepan dari UNIMASI. Temukan arsitektur teknis modern, performa tinggi, dan solusi rekayasa terbaik kami.`
     }
     if (candidateDesc.length > 160) {
       candidateDesc = candidateDesc.slice(0, 155)
@@ -135,7 +135,7 @@ export function refineArticleContent(input: RefineArticleInput): RefineArticleRe
   if (!coverAlt || !coverAlt.toLowerCase().includes(kw)) {
     coverAlt = isGraphics
       ? `Simulasi ${focusKeyphrase} Berbasis WebGL`
-      : `Implementasi visual ${focusKeyphrase} oleh tim SegiaTech`
+      : `Implementasi visual ${focusKeyphrase} oleh tim UNIMASI`
   }
 
   // 6. Refine Content Body
@@ -199,14 +199,14 @@ export function refineArticleContent(input: RefineArticleInput): RefineArticleRe
   })
 
   // 6e. Inject Contextual Internal & External Links
-  const intMatches = refined.match(/href=["'](?:\/|\/layanan|\/portofolio|\/solusi|\/artikel|\/kontak|https?:\/\/(?:www\.)?segiatech\.com)[^"']*["']/gi) || []
+  const intMatches = refined.match(/href=["'](?:\/|\/layanan|\/portofolio|\/solusi|\/artikel|\/kontak|https?:\/\/(?:www\.)?unimasi\.com)[^"']*["']/gi) || []
   if (intMatches.length < 2) {
     const targetPorto = input.internalLinkSuggestions?.[1]?.slug || (isGraphics ? 'interactive-3d-aquarium-edutainment' : 'portofolio-digital')
     const targetLayanan = input.internalLinkSuggestions?.[0]?.slug || (isGraphics ? 'interactive-3d-aquarium' : 'layanan-digital')
-    refined += `\n<p>Di samping itu, kami mendokumentasikan implementasi lengkap wahana ini. Anda dapat meninjau laman <a href="/portofolio/${targetPorto}">Portofolio ${focusKeyphrase}</a> kami. Tinjau juga spesifikasi teknis pada halaman <a href="/layanan/${targetLayanan}">Layanan ${focusKeyphrase} SegiaTech</a>.</p>`
+    refined += `\n<p>Di samping itu, kami mendokumentasikan implementasi lengkap wahana ini. Anda dapat meninjau laman <a href="/portofolio/${targetPorto}">Portofolio ${focusKeyphrase}</a> kami. Tinjau juga spesifikasi teknis pada halaman <a href="/layanan/${targetLayanan}">Layanan ${focusKeyphrase} UNIMASI</a>.</p>`
   }
 
-  const extMatches = refined.match(/href=["']https?:\/\/(?!www\.segiatech\.com|segiatech\.com|localhost)[^"']+["']/gi) || []
+  const extMatches = refined.match(/href=["']https?:\/\/(?!www\.unimasi\.com|unimasi\.com|localhost)[^"']+["']/gi) || []
   if (extMatches.length < 1) {
     refined += isGraphics
       ? `\n<p>Maka dari itu, arsitektur rendering menggunakan custom GLSL shaders mutakhir. Dokumentasi lengkap dapat dipelajari melalui tautan <a href="https://threejs.org">Three.js Documentation</a> resmi.</p>`

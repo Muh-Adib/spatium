@@ -28,6 +28,10 @@ import {
   VisualShowcaseGalleryBlock,
   MediaShowcaseBlock,
 } from './CatalogBlocks'
+import { HeroCinemaBlock } from '@/blocks/HeroCinemaBlock'
+import { ProcessTimelineBlock } from '@/blocks/ProcessTimelineBlock'
+import { StatsTickerBlock } from '@/blocks/StatsTickerBlock'
+import { InteractiveCtaBlock, TextEditorialBlock } from '@/blocks/InteractiveCtaBlock'
 import { getAnimationClasses } from '@/lib/blocks/animation'
 
 interface BlockRendererProps {
@@ -45,7 +49,7 @@ interface BlockRendererProps {
  * specular ambient chromatic glow, and responsive spacing.
  */
 function AnimatedBlockWrapper({ block, children }: { block: any; children: React.ReactNode }) {
-  const anim = block?.animation
+  const anim = block?.animation || block?.settings?.animation
   const { containerClasses, glowBackdrop, paddingClasses } = getAnimationClasses(anim)
 
   return (
@@ -56,7 +60,7 @@ function AnimatedBlockWrapper({ block, children }: { block: any; children: React
     >
       {glowBackdrop && (
         <div className="pointer-events-none absolute inset-0 -z-10 flex items-center justify-center overflow-hidden">
-          <div className="w-[700px] h-[380px] rounded-full bg-gradient-to-r from-[#F2C7A0]/[0.08] via-purple-500/[0.05] to-[#F2C7A0]/[0.08] blur-[150px] animate-pulse pointer-events-none" />
+          <div className="w-[700px] h-[380px] rounded-full bg-gradient-to-r from-[#FFD600]/[0.08] via-[#0F3A79]/[0.1] to-[#FFD600]/[0.08] blur-[150px] animate-pulse pointer-events-none" />
         </div>
       )}
       {children}
@@ -65,9 +69,22 @@ function AnimatedBlockWrapper({ block, children }: { block: any; children: React
 }
 
 function renderBlockContent(block: any, idx: number, contextData?: BlockRendererProps['contextData']) {
+  if (!block) return null
   const type = block.type || block.__component
 
   switch (type) {
+    // UNIMASI Dedicated Cinema Blocks
+    case 'hero-cinema':
+      return <HeroCinemaBlock block={block} />
+    case 'process-timeline':
+      return <ProcessTimelineBlock block={block} />
+    case 'stats-ticker':
+      return <StatsTickerBlock block={block} />
+    case 'interactive-cta':
+      return <InteractiveCtaBlock block={block} />
+    case 'text-editorial':
+      return <TextEditorialBlock block={block} />
+
     // Catalog & Department Blocks
     case 'hero-department':
       return <HeroDepartmentBlock block={block} />
@@ -162,14 +179,24 @@ export function BlockRenderer({ blocks, contextData }: BlockRendererProps) {
   return (
     <div className="flex flex-col">
       {blocks.map((block, idx) => {
-        const content = renderBlockContent(block, idx, contextData)
-        if (!content) return null
+        if (!block) return null
+        try {
+          const content = renderBlockContent(block, idx, contextData)
+          if (!content) return null
 
-        return (
-          <AnimatedBlockWrapper key={block.id || idx} block={block}>
-            {content}
-          </AnimatedBlockWrapper>
-        )
+          return (
+            <AnimatedBlockWrapper key={block.id || idx} block={block}>
+              {content}
+            </AnimatedBlockWrapper>
+          )
+        } catch (err) {
+          console.error(`Error rendering block ${block?.type || idx}:`, err)
+          return (
+            <div key={block.id || idx} className="p-4 m-2 rounded-xl bg-rose-950/40 border border-rose-500/30 text-rose-200 text-xs font-mono">
+              Gagal merender blok: <strong>{block?.type || 'unknown'}</strong>. Harap periksa skema data blok.
+            </div>
+          )
+        }
       })}
     </div>
   )
@@ -238,7 +265,7 @@ function RichTextBlockComponent({ block }: { block: any }) {
   return (
     <section className="py-16 sm:py-24 bg-[#0A0A0A] text-white border-b border-white/[0.08]">
       <div
-        className="container max-w-4xl mx-auto px-4 sm:px-6 prose dark:prose-invert prose-neutral prose-headings:font-display prose-headings:text-white prose-p:text-[#DBD7D5] prose-p:leading-relaxed prose-a:text-[#F2C7A0] hover:prose-a:underline prose-img:rounded-3xl prose-img:border prose-img:border-white/10 prose-img:shadow-2xl prose-img:my-8 prose-blockquote:border-l-4 prose-blockquote:border-[#F2C7A0] prose-blockquote:text-neutral-300"
+        className="container max-w-4xl mx-auto px-4 sm:px-6 prose dark:prose-invert prose-neutral prose-headings:font-display prose-headings:text-white prose-p:text-[#DBD7D5] prose-p:leading-relaxed prose-a:text-[#FFD600] hover:prose-a:underline prose-img:rounded-3xl prose-img:border prose-img:border-white/10 prose-img:shadow-2xl prose-img:my-8 prose-blockquote:border-l-4 prose-blockquote:border-[#FFD600] prose-blockquote:text-neutral-300"
         dangerouslySetInnerHTML={{ __html: sanitizedContent }}
       />
     </section>

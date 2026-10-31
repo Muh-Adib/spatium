@@ -28,20 +28,20 @@ export async function GET() {
     return NextResponse.json({
       success: true,
       data: {
-        name: 'SegiaTech',
-        tagline: 'Rekayasa Pengalaman Digital, Website Performa Tinggi & Sistem Terintegrasi',
-        description: 'Studio rekayasa digital terdepan di Indonesia.',
-        url: 'https://www.segiatech.com',
-        whatsapp: '6285227702811',
-        email: 'contact@segiatech.com',
-        phone: '+62 852-2770-2811',
+        name: 'UNIMASI Studio',
+        tagline: 'We Make Ideas Move — 2D & 3D Animation, Motion Graphics & Videotron',
+        description: 'UNIMASI adalah studio animasi 2D, 3D, motion graphics, dan visual production untuk edukasi, industri, dan brands.',
+        url: 'https://unimasi.studio',
+        whatsapp: '6283121138821',
+        email: 'hello@unimasi.studio',
+        phone: '+62 831-2113-8821',
         address: 'Yogyakarta, Indonesia',
-        logoUrl: '/images/logo.png',
-        faviconUrl: '/favicon.ico',
+        logoUrl: '/logo/unimasi-coloured.webp',
+        faviconUrl: '/favicon.svg',
         socialLinks: {
-          instagram: 'https://instagram.com/segiatech',
-          linkedin: 'https://linkedin.com/company/segiatech',
-          github: 'https://github.com/segiatech',
+          instagram: 'https://instagram.com/unimasi.studio',
+          linkedin: 'https://linkedin.com/company/unimasi',
+          github: 'https://github.com/unimasi',
         },
       },
     })
@@ -73,10 +73,10 @@ export async function POST(request: NextRequest) {
     const existing = await prisma.orm.public.SiteConfig.where({ id: 1 }).first()
 
     const payload = {
-      name: String((body as any).siteName || body.name || 'SegiaTech'),
+      name: String((body as any).siteName || body.name || 'UNIMASI Studio'),
       tagline: body.tagline || null,
       description: body.metaDescription || (body as any).description || null,
-      url: String((body as any).canonicalUrl || (body as any).url || 'https://www.segiatech.com'),
+      url: String((body as any).canonicalUrl || (body as any).url || 'https://www.unimasi.com'),
       whatsapp: body.whatsapp || null,
       email: body.contactEmail || (body as any).email || null,
       phone: (body as any).phone ? String((body as any).phone) : null,

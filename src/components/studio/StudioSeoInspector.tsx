@@ -211,7 +211,7 @@ export default function StudioSeoInspector({
       .replace(/%{1,2}date%{1,2}/g, now.getFullYear().toString())
   }
 
-  const effectiveTitle = resolveTemplate(seoTitle) || articleTitle || 'Judul Konten — SegiaTech'
+  const effectiveTitle = resolveTemplate(seoTitle) || articleTitle || 'Judul Konten — UNIMASI'
   const effectiveDescription = resolveTemplate(metaDescription) || articleExcerpt || 'Ringkasan konten yang informatif untuk mesin pencari.'
 
   // Estimated pixel width for desktop title (~600px standard cut off in SERP)
@@ -963,7 +963,7 @@ export default function StudioSeoInspector({
                     <button
                       type="button"
                       onClick={() => {
-                        const candidate = `${articleTitle || 'Visual'} - SegiaTech Rekayasa Sistem Digital`.slice(0, 120)
+                        const candidate = `${articleTitle || 'Visual'} - UNIMASI Rekayasa Sistem Digital`.slice(0, 120)
                         onChangeCoverAlt?.(candidate)
                       }}
                       className="text-[10px] text-accent-400 hover:text-accent-300 flex items-center gap-1"
@@ -1239,7 +1239,7 @@ export default function StudioSeoInspector({
             <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-black/40 border border-white/5 text-[11px] font-mono text-neutral-300">
               <span className="text-neutral-500 shrink-0">Target URL:</span>
               <span className="truncate text-accent-300 select-all" title={indexingTargetUrl}>
-                {indexingTargetUrl || `https://www.segiatech.com/artikel/${slug || '...'}`}
+                {indexingTargetUrl || `https://www.unimasi.com/artikel/${slug || '...'}`}
               </span>
             </div>
 
@@ -1488,7 +1488,7 @@ export default function StudioSeoInspector({
                 className="w-full rounded-xl bg-black/40 border border-white/15 p-2.5 text-xs text-white font-mono focus:outline-none focus:border-accent-400"
               />
               <span className="text-[10px] text-neutral-500 font-mono block">
-                Default: https://www.segiatech.com/artikel/{slug}
+                Default: https://www.unimasi.com/artikel/{slug}
               </span>
             </div>
 
@@ -1620,7 +1620,7 @@ export default function StudioSeoInspector({
                 onChange={(e) => setTempAlt(e.target.value)}
                 rows={3}
                 placeholder={`Deskripsikan visual hero ini secara jelas dan informatif untuk bahasa [${locale.toUpperCase()}]...`}
-                className="w-full rounded-xl bg-black/40 border border-white/15 p-2.5 text-xs text-white focus:outline-none focus:border-[#F2C7A0]"
+                className="w-full rounded-xl bg-black/40 border border-white/15 p-2.5 text-xs text-white focus:outline-none focus:border-[#FFD600]"
               />
 
               {/* Real-time warning feedback */}
@@ -1645,7 +1645,7 @@ export default function StudioSeoInspector({
                 <button
                   type="button"
                   onClick={() => {
-                    const candidate = `${articleTitle || 'Visual'} - Solusi Rekayasa Digital SegiaTech`.slice(0, 120)
+                    const candidate = `${articleTitle || 'Visual'} - Solusi Rekayasa Digital UNIMASI`.slice(0, 120)
                     setTempAlt(candidate)
                   }}
                   className="text-[10px] text-amber-300 hover:text-amber-200 flex items-center gap-1"
@@ -1656,9 +1656,9 @@ export default function StudioSeoInspector({
               </div>
               <div className="flex flex-wrap gap-1.5">
                 {[
-                  `${articleTitle || 'Proyek'} - Implementasi Sistem Digital SegiaTech`,
+                  `${articleTitle || 'Proyek'} - Implementasi Sistem Digital UNIMASI`,
                   `Arsitektur dan antarmuka visual ${articleTitle || 'karya'}`,
-                  `Solusi teknologi inovatif ${category || 'SegiaTech'}: ${articleTitle || 'Digital'}`,
+                  `Solusi teknologi inovatif ${category || 'UNIMASI'}: ${articleTitle || 'Digital'}`,
                 ].map((preset, idx) => (
                   <button
                     key={idx}
@@ -1690,7 +1690,7 @@ export default function StudioSeoInspector({
                   }
                   setShowAltFixModal(false)
                 }}
-                className="px-4 py-1.5 rounded-xl bg-[#F2C7A0] hover:bg-[#E0B285] text-black font-semibold text-xs transition-colors flex items-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed shadow-md"
+                className="px-4 py-1.5 rounded-xl bg-[#FFD600] hover:bg-[#E0B285] text-black font-semibold text-xs transition-colors flex items-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed shadow-md"
               >
                 <CheckCircle2 className="w-3.5 h-3.5" />
                 <span>Terapkan Alt Text & Buka Kunci</span>

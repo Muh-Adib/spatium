@@ -185,7 +185,7 @@ export async function getServiceWithDetails(slug: string) {
       { label: 'Architecture', value: 'Modular Cloud' },
     ]
 
-    const safeWhatsappPrompt = svc.whatsappPrompt || `Halo SegiaTech, saya ingin konsultasi mengenai layanan ${svc.name}.`
+    const safeWhatsappPrompt = svc.whatsappPrompt || `Halo UNIMASI, saya ingin konsultasi mengenai layanan ${svc.name}.`
 
     // Portofolio terkait via relation
     const linkedRels = await prisma.orm.public.ServicePortfolio

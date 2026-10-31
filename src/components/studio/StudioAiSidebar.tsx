@@ -201,7 +201,7 @@ export function LiveThinkingBar({
       data-testid="live-thinking-bar"
       className={`mb-2.5 rounded-xl border transition-all overflow-hidden text-xs ${
         isStreaming
-          ? 'border-[#F2C7A0]/40 bg-[#F2C7A0]/[0.03] shadow-[0_0_12px_rgba(242,199,160,0.1)]'
+          ? 'border-[#FFD600]/40 bg-[#FFD600]/[0.03] shadow-[0_0_12px_rgba(255, 214, 0,0.1)]'
           : 'border-white/10 bg-black/40'
       }`}
     >
@@ -211,19 +211,19 @@ export function LiveThinkingBar({
         className="w-full px-3 py-2 bg-white/[0.02] hover:bg-white/[0.05] flex items-center justify-between text-left transition-colors select-none"
       >
         <div className="flex items-center gap-2 min-w-0">
-          <Brain className={`w-3.5 h-3.5 text-[#F2C7A0] ${isStreaming ? 'animate-pulse' : ''}`} />
+          <Brain className={`w-3.5 h-3.5 text-[#FFD600] ${isStreaming ? 'animate-pulse' : ''}`} />
           <span className="font-semibold text-white text-[11px] truncate">
             {isStreaming ? 'Proses Berpikir Model (Thinking Live)...' : 'Catatan Pemikiran Model (Reasoning)'}
           </span>
           {isStreaming && (
-            <span className="px-1.5 py-0.2 rounded bg-[#F2C7A0]/20 text-[#F2C7A0] font-mono text-[9px] border border-[#F2C7A0]/30 animate-pulse">
+            <span className="px-1.5 py-0.2 rounded bg-[#FFD600]/20 text-[#FFD600] font-mono text-[9px] border border-[#FFD600]/30 animate-pulse">
               Live
             </span>
           )}
         </div>
         <div className="flex items-center gap-1.5 text-neutral-400">
           <span className="text-[10px] font-mono">{isOpen ? 'Tutup' : 'Lihat'}</span>
-          {isOpen ? <ChevronDown className="w-3.5 h-3.5 text-[#F2C7A0]" /> : <ChevronRight className="w-3.5 h-3.5 text-neutral-400" />}
+          {isOpen ? <ChevronDown className="w-3.5 h-3.5 text-[#FFD600]" /> : <ChevronRight className="w-3.5 h-3.5 text-neutral-400" />}
         </div>
       </button>
 
@@ -233,7 +233,7 @@ export function LiveThinkingBar({
           {isStreaming && (
             <span
               data-testid="streaming-cursor-thought"
-              className="inline-block text-[#F2C7A0] font-mono animate-pulse ml-0.5 select-none font-bold"
+              className="inline-block text-[#FFD600] font-mono animate-pulse ml-0.5 select-none font-bold"
             >
               ▌
             </span>
@@ -1018,7 +1018,7 @@ export function StudioAiSidebar({
     // Eagerly load from localStorage to prevent false "API key not set" warning on mount
     if (typeof window === 'undefined') return ''
     try {
-      const raw = localStorage.getItem('segiatech_ai_config')
+      const raw = localStorage.getItem('unimasi_ai_config')
       if (raw) {
         const parsed = JSON.parse(raw)
         if (parsed.googleApiKey) return String(parsed.googleApiKey).trim()
@@ -1029,7 +1029,7 @@ export function StudioAiSidebar({
   const [openrouterKey, setOpenrouterKey] = useState(() => {
     if (typeof window === 'undefined') return ''
     try {
-      const raw = localStorage.getItem('segiatech_ai_config')
+      const raw = localStorage.getItem('unimasi_ai_config')
       if (raw) {
         const parsed = JSON.parse(raw)
         if (parsed.openrouterApiKey) return String(parsed.openrouterApiKey).trim()
@@ -1058,10 +1058,10 @@ export function StudioAiSidebar({
       setOpenrouterModel(targetModel)
       setCustomModel(targetModel)
       try {
-        const raw = localStorage.getItem('segiatech_ai_config')
+        const raw = localStorage.getItem('unimasi_ai_config')
         const parsed = raw ? JSON.parse(raw) : {}
         localStorage.setItem(
-          'segiatech_ai_config',
+          'unimasi_ai_config',
           JSON.stringify({
             ...parsed,
             provider: 'openrouter',
@@ -1077,10 +1077,10 @@ export function StudioAiSidebar({
       const targetModel = 'gemini-3.8-flash'
       setGoogleModel(targetModel)
       try {
-        const raw = localStorage.getItem('segiatech_ai_config')
+        const raw = localStorage.getItem('unimasi_ai_config')
         const parsed = raw ? JSON.parse(raw) : {}
         localStorage.setItem(
-          'segiatech_ai_config',
+          'unimasi_ai_config',
           JSON.stringify({
             ...parsed,
             provider: 'google',
@@ -1100,10 +1100,10 @@ export function StudioAiSidebar({
     setOpenrouterModel(freeModel)
     setCustomModel(freeModel)
     try {
-      const raw = localStorage.getItem('segiatech_ai_config')
+      const raw = localStorage.getItem('unimasi_ai_config')
       const parsed = raw ? JSON.parse(raw) : {}
       localStorage.setItem(
-        'segiatech_ai_config',
+        'unimasi_ai_config',
         JSON.stringify({
           ...parsed,
           provider: 'openrouter',
@@ -1468,7 +1468,7 @@ export function StudioAiSidebar({
       let prov: 'google' | 'openrouter' = 'google'
 
       try {
-        const raw = localStorage.getItem('segiatech_ai_config')
+        const raw = localStorage.getItem('unimasi_ai_config')
         if (raw) {
           const parsed = JSON.parse(raw)
           if (parsed.provider) prov = parsed.provider
@@ -1531,13 +1531,13 @@ export function StudioAiSidebar({
       syncFromStorage()
     }
 
-    window.addEventListener('segiatech:ai-key-updated', handleKeyUpdated)
-    window.addEventListener('segiatech:ai-models-updated', handleModelsUpdated)
+    window.addEventListener('unimasi:ai-key-updated', handleKeyUpdated)
+    window.addEventListener('unimasi:ai-models-updated', handleModelsUpdated)
     window.addEventListener('storage', handleModelsUpdated)
 
     return () => {
-      window.removeEventListener('segiatech:ai-key-updated', handleKeyUpdated)
-      window.removeEventListener('segiatech:ai-models-updated', handleModelsUpdated)
+      window.removeEventListener('unimasi:ai-key-updated', handleKeyUpdated)
+      window.removeEventListener('unimasi:ai-models-updated', handleModelsUpdated)
       window.removeEventListener('storage', handleModelsUpdated)
     }
   }, [])
@@ -1600,7 +1600,7 @@ export function StudioAiSidebar({
         googleModel,
         openrouterModel: customModel.trim() || openrouterModel,
       }
-      localStorage.setItem('segiatech_ai_config', JSON.stringify(config))
+      localStorage.setItem('unimasi_ai_config', JSON.stringify(config))
       setSaveSuccess(true)
       setTimeout(() => {
         setSaveSuccess(false)
@@ -1702,7 +1702,7 @@ export function StudioAiSidebar({
       desc: `Riset kata kunci SERP (${dynamicKeyphrase !== '(belum ditentukan)' ? dynamicKeyphrase : 'GSC'})`,
       insertText: dynamicKeyphrase !== '(belum ditentukan)'
         ? `Analisis peluang kata kunci SERP dan performa Search Console untuk target "${dynamicKeyphrase}".`
-        : `Analisis peluang kata kunci posisi 8-20 dan query CTR tinggi dari Google Search Console untuk domain segiatech.com.`,
+        : `Analisis peluang kata kunci posisi 8-20 dan query CTR tinggi dari Google Search Console untuk domain unimasi.com.`,
       action: 'submit',
       icon: Target,
     },
@@ -2111,13 +2111,13 @@ export function StudioAiSidebar({
       // Read extra parameters and token optimization from localStorage if available
       let extraConfig: any = {}
       try {
-        const raw = localStorage.getItem('segiatech_ai_config')
+        const raw = localStorage.getItem('unimasi_ai_config')
         if (raw) extraConfig = JSON.parse(raw)
       } catch (_) {}
 
       let tokenOptConfig: any = {}
       try {
-        const rawOpt = localStorage.getItem('segiatech_ai_token_opt')
+        const rawOpt = localStorage.getItem('unimasi_ai_token_opt')
         if (rawOpt) tokenOptConfig = JSON.parse(rawOpt)
       } catch (_) {}
 
@@ -2673,7 +2673,7 @@ export function StudioAiSidebar({
     try {
       let tokenOptConfig: any = {}
       try {
-        const rawOpt = localStorage.getItem('segiatech_ai_token_opt')
+        const rawOpt = localStorage.getItem('unimasi_ai_token_opt')
         if (rawOpt) tokenOptConfig = JSON.parse(rawOpt)
       } catch (_) {}
 
@@ -2939,10 +2939,10 @@ export function StudioAiSidebar({
                         }).catch(() => {})
                       }
                       try {
-                        const raw = localStorage.getItem('segiatech_ai_config')
+                        const raw = localStorage.getItem('unimasi_ai_config')
                         const parsed = raw ? JSON.parse(raw) : {}
                         localStorage.setItem(
-                          'segiatech_ai_config',
+                          'unimasi_ai_config',
                           JSON.stringify({
                             ...parsed,
                             ...(aiProvider === 'google' ? { googleModel: val } : { openrouterModel: val, customModel: val }),
@@ -2951,7 +2951,7 @@ export function StudioAiSidebar({
                       } catch (_) {}
                     }}
                     placeholder="Ketik model kustom..."
-                    className="w-full bg-white/5 border border-accent-400/50 rounded-lg px-2.5 py-1 text-[11px] font-mono text-[#F2C7A0] focus:outline-none focus:border-accent-400"
+                    className="w-full bg-white/5 border border-accent-400/50 rounded-lg px-2.5 py-1 text-[11px] font-mono text-[#FFD600] focus:outline-none focus:border-accent-400"
                   />
                 ) : (
                   <div className="relative">
@@ -2987,10 +2987,10 @@ export function StudioAiSidebar({
                         }
 
                         try {
-                          const raw = localStorage.getItem('segiatech_ai_config')
+                          const raw = localStorage.getItem('unimasi_ai_config')
                           const parsed = raw ? JSON.parse(raw) : {}
                           localStorage.setItem(
-                            'segiatech_ai_config',
+                            'unimasi_ai_config',
                             JSON.stringify({
                               ...parsed,
                               provider: nextProvider,
@@ -3111,9 +3111,9 @@ export function StudioAiSidebar({
                       const nextMode = thinkingMode === 'auto' ? 'on' : thinkingMode === 'on' ? 'off' : 'auto'
                       setThinkingMode(nextMode)
                       try {
-                        const raw = localStorage.getItem('segiatech_ai_config')
+                        const raw = localStorage.getItem('unimasi_ai_config')
                         const parsed = raw ? JSON.parse(raw) : {}
-                        localStorage.setItem('segiatech_ai_config', JSON.stringify({ ...parsed, thinkingMode: nextMode }))
+                        localStorage.setItem('unimasi_ai_config', JSON.stringify({ ...parsed, thinkingMode: nextMode }))
                       } catch (_) {}
                     }}
                     className={`inline-flex items-center gap-1 rounded px-1.5 py-0.2 font-semibold transition-colors border ${
@@ -3461,7 +3461,7 @@ export function StudioAiSidebar({
                 <p className="text-xs text-neutral-400 max-w-xs mx-auto leading-relaxed">
                   {pageContext?.title
                     ? `Terhubung langsung ke draf "${pageContext.title}". Agen siap mengaudit dan merevisi penulisan agar SEO & Readability mencapai skor 100.`
-                    : 'Asisten kecerdasan rekayasa web SegiaTech siap mengaudit SEO, meriset kata kunci, dan menyusun konten editorial.'}
+                    : 'Asisten kecerdasan animasi UNIMASI siap mengaudit SEO, meriset kata kunci, dan menyusun konten editorial.'}
                 </p>
               </div>
 
@@ -3502,7 +3502,7 @@ export function StudioAiSidebar({
                   <button
                     type="button"
                     onClick={() => {
-                      setInput('Rekomendasikan 3-5 tautan internal kontekstual ke layanan dan portofolio SegiaTech untuk artikel ini.')
+                      setInput('Rekomendasikan 3-5 tautan internal kontekstual ke layanan dan portofolio UNIMASI untuk artikel ini.')
                       setTimeout(() => textareaRef.current?.focus(), 50)
                     }}
                     className="w-full text-left p-2.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 hover:border-purple-400/40 text-xs text-neutral-200 transition-all group flex items-start gap-2"
@@ -3510,7 +3510,7 @@ export function StudioAiSidebar({
                     <ArrowRight className="w-4 h-4 text-purple-400 shrink-0 mt-0.5 group-hover:scale-110 transition-transform" />
                     <div>
                       <div className="font-semibold text-white">Rekomendasi Tautan Internal</div>
-                      <div className="text-[10px] text-neutral-400">Tautkan ke halaman layanan dan portofolio resmi SegiaTech.</div>
+                      <div className="text-[10px] text-neutral-400">Tautkan ke halaman layanan dan portofolio resmi UNIMASI.</div>
                     </div>
                   </button>
                 </div>
@@ -3539,11 +3539,11 @@ export function StudioAiSidebar({
                     {m.isStreaming && m.streamingStatus && (
                       <div
                         data-testid="streaming-status-pill"
-                        className="mb-2 flex items-center gap-2 text-[10px] font-mono text-[#F2C7A0] bg-[#F2C7A0]/10 border border-[#F2C7A0]/20 px-2.5 py-1 rounded-lg animate-pulse"
+                        className="mb-2 flex items-center gap-2 text-[10px] font-mono text-[#FFD600] bg-[#FFD600]/10 border border-[#FFD600]/20 px-2.5 py-1 rounded-lg animate-pulse"
                       >
                         <span className="relative flex h-2 w-2">
-                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#F2C7A0] opacity-75" />
-                          <span className="relative inline-flex rounded-full h-2 w-2 bg-[#F2C7A0]" />
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#FFD600] opacity-75" />
+                          <span className="relative inline-flex rounded-full h-2 w-2 bg-[#FFD600]" />
                         </span>
                         <span>{m.streamingStatus}</span>
                       </div>
@@ -3572,7 +3572,7 @@ export function StudioAiSidebar({
                         {m.isStreaming && (
                           <span
                             data-testid="streaming-cursor"
-                            className="inline-block text-[#F2C7A0] font-mono animate-pulse ml-0.5 select-none font-bold"
+                            className="inline-block text-[#FFD600] font-mono animate-pulse ml-0.5 select-none font-bold"
                           >
                             ▌
                           </span>
@@ -3582,7 +3582,7 @@ export function StudioAiSidebar({
                       <div className="flex items-center gap-1.5 text-neutral-400 italic text-[11px] py-1">
                         <span
                           data-testid="streaming-cursor"
-                          className="inline-block text-[#F2C7A0] font-mono animate-pulse font-bold"
+                          className="inline-block text-[#FFD600] font-mono animate-pulse font-bold"
                         >
                           ▌
                         </span>
@@ -3873,7 +3873,7 @@ export function StudioAiSidebar({
               <div className="flex items-center gap-2">
                 <Settings className="w-5 h-5 text-accent-400" />
                 <h3 className="text-sm font-bold text-white tracking-wide">
-                  Pengaturan Agentic AI &amp; Tools Native SegiaTech
+                  Pengaturan Agentic AI &amp; Tools Native UNIMASI
                 </h3>
               </div>
               <button
@@ -3889,7 +3889,7 @@ export function StudioAiSidebar({
               onSaved={() => {
                 setSettingsOpen(false)
                 try {
-                  const saved = localStorage.getItem('segiatech_ai_config')
+                  const saved = localStorage.getItem('unimasi_ai_config')
                   if (saved) {
                     const parsed = JSON.parse(saved)
                     if (parsed.provider) setAiProvider(parsed.provider)

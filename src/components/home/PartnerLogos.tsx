@@ -7,7 +7,11 @@ export function PartnerLogos() {
   const logosDoubled = [...PARTNER_LOGOS, ...PARTNER_LOGOS]
 
   return (
-    <section className="partner-logos" aria-label="Trusted Partners & Enterprise Clients">
+    <section
+      className="partner-logos"
+      aria-label="Trusted Partners & Enterprise Clients"
+      data-reveal
+    >
       <div className="container">
         <p className="partner-logos__title">Trusted by Industry Leaders &amp; Enterprise Clients</p>
       </div>

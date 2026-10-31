@@ -9,13 +9,14 @@ import { Reveal } from '@/components/ui/Reveal'
 import { SectionHead } from '@/components/ui/SectionHead'
 import './portfolio-preview.css'
 
-export function PortfolioPreview() {
+export function PortfolioPreview({ initialProjects }: { initialProjects?: any[] } = {}) {
   const [filter, setFilter] = useState<'all' | ProjectCategory>('all')
+  const allProjects = initialProjects && initialProjects.length > 0 ? initialProjects : PROJECTS
 
   const visible = useMemo(() => {
-    const list = filter === 'all' ? PROJECTS : PROJECTS.filter((p) => p.category === filter)
+    const list = filter === 'all' ? allProjects : allProjects.filter((p: any) => p.category === filter)
     return list.slice(0, 6)
-  }, [filter])
+  }, [filter, allProjects])
 
   return (
     <section className="section portfolio-preview" id="work" aria-labelledby="work-title">
@@ -54,14 +55,14 @@ export function PortfolioPreview() {
             >
               {cat.label}
               <span className="filter-btn__count">
-                {cat.id === 'all' ? PROJECTS.length : PROJECTS.filter((p) => p.category === cat.id).length}
+                {cat.id === 'all' ? allProjects.length : allProjects.filter((p: any) => p.category === cat.id).length}
               </span>
             </button>
           ))}
         </div>
 
         <div className="portfolio-preview__grid" key={filter}>
-          {visible.map((project, i) => (
+          {visible.map((project: any, i: number) => (
             <Reveal key={project.slug} delay={i * 60} variant="scale" className="portfolio-preview__item">
               <ProjectCard project={project} />
             </Reveal>
@@ -70,8 +71,7 @@ export function PortfolioPreview() {
 
         <p className="portfolio-preview__note">
           <Icon name="eye" size={15} />
-          Entries shown are illustrative capability studies created by the studio. Replace with real
-          project assets before launch.
+          Entries shown are capability studies and productions created by the studio.
         </p>
       </div>
     </section>

@@ -1,0 +1,91 @@
+{
+  "$schema": "https://design-tokens.org/schema.json",
+  "brand": {
+    "name": "UNIMASI",
+    "descriptor": "Animation & Motion Design",
+    "tagline": "We Make Ideas Move | Make Ideas Move, Explain the Complex",
+    "version": "3.0.0"
+  },
+  "primitive": {
+    "color": {
+      "yellow": {
+        "50": { "$value": "#FFFDE6", "$type": "color" },
+        "100": { "$value": "#FFF9BF", "$type": "color" },
+        "200": { "$value": "#FFF480", "$type": "color" },
+        "300": { "$value": "#FFEE40", "$type": "color" },
+        "400": { "$value": "#FFE41A", "$type": "color" },
+        "500": { "$value": "#FFD600", "$type": "color" },
+        "600": { "$value": "#D6B400", "$type": "color" },
+        "700": { "$value": "#A38900", "$type": "color" }
+      },
+      "darkBlue": {
+        "400": { "$value": "#1C58B3", "$type": "color" },
+        "500": { "$value": "#0F3A79", "$type": "color" },
+        "600": { "$value": "#0A2854", "$type": "color" },
+        "700": { "$value": "#061A36", "$type": "color" }
+      },
+      "navy": {
+        "800": { "$value": "#0E1E3D", "$type": "color" },
+        "900": { "$value": "#0A1730", "$type": "color" },
+        "950": { "$value": "#060A17", "$type": "color" }
+      },
+      "white": { "$value": "#FFFFFF", "$type": "color" },
+      "black": { "$value": "#000000", "$type": "color" }
+    },
+    "typography": {
+      "fontHeading": { "$value": "Montserrat, Syne, sans-serif", "$type": "fontFamily" },
+      "fontBody": { "$value": "Plus Jakarta Sans, sans-serif", "$type": "fontFamily" },
+      "fontMono": { "$value": "Space Mono, monospace", "$type": "fontFamily" }
+    },
+    "fontSize": {
+      "xs": { "$value": "0.75rem", "$type": "dimension" },
+      "sm": { "$value": "0.875rem", "$type": "dimension" },
+      "base": { "$value": "1rem", "$type": "dimension" },
+      "lg": { "$value": "1.125rem", "$type": "dimension" },
+      "xl": { "$value": "1.25rem", "$type": "dimension" },
+      "2xl": { "$value": "1.5rem", "$type": "dimension" },
+      "3xl": { "$value": "1.875rem", "$type": "dimension" },
+      "4xl": { "$value": "2.25rem", "$type": "dimension" },
+      "display": { "$value": "3.5rem", "$type": "dimension" }
+    },
+    "radius": {
+      "sm": { "$value": "0.25rem", "$type": "dimension" },
+      "md": { "$value": "0.5rem", "$type": "dimension" },
+      "lg": { "$value": "0.75rem", "$type": "dimension" },
+      "xl": { "$value": "1rem", "$type": "dimension" },
+      "full": { "$value": "9999px", "$type": "dimension" }
+    }
+  },
+  "semantic": {
+    "color": {
+      "primary": { "$value": "{primitive.color.yellow.500}", "$type": "color" },
+      "primaryHover": { "$value": "{primitive.color.yellow.400}", "$type": "color" },
+      "primaryForeground": { "$value": "{primitive.color.navy.950}", "$type": "color" },
+      "background": { "$value": "{primitive.color.navy.950}", "$type": "color" },
+      "foreground": { "$value": "{primitive.color.white}", "$type": "color" },
+      "surface": { "$value": "{primitive.color.navy.900}", "$type": "color" },
+      "surfaceElevated": { "$value": "{primitive.color.darkBlue.500}", "$type": "color" },
+      "textMuted": { "$value": "#8C9BB3", "$type": "color" },
+      "border": { "$value": "rgba(255, 214, 0, 0.2)", "$type": "color" },
+      "borderSubtle": { "$value": "rgba(255, 255, 255, 0.08)", "$type": "color" }
+    }
+  },
+  "component": {
+    "button": {
+      "primaryBg": { "$value": "{semantic.color.primary}", "$type": "color" },
+      "primaryFg": { "$value": "{semantic.color.primaryForeground}", "$type": "color" },
+      "primaryHoverBg": { "$value": "{semantic.color.primaryHover}", "$type": "color" }
+    },
+    "card": {
+      "bg": { "$value": "{semantic.color.surface}", "$type": "color" },
+      "border": { "$value": "{semantic.color.borderSubtle}", "$type": "color" },
+      "borderHover": { "$value": "{semantic.color.border}", "$type": "color" }
+    },
+    "studio": {
+      "bg": { "$value": "{primitive.color.navy.950}", "$type": "color" },
+      "sidebarBg": { "$value": "{primitive.color.navy.900}", "$type": "color" },
+      "accent": { "$value": "{primitive.color.yellow.500}", "$type": "color" },
+      "border": { "$value": "rgba(255, 214, 0, 0.15)", "$type": "color" }
+    }
+  }
+}

@@ -75,7 +75,7 @@ export async function dispatchRevalidationWebhook(
         headers: {
           'Content-Type': 'application/json',
           'x-revalidate-secret': secret,
-          'User-Agent': 'SegiaTech-Core-WebhookDispatcher/1.0',
+          'User-Agent': 'UNIMASI-Core-WebhookDispatcher/1.0',
         },
         body: JSON.stringify(payload),
         signal: controller.signal,

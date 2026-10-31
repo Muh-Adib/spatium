@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
 
   return NextResponse.json({
     status: 'online',
-    server: 'segiatech-mcp v2.0.0',
+    server: 'unimasi-mcp v2.0.0',
     transport: ['stdio', 'streamable-http'],
     activeTools: [
       'generate_draft',
@@ -109,7 +109,7 @@ Dengan pendekatan terukur ini, sistem digital perusahaan Anda siap melayani juta
 
     // --- ACTION 2: Optimize SEO & Meta Description -----------------------------
     if (action === 'optimize_seo') {
-      const cleanTitle = title.trim() || 'Artikel Rekayasa Sistem SegiaTech'
+      const cleanTitle = title.trim() || 'Artikel Rekayasa Sistem UNIMASI'
       const optimalSlug = slugify(cleanTitle)
 
       // Extract high-value summary from content or generate tailored meta description
@@ -118,18 +118,18 @@ Dengan pendekatan terukur ini, sistem digital perusahaan Anda siap melayani juta
         const plainText = content.replace(/#+\s/g, '').replace(/[`*>\-_]/g, '').trim()
         generatedExcerpt = plainText.slice(0, 150).replace(/\s+[^\s]*$/, '...')
       } else {
-        generatedExcerpt = `Analisis mendalam mengenai ${cleanTitle} oleh tim engineer SegiaTech. Temukan arsitektur terbaik untuk skalabilitas bisnis digital.`
+        generatedExcerpt = `Analisis mendalam mengenai ${cleanTitle} oleh tim engineer UNIMASI. Temukan arsitektur terbaik untuk skalabilitas bisnis digital.`
       }
 
       if (generatedExcerpt.length < 90) {
-        generatedExcerpt = `${cleanTitle} — Pelajari arsitektur sistem, panduan teknis, dan insight industri digital dari studio rekayasa perangkat lunak SegiaTech.`
+        generatedExcerpt = `${cleanTitle} — Pelajari arsitektur sistem, panduan teknis, dan insight industri digital dari studio rekayasa perangkat lunak UNIMASI.`
       }
 
       return NextResponse.json({
         success: true,
         action: 'optimize_seo',
         result: {
-          suggestedTitle: `${cleanTitle} — SegiaTech Engineering`,
+          suggestedTitle: `${cleanTitle} — UNIMASI Engineering`,
           suggestedSlug: optimalSlug,
           metaDescription: generatedExcerpt.slice(0, 158),
           characterCount: Math.min(158, generatedExcerpt.length),
@@ -149,7 +149,7 @@ Dengan pendekatan terukur ini, sistem digital perusahaan Anda siap melayani juta
 
       // Ensure closing takeaway exists
       if (!polished.includes('## Ringkasan Eksekutif & Tindak Lanjut') && !polished.includes('Langkah Implementasi')) {
-        polished = `${polished}\n\n---\n\n## Ringkasan Eksekutif & Tindak Lanjut\n\n- Terapkan evaluasi arsitektur secara berkala untuk memitigasi teknis utang (technical debt).\n- Prioritaskan pengalaman pengguna akhir melalui latensi rendah dan kepatuhan standar Core Web Vitals.\n- Konsultasikan arsitektur sistem dengan lead engineer SegiaTech untuk akselerasi eksekusi produk.`
+        polished = `${polished}\n\n---\n\n## Ringkasan Eksekutif & Tindak Lanjut\n\n- Terapkan evaluasi arsitektur secara berkala untuk memitigasi teknis utang (technical debt).\n- Prioritaskan pengalaman pengguna akhir melalui latensi rendah dan kepatuhan standar Core Web Vitals.\n- Konsultasikan arsitektur sistem dengan lead engineer UNIMASI untuk akselerasi eksekusi produk.`
       }
 
       return NextResponse.json({
@@ -157,7 +157,7 @@ Dengan pendekatan terukur ini, sistem digital perusahaan Anda siap melayani juta
         action: 'polish_content',
         result: {
           content: polished,
-          message: 'Format tulisan, kutipan insight, dan ringkasan eksekutif berhasil diselaraskan dengan standar SegiaTech.',
+          message: 'Format tulisan, kutipan insight, dan ringkasan eksekutif berhasil diselaraskan dengan standar UNIMASI.',
         },
       })
     }

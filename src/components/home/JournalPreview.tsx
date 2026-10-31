@@ -52,7 +52,12 @@ export async function JournalPreview() {
   const [featured, ...recent] = articles
 
   return (
-    <section className="section journal-preview" id="journal" aria-labelledby="journal-title">
+    <section
+      className="section journal-preview"
+      id="journal"
+      aria-labelledby="journal-title"
+      data-reveal
+    >
       <div className="container container--wide">
         <SectionHead
           id="journal-title"

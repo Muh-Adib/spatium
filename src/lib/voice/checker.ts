@@ -121,7 +121,7 @@ export function evaluateContentVoice(
     })
   }
 
-  // 4. Stylometry: POV Check (SegiaTech engineering tone uses 1st Person Plural "kami" or 2nd Person "Anda")
+  // 4. Stylometry: POV Check (UNIMASI engineering tone uses 1st Person Plural "kami" or 2nd Person "Anda")
   if (stylometry.povRatios.firstPersonSingular > 0.45 && stylometry.wordCount > 20) {
     deviations.push({
       dimension: 'pov_consistency',
@@ -139,7 +139,7 @@ export function evaluateContentVoice(
     if (!hasSignature) {
       deviations.push({
         dimension: 'signature_phrases',
-        message: `Disarankan menyertakan minimal salah satu pilar terminologi SegiaTech (misal: ${signatures.slice(0, 3).map((s) => `"${s}"`).join(', ')}).`,
+        message: `Disarankan menyertakan minimal salah satu pilar terminologi UNIMASI (misal: ${signatures.slice(0, 3).map((s) => `"${s}"`).join(', ')}).`,
         severity: 'warning',
         expected: 'Minimal 1 frasa pilar',
       })

@@ -33,27 +33,25 @@ export interface NavEntry {
 }
 
 // --- Canonical Fallback Navigation (Used only when database is initializing) ---
+// Hrefs must match real App Router routes under src/app:
+// /services, /portfolio, /journal, /about, /contact.
 
 export const primaryNav: NavEntry[] = [
   {
-    label: 'Solusi',
-    href: '/solusi',
-  },
-  {
     label: 'Layanan',
-    href: '/layanan',
+    href: '/services',
   },
   {
     label: 'Portofolio',
-    href: '/portofolio',
+    href: '/portfolio',
   },
   {
     label: 'Artikel',
-    href: '/artikel',
+    href: '/journal',
   },
   {
     label: 'Tentang',
-    href: '/tentang',
+    href: '/about',
   },
 ]
 
@@ -61,32 +59,21 @@ export const primaryNav: NavEntry[] = [
 
 export const footerNav = [
   {
-    title: 'Layanan & Solusi',
+    title: 'Layanan',
     items: [
-      { label: 'Semua Layanan', href: '/layanan' },
-      { label: 'Katalog Solusi', href: '/solusi' },
-      { label: 'Studi Kasus Portofolio', href: '/portofolio' },
+      { label: 'Semua Layanan', href: '/services' },
+      { label: 'Studi Kasus Portofolio', href: '/portfolio' },
     ],
   },
   {
     title: 'Wawasan',
-    items: [
-      { label: 'Semua Artikel', href: '/artikel' },
-      { label: 'Pencarian Konten', href: '/search' },
-    ],
+    items: [{ label: 'Semua Artikel', href: '/journal' }],
   },
   {
     title: 'Perusahaan',
     items: [
-      { label: 'Tentang Kami', href: '/tentang' },
-      { label: 'Kontak', href: '/kontak' },
-    ],
-  },
-  {
-    title: 'Hukum',
-    items: [
-      { label: 'Kebijakan Privasi', href: '/privasi' },
-      { label: 'Syarat & Ketentuan', href: '/syarat-ketentuan' },
+      { label: 'Tentang Kami', href: '/about' },
+      { label: 'Kontak', href: '/contact' },
     ],
   },
 ]

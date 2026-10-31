@@ -42,7 +42,7 @@ export const DEFAULT_THEME_TOKENS: ThemeTokensPayload = {
     foreground: '#F8FAFC',
     card: '#0E1A33',
     cardForeground: '#F8FAFC',
-    accent: '#FFDE00',
+    accent: '#FFD600',
     accentForeground: '#070E1E',
     border: 'rgba(255, 255, 255, 0.08)',
     muted: '#142345',

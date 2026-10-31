@@ -41,7 +41,7 @@ interface UserProfileModalProps {
 }
 
 const initials = (name: string) =>
-  (name || 'SegiaTech')
+  (name || 'UNIMASI')
     .split(' ')
     .filter(Boolean)
     .map((n) => n[0])
@@ -199,7 +199,7 @@ export function UserProfileModal({
               </span>
               <div className="min-w-0">
                 <h3 className="truncate text-base font-semibold text-white">{name || userName || 'Pengguna Admin'}</h3>
-                <p className="truncate text-xs text-neutral-400">{userEmail || 'admin@segiatech.com'}</p>
+                <p className="truncate text-xs text-neutral-400">{userEmail || 'admin@unimasi.com'}</p>
                 <div className="mt-2 flex items-center gap-2">
                   <span className={`inline-flex items-center gap-1.5 rounded-md border px-2 py-0.5 text-xs font-medium ${roleMeta.badge}`}>
                     <RoleIcon className="h-3 w-3" aria-hidden="true" />
@@ -297,7 +297,7 @@ export function UserProfileModal({
                   Alamat Email
                 </label>
                 <div className="flex items-center justify-between rounded-xl border border-white/10 bg-white/[0.02] px-3.5 py-2.5 text-xs">
-                  <span className="font-mono text-neutral-200">{userEmail || 'admin@segiatech.com'}</span>
+                  <span className="font-mono text-neutral-200">{userEmail || 'admin@unimasi.com'}</span>
                   <span className="inline-flex items-center gap-1 rounded bg-emerald-500/10 px-2 py-0.5 font-mono text-[10px] font-medium text-emerald-400">
                     <CheckCircle2 className="h-3 w-3" />
                     Terotentikasi

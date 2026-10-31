@@ -112,7 +112,7 @@ export async function GET(req: NextRequest) {
     },
     meta: {
       generatedAt: new Date().toISOString(),
-      provider: 'SegiaTech Platform Core',
+      provider: 'UNIMASI Platform Core',
     },
   })
 }

@@ -11,7 +11,7 @@ export interface BrandLogoProps {
 }
 
 export function BrandLogo({
-  siteName = 'SegiaTech',
+  siteName = 'UNIMASI Studio',
   logoUrl,
   className = '',
   iconSize = 28,
@@ -34,16 +34,16 @@ export function BrandLogo({
     )
   }
 
-  // If SegiaTech default official logo exists
-  if (siteName.toLowerCase() === 'segiatech') {
+  // Official UNIMASI Logo
+  if (!logoUrl) {
     return (
-      <div className={`flex items-center select-none py-1 px-1 sm:px-1.5 ${className}`}>
+      <div className={`flex items-center gap-2 select-none py-1 px-1 sm:px-1.5 ${className}`}>
         <Image
-          src="/images/logo-segiatech-official.png"
-          alt="SegiaTech"
+          src="/logo/unimasi-coloured.webp"
+          alt={siteName}
           width={110}
-          height={33}
-          className="h-6 sm:h-[26px] w-auto object-contain transition-transform duration-200 group-hover:scale-105"
+          height={30}
+          className="h-6 sm:h-[28px] w-auto object-contain transition-transform duration-200 group-hover:scale-105"
           priority
         />
       </div>
@@ -57,7 +57,7 @@ export function BrandLogo({
       {/* Modern geometric glowing icon mark */}
       <div
         style={{ width: iconSize, height: iconSize }}
-        className="relative flex items-center justify-center rounded-lg bg-gradient-to-br from-amber-400 via-orange-500 to-amber-600 text-black font-bold font-mono text-sm shadow-[0_0_15px_rgba(245,158,11,0.25)] transition-transform duration-200 group-hover:scale-105 shrink-0"
+        className="relative flex items-center justify-center rounded-lg bg-gradient-to-br from-[#FFE855] via-[#FFD600] to-[#E6C700] text-[#060A17] font-bold font-syne text-sm shadow-[0_0_15px_rgba(255,214,0,0.3)] transition-transform duration-200 group-hover:scale-105 shrink-0"
       >
         <span>{initial}</span>
         <div className="absolute inset-0 rounded-lg ring-1 ring-inset ring-white/20" />
@@ -65,7 +65,7 @@ export function BrandLogo({
 
       {showText && (
         <div className="flex flex-col">
-          <span className="font-display font-bold text-base sm:text-lg tracking-tight text-white group-hover:text-amber-300 transition-colors">
+          <span className="font-syne font-bold text-base sm:text-lg tracking-tight text-white group-hover:text-[#FFD600] transition-colors">
             {siteName}
           </span>
           {subtext && (
@@ -78,4 +78,5 @@ export function BrandLogo({
     </div>
   )
 }
+
 

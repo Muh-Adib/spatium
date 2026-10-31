@@ -60,7 +60,7 @@ export const COPILOT_EDITOR_TOOLS = [
         },
         searchScope: {
           type: 'STRING',
-          description: 'Cakupan riset: "all" (semua sumber), "primary_docs" (dokumentasi & standar resmi), atau "internal_catalog" (portofolio & layanan SegiaTech).',
+          description: 'Cakupan riset: "all" (semua sumber), "primary_docs" (dokumentasi & standar resmi), atau "internal_catalog" (portofolio & layanan UNIMASI).',
         },
       },
       required: ['queries'],
@@ -71,7 +71,7 @@ export const COPILOT_EDITOR_TOOLS = [
   {
     name: 'fetch_web_evidence',
     description:
-      'Tahap 2 & 3: Mengambil dan mengekstrak teks kutipan faktual dari URL eksternal (dengan proteksi SSRF) atau rute internal SegiaTech (/portofolio/..., /layanan/...) untuk diverifikasi keabsahannya.',
+      'Tahap 2 & 3: Mengambil dan mengekstrak teks kutipan faktual dari URL eksternal (dengan proteksi SSRF) atau rute internal UNIMASI (/portofolio/..., /layanan/...) untuk diverifikasi keabsahannya.',
     parameters: {
       type: 'OBJECT',
       properties: {
@@ -226,7 +226,7 @@ export const COPILOT_EDITOR_TOOLS = [
         },
         seoTitle: {
           type: 'STRING',
-          description: 'Meta Title SEO (40-68 karakter, diakhiri " | SegiaTech").',
+          description: 'Meta Title SEO (40-68 karakter, diakhiri " | UNIMASI").',
         },
         metaDescription: {
           type: 'STRING',
@@ -377,7 +377,7 @@ export function computeEditorialMetrics(rawContent: string, focusKeyphrase: stri
 
   const h2Count = ((rawContent || '').match(/<h2[\s>]/gi) || []).length
   const h3Count = ((rawContent || '').match(/<h3[\s>]/gi) || []).length
-  const internalLinkCount = ((rawContent || '').match(/href=["'](\/[^"']*|https?:\/\/(www\.)?segiatech\.com[^"']*)["']/gi) || []).length
+  const internalLinkCount = ((rawContent || '').match(/href=["'](\/[^"']*|https?:\/\/(www\.)?unimasi\.com[^"']*)["']/gi) || []).length
 
   return {
     wordCount,
@@ -426,7 +426,7 @@ export async function executeMultiQuerySearch(queries: string[], searchScope = '
         if (matches) {
           allResults.push({
             query: q,
-            title: `Portofolio: ${p.title} (${p.client || 'SegiaTech'})`,
+            title: `Portofolio: ${p.title} (${p.client || 'UNIMASI'})`,
             url: `/portofolio/${p.slug}`,
             snippet: (p.summary || p.challenge || '').replace(/<[^>]*>/g, '').slice(0, 220) + '...',
             sourceType: 'internal_catalog',
@@ -514,7 +514,7 @@ export async function executeMultiQuerySearch(queries: string[], searchScope = '
  */
 export async function executeFetchWebEvidence(urlStr: string, claimToVerify?: string) {
   // Case A: Internal path
-  if (urlStr.startsWith('/') || urlStr.includes('segiatech.com')) {
+  if (urlStr.startsWith('/') || urlStr.includes('unimasi.com')) {
     const slug = urlStr.split('/').filter(Boolean).pop() || ''
     const portfolioMatch = (seedPortfolio as any[]).find((p) => p.slug === slug)
     if (portfolioMatch) {
@@ -551,7 +551,7 @@ export async function executeFetchWebEvidence(urlStr: string, claimToVerify?: st
 
     const res = await fetch(safeUrl.toString(), {
       signal: controller.signal,
-      headers: { 'User-Agent': 'SegiaTech-Evidence-Bot/1.0' },
+      headers: { 'User-Agent': 'UNIMASI-Evidence-Bot/1.0' },
     })
     clearTimeout(timer)
 
@@ -684,10 +684,10 @@ export async function executeCopilotAgentRunner(
 - Jika data yang dibutuhkan sudah mencukupi atau tidak ada tool yang cocok, berikan jawaban langsung dalam teks tanpa memanggil tool fiktif.
 
 [STANDAR EKSEKUSI AGENTIC — 6-STAGE RESEARCH & EVIDENCE PIPELINE]:
-Anda adalah SegiaTech Editorial Intelligence Agent. Anda TIDAK diperbolehkan langsung membuat artikel secara asal-asalan tanpa riset bertahap dan verifikasi fakta.
+Anda adalah UNIMASI Editorial Intelligence Agent. Anda TIDAK diperbolehkan langsung membuat artikel secara asal-asalan tanpa riset bertahap dan verifikasi fakta.
 Ikuti alur terstruktur ini secara disiplin:
 1. Search Intent & Topic Analysis: Jalankan research_topic_intent untuk memahami kebutuhan pengguna, intent (informational/commercial), audiens, dan pertanyaan kunci.
-2. Multi-Source Research: Jalankan web_search_multi_query dengan minimal 2-4 query berbeda melintasi broad keywords, deep technical specs, primary docs, dan katalog internal SegiaTech (/portofolio dan /layanan).
+2. Multi-Source Research: Jalankan web_search_multi_query dengan minimal 2-4 query berbeda melintasi broad keywords, deep technical specs, primary docs, dan katalog internal UNIMASI (/portofolio dan /layanan).
 3. Evidence & Fact Verification: Ekstrak bukti dengan fetch_web_evidence dan catat bukti faktual ke dalam record_evidence_dossier. DILARANG MENGARANG FAKTA. Semua angka, metrik, dan klaim teknis wajib didukung kutipan dan URL.
 4. Gap Analysis & Cross-Check: Jalankan gap_analysis_and_cross_check untuk memastikan tidak ada klaim penting yang hanya didukung 1 sumber atau saling bertentangan.
 5. Article Generation: Susun draf dengan apply_article_draft_or_metadata atau edit_article_segment berlandaskan Research Dossier yang terverifikasi.
@@ -1045,7 +1045,7 @@ Pengguna meminta Anda untuk MELANJUTKAN pekerjaan yang terputus atau belum seles
                 nextChanges.title.length > 56
                   ? nextChanges.title.slice(0, 56).trimEnd()
                   : nextChanges.title
-              nextChanges.seoTitle = `${prefix} | SegiaTech`
+              nextChanges.seoTitle = `${prefix} | UNIMASI`
               nextChanges.metaTitle = nextChanges.seoTitle
             }
             if (args.metaDescription) {
@@ -1119,7 +1119,7 @@ Pengguna meminta Anda untuk MELANJUTKAN pekerjaan yang terputus atau belum seles
               violations,
               passedChecks,
               metrics,
-              recommendations: violations.length > 0 ? violations : ['Artikel memenuhi 100% kriteria kelulusan publikasi SegiaTech.'],
+              recommendations: violations.length > 0 ? violations : ['Artikel memenuhi 100% kriteria kelulusan publikasi UNIMASI.'],
             }
             break
           }

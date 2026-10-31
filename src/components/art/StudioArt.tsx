@@ -222,19 +222,20 @@ const MOTIFS: Motif[] = [
   ),
 ]
 
-const ACCENTS = ['#FFD400', '#7FB2FF', '#8FF0C4', '#FFD400', '#FFE566', '#7FB2FF']
+const ACCENTS = ['#FFD600', '#7FB2FF', '#8FF0C4', '#FFD600', '#FFE566', '#7FB2FF']
 
 type StudioArtProps = {
-  variant: number
+  variant?: number
   /** Optional label rendered in the corner, e.g. a discipline tag. */
   caption?: string
   className?: string
 }
 
-export function StudioArt({ variant, caption, className }: StudioArtProps) {
-  const index = Math.abs(variant) % MOTIFS.length
-  const accent = ACCENTS[Math.abs(variant) % ACCENTS.length]
-  const motif = MOTIFS[index]
+export function StudioArt({ variant = 0, caption, className }: StudioArtProps) {
+  const numVariant = typeof variant === 'number' && !Number.isNaN(variant) ? variant : 0
+  const index = Math.abs(numVariant) % MOTIFS.length
+  const accent = ACCENTS[Math.abs(numVariant) % ACCENTS.length]
+  const motif = MOTIFS[index] || MOTIFS[0]
 
   return (
     <div className={`studio-art${className ? ` ${className}` : ''}`}>

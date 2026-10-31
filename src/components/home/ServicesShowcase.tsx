@@ -1,12 +1,16 @@
 import Link from 'next/link'
 import { CORE_SERVICES } from '@/data/services'
+import { getCoreServices } from '@/lib/core'
 import { ServiceVisual } from '@/components/services/ServiceVisual'
 import { Icon } from '@/components/Icon'
 import { Reveal } from '@/components/ui/Reveal'
 import { SectionHead } from '@/components/ui/SectionHead'
 import './services-showcase.css'
 
-export function ServicesShowcase() {
+export async function ServicesShowcase({ initialServices }: { initialServices?: any[] } = {}) {
+  const services = initialServices || (await getCoreServices())
+  const displayServices = (services && services.length > 0 ? services : CORE_SERVICES).slice(0, 3)
+
   return (
     <section className="section services-showcase" id="services" aria-labelledby="services-title">
       <div className="container container--wide">
@@ -33,7 +37,7 @@ export function ServicesShowcase() {
         />
 
         <div className="services-showcase__list">
-          {CORE_SERVICES.map((service, index) => (
+          {displayServices.map((service: any, index: number) => (
             <article
               className={`service-block${index % 2 === 1 ? ' service-block--reverse' : ''}`}
               key={service.slug}
@@ -42,10 +46,10 @@ export function ServicesShowcase() {
               <div className="service-block__copy">
                 <Reveal variant={index % 2 === 0 ? 'left' : 'right'}>
                   <div className="service-block__index-row">
-                    <span className="service-block__index">{service.index}</span>
+                    <span className="service-block__index">{service.index || `0${index + 1}`}</span>
                     <span className="service-block__rule" aria-hidden="true" />
-                    <span className="pill" style={{ borderColor: 'transparent', background: 'rgba(255,212,0,0.12)', color: 'var(--yellow)' }}>
-                      {service.shortName}
+                    <span className="pill" style={{ borderColor: 'transparent', background: 'rgba(255,214,0,0.12)', color: 'var(--yellow)' }}>
+                      {service.shortName || service.name}
                     </span>
                   </div>
 
@@ -57,16 +61,16 @@ export function ServicesShowcase() {
                   <p className="service-block__summary">{service.summary}</p>
 
                   <ul className="service-block__capabilities">
-                    {service.capabilities.slice(0, 6).map((cap) => (
-                      <li key={cap.title}>
+                    {(service.capabilities || []).slice(0, 6).map((cap: any) => (
+                      <li key={typeof cap === 'string' ? cap : cap.title}>
                         <Icon name="check" size={14} />
-                        {cap.title}
+                        {typeof cap === 'string' ? cap : cap.title}
                       </li>
                     ))}
                   </ul>
 
                   <Link href={`/services/${service.slug}`} className="btn btn--ghost">
-                    Explore {service.shortName}
+                    Explore {service.shortName || service.name}
                     <span className="btn__icon">
                       <Icon name="arrow-right" size={16} />
                     </span>
@@ -84,7 +88,7 @@ export function ServicesShowcase() {
                       <i />
                     </span>
                   </div>
-                  <ServiceVisual kind={service.visual} />
+                  <ServiceVisual kind={service.visual || '2d'} />
                 </div>
               </Reveal>
             </article>

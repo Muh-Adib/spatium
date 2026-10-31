@@ -65,7 +65,7 @@ export function StudioWpImporter() {
   const [username, setUsername] = useState('')
   const [applicationPassword, setApplicationPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
-  const [siteUrl, setSiteUrl] = useState('https://www.segiatech.com')
+  const [siteUrl, setSiteUrl] = useState('https://www.unimasi.com')
   const [loading, setLoading] = useState(false)
   const [activeJobId, setActiveJobId] = useState<string | null>(null)
   const [jobStatus, setJobStatus] = useState<JobStatus | null>(null)
@@ -460,7 +460,7 @@ export function StudioWpImporter() {
                 type="url"
                 value={siteUrl}
                 onChange={(e) => setSiteUrl(e.target.value)}
-                placeholder="https://www.segiatech.com"
+                placeholder="https://www.unimasi.com"
                 required
                 disabled={isRunning}
                 className="w-full bg-black/40 border border-white/15 rounded-xl px-4 py-2.5 pl-10 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-cyan-400 font-mono disabled:opacity-60 transition-colors"
@@ -487,7 +487,7 @@ export function StudioWpImporter() {
                     type="text"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
-                    placeholder="admin_segiatech"
+                    placeholder="admin_unimasi"
                     autoComplete="off"
                     required
                     disabled={isRunning}

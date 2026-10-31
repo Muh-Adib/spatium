@@ -155,7 +155,7 @@ export function StudioServicesManager() {
       setDepTag(cat.tag || '')
       setDepShortDesc(cat.shortDescription || '')
       setDepHeroImage(cat.heroImage || '/images/nav/web-dev.jpg')
-      setDepHeroAlt(cat.heroAlt || (cat.title ? `${cat.title} - Departemen Spesialisasi SegiaTech` : 'Departemen Spesialisasi SegiaTech'))
+      setDepHeroAlt(cat.heroAlt || (cat.title ? `${cat.title} - Departemen Spesialisasi UNIMASI` : 'Departemen Spesialisasi UNIMASI'))
       setDepThemePreset(cat.themePreset || 'charcoal')
       setDepOrder(String(cat.order ?? 0))
       setDepStatus(cat.status || 'published')
@@ -165,7 +165,7 @@ export function StudioServicesManager() {
       setMetaDesc(cat.metaDescription || cat.shortDescription || '')
       setFocusKeyphrase(cat.focusKeyphrase || cat.title)
       setRelatedKeyphrases(cat.relatedKeyphrases || [])
-      setCanonicalUrl(cat.canonicalUrl || `https://www.segiatech.com/layanan/${cat.slug}`)
+      setCanonicalUrl(cat.canonicalUrl || `https://www.unimasi.com/layanan/${cat.slug}`)
     } else {
       setDepId(null)
       setDepSlug('')
@@ -173,7 +173,7 @@ export function StudioServicesManager() {
       setDepTag('DEPARTEMEN SPESIALISASI')
       setDepShortDesc('')
       setDepHeroImage('/images/nav/web-dev.jpg')
-      setDepHeroAlt('Departemen Spesialisasi SegiaTech')
+      setDepHeroAlt('Departemen Spesialisasi UNIMASI')
       setDepThemePreset('charcoal')
       setDepOrder(String(categories.length + 1))
       setDepStatus('published')
@@ -202,7 +202,7 @@ export function StudioServicesManager() {
       setSvcShortDesc(svc.shortDescription || '')
       setSvcWhatsappPrompt(svc.whatsappPrompt || '')
       setSvcHeroImage(svc.heroImage?.url || svc.heroImage || '/images/nav/web-dev.jpg')
-      setSvcHeroAlt(svc.heroAlt || (svc.name ? `${svc.name} - Layanan Rekayasa SegiaTech` : 'Layanan Rekayasa SegiaTech'))
+      setSvcHeroAlt(svc.heroAlt || (svc.name ? `${svc.name} - Layanan UNIMASI Studio` : 'Layanan UNIMASI Studio'))
       setSvcOrder(String(svc.order ?? 0))
       setSvcFeatured(Boolean(svc.featured))
       setSvcStatus(svc.status || 'published')
@@ -218,7 +218,7 @@ export function StudioServicesManager() {
           ? JSON.parse(svc.relatedKeyphrases)
           : svc.relatedKeyphrases || []
       )
-      setCanonicalUrl(`https://www.segiatech.com/layanan/${svc.slug}`)
+      setCanonicalUrl(`https://unimasi.studio/services/${svc.slug}`)
       setSvcSelectedPortfolios([])
     } else {
       setSvcId(null)
@@ -229,9 +229,9 @@ export function StudioServicesManager() {
       setSvcCategoryBadge(categories[0]?.title || '')
       setSvcHighlightWord('')
       setSvcShortDesc('')
-      setSvcWhatsappPrompt('Halo SegiaTech, saya ingin konsultasi layanan.')
+      setSvcWhatsappPrompt('Halo UNIMASI, saya ingin konsultasi layanan.')
       setSvcHeroImage('/images/nav/web-dev.jpg')
-      setSvcHeroAlt('Layanan Rekayasa Perangkat Lunak SegiaTech')
+      setSvcHeroAlt('Layanan UNIMASI Studio')
       setSvcOrder(String(services.length + 1))
       setSvcFeatured(false)
       setSvcStatus('published')
@@ -442,10 +442,10 @@ export function StudioServicesManager() {
   // ─────────────────────────────────────────────────────────────────────────────
   if (editorMode) {
     return (
-      <div className="fixed inset-0 z-50 flex h-screen w-screen flex-col overflow-hidden bg-[#0D0D0D] text-white antialiased selection:bg-[#F2C7A0] selection:text-black">
+      <div className="fixed inset-0 z-50 flex h-screen w-screen flex-col overflow-hidden bg-[#0D0D0D] text-white antialiased selection:bg-[#FFD600] selection:text-black">
         {/* Top Dedicated Studio Master Header */}
         <header className="h-14 shrink-0 px-4 sm:px-6 bg-[#161616] border-b border-white/[0.08] flex items-center justify-between gap-3 z-30 select-none">
-          <div className="flex items-center gap-3 min-w-0">
+          <div className="flex items-center gap-2.5 min-w-0 flex-1 max-w-[45%] md:max-w-[50%]">
             <Tooltip label="Kembali" hint="Kembali ke Daftar Layanan" side="bottom">
               <button
                 type="button"
@@ -459,30 +459,14 @@ export function StudioServicesManager() {
               </button>
             </Tooltip>
             <div className="h-4 w-px bg-white/10 hidden sm:block shrink-0" />
-            <div className="min-w-0">
-              <div className="flex items-center gap-2">
-                <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-mono font-bold bg-[#F2C7A0]/15 border border-[#F2C7A0]/40 text-[#F2C7A0] uppercase tracking-wider">
-                  <Layers className="w-3 h-3 text-[#F2C7A0]" />
-                  {editingType === 'department' ? 'DEPARTEMEN SPESIALISASI' : 'LAYANAN TEKNIS'}
-                </span>
-                {editingType === 'department' && depTag && (
-                  <span className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-white/5 text-neutral-400 border border-white/10 hidden sm:inline-block">
-                    {depTag}
-                  </span>
-                )}
-                {editingType === 'service' && svcCategoryBadge && (
-                  <span className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-white/5 text-neutral-400 border border-white/10 hidden sm:inline-block">
-                    {svcCategoryBadge}
-                  </span>
-                )}
-                <span className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 hidden md:inline-block uppercase">
-                  {editingType === 'department' ? depStatus : svcStatus}
-                </span>
-              </div>
-              <h2 className="font-display text-xs sm:text-sm font-bold text-white truncate max-w-[200px] sm:max-w-xs md:max-w-md">
-                {editingType === 'department'
-                  ? depTitle || 'Departemen Baru'
-                  : svcName || 'Layanan Baru'}
+            <div className="flex items-center gap-2 min-w-0 overflow-hidden">
+              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-[#FFD600]/15 border border-[#FFD600]/40 text-[#FFD600] uppercase tracking-wider shrink-0">
+                <Layers className="w-3 h-3 text-[#FFD600]" />
+                <span className="hidden sm:inline">{editingType === 'department' ? 'DEPARTEMEN' : 'LAYANAN'}</span>
+              </span>
+              <span className="text-xs text-neutral-600 hidden sm:inline shrink-0">/</span>
+              <h2 className="font-syne text-xs sm:text-sm font-bold text-white truncate" title={editingType === 'department' ? depTitle || 'Departemen Baru' : svcName || 'Layanan Baru'}>
+                {editingType === 'department' ? depTitle || 'Departemen Baru' : svcName || 'Layanan Baru'}
               </h2>
             </div>
           </div>
@@ -499,7 +483,7 @@ export function StudioServicesManager() {
                     : 'text-neutral-400 hover:text-white'
                 }`}
               >
-                <PenSquare className="w-3.5 h-3.5 text-[#F2C7A0]" />
+                <PenSquare className="w-3.5 h-3.5 text-[#FFD600]" />
                 <span className="hidden sm:inline">Kanvas</span>
               </button>
             </Tooltip>
@@ -541,11 +525,11 @@ export function StudioServicesManager() {
                 onClick={() => setAiOpen(!aiOpen)}
                 className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-mono border transition-all ${
                   aiOpen
-                    ? 'bg-[#F2C7A0]/20 border-[#F2C7A0]/50 text-[#F2C7A0]'
-                    : 'bg-white/5 border-white/10 text-neutral-300 hover:text-white hover:border-[#F2C7A0]/30'
+                    ? 'bg-[#FFD600]/20 border-[#FFD600]/50 text-[#FFD600]'
+                    : 'bg-white/5 border-white/10 text-neutral-300 hover:text-white hover:border-[#FFD600]/30'
                 }`}
               >
-                <Sparkles className="w-3.5 h-3.5 text-[#F2C7A0]" />
+                <Sparkles className="w-3.5 h-3.5 text-[#FFD600]" />
                 <span className="hidden lg:inline">AI Copilot</span>
               </button>
             </Tooltip>
@@ -558,7 +542,7 @@ export function StudioServicesManager() {
                   onClick={() => setShowPropertiesDrawer(!showPropertiesDrawer)}
                   className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-mono border transition-all ${
                     showPropertiesDrawer
-                      ? 'bg-[#F2C7A0]/20 border-[#F2C7A0]/50 text-[#F2C7A0]'
+                      ? 'bg-[#FFD600]/20 border-[#FFD600]/50 text-[#FFD600]'
                       : 'bg-white/5 border-white/10 text-neutral-400 hover:text-white'
                   }`}
                 >
@@ -590,7 +574,7 @@ export function StudioServicesManager() {
                 type="button"
                 onClick={editingType === 'department' ? handleSaveDepartment : handleSaveService}
                 disabled={saving || !isBlocksValid}
-                className="inline-flex items-center gap-2 px-4 py-1.5 rounded-xl bg-[#F2C7A0] text-[#191919] font-medium text-xs font-mono uppercase tracking-wider hover:bg-[#ebd5c1] transition-all shadow-[0_0_15px_rgba(242,199,160,0.25)] disabled:opacity-50"
+                className="inline-flex items-center gap-2 px-4 py-1.5 rounded-xl bg-[#FFD600] text-[#191919] font-medium text-xs font-mono uppercase tracking-wider hover:bg-[#FFE855] transition-all shadow-[0_0_15px_rgba(255, 214, 0,0.25)] disabled:opacity-50"
               >
                 <Save className="w-3.5 h-3.5" />
                 <span>{saving ? 'Menyimpan...' : 'Simpan Halaman'}</span>
@@ -651,7 +635,7 @@ export function StudioServicesManager() {
                       onClick={() => setActiveInspectorTab('meta')}
                       className={`flex-1 py-2 text-xs font-mono font-medium rounded-xl transition-all ${
                         activeInspectorTab === 'meta'
-                          ? 'bg-[#F2C7A0] text-[#191919] shadow font-bold'
+                          ? 'bg-[#FFD600] text-[#191919] shadow font-bold'
                           : 'text-neutral-400 hover:text-white'
                       }`}
                     >
@@ -662,7 +646,7 @@ export function StudioServicesManager() {
                       onClick={() => setActiveInspectorTab('seo')}
                       className={`flex-1 py-2 text-xs font-mono font-medium rounded-xl transition-all ${
                         activeInspectorTab === 'seo'
-                          ? 'bg-[#F2C7A0] text-[#191919] shadow font-bold'
+                          ? 'bg-[#FFD600] text-[#191919] shadow font-bold'
                           : 'text-neutral-400 hover:text-white'
                       }`}
                     >
@@ -691,7 +675,7 @@ export function StudioServicesManager() {
                                 setDepTitle(e.target.value)
                                 if (!depId) {
                                   setDepSlug(e.target.value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''))
-                                  setSeoTitle(`${e.target.value} — Spesialisasi Rekayasa SegiaTech`)
+                                  setSeoTitle(`${e.target.value} — Spesialisasi UNIMASI`)
                                   setFocusKeyphrase(e.target.value)
                                 }
                               }}
@@ -791,7 +775,7 @@ export function StudioServicesManager() {
                               type="checkbox"
                               checked={depShowInNav}
                               onChange={(e) => setDepShowInNav(e.target.checked)}
-                              className="w-4 h-4 rounded text-[#F2C7A0] accent-[#F2C7A0]"
+                              className="w-4 h-4 rounded text-[#FFD600] accent-[#FFD600]"
                             />
                           </div>
                         </>
@@ -809,7 +793,7 @@ export function StudioServicesManager() {
                                 setSvcName(e.target.value)
                                 if (!svcId) {
                                   setSvcSlug(e.target.value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''))
-                                  setSeoTitle(`${e.target.value} — Layanan Rekayasa SegiaTech`)
+                                  setSeoTitle(`${e.target.value} — Layanan UNIMASI`)
                                   setFocusKeyphrase(e.target.value)
                                 }
                               }}
@@ -925,7 +909,7 @@ export function StudioServicesManager() {
                                       htmlFor={`svc-portfolio-${p.id}`}
                                       className={`flex items-center gap-2 p-2 rounded-xl text-xs cursor-pointer transition-colors ${
                                         isChecked
-                                          ? 'bg-[#F2C7A0]/15 text-[#F2C7A0]'
+                                          ? 'bg-[#FFD600]/15 text-[#FFD600]'
                                           : 'text-neutral-300 hover:bg-white/5'
                                       }`}
                                     >
@@ -944,7 +928,7 @@ export function StudioServicesManager() {
                                             )
                                           }
                                         }}
-                                        className="rounded text-[#F2C7A0] accent-[#F2C7A0]"
+                                        className="rounded text-[#FFD600] accent-[#FFD600]"
                                       />
                                       <span className="truncate">{p.title}</span>
                                     </label>
@@ -1094,7 +1078,7 @@ export function StudioServicesManager() {
             onClick={() => setActiveTab('departments')}
             className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-mono font-medium transition-all ${
               activeTab === 'departments'
-                ? 'bg-[#F2C7A0] text-[#191919] font-bold shadow-sm'
+                ? 'bg-[#FFD600] text-[#191919] font-bold shadow-sm'
                 : 'text-neutral-400 hover:text-white hover:bg-white/5'
             }`}
           >
@@ -1106,7 +1090,7 @@ export function StudioServicesManager() {
             onClick={() => setActiveTab('services')}
             className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-mono font-medium transition-all ${
               activeTab === 'services'
-                ? 'bg-[#F2C7A0] text-[#191919] font-bold shadow-sm'
+                ? 'bg-[#FFD600] text-[#191919] font-bold shadow-sm'
                 : 'text-neutral-400 hover:text-white hover:bg-white/5'
             }`}
           >
@@ -1122,7 +1106,7 @@ export function StudioServicesManager() {
               <button
                 type="button"
                 onClick={() => handleEditDepartment()}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#F2C7A0] text-[#191919] font-medium text-xs font-mono uppercase tracking-wider hover:bg-[#ebd5c1] transition-all shadow-sm"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#FFD600] text-[#191919] font-medium text-xs font-mono uppercase tracking-wider hover:bg-[#FFE855] transition-all shadow-sm"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>Tambah Departemen</span>
@@ -1133,7 +1117,7 @@ export function StudioServicesManager() {
               <button
                 type="button"
                 onClick={() => handleEditService()}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#F2C7A0] text-[#191919] font-medium text-xs font-mono uppercase tracking-wider hover:bg-[#ebd5c1] transition-all shadow-sm"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#FFD600] text-[#191919] font-medium text-xs font-mono uppercase tracking-wider hover:bg-[#FFE855] transition-all shadow-sm"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>Tambah Layanan</span>
@@ -1151,11 +1135,11 @@ export function StudioServicesManager() {
             return (
               <div
                 key={cat.id}
-                className="p-6 rounded-3xl bg-[#1e1e1e] border border-white/10 hover:border-[#F2C7A0]/40 transition-all flex flex-col justify-between group shadow-xl"
+                className="p-6 rounded-3xl bg-[#1e1e1e] border border-white/10 hover:border-[#FFD600]/40 transition-all flex flex-col justify-between group shadow-xl"
               >
                 <div>
                   <div className="flex items-center justify-between gap-2 mb-3">
-                    <span className="font-mono text-[10px] text-[#F2C7A0] uppercase px-2.5 py-0.5 rounded-full bg-[#F2C7A0]/10 border border-[#F2C7A0]/20 font-semibold truncate">
+                    <span className="font-mono text-[10px] text-[#FFD600] uppercase px-2.5 py-0.5 rounded-full bg-[#FFD600]/10 border border-[#FFD600]/20 font-semibold truncate">
                       {cat.tag || 'SPESIALISASI'}
                     </span>
                     <div className="flex items-center gap-1.5 text-neutral-400 text-xs font-mono">
@@ -1165,7 +1149,7 @@ export function StudioServicesManager() {
                     </div>
                   </div>
 
-                  <h3 className="font-display text-lg font-bold text-white group-hover:text-[#F2C7A0] transition-colors">
+                  <h3 className="font-display text-lg font-bold text-white group-hover:text-[#FFD600] transition-colors">
                     {cat.title}
                   </h3>
                   <p className="text-xs text-neutral-400 mt-2 line-clamp-2 leading-relaxed">
@@ -1200,7 +1184,7 @@ export function StudioServicesManager() {
                     <button
                       type="button"
                       onClick={() => handleEditDepartment(cat)}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-xs font-mono text-[#F2C7A0] hover:bg-white/10"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-xs font-mono text-[#FFD600] hover:bg-white/10"
                     >
                       <Edit className="w-3.5 h-3.5" />
                       <span>Edit & Blok</span>
@@ -1233,7 +1217,7 @@ export function StudioServicesManager() {
               >
                 <div className="flex items-center justify-between border-b border-white/10 pb-3">
                   <div>
-                    <span className="font-mono text-[10px] text-[#F2C7A0] uppercase font-semibold">
+                    <span className="font-mono text-[10px] text-[#FFD600] uppercase font-semibold">
                       DEPARTEMEN
                     </span>
                     <h2 className="font-display text-base sm:text-lg font-bold text-white">
@@ -1282,7 +1266,7 @@ export function StudioServicesManager() {
                             <button
                               type="button"
                               onClick={() => handleEditService(svc)}
-                              className="px-2.5 py-1 rounded-lg bg-white/5 border border-white/10 text-xs font-mono text-[#F2C7A0] hover:bg-white/10"
+                              className="px-2.5 py-1 rounded-lg bg-white/5 border border-white/10 text-xs font-mono text-[#FFD600] hover:bg-white/10"
                             >
                               Edit
                             </button>

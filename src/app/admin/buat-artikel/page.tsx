@@ -428,7 +428,7 @@ function ArticleEditorInner() {
       l.includes('berbobot (40-65') ||
       l.includes('kata kunci fokus') ||
       l.includes('judul baru yang dioptimalkan') ||
-      l.includes('judul seo | segiatech') ||
+      l.includes('judul seo | unimasi') ||
       l.includes('deskripsi meta memikat') ||
       l.includes('deskripsi visual gambar') ||
       l === 'paragraf...' ||
@@ -579,8 +579,8 @@ function ArticleEditorInner() {
           id,
           type: 'image',
           url: '/images/articles/web-architecture.jpg',
-          alt: `${title || 'Artikel SegiaTech'} - Ilustrasi`,
-          caption: 'Keterangan gambar atau diagram arsitektur.',
+          alt: `${title || 'Artikel UNIMASI'} - Ilustrasi`,
+          caption: 'Keterangan visual animasi atau produksi 3D.',
           alignment: 'center',
         }
         break
@@ -589,7 +589,7 @@ function ArticleEditorInner() {
           id,
           type: 'video',
           url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-          title: 'Video Demonstrasi Proyek',
+          title: 'Video Demonstrasi Animasi',
           embedUrl: 'https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ',
         }
         break
@@ -597,8 +597,8 @@ function ArticleEditorInner() {
         newBlock = {
           id,
           type: 'quote',
-          text: 'Kutipan penting atau prinsip teknologi yang mempertegas poin artikel.',
-          author: 'Pakar Industri SegiaTech',
+          text: 'Kutipan penting atau visi animasi kreatif yang mempertegas poin artikel.',
+          author: 'Pakar Animasi UNIMASI Studio',
         }
         break
       case 'list':
@@ -825,7 +825,7 @@ function ArticleEditorInner() {
         title,
         slug: slug.trim() || editSlug || '',
         metaDescription: metaDescription.trim() || excerpt || title,
-        seoTitle: seoTitle.trim() || `${title} — SegiaTech`,
+        seoTitle: seoTitle.trim() || `${title} — UNIMASI`,
         existingSlugs: [],
         images: contentImages,
         heroVisual: coverUrl ? { url: coverUrl, altText: coverAlt, decorative: false } : null,
@@ -842,7 +842,7 @@ function ArticleEditorInner() {
     setSuccessData(null)
 
     try {
-      const finalMetaTitle = seoTitle.trim() || `${title} — SegiaTech`
+      const finalMetaTitle = seoTitle.trim() || `${title} — UNIMASI`
       const finalMetaDesc = metaDescription.trim() || excerpt || title
 
       const payload = {

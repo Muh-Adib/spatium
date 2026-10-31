@@ -48,7 +48,7 @@ export const DEFAULT_TOKEN_OPTIMIZATION_CONFIG: TokenOptimizationConfig = {
   customSystemPrompt: '',
 }
 
-const STORAGE_TOKEN_OPT_KEY = 'segiatech_ai_token_opt'
+const STORAGE_TOKEN_OPT_KEY = 'unimasi_ai_token_opt'
 
 export function getTokenOptimizationConfig(): TokenOptimizationConfig {
   if (typeof window === 'undefined') return DEFAULT_TOKEN_OPTIMIZATION_CONFIG

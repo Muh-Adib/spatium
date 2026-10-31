@@ -123,6 +123,13 @@ export interface TextEditorialBlockInstance {
   }
 }
 
+export interface GenericUnimasiBlockInstance {
+  id?: string
+  type: string
+  data: Record<string, any>
+  settings?: Record<string, any>
+}
+
 // Union of all block instances
 export type UnimasiBlockInstance =
   | HeroCinemaBlockInstance
@@ -130,6 +137,7 @@ export type UnimasiBlockInstance =
   | StatsTickerBlockInstance
   | InteractiveCtaBlockInstance
   | TextEditorialBlockInstance
+  | GenericUnimasiBlockInstance
 
 /**
  * Manifest Schema describing all available blocks for CMS & AI Agents.

@@ -186,8 +186,8 @@ export async function POST(req: NextRequest) {
           headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${trimmedKey}`,
-            'HTTP-Referer': 'https://segiatech.com',
-            'X-Title': 'SegiaTech AI Studio',
+            'HTTP-Referer': 'https://unimasi.com',
+            'X-Title': 'UNIMASI AI Studio',
           },
           body: JSON.stringify(payload),
         })
@@ -249,8 +249,8 @@ export async function POST(req: NextRequest) {
           headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${trimmedKey}`,
-            'HTTP-Referer': 'https://segiatech.com',
-            'X-Title': 'SegiaTech AI Studio',
+            'HTTP-Referer': 'https://unimasi.com',
+            'X-Title': 'UNIMASI AI Studio',
           },
         })
 

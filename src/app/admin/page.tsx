@@ -14,6 +14,7 @@ import { StudioSettings } from '@/components/studio/StudioSettings'
 import { StudioPortfolioManager } from '@/components/studio/StudioPortfolioManager'
 import { StudioServicesManager } from '@/components/studio/StudioServicesManager'
 import { StudioSolutionsManager } from '@/components/studio/StudioSolutionsManager'
+import { StudioBlocksCatalog } from '@/components/studio/StudioBlocksCatalog'
 import { StudioMediaManager } from '@/components/studio/StudioMediaManager'
 import { StudioKeywordPlanner } from '@/components/studio/StudioKeywordPlanner'
 import { StudioSiteAudit } from '@/components/studio/StudioSiteAudit'
@@ -64,7 +65,7 @@ import {
 } from 'lucide-react'
 
 export type UserRole = Role | 'admin' | 'writer'
-export type AdminTab = 'brands' | 'matrix' | 'articles' | 'publisher' | 'overview' | 'portfolio' | 'services' | 'solutions' | 'media' | 'keywords' | 'audit' | 'cta' | 'perf' | 'ai' | 'ai-settings' | 'gsc' | 'import' | 'migration' | 'redirects' | 'system' | 'roles' | 'settings'
+export type AdminTab = 'brands' | 'matrix' | 'articles' | 'publisher' | 'overview' | 'portfolio' | 'services' | 'solutions' | 'blocks' | 'media' | 'keywords' | 'audit' | 'cta' | 'perf' | 'ai' | 'ai-settings' | 'gsc' | 'import' | 'migration' | 'redirects' | 'system' | 'roles' | 'settings'
 
 interface ArticleItem {
   id?: number
@@ -617,12 +618,12 @@ function AdminDashboardContent() {
   }
 
   const getMcpSnippet = (client: string) => {
-    const serverPath = '/path/to/segiatech/mcp/server.js'
+    const serverPath = '/path/to/unimasi/mcp/server.js'
     if (client === 'antigravity') {
       return `// Lokasi konfigurasi: ~/.gemini/config/mcp_config.json
 {
   "mcpServers": {
-    "segiatech-mcp": {
+    "unimasi-mcp": {
       "command": "node",
       "args": [
         "${serverPath}"
@@ -638,7 +639,7 @@ function AdminDashboardContent() {
       return `// Lokasi konfigurasi: %APPDATA%\\Claude\\claude_desktop_config.json (Windows) atau ~/Library/Application Support/Claude/claude_desktop_config.json (Mac)
 {
   "mcpServers": {
-    "segiatech-mcp": {
+    "unimasi-mcp": {
       "command": "node",
       "args": [
         "${serverPath}"
@@ -651,7 +652,7 @@ function AdminDashboardContent() {
       return `// Lokasi konfigurasi: .cursor/mcp.json
 {
   "mcpServers": {
-    "segiatech-mcp": {
+    "unimasi-mcp": {
       "command": "node",
       "args": [
         "${serverPath}"
@@ -664,7 +665,7 @@ function AdminDashboardContent() {
       return `// Lokasi konfigurasi: ~/.codeium/windsurf/mcp_config.json
 {
   "mcpServers": {
-    "segiatech-mcp": {
+    "unimasi-mcp": {
       "command": "node",
       "args": [
         "${serverPath}"
@@ -898,7 +899,7 @@ node mcp/server.js`
     const url = URL.createObjectURL(blob)
     const link = document.createElement('a')
     link.href = url
-    link.setAttribute('download', `migrasi-887-urls-segiatech-${new Date().toISOString().slice(0, 10)}.csv`)
+    link.setAttribute('download', `migrasi-887-urls-unimasi-${new Date().toISOString().slice(0, 10)}.csv`)
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)
@@ -910,7 +911,7 @@ node mcp/server.js`
     const url = URL.createObjectURL(blob)
     const link = document.createElement('a')
     link.href = url
-    link.setAttribute('download', `migrasi-report-segiatech.json`)
+    link.setAttribute('download', `migrasi-report-unimasi.json`)
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)
@@ -1005,9 +1006,9 @@ node mcp/server.js`
       {activeTab === 'brands' && (
         <div className="p-8 rounded-2xl border border-white/10 bg-[#191919] text-center space-y-4">
           <Globe className="w-10 h-10 text-accent-400 mx-auto" />
-          <h2 className="text-lg font-bold text-white">Arsitektur Satu Brand: SegiaTech</h2>
+          <h2 className="text-lg font-bold text-white">Arsitektur Satu Brand: UNIMASI Studio</h2>
           <p className="text-xs text-neutral-400 max-w-md mx-auto leading-relaxed">
-            Sesuai standar arsitektur ADR-0007, platform ini beroperasi dalam mode satu brand terdedikasi (1 Deployment = 1 Brand). Seluruh konten, layanan, dan analitik dikhususkan untuk brand SegiaTech.
+            Sesuai standar arsitektur ADR-0007, platform ini beroperasi dalam mode satu brand terdedikasi (1 Deployment = 1 Brand). Seluruh konten, layanan, dan analitik dikhususkan untuk brand UNIMASI.
           </p>
           <button
             onClick={() => handleTabChange('overview')}
@@ -1024,7 +1025,7 @@ node mcp/server.js`
           <Zap className="w-10 h-10 text-accent-400 mx-auto" />
           <h2 className="text-lg font-bold text-white">Keyword Matrix Dinonaktifkan</h2>
           <p className="text-xs text-neutral-400 max-w-md mx-auto leading-relaxed">
-            PSEO Matrix telah didepresiasi sesuai standar SegiaTech Single-Brand. Silakan kelola artikel langsung melalui tab Artikel atau Keyword Planner.
+            PSEO Matrix telah didepresiasi sesuai standar UNIMASI Single-Brand. Silakan kelola artikel langsung melalui tab Artikel atau Keyword Planner.
           </p>
           <button
             onClick={() => handleTabChange('articles')}
@@ -1041,7 +1042,7 @@ node mcp/server.js`
           <Download className="w-10 h-10 text-accent-400 mx-auto" />
           <h2 className="text-lg font-bold text-white">Publisher Bridge Dinonaktifkan</h2>
           <p className="text-xs text-neutral-400 max-w-md mx-auto leading-relaxed">
-            SegiaTech kini sepenuhnya berjalan di atas Next.js 16 App Router dengan embedded SQLite (Drizzle ORM). Sinkronisasi multi-situs eksternal tidak lagi diperlukan.
+            UNIMASI kini sepenuhnya berjalan di atas Next.js 16 App Router dengan arsitektur terisolasi. Sinkronisasi multi-situs eksternal tidak lagi diperlukan.
           </p>
           <button
             onClick={() => handleTabChange('articles')}
@@ -1171,6 +1172,13 @@ node mcp/server.js`
       {activeTab === 'audit' && (
         <div className="space-y-6">
           <StudioSiteAudit />
+        </div>
+      )}
+
+      {/* --- TAB: DYNAMIC BLOCKS CATALOG (ADR-0012) ----------------- */}
+      {activeTab === 'blocks' && (
+        <div className="space-y-6">
+          <StudioBlocksCatalog />
         </div>
       )}
 
@@ -1872,7 +1880,7 @@ node mcp/server.js`
                     <span>Model Context Protocol (MCP) Server</span>
                   </h3>
                   <p className="text-xs text-neutral-300 mt-1 max-w-2xl leading-relaxed">
-                    Server MCP menghubungkan AI Coding Assistant (Antigravity, Claude Desktop, Cursor, Codex, Windsurf) langsung ke basis data artikel, portofolio, dan 887 redirect SegiaTech.
+                    Server MCP menghubungkan AI Coding Assistant (Antigravity, Claude Desktop, Cursor, Codex, Windsurf) langsung ke basis data artikel, portofolio, dan redirect UNIMASI.
                   </p>
                 </div>
 

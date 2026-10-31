@@ -1,7 +1,7 @@
 /**
  * Block Schema Contract (K-2)
  *
- * Defines Zod schemas for all dynamic presentation blocks in SegiaTech WebShift.
+ * Defines Zod schemas for all dynamic presentation blocks in UNIMASI WebShift.
  * Used for strict validation of content blocks across service categories,
  * services, solutions, landing pages, and templates.
  */
@@ -577,6 +577,137 @@ export const caseStudyChapterBlockSchema = z.object({
   content: z.string().max(20000),
 })
 
+// ─── 22. Dedicated UNIMASI Cinema & Editorial Blocks ─────────────────────────
+export const heroCinemaBlockSchema = z
+  .object({
+    id: z.string().optional(),
+    type: z.literal('hero-cinema'),
+    badge: z.string().max(200).optional(),
+    headline: z.string().max(500).optional(),
+    title: z.string().max(500).optional(),
+    subheadline: z.string().max(1000).optional(),
+    subtitle: z.string().max(1000).optional(),
+    description: z.string().max(5000).optional(),
+    primaryCta: z
+      .object({
+        label: z.string().optional(),
+        href: z.string().optional(),
+        url: z.string().optional(),
+      })
+      .optional(),
+    secondaryCta: z
+      .object({
+        label: z.string().optional(),
+        href: z.string().optional(),
+        url: z.string().optional(),
+      })
+      .optional(),
+    media: z
+      .object({
+        type: z.string().optional(),
+        src: z.string().optional(),
+        poster: z.string().optional(),
+        url: z.string().optional(),
+      })
+      .optional(),
+    data: z.record(z.string(), z.any()).optional(),
+  })
+  .passthrough()
+
+export const processTimelineBlockSchema = z
+  .object({
+    id: z.string().optional(),
+    type: z.literal('process-timeline'),
+    title: z.string().max(500).optional(),
+    eyebrow: z.string().max(200).optional(),
+    badge: z.string().max(200).optional(),
+    description: z.string().max(5000).optional(),
+    steps: z
+      .array(
+        z
+          .object({
+            step: z.string().optional(),
+            number: z.string().optional(),
+            title: z.string().optional(),
+            description: z.string().optional(),
+            duration: z.string().optional(),
+            deliverables: z.array(z.string()).optional(),
+          })
+          .passthrough()
+      )
+      .optional(),
+    data: z.record(z.string(), z.any()).optional(),
+  })
+  .passthrough()
+
+export const statsTickerBlockSchema = z
+  .object({
+    id: z.string().optional(),
+    type: z.literal('stats-ticker'),
+    title: z.string().max(500).optional(),
+    eyebrow: z.string().max(200).optional(),
+    badge: z.string().max(200).optional(),
+    metrics: z
+      .array(
+        z
+          .object({
+            value: z.string().optional(),
+            label: z.string().optional(),
+            subtext: z.string().optional(),
+          })
+          .passthrough()
+      )
+      .optional(),
+    stats: z.array(z.any()).optional(),
+    items: z.array(z.any()).optional(),
+    data: z.record(z.string(), z.any()).optional(),
+  })
+  .passthrough()
+
+export const interactiveCtaBlockSchema = z
+  .object({
+    id: z.string().optional(),
+    type: z.literal('interactive-cta'),
+    title: z.string().max(500).optional(),
+    headline: z.string().max(500).optional(),
+    subheadline: z.string().max(1000).optional(),
+    description: z.string().max(5000).optional(),
+    badge: z.string().max(200).optional(),
+    ctaText: z.string().optional(),
+    ctaLink: z.string().optional(),
+    secondaryCtaText: z.string().optional(),
+    secondaryCtaLink: z.string().optional(),
+    primaryCta: z
+      .object({
+        label: z.string().optional(),
+        href: z.string().optional(),
+        url: z.string().optional(),
+      })
+      .optional(),
+    secondaryCta: z
+      .object({
+        label: z.string().optional(),
+        href: z.string().optional(),
+        url: z.string().optional(),
+      })
+      .optional(),
+    data: z.record(z.string(), z.any()).optional(),
+  })
+  .passthrough()
+
+export const textEditorialBlockSchema = z
+  .object({
+    id: z.string().optional(),
+    type: z.literal('text-editorial'),
+    leadText: z.string().max(5000).optional(),
+    lead: z.string().max(5000).optional(),
+    body: z.string().max(50000).optional(),
+    content: z.string().max(50000).optional(),
+    columns: z.union([z.number(), z.string()]).optional(),
+    data: z.record(z.string(), z.any()).optional(),
+  })
+  .passthrough()
+
 // ─── Legacy Strapi Blocks ─────────────────────────────────────────────────────
 export const legacyHeroBlockSchema = z.object({
   id: z.string().optional(),
@@ -643,6 +774,11 @@ export const legacyLiveEmbedBlockSchema = z.object({
 
 // ─── Discriminated Union of All Blocks ────────────────────────────────────────
 export const blockSchema = z.discriminatedUnion('type', [
+  heroCinemaBlockSchema,
+  processTimelineBlockSchema,
+  statsTickerBlockSchema,
+  interactiveCtaBlockSchema,
+  textEditorialBlockSchema,
   heroDepartmentBlockSchema,
   heroServiceBlockSchema,
   featureBentoGridBlockSchema,

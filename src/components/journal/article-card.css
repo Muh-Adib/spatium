@@ -8,7 +8,7 @@
 }
 
 .article-card:hover {
-  border-color: rgba(255, 212, 0, 0.45);
+  border-color: rgba(255, 214, 0, 0.45);
   transform: translateY(-5px);
 }
 

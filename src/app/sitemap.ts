@@ -59,7 +59,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.6,
   }))
 
-  // Fetch articles from SegiaTech Core Delivery API
+  // Fetch articles from UNIMASI Core Delivery API
   let postRoutes: MetadataRoute.Sitemap = []
   try {
     const { articles } = await getCoreArticles({ page: 1, pageSize: 100 })

@@ -9,7 +9,7 @@ import StudioLivePreview from '@/components/studio/StudioLivePreview'
 import { AlertCircle } from 'lucide-react'
 
 export const metadata: Metadata = {
-  title: 'Preview — SegiaTech Studio',
+  title: 'Preview — UNIMASI Studio',
   robots: { index: false, follow: false },
 }
 
@@ -66,7 +66,7 @@ export default async function AdminEntityPreviewPage({ params }: Props) {
           </div>
           <h2 className="text-xl font-bold font-display">Entitas Pratinjau Tidak Ditemukan</h2>
           <p className="text-xs text-neutral-400 font-mono">
-            Tipe: <span className="text-[#F2C7A0]">{type}</span> • ID: <span className="text-[#F2C7A0]">{decodedId}</span>
+            Tipe: <span className="text-[#FFD600]">{type}</span> • ID: <span className="text-[#FFD600]">{decodedId}</span>
           </p>
           <p className="text-xs text-neutral-500">
             Pastikan entitas telah disimpan ke database sebelum memuat pratinjau server.

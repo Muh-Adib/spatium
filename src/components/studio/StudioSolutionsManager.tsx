@@ -76,7 +76,7 @@ export function StudioSolutionsManager() {
   const [solShortDesc, setSolShortDesc] = useState('')
   const [solDesc, setSolDesc] = useState('')
   const [solHeroImage, setSolHeroImage] = useState('/images/solutions/default.jpg')
-  const [solHeroAlt, setSolHeroAlt] = useState('Solusi Rekayasa Digital & Arsitektur Terintegrasi SegiaTech')
+  const [solHeroAlt, setSolHeroAlt] = useState('Solusi Produksi Animasi & Visual Terintegrasi UNIMASI')
   const [mediaPickerOpen, setMediaPickerOpen] = useState(false)
   const [solOrder, setSolOrder] = useState('0')
   const [solFeatured, setSolFeatured] = useState(false)
@@ -136,7 +136,7 @@ export function StudioSolutionsManager() {
       setSolShortDesc(sol.shortDescription || '')
       setSolDesc(sol.description || '')
       setSolHeroImage(sol.heroImage || '/images/solutions/default.jpg')
-      setSolHeroAlt(sol.heroAlt || (sol.title ? `${sol.title} - Solusi Rekayasa SegiaTech` : 'Solusi Rekayasa SegiaTech'))
+      setSolHeroAlt(sol.heroAlt || (sol.title ? `${sol.title} - Solusi UNIMASI Studio` : 'Solusi UNIMASI Studio'))
       setSolOrder(String(sol.order ?? 0))
       setSolFeatured(Boolean(sol.featured))
       setSolStatus(sol.status || 'published')
@@ -147,7 +147,7 @@ export function StudioSolutionsManager() {
       setMetaDesc(sol.metaDescription || sol.shortDescription || '')
       setFocusKeyphrase(sol.focusKeyphrase || sol.title)
       setRelatedKeyphrases(sol.relatedKeyphrases || [])
-      setCanonicalUrl(sol.canonicalUrl || `https://www.segiatech.com/solusi/${sol.slug}`)
+      setCanonicalUrl(sol.canonicalUrl || `https://www.unimasi.com/solusi/${sol.slug}`)
     } else {
       setSolId(null)
       setSolSlug('')
@@ -156,7 +156,7 @@ export function StudioSolutionsManager() {
       setSolShortDesc('')
       setSolDesc('')
       setSolHeroImage('/images/solutions/default.jpg')
-      setSolHeroAlt('Solusi Rekayasa Digital & Arsitektur Terintegrasi SegiaTech')
+      setSolHeroAlt('Solusi Produksi Animasi & Visual Terintegrasi UNIMASI')
       setSolOrder(String(solutions.length + 1))
       setSolFeatured(false)
       setSolStatus('published')
@@ -305,10 +305,10 @@ export function StudioSolutionsManager() {
   // ─────────────────────────────────────────────────────────────────────────────
   if (editorMode) {
     return (
-      <div className="fixed inset-0 z-50 flex h-screen w-screen flex-col overflow-hidden bg-[#0D0D0D] text-white antialiased selection:bg-[#F2C7A0] selection:text-black">
+      <div className="fixed inset-0 z-50 flex h-screen w-screen flex-col overflow-hidden bg-[#0D0D0D] text-white antialiased selection:bg-[#FFD600] selection:text-black">
         {/* Top Dedicated Studio Master Header */}
         <header className="h-14 shrink-0 px-4 sm:px-6 bg-[#161616] border-b border-white/[0.08] flex items-center justify-between gap-3 z-30 select-none">
-          <div className="flex items-center gap-3 min-w-0">
+          <div className="flex items-center gap-2.5 min-w-0 flex-1 max-w-[45%] md:max-w-[50%]">
             <Tooltip label="Kembali" hint="Kembali ke Daftar Solusi" side="bottom">
               <button
                 type="button"
@@ -322,22 +322,13 @@ export function StudioSolutionsManager() {
               </button>
             </Tooltip>
             <div className="h-4 w-px bg-white/10 hidden sm:block shrink-0" />
-            <div className="min-w-0">
-              <div className="flex items-center gap-2">
-                <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-mono font-bold bg-sky-500/15 border border-sky-500/40 text-sky-300 uppercase tracking-wider">
-                  <Compass className="w-3 h-3 text-sky-400" />
-                  PAKET SOLUSI TERINTEGRASI
-                </span>
-                {solCategory && (
-                  <span className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-white/5 text-neutral-400 border border-white/10 hidden sm:inline-block">
-                    {solCategory}
-                  </span>
-                )}
-                <span className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 hidden md:inline-block uppercase">
-                  {solStatus}
-                </span>
-              </div>
-              <h2 className="font-display text-xs sm:text-sm font-bold text-white truncate max-w-[200px] sm:max-w-xs md:max-w-md">
+            <div className="flex items-center gap-2 min-w-0 overflow-hidden">
+              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-[#FFD600]/15 border border-[#FFD600]/30 text-[#FFD600] uppercase tracking-wider shrink-0">
+                <Compass className="w-3 h-3 text-[#FFD600]" />
+                <span className="hidden sm:inline">SOLUSI</span>
+              </span>
+              <span className="text-xs text-neutral-600 hidden sm:inline shrink-0">/</span>
+              <h2 className="font-syne text-xs sm:text-sm font-bold text-white truncate" title={solTitle || 'Solusi Baru'}>
                 {solTitle || 'Solusi Baru'}
               </h2>
             </div>
@@ -355,7 +346,7 @@ export function StudioSolutionsManager() {
                     : 'text-neutral-400 hover:text-white'
                 }`}
               >
-                <PenSquare className="w-3.5 h-3.5 text-[#F2C7A0]" />
+                <PenSquare className="w-3.5 h-3.5 text-[#FFD600]" />
                 <span className="hidden sm:inline">Kanvas</span>
               </button>
             </Tooltip>
@@ -414,7 +405,7 @@ export function StudioSolutionsManager() {
                   onClick={() => setShowPropertiesDrawer(!showPropertiesDrawer)}
                   className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-mono border transition-all ${
                     showPropertiesDrawer
-                      ? 'bg-[#F2C7A0]/20 border-[#F2C7A0]/50 text-[#F2C7A0]'
+                      ? 'bg-[#FFD600]/20 border-[#FFD600]/50 text-[#FFD600]'
                       : 'bg-white/5 border-white/10 text-neutral-400 hover:text-white'
                   }`}
                 >
@@ -446,7 +437,7 @@ export function StudioSolutionsManager() {
                 type="button"
                 onClick={handleSaveSolution}
                 disabled={saving || !isBlocksValid}
-                className="inline-flex items-center gap-2 px-4 py-1.5 rounded-xl bg-[#F2C7A0] text-[#191919] font-medium text-xs font-mono uppercase tracking-wider hover:bg-[#ebd5c1] transition-all shadow-[0_0_15px_rgba(242,199,160,0.25)] disabled:opacity-50"
+                className="inline-flex items-center gap-2 px-4 py-1.5 rounded-xl bg-[#FFD600] text-[#191919] font-medium text-xs font-mono uppercase tracking-wider hover:bg-[#FFE855] transition-all shadow-[0_0_15px_rgba(255, 214, 0,0.25)] disabled:opacity-50"
               >
                 <Save className="w-3.5 h-3.5" />
                 <span>{saving ? 'Menyimpan...' : 'Simpan Solusi'}</span>
@@ -504,7 +495,7 @@ export function StudioSolutionsManager() {
                       onClick={() => setActiveInspectorTab('meta')}
                       className={`flex-1 py-2 text-xs font-mono font-medium rounded-xl transition-all ${
                         activeInspectorTab === 'meta'
-                          ? 'bg-[#F2C7A0] text-[#191919] shadow font-bold'
+                          ? 'bg-[#FFD600] text-[#191919] shadow font-bold'
                           : 'text-neutral-400 hover:text-white'
                       }`}
                     >
@@ -515,7 +506,7 @@ export function StudioSolutionsManager() {
                       onClick={() => setActiveInspectorTab('seo')}
                       className={`flex-1 py-2 text-xs font-mono font-medium rounded-xl transition-all ${
                         activeInspectorTab === 'seo'
-                          ? 'bg-[#F2C7A0] text-[#191919] shadow font-bold'
+                          ? 'bg-[#FFD600] text-[#191919] shadow font-bold'
                           : 'text-neutral-400 hover:text-white'
                       }`}
                     >
@@ -539,7 +530,7 @@ export function StudioSolutionsManager() {
                             setSolTitle(e.target.value)
                             if (!solId) {
                               setSolSlug(e.target.value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''))
-                              setSeoTitle(`${e.target.value} — Solusi SegiaTech`)
+                              setSeoTitle(`${e.target.value} — Solusi UNIMASI`)
                               setFocusKeyphrase(e.target.value)
                             }
                           }}
@@ -633,7 +624,7 @@ export function StudioSolutionsManager() {
                                   key={p.id}
                                   className={`flex items-center gap-2 p-2 rounded-xl text-xs cursor-pointer transition-colors ${
                                     isChecked
-                                      ? 'bg-[#F2C7A0]/15 text-[#F2C7A0]'
+                                      ? 'bg-[#FFD600]/15 text-[#FFD600]'
                                       : 'text-neutral-300 hover:bg-white/5'
                                   }`}
                                 >
@@ -649,7 +640,7 @@ export function StudioSolutionsManager() {
                                         )
                                       }
                                     }}
-                                    className="rounded text-[#F2C7A0] accent-[#F2C7A0]"
+                                    className="rounded text-[#FFD600] accent-[#FFD600]"
                                   />
                                   <span className="truncate">{p.title}</span>
                                 </label>
@@ -775,7 +766,7 @@ export function StudioSolutionsManager() {
             onClick={() => setActiveTab('solutions')}
             className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-mono font-medium transition-all ${
               activeTab === 'solutions'
-                ? 'bg-[#F2C7A0] text-[#191919] font-bold shadow-sm'
+                ? 'bg-[#FFD600] text-[#191919] font-bold shadow-sm'
                 : 'text-neutral-400 hover:text-white hover:bg-white/5'
             }`}
           >
@@ -787,7 +778,7 @@ export function StudioSolutionsManager() {
             onClick={() => setActiveTab('finder')}
             className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-mono font-medium transition-all ${
               activeTab === 'finder'
-                ? 'bg-[#F2C7A0] text-[#191919] font-bold shadow-sm'
+                ? 'bg-[#FFD600] text-[#191919] font-bold shadow-sm'
                 : 'text-neutral-400 hover:text-white hover:bg-white/5'
             }`}
           >
@@ -801,7 +792,7 @@ export function StudioSolutionsManager() {
             <button
               type="button"
               onClick={() => handleEditSolution()}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#F2C7A0] text-[#191919] font-medium text-xs font-mono uppercase tracking-wider hover:bg-[#ebd5c1] transition-all shadow-sm"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#FFD600] text-[#191919] font-medium text-xs font-mono uppercase tracking-wider hover:bg-[#FFE855] transition-all shadow-sm"
             >
               <Plus className="w-3.5 h-3.5" />
               <span>Tambah Solusi</span>
@@ -816,14 +807,14 @@ export function StudioSolutionsManager() {
           {solutions.map((sol) => (
             <div
               key={sol.id}
-              className="p-5 rounded-3xl bg-[#1e1e1e] border border-white/10 hover:border-[#F2C7A0]/40 transition-all flex flex-col justify-between group shadow-xl"
+              className="p-5 rounded-3xl bg-[#1e1e1e] border border-white/10 hover:border-[#FFD600]/40 transition-all flex flex-col justify-between group shadow-xl"
             >
               <div>
                 <div className="flex items-center justify-between text-xs font-mono text-neutral-400 mb-2">
-                  <span className="text-[#F2C7A0] font-semibold uppercase">{sol.category}</span>
+                  <span className="text-[#FFD600] font-semibold uppercase">{sol.category}</span>
                   <span className="text-emerald-400 font-semibold">{sol.status}</span>
                 </div>
-                <h3 className="font-display text-base font-bold text-white group-hover:text-[#F2C7A0] transition-colors">
+                <h3 className="font-display text-base font-bold text-white group-hover:text-[#FFD600] transition-colors">
                   {sol.title}
                 </h3>
                 <p className="text-xs text-neutral-400 mt-1 line-clamp-2 leading-relaxed">
@@ -851,7 +842,7 @@ export function StudioSolutionsManager() {
                   <button
                     type="button"
                     onClick={() => handleEditSolution(sol)}
-                    className="px-3 py-1 rounded-lg bg-white/5 border border-white/10 text-xs font-mono text-[#F2C7A0] hover:bg-white/10"
+                    className="px-3 py-1 rounded-lg bg-white/5 border border-white/10 text-xs font-mono text-[#FFD600] hover:bg-white/10"
                   >
                     Edit & Blok
                   </button>
@@ -885,7 +876,7 @@ export function StudioSolutionsManager() {
               type="button"
               onClick={handleSaveFinderConfig}
               disabled={saving}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#F2C7A0] text-[#191919] font-medium text-xs hover:bg-[#ebd5c1]"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#FFD600] text-[#191919] font-medium text-xs hover:bg-[#FFE855]"
             >
               <Save className="w-4 h-4" />
               <span>Simpan Konfigurasi</span>

@@ -3,7 +3,7 @@ import { UNIMASI_BLOCK_MANIFEST } from '@/blocks/registry'
 
 /**
  * Public Block Manifest API for UNIMASI Studio.
- * Consumed by SegiaTech Core Admin Studio Page Builder & AI Agent Copilots.
+ * Consumed by UNIMASI Core Admin Studio Page Builder & AI Agent Copilots.
  */
 export async function GET() {
   return NextResponse.json(

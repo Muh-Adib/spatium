@@ -254,7 +254,7 @@ export function blocksToContent(blocks: ContentBlock[]): string {
           const block = b as any
           const features = (block.features || []).map((f: any) =>
             `<div class="bento-card p-5 rounded-2xl bg-white/[0.03] border border-white/10 my-3">
-              ${f.tag ? `<span class="badge text-xs font-mono text-[#F2C7A0] mb-2 inline-block">${f.tag}</span>` : ''}
+              ${f.tag ? `<span class="badge text-xs font-mono text-[#FFD600] mb-2 inline-block">${f.tag}</span>` : ''}
               <h4 class="font-bold text-white text-lg">${f.title || ''}</h4>
               <p class="text-sm text-neutral-300 mt-1">${f.description || ''}</p>
             </div>`
@@ -270,14 +270,14 @@ export function blocksToContent(blocks: ContentBlock[]): string {
           const rows = (block.rows || []).map((r: any) =>
             `<tr class="border-b border-white/10">
               <td class="p-3 font-semibold text-white">${r.feature || ''}</td>
-              <td class="p-3 text-[#F2C7A0]">${r.us || ''}</td>
+              <td class="p-3 text-[#FFD600]">${r.us || ''}</td>
               <td class="p-3 text-neutral-400">${r.standard || ''}</td>
             </tr>`
           ).join('')
           return `<section class="article-comparison-matrix my-8 overflow-x-auto">
             ${block.title ? `<h3 class="text-2xl font-bold text-white mb-3">${block.title}</h3>` : ''}
             <table class="w-full text-left text-sm border-collapse border border-white/10 rounded-xl">
-              <thead><tr class="bg-white/5 border-b border-white/10"><th class="p-3">Fitur / Dimensi</th><th class="p-3">SegiaTech Enterprise</th><th class="p-3">Solusi Konvensional</th></tr></thead>
+              <thead><tr class="bg-white/5 border-b border-white/10"><th class="p-3">Fitur / Dimensi</th><th class="p-3">UNIMASI Enterprise</th><th class="p-3">Solusi Konvensional</th></tr></thead>
               <tbody>${rows}</tbody>
             </table>
           </section>`
@@ -286,7 +286,7 @@ export function blocksToContent(blocks: ContentBlock[]): string {
           const block = b as any
           const stats = (block.stats || []).map((s: any) =>
             `<div class="stat-card p-4 rounded-2xl bg-white/[0.04] border border-white/10 text-center">
-              <span class="block text-3xl font-extrabold text-[#F2C7A0]">${s.value || ''}</span>
+              <span class="block text-3xl font-extrabold text-[#FFD600]">${s.value || ''}</span>
               <strong class="block text-xs uppercase tracking-wider text-white mt-1">${s.label || ''}</strong>
               ${s.detail ? `<span class="block text-xs text-neutral-400 mt-1">${s.detail}</span>` : ''}
             </div>`
@@ -302,7 +302,7 @@ export function blocksToContent(blocks: ContentBlock[]): string {
             `<div class="p-4 rounded-xl bg-white/[0.03] border border-white/10 mb-3">
               <div class="flex justify-between items-center mb-1">
                 <span class="font-bold text-white text-base">${l.name || ''}</span>
-                <span class="text-xs font-mono text-[#F2C7A0]">${l.tech || ''}</span>
+                <span class="text-xs font-mono text-[#FFD600]">${l.tech || ''}</span>
               </div>
               <p class="text-xs text-neutral-300">${l.desc || ''}</p>
             </div>`
@@ -317,7 +317,7 @@ export function blocksToContent(blocks: ContentBlock[]): string {
           const block = b as any
           const items = (block.items || []).map((it: any) =>
             `<li class="flex items-start gap-2 mb-3">
-              <span class="text-[#F2C7A0] font-bold">✓</span>
+              <span class="text-[#FFD600] font-bold">✓</span>
               <div>
                 <strong class="text-white block">${it.title || ''}</strong>
                 <span class="text-neutral-300 text-sm">${it.desc || ''}</span>
@@ -346,8 +346,8 @@ export function blocksToContent(blocks: ContentBlock[]): string {
           const block = b as any
           return `<div class="article-cta my-10 p-8 rounded-3xl bg-gradient-to-r from-neutral-900 to-neutral-950 border border-white/15 text-center">
             <h3 class="text-2xl font-bold text-white mb-2">${block.title || 'Mulai Konsultasi Proyek Digital Anda'}</h3>
-            <p class="text-sm text-neutral-300 max-w-xl mx-auto mb-6">${block.description || 'Diskusikan arsitektur dan kebutuhan spesifik sistem Anda bersama tim spesialis SegiaTech.'}</p>
-            <a href="${block.buttonUrl || 'https://wa.me/6285227702811'}" target="_blank" rel="noopener noreferrer" class="inline-block px-6 py-3 rounded-xl bg-[#F2C7A0] text-neutral-900 font-bold text-sm hover:opacity-90 transition-opacity">
+            <p class="text-sm text-neutral-300 max-w-xl mx-auto mb-6">${block.description || 'Diskusikan arsitektur dan kebutuhan spesifik sistem Anda bersama tim spesialis UNIMASI.'}</p>
+            <a href="${block.buttonUrl || 'https://wa.me/6285227702811'}" target="_blank" rel="noopener noreferrer" class="inline-block px-6 py-3 rounded-xl bg-[#FFD600] text-neutral-900 font-bold text-sm hover:opacity-90 transition-opacity">
               ${block.buttonText || 'Konsultasi Sekarang'}
             </a>
           </div>`
@@ -1457,14 +1457,14 @@ export function calculateSeoScore(params: {
   }
 
   // 5. Internal Links
-  const internalLinksRegex = /href=["'](?:\/|\/layanan|\/portofolio|\/solusi|\/artikel|\/kontak|https?:\/\/(?:www\.)?segiatech\.com)[^"']*["']/gi
+  const internalLinksRegex = /href=["'](?:\/|\/layanan|\/portofolio|\/solusi|\/artikel|\/kontak|https?:\/\/(?:www\.)?unimasi\.com)[^"']*["']/gi
   const internalLinks = content.match(internalLinksRegex) || []
   if (internalLinks.length >= 2) {
     indicators.push({
       id: 'internal-links',
       label: 'Tautan Internal (Internal Links)',
       status: 'good',
-      message: `Terdeteksi ${internalLinks.length} tautan internal ke ekosistem SegiaTech.`,
+      message: `Terdeteksi ${internalLinks.length} tautan internal ke ekosistem UNIMASI.`,
       value: internalLinks.length,
     })
   } else if (internalLinks.length === 1) {
@@ -1486,7 +1486,7 @@ export function calculateSeoScore(params: {
   }
 
   // 6. External Links
-  const externalLinksRegex = /href=["']https?:\/\/(?!www\.segiatech\.com|segiatech\.com|localhost)[^"']+["']/gi
+  const externalLinksRegex = /href=["']https?:\/\/(?!www\.unimasi\.com|unimasi\.com|localhost)[^"']+["']/gi
   const externalLinks = content.match(externalLinksRegex) || []
   if (externalLinks.length >= 1) {
     indicators.push({

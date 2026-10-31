@@ -156,7 +156,7 @@ export async function createAiSession(
     if (!existingUser) {
       await prisma.orm.public.User.create({
         id: userId,
-        email: `${userId}@segiatech.com`,
+        email: `${userId}@unimasi.com`,
         name: 'Studio User',
         role: 'SUPER_ADMIN',
         createdAt: now,

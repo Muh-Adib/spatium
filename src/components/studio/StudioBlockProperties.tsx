@@ -44,7 +44,7 @@ function FieldHeader({
         <span className="text-xs font-mono font-medium text-neutral-300">{label}</span>
         {tooltip && (
           <Tooltip hint={tooltip} side="top">
-            <Info className="w-3 h-3 text-neutral-500 hover:text-[#F2C7A0] cursor-help transition-colors" />
+            <Info className="w-3 h-3 text-neutral-500 hover:text-[#FFD600] cursor-help transition-colors" />
           </Tooltip>
         )}
       </div>
@@ -85,7 +85,11 @@ export default function StudioBlockProperties({
 
   // Helper for updating a specific field
   const setField = (field: string, value: any) => {
-    onUpdateBlock({ [field]: value })
+    const update: any = { [field]: value }
+    if (block.data && typeof block.data === 'object') {
+      update.data = { ...block.data, [field]: value }
+    }
+    onUpdateBlock(update)
   }
 
   // Helper for updating animation field
@@ -101,6 +105,16 @@ export default function StudioBlockProperties({
   // Get human-friendly label and icon
   const getBlockMeta = () => {
     switch (type) {
+      case 'hero-cinema':
+        return { label: 'Hero Sinematik 3D', icon: Sparkles, desc: 'Header sinematik imersif dengan showcase motion reel & 3D' }
+      case 'process-timeline':
+        return { label: 'Timeline Produksi Animasi', icon: Layers, desc: 'Tahapan pipeline kreatif produksi 3D end-to-end' }
+      case 'stats-ticker':
+        return { label: 'Ticker Metrik Studio', icon: BarChart3, desc: 'Pencapaian jam tayang, proyek animasi, dan audiens' }
+      case 'interactive-cta':
+        return { label: 'CTA Kolaborasi Kreatif', icon: Sparkles, desc: 'Ajakan aksi memulai proyek animasi dan motion' }
+      case 'text-editorial':
+        return { label: 'Editorial Narrative', icon: MessageSquare, desc: 'Narasi editorial dengan lead paragraph dan multi-kolom teks' }
       case 'hero-department':
         return { label: 'Hero Departemen', icon: Layers, desc: 'Header utama dengan 3 Key Outcome Cards' }
       case 'hero-service':
@@ -120,7 +134,7 @@ export default function StudioBlockProperties({
       case 'faq-accordion':
         return { label: 'FAQ Accordion', icon: HelpCircle, desc: 'Tanya jawab dengan schema FAQPage JSON-LD' }
       case 'comparison-matrix':
-        return { label: 'Standar Rekayasa (Matrix)', icon: ShieldCheck, desc: 'Komparasi parameter teknis SegiaTech vs Konvensional' }
+        return { label: 'Standar Rekayasa (Matrix)', icon: ShieldCheck, desc: 'Komparasi parameter teknis UNIMASI vs Konvensional' }
       case 'architecture-blueprint':
         return { label: '4-Layer Architecture Blueprint', icon: Terminal, desc: 'Spesifikasi arsitektur end-to-end multi-layer' }
       case 'client-stats-impact':
@@ -154,7 +168,7 @@ export default function StudioBlockProperties({
           <button
             type="button"
             onClick={onDeselect}
-            className="inline-flex items-center gap-1.5 text-xs font-mono text-neutral-400 hover:text-[#F2C7A0] p-1 rounded-lg hover:bg-white/5 transition-colors"
+            className="inline-flex items-center gap-1.5 text-xs font-mono text-neutral-400 hover:text-[#FFD600] p-1 rounded-lg hover:bg-white/5 transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
             <span className="text-xs">Kembali</span>
@@ -217,14 +231,14 @@ export default function StudioBlockProperties({
       {/* Block Badge & Info */}
       <div className="px-4 py-3 border-b border-white/5 bg-[#141414] flex items-center justify-between gap-3">
         <div className="flex items-center gap-2.5 min-w-0">
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#F2C7A0]/10 border border-[#F2C7A0]/20 text-[#F2C7A0]">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#FFD600]/10 border border-[#FFD600]/20 text-[#FFD600]">
             <Icon className="w-4 h-4" />
           </div>
           <div className="overflow-hidden min-w-0">
             <div className="flex items-center gap-1.5">
               <span className="text-xs font-bold text-white truncate">{meta.label}</span>
               <Tooltip hint={meta.desc} side="bottom">
-                <Info className="w-3 h-3 text-neutral-500 hover:text-[#F2C7A0] cursor-help shrink-0" />
+                <Info className="w-3 h-3 text-neutral-500 hover:text-[#FFD600] cursor-help shrink-0" />
               </Tooltip>
             </div>
             <span className="text-[10px] font-mono text-neutral-500 truncate block">
@@ -268,7 +282,7 @@ export default function StudioBlockProperties({
                 <select
                   value={block.animation?.type || 'none'}
                   onChange={(e) => setAnimationField('type', e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl bg-[#181818] border border-white/10 text-[#F2C7A0] text-xs font-mono"
+                  className="w-full px-3 py-2 rounded-xl bg-[#181818] border border-white/10 text-[#FFD600] text-xs font-mono"
                 >
                   <option value="none">Tanpa Animasi (Normal Static)</option>
                   <option value="fade-up">Fade Up Reveal (Smooth Modern)</option>
@@ -326,12 +340,12 @@ export default function StudioBlockProperties({
                     type="checkbox"
                     checked={Boolean(block.animation?.immersiveGlow)}
                     onChange={(e) => setAnimationField('immersiveGlow', e.target.checked)}
-                    className="rounded text-[#F2C7A0] accent-[#F2C7A0]"
+                    className="rounded text-[#FFD600] accent-[#FFD600]"
                   />
                   <div className="flex items-center gap-1.5">
                     <span className="text-xs text-neutral-200">Ambient Glow</span>
                     <Tooltip hint="Efek pendaran cahaya kromatik halus di belakang blok" side="top">
-                      <Info className="w-3 h-3 text-neutral-500 hover:text-[#F2C7A0] cursor-help" />
+                      <Info className="w-3 h-3 text-neutral-500 hover:text-[#FFD600] cursor-help" />
                     </Tooltip>
                   </div>
                 </label>
@@ -339,6 +353,237 @@ export default function StudioBlockProperties({
             </div>
           )}
         </div>
+
+        {/* ─── 0. HERO CINEMA (UNIMASI DEDICATED) ─────────────────────────── */}
+        {type === 'hero-cinema' && (
+          <>
+            <div>
+              <FieldHeader label="Badge Studio" tooltip="Label sinematik studio di atas judul" />
+              <input
+                type="text"
+                value={block.badge || block.data?.badge || ''}
+                onChange={(e) => setField('badge', e.target.value)}
+                placeholder="UNIMASI ANIMATION STUDIO"
+                className="w-full px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-white text-xs font-mono"
+              />
+            </div>
+
+            <div>
+              <FieldHeader label="Headline Judul" tooltip="Judul karya / showreel animasi" />
+              <input
+                type="text"
+                value={block.headline || block.title || block.data?.headline || ''}
+                onChange={(e) => {
+                  setField('headline', e.target.value)
+                  setField('title', e.target.value)
+                }}
+                placeholder="Cinematic Motion & 3D Animation Showcase"
+                className="w-full px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-white text-xs font-mono font-bold"
+              />
+            </div>
+
+            <div>
+              <FieldHeader label="Deskripsi / Sinopsis" tooltip="Narasi kreatif cerita atau tujuan animasi" />
+              <textarea
+                rows={3}
+                value={block.subheadline || block.description || block.data?.subheadline || ''}
+                onChange={(e) => {
+                  setField('subheadline', e.target.value)
+                  setField('description', e.target.value)
+                }}
+                placeholder="Eksplorasi visual imersif, animasi 3D fidelitas tinggi..."
+                className="w-full px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-neutral-300 text-xs leading-relaxed"
+              />
+            </div>
+
+            <div className="pt-2 border-t border-white/10">
+              <FieldHeader label="Tombol CTA Utama" tooltip="Tautan aksi penonton" />
+              <div className="grid grid-cols-2 gap-2 mt-1">
+                <input
+                  type="text"
+                  value={block.primaryCta?.label || block.data?.primaryCta?.label || 'Tonton Showreel'}
+                  onChange={(e) => setField('primaryCta', { ...(block.primaryCta || block.data?.primaryCta || {}), label: e.target.value })}
+                  placeholder="Label Tombol"
+                  className="px-3 py-1.5 rounded-lg bg-[#141414] border border-white/10 text-xs text-white font-mono"
+                />
+                <input
+                  type="text"
+                  value={block.primaryCta?.href || block.data?.primaryCta?.href || '#reel'}
+                  onChange={(e) => setField('primaryCta', { ...(block.primaryCta || block.data?.primaryCta || {}), href: e.target.value })}
+                  placeholder="Tautan URL"
+                  className="px-3 py-1.5 rounded-lg bg-[#141414] border border-white/10 text-xs text-[#FFD600] font-mono"
+                />
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* ─── 0b. PROCESS TIMELINE (UNIMASI DEDICATED) ──────────────────────── */}
+        {type === 'process-timeline' && (
+          <>
+            <div>
+              <FieldHeader label="Badge" tooltip="Label penanda seksi" />
+              <input
+                type="text"
+                value={block.badge || block.data?.badge || ''}
+                onChange={(e) => setField('badge', e.target.value)}
+                placeholder="CREATIVE PRODUCTION PIPELINE"
+                className="w-full px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-white text-xs font-mono"
+              />
+            </div>
+            <div>
+              <FieldHeader label="Judul Pipeline" tooltip="Judul alur kerja studio animasi" />
+              <input
+                type="text"
+                value={block.headline || block.title || block.data?.headline || ''}
+                onChange={(e) => {
+                  setField('headline', e.target.value)
+                  setField('title', e.target.value)
+                }}
+                placeholder="Dari Konseptual Hingga Rendering Resolusi 4K"
+                className="w-full px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-white text-xs font-mono font-bold"
+              />
+            </div>
+            <div>
+              <FieldHeader label="Deskripsi" tooltip="Keterangan metodologi produksi animasi" />
+              <textarea
+                rows={3}
+                value={block.subheadline || block.description || block.data?.subheadline || ''}
+                onChange={(e) => {
+                  setField('subheadline', e.target.value)
+                  setField('description', e.target.value)
+                }}
+                className="w-full px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-neutral-300 text-xs leading-relaxed"
+              />
+            </div>
+          </>
+        )}
+
+        {/* ─── 0c. STATS TICKER (UNIMASI DEDICATED) ───────────────────────────── */}
+        {type === 'stats-ticker' && (
+          <>
+            <div>
+              <FieldHeader label="Judul Metrik" tooltip="Judul pencapaian produksi animasi" />
+              <input
+                type="text"
+                value={block.headline || block.title || block.data?.headline || ''}
+                onChange={(e) => {
+                  setField('headline', e.target.value)
+                  setField('title', e.target.value)
+                }}
+                placeholder="Pencapaian Produksi Studio Animasi"
+                className="w-full px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-white text-xs font-mono font-bold"
+              />
+            </div>
+            <div>
+              <FieldHeader label="Deskripsi" tooltip="Keterangan metrik" />
+              <textarea
+                rows={3}
+                value={block.subheadline || block.description || block.data?.subheadline || ''}
+                onChange={(e) => {
+                  setField('subheadline', e.target.value)
+                  setField('description', e.target.value)
+                }}
+                className="w-full px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-neutral-300 text-xs leading-relaxed"
+              />
+            </div>
+          </>
+        )}
+
+        {/* ─── 0d. INTERACTIVE CTA (UNIMASI DEDICATED) ────────────────────────── */}
+        {type === 'interactive-cta' && (
+          <>
+            <div>
+              <FieldHeader label="Judul Ajakan Aksi" tooltip="Headline CTA utama animasi" />
+              <input
+                type="text"
+                value={block.headline || block.title || block.data?.headline || ''}
+                onChange={(e) => {
+                  setField('headline', e.target.value)
+                  setField('title', e.target.value)
+                }}
+                placeholder="Siap Mewujudkan Visi Animasi Anda?"
+                className="w-full px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-white text-xs font-mono font-bold"
+              />
+            </div>
+            <div>
+              <FieldHeader label="Deskripsi CTA" tooltip="Penjelasan kolaborasi produksi studio" />
+              <textarea
+                rows={3}
+                value={block.subheadline || block.description || block.data?.subheadline || ''}
+                onChange={(e) => {
+                  setField('subheadline', e.target.value)
+                  setField('description', e.target.value)
+                }}
+                className="w-full px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-neutral-300 text-xs leading-relaxed"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <FieldHeader label="Teks Tombol" tooltip="Label tombol" />
+                <input
+                  type="text"
+                  value={block.ctaText || block.data?.ctaText || 'Mulai Kolaborasi Studio'}
+                  onChange={(e) => setField('ctaText', e.target.value)}
+                  className="w-full px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-white text-xs font-mono"
+                />
+              </div>
+              <div>
+                <FieldHeader label="Tautan URL" tooltip="URL tujuan tombol" />
+                <input
+                  type="text"
+                  value={block.ctaLink || block.data?.ctaLink || '/kontak'}
+                  onChange={(e) => setField('ctaLink', e.target.value)}
+                  className="w-full px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-[#FFD600] text-xs font-mono"
+                />
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* ─── 0e. TEXT EDITORIAL (UNIMASI DEDICATED) ─────────────────────────── */}
+        {type === 'text-editorial' && (
+          <>
+            <div>
+              <FieldHeader label="Lead Paragraph" tooltip="Paragraf pembuka / penekanan editorial" />
+              <textarea
+                rows={3}
+                value={block.leadText || block.lead || block.data?.leadText || block.data?.lead || ''}
+                onChange={(e) => {
+                  setField('leadText', e.target.value)
+                  setField('lead', e.target.value)
+                }}
+                placeholder="Paragraf pengantar bernada editorial..."
+                className="w-full px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-white text-xs leading-relaxed"
+              />
+            </div>
+            <div>
+              <FieldHeader label="Isi Narasi / Body" tooltip="Teks isi narasi editorial lengkap" />
+              <textarea
+                rows={6}
+                value={block.body || block.content || block.data?.body || block.data?.content || ''}
+                onChange={(e) => {
+                  setField('body', e.target.value)
+                  setField('content', e.target.value)
+                }}
+                placeholder="Isi narasi, penjelasan konteks karya, atau esai kreatif..."
+                className="w-full px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-neutral-300 text-xs leading-relaxed"
+              />
+            </div>
+            <div>
+              <FieldHeader label="Jumlah Kolom" tooltip="Tata letak pembagian kolom narasi" />
+              <select
+                aria-label="Jumlah Kolom Editorial"
+                value={block.columns || block.data?.columns || 1}
+                onChange={(e) => setField('columns', Number(e.target.value) || 1)}
+                className="w-full px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-[#FFD600] text-xs font-mono"
+              >
+                <option value={1}>1 Kolom (Default Full Width)</option>
+                <option value={2}>2 Kolom Editorial</option>
+              </select>
+            </div>
+          </>
+        )}
 
         {/* ─── 1. HERO DEPARTMENT ───────────────────────────────────────── */}
         {type === 'hero-department' && (
@@ -350,7 +595,7 @@ export default function StudioBlockProperties({
                 aria-label="Varian Tampilan Hero"
                 value={block.variant || 'cinematic'}
                 onChange={(e) => setField('variant', e.target.value)}
-                className="w-full px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-[#F2C7A0] text-xs font-mono"
+                className="w-full px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-[#FFD600] text-xs font-mono"
               >
                 <option value="cinematic">Cinematic Ambient Glow (Default)</option>
                 <option value="showcase">Split Headline &amp; Standard Box (Showcase)</option>
@@ -396,14 +641,14 @@ export default function StudioBlockProperties({
             {/* Key Outcomes Cards */}
             <div className="pt-2 border-t border-white/10">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-mono font-semibold text-[#F2C7A0]">Key Outcome Cards (3 Metrik)</span>
+                <span className="text-xs font-mono font-semibold text-[#FFD600]">Key Outcome Cards (3 Metrik)</span>
                 <button
                   type="button"
                   onClick={() => {
                     const current = block.keyOutcomes || []
                     setField('keyOutcomes', [...current, { label: 'Metrik Baru', value: '100%' }])
                   }}
-                  className="inline-flex items-center gap-1 text-[11px] font-mono text-[#F2C7A0] hover:underline"
+                  className="inline-flex items-center gap-1 text-[11px] font-mono text-[#FFD600] hover:underline"
                 >
                   <Plus className="w-3 h-3" /> Tambah
                 </button>
@@ -440,7 +685,7 @@ export default function StudioBlockProperties({
                           setField('keyOutcomes', copy)
                         }}
                         placeholder="Value (mis. < 1.2s)"
-                        className="w-full px-2.5 py-1.5 rounded-lg bg-black/40 border border-white/10 text-[#F2C7A0] font-bold text-xs"
+                        className="w-full px-2.5 py-1.5 rounded-lg bg-black/40 border border-white/10 text-[#FFD600] font-bold text-xs"
                       />
                     </label>
                     <button
@@ -498,7 +743,7 @@ export default function StudioBlockProperties({
                         setField('windowBadge', e.target.value)
                       }}
                       placeholder="Akses Cepat & Responsif"
-                      className="w-full px-2.5 py-1.5 rounded-lg bg-black/40 border border-white/10 text-[#F2C7A0] text-xs font-mono"
+                      className="w-full px-2.5 py-1.5 rounded-lg bg-black/40 border border-white/10 text-[#FFD600] text-xs font-mono"
                     />
                   </label>
                 </div>
@@ -592,7 +837,7 @@ export default function StudioBlockProperties({
                 aria-label="Pesan Prompt WhatsApp"
                 value={block.whatsappPrompt || ''}
                 onChange={(e) => setField('whatsappPrompt', e.target.value)}
-                placeholder="Halo SegiaTech, saya ingin konsultasi..."
+                placeholder="Halo UNIMASI, saya ingin konsultasi..."
                 className="w-full px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-white text-xs"
               />
             </div>
@@ -621,14 +866,14 @@ export default function StudioBlockProperties({
             {/* Metrik Bar */}
             <div className="pt-2 border-t border-white/10">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-mono font-semibold text-[#F2C7A0]">Metrik Kinerja (3 Bar)</span>
+                <span className="text-xs font-mono font-semibold text-[#FFD600]">Metrik Kinerja (3 Bar)</span>
                 <button
                   type="button"
                   onClick={() => {
                     const current = block.metrics || []
                     setField('metrics', [...current, { label: 'Metrik Baru', value: '99%' }])
                   }}
-                  className="inline-flex items-center gap-1 text-[11px] font-mono text-[#F2C7A0] hover:underline"
+                  className="inline-flex items-center gap-1 text-[11px] font-mono text-[#FFD600] hover:underline"
                 >
                   <Plus className="w-3 h-3" /> Tambah
                 </button>
@@ -665,7 +910,7 @@ export default function StudioBlockProperties({
                           setField('metrics', copy)
                         }}
                         placeholder="Value (99.9%)"
-                        className="w-full px-2.5 py-1.5 rounded-lg bg-black/40 border border-white/10 text-[#F2C7A0] font-bold text-xs"
+                        className="w-full px-2.5 py-1.5 rounded-lg bg-black/40 border border-white/10 text-[#FFD600] font-bold text-xs"
                       />
                     </label>
                     <button
@@ -696,7 +941,7 @@ export default function StudioBlockProperties({
                 aria-label="Varian Layout Bento"
                 value={block.variant || 'asymmetric-bento'}
                 onChange={(e) => setField('variant', e.target.value)}
-                className="w-full px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-[#F2C7A0] text-xs font-mono"
+                className="w-full px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-[#FFD600] text-xs font-mono"
               >
                 <option value="asymmetric-bento">Asymmetric Bento (Hero Spotlight Card + Grid)</option>
                 <option value="three-column">3-Column Uniform Matrix (Simetris)</option>
@@ -728,14 +973,14 @@ export default function StudioBlockProperties({
 
             <div className="pt-2 border-t border-white/10">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-mono font-semibold text-[#F2C7A0]">Daftar Fitur Bento</span>
+                <span className="text-xs font-mono font-semibold text-[#FFD600]">Daftar Fitur Bento</span>
                 <button
                   type="button"
                   onClick={() => {
                     const current = block.features || []
                     setField('features', [...current, { title: 'Fitur Baru', description: 'Uraian teknis...' }])
                   }}
-                  className="inline-flex items-center gap-1 text-[11px] font-mono text-[#F2C7A0] hover:underline"
+                  className="inline-flex items-center gap-1 text-[11px] font-mono text-[#FFD600] hover:underline"
                 >
                   <Plus className="w-3 h-3" /> Tambah
                 </button>
@@ -806,7 +1051,7 @@ export default function StudioBlockProperties({
                             setField('features', copy)
                           }}
                           placeholder="Solusi Unggulan"
-                          className="w-full px-2.5 py-1.5 rounded-lg bg-black/40 border border-white/10 text-[#F2C7A0] text-xs font-mono"
+                          className="w-full px-2.5 py-1.5 rounded-lg bg-black/40 border border-white/10 text-[#FFD600] text-xs font-mono"
                         />
                       </div>
                     </div>
@@ -844,7 +1089,7 @@ export default function StudioBlockProperties({
                 aria-label="Varian Tampilan Pilar"
                 value={block.variant || 'blueprint'}
                 onChange={(e) => setField('variant', e.target.value)}
-                className="w-full px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-[#F2C7A0] text-xs font-mono"
+                className="w-full px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-[#FFD600] text-xs font-mono"
               >
                 <option value="blueprint">Blueprint Glow Cards (Modern Obsidian)</option>
                 <option value="cards">Classic Technical Cards</option>
@@ -877,7 +1122,7 @@ export default function StudioBlockProperties({
 
             <div className="pt-2 border-t border-white/10">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-mono font-semibold text-[#F2C7A0]">Pilar Utama</span>
+                <span className="text-xs font-mono font-semibold text-[#FFD600]">Pilar Utama</span>
                 <span className="text-[10px] font-mono text-neutral-500">{(block.pillars || []).length} Pilar</span>
               </div>
               <div className="space-y-3">
@@ -927,7 +1172,7 @@ export default function StudioBlockProperties({
                 aria-label="Varian Alur Kerja"
                 value={block.variant || 'timeline-connected'}
                 onChange={(e) => setField('variant', e.target.value)}
-                className="w-full px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-[#F2C7A0] text-xs font-mono"
+                className="w-full px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-[#FFD600] text-xs font-mono"
               >
                 <option value="timeline-connected">Connected Step Pulse (Garis Alur Terhubung)</option>
                 <option value="cards-grid">4-Phases Modular Grid</option>
@@ -958,11 +1203,11 @@ export default function StudioBlockProperties({
             </div>
 
             <div className="pt-2 border-t border-white/10 space-y-3">
-              <span className="text-xs font-mono font-semibold text-[#F2C7A0] block">4 Fase Agile Pelaksanaan</span>
+              <span className="text-xs font-mono font-semibold text-[#FFD600] block">4 Fase Agile Pelaksanaan</span>
               {(block.phases || []).map((ph: any, phIdx: number) => (
                 <div key={phIdx} className="p-3.5 rounded-xl bg-[#141414] border border-white/10 space-y-2">
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-mono px-2 py-0.5 rounded bg-[#F2C7A0]/20 text-[#F2C7A0] font-bold">
+                    <span className="text-xs font-mono px-2 py-0.5 rounded bg-[#FFD600]/20 text-[#FFD600] font-bold">
                       FASE {ph.step || `0${phIdx + 1}`}
                     </span>
                     <label className="flex-1">
@@ -1021,7 +1266,7 @@ export default function StudioBlockProperties({
             </div>
 
             <div className="pt-2 border-t border-white/10">
-              <span className="text-xs font-mono font-semibold text-[#F2C7A0] block mb-2">
+              <span className="text-xs font-mono font-semibold text-[#FFD600] block mb-2">
                 Pilih Studi Kasus Terkait (Relasional)
               </span>
               <p className="text-[11px] text-neutral-400 mb-3">
@@ -1039,7 +1284,7 @@ export default function StudioBlockProperties({
                       key={p.id}
                       className={`flex items-center gap-2.5 p-2.5 rounded-xl border transition-all cursor-pointer ${
                         isChecked
-                          ? 'bg-[#F2C7A0]/10 border-[#F2C7A0]/40 text-white'
+                          ? 'bg-[#FFD600]/10 border-[#FFD600]/40 text-white'
                           : 'bg-[#141414] border-white/10 text-neutral-400 hover:text-white'
                       }`}
                     >
@@ -1061,7 +1306,7 @@ export default function StudioBlockProperties({
                             portfolios: nextPortfolios,
                           })
                         }}
-                        className="rounded border-white/20 text-[#F2C7A0] focus:ring-0"
+                        className="rounded border-white/20 text-[#FFD600] focus:ring-0"
                       />
                       <div className="overflow-hidden flex-1">
                         <div className="text-xs font-semibold truncate text-white">{p.title}</div>
@@ -1123,7 +1368,7 @@ export default function StudioBlockProperties({
                   aria-label="Perusahaan"
                   value={block.company || ''}
                   onChange={(e) => setField('company', e.target.value)}
-                  placeholder="SegiaTech"
+                  placeholder="UNIMASI"
                   className="w-full px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-white text-xs"
                 />
               </div>
@@ -1189,14 +1434,14 @@ export default function StudioBlockProperties({
 
             <div className="pt-2 border-t border-white/10">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-mono font-semibold text-[#F2C7A0]">Item Tanya Jawab</span>
+                <span className="text-xs font-mono font-semibold text-[#FFD600]">Item Tanya Jawab</span>
                 <button
                   type="button"
                   onClick={() => {
                     const current = block.faqs || []
                     setField('faqs', [...current, { question: 'Pertanyaan baru?', answer: 'Jawaban detail...' }])
                   }}
-                  className="inline-flex items-center gap-1 text-[11px] font-mono text-[#F2C7A0] hover:underline"
+                  className="inline-flex items-center gap-1 text-[11px] font-mono text-[#FFD600] hover:underline"
                 >
                   <Plus className="w-3 h-3" /> Tambah
                 </button>
@@ -1328,7 +1573,7 @@ export default function StudioBlockProperties({
                 aria-label="Judul Seksi Komparasi"
                 value={block.title || ''}
                 onChange={(e) => setField('title', e.target.value)}
-                placeholder="Standar Rekayasa SegiaTech vs Konvensional"
+                placeholder="Standar Rekayasa UNIMASI vs Konvensional"
                 className="w-full px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-white text-xs font-bold"
               />
             </div>
@@ -1345,7 +1590,7 @@ export default function StudioBlockProperties({
             </div>
             <div className="pt-2 border-t border-white/10">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-mono font-semibold text-[#F2C7A0]">Baris Parameter Komparasi</span>
+                <span className="text-xs font-mono font-semibold text-[#FFD600]">Baris Parameter Komparasi</span>
                 <button
                   type="button"
                   onClick={() => {
@@ -1354,12 +1599,12 @@ export default function StudioBlockProperties({
                       ...current,
                       {
                         feature: 'Parameter Baru',
-                        segia: 'Standar SegiaTech Modern',
+                        segia: 'Standar UNIMASI Modern',
                         traditional: 'Pendekatan Tradisional',
                       },
                     ])
                   }}
-                  className="inline-flex items-center gap-1 text-[11px] font-mono text-[#F2C7A0] hover:underline"
+                  className="inline-flex items-center gap-1 text-[11px] font-mono text-[#FFD600] hover:underline"
                 >
                   <Plus className="w-3 h-3" /> Tambah Baris
                 </button>
@@ -1396,19 +1641,19 @@ export default function StudioBlockProperties({
                         className="w-full px-2.5 py-1.5 rounded-lg bg-black/40 border border-white/10 text-white text-xs"
                       />
                     </label>
-                    <label className="block text-[11px] font-mono text-[#F2C7A0]">
-                      <span className="block mb-1">Standar SegiaTech</span>
+                    <label className="block text-[11px] font-mono text-[#FFD600]">
+                      <span className="block mb-1">Standar UNIMASI</span>
                       <input
                         type="text"
                         name={`rowSegia-${rIdx}`}
-                        aria-label={`Standar SegiaTech ${rIdx + 1}`}
+                        aria-label={`Standar UNIMASI ${rIdx + 1}`}
                         value={row.segia || ''}
                         onChange={(e) => {
                           const copy = [...(block.rows || [])]
                           copy[rIdx] = { ...copy[rIdx], segia: e.target.value }
                           setField('rows', copy)
                         }}
-                        className="w-full px-2.5 py-1.5 rounded-lg bg-black/40 border border-[#F2C7A0]/30 text-[#F2C7A0] text-xs font-mono"
+                        className="w-full px-2.5 py-1.5 rounded-lg bg-black/40 border border-[#FFD600]/30 text-[#FFD600] text-xs font-mono"
                       />
                     </label>
                     <label className="block text-[11px] font-mono text-neutral-400">
@@ -1461,7 +1706,7 @@ export default function StudioBlockProperties({
             </div>
             <div className="pt-2 border-t border-white/10">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-mono font-semibold text-[#F2C7A0]">Layers Arsitektur</span>
+                <span className="text-xs font-mono font-semibold text-[#FFD600]">Layers Arsitektur</span>
                 <button
                   type="button"
                   onClick={() => {
@@ -1477,7 +1722,7 @@ export default function StudioBlockProperties({
                       },
                     ])
                   }}
-                  className="inline-flex items-center gap-1 text-[11px] font-mono text-[#F2C7A0] hover:underline"
+                  className="inline-flex items-center gap-1 text-[11px] font-mono text-[#FFD600] hover:underline"
                 >
                   <Plus className="w-3 h-3" /> Tambah Layer
                 </button>
@@ -1486,7 +1731,7 @@ export default function StudioBlockProperties({
                 {(block.layers || []).map((layer: any, lIdx: number) => (
                   <div key={lIdx} className="p-3 rounded-2xl bg-[#141414] border border-white/10 space-y-2">
                     <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-mono text-[#F2C7A0]">{layer.level || `Layer 0${lIdx + 1}`}</span>
+                      <span className="text-[10px] font-mono text-[#FFD600]">{layer.level || `Layer 0${lIdx + 1}`}</span>
                       <button
                         type="button"
                         aria-label={`Hapus layer ${lIdx + 1}`}
@@ -1543,7 +1788,7 @@ export default function StudioBlockProperties({
                           setField('layers', copy)
                         }}
                         placeholder="Turbopack Edge"
-                        className="w-full px-2 py-1 rounded bg-black/40 border border-white/10 text-[#F2C7A0] text-xs font-mono"
+                        className="w-full px-2 py-1 rounded bg-black/40 border border-white/10 text-[#FFD600] text-xs font-mono"
                       />
                     </label>
                     <label className="block text-[11px] font-mono text-neutral-400">
@@ -1584,7 +1829,7 @@ export default function StudioBlockProperties({
 
             {/* Showcase Image & HUD Metrics Settings */}
             <div className="pt-2 border-t border-white/10 space-y-3">
-              <span className="text-xs font-mono font-semibold text-[#F2C7A0] block">
+              <span className="text-xs font-mono font-semibold text-[#FFD600] block">
                 Visual Showcase Karya Nyata
               </span>
               <StudioImageControl
@@ -1618,7 +1863,7 @@ export default function StudioBlockProperties({
                       value={block.imageBadge || ''}
                       onChange={(e) => setField('imageBadge', e.target.value)}
                       placeholder="Hasil Produksi Aktif"
-                      className="w-full px-2.5 py-1.5 rounded-lg bg-black/40 border border-white/10 text-[#F2C7A0] text-xs font-mono"
+                      className="w-full px-2.5 py-1.5 rounded-lg bg-black/40 border border-white/10 text-[#FFD600] text-xs font-mono"
                     />
                   </label>
                 </div>
@@ -1684,7 +1929,7 @@ export default function StudioBlockProperties({
             </div>
             <div className="pt-2 border-t border-white/10">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-mono font-semibold text-[#F2C7A0]">Metrik Angka & KPI</span>
+                <span className="text-xs font-mono font-semibold text-[#FFD600]">Metrik Angka & KPI</span>
                 <button
                   type="button"
                   onClick={() => {
@@ -1694,7 +1939,7 @@ export default function StudioBlockProperties({
                       { value: '100%', label: 'Label KPI', detail: 'Keterangan pembuktian' },
                     ])
                   }}
-                  className="inline-flex items-center gap-1 text-[11px] font-mono text-[#F2C7A0] hover:underline"
+                  className="inline-flex items-center gap-1 text-[11px] font-mono text-[#FFD600] hover:underline"
                 >
                   <Plus className="w-3 h-3" /> Tambah KPI
                 </button>
@@ -1730,7 +1975,7 @@ export default function StudioBlockProperties({
                             setField('stats', copy)
                           }}
                           placeholder="99.98%"
-                          className="w-full px-2 py-1 rounded bg-black/40 border border-[#F2C7A0]/30 text-[#F2C7A0] font-bold text-xs"
+                          className="w-full px-2 py-1 rounded bg-black/40 border border-[#FFD600]/30 text-[#FFD600] font-bold text-xs"
                         />
                       </div>
                       <div>
@@ -1801,7 +2046,7 @@ export default function StudioBlockProperties({
             </div>
             <div className="pt-2 border-t border-white/10">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-mono font-semibold text-[#F2C7A0]">Item Garansi & Deliverable</span>
+                <span className="text-xs font-mono font-semibold text-[#FFD600]">Item Garansi & Deliverable</span>
                 <button
                   type="button"
                   onClick={() => {
@@ -1811,7 +2056,7 @@ export default function StudioBlockProperties({
                       { title: 'Item Deliverable Baru', desc: 'Uraian spesifikasi garansi...' },
                     ])
                   }}
-                  className="inline-flex items-center gap-1 text-[11px] font-mono text-[#F2C7A0] hover:underline"
+                  className="inline-flex items-center gap-1 text-[11px] font-mono text-[#FFD600] hover:underline"
                 >
                   <Plus className="w-3 h-3" /> Tambah Item
                 </button>
@@ -1881,7 +2126,7 @@ export default function StudioBlockProperties({
                 aria-label="Judul Matriks Teknologi"
                 value={block.title || ''}
                 onChange={(e) => setField('title', e.target.value)}
-                placeholder="Matriks Standar Teknologi SegiaTech"
+                placeholder="Matriks Standar Teknologi UNIMASI"
                 className="w-full px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-white text-xs font-bold"
               />
             </div>
@@ -1898,7 +2143,7 @@ export default function StudioBlockProperties({
             </div>
             <div className="pt-2 border-t border-white/10">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-mono font-semibold text-[#F2C7A0]">Kategori Stack (Maks 4)</span>
+                <span className="text-xs font-mono font-semibold text-[#FFD600]">Kategori Stack (Maks 4)</span>
                 <button
                   type="button"
                   onClick={() => {
@@ -1908,7 +2153,7 @@ export default function StudioBlockProperties({
                       { name: 'Kategori Baru', badge: 'Stack', items: ['Teknologi 1', 'Teknologi 2'] },
                     ])
                   }}
-                  className="inline-flex items-center gap-1 text-[11px] font-mono text-[#F2C7A0] hover:underline"
+                  className="inline-flex items-center gap-1 text-[11px] font-mono text-[#FFD600] hover:underline"
                 >
                   <Plus className="w-3 h-3" /> Tambah Kategori
                 </button>
@@ -1960,7 +2205,7 @@ export default function StudioBlockProperties({
                             setField('categories', copy)
                           }}
                           placeholder="Core UI"
-                          className="w-full px-2 py-1 rounded bg-black/40 border border-white/10 text-[#F2C7A0] text-xs font-mono"
+                          className="w-full px-2 py-1 rounded bg-black/40 border border-white/10 text-[#FFD600] text-xs font-mono"
                         />
                       </label>
                     </div>
@@ -2025,7 +2270,7 @@ export default function StudioBlockProperties({
             {/* List Item Sub-Layanan */}
             <div className="pt-2 border-t border-white/10 space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-mono font-semibold text-[#F2C7A0]">
+                <span className="text-xs font-mono font-semibold text-[#FFD600]">
                   Item Sub-Layanan ({(block.services || []).length > 0 ? (block.services || []).length : 'Default Bawaan'})
                 </span>
                 <button
@@ -2077,7 +2322,7 @@ export default function StudioBlockProperties({
                       },
                     ])
                   }}
-                  className="inline-flex items-center gap-1 text-[11px] font-mono text-[#F2C7A0] hover:underline"
+                  className="inline-flex items-center gap-1 text-[11px] font-mono text-[#FFD600] hover:underline"
                 >
                   <Plus className="w-3 h-3" /> Tambah Sub-Layanan
                 </button>
@@ -2088,7 +2333,7 @@ export default function StudioBlockProperties({
                   {(block.services || []).map((srv: any, sIdx: number) => (
                     <div key={sIdx} className="p-3.5 rounded-2xl bg-[#141414] border border-white/10 space-y-3">
                       <div className="flex items-center justify-between">
-                        <span className="text-xs font-mono text-[#F2C7A0] font-semibold">
+                        <span className="text-xs font-mono text-[#FFD600] font-semibold">
                           Sub-Layanan #{sIdx + 1}
                         </span>
                         <button
@@ -2148,7 +2393,7 @@ export default function StudioBlockProperties({
                               setField('services', copy)
                             }}
                             placeholder="Tingkatkan Kredibilitas"
-                            className="w-full px-2.5 py-1.5 rounded-lg bg-black/40 border border-white/10 text-[#F2C7A0] text-xs font-mono"
+                            className="w-full px-2.5 py-1.5 rounded-lg bg-black/40 border border-white/10 text-[#FFD600] text-xs font-mono"
                           />
                         </div>
                         <div>
@@ -2203,7 +2448,7 @@ export default function StudioBlockProperties({
                 value={block.badge || ''}
                 onChange={(e) => setField('badge', e.target.value)}
                 placeholder="Bukti Portofolio Nyata"
-                className="w-full px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-[#F2C7A0] text-xs font-mono"
+                className="w-full px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-[#FFD600] text-xs font-mono"
               />
             </div>
             <div>
@@ -2233,7 +2478,7 @@ export default function StudioBlockProperties({
             {/* List Kartu Gambar Galeri */}
             <div className="pt-2 border-t border-white/10 space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-mono font-semibold text-[#F2C7A0]">
+                <span className="text-xs font-mono font-semibold text-[#FFD600]">
                   Kartu Showcase Gambar ({(block.items || []).length} Item)
                 </span>
                 <button
@@ -2251,7 +2496,7 @@ export default function StudioBlockProperties({
                       },
                     ])
                   }}
-                  className="inline-flex items-center gap-1 text-[11px] font-mono text-[#F2C7A0] hover:underline"
+                  className="inline-flex items-center gap-1 text-[11px] font-mono text-[#FFD600] hover:underline"
                 >
                   <Plus className="w-3 h-3" /> Tambah Kartu
                 </button>
@@ -2261,7 +2506,7 @@ export default function StudioBlockProperties({
                 {(block.items || []).map((item: any, gIdx: number) => (
                   <div key={gIdx} className="p-3.5 rounded-2xl bg-[#141414] border border-white/10 space-y-3">
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-mono text-[#F2C7A0] font-semibold">
+                      <span className="text-xs font-mono text-[#FFD600] font-semibold">
                         Kartu #{gIdx + 1}
                       </span>
                       <button
@@ -2322,7 +2567,7 @@ export default function StudioBlockProperties({
                             setField('items', copy)
                           }}
                           placeholder="Pendidikan Tinggi"
-                          className="w-full px-2.5 py-1.5 rounded-lg bg-black/40 border border-white/10 text-[#F2C7A0] text-xs font-mono"
+                          className="w-full px-2.5 py-1.5 rounded-lg bg-black/40 border border-white/10 text-[#FFD600] text-xs font-mono"
                         />
                       </div>
                       <div>
@@ -2374,7 +2619,7 @@ export default function StudioBlockProperties({
               <select
                 value={block.frameStyle === 'browser' ? 'immersive' : (block.frameStyle || 'immersive')}
                 onChange={(e) => setField('frameStyle', e.target.value)}
-                className="w-full px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-[#F2C7A0] text-xs font-mono"
+                className="w-full px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-[#FFD600] text-xs font-mono"
               >
                 <option value="immersive">Immersive Editorial Surface (Bersih, Refined Specular Border)</option>
                 <option value="floating-card">Clean Floating Card (Kartu Melayang dengan Padding)</option>
@@ -2400,7 +2645,7 @@ export default function StudioBlockProperties({
             {/* Universal Image Control */}
             <StudioImageControl
               label="Gambar / Tangkapan Layar Utama"
-              description="Unggah file gambar atau pilih dari galeri karya nyata SegiaTech."
+              description="Unggah file gambar atau pilih dari galeri karya nyata UNIMASI."
               value={block.image || block.imageUrl || ''}
               onChange={(url) => {
                 setField('image', url)
@@ -2449,7 +2694,7 @@ export default function StudioBlockProperties({
                     value={block.badge || ''}
                     onChange={(e) => setField('badge', e.target.value)}
                     placeholder="Showcase Visual"
-                    className="w-full px-2.5 py-1.5 rounded-lg bg-black/40 border border-white/10 text-[#F2C7A0] text-xs font-mono"
+                    className="w-full px-2.5 py-1.5 rounded-lg bg-black/40 border border-white/10 text-[#FFD600] text-xs font-mono"
                   />
                 </label>
               </div>
@@ -2497,7 +2742,7 @@ export default function StudioBlockProperties({
           <button
             type="button"
             onClick={onDeselect}
-            className="w-full py-2 rounded-xl bg-[#F2C7A0] text-[#191919] hover:bg-[#ebd5c1] text-xs font-mono font-bold transition-all shadow-[0_0_15px_rgba(242,199,160,0.2)] flex items-center justify-center gap-2"
+            className="w-full py-2 rounded-xl bg-[#FFD600] text-[#191919] hover:bg-[#ffe855] text-xs font-mono font-bold transition-all shadow-[0_0_15px_rgba(255, 214, 0,0.2)] flex items-center justify-center gap-2"
           >
             <Check className="w-4 h-4" />
             <span>Selesai Mengedit</span>

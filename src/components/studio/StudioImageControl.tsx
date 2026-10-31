@@ -20,7 +20,7 @@ import {
 } from 'lucide-react'
 import MediaPickerModal from './MediaPickerModal'
 
-// Preset template visual nyata dari SegiaTech
+// Preset template visual nyata dari UNIMASI
 export const SEGIA_IMAGE_PRESETS = [
   {
     name: 'Portal PMB Universitas Mercu Buana Yogyakarta',
@@ -44,7 +44,7 @@ export const SEGIA_IMAGE_PRESETS = [
     name: 'Simulator 3D Virtual Aquarium Interaktif',
     url: '/images/portfolio/interactive-3d-aquarium.png',
     category: 'Edutainment & 3D WebGL',
-    defaultAlt: 'Visualisasi simulasi interaktif 3D akuarium virtual SegiaTech',
+    defaultAlt: 'Visualisasi simulasi interaktif 3D akuarium virtual UNIMASI',
   },
   {
     name: 'Interactive Sensing Wall & Projection Mapping',
@@ -187,7 +187,7 @@ export default function StudioImageControl({
       <div className="flex items-start justify-between gap-2">
         <div>
           <div className="flex items-center gap-2">
-            <ImageIcon className="w-4 h-4 text-[#F2C7A0]" />
+            <ImageIcon className="w-4 h-4 text-[#FFD600]" />
             <span className="text-xs font-mono font-semibold text-white">
               {label} {required && <span className="text-rose-400">*</span>}
             </span>
@@ -223,7 +223,7 @@ export default function StudioImageControl({
                 title={`Pratinjau Aspek Rasio ${ratio}`}
                 className={`px-1.5 py-0.5 rounded transition-colors ${
                   previewAspect === ratio
-                    ? 'bg-[#F2C7A0] text-[#191919] font-bold'
+                    ? 'bg-[#FFD600] text-[#191919] font-bold'
                     : 'text-neutral-400 hover:text-white'
                 }`}
               >
@@ -244,7 +244,7 @@ export default function StudioImageControl({
         onDrop={handleDrop}
         className={`relative rounded-xl overflow-hidden border transition-all duration-300 bg-black/60 group ${
           isDragOver
-            ? 'border-[#F2C7A0] ring-2 ring-[#F2C7A0]/50 scale-[1.01]'
+            ? 'border-[#FFD600] ring-2 ring-[#FFD600]/50 scale-[1.01]'
             : 'border-white/10 hover:border-white/25'
         }`}
       >
@@ -312,7 +312,7 @@ export default function StudioImageControl({
                 href={value}
                 target="_blank"
                 rel="noreferrer"
-                className="hover:text-[#F2C7A0] inline-flex items-center gap-1 text-[10px] bg-black/60 px-2 py-0.5 rounded border border-white/10"
+                className="hover:text-[#FFD600] inline-flex items-center gap-1 text-[10px] bg-black/60 px-2 py-0.5 rounded border border-white/10"
               >
                 <span>Lihat Asli</span>
                 <ExternalLink className="w-3 h-3" />
@@ -320,8 +320,8 @@ export default function StudioImageControl({
             </div>
           </div>
         ) : (
-          <div className="aspect-[16/9] w-full flex flex-col items-center justify-center p-6 text-center border-2 border-dashed border-white/10 bg-gradient-to-b from-white/[0.02] to-transparent group-hover:border-[#F2C7A0]/40 transition-colors">
-            <div className="w-11 h-11 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-neutral-400 mb-2 group-hover:scale-105 group-hover:border-[#F2C7A0]/40 group-hover:text-[#F2C7A0] transition-all">
+          <div className="aspect-[16/9] w-full flex flex-col items-center justify-center p-6 text-center border-2 border-dashed border-white/10 bg-gradient-to-b from-white/[0.02] to-transparent group-hover:border-[#FFD600]/40 transition-colors">
+            <div className="w-11 h-11 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-neutral-400 mb-2 group-hover:scale-105 group-hover:border-[#FFD600]/40 group-hover:text-[#FFD600] transition-all">
               <ImageIcon className="w-5 h-5" />
             </div>
             <p className="text-xs font-semibold text-neutral-300">Tarik &amp; Lepaskan Gambar ke Sini</p>
@@ -334,7 +334,7 @@ export default function StudioImageControl({
         {/* Uploading Overlay */}
         {uploading && (
           <div className="absolute inset-0 bg-black/85 backdrop-blur-sm flex flex-col items-center justify-center gap-2 z-20 text-white">
-            <RefreshCw className="w-6 h-6 animate-spin text-[#F2C7A0]" />
+            <RefreshCw className="w-6 h-6 animate-spin text-[#FFD600]" />
             <span className="text-xs font-mono text-neutral-300">Mengunggah ke server...</span>
           </div>
         )}
@@ -363,7 +363,7 @@ export default function StudioImageControl({
           disabled={uploading}
           className="flex-1 py-2 px-3 rounded-xl bg-white/10 hover:bg-white/15 text-white text-xs font-mono inline-flex items-center justify-center gap-1.5 border border-white/10 transition-colors disabled:opacity-50 shadow-sm"
         >
-          <Upload className="w-3.5 h-3.5 text-[#F2C7A0]" />
+          <Upload className="w-3.5 h-3.5 text-[#FFD600]" />
           <span>Unggah File</span>
         </button>
 
@@ -382,8 +382,8 @@ export default function StudioImageControl({
           <button
             type="button"
             onClick={() => setShowPresetsDropdown(!showPresetsDropdown)}
-            className="py-2 px-3 rounded-xl bg-[#F2C7A0]/15 hover:bg-[#F2C7A0]/25 text-[#F2C7A0] text-xs font-mono inline-flex items-center gap-1.5 border border-[#F2C7A0]/40 transition-colors shadow-sm font-semibold"
-            title="Pilih gambar studi kasus nyata SegiaTech"
+            className="py-2 px-3 rounded-xl bg-[#FFD600]/15 hover:bg-[#FFD600]/25 text-[#FFD600] text-xs font-mono inline-flex items-center gap-1.5 border border-[#FFD600]/40 transition-colors shadow-sm font-semibold"
+            title="Pilih gambar studi kasus nyata UNIMASI"
           >
             <Sparkles className="w-3.5 h-3.5" />
             <span>Preset Karya</span>
@@ -392,9 +392,9 @@ export default function StudioImageControl({
           {showPresetsDropdown && (
             <div className="absolute right-0 bottom-full mb-2 w-80 rounded-2xl bg-[#1C1C1C] border border-white/15 shadow-2xl p-3 z-50 space-y-2.5 max-h-80 overflow-y-auto">
               <div className="flex items-center justify-between pb-2 border-b border-white/10">
-                <span className="text-[11px] font-mono text-[#F2C7A0] font-semibold flex items-center gap-1">
+                <span className="text-[11px] font-mono text-[#FFD600] font-semibold flex items-center gap-1">
                   <Sparkles className="w-3 h-3" />
-                  Katalog Karya SegiaTech
+                  Katalog Karya UNIMASI
                 </span>
                 <button
                   type="button"
@@ -414,7 +414,7 @@ export default function StudioImageControl({
                     onClick={() => setPresetCategory(cat)}
                     className={`text-[10px] font-mono px-2 py-0.5 rounded-full transition-colors ${
                       presetCategory === cat
-                        ? 'bg-[#F2C7A0] text-[#191919] font-bold'
+                        ? 'bg-[#FFD600] text-[#191919] font-bold'
                         : 'bg-white/5 text-neutral-400 hover:text-white hover:bg-white/10'
                     }`}
                   >
@@ -441,7 +441,7 @@ export default function StudioImageControl({
                       />
                     </div>
                     <div className="truncate flex-1">
-                      <span className="text-xs font-semibold text-white block truncate group-hover:text-[#F2C7A0] transition-colors">
+                      <span className="text-xs font-semibold text-white block truncate group-hover:text-[#FFD600] transition-colors">
                         {preset.name}
                       </span>
                       <span className="text-[10px] font-mono text-neutral-400 block truncate">
@@ -466,7 +466,7 @@ export default function StudioImageControl({
           value={value || ''}
           onChange={(e) => onChange(e.target.value)}
           placeholder="/images/portfolio/nama-file.png atau https://..."
-          className="w-full px-3 py-2 rounded-xl bg-black/40 border border-white/10 text-white text-xs font-mono placeholder:text-neutral-600 focus:outline-none focus:border-[#F2C7A0] transition-colors"
+          className="w-full px-3 py-2 rounded-xl bg-black/40 border border-white/10 text-white text-xs font-mono placeholder:text-neutral-600 focus:outline-none focus:border-[#FFD600] transition-colors"
         />
       </div>
 
@@ -487,7 +487,7 @@ export default function StudioImageControl({
             value={altText || ''}
             onChange={(e) => onChangeAltText(e.target.value)}
             placeholder="Deskripsikan gambar dengan jelas untuk mesin pencari..."
-            className="w-full px-3 py-2 rounded-xl bg-black/40 border border-white/10 text-white text-xs placeholder:text-neutral-600 focus:outline-none focus:border-[#F2C7A0] transition-colors"
+            className="w-full px-3 py-2 rounded-xl bg-black/40 border border-white/10 text-white text-xs placeholder:text-neutral-600 focus:outline-none focus:border-[#FFD600] transition-colors"
           />
         </div>
       )}
@@ -503,7 +503,7 @@ export default function StudioImageControl({
             value={caption || ''}
             onChange={(e) => onChangeCaption(e.target.value)}
             placeholder="Contoh: Implementasi antarmuka pada layar tablet dan desktop..."
-            className="w-full px-3 py-2 rounded-xl bg-black/40 border border-white/10 text-white text-xs placeholder:text-neutral-600 focus:outline-none focus:border-[#F2C7A0] transition-colors"
+            className="w-full px-3 py-2 rounded-xl bg-black/40 border border-white/10 text-white text-xs placeholder:text-neutral-600 focus:outline-none focus:border-[#FFD600] transition-colors"
           />
         </div>
       )}
@@ -519,7 +519,7 @@ export default function StudioImageControl({
             value={caption || ''}
             onChange={(e) => onChangeCaption(e.target.value)}
             placeholder="Contoh: Implementasi antarmuka pada layar tablet dan desktop..."
-            className="w-full px-3 py-2 rounded-xl bg-black/40 border border-white/10 text-white text-xs placeholder:text-neutral-600 focus:outline-none focus:border-[#F2C7A0]"
+            className="w-full px-3 py-2 rounded-xl bg-black/40 border border-white/10 text-white text-xs placeholder:text-neutral-600 focus:outline-none focus:border-[#FFD600]"
           />
         </div>
       )}

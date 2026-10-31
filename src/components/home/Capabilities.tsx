@@ -11,7 +11,7 @@ export function Capabilities() {
   return (
     <section className="section capabilities" id="capabilities" aria-labelledby="capabilities-title">
       <div className="bg-grid capabilities__grid" aria-hidden="true" />
-      <div className="bg-glow bg-glow--yellow capabilities__glow" aria-hidden="true" />
+      <div className="bg-glow bg-glow--yellow capabilities__glow" aria-hidden="true" data-parallax="12" />
 
       <div className="container container--wide capabilities__inner">
         <Reveal className="capabilities__head">

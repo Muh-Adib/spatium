@@ -1,5 +1,5 @@
 /**
- * SegiaTech Core Engine Client for UNIMASI Studio (Next.js App Router)
+ * UNIMASI Core Engine Client for UNIMASI Studio (Next.js App Router)
  *
  * Provides typed access to the Core Headless Delivery API:
  * - Articles, Journal posts, and Categories
@@ -94,15 +94,15 @@ export interface CoreArticleDetailResponse {
 const CORE_API_URL =
   process.env.CORE_API_URL ||
   process.env.NEXT_PUBLIC_CORE_URL ||
-  'http://localhost:3000'
+  'http://localhost:3001'
 
 const CORE_SITE_KEY =
   process.env.CORE_SITE_KEY ||
   process.env.NEXT_PUBLIC_CORE_SITE_KEY ||
-  'site_sec_default'
+  'site_sec_unimasi'
 
 /**
- * Standard fetch wrapper for SegiaTech Core Delivery API with Next.js caching.
+ * Standard fetch wrapper for UNIMASI Core Delivery API with Next.js caching.
  */
 async function coreFetch<T>(endpoint: string, options: RequestInit = {}): Promise<T | null> {
   const url = `${CORE_API_URL.replace(/\/$/, '')}${endpoint}`
@@ -175,7 +175,7 @@ export function getMediaUrl(media?: CoreMedia | null, coverUrl?: string | null):
 }
 
 /**
- * Fetch paginated articles from SegiaTech Core with query & category filters.
+ * Fetch paginated articles from UNIMASI Core with query & category filters.
  */
 export async function getCoreArticles(params: {
   page?: number
@@ -258,7 +258,7 @@ export async function getCoreArticles(params: {
 }
 
 /**
- * Fetch a single article by slug from SegiaTech Core.
+ * Fetch a single article by slug from UNIMASI Core.
  */
 export async function getCoreArticleBySlug(slug: string): Promise<CoreArticle | null> {
   const result = await coreFetch<CoreArticleDetailResponse>(
@@ -360,17 +360,28 @@ export interface CorePartnerItem {
   tier?: string
 }
 
-export async function getCoreServices(): Promise<CoreServiceItem[]> {
+import { SERVICES } from '@/data/services'
+
+export async function getCoreServices(): Promise<any[]> {
   const res = await coreFetch<{ services: CoreServiceItem[] }>('/api/v1/delivery/services')
+  const localServices = SERVICES || []
   if (res && Array.isArray(res.services) && res.services.length > 0) {
-    return res.services
+    return res.services.map((svc) => {
+      const match = localServices.find((s) => s.slug === svc.slug)
+      return {
+        ...match,
+        ...svc,
+        name: svc.name || match?.name || '',
+        shortName: (svc as any).shortName || match?.shortName || svc.name || '',
+        tagline: svc.shortDescription || match?.tagline || '',
+        summary: svc.summary || (svc as any).description || match?.summary || '',
+        visual: match?.visual || '2d',
+        capabilities: match?.capabilities || (svc.deliverables || []).map((d) => ({ title: d, description: d })),
+        tools: match?.tools || ['Cinema 4D', 'Blender', 'After Effects'],
+      }
+    })
   }
-  try {
-    const seed = require('@/data/services')
-    return seed.SERVICES || []
-  } catch {
-    return []
-  }
+  return localServices
 }
 
 export async function getCorePortfolios(): Promise<CorePortfolioItem[]> {

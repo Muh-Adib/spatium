@@ -52,7 +52,7 @@ const ROLES_LIST = [
 ] as const
 
 const initials = (name: string) =>
-  (name || 'SegiaTech')
+  (name || 'UNIMASI')
     .split(' ')
     .filter(Boolean)
     .map((n) => n[0])
@@ -617,7 +617,7 @@ export function StudioUsersManager() {
                 setNewEmail(e.target.value)
                 if (modalError) setModalError(null)
               }}
-              placeholder="budi@segiatech.com"
+              placeholder="budi@unimasi.com"
               className={fieldCls}
               required
             />

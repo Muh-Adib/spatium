@@ -7,13 +7,13 @@ import { wordpressCollection, normalizeWordPressSource, contentHash, localConten
 
 export interface WpImportOptions extends WordPressConnection {
   jobId: string
-  brand?: 'segiatech' | 'unimasi' | 'erfomultimedia'
+  brand?: 'unimasi' | 'unimasi' | 'erfomultimedia'
   defaultAuthorName?: string
   actor?: string
   onProgress?: (progress: { imported: number; total: number; message: string; log?: string }) => void
 }
 
-function seoFields(post: Record<string, any>, title: string, excerpt: string, image: string | null, sourceUrl: string = 'https://www.segiatech.com') {
+function seoFields(post: Record<string, any>, title: string, excerpt: string, image: string | null, sourceUrl: string = 'https://www.unimasi.com') {
   return extractWordPressSeo(post, title, excerpt, image, sourceUrl)
 }
 

@@ -8,8 +8,8 @@
 export const ALLOWED_EMBED_DOMAINS = [
   'unimasi.studio',
   'www.unimasi.studio',
-  'segiatech.com',
-  'www.segiatech.com',
+  'unimasi.com',
+  'www.unimasi.com',
   'unicamstudio.com',
   'www.unicamstudio.com',
   'smkpbsoedirman2.sch.id',

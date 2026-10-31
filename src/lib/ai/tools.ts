@@ -379,7 +379,7 @@ export async function handleSuggestInternalLinks(input: {
             title: s.name,
             url,
             type: 'service',
-            relevance: 'Layanan kapabilitas digital inti SegiaTech',
+            relevance: 'Layanan kapabilitas digital inti UNIMASI',
             score: 0.85,
             suggestedAnchors: [s.name, `layanan ${s.name.toLowerCase()}`],
             markdownSnippet: `[layanan ${s.name.toLowerCase()}](${url})`,
@@ -429,7 +429,7 @@ export async function handleSuggestInternalLinks(input: {
         title: c.title,
         url,
         type: c.type as any,
-        relevance: 'Layanan digital terverifikasi SegiaTech',
+        relevance: 'Layanan digital terverifikasi UNIMASI',
         score: 0.75,
         suggestedAnchors: [c.title, `layanan ${c.title.toLowerCase()}`],
         markdownSnippet: `[${c.title}](${url})`,
@@ -883,7 +883,7 @@ export async function executeSegiaTool(
       }
 
       default:
-        throw new Error(`Tool "${toolId}" tidak dikenali dalam katalog SegiaTech.`)
+        throw new Error(`Tool "${toolId}" tidak dikenali dalam katalog UNIMASI.`)
     }
   } catch (err: any) {
     return {

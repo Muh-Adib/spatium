@@ -87,7 +87,41 @@ interface BlockDefinition {
 }
 
 const BLOCK_DEFINITIONS: BlockDefinition[] = [
-  // 1. Hero
+  // 1. UNIMASI Dedicated Cinema Blocks
+  {
+    type: 'hero-cinema',
+    name: 'Hero Cinematic Showcase',
+    category: 'hero',
+    badge: 'UNIMASI Cinema',
+    description: 'Header hero visual besar dengan headline tegas, badge studio, dan dua tombol CTA aksi berlatar grid sinematik.',
+    icon: Sparkles,
+  },
+  {
+    type: 'process-timeline',
+    name: 'Pipeline Produksi Animasi 3D',
+    category: 'value',
+    badge: 'UNIMASI Pipeline',
+    description: 'Timeline 4 tahapan produksi: Konsep & Storyboard, 3D Modeling & Rigging, Animasi & Simulasi Fisika, hingga Lighting & Render 4K.',
+    icon: ShieldCheck,
+  },
+  {
+    type: 'stats-ticker',
+    name: 'Ticker Metrik Produksi Studio',
+    category: 'value',
+    badge: 'UNIMASI Stats',
+    description: 'Metrik jam komputasi render, frame terkirim, penghargaan festival, dan aset 3D orisinal.',
+    icon: BarChart3,
+  },
+  {
+    type: 'interactive-cta',
+    name: 'Komisi Proyek UNIMASI',
+    category: 'conversion',
+    badge: 'Konversi',
+    description: 'Banner konversi interaktif untuk konsultasi komisi pembuatan animasi 3D, CGI, dan billboard videotron.',
+    icon: ArrowUpRight,
+  },
+
+  // 2. Hero Departemen & Layanan
   {
     type: 'hero-department',
     name: 'Hero Departemen',
@@ -158,10 +192,10 @@ const BLOCK_DEFINITIONS: BlockDefinition[] = [
   },
   {
     type: 'comparison-matrix',
-    name: 'Perbandingan Nilai SegiaTech',
+    name: 'Perbandingan Kualitas UNIMASI',
     category: 'value',
     badge: 'Komparasi',
-    description: 'Tabel perbandingan transparan keuntungan SegiaTech vs agensi konvensional.',
+    description: 'Tabel perbandingan transparan keunggulan UNIMASI 3D Cinema vs template animasi konvensional.',
     icon: CheckCircle2,
   },
   {
@@ -257,6 +291,14 @@ const BLOCK_DEFINITIONS: BlockDefinition[] = [
     icon: FileText,
   },
   {
+    type: 'text-editorial',
+    name: 'Editorial Narrative Multi-Kolom',
+    category: 'editorial',
+    badge: 'UNIMASI Narasi',
+    description: 'Narasi editorial dengan lead paragraph beraksen tebal dan pembagian 1 atau 2 kolom teks.',
+    icon: FileText,
+  },
+  {
     type: 'tech-stack-chips',
     name: 'Chips Fitur / Kategori',
     category: 'editorial',
@@ -271,9 +313,9 @@ function BlockMiniWireframe({ type }: { type: string }) {
     case 'hero-department':
     case 'hero-service':
       return (
-        <div className="w-full h-20 rounded-xl bg-[#0e0e0e] border border-white/10 p-2.5 flex flex-col justify-between overflow-hidden relative group-hover:border-[#F2C7A0]/40 transition-colors">
+        <div className="w-full h-20 rounded-xl bg-[#0e0e0e] border border-white/10 p-2.5 flex flex-col justify-between overflow-hidden relative group-hover:border-[#FFD600]/40 transition-colors">
           <div className="flex items-center justify-between">
-            <span className="w-10 h-1.5 rounded-full bg-[#F2C7A0]/70" />
+            <span className="w-10 h-1.5 rounded-full bg-[#FFD600]/70" />
             <div className="flex gap-1">
               <span className="w-1.5 h-1.5 rounded-full bg-white/20" />
               <span className="w-1.5 h-1.5 rounded-full bg-white/20" />
@@ -284,7 +326,7 @@ function BlockMiniWireframe({ type }: { type: string }) {
             <div className="w-1/2 h-1.5 rounded bg-white/30" />
           </div>
           <div className="flex items-center gap-2">
-            <span className="w-12 h-3.5 rounded bg-[#F2C7A0]/80" />
+            <span className="w-12 h-3.5 rounded bg-[#FFD600]/80" />
             <span className="w-8 h-3.5 rounded bg-white/10" />
           </div>
         </div>
@@ -293,17 +335,17 @@ function BlockMiniWireframe({ type }: { type: string }) {
     case 'portfolio-proof-grid':
     case 'visual-showcase-gallery':
       return (
-        <div className="w-full h-20 rounded-xl bg-[#0e0e0e] border border-white/10 p-2 grid grid-cols-2 gap-2 overflow-hidden group-hover:border-[#F2C7A0]/40 transition-colors">
+        <div className="w-full h-20 rounded-xl bg-[#0e0e0e] border border-white/10 p-2 grid grid-cols-2 gap-2 overflow-hidden group-hover:border-[#FFD600]/40 transition-colors">
           <div className="rounded-lg bg-white/5 border border-white/5 p-1.5 flex flex-col justify-between">
             <div className="w-full h-6 rounded bg-neutral-800 flex items-center justify-center">
-              <div className="w-2.5 h-2.5 rounded-full bg-[#F2C7A0]/50" />
+              <div className="w-2.5 h-2.5 rounded-full bg-[#FFD600]/50" />
             </div>
             <div className="w-3/4 h-1.5 rounded bg-white/60 mt-1" />
             <div className="w-1/2 h-1 rounded bg-white/20" />
           </div>
           <div className="rounded-lg bg-white/5 border border-white/5 p-1.5 flex flex-col justify-between">
             <div className="w-full h-6 rounded bg-neutral-800 flex items-center justify-center">
-              <div className="w-2.5 h-2.5 rounded-full bg-[#F2C7A0]/50" />
+              <div className="w-2.5 h-2.5 rounded-full bg-[#FFD600]/50" />
             </div>
             <div className="w-3/4 h-1.5 rounded bg-white/60 mt-1" />
             <div className="w-1/2 h-1 rounded bg-white/20" />
@@ -312,9 +354,9 @@ function BlockMiniWireframe({ type }: { type: string }) {
       )
     case 'feature-bento-grid':
       return (
-        <div className="w-full h-20 rounded-xl bg-[#0e0e0e] border border-white/10 p-2 grid grid-cols-3 gap-1.5 overflow-hidden group-hover:border-[#F2C7A0]/40 transition-colors">
-          <div className="col-span-2 rounded-lg bg-white/5 border border-[#F2C7A0]/20 p-1.5 flex flex-col justify-between">
-            <div className="w-1/3 h-1.5 rounded bg-[#F2C7A0]/70" />
+        <div className="w-full h-20 rounded-xl bg-[#0e0e0e] border border-white/10 p-2 grid grid-cols-3 gap-1.5 overflow-hidden group-hover:border-[#FFD600]/40 transition-colors">
+          <div className="col-span-2 rounded-lg bg-white/5 border border-[#FFD600]/20 p-1.5 flex flex-col justify-between">
+            <div className="w-1/3 h-1.5 rounded bg-[#FFD600]/70" />
             <div className="w-4/5 h-2 rounded bg-white/70" />
             <div className="w-2/3 h-1.5 rounded bg-white/30" />
           </div>
@@ -327,24 +369,24 @@ function BlockMiniWireframe({ type }: { type: string }) {
     case 'architecture-blueprint':
     case 'engineering-pillars':
       return (
-        <div className="w-full h-20 rounded-xl bg-[#0e0e0e] border border-white/10 p-1.5 flex flex-col justify-between overflow-hidden group-hover:border-[#F2C7A0]/40 transition-colors">
+        <div className="w-full h-20 rounded-xl bg-[#0e0e0e] border border-white/10 p-1.5 flex flex-col justify-between overflow-hidden group-hover:border-[#FFD600]/40 transition-colors">
           {[1, 2, 3].map((i) => (
             <div key={i} className="flex items-center justify-between p-1 rounded bg-white/5 border border-white/5">
               <div className="flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#F2C7A0]" />
+                <span className="w-1.5 h-1.5 rounded-full bg-[#FFD600]" />
                 <span className="w-16 h-1.5 rounded bg-white/60" />
               </div>
-              <span className="w-8 h-1.5 rounded bg-[#F2C7A0]/30" />
+              <span className="w-8 h-1.5 rounded bg-[#FFD600]/30" />
             </div>
           ))}
         </div>
       )
     case 'comparison-matrix':
       return (
-        <div className="w-full h-20 rounded-xl bg-[#0e0e0e] border border-white/10 p-2 flex flex-col justify-between overflow-hidden group-hover:border-[#F2C7A0]/40 transition-colors">
+        <div className="w-full h-20 rounded-xl bg-[#0e0e0e] border border-white/10 p-2 flex flex-col justify-between overflow-hidden group-hover:border-[#FFD600]/40 transition-colors">
           <div className="grid grid-cols-3 gap-1 pb-1 border-b border-white/10">
             <span className="h-1.5 rounded bg-white/20" />
-            <span className="h-1.5 rounded bg-[#F2C7A0]/60" />
+            <span className="h-1.5 rounded bg-[#FFD600]/60" />
             <span className="h-1.5 rounded bg-white/20" />
           </div>
           {[1, 2].map((i) => (
@@ -358,11 +400,11 @@ function BlockMiniWireframe({ type }: { type: string }) {
       )
     case 'workflow-phases':
       return (
-        <div className="w-full h-20 rounded-xl bg-[#0e0e0e] border border-white/10 p-2 flex items-center justify-between overflow-hidden group-hover:border-[#F2C7A0]/40 transition-colors">
+        <div className="w-full h-20 rounded-xl bg-[#0e0e0e] border border-white/10 p-2 flex items-center justify-between overflow-hidden group-hover:border-[#FFD600]/40 transition-colors">
           {[1, 2, 3, 4].map((step, idx) => (
             <React.Fragment key={step}>
               <div className="flex flex-col items-center gap-1">
-                <div className="w-4 h-4 rounded-full bg-[#F2C7A0]/20 border border-[#F2C7A0] flex items-center justify-center text-[8px] font-mono text-[#F2C7A0]">
+                <div className="w-4 h-4 rounded-full bg-[#FFD600]/20 border border-[#FFD600] flex items-center justify-center text-[8px] font-mono text-[#FFD600]">
                   {step}
                 </div>
                 <div className="w-6 h-1 rounded bg-white/30" />
@@ -374,10 +416,10 @@ function BlockMiniWireframe({ type }: { type: string }) {
       )
     case 'client-stats-impact':
       return (
-        <div className="w-full h-20 rounded-xl bg-[#0e0e0e] border border-white/10 p-1.5 grid grid-cols-4 gap-1 items-center overflow-hidden group-hover:border-[#F2C7A0]/40 transition-colors">
+        <div className="w-full h-20 rounded-xl bg-[#0e0e0e] border border-white/10 p-1.5 grid grid-cols-4 gap-1 items-center overflow-hidden group-hover:border-[#FFD600]/40 transition-colors">
           {['99%', '<1s', '10x', '100%'].map((val, idx) => (
             <div key={idx} className="p-1 rounded bg-white/5 text-center flex flex-col items-center justify-center h-full">
-              <span className="text-[10px] font-bold font-mono text-[#F2C7A0]">{val}</span>
+              <span className="text-[10px] font-bold font-mono text-[#FFD600]">{val}</span>
               <span className="w-4 h-1 rounded bg-white/30 mt-1" />
             </div>
           ))}
@@ -385,7 +427,7 @@ function BlockMiniWireframe({ type }: { type: string }) {
       )
     case 'deliverables-checklist':
       return (
-        <div className="w-full h-20 rounded-xl bg-[#0e0e0e] border border-white/10 p-2 grid grid-cols-2 gap-1.5 overflow-hidden group-hover:border-[#F2C7A0]/40 transition-colors">
+        <div className="w-full h-20 rounded-xl bg-[#0e0e0e] border border-white/10 p-2 grid grid-cols-2 gap-1.5 overflow-hidden group-hover:border-[#FFD600]/40 transition-colors">
           {[1, 2, 3, 4].map((i) => (
             <div key={i} className="flex items-center gap-1.5 p-1 rounded bg-white/5">
               <span className="w-2 h-2 rounded-full bg-emerald-400/40 border border-emerald-400 flex items-center justify-center text-[6px] text-emerald-300">✓</span>
@@ -396,28 +438,28 @@ function BlockMiniWireframe({ type }: { type: string }) {
       )
     case 'faq-accordion':
       return (
-        <div className="w-full h-20 rounded-xl bg-[#0e0e0e] border border-white/10 p-1.5 flex flex-col justify-between overflow-hidden group-hover:border-[#F2C7A0]/40 transition-colors">
+        <div className="w-full h-20 rounded-xl bg-[#0e0e0e] border border-white/10 p-1.5 flex flex-col justify-between overflow-hidden group-hover:border-[#FFD600]/40 transition-colors">
           {[1, 2, 3].map((i) => (
             <div key={i} className="flex items-center justify-between p-1 rounded bg-white/5 border border-white/5">
               <div className="w-3/4 h-1.5 rounded bg-white/60" />
-              <span className="text-[10px] text-[#F2C7A0] leading-none">+</span>
+              <span className="text-[10px] text-[#FFD600] leading-none">+</span>
             </div>
           ))}
         </div>
       )
     case 'studio-cta':
       return (
-        <div className="w-full h-20 rounded-xl bg-gradient-to-r from-neutral-900 to-neutral-950 border border-white/10 p-2 flex flex-col items-center justify-center text-center overflow-hidden group-hover:border-[#F2C7A0]/40 transition-colors">
+        <div className="w-full h-20 rounded-xl bg-gradient-to-r from-neutral-900 to-neutral-950 border border-white/10 p-2 flex flex-col items-center justify-center text-center overflow-hidden group-hover:border-[#FFD600]/40 transition-colors">
           <div className="w-3/4 h-1.5 rounded bg-white/80 mb-1" />
           <div className="w-1/2 h-1 rounded bg-white/30 mb-2" />
-          <div className="w-16 h-3.5 rounded bg-[#F2C7A0] flex items-center justify-center text-[8px] font-bold text-neutral-950">
+          <div className="w-16 h-3.5 rounded bg-[#FFD600] flex items-center justify-center text-[8px] font-bold text-neutral-950">
             Hubungi
           </div>
         </div>
       )
     case 'media-showcase':
       return (
-        <div className="w-full h-20 rounded-xl bg-[#0e0e0e] border border-white/10 p-1.5 flex flex-col justify-between overflow-hidden group-hover:border-[#F2C7A0]/40 transition-colors relative">
+        <div className="w-full h-20 rounded-xl bg-[#0e0e0e] border border-white/10 p-1.5 flex flex-col justify-between overflow-hidden group-hover:border-[#FFD600]/40 transition-colors relative">
           <div className="flex items-center justify-between px-1.5 py-0.5 rounded bg-black/60 border border-white/5">
             <span className="w-8 h-1 rounded bg-white/30" />
             <div className="flex gap-1">
@@ -427,13 +469,13 @@ function BlockMiniWireframe({ type }: { type: string }) {
             </div>
           </div>
           <div className="flex-1 my-1 rounded bg-neutral-900 border border-dashed border-white/10 flex items-center justify-center">
-            <span className="text-[8px] font-mono text-[#F2C7A0]">Media Screenshot</span>
+            <span className="text-[8px] font-mono text-[#FFD600]">Media Screenshot</span>
           </div>
         </div>
       )
     default:
       return (
-        <div className="w-full h-20 rounded-xl bg-[#0e0e0e] border border-white/10 p-2.5 flex flex-col justify-center gap-1.5 overflow-hidden group-hover:border-[#F2C7A0]/40 transition-colors">
+        <div className="w-full h-20 rounded-xl bg-[#0e0e0e] border border-white/10 p-2.5 flex flex-col justify-center gap-1.5 overflow-hidden group-hover:border-[#FFD600]/40 transition-colors">
           <div className="w-3/4 h-2 rounded bg-white/70" />
           <div className="w-full h-1.5 rounded bg-white/30" />
           <div className="w-2/3 h-1.5 rounded bg-white/20" />
@@ -510,7 +552,7 @@ export default function StudioVisualEditor({
   const [canRedo, setCanRedo] = useState(false)
 
   // Local draft recovery state
-  const draftKey = `segiatech_draft_${targetType}_${slug || 'default'}`
+  const draftKey = `unimasi_draft_${targetType}_${slug || 'default'}`
   const [hasLocalDraft, setHasLocalDraft] = useState(false)
 
   const pushHistory = (newBlocks: StudioBlock[]) => {
@@ -751,7 +793,86 @@ export default function StudioVisualEditor({
       type,
     }
 
-    if (type === 'hero-department') {
+    if (type === 'hero-cinema') {
+      const cinemaData = {
+        badge: 'UNIMASI Animation Studio',
+        headline: 'We make ideas move with iconic 3D CGI.',
+        title: 'We make ideas move with iconic 3D CGI.',
+        subheadline: 'Studio produksi animasi 3D, videotron billboard fotorealistik, karakter orisinal, dan visual motion berkelas internasional.',
+        description: 'Studio produksi animasi 3D, videotron billboard fotorealistik, karakter orisinal, dan visual motion berkelas internasional.',
+        primaryCta: { label: 'Lihat Showreel Portofolio', href: '/portfolio' },
+        secondaryCta: { label: 'Konsultasi Proyek', href: '/contact' },
+      }
+      newBlock.data = cinemaData
+      Object.assign(newBlock, cinemaData)
+      newBlock.settings = { height: 'screen', animation: 'reveal-stagger', alignment: 'left' }
+    } else if (type === 'process-timeline') {
+      const timelineData = {
+        badge: 'UNIMASI Pipeline',
+        eyebrow: 'Pipeline Produksi UNIMASI',
+        title: 'Alur Kerja Presisi dari Naskah Hingga 4K Render',
+        description: 'Metodologi animasi 4 tahapan berstandar bioskop untuk menjamin kualitas narasi dan keindahan visual tanpa kompromi.',
+        steps: [
+          { number: '01', title: 'Script & Storyboard', description: 'Pengembangan konsep cerita, naskah puitis, dan animatic ritmis.', duration: '1-2 Minggu' },
+          { number: '02', title: 'Concept Art & 3D Modeling', description: 'Desain karakter orisinal, environment building, dan rigging ekspresif.', duration: '2-3 Minggu' },
+          { number: '03', title: 'Animation & Motion Capture', description: 'Pemberian jiwa pada gerakan, simulasi kain, rambut, dan dinamika fisik.', duration: '2-4 Minggu' },
+          { number: '04', title: 'Lighting, VFX & 4K Render', description: 'Tata cahaya sinematik, compositing warna, efek partikel, dan final master.', duration: '1-2 Minggu' },
+        ],
+      }
+      newBlock.data = timelineData
+      Object.assign(newBlock, timelineData)
+    } else if (type === 'stats-ticker') {
+      const statsData = {
+        badge: 'UNIMASI Stats',
+        eyebrow: 'Metrik Produksi',
+        title: 'Dedikasi Karya Dalam Angka Nyata',
+        stats: [
+          { value: '1,200+', label: 'Jam Render Mesin GPU', suffix: 'Hrs' },
+          { value: '45,000+', label: 'Frame 3D Ultra HD Terkirim', suffix: 'Frames' },
+          { value: '12+', label: 'Penghargaan & Seleksi Festival', suffix: 'Awards' },
+          { value: '100%', label: 'Aset 3D & Karakter Orisinal', suffix: 'IP' },
+        ],
+        metrics: [
+          { value: '1,200+', label: 'Jam Render Mesin GPU', subtext: 'Hrs' },
+          { value: '45,000+', label: 'Frame 3D Ultra HD Terkirim', subtext: 'Frames' },
+          { value: '12+', label: 'Penghargaan & Seleksi Festival', subtext: 'Awards' },
+          { value: '100%', label: 'Aset 3D & Karakter Orisinal', subtext: 'IP' },
+        ],
+      }
+      newBlock.data = statsData
+      Object.assign(newBlock, statsData)
+    } else if (type === 'interactive-cta') {
+      const ctaData = {
+        headline: 'Siap Menghidupkan Visi Cerita Anda Bersama UNIMASI?',
+        title: 'Siap Menghidupkan Visi Cerita Anda Bersama UNIMASI?',
+        subheadline: 'Diskusikan konsep animasi 3D, CGI komersial, atau videotron anamorphic bersama tim direktur kreatif kami.',
+        description: 'Diskusikan konsep animasi 3D, CGI komersial, atau videotron anamorphic bersama tim direktur kreatif kami.',
+        ctaText: 'Mulai Komisi Proyek via WhatsApp',
+        ctaLink: 'https://wa.me/6283121138821?text=Halo%20UNIMASI,%20saya%20ingin%20berkonsultasi%20mengenai%20produksi%20animasi%203D',
+        primaryCta: {
+          label: 'Mulai Komisi Proyek via WhatsApp',
+          href: 'https://wa.me/6283121138821?text=Halo%20UNIMASI,%20saya%20ingin%20berkonsultasi%20mengenai%20produksi%20animasi%203D',
+        },
+        secondaryCtaText: 'Jelajahi Galeri Portofolio',
+        secondaryCtaLink: '/portfolio',
+        secondaryCta: {
+          label: 'Jelajahi Galeri Portofolio',
+          href: '/portfolio',
+        },
+      }
+      newBlock.data = ctaData
+      Object.assign(newBlock, ctaData)
+    } else if (type === 'text-editorial') {
+      const editorialData = {
+        leadText: 'UNIMASI memadukan kecanggihan rekayasa grafis komputer dan seni bercerita yang menyentuh nurani.',
+        lead: 'UNIMASI memadukan kecanggihan rekayasa grafis komputer dan seni bercerita yang menyentuh nurani.',
+        body: 'Dari animasi 3D fotorealistik untuk kampanye komersial global hingga karya intelektual animasi cerita pendek, kami mendedikasikan presisi visual tertinggi pada setiap frame render.',
+        content: 'Dari animasi 3D fotorealistik untuk kampanye komersial global hingga karya intelektual animasi cerita pendek, kami mendedikasikan presisi visual tertinggi pada setiap frame render.',
+        columns: 1,
+      }
+      newBlock.data = editorialData
+      Object.assign(newBlock, editorialData)
+    } else if (type === 'hero-department') {
       newBlock.variant = 'cinematic'
       newBlock.badge = 'Solusi Digital Terpadu'
       newBlock.title = 'Pembuatan Website & Aplikasi Bisnis'
@@ -775,7 +896,7 @@ export default function StudioVisualEditor({
       newBlock.categoryBadge = 'Layanan Rekayasa'
       newBlock.description =
         'Website modern yang cepat dibuka, ramah SEO Google, dan memikat calon pelanggan Anda.'
-      newBlock.whatsappPrompt = 'Halo SegiaTech, saya ingin konsultasi mengenai layanan ini.'
+      newBlock.whatsappPrompt = 'Halo UNIMASI, saya ingin konsultasi mengenai layanan animasi ini.'
     } else if (type === 'department-service-list') {
       newBlock.title = 'Layanan Pembuatan Website & Aplikasi yang Kami Sediakan'
       newBlock.description =
@@ -864,7 +985,7 @@ export default function StudioVisualEditor({
         },
       ]
     } else if (type === 'comparison-matrix') {
-      newBlock.title = 'Perbandingan Nilai: Mengapa Memilih SegiaTech'
+      newBlock.title = 'Perbandingan Kualitas: Mengapa Memilih UNIMASI'
       newBlock.description =
         'Transparansi bagaimana komitmen pengerjaan kami memberikan hasil yang jauh lebih menguntungkan untuk investasi jangka panjang Anda.'
       newBlock.rows = [
@@ -996,41 +1117,41 @@ export default function StudioVisualEditor({
       ]
     } else if (type === 'executive-quote-card') {
       newBlock.quote =
-        'Website yang hebat bukan sekadar tampak indah di layar, melainkan mampu menjawab masalah pengunjung, membangun kepercayaan instan, dan menghasilkan pertumbuhan nyata bagi pemilik bisnis.'
-      newBlock.author = 'Fadel'
-      newBlock.role = 'Chief Technology Officer'
-      newBlock.company = 'SegiaTech'
+        'Animasi yang berkesan bukan sekadar gerakan poligon 3D yang mulus, melainkan denyut emosi yang mengikat audiens pada cerita dan karakternya.'
+      newBlock.author = 'Creative Director'
+      newBlock.role = 'Head of Animation'
+      newBlock.company = 'UNIMASI Studio'
     } else if (type === 'faq-accordion') {
-      newBlock.title = 'Pertanyaan yang Sering Diajukan'
+      newBlock.title = 'Pertanyaan Seputar Produksi Animasi UNIMASI'
       newBlock.faqs = [
         {
-          question: 'Apakah saya bisa mengupdate isi website sendiri tanpa keahlian koding?',
+          question: 'Berapa resolusi dan format akhir video yang diserahkan?',
           answer:
-            'Tentu saja! Kami menyediakan dashboard admin berbahasa Indonesia yang sangat mudah digunakan. Anda bisa menambah berita, mengganti foto banner, atau memperbarui portofolio semudah mengetik di aplikasi pesan.',
+            'Kami menyerahkan master video dalam resolusi 4K UHD, ProRes 422 HQ atau MP4 H.265 dengan bitrate tinggi, siap untuk bioskop, videotron billboard, maupun siaran digital.',
         },
         {
-          question: 'Apakah saya harus membayar biaya langganan bulanan ke SegiaTech?',
+          question: 'Apakah karakter dan aset 3D yang dibuat menjadi hak milik klien?',
           answer:
-            'Tidak ada biaya sewa wajib ke kami. Sistem dan kode 100% menjadi hak milik Anda sepenuhnya. Anda hanya perlu memperpanjang biaya sewa server hosting/domain tahunan biasa.',
+            'Ya, seluruh aset 3D, rig karakter, dan file proyek final menjadi 100% hak cipta dan kepemilikan klien tanpa royalti tersembunyi.',
         },
         {
-          question: 'Berapa lama proses pembuatan website atau aplikasi biasanya berlangsung?',
+          question: 'Berapa lama waktu yang dibutuhkan untuk memproduksi animasi 3D?',
           answer:
-            'Tergantung kompleksitas fitur. Untuk website perusahaan dan landing page biasanya selesai dalam 2-3 minggu. Untuk sistem informasi kustom memerlukan waktu 4-8 minggu dengan laporan berkala.',
+            'Tergantung durasi dan kompleksitas scene. Rata-rata video animasi 60-90 detik membutuhkan waktu 4 hingga 8 minggu dari storyboard hingga final render.',
         },
         {
-          question: 'Bagaimana jika setelah website selesai ada kendala atau error?',
+          question: 'Apakah UNIMASI dapat mengerjakan videotron 3D anamorphic (ilusi kedalaman)?',
           answer:
-            'Kami memberikan garansi bug-free selama 90 hari setelah serah terima. Jika ada kendala teknis, tim kami akan memperbaikinya tanpa pungutan biaya tambahan.',
+            'Tentu! Kami menguasai teknik perhitungan sudut pandang ilusi 3D anamorphic untuk videotron sudut melengkung di pusat perbelanjaan dan gedung perkotaan.',
         },
       ]
     } else if (type === 'studio-cta') {
-      newBlock.title = 'Siap Membangun Website & Sistem yang Memajukan Bisnis Anda?'
+      newBlock.title = 'Siap Menghidupkan Cerita Visual Anda dalam Kualitas Bioskop?'
       newBlock.description =
-        'Konsultasikan ide atau kendala sistem Anda bersama tim SegiaTech secara gratis dan dapatkan solusi terbaik.'
-      newBlock.buttonText = 'Konsultasi Solusi via WhatsApp'
+        'Diskusikan konsep animasi 3D, CGI komersial, atau videotron bersama tim sutradara kreatif UNIMASI Studio.'
+      newBlock.buttonText = 'Konsultasi Produksi via WhatsApp'
       newBlock.buttonUrl =
-        'https://wa.me/6285227702811?text=Halo%20SegiaTech,%20saya%20ingin%20berkonsultasi%20mengenai%20pembuatan%20website%20atau%20sistem%20untuk%20bisnis%20saya'
+        'https://wa.me/6283121138821?text=Halo%20UNIMASI,%20saya%20ingin%20berkonsultasi%20mengenai%20produksi%20animasi%203D'
     } else if (type === 'paragraph') {
       newBlock.text =
         'Kami menghadirkan solusi teknologi yang tepat guna dan terukur, dirancang khusus untuk memenuhi standar mutu bisnis Anda.'
@@ -1064,31 +1185,39 @@ export default function StudioVisualEditor({
 
   // Canvas renderer for Canvas mode and Split mode
   const renderCanvas = () => (
-    <div className={`flex-1 overflow-y-auto bg-[#0a0a0a] flex justify-center items-start relative w-full scrollbar-thin ${device === 'desktop' ? 'p-0' : 'p-4 sm:p-6'}`}>
+    <div className={`flex-1 min-w-0 overflow-y-auto bg-[#0a0a0a] flex justify-center items-start relative w-full scrollbar-thin studio-canvas-root ${device === 'desktop' ? 'p-0' : 'p-4 sm:p-6'}`}>
       <div
         key={refreshKey}
-        className={`transition-all duration-300 w-full ${
+        className={`transition-all duration-300 ${
           device === 'desktop'
             ? 'w-full max-w-full'
             : device === 'tablet'
-            ? 'max-w-[768px] rounded-3xl border-4 border-[#222] shadow-[0_25px_60px_rgba(0,0,0,0.8)] overflow-hidden bg-black my-4'
-            : 'max-w-[375px] rounded-[44px] border-[10px] border-[#222] shadow-[0_25px_70px_rgba(0,0,0,0.9)] overflow-hidden bg-black my-4'
+            ? 'w-full max-w-[768px] rounded-[32px] border-[8px] border-[#1C1C1E] shadow-[0_25px_60px_rgba(0,0,0,0.85)] ring-1 ring-white/10 overflow-hidden bg-black my-4'
+            : 'w-full max-w-[390px] min-h-[844px] rounded-[48px] border-[10px] border-[#1C1C1E] shadow-[0_25px_70px_rgba(0,0,0,0.95)] ring-1 ring-white/10 overflow-hidden bg-black my-4'
         }`}
       >
-        {/* Mobile phone bezel */}
+        {/* Real Mobile Bezel (Dynamic Island & Speaker) */}
         {device === 'mobile' && (
-          <div className="sticky top-0 left-0 right-0 h-6 bg-[#222] flex items-center justify-center z-50 rounded-b-xl mb-1">
-            <div className="w-16 h-3 bg-neutral-900 rounded-full flex items-center justify-center">
+          <div className="sticky top-0 left-0 right-0 h-7 bg-[#1C1C1E] flex items-center justify-center z-50 rounded-b-2xl mb-1 px-4">
+            <div className="w-24 h-4 bg-black rounded-full flex items-center justify-between px-2.5">
               <div className="w-2 h-2 rounded-full bg-neutral-800" />
+              <div className="w-2 h-2 rounded-full bg-blue-950/60 ring-1 ring-blue-500/30" />
             </div>
+          </div>
+        )}
+
+        {/* Real Tablet Bezel (Camera Dot) */}
+        {device === 'tablet' && (
+          <div className="sticky top-0 left-0 right-0 h-5 bg-[#1C1C1E] flex items-center justify-center z-50 rounded-b-xl mb-1">
+            <div className="w-2 h-2 rounded-full bg-neutral-800 ring-1 ring-white/10" />
           </div>
         )}
 
         {/* Empty Canvas Placeholder */}
         {blocks.length === 0 ? (
           <div className="py-24 px-6 text-center border-2 border-dashed border-white/10 bg-[#121212] m-6">
-            <Layers className="w-12 h-12 text-[#F2C7A0] mx-auto mb-4 opacity-75 animate-bounce" />
-            <h3 className="font-display text-xl font-bold text-white mb-2">
+            <Layers className="w-12 h-12 text-[#FFD600] mx-auto mb-4 opacity-75 animate-bounce" />
+            <h3 className="font-syne text-xl font-bold text-white mb-2">
               Halaman Ini Masih Kosong
             </h3>
             <p className="text-sm text-neutral-400 max-w-md mx-auto mb-6 leading-relaxed">
@@ -1098,7 +1227,7 @@ export default function StudioVisualEditor({
               <button
                 type="button"
                 onClick={() => openPaletteAt(0)}
-                className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-[#F2C7A0] text-[#191919] font-medium text-xs font-mono uppercase tracking-wider hover:bg-[#ebd5c1] transition-all shadow-[0_0_20px_rgba(242,199,160,0.25)]"
+                className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-[#FFD600] text-[#191919] font-medium text-xs font-mono uppercase tracking-wider hover:bg-[#ffe855] transition-all shadow-[0_0_20px_rgba(255, 214, 0,0.25)]"
               >
                 <Plus className="w-4 h-4" />
                 <span>Pilih Blok Pertama</span>
@@ -1153,14 +1282,14 @@ export default function StudioVisualEditor({
 
             {/* Top Inserter (Before first block) */}
             <div className="group/top relative h-2 hover:h-6 flex items-center justify-center transition-all z-30">
-              <div className="absolute inset-x-0 h-px border-t border-dashed border-white/0 group-hover/top:border-[#F2C7A0]/40 transition-colors" />
+              <div className="absolute inset-x-0 h-px border-t border-dashed border-white/0 group-hover/top:border-[#FFD600]/40 transition-colors" />
               <Tooltip label="Sisipkan di Atas" side="bottom">
                 <button
                   type="button"
                   onClick={() => openPaletteAt(0)}
-                  className="relative z-10 px-2.5 py-1 rounded-full bg-[#181818] border border-white/15 text-[10px] font-mono text-neutral-400 hover:text-[#F2C7A0] hover:border-[#F2C7A0]/60 transition-all opacity-0 group-hover/top:opacity-100 flex items-center gap-1 shadow-lg"
+                  className="relative z-10 px-2.5 py-1 rounded-full bg-[#181818] border border-white/15 text-[10px] font-mono text-neutral-400 hover:text-[#FFD600] hover:border-[#FFD600]/60 transition-all opacity-0 group-hover/top:opacity-100 flex items-center gap-1 shadow-lg"
                 >
-                  <Plus className="w-3 h-3 text-[#F2C7A0]" />
+                  <Plus className="w-3 h-3 text-[#FFD600]" />
                   <span>Tambah Blok di Atas</span>
                 </button>
               </Tooltip>
@@ -1184,30 +1313,37 @@ export default function StudioVisualEditor({
                       hasBlockError
                         ? 'border-y-2 border-rose-500/80 bg-rose-950/20'
                         : isSelected
-                        ? 'border-y-2 border-[#F2C7A0] ring-1 ring-inset ring-[#F2C7A0]/30 shadow-[0_0_40px_rgba(242,199,160,0.12)]'
+                        ? 'border-y-2 border-[#FFD600] ring-1 ring-inset ring-[#FFD600]/30 shadow-[0_0_40px_rgba(255, 214, 0,0.12)]'
                         : isHovered
                         ? 'border-y border-white/20'
                         : 'border-y border-transparent'
                     }`}
                   >
-                    {/* Floating Control Toolbar (Visible on hover or when selected) */}
+                    {/* Integrated Block Action Header Bar */}
                     <div
-                      className={`absolute top-3 left-4 right-4 z-40 flex items-center justify-between gap-2 transition-all duration-200 pointer-events-auto ${
-                        isSelected || isHovered
-                          ? 'opacity-100 translate-y-0'
-                          : 'opacity-0 -translate-y-1 pointer-events-none'
+                      className={`w-full px-4 py-2 border-b transition-all duration-200 flex items-center justify-between gap-2 select-none ${
+                        isSelected
+                          ? 'bg-[#181818] border-[#FFD600]/40'
+                          : isHovered
+                          ? 'bg-[#141414] border-white/15'
+                          : 'bg-[#0f0f0f] border-white/5'
                       }`}
-                      onClick={(e) => e.stopPropagation()}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        onSelectBlock(block.id)
+                      }}
                     >
                       {/* Left: Block Identifier Badge */}
-                      <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-black/90 backdrop-blur-md border border-white/20 text-xs font-mono shadow-xl">
-                        <GripVertical className="w-3 h-3 text-neutral-400" />
-                        <span className="text-[#F2C7A0] font-bold uppercase tracking-wider text-[11px]">
+                      <div className="flex items-center gap-2">
+                        <GripVertical className="w-3.5 h-3.5 text-neutral-500" />
+                        <span className="text-[#FFD600] font-mono font-bold uppercase tracking-wider text-[11px]">
                           {block.type}
                         </span>
-                        <span className="text-neutral-400 text-[11px]">#{idx + 1}</span>
+                        <span className="text-neutral-500 font-mono text-[11px]">#{idx + 1}</span>
                         {isSelected && (
-                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
+                          <span className="px-1.5 py-0.2 rounded bg-[#FFD600]/20 text-[#FFD600] text-[9px] font-mono font-bold uppercase">
+                            Aktif
+                          </span>
                         )}
                         {perfAudit.lcpCandidateBlockIndex === idx && (
                           <Tooltip label="Kandidat LCP" hint="Blok ini memuat hero gambar utama (Largest Contentful Paint)" side="top">
@@ -1219,14 +1355,14 @@ export default function StudioVisualEditor({
                         )}
                       </div>
 
-                      {/* Right: Quick Action Controls with Tooltips */}
-                      <div className="flex items-center gap-1 p-1 rounded-full bg-black/90 backdrop-blur-md border border-white/20 shadow-xl">
+                      {/* Right: Quick Action Controls */}
+                      <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
                         <Tooltip label="Pindah ke Atas" side="top">
                           <button
                             type="button"
                             onClick={() => moveBlock(idx, 'up')}
                             disabled={idx === 0}
-                            className="p-1.5 rounded-full text-neutral-400 hover:text-white hover:bg-white/10 disabled:opacity-30 transition-colors"
+                            className="p-1.5 rounded-lg text-neutral-400 hover:text-white hover:bg-white/10 disabled:opacity-20 transition-colors"
                           >
                             <ChevronUp className="w-3.5 h-3.5" />
                           </button>
@@ -1236,7 +1372,7 @@ export default function StudioVisualEditor({
                             type="button"
                             onClick={() => moveBlock(idx, 'down')}
                             disabled={idx === blocks.length - 1}
-                            className="p-1.5 rounded-full text-neutral-400 hover:text-white hover:bg-white/10 disabled:opacity-30 transition-colors"
+                            className="p-1.5 rounded-lg text-neutral-400 hover:text-white hover:bg-white/10 disabled:opacity-20 transition-colors"
                           >
                             <ChevronDown className="w-3.5 h-3.5" />
                           </button>
@@ -1245,7 +1381,7 @@ export default function StudioVisualEditor({
                           <button
                             type="button"
                             onClick={() => duplicateBlock(idx)}
-                            className="p-1.5 rounded-full text-neutral-400 hover:text-white hover:bg-white/10 transition-colors"
+                            className="p-1.5 rounded-lg text-neutral-400 hover:text-white hover:bg-white/10 transition-colors"
                           >
                             <Copy className="w-3.5 h-3.5" />
                           </button>
@@ -1254,7 +1390,7 @@ export default function StudioVisualEditor({
                           <button
                             type="button"
                             onClick={() => onSelectBlock(block.id)}
-                            className="p-1.5 rounded-full text-[#F2C7A0] hover:bg-[#F2C7A0]/20 transition-colors"
+                            className="p-1.5 rounded-lg text-[#FFD600] hover:bg-[#FFD600]/20 transition-colors"
                           >
                             <Settings className="w-3.5 h-3.5" />
                           </button>
@@ -1263,7 +1399,7 @@ export default function StudioVisualEditor({
                           <button
                             type="button"
                             onClick={() => deleteBlock(idx)}
-                            className="p-1.5 rounded-full text-neutral-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors"
+                            className="p-1.5 rounded-lg text-neutral-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>
@@ -1294,14 +1430,14 @@ export default function StudioVisualEditor({
 
                   {/* Low-profile Inserter Bar between blocks */}
                   <div className="group/inserter relative h-2 hover:h-6 flex items-center justify-center transition-all z-30">
-                    <div className="absolute inset-x-0 h-px border-t border-dashed border-white/0 group-hover/inserter:border-[#F2C7A0]/40 transition-colors" />
+                    <div className="absolute inset-x-0 h-px border-t border-dashed border-white/0 group-hover/inserter:border-[#FFD600]/40 transition-colors" />
                     <Tooltip label="Sisipkan Blok" side="top">
                       <button
                         type="button"
                         onClick={() => openPaletteAt(idx + 1)}
-                        className="relative z-10 px-2.5 py-1 rounded-full bg-[#181818] border border-white/15 text-[10px] font-mono text-neutral-400 hover:text-[#F2C7A0] hover:border-[#F2C7A0]/60 transition-all opacity-0 group-hover/inserter:opacity-100 flex items-center gap-1 shadow-lg hover:scale-105"
+                        className="relative z-10 px-2.5 py-1 rounded-full bg-[#181818] border border-white/15 text-[10px] font-mono text-neutral-400 hover:text-[#FFD600] hover:border-[#FFD600]/60 transition-all opacity-0 group-hover/inserter:opacity-100 flex items-center gap-1 shadow-lg hover:scale-105"
                       >
-                        <Plus className="w-3 h-3 text-[#F2C7A0]" />
+                        <Plus className="w-3 h-3 text-[#FFD600]" />
                         <span>Sisipkan Blok</span>
                       </button>
                     </Tooltip>
@@ -1316,13 +1452,20 @@ export default function StudioVisualEditor({
                 <button
                   type="button"
                   onClick={() => openPaletteAt(blocks.length)}
-                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/5 border border-white/10 hover:border-[#F2C7A0]/50 text-white hover:text-[#F2C7A0] font-mono text-xs font-medium transition-all shadow-xl hover:scale-[1.02]"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/5 border border-white/10 hover:border-[#FFD600]/50 text-white hover:text-[#FFD600] font-mono text-xs font-medium transition-all shadow-xl hover:scale-[1.02]"
                 >
-                  <Plus className="w-4 h-4 text-[#F2C7A0]" />
+                  <Plus className="w-4 h-4 text-[#FFD600]" />
                   <span>Tambah Blok di Akhir</span>
                 </button>
               </Tooltip>
             </div>
+          </div>
+        )}
+
+        {/* Real Smartphone Home Bar Indicator */}
+        {device === 'mobile' && (
+          <div className="sticky bottom-0 left-0 right-0 flex justify-center pointer-events-none z-50 py-2 bg-gradient-to-t from-black/80 to-transparent">
+            <div className="w-28 h-1 rounded-full bg-white/40" />
           </div>
         )}
       </div>
@@ -1332,10 +1475,10 @@ export default function StudioVisualEditor({
   return (
     <div className="flex flex-col flex-1 h-full w-full bg-[#141414] overflow-hidden select-none">
       {/* ── Top Viewport Controls Bar ────────────────────────────────────────── */}
-      <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-3 bg-[#191919] border-b border-white/10">
+      <div className="h-12 shrink-0 px-4 sm:px-5 bg-[#191919] border-b border-white/10 flex items-center justify-between gap-2 overflow-x-auto select-none no-scrollbar flex-nowrap">
         <div className="flex items-center gap-2.5">
           <Tooltip label="Editor Visual Langsung" hint="Penyusun blok real-time dengan pratinjau instan" side="bottom">
-            <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-[#F2C7A0]/10 border border-[#F2C7A0]/25 text-[#F2C7A0] font-mono text-xs font-semibold cursor-help">
+            <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-[#FFD600]/10 border border-[#FFD600]/25 text-[#FFD600] font-mono text-xs font-semibold cursor-help">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
               <span>EDITOR VISUAL</span>
             </div>
@@ -1363,7 +1506,7 @@ export default function StudioVisualEditor({
 
           {selectedBlockId && (
             <Tooltip label="Blok Terpilih" hint={`Blok aktif yang sedang disunting di inspector: ${selectedBlockId}`} side="bottom">
-              <div className="items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-white/5 border border-white/10 text-xs font-mono text-[#F2C7A0] hidden md:flex cursor-help">
+              <div className="items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-white/5 border border-white/10 text-xs font-mono text-[#FFD600] hidden md:flex cursor-help">
                 <span>Aktif:</span>
                 <span className="truncate max-w-[120px] font-bold">{selectedBlockId}</span>
               </div>
@@ -1373,50 +1516,48 @@ export default function StudioVisualEditor({
 
         {/* Center: Device Switcher & History (Canvas Viewport Controls) */}
         <div className="flex items-center gap-2">
-          {/* Responsive device frames (visible when in canvas mode) */}
-          {viewMode === 'canvas' && (
-            <div className="flex items-center gap-1 p-1 rounded-xl bg-[#121212] border border-white/10">
-              <Tooltip label="Desktop" hint="Viewport layar lebar (100% rasio web publik)" side="bottom">
-                <button
-                  type="button"
-                  onClick={() => setDevice('desktop')}
-                  className={`p-1.5 rounded-lg transition-all ${
-                    device === 'desktop'
-                      ? 'bg-[#F2C7A0] text-[#191919] font-bold shadow'
-                      : 'text-neutral-400 hover:text-white'
-                  }`}
-                >
-                  <Monitor className="w-4 h-4" />
-                </button>
-              </Tooltip>
-              <Tooltip label="Tablet" hint="Viewport tablet (768px)" side="bottom">
-                <button
-                  type="button"
-                  onClick={() => setDevice('tablet')}
-                  className={`p-1.5 rounded-lg transition-all ${
-                    device === 'tablet'
-                      ? 'bg-[#F2C7A0] text-[#191919] font-bold shadow'
-                      : 'text-neutral-400 hover:text-white'
-                  }`}
-                >
-                  <Tablet className="w-4 h-4" />
-                </button>
-              </Tooltip>
-              <Tooltip label="Ponsel" hint="Viewport smartphone (375px)" side="bottom">
-                <button
-                  type="button"
-                  onClick={() => setDevice('mobile')}
-                  className={`p-1.5 rounded-lg transition-all ${
-                    device === 'mobile'
-                      ? 'bg-[#F2C7A0] text-[#191919] font-bold shadow'
-                      : 'text-neutral-400 hover:text-white'
-                  }`}
-                >
-                  <Smartphone className="w-4 h-4" />
-                </button>
-              </Tooltip>
-            </div>
-          )}
+          {/* Responsive device frames (always accessible) */}
+          <div className="flex items-center gap-1 p-1 rounded-xl bg-[#121212] border border-white/10">
+            <Tooltip label="Desktop" hint="Viewport layar lebar (100% rasio web publik)" side="bottom">
+              <button
+                type="button"
+                onClick={() => setDevice('desktop')}
+                className={`p-1.5 rounded-lg transition-all ${
+                  device === 'desktop'
+                    ? 'bg-[#FFD600] text-[#191919] font-bold shadow'
+                    : 'text-neutral-400 hover:text-white'
+                }`}
+              >
+                <Monitor className="w-4 h-4" />
+              </button>
+            </Tooltip>
+            <Tooltip label="Tablet" hint="Viewport tablet (768px)" side="bottom">
+              <button
+                type="button"
+                onClick={() => setDevice('tablet')}
+                className={`p-1.5 rounded-lg transition-all ${
+                  device === 'tablet'
+                    ? 'bg-[#FFD600] text-[#191919] font-bold shadow'
+                    : 'text-neutral-400 hover:text-white'
+                }`}
+              >
+                <Tablet className="w-4 h-4" />
+              </button>
+            </Tooltip>
+            <Tooltip label="Ponsel" hint="Viewport smartphone nyata (390px)" side="bottom">
+              <button
+                type="button"
+                onClick={() => setDevice('mobile')}
+                className={`p-1.5 rounded-lg transition-all ${
+                  device === 'mobile'
+                    ? 'bg-[#FFD600] text-[#191919] font-bold shadow'
+                    : 'text-neutral-400 hover:text-white'
+                }`}
+              >
+                <Smartphone className="w-4 h-4" />
+              </button>
+            </Tooltip>
+          </div>
 
           {/* Undo & Redo Controls (L3-T4) */}
           <div className="flex items-center gap-1 p-1 rounded-xl bg-[#121212] border border-white/10">
@@ -1460,7 +1601,7 @@ export default function StudioVisualEditor({
             <button
               type="button"
               onClick={handleOpenTemplates}
-              className="p-2 rounded-xl bg-white/5 border border-white/10 hover:border-[#F2C7A0]/40 text-neutral-300 hover:text-[#F2C7A0] transition-colors"
+              className="p-2 rounded-xl bg-white/5 border border-white/10 hover:border-[#FFD600]/40 text-neutral-300 hover:text-[#FFD600] transition-colors"
             >
               <Bookmark className="w-4 h-4" />
             </button>
@@ -1472,7 +1613,7 @@ export default function StudioVisualEditor({
               <button
                 type="button"
                 onClick={() => setSaveTemplateModalOpen(true)}
-                className="p-2 rounded-xl bg-white/5 border border-white/10 hover:border-[#F2C7A0]/40 text-neutral-400 hover:text-white transition-colors hidden sm:inline-flex"
+                className="p-2 rounded-xl bg-white/5 border border-white/10 hover:border-[#FFD600]/40 text-neutral-400 hover:text-white transition-colors hidden sm:inline-flex"
               >
                 <Save className="w-4 h-4" />
               </button>
@@ -1506,7 +1647,7 @@ export default function StudioVisualEditor({
             <button
               type="button"
               onClick={() => openPaletteAt(blocks.length)}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#F2C7A0] text-[#191919] text-xs font-mono font-bold hover:bg-[#ebd5c1] transition-all shadow-[0_0_15px_rgba(242,199,160,0.25)]"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#FFD600] text-[#191919] text-xs font-mono font-bold hover:bg-[#ffe855] transition-all shadow-[0_0_15px_rgba(255, 214, 0,0.25)]"
             >
               <Plus className="w-4 h-4" />
               <span className="hidden sm:inline">Tambah</span>
@@ -1562,11 +1703,11 @@ export default function StudioVisualEditor({
             {/* Modal Header */}
             <div className="flex items-center justify-between p-6 border-b border-white/10 bg-[#151515]">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-[#F2C7A0]/10 border border-[#F2C7A0]/30 flex items-center justify-center text-[#F2C7A0]">
+                <div className="w-10 h-10 rounded-2xl bg-[#FFD600]/10 border border-[#FFD600]/30 flex items-center justify-center text-[#FFD600]">
                   <LayoutTemplate className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="font-display text-lg font-bold text-white">
+                  <h3 className="font-syne text-lg font-bold text-white">
                     Pilih Blok yang Ingin Ditambahkan
                   </h3>
                   <p className="text-xs text-neutral-400">
@@ -1601,7 +1742,7 @@ export default function StudioVisualEditor({
                     onClick={() => setActiveCategory(cat.id)}
                     className={`px-3 py-1.5 rounded-xl text-xs font-mono transition-all ${
                       activeCategory === cat.id
-                        ? 'bg-[#F2C7A0] text-[#191919] font-bold shadow'
+                        ? 'bg-[#FFD600] text-[#191919] font-bold shadow'
                         : 'bg-white/5 text-neutral-300 hover:text-white hover:bg-white/10'
                     }`}
                   >
@@ -1618,7 +1759,7 @@ export default function StudioVisualEditor({
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Cari blok..."
-                  className="w-full pl-9 pr-3 py-1.5 rounded-xl bg-[#121212] border border-white/10 text-white text-xs font-mono focus:outline-none focus:border-[#F2C7A0]/50 placeholder:text-neutral-500"
+                  className="w-full pl-9 pr-3 py-1.5 rounded-xl bg-[#121212] border border-white/10 text-white text-xs font-mono focus:outline-none focus:border-[#FFD600]/50 placeholder:text-neutral-500"
                 />
               </div>
             </div>
@@ -1636,7 +1777,7 @@ export default function StudioVisualEditor({
                     <div
                       key={b.type}
                       onClick={() => handleInsertBlock(b.type)}
-                      className="group p-4 rounded-2xl bg-[#151515] border border-white/10 hover:border-[#F2C7A0]/50 hover:bg-[#1a1a1a] transition-all cursor-pointer flex flex-col justify-between shadow-lg hover:-translate-y-0.5"
+                      className="group p-4 rounded-2xl bg-[#151515] border border-white/10 hover:border-[#FFD600]/50 hover:bg-[#1a1a1a] transition-all cursor-pointer flex flex-col justify-between shadow-lg hover:-translate-y-0.5"
                     >
                       <div>
                         {/* Mini Visual Wireframe Preview */}
@@ -1646,14 +1787,14 @@ export default function StudioVisualEditor({
 
                         <div className="flex items-center justify-between gap-3 mb-2">
                           <div className="flex items-center gap-2">
-                            <div className="w-7 h-7 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-[#F2C7A0] group-hover:scale-110 group-hover:bg-[#F2C7A0]/10 transition-all">
+                            <div className="w-7 h-7 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-[#FFD600] group-hover:scale-110 group-hover:bg-[#FFD600]/10 transition-all">
                               <IconComp className="w-3.5 h-3.5" />
                             </div>
-                            <h4 className="font-display text-sm font-bold text-white group-hover:text-[#F2C7A0] transition-colors">
+                            <h4 className="font-syne text-sm font-bold text-white group-hover:text-[#FFD600] transition-colors">
                               {b.name}
                             </h4>
                           </div>
-                          <span className="font-mono text-[10px] px-2 py-0.5 rounded-md bg-white/5 border border-white/10 text-[#F2C7A0]">
+                          <span className="font-mono text-[10px] px-2 py-0.5 rounded-md bg-white/5 border border-white/10 text-[#FFD600]">
                             {b.badge}
                           </span>
                         </div>
@@ -1662,7 +1803,7 @@ export default function StudioVisualEditor({
                         </p>
                       </div>
 
-                      <div className="mt-3 pt-2.5 border-t border-white/5 flex items-center justify-between text-xs font-mono text-neutral-400 group-hover:text-[#F2C7A0]">
+                      <div className="mt-3 pt-2.5 border-t border-white/5 flex items-center justify-between text-xs font-mono text-neutral-400 group-hover:text-[#FFD600]">
                         <span className="text-[11px]">Tipe: {b.type}</span>
                         <span className="font-bold inline-flex items-center gap-1 group-hover:translate-x-1 transition-transform">
                           + Sisipkan Blok
@@ -1689,11 +1830,11 @@ export default function StudioVisualEditor({
           >
             <div className="flex items-center justify-between p-6 border-b border-white/10 bg-[#151515]">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-[#F2C7A0]/10 border border-[#F2C7A0]/30 flex items-center justify-center text-[#F2C7A0]">
+                <div className="w-10 h-10 rounded-2xl bg-[#FFD600]/10 border border-[#FFD600]/30 flex items-center justify-center text-[#FFD600]">
                   <Bookmark className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="font-display text-lg font-bold text-white">
+                  <h3 className="font-syne text-lg font-bold text-white">
                     Pustaka Template Blok Halaman
                   </h3>
                   <p className="text-xs text-neutral-400">
@@ -1718,7 +1859,7 @@ export default function StudioVisualEditor({
               ) : savedTemplates.length === 0 ? (
                 <div className="py-12 text-center">
                   <Bookmark className="w-10 h-10 text-neutral-600 mx-auto mb-3" />
-                  <p className="text-sm font-display font-bold text-white mb-1">
+                  <p className="text-sm font-syne font-bold text-white mb-1">
                     Belum Ada Template Tersimpan
                   </p>
                   <p className="text-xs text-neutral-400 max-w-sm mx-auto">
@@ -1729,14 +1870,14 @@ export default function StudioVisualEditor({
                 savedTemplates.map((tpl) => (
                   <div
                     key={tpl.id}
-                    className="p-4 rounded-2xl bg-[#151515] border border-white/10 hover:border-[#F2C7A0]/40 transition-all flex items-center justify-between gap-4"
+                    className="p-4 rounded-2xl bg-[#151515] border border-white/10 hover:border-[#FFD600]/40 transition-all flex items-center justify-between gap-4"
                   >
                     <div>
                       <div className="flex items-center gap-2 mb-1">
-                        <span className="font-display text-sm font-bold text-white">
+                        <span className="font-syne text-sm font-bold text-white">
                           {tpl.name}
                         </span>
-                        <span className="font-mono text-[10px] px-2 py-0.5 rounded-md bg-white/5 border border-white/10 text-[#F2C7A0]">
+                        <span className="font-mono text-[10px] px-2 py-0.5 rounded-md bg-white/5 border border-white/10 text-[#FFD600]">
                           {tpl.targetType}
                         </span>
                         <span className="font-mono text-[10px] text-neutral-400">
@@ -1751,7 +1892,7 @@ export default function StudioVisualEditor({
                     <button
                       type="button"
                       onClick={() => handleApplyTemplate(tpl.blocks)}
-                      className="px-4 py-2 rounded-xl bg-[#F2C7A0] text-[#191919] font-mono text-xs font-bold hover:bg-[#ebd5c1] transition-all shadow shrink-0"
+                      className="px-4 py-2 rounded-xl bg-[#FFD600] text-[#191919] font-mono text-xs font-bold hover:bg-[#ffe855] transition-all shadow shrink-0"
                     >
                       Terapkan Template
                     </button>
@@ -1774,7 +1915,7 @@ export default function StudioVisualEditor({
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-4">
-              <h3 className="font-display text-base font-bold text-white">
+              <h3 className="font-syne text-base font-bold text-white">
                 Simpan Sebagai Template
               </h3>
               <button
@@ -1800,7 +1941,7 @@ export default function StudioVisualEditor({
                   value={newTemplateName}
                   onChange={(e) => setNewTemplateName(e.target.value)}
                   placeholder="Contoh: Template Landing Page Edukasi"
-                  className="w-full px-3.5 py-2 rounded-xl bg-[#121212] border border-white/15 text-white text-xs font-mono focus:outline-none focus:border-[#F2C7A0]/60"
+                  className="w-full px-3.5 py-2 rounded-xl bg-[#121212] border border-white/15 text-white text-xs font-mono focus:outline-none focus:border-[#FFD600]/60"
                   autoFocus
                 />
               </div>
@@ -1818,7 +1959,7 @@ export default function StudioVisualEditor({
                 type="button"
                 onClick={handleSaveCurrentAsTemplate}
                 disabled={!newTemplateName.trim()}
-                className="px-4 py-2 rounded-xl bg-[#F2C7A0] text-[#191919] font-mono text-xs font-bold hover:bg-[#ebd5c1] disabled:opacity-40 transition-all"
+                className="px-4 py-2 rounded-xl bg-[#FFD600] text-[#191919] font-mono text-xs font-bold hover:bg-[#ffe855] disabled:opacity-40 transition-all"
               >
                 Simpan Template
               </button>
@@ -1843,7 +1984,7 @@ export default function StudioVisualEditor({
                   <Gauge className="w-4 h-4" />
                 </div>
                 <div>
-                  <h3 className="font-display text-base font-bold text-white">
+                  <h3 className="font-syne text-base font-bold text-white">
                     Anggaran Performa Halaman
                   </h3>
                   <p className="text-[11px] text-neutral-400">
@@ -1891,7 +2032,7 @@ export default function StudioVisualEditor({
 
               <div className="p-3.5 rounded-2xl bg-white/5 border border-white/10">
                 <div className="text-[11px] font-mono text-neutral-400 mb-1">Kandidat LCP</div>
-                <div className="text-sm font-mono text-[#F2C7A0]">
+                <div className="text-sm font-mono text-[#FFD600]">
                   {perfAudit.lcpCandidateBlockIndex !== null
                     ? `Blok #${perfAudit.lcpCandidateBlockIndex + 1} (Priority)`
                     : 'Belum Terdeteksi'}

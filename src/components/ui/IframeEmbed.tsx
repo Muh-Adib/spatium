@@ -48,7 +48,7 @@ export function IframeEmbed({
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 rounded-xl bg-neutral-800 hover:bg-neutral-700 px-5 py-2.5 text-body-sm font-medium text-white transition-all border border-neutral-700"
           >
-            <Globe className="h-4 w-4 text-[#F2C7A0]" />
+            <Globe className="h-4 w-4 text-[#FFD600]" />
             <span>Kunjungi Situs Langsung</span>
             <ExternalLink className="h-3.5 w-3.5 text-neutral-400" />
           </a>
@@ -73,7 +73,7 @@ export function IframeEmbed({
           href={validation.safeUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-1.5 text-[12px] font-medium text-[#F2C7A0] hover:text-[#D3AD8D] transition-colors"
+          className="inline-flex items-center gap-1.5 text-[12px] font-medium text-[#FFD600] hover:text-[#FFE855] transition-colors"
           title={openExternalLabel}
         >
           <span>{openExternalLabel}</span>
@@ -101,7 +101,7 @@ export function IframeEmbed({
               href={validation.safeUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-3 inline-flex items-center gap-2 text-[#F2C7A0] underline text-body-xs"
+              className="mt-3 inline-flex items-center gap-2 text-[#FFD600] underline text-body-xs"
             >
               Buka situs secara langsung di tab baru
             </a>

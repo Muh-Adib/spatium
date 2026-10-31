@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { RevealProvider } from '@/components/motion/RevealProvider'
 import { Hero } from '@/components/home/Hero'
 import { PartnerLogos } from '@/components/home/PartnerLogos'
 import { ServicesShowcase } from '@/components/home/ServicesShowcase'
@@ -11,6 +12,7 @@ import { JournalPreview } from '@/components/home/JournalPreview'
 import { InquirySection } from '@/components/home/InquirySection'
 import { SERVICES } from '@/data/services'
 import { STUDIO_EMAIL } from '@/data/site'
+import { getCorePortfolios, getCoreServices } from '@/lib/core'
 
 const SITE_URL = 'https://unimasi.studio'
 
@@ -59,23 +61,30 @@ const jsonLd = [
   },
 ]
 
-export default function HomePage() {
+export default async function HomePage() {
+  const [portfolios, services] = await Promise.all([
+    getCorePortfolios(),
+    getCoreServices(),
+  ])
+
   return (
     <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <Hero />
-      <PartnerLogos />
-      <ServicesShowcase />
-      <Capabilities />
-      <PortfolioPreview />
-      <ProcessTimeline />
-      <WhyUnimasi />
-      <Industries />
-      <JournalPreview />
-      <InquirySection />
+      <RevealProvider>
+        <Hero />
+        <PartnerLogos />
+        <ServicesShowcase initialServices={services} />
+        <Capabilities />
+        <PortfolioPreview initialProjects={portfolios as any} />
+        <ProcessTimeline />
+        <WhyUnimasi />
+        <Industries />
+        <JournalPreview />
+        <InquirySection />
+      </RevealProvider>
     </>
   )
 }

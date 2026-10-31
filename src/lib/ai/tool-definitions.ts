@@ -197,7 +197,7 @@ export const SEGIA_TOOLS_CATALOG: ToolDefinition[] = [
     name: 'db_portfolio_query',
     label: 'Kueri Portofolio & Studi Kasus (Prisma 8 ORM)',
     category: 'database',
-    description: 'Pencarian data 15 portofolio & proyek creative engineering klien SegiaTech (stack teknologi, industri, hasil dampak bisnis).',
+    description: 'Pencarian data 15 portofolio & proyek creative engineering klien UNIMASI (stack teknologi, industri, hasil dampak bisnis).',
     parameters: [
       {
         name: 'action',
@@ -232,7 +232,7 @@ export const SEGIA_TOOLS_CATALOG: ToolDefinition[] = [
     name: 'db_services_query',
     label: 'Katalog Layanan Digital Enterprise (Prisma 8 ORM)',
     category: 'database',
-    description: 'Akses kueri 142 katalog layanan SegiaTech (web engineering, AI integration, headless CMS, technical SEO).',
+    description: 'Akses kueri 142 katalog layanan UNIMASI (web engineering, AI integration, headless CMS, technical SEO).',
     parameters: [
       {
         name: 'action',

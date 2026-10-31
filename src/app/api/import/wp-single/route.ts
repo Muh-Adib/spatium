@@ -11,7 +11,7 @@ import { safeFetch } from '@/lib/security/ssrf'
 /**
  * API Endpoint: /api/import/wp-single
  * Mengambil satu artikel dari WordPress secara langsung berdasarkan URL Post atau Domain + Slug.
- * Mengonversi konten HTML WordPress ke format Content Blocks SegiaTech yang aman,
+ * Mengonversi konten HTML WordPress ke format Content Blocks UNIMASI yang aman,
  * mengekstrak seluruh metadata Yoast SEO / Rank Math secara lengkap (termasuk kata kunci target).
  */
 export async function POST(req: NextRequest) {
@@ -60,7 +60,7 @@ export async function POST(req: NextRequest) {
     console.log(`[WP Single Import] Fetching from: ${targetEndpoint}`)
 
     const headers: Record<string, string> = {
-      'User-Agent': 'SegiaTech-Importer/2.0',
+      'User-Agent': 'UNIMASI-Importer/2.0',
       Accept: 'application/json',
     }
 
@@ -102,7 +102,7 @@ export async function POST(req: NextRequest) {
     const sanitizedHtml = cleanWpHtml(rawContent)
     const localizedHtml = await localizeAndOptimizeContentImages(sanitizedHtml, 'articles')
 
-    // 2. Konversi ke Blok Editor SegiaTech
+    // 2. Konversi ke Blok Editor UNIMASI
     const blocks = contentToBlocks(localizedHtml)
 
     // 3. Ekstraksi Excerpt / Ringkasan
@@ -139,7 +139,7 @@ export async function POST(req: NextRequest) {
     }
 
     // 7. Ekstraksi Penulis
-    let author = 'Tim SegiaTech'
+    let author = 'Tim UNIMASI'
     const embeddedAuthor = wpPost._embedded?.author?.[0]
     if (embeddedAuthor?.name) {
       author = embeddedAuthor.name

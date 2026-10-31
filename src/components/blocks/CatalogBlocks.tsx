@@ -40,50 +40,72 @@ import { IframeEmbed } from '@/components/ui/IframeEmbed'
 
 // ─── 1. Hero Department ───────────────────────────────────────────────────────
 export function HeroDepartmentBlock({ block }: { block: any }) {
-  const variant = block.variant || 'cinematic'
-  const titleParts = (block.title || '').split('&')
-  const keyOutcomes = block.keyOutcomes || []
-  const heroImage = block.heroImage
+  const data = block?.data || block || {}
+  const variant = block?.variant || data.variant || 'cinematic'
+  const title = block?.title || data.title || ''
+  const titleParts = title.split('&')
+  const keyOutcomes = Array.isArray(block?.keyOutcomes)
+    ? block.keyOutcomes
+    : Array.isArray(data.keyOutcomes)
+    ? data.keyOutcomes
+    : []
+  const heroImage = block?.heroImage || data.heroImage
 
   // Clean, client-oriented labels & caption
-  const imageCaption = block.imageCaption || block.windowTitle || 'Karya Nyata Klien: Portal Informasi & Sistem Online'
-  const imageBadge = block.imageBadge || block.windowBadge || 'Akses Cepat & Responsif'
-  const floatingBadges = block.floatingBadges || []
+  const imageCaption =
+    block?.imageCaption ||
+    data.imageCaption ||
+    block?.windowTitle ||
+    data.windowTitle ||
+    'Karya Nyata Klien: Portal Informasi & Sistem Online'
+  const imageBadge =
+    block?.imageBadge ||
+    data.imageBadge ||
+    block?.windowBadge ||
+    data.windowBadge ||
+    'Akses Cepat & Responsif'
+  const floatingBadges = Array.isArray(block?.floatingBadges)
+    ? block.floatingBadges
+    : Array.isArray(data.floatingBadges)
+    ? data.floatingBadges
+    : []
+  const badge = block?.badge || data.badge
+  const description = block?.description || data.description
 
   if (variant === 'showcase') {
     return (
       <section className="pt-32 pb-20 sm:pt-40 sm:pb-28 lg:pt-44 lg:pb-36 relative overflow-hidden text-white border-b border-white/[0.08] bg-[#0A0A0A]">
         <ThematicWave opacity={0.55} showBottomWave={true} />
-        <div className="pointer-events-none absolute -left-20 top-1/4 w-[600px] h-[600px] rounded-full bg-[#F2C7A0]/[0.05] blur-[160px]" />
-        <div className="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full bg-[#C68D5D]/[0.04] blur-[150px]" />
+        <div className="pointer-events-none absolute -left-20 top-1/4 w-[600px] h-[600px] rounded-full bg-[#FFD600]/[0.05] blur-[160px]" />
+        <div className="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full bg-[#0F3A79]/[0.04] blur-[150px]" />
 
         <div className="container relative z-10 max-w-6xl mx-auto px-4 sm:px-6">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
             <div className="lg:col-span-7">
-              {block.badge && (
-                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.04] text-[#F2C7A0] border border-[#F2C7A0]/30 text-xs font-mono mb-6 backdrop-blur-md shadow-[0_0_20px_rgba(242,199,160,0.12)]">
-                  <Layers className="w-3.5 h-3.5 text-[#F2C7A0]" />
-                  <span>{block.badge}</span>
+              {badge && (
+                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.04] text-[#FFD600] border border-[#FFD600]/30 text-xs font-mono mb-6 backdrop-blur-md shadow-[0_0_20px_rgba(255, 214, 0,0.12)]">
+                  <Layers className="w-3.5 h-3.5 text-[#FFD600]" />
+                  <span>{badge}</span>
                 </div>
               )}
-              <h1 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-white leading-[1.14]">
+              <h1 className="font-syne text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-white leading-[1.14]">
                 {titleParts[0]?.trim()}{' '}
                 {titleParts.length > 1 && (
-                  <span className="gradient-text-italic bg-gradient-to-r from-[#FFFFFF] via-[#DBD7D5] to-[#F2C7A0]">
+                  <span className="gradient-text-italic bg-gradient-to-r from-[#FFFFFF] via-[#DBD7D5] to-[#FFD600]">
                     & {titleParts[1]?.trim()}
                   </span>
                 )}
               </h1>
-              {block.description && (
+              {description && (
                 <p className="mt-6 text-body-lg sm:text-body-xl text-[#DBD7D5] leading-relaxed font-normal">
-                  {block.description}
+                  {description}
                 </p>
               )}
             </div>
 
             <div className="lg:col-span-5">
-              <div className="rounded-3xl border border-white/10 bg-[#141414]/90 p-6 sm:p-8 backdrop-blur-xl shadow-2xl relative overflow-hidden group hover:border-[#F2C7A0]/40 transition-colors">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-[#F2C7A0]/10 rounded-full blur-2xl pointer-events-none" />
+              <div className="rounded-3xl border border-white/10 bg-[#141414]/90 p-6 sm:p-8 backdrop-blur-xl shadow-2xl relative overflow-hidden group hover:border-[#FFD600]/40 transition-colors">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-[#FFD600]/10 rounded-full blur-2xl pointer-events-none" />
                 <div className="flex items-center justify-between border-b border-white/10 pb-4 mb-6">
                   <div className="flex items-center gap-2">
                     <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
@@ -91,7 +113,7 @@ export function HeroDepartmentBlock({ block }: { block: any }) {
                       Keunggulan Solusi
                     </span>
                   </div>
-                  <span className="font-mono text-xs text-[#F2C7A0]">{imageBadge}</span>
+                  <span className="font-mono text-xs text-[#FFD600]">{imageBadge}</span>
                 </div>
 
                 <div className="space-y-4">
@@ -101,7 +123,7 @@ export function HeroDepartmentBlock({ block }: { block: any }) {
                       className="p-3.5 rounded-xl bg-white/[0.02] border border-white/5 flex items-center justify-between"
                     >
                       <span className="font-mono text-xs text-neutral-300">{metric.label}</span>
-                      <span className="font-display text-lg sm:text-xl font-bold text-[#F2C7A0]">
+                      <span className="font-syne text-lg sm:text-xl font-bold text-[#FFD600]">
                         {metric.value}
                       </span>
                     </div>
@@ -113,22 +135,22 @@ export function HeroDepartmentBlock({ block }: { block: any }) {
 
           {/* Clean Immersive Media Showcase */}
           {heroImage && (
-            <div className="mt-14 rounded-3xl border border-white/10 bg-[#121212] overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.8)] relative group hover:border-[#F2C7A0]/30 transition-all">
+            <div className="mt-14 rounded-3xl border border-white/10 bg-[#121212] overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.8)] relative group hover:border-[#FFD600]/30 transition-all">
               <div className="flex items-center justify-between px-6 py-3.5 bg-[#161616]/80 backdrop-blur-md border-b border-white/[0.06]">
                 <div className="flex items-center gap-2.5">
-                  <span className="w-2 h-2 rounded-full bg-[#F2C7A0]" />
+                  <span className="w-2 h-2 rounded-full bg-[#FFD600]" />
                   <span className="font-mono text-xs text-neutral-300 font-medium truncate max-w-sm">
                     {imageCaption}
                   </span>
                 </div>
-                <span className="font-mono text-xs text-[#F2C7A0] hidden sm:inline-block">
+                <span className="font-mono text-xs text-[#FFD600] hidden sm:inline-block">
                   {imageBadge}
                 </span>
               </div>
               <div className="relative aspect-[16/10] sm:aspect-[21/9] w-full overflow-hidden bg-black">
                 <Image
                   src={heroImage}
-                  alt={block.title || 'Platform Showcase'}
+                  alt={title || 'Platform Showcase'}
                   fill
                   priority
                   className="object-cover object-top group-hover:scale-[1.02] transition-transform duration-700"
@@ -147,30 +169,30 @@ export function HeroDepartmentBlock({ block }: { block: any }) {
   return (
     <section className="pt-32 pb-20 sm:pt-40 sm:pb-28 lg:pt-44 lg:pb-36 relative overflow-hidden text-white border-b border-white/[0.08] bg-[#0A0A0A]">
       <ThematicWave opacity={0.65} showBottomWave={true} />
-      <div className="pointer-events-none absolute left-1/2 top-1/3 -translate-x-1/2 -translate-y-1/2 w-[850px] h-[550px] rounded-full bg-[#F2C7A0]/[0.08] blur-[180px]" />
-      <div className="pointer-events-none absolute right-1/4 top-1/4 w-[450px] h-[450px] rounded-full bg-[#C68D5D]/[0.06] blur-[160px]" />
+      <div className="pointer-events-none absolute left-1/2 top-1/3 -translate-x-1/2 -translate-y-1/2 w-[850px] h-[550px] rounded-full bg-[#FFD600]/[0.08] blur-[180px]" />
+      <div className="pointer-events-none absolute right-1/4 top-1/4 w-[450px] h-[450px] rounded-full bg-[#0F3A79]/[0.06] blur-[160px]" />
 
       <div className="container relative z-10 max-w-6xl mx-auto px-4 sm:px-6">
         <div className="max-w-4xl">
-          {block.badge && (
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#181818]/90 text-[#F2C7A0] border border-[#F2C7A0]/30 text-xs font-mono mb-6 backdrop-blur-md shadow-[0_0_20px_rgba(242,199,160,0.15)]">
-              <Layers className="w-3.5 h-3.5 text-[#F2C7A0]" />
-              <span>{block.badge}</span>
+          {badge && (
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#181818]/90 text-[#FFD600] border border-[#FFD600]/30 text-xs font-mono mb-6 backdrop-blur-md shadow-[0_0_20px_rgba(255, 214, 0,0.15)]">
+              <Layers className="w-3.5 h-3.5 text-[#FFD600]" />
+              <span>{badge}</span>
             </div>
           )}
 
-          <h1 className="font-display text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold tracking-tight text-white leading-[1.12]">
+          <h1 className="font-syne text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold tracking-tight text-white leading-[1.12]">
             {titleParts[0]?.trim()}{' '}
             {titleParts.length > 1 && (
-              <span className="gradient-text-italic bg-gradient-to-r from-[#FFFFFF] via-[#DBD7D5] to-[#F2C7A0]">
+              <span className="gradient-text-italic bg-gradient-to-r from-[#FFFFFF] via-[#DBD7D5] to-[#FFD600]">
                 & {titleParts[1]?.trim()}
               </span>
             )}
           </h1>
 
-          {block.description && (
+          {description && (
             <p className="mt-6 max-w-3xl text-body-lg sm:text-body-xl text-[#DBD7D5] leading-relaxed font-normal">
-              {block.description}
+              {description}
             </p>
           )}
 
@@ -179,12 +201,12 @@ export function HeroDepartmentBlock({ block }: { block: any }) {
               {keyOutcomes.map((metric: any, mIdx: number) => (
                 <div
                   key={mIdx}
-                  className="rounded-2xl border border-white/10 bg-[#161616]/80 p-4.5 backdrop-blur-md text-left hover:border-[#F2C7A0]/40 transition-all hover:-translate-y-0.5 shadow-lg group"
+                  className="rounded-2xl border border-white/10 bg-[#161616]/80 p-4.5 backdrop-blur-md text-left hover:border-[#FFD600]/40 transition-all hover:-translate-y-0.5 shadow-lg group"
                 >
                   <span className="font-mono text-xs text-neutral-400 block truncate group-hover:text-neutral-300">
                     {metric.label}
                   </span>
-                  <span className="font-display text-xl sm:text-2xl font-bold text-[#F2C7A0] mt-1 block tracking-tight">
+                  <span className="font-syne text-xl sm:text-2xl font-bold text-[#FFD600] mt-1 block tracking-tight">
                     {metric.value}
                   </span>
                 </div>
@@ -195,16 +217,16 @@ export function HeroDepartmentBlock({ block }: { block: any }) {
 
         {/* Clean Immersive Media Showcase */}
         {heroImage && (
-          <div className="mt-14 sm:mt-16 rounded-3xl border border-white/15 bg-[#121212] overflow-hidden shadow-[0_25px_80px_rgba(0,0,0,0.85)] relative group hover:border-[#F2C7A0]/30 transition-all">
+          <div className="mt-14 sm:mt-16 rounded-3xl border border-white/15 bg-[#121212] overflow-hidden shadow-[0_25px_80px_rgba(0,0,0,0.85)] relative group hover:border-[#FFD600]/30 transition-all">
             <div className="flex items-center justify-between px-6 py-3.5 bg-[#161616]/90 backdrop-blur-md border-b border-white/[0.06]">
               <div className="flex items-center gap-2.5">
-                <span className="w-2 h-2 rounded-full bg-[#F2C7A0]" />
+                <span className="w-2 h-2 rounded-full bg-[#FFD600]" />
                 <span className="font-mono text-xs text-neutral-300 font-medium truncate max-w-sm">
                   {imageCaption}
                 </span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="font-mono text-xs text-[#F2C7A0] px-2.5 py-0.5 rounded-full bg-[#F2C7A0]/10 border border-[#F2C7A0]/20 hidden sm:inline-block">
+                <span className="font-mono text-xs text-[#FFD600] px-2.5 py-0.5 rounded-full bg-[#FFD600]/10 border border-[#FFD600]/20 hidden sm:inline-block">
                   {imageBadge}
                 </span>
               </div>
@@ -213,7 +235,7 @@ export function HeroDepartmentBlock({ block }: { block: any }) {
             <div className="relative aspect-[16/10] sm:aspect-[21/9] w-full overflow-hidden bg-black">
               <Image
                 src={heroImage}
-                alt={block.title || 'Platform Showcase'}
+                alt={title || 'Platform Showcase'}
                 fill
                 priority
                 className="object-cover object-top group-hover:scale-[1.015] transition-transform duration-700"
@@ -247,47 +269,77 @@ export function HeroDepartmentBlock({ block }: { block: any }) {
 
 // ─── 2. Hero Service ──────────────────────────────────────────────────────────
 export function HeroServiceBlock({ block }: { block: any }) {
-  const metrics = block.metrics || []
-  const primaryMedia = block.primaryMedia
-  const heroImageUrl = block.heroImage || primaryMedia?.imageUrl || block.primaryMedia?.url || ''
-  const title = block.name || block.title || 'Pengembangan Sistem & Rekayasa Digital'
-  const highlightWord = block.highlightWord || ''
-  const badge = block.categoryBadge || block.badge || 'Layanan Rekayasa'
-  const description = block.description || block.shortDescription || block.summary || ''
+  const data = block?.data || block || {}
+  const metrics = Array.isArray(block?.metrics)
+    ? block.metrics
+    : Array.isArray(data.metrics)
+    ? data.metrics
+    : []
+  const primaryMedia = block?.primaryMedia || data.primaryMedia
+  const heroImageUrl =
+    block?.heroImage ||
+    data.heroImage ||
+    primaryMedia?.imageUrl ||
+    primaryMedia?.url ||
+    ''
+  const title =
+    block?.name ||
+    data.name ||
+    block?.title ||
+    data.title ||
+    'Pengembangan Sistem & Rekayasa Digital'
+  const highlightWord = block?.highlightWord || data.highlightWord || ''
+  const badge =
+    block?.categoryBadge ||
+    data.categoryBadge ||
+    block?.badge ||
+    data.badge ||
+    'Layanan Rekayasa'
+  const description =
+    block?.description ||
+    data.description ||
+    block?.shortDescription ||
+    data.shortDescription ||
+    block?.summary ||
+    data.summary ||
+    ''
+  const subtitle = block?.subtitle || data.subtitle
+  const client = block?.client || data.client
+  const whatsappPrompt = block?.whatsappPrompt || data.whatsappPrompt
 
   return (
     <section className="pt-28 pb-20 sm:pt-36 sm:pb-24 lg:pt-40 lg:pb-32 relative overflow-hidden bg-[#0A0A0A] text-white border-b border-white/[0.08] w-full">
       <ThematicWave opacity={0.65} showBottomWave={true} />
-      <div className="pointer-events-none absolute -right-20 top-1/4 w-[650px] h-[650px] rounded-full bg-[#F2C7A0]/[0.06] blur-[160px]" />
-      <div className="pointer-events-none absolute -left-20 bottom-10 w-[500px] h-[500px] rounded-full bg-[#C68D5D]/[0.04] blur-[140px]" />
+      <div className="pointer-events-none absolute -right-20 top-1/4 w-[650px] h-[650px] rounded-full bg-[#FFD600]/[0.06] blur-[160px]" />
+      <div className="pointer-events-none absolute -left-20 bottom-10 w-[500px] h-[500px] rounded-full bg-[#0F3A79]/[0.04] blur-[140px]" />
 
       <div className="container relative z-10 max-w-5xl mx-auto px-4 sm:px-6">
         {badge && (
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#181818]/90 text-[#F2C7A0] border border-[#F2C7A0]/30 text-xs font-mono mb-6 backdrop-blur-md shadow-[0_0_15px_rgba(242,199,160,0.12)]">
-            <Zap className="w-3.5 h-3.5 text-[#F2C7A0]" />
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#181818]/90 text-[#FFD600] border border-[#FFD600]/30 text-xs font-mono mb-6 backdrop-blur-md shadow-[0_0_15px_rgba(255, 214, 0,0.12)]">
+            <Zap className="w-3.5 h-3.5 text-[#FFD600]" />
             <span>{badge}</span>
           </div>
         )}
 
-        <h1 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-white leading-[1.15]">
+        <h1 className="font-syne text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-white leading-[1.15]">
           {title}{' '}
           {highlightWord && (
-            <span className="gradient-text-italic bg-gradient-to-r from-[#FFFFFF] via-[#DBD7D5] to-[#F2C7A0]">
+            <span className="gradient-text-italic bg-gradient-to-r from-[#FFFFFF] via-[#DBD7D5] to-[#FFD600]">
               {highlightWord}
             </span>
           )}
         </h1>
 
-        {block.subtitle && (
-          <p className="mt-3 text-sm sm:text-base font-mono text-[#F2C7A0]/90">
-            {block.subtitle}
+        {subtitle && (
+          <p className="mt-3 text-sm sm:text-base font-mono text-[#FFD600]/90">
+            {subtitle}
           </p>
         )}
 
-        {block.client && (
+        {client && (
           <p className="mt-3 text-sm sm:text-base text-[#DBD7D5] font-mono flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-[#F2C7A0] animate-pulse" />
-            <span>Mitra Klien: <strong className="text-white">{block.client}</strong></span>
+            <span className="w-2 h-2 rounded-full bg-[#FFD600] animate-pulse" />
+            <span>Mitra Klien: <strong className="text-white">{client}</strong></span>
           </p>
         )}
 
@@ -298,13 +350,13 @@ export function HeroServiceBlock({ block }: { block: any }) {
         )}
 
         {/* WhatsApp CTA button */}
-        {block.whatsappPrompt && (
+        {whatsappPrompt && (
           <div className="mt-8 flex flex-wrap gap-4 items-center">
             <Link
-              href={`https://wa.me/${siteConfig.whatsapp || '6281234567890'}?text=${encodeURIComponent(block.whatsappPrompt)}`}
+              href={`https://wa.me/${siteConfig.whatsapp || '6281234567890'}?text=${encodeURIComponent(whatsappPrompt)}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-[#F2C7A0] text-[#191919] font-medium text-sm hover:bg-[#ebd5c1] transition-all shadow-[0_0_25px_rgba(242,199,160,0.25)] hover:scale-[1.02]"
+              className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-[#FFD600] text-[#191919] font-medium text-sm hover:bg-[#FFE855] transition-all shadow-[0_0_25px_rgba(255, 214, 0,0.25)] hover:scale-[1.02]"
             >
               <MessageSquare className="w-4 h-4" />
               <span>Konsultasikan Spesifikasi</span>
@@ -319,8 +371,8 @@ export function HeroServiceBlock({ block }: { block: any }) {
               <div className="relative aspect-video rounded-2xl overflow-hidden">
                 <IframeEmbed url={primaryMedia.videoUrl} title={title} aspectRatio="16/9" />
               </div>
-            ) : heroImageUrl ? (
-              <div className="relative aspect-[16/10] sm:aspect-video rounded-2xl overflow-hidden">
+            ) : heroImageUrl && heroImageUrl.trim() !== '' && !heroImageUrl.includes('default') ? (
+              <div className="relative aspect-[16/10] sm:aspect-video rounded-2xl overflow-hidden bg-black/40">
                 <Image
                   src={heroImageUrl}
                   alt={primaryMedia?.altText || block.altText || title}
@@ -328,16 +380,38 @@ export function HeroServiceBlock({ block }: { block: any }) {
                   priority
                   className="object-cover"
                   sizes="(max-width: 1024px) 100vw, 1024px"
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none'
+                  }}
                 />
               </div>
-            ) : null}
+            ) : (
+              <div className="relative aspect-[16/10] sm:aspect-video rounded-2xl overflow-hidden bg-gradient-to-br from-[#060A17] via-[#0F3A79]/40 to-[#060A17] p-6 flex flex-col justify-between border border-white/10">
+                <div className="flex items-center justify-between">
+                  <span className="px-2.5 py-1 rounded text-[10px] font-mono font-bold bg-[#FFD600]/15 text-[#FFD600] border border-[#FFD600]/30 uppercase tracking-wider">
+                    UNIMASI SHOWREEL
+                  </span>
+                  <span className="text-xs font-mono text-sky-300">16:9 4K DCI</span>
+                </div>
+                <div className="text-center my-auto py-4">
+                  <div className="w-12 h-12 rounded-2xl bg-[#FFD600]/10 border border-[#FFD600]/30 mx-auto flex items-center justify-center text-[#FFD600] font-syne font-bold text-lg mb-2">
+                    ▶
+                  </div>
+                  <p className="text-sm font-syne font-bold text-white/90">{title}</p>
+                </div>
+                <div className="flex items-center justify-between text-[10px] font-mono text-neutral-400 border-t border-white/5 pt-2">
+                  <span>ANIMATION &amp; 3D CGI</span>
+                  <span className="text-[#FFD600]">MASTER RENDER</span>
+                </div>
+              </div>
+            )}
 
             {metrics.length > 0 && (
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-4 bg-[#141414] border-t border-white/[0.08]">
                 {metrics.map((m: any, idx: number) => (
-                  <div key={idx} className="p-3.5 rounded-xl bg-white/[0.03] border border-white/5 hover:border-[#F2C7A0]/30 transition-colors">
+                  <div key={idx} className="p-3.5 rounded-xl bg-white/[0.03] border border-white/5 hover:border-[#FFD600]/30 transition-colors">
                     <p className="font-mono text-xs text-neutral-400">{m.label}</p>
-                    <p className="font-display text-xl font-bold text-[#F2C7A0] mt-1">{m.value}</p>
+                    <p className="font-syne text-xl font-bold text-[#FFD600] mt-1">{m.value}</p>
                     {m.detail && <p className="text-xs text-neutral-400 mt-0.5">{m.detail}</p>}
                   </div>
                 ))}
@@ -352,44 +426,51 @@ export function HeroServiceBlock({ block }: { block: any }) {
 
 // ─── 3. Feature Bento Grid ────────────────────────────────────────────────────
 export function FeatureBentoGridBlock({ block }: { block: any }) {
-  const features = block.features || []
-  const variant = block.variant || 'asymmetric-bento'
+  const data = block?.data || block || {}
+  const features = Array.isArray(block?.features)
+    ? block.features
+    : Array.isArray(data.features)
+    ? data.features
+    : []
+  const variant = block?.variant || data.variant || 'asymmetric-bento'
+  const title = block?.title || data.title
+  const description = block?.description || data.description
 
   if (variant === 'asymmetric-bento' && features.length >= 3) {
     const [leadFeature, ...otherFeatures] = features
 
     return (
       <section className="py-20 sm:py-24 bg-[#111111] text-white border-b border-white/[0.08] relative overflow-hidden">
-        <div className="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 w-96 h-96 rounded-full bg-[#F2C7A0]/[0.03] blur-3xl" />
+        <div className="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 w-96 h-96 rounded-full bg-[#FFD600]/[0.03] blur-3xl" />
         <div className="container max-w-5xl mx-auto px-4 sm:px-6 relative z-10">
-          {block.title && (
+          {title && (
             <div className="mb-12">
-              <span className="font-mono text-xs uppercase tracking-widest text-[#F2C7A0] block mb-2 font-semibold">
+              <span className="font-mono text-xs uppercase tracking-widest text-[#FFD600] block mb-2 font-semibold">
                 Core Capabilities
               </span>
-              <h2 className="font-display text-2xl sm:text-3xl font-bold tracking-tight text-white">
-                {block.title}
+              <h2 className="font-syne text-2xl sm:text-3xl font-bold tracking-tight text-white">
+                {title}
               </h2>
-              {block.description && (
+              {description && (
                 <p className="mt-3 text-[#DBD7D5] max-w-2xl text-body-md sm:text-body-lg">
-                  {block.description}
+                  {description}
                 </p>
               )}
             </div>
           )}
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-3 cq-cols-3 gap-5">
             {/* Lead Feature Card (Spans 2 columns on desktop) with High-Res Interface Mockup */}
-            <div className="md:col-span-2 rounded-3xl bg-gradient-to-br from-[#1A1A1A] to-[#141414] border border-[#F2C7A0]/30 relative overflow-hidden group shadow-xl flex flex-col justify-between">
-              <div className="absolute top-0 right-0 w-48 h-48 bg-[#F2C7A0]/10 rounded-full blur-2xl pointer-events-none group-hover:scale-125 transition-transform duration-700" />
+            <div className="md:col-span-2 rounded-3xl bg-gradient-to-br from-[#1A1A1A] to-[#141414] border border-[#FFD600]/30 relative overflow-hidden group shadow-xl flex flex-col justify-between">
+              <div className="absolute top-0 right-0 w-48 h-48 bg-[#FFD600]/10 rounded-full blur-2xl pointer-events-none group-hover:scale-125 transition-transform duration-700" />
               <div className="p-7 sm:p-8">
-                <div className="w-12 h-12 rounded-2xl bg-[#F2C7A0]/15 border border-[#F2C7A0]/40 flex items-center justify-center text-[#F2C7A0] mb-6">
+                <div className="w-12 h-12 rounded-2xl bg-[#FFD600]/15 border border-[#FFD600]/40 flex items-center justify-center text-[#FFD600] mb-6">
                   <Sparkles className="w-6 h-6" />
                 </div>
-                <span className="font-mono text-xs uppercase tracking-wider text-[#F2C7A0] font-semibold block mb-2">
+                <span className="font-mono text-xs uppercase tracking-wider text-[#FFD600] font-semibold block mb-2">
                   Solusi Unggulan
                 </span>
-                <h3 className="font-display text-xl sm:text-2xl font-bold text-white mb-3">
+                <h3 className="font-syne text-xl sm:text-2xl font-bold text-white mb-3">
                   {leadFeature.title}
                 </h3>
                 {(leadFeature.description || leadFeature.desc) && (
@@ -402,9 +483,9 @@ export function FeatureBentoGridBlock({ block }: { block: any }) {
               {/* Clean Immersive Visual Preview in Bento */}
               {leadFeature.image && (
                 <div className="mt-4 px-6 sm:px-8 pb-6 sm:pb-8">
-                  <div className="rounded-2xl border border-white/10 overflow-hidden bg-black/60 relative group-hover:border-[#F2C7A0]/40 transition-all shadow-2xl">
+                  <div className="rounded-2xl border border-white/10 overflow-hidden bg-black/60 relative group-hover:border-[#FFD600]/40 transition-all shadow-2xl">
                     <div className="flex items-center justify-between px-4 py-2.5 bg-[#161616]/90 border-b border-white/[0.06] text-xs font-mono text-neutral-400">
-                      <span className="text-[#F2C7A0] font-medium flex items-center gap-2">
+                      <span className="text-[#FFD600] font-medium flex items-center gap-2">
                         <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
                         {leadFeature.badge || 'Pratinjau Multi-Perangkat'}
                       </span>
@@ -429,20 +510,20 @@ export function FeatureBentoGridBlock({ block }: { block: any }) {
             {otherFeatures.map((feat: any, idx: number) => (
               <div
                 key={idx}
-                className="p-6 rounded-2xl bg-[#161616] border border-white/[0.08] hover:border-[#F2C7A0]/40 transition-all hover:-translate-y-1 group shadow-lg flex flex-col justify-between"
+                className="p-6 rounded-2xl bg-[#161616] border border-white/[0.08] hover:border-[#FFD600]/40 transition-all hover:-translate-y-1 group shadow-lg flex flex-col justify-between"
               >
                 <div>
-                  <div className="w-10 h-10 rounded-xl bg-white/[0.04] border border-white/10 flex items-center justify-center text-[#F2C7A0] mb-4 group-hover:scale-105 group-hover:bg-[#F2C7A0]/10 transition-all">
+                  <div className="w-10 h-10 rounded-xl bg-white/[0.04] border border-white/10 flex items-center justify-center text-[#FFD600] mb-4 group-hover:scale-105 group-hover:bg-[#FFD600]/10 transition-all">
                     <CheckCircle2 className="w-5 h-5" />
                   </div>
-                  <h3 className="font-display text-lg font-bold text-white mb-2">{feat.title}</h3>
+                  <h3 className="font-syne text-lg font-bold text-white mb-2">{feat.title}</h3>
                   {(feat.description || feat.desc) && (
                     <p className="text-sm text-[#DBD7D5] leading-relaxed">{feat.description || feat.desc}</p>
                   )}
                 </div>
                 <div className="mt-5 pt-3 border-t border-white/5 flex items-center justify-between text-xs font-mono text-neutral-400">
                   <span>Keunggulan 0{idx + 2}</span>
-                  <span className="text-[#F2C7A0]">Teruji</span>
+                  <span className="text-[#FFD600]">Teruji</span>
                 </div>
               </div>
             ))}
@@ -456,29 +537,29 @@ export function FeatureBentoGridBlock({ block }: { block: any }) {
   return (
     <section className="py-20 sm:py-24 bg-[#111111] text-white border-b border-white/[0.08]">
       <div className="container max-w-5xl mx-auto px-4 sm:px-6">
-        {block.title && (
+        {title && (
           <div className="mb-12">
-            <h2 className="font-display text-2xl sm:text-3xl font-bold tracking-tight text-white">
-              {block.title}
+            <h2 className="font-syne text-2xl sm:text-3xl font-bold tracking-tight text-white">
+              {title}
             </h2>
-            {block.description && (
+            {description && (
               <p className="mt-3 text-[#DBD7D5] max-w-2xl text-body-md sm:text-body-lg">
-                {block.description}
+                {description}
               </p>
             )}
           </div>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 cq-cols-3 gap-5">
           {features.map((feat: any, idx: number) => (
             <div
               key={idx}
-              className="p-6 rounded-2xl bg-[#181818] border border-white/[0.08] hover:border-[#F2C7A0]/40 transition-colors group shadow-md"
+              className="p-6 rounded-2xl bg-[#181818] border border-white/[0.08] hover:border-[#FFD600]/40 transition-colors group shadow-md"
             >
-              <div className="w-10 h-10 rounded-xl bg-[#F2C7A0]/10 border border-[#F2C7A0]/20 flex items-center justify-center text-[#F2C7A0] mb-4 group-hover:scale-105 transition-transform">
+              <div className="w-10 h-10 rounded-xl bg-[#FFD600]/10 border border-[#FFD600]/20 flex items-center justify-center text-[#FFD600] mb-4 group-hover:scale-105 transition-transform">
                 <CheckCircle2 className="w-5 h-5" />
               </div>
-              <h3 className="font-display text-lg font-bold text-white">{feat.title}</h3>
+              <h3 className="font-syne text-lg font-bold text-white">{feat.title}</h3>
               {(feat.description || feat.desc) && (
                 <p className="mt-2 text-sm text-[#DBD7D5] leading-relaxed">{feat.description || feat.desc}</p>
               )}
@@ -492,7 +573,10 @@ export function FeatureBentoGridBlock({ block }: { block: any }) {
 
 // ─── 4. Tech Stack Chips ──────────────────────────────────────────────────────
 export function TechStackChipsBlock({ block }: { block: any }) {
-  let technologies = block.technologies || []
+  const data = block?.data || block || {}
+  const title = block?.title || data.title
+  const subtitle = block?.subtitle || data.subtitle
+  let technologies = block?.technologies || data.technologies || []
   if (typeof technologies === 'string') {
     try {
       technologies = JSON.parse(technologies)
@@ -505,8 +589,9 @@ export function TechStackChipsBlock({ block }: { block: any }) {
   }
 
   // Support categories fallback if technologies array is empty but categories is defined
-  if (technologies.length === 0 && Array.isArray(block.categories)) {
-    technologies = block.categories.flatMap((c: any) =>
+  const categories = block?.categories || data.categories
+  if (technologies.length === 0 && Array.isArray(categories)) {
+    technologies = categories.flatMap((c: any) =>
       (c.technologies || []).map((t: any) =>
         typeof t === 'string' ? { name: t, category: c.category } : { ...t, category: t.category || c.category }
       )
@@ -516,17 +601,17 @@ export function TechStackChipsBlock({ block }: { block: any }) {
   return (
     <section className="py-16 bg-[#0E0E0E] text-white border-b border-white/[0.08]">
       <div className="container max-w-5xl mx-auto px-4 sm:px-6">
-        {block.title && (
-          <h2 className="font-mono text-xs uppercase tracking-widest text-[#F2C7A0] mb-2 font-semibold">
-            {block.title}
+        {title && (
+          <h2 className="font-mono text-xs uppercase tracking-widest text-[#FFD600] mb-2 font-semibold">
+            {title}
           </h2>
         )}
-        {block.subtitle && (
+        {subtitle && (
           <p className="text-sm text-[#DBD7D5] mb-6 max-w-2xl leading-relaxed">
-            {block.subtitle}
+            {subtitle}
           </p>
         )}
-        {!block.subtitle && block.title && <div className="mb-4" />}
+        {!subtitle && title && <div className="mb-4" />}
         <div className="flex flex-wrap gap-2.5">
           {technologies.map((tech: any, idx: number) => {
             const name = typeof tech === 'string' ? tech : (tech?.name || tech?.title || tech?.label || '')
@@ -537,11 +622,11 @@ export function TechStackChipsBlock({ block }: { block: any }) {
             return (
               <span
                 key={idx}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#181818] border border-white/10 text-xs sm:text-sm font-mono text-[#DBD7D5] hover:text-[#F2C7A0] hover:border-[#F2C7A0]/30 transition-colors shadow-sm"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#181818] border border-white/10 text-xs sm:text-sm font-mono text-[#DBD7D5] hover:text-[#FFD600] hover:border-[#FFD600]/30 transition-colors shadow-sm"
               >
                 <span>{name || category}</span>
                 {category && name && (
-                  <span className="text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded bg-white/5 text-[#F2C7A0]/80 border border-[#F2C7A0]/20">
+                  <span className="text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded bg-white/5 text-[#FFD600]/80 border border-[#FFD600]/20">
                     {category}
                   </span>
                 )}
@@ -556,19 +641,25 @@ export function TechStackChipsBlock({ block }: { block: any }) {
 
 // ─── 5. Executive Quote Card ──────────────────────────────────────────────────
 export function ExecutiveQuoteCardBlock({ block }: { block: any }) {
+  const data = block?.data || block || {}
+  const quote = block?.quote || data.quote || ''
+  const author = block?.author || data.author || ''
+  const role = block?.role || data.role || ''
+  const company = block?.company || data.company || ''
+
   return (
     <section className="py-16 bg-[#131313] text-white border-b border-white/[0.08] relative overflow-hidden">
       <div className="container max-w-4xl mx-auto px-4 sm:px-6">
         <div className="relative p-8 sm:p-12 rounded-3xl bg-[#181818] border border-white/10 overflow-hidden shadow-2xl">
-          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-[#F2C7A0] to-transparent opacity-80" />
-          <p className="font-display text-lg sm:text-xl md:text-2xl italic text-white leading-relaxed">
-            &ldquo;{block.quote}&rdquo;
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-[#FFD600] to-transparent opacity-80" />
+          <p className="font-syne text-lg sm:text-xl md:text-2xl italic text-white leading-relaxed">
+            &ldquo;{quote}&rdquo;
           </p>
           <div className="mt-6 flex items-center gap-3">
             <div>
-              <p className="font-bold text-sm text-white">{block.author}</p>
-              <p className="text-xs font-mono text-[#F2C7A0]">
-                {block.role} {block.company ? `— ${block.company}` : ''}
+              <p className="font-bold text-sm text-white">{author}</p>
+              <p className="text-xs font-mono text-[#FFD600]">
+                {role} {company ? `— ${company}` : ''}
               </p>
             </div>
           </div>
@@ -580,39 +671,45 @@ export function ExecutiveQuoteCardBlock({ block }: { block: any }) {
 
 // ─── 6. Engineering Pillars ───────────────────────────────────────────────────
 export function EngineeringPillarsBlock({ block }: { block: any }) {
-  const pillars = block.pillars || []
-  const variant = block.variant || 'blueprint'
+  const data = block?.data || block || {}
+  const pillars = Array.isArray(block?.pillars)
+    ? block.pillars
+    : Array.isArray(data.pillars)
+    ? data.pillars
+    : []
+  const title = block?.title || data.title
+  const description = block?.description || data.description
 
   return (
     <section className="py-20 sm:py-24 bg-[#0F0F0F] text-white border-b border-white/[0.08] relative overflow-hidden">
       <div className="container max-w-5xl mx-auto px-4 sm:px-6">
-        {block.title && (
+        {title && (
           <div className="mb-12">
-            <span className="font-mono text-xs uppercase tracking-widest text-[#F2C7A0] block mb-2 font-semibold">
+            <span className="font-mono text-xs uppercase tracking-widest text-[#FFD600] block mb-2 font-semibold">
               Engineering Disciplines
             </span>
-            <h2 className="font-display text-2xl sm:text-3xl font-bold tracking-tight text-white">
-              {block.title}
+            <h2 className="font-syne text-2xl sm:text-3xl font-bold tracking-tight text-white">
+              {title}
             </h2>
-            {block.description && (
+            {description && (
               <p className="mt-3 text-[#DBD7D5] max-w-2xl text-body-md sm:text-body-lg">
-                {block.description}
+                {description}
               </p>
             )}
           </div>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 cq-cols-3 gap-6">
           {pillars.map((pil: any, idx: number) => (
             <div
               key={idx}
-              className="p-7 rounded-3xl bg-[#161616] border border-white/10 hover:border-[#F2C7A0]/40 transition-all hover:-translate-y-1 shadow-lg relative group overflow-hidden"
+              className="p-7 rounded-3xl bg-[#161616] border border-white/10 hover:border-[#FFD600]/40 transition-all hover:-translate-y-1 shadow-lg relative group overflow-hidden"
             >
-              <div className="absolute -right-8 -top-8 w-24 h-24 bg-[#F2C7A0]/5 rounded-full blur-xl pointer-events-none group-hover:scale-150 transition-transform" />
-              <div className="w-11 h-11 rounded-2xl bg-white/[0.04] border border-white/10 flex items-center justify-center text-[#F2C7A0] mb-5 group-hover:bg-[#F2C7A0]/10 transition-colors">
+              <div className="absolute -right-8 -top-8 w-24 h-24 bg-[#FFD600]/5 rounded-full blur-xl pointer-events-none group-hover:scale-150 transition-transform" />
+              <div className="w-11 h-11 rounded-2xl bg-white/[0.04] border border-white/10 flex items-center justify-center text-[#FFD600] mb-5 group-hover:bg-[#FFD600]/10 transition-colors">
                 {idx === 0 ? <Cpu className="w-5 h-5" /> : idx === 1 ? <ShieldCheck className="w-5 h-5" /> : <Zap className="w-5 h-5" />}
               </div>
-              <h3 className="font-display text-lg font-bold text-white mb-2">{pil.title}</h3>
+              <h3 className="font-syne text-lg font-bold text-white mb-2">{pil.title}</h3>
               <p className="text-sm text-[#DBD7D5] leading-relaxed">{pil.description || pil.desc}</p>
             </div>
           ))}
@@ -624,41 +721,47 @@ export function EngineeringPillarsBlock({ block }: { block: any }) {
 
 // ─── 7. Workflow Phases ───────────────────────────────────────────────────────
 export function WorkflowPhasesBlock({ block }: { block: any }) {
-  const phases = block.phases || []
-  const variant = block.variant || 'timeline-connected'
+  const data = block?.data || block || {}
+  const phases = Array.isArray(block?.phases)
+    ? block.phases
+    : Array.isArray(data.phases)
+    ? data.phases
+    : []
+  const title = block?.title || data.title
+  const description = block?.description || data.description
 
   return (
     <section className="py-20 sm:py-24 bg-[#141414] text-white border-b border-white/[0.08] relative overflow-hidden">
       <div className="container max-w-5xl mx-auto px-4 sm:px-6">
-        {block.title && (
+        {title && (
           <div className="mb-14">
-            <span className="font-mono text-xs uppercase tracking-widest text-[#F2C7A0] block mb-2 font-semibold">
+            <span className="font-mono text-xs uppercase tracking-widest text-[#FFD600] block mb-2 font-semibold">
               Execution Methodology
             </span>
-            <h2 className="font-display text-2xl sm:text-3xl font-bold tracking-tight text-white">
-              {block.title}
+            <h2 className="font-syne text-2xl sm:text-3xl font-bold tracking-tight text-white">
+              {title}
             </h2>
-            {block.description && (
+            {description && (
               <p className="mt-3 text-[#DBD7D5] max-w-2xl text-body-md sm:text-body-lg">
-                {block.description}
+                {description}
               </p>
             )}
           </div>
         )}
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 relative">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 cq-cols-2 gap-5 relative">
           {phases.map((ph: any, idx: number) => (
             <div
               key={idx}
-              className="p-6 rounded-2xl bg-[#1A1A1A] border border-white/10 hover:border-[#F2C7A0]/50 transition-all hover:-translate-y-1 relative group shadow-lg"
+              className="p-6 rounded-2xl bg-[#1A1A1A] border border-white/10 hover:border-[#FFD600]/50 transition-all hover:-translate-y-1 relative group shadow-lg"
             >
               <div className="flex items-center justify-between mb-4">
-                <span className="font-mono text-2xl font-bold text-[#F2C7A0] block">
+                <span className="font-mono text-2xl font-bold text-[#FFD600] block">
                   {ph.step || `0${idx + 1}`}
                 </span>
-                <span className="w-2 h-2 rounded-full bg-[#F2C7A0]/40 group-hover:bg-[#F2C7A0] transition-colors" />
+                <span className="w-2 h-2 rounded-full bg-[#FFD600]/40 group-hover:bg-[#FFD600] transition-colors" />
               </div>
-              <h3 className="font-display text-base font-bold text-white mb-2">{ph.title}</h3>
+              <h3 className="font-syne text-base font-bold text-white mb-2">{ph.title}</h3>
               <p className="text-xs text-[#DBD7D5] leading-relaxed">{ph.description}</p>
             </div>
           ))}
@@ -670,29 +773,37 @@ export function WorkflowPhasesBlock({ block }: { block: any }) {
 
 // ─── 8. Comparison Matrix (NEW) ───────────────────────────────────────────────
 export function ComparisonMatrixBlock({ block }: { block: any }) {
-  const rows = (Array.isArray(block.rows) && block.rows.length > 0)
-    ? block.rows
-    : [
-        { feature: 'Kecepatan Muat LCP', segia: 'Sub-detik (< 1.0s)', traditional: '3.0 - 5.0 detik' },
-        { feature: 'Ownership & Source Code', segia: '100% Hak Milik Klien', traditional: 'Terkunci Platform / Vendor' },
-        { feature: 'Arsitektur Sistem', segia: 'Next.js 16 App Router + Prisma 8', traditional: 'Template Monolitik Konvensional' },
-      ]
+  const data = block?.data || block || {}
+  const rawRows =
+    Array.isArray(block?.rows) && block.rows.length > 0
+      ? block.rows
+      : Array.isArray(data.rows) && data.rows.length > 0
+      ? data.rows
+      : null
+  const rows =
+    rawRows || [
+      { feature: 'Kecepatan Muat LCP', segia: 'Sub-detik (< 1.0s)', traditional: '3.0 - 5.0 detik' },
+      { feature: 'Ownership & Source Code', segia: '100% Hak Milik Klien', traditional: 'Terkunci Platform / Vendor' },
+      { feature: 'Arsitektur Sistem', segia: 'Next.js 16 App Router + Prisma 8', traditional: 'Template Monolitik Konvensional' },
+    ]
+  const title = block?.title || data.title || 'Mengapa Memilih Layanan Kami untuk Proyek Anda'
+  const description = block?.description || data.description
 
   return (
     <section className="py-20 sm:py-24 bg-[#0E0E0E] text-white border-b border-white/[0.08] relative overflow-hidden">
-      <div className="pointer-events-none absolute left-1/2 -top-24 -translate-x-1/2 w-[700px] h-[350px] bg-[#F2C7A0]/[0.05] rounded-full blur-[140px]" />
+      <div className="pointer-events-none absolute left-1/2 -top-24 -translate-x-1/2 w-[700px] h-[350px] bg-[#FFD600]/[0.05] rounded-full blur-[140px]" />
 
       <div className="container max-w-5xl mx-auto px-4 sm:px-6 relative z-10">
         <div className="text-center max-w-2xl mx-auto mb-14">
-          <span className="font-mono text-xs uppercase tracking-widest text-[#F2C7A0] font-semibold block mb-2">
+          <span className="font-mono text-xs uppercase tracking-widest text-[#FFD600] font-semibold block mb-2">
             Perbandingan Nilai
           </span>
-          <h2 className="font-display text-2xl sm:text-3xl font-bold tracking-tight text-white">
-            {block.title || 'Mengapa Memilih Layanan Kami untuk Proyek Anda'}
+          <h2 className="font-syne text-2xl sm:text-3xl font-bold tracking-tight text-white">
+            {title}
           </h2>
-          {block.description && (
+          {description && (
             <p className="mt-3 text-body-md text-[#DBD7D5]">
-              {block.description}
+              {description}
             </p>
           )}
         </div>
@@ -703,8 +814,8 @@ export function ComparisonMatrixBlock({ block }: { block: any }) {
             <div className="p-4 md:col-span-4 text-neutral-400 font-semibold uppercase tracking-wider">
               Kebutuhan Bisnis Anda
             </div>
-            <div className="p-4 md:col-span-4 bg-[#F2C7A0]/10 text-[#F2C7A0] font-bold uppercase tracking-wider flex items-center gap-2 border-l border-r border-[#F2C7A0]/20">
-              <Check className="w-4 h-4 text-[#F2C7A0]" />
+            <div className="p-4 md:col-span-4 bg-[#FFD600]/10 text-[#FFD600] font-bold uppercase tracking-wider flex items-center gap-2 border-l border-r border-[#FFD600]/20">
+              <Check className="w-4 h-4 text-[#FFD600]" />
               <span>Standar Enterprise</span>
             </div>
             <div className="p-4 md:col-span-4 text-neutral-300 font-semibold uppercase tracking-wider">
@@ -720,11 +831,11 @@ export function ComparisonMatrixBlock({ block }: { block: any }) {
                 className="grid grid-cols-1 md:grid-cols-12 items-center hover:bg-white/[0.02] transition-colors"
               >
                 <div className="p-4 md:col-span-4 font-medium text-white flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#F2C7A0]/60" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#FFD600]/60" />
                   <span>{row.feature}</span>
                 </div>
-                <div className="p-4 md:col-span-4 bg-[#F2C7A0]/[0.04] border-l border-r border-[#F2C7A0]/15 font-mono text-xs text-[#F2C7A0] flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-[#F2C7A0] shrink-0" />
+                <div className="p-4 md:col-span-4 bg-[#FFD600]/[0.04] border-l border-r border-[#FFD600]/15 font-mono text-xs text-[#FFD600] flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-[#FFD600] shrink-0" />
                   <span>{row.segia}</span>
                 </div>
                 <div className="p-4 md:col-span-4 font-mono text-xs text-neutral-400 flex items-center gap-2">
@@ -742,38 +853,47 @@ export function ComparisonMatrixBlock({ block }: { block: any }) {
 
 // ─── 9. Architecture Blueprint (Refactored to Business Solutions Pillar) ──────
 export function ArchitectureBlueprintBlock({ block }: { block: any }) {
-  const layers = (Array.isArray(block.layers) && block.layers.length > 0)
-    ? block.layers
-    : [
-        { title: 'Performa Tinggi', desc: 'Arsitektur Next.js 16 dengan sub-second LCP', icon: 'zap' },
-        { title: 'Antarmuka Intuitif', desc: 'Desain responsif multi-perangkat berstandar Dogstudio', icon: 'sparkles' },
-        { title: 'Keamanan Data', desc: 'Validasi Zod & enkripsi PostgreSQL', icon: 'shield-check' },
-        { title: 'Garansi Sistem', desc: 'Dukungan pemeliharaan dan pemantauan SLA berkelanjutan', icon: 'check-circle' },
-      ]
+  const data = block?.data || block || {}
+  const rawLayers =
+    Array.isArray(block?.layers) && block.layers.length > 0
+      ? block.layers
+      : Array.isArray(data.layers) && data.layers.length > 0
+      ? data.layers
+      : null
+  const layers =
+    rawLayers || [
+      { title: 'Performa Tinggi', desc: 'Arsitektur Next.js 16 dengan sub-second LCP', icon: 'zap' },
+      { title: 'Antarmuka Intuitif', desc: 'Desain responsif multi-perangkat berstandar Dogstudio', icon: 'sparkles' },
+      { title: 'Keamanan Data', desc: 'Validasi Zod & enkripsi PostgreSQL', icon: 'shield-check' },
+      { title: 'Garansi Sistem', desc: 'Dukungan pemeliharaan dan pemantauan SLA berkelanjutan', icon: 'check-circle' },
+    ]
 
-  const architectureImage = block.image
-  const imageLabel = block.imageLabel || 'Karya Nyata Klien: Portal Edukasi & Informasi'
-  const imageBadge = block.imageBadge || 'Hasil Produksi Aktif'
-  const hudTitle = block.hudTitle || 'Kecepatan Akses Nyata'
-  const hudMetric = block.hudMetric || 'Waktu Muat < 1 Detik'
-  const hudDesc = block.hudDesc || 'Pengunjung langsung masuk tanpa menunggu loading'
+  const architectureImage = block?.image || data.image
+  const imageLabel = block?.imageLabel || data.imageLabel || 'Karya Nyata Klien: Portal Edukasi & Informasi'
+  const imageBadge = block?.imageBadge || data.imageBadge || 'Hasil Produksi Aktif'
+  const hudTitle = block?.hudTitle || data.hudTitle || 'Kecepatan Akses Nyata'
+  const hudMetric = block?.hudMetric || data.hudMetric || 'Waktu Muat < 1 Detik'
+  const hudDesc = block?.hudDesc || data.hudDesc || 'Pengunjung langsung masuk tanpa menunggu loading'
+  const badge = block?.badge || data.badge || 'Standar Keunggulan'
+  const title = block?.title || data.title || '4 Jaminan Kualitas untuk Pertumbuhan Bisnis Anda'
+  const description = block?.description || data.description
 
   return (
     <section className="py-20 sm:py-24 bg-[#0A0A0A] text-white border-b border-white/[0.08] relative overflow-hidden">
-      <div className="pointer-events-none absolute right-0 top-1/3 w-[600px] h-[600px] bg-[#C68D5D]/[0.05] rounded-full blur-[180px]" />
-      <div className="pointer-events-none absolute left-0 bottom-10 w-[450px] h-[450px] bg-[#F2C7A0]/[0.04] rounded-full blur-[160px]" />
+      <div className="pointer-events-none absolute right-0 top-1/3 w-[600px] h-[600px] bg-[#0F3A79]/[0.05] rounded-full blur-[180px]" />
+      <div className="pointer-events-none absolute left-0 bottom-10 w-[450px] h-[450px] bg-[#FFD600]/[0.04] rounded-full blur-[160px]" />
 
       <div className="container max-w-6xl mx-auto px-4 sm:px-6 relative z-10">
         <div className="mb-14">
-          <span className="font-mono text-xs uppercase tracking-widest text-[#F2C7A0] font-semibold block mb-2">
-            {block.badge || 'Standar Keunggulan'}
+          <span className="font-mono text-xs uppercase tracking-widest text-[#FFD600] font-semibold block mb-2">
+            {badge}
           </span>
-          <h2 className="font-display text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-white">
-            {block.title || '4 Jaminan Kualitas untuk Pertumbuhan Bisnis Anda'}
+          <h2 className="font-syne text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-white">
+            {title}
           </h2>
-          {block.description && (
+          {description && (
             <p className="mt-3 text-body-md text-[#DBD7D5] max-w-2xl">
-              {block.description}
+              {description}
             </p>
           )}
         </div>
@@ -781,7 +901,7 @@ export function ArchitectureBlueprintBlock({ block }: { block: any }) {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           {/* Left Column: Authentic Client Showcase Preview */}
           {architectureImage && (
-            <div className="lg:col-span-5 rounded-3xl border border-white/10 bg-[#121212] overflow-hidden shadow-2xl relative group hover:border-[#F2C7A0]/40 transition-colors">
+            <div className="lg:col-span-5 rounded-3xl border border-white/10 bg-[#121212] overflow-hidden shadow-2xl relative group hover:border-[#FFD600]/40 transition-colors">
               <div className="flex items-center justify-between px-5 py-3.5 bg-[#161616] border-b border-white/[0.08]">
                 <div className="flex items-center gap-2">
                   <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
@@ -789,7 +909,7 @@ export function ArchitectureBlueprintBlock({ block }: { block: any }) {
                     {imageLabel}
                   </span>
                 </div>
-                <span className="font-mono text-[11px] text-[#F2C7A0] px-2 py-0.5 rounded bg-[#F2C7A0]/10 border border-[#F2C7A0]/20 shrink-0">
+                <span className="font-mono text-[11px] text-[#FFD600] px-2 py-0.5 rounded bg-[#FFD600]/10 border border-[#FFD600]/20 shrink-0">
                   {imageBadge}
                 </span>
               </div>
@@ -825,25 +945,25 @@ export function ArchitectureBlueprintBlock({ block }: { block: any }) {
             {layers.map((layer: any, idx: number) => (
               <div
                 key={idx}
-                className="p-5 sm:p-6 rounded-2xl bg-[#141414] border border-white/10 hover:border-[#F2C7A0]/40 transition-all hover:bg-[#181818] shadow-xl group"
+                className="p-5 sm:p-6 rounded-2xl bg-[#141414] border border-white/10 hover:border-[#FFD600]/40 transition-all hover:bg-[#181818] shadow-xl group"
               >
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 mb-2.5">
                   <div className="flex items-center gap-3">
                     <span className="font-mono text-xs px-2.5 py-1 rounded-lg bg-white/5 border border-white/10 text-neutral-300 font-semibold">
                       {layer.level}
                     </span>
-                    <h3 className="font-display text-base sm:text-lg font-bold text-white group-hover:text-[#F2C7A0] transition-colors">
+                    <h3 className="font-syne text-base sm:text-lg font-bold text-white group-hover:text-[#FFD600] transition-colors">
                       {layer.title}
                     </h3>
                   </div>
-                  <span className="inline-flex items-center font-mono text-[11px] px-2.5 py-0.5 rounded-full bg-[#F2C7A0]/10 border border-[#F2C7A0]/30 text-[#F2C7A0] w-fit">
+                  <span className="inline-flex items-center font-mono text-[11px] px-2.5 py-0.5 rounded-full bg-[#FFD600]/10 border border-[#FFD600]/30 text-[#FFD600] w-fit">
                     {layer.badge}
                   </span>
                 </div>
                 <p className="text-sm text-[#DBD7D5] leading-relaxed mb-3">{layer.desc}</p>
                 <div className="flex items-center gap-2 pt-2.5 border-t border-white/5">
                   <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                  <span className="font-mono text-xs text-[#F2C7A0] truncate">{layer.tech}</span>
+                  <span className="font-mono text-xs text-[#FFD600] truncate">{layer.tech}</span>
                 </div>
               </div>
             ))}
@@ -856,31 +976,38 @@ export function ArchitectureBlueprintBlock({ block }: { block: any }) {
 
 // ─── 10. Client Stats & Impact (NEW) ──────────────────────────────────────────
 export function ClientStatsImpactBlock({ block }: { block: any }) {
+  const data = block?.data || block || {}
   const fallbackStats = [
     { value: '99.9%', label: 'Ketersediaan Sistem', detail: 'SLA uptime arsitektur cloud terdistribusi' },
     { value: '<100ms', label: 'Latensi Akses', detail: 'Optimasi global Edge Caching & WebAssembly' },
     { value: '10x', label: 'Efisiensi Operasional', detail: 'Automasi workflow cerdas terintegrasi' },
     { value: '100%', label: 'Keamanan Data', detail: 'Enkripsi standar end-to-end multi-tenant' },
   ]
-  const stats = (block.stats && Array.isArray(block.stats) && block.stats.length > 0)
-    ? block.stats
-    : fallbackStats
+  const stats =
+    Array.isArray(block?.stats) && block.stats.length > 0
+      ? block.stats
+      : Array.isArray(data.stats) && data.stats.length > 0
+      ? data.stats
+      : fallbackStats
+
+  const title = block?.title || data.title || 'Dampak Performa Nyata & Metrik Teruji'
+  const description = block?.description || data.description
 
   return (
     <section className="py-20 sm:py-24 bg-[#121212] text-white border-b border-white/[0.08] relative overflow-hidden">
-      <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[750px] h-[400px] bg-[#F2C7A0]/[0.06] rounded-full blur-[170px]" />
+      <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[750px] h-[400px] bg-[#FFD600]/[0.06] rounded-full blur-[170px]" />
 
       <div className="container max-w-5xl mx-auto px-4 sm:px-6 relative z-10">
         <div className="text-center max-w-2xl mx-auto mb-14">
-          <span className="font-mono text-xs uppercase tracking-widest text-[#F2C7A0] font-semibold block mb-2">
+          <span className="font-mono text-xs uppercase tracking-widest text-[#FFD600] font-semibold block mb-2">
             Proven Metrics
           </span>
-          <h2 className="font-display text-2xl sm:text-3xl font-bold tracking-tight text-white">
-            {block.title || 'Dampak Performa Nyata & Metrik Teruji'}
+          <h2 className="font-syne text-2xl sm:text-3xl font-bold tracking-tight text-white">
+            {title}
           </h2>
-          {block.description && (
+          {description && (
             <p className="mt-3 text-body-md text-[#DBD7D5]">
-              {block.description}
+              {description}
             </p>
           )}
         </div>
@@ -889,9 +1016,9 @@ export function ClientStatsImpactBlock({ block }: { block: any }) {
           {stats.map((s: any, idx: number) => (
             <div
               key={idx}
-              className="p-6 rounded-3xl bg-[#181818] border border-white/10 hover:border-[#F2C7A0]/40 transition-all hover:-translate-y-1 shadow-xl text-center group"
+              className="p-6 rounded-3xl bg-[#181818] border border-white/10 hover:border-[#FFD600]/40 transition-all hover:-translate-y-1 shadow-xl text-center group"
             >
-              <span className="font-display text-3xl sm:text-4xl font-extrabold text-[#F2C7A0] tracking-tight block group-hover:scale-105 transition-transform">
+              <span className="font-syne text-3xl sm:text-4xl font-extrabold text-[#FFD600] tracking-tight block group-hover:scale-105 transition-transform">
                 {s.value}
               </span>
               <span className="font-mono text-xs font-semibold uppercase tracking-wider text-white block mt-3 mb-1">
@@ -908,29 +1035,36 @@ export function ClientStatsImpactBlock({ block }: { block: any }) {
 
 // ─── 11. Deliverables Checklist (NEW) ─────────────────────────────────────────
 export function DeliverablesChecklistBlock({ block }: { block: any }) {
+  const data = block?.data || block || {}
   const fallbackItems = [
     { title: 'Arsitektur & Kode Sumber Lengkap', desc: 'Hak milik penuh atas repository, dokumentasi teknis, dan clean-code standar enterprise.' },
     { title: 'Deployment Pipeline Otomatis (CI/CD)', desc: 'Konfigurasi zero-downtime deployment, automated testing, dan backup database berkala.' },
     { title: 'Optimasi SEO & Performa Core Web Vitals', desc: 'Skor Lighthouse 90+, struktur Schema JSON-LD, sitemap dinamis, dan index engine.' },
     { title: 'Dukungan & Garansi Pemeliharaan', desc: 'Pemantauan sistem 24/7, perbaikan bug prioritas, dan transfer pengetahuan tim.' },
   ]
-  const items = (block.items && Array.isArray(block.items) && block.items.length > 0)
-    ? block.items
-    : fallbackItems
+  const items =
+    Array.isArray(block?.items) && block.items.length > 0
+      ? block.items
+      : Array.isArray(data.items) && data.items.length > 0
+      ? data.items
+      : fallbackItems
+
+  const title = block?.title || data.title || 'Ruang Lingkup Serah Terima & Garansi Organisasi'
+  const description = block?.description || data.description
 
   return (
     <section className="py-20 sm:py-24 bg-[#0F0F0F] text-white border-b border-white/[0.08] relative overflow-hidden">
       <div className="container max-w-5xl mx-auto px-4 sm:px-6 relative z-10">
         <div className="mb-14">
-          <span className="font-mono text-xs uppercase tracking-widest text-[#F2C7A0] font-semibold block mb-2">
+          <span className="font-mono text-xs uppercase tracking-widest text-[#FFD600] font-semibold block mb-2">
             Scope & Handover Guarantee
           </span>
-          <h2 className="font-display text-2xl sm:text-3xl font-bold tracking-tight text-white">
-            {block.title || 'Ruang Lingkup Serah Terima & Garansi Organisasi'}
+          <h2 className="font-syne text-2xl sm:text-3xl font-bold tracking-tight text-white">
+            {title}
           </h2>
-          {block.description && (
+          {description && (
             <p className="mt-3 text-body-md text-[#DBD7D5] max-w-2xl">
-              {block.description}
+              {description}
             </p>
           )}
         </div>
@@ -939,13 +1073,13 @@ export function DeliverablesChecklistBlock({ block }: { block: any }) {
           {items.map((it: any, idx: number) => (
             <div
               key={idx}
-              className="p-6 rounded-3xl bg-[#161616] border border-white/10 hover:border-[#F2C7A0]/40 transition-all shadow-xl flex gap-4"
+              className="p-6 rounded-3xl bg-[#161616] border border-white/10 hover:border-[#FFD600]/40 transition-all shadow-xl flex gap-4"
             >
-              <div className="w-10 h-10 rounded-xl bg-[#F2C7A0]/10 border border-[#F2C7A0]/30 flex items-center justify-center text-[#F2C7A0] shrink-0">
+              <div className="w-10 h-10 rounded-xl bg-[#FFD600]/10 border border-[#FFD600]/30 flex items-center justify-center text-[#FFD600] shrink-0">
                 <CheckCircle2 className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="font-display text-base font-bold text-white mb-1.5">{it.title}</h3>
+                <h3 className="font-syne text-base font-bold text-white mb-1.5">{it.title}</h3>
                 <p className="text-xs sm:text-sm text-[#DBD7D5] leading-relaxed">{it.desc}</p>
               </div>
             </div>
@@ -958,29 +1092,36 @@ export function DeliverablesChecklistBlock({ block }: { block: any }) {
 
 // ─── 12. Interactive Tech Matrix (Quality Standards) ──────────────────────────
 export function InteractiveTechMatrixBlock({ block }: { block: any }) {
+  const data = block?.data || block || {}
   const fallbackCategories = [
     { name: 'Core Framework & Frontend', badge: 'Next.js 16 + React 19', items: ['TypeScript', 'Tailwind CSS', 'Turbopack', 'GSAP / Motion'] },
     { name: 'Backend & Data Engine', badge: 'PostgreSQL + Prisma 8', items: ['Edge Runtime', 'Redis Caching', 'Vector Embeddings', 'GraphQL / REST'] },
     { name: 'Keamanan & Kepatuhan', badge: 'Enterprise Ready', items: ['SSRF Protection', 'RBAC Multi-Level', 'Audit Trail', 'SSL Strict TLS 1.3'] },
     { name: 'Infrastruktur & Cloud', badge: 'Zero Downtime', items: ['Docker Container', 'Coolify Edge Proxy', 'Cloudflare CDN', 'Prometheus Metrics'] },
   ]
-  const categories = (block.categories && Array.isArray(block.categories) && block.categories.length > 0)
-    ? block.categories
-    : fallbackCategories
+  const categories =
+    Array.isArray(block?.categories) && block.categories.length > 0
+      ? block.categories
+      : Array.isArray(data.categories) && data.categories.length > 0
+      ? data.categories
+      : fallbackCategories
+
+  const title = block?.title || data.title || 'Standar Kualitas & Keandalan yang Anda Dapatkan'
+  const description = block?.description || data.description
 
   return (
     <section className="py-20 sm:py-24 bg-[#111111] text-white border-b border-white/[0.08] relative overflow-hidden">
       <div className="container max-w-5xl mx-auto px-4 sm:px-6 relative z-10">
         <div className="mb-14">
-          <span className="font-mono text-xs uppercase tracking-widest text-[#F2C7A0] font-semibold block mb-2">
+          <span className="font-mono text-xs uppercase tracking-widest text-[#FFD600] font-semibold block mb-2">
             Standar Kualitas
           </span>
-          <h2 className="font-display text-2xl sm:text-3xl font-bold tracking-tight text-white">
-            {block.title || 'Standar Kualitas & Keandalan yang Anda Dapatkan'}
+          <h2 className="font-syne text-2xl sm:text-3xl font-bold tracking-tight text-white">
+            {title}
           </h2>
-          {block.description && (
+          {description && (
             <p className="mt-3 text-body-md text-[#DBD7D5] max-w-2xl">
-              {block.description}
+              {description}
             </p>
           )}
         </div>
@@ -989,11 +1130,11 @@ export function InteractiveTechMatrixBlock({ block }: { block: any }) {
           {categories.map((cat: any, idx: number) => (
             <div
               key={idx}
-              className="p-6 sm:p-7 rounded-3xl bg-[#181818] border border-white/10 hover:border-[#F2C7A0]/30 transition-all shadow-xl"
+              className="p-6 sm:p-7 rounded-3xl bg-[#181818] border border-white/10 hover:border-[#FFD600]/30 transition-all shadow-xl"
             >
               <div className="flex items-center justify-between mb-4">
-                <h3 className="font-display text-lg font-bold text-white">{cat.name}</h3>
-                <span className="font-mono text-xs px-2.5 py-0.5 rounded-full bg-white/5 border border-white/10 text-[#F2C7A0]">
+                <h3 className="font-syne text-lg font-bold text-white">{cat.name}</h3>
+                <span className="font-mono text-xs px-2.5 py-0.5 rounded-full bg-white/5 border border-white/10 text-[#FFD600]">
                   {cat.badge}
                 </span>
               </div>
@@ -1004,7 +1145,7 @@ export function InteractiveTechMatrixBlock({ block }: { block: any }) {
                   return (
                     <span
                       key={tIdx}
-                      className="px-3 py-1.5 rounded-xl bg-white/[0.03] border border-white/10 text-xs font-mono text-[#DBD7D5] hover:text-[#F2C7A0] hover:border-[#F2C7A0]/30 transition-colors"
+                      className="px-3 py-1.5 rounded-xl bg-white/[0.03] border border-white/10 text-xs font-mono text-[#DBD7D5] hover:text-[#FFD600] hover:border-[#FFD600]/30 transition-colors"
                     >
                       {label}
                     </span>
@@ -1027,6 +1168,7 @@ export function PortfolioProofGridBlock({
   block: any
   contextPortfolios?: any[]
 }) {
+  const data = block?.data || block || {}
   const fallbackPortfolios = [
     {
       slug: 'sistem-informasi-enterprise',
@@ -1044,29 +1186,36 @@ export function PortfolioProofGridBlock({
     },
   ]
   const portfolios =
-    (block.portfolios && block.portfolios.length > 0)
+    Array.isArray(block?.portfolios) && block.portfolios.length > 0
       ? block.portfolios
-      : (contextPortfolios && contextPortfolios.length > 0)
+      : Array.isArray(data.portfolios) && data.portfolios.length > 0
+      ? data.portfolios
+      : Array.isArray(contextPortfolios) && contextPortfolios.length > 0
       ? contextPortfolios
-      : (block.items && block.items.length > 0)
+      : Array.isArray(block?.items) && block.items.length > 0
       ? block.items
+      : Array.isArray(data.items) && data.items.length > 0
+      ? data.items
       : fallbackPortfolios
+
+  const title = block?.title || data.title || 'Studi Kasus Terkait'
+  const description = block?.description || data.description
 
   return (
     <section className="py-20 sm:py-24 bg-[#131313] text-white border-b border-white/[0.08]">
       <div className="container max-w-5xl mx-auto px-4 sm:px-6">
         <div className="mb-12 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
           <div>
-            <h2 className="font-display text-2xl sm:text-3xl font-bold tracking-tight text-white">
-              {block.title || 'Studi Kasus Terkait'}
+            <h2 className="font-syne text-2xl sm:text-3xl font-bold tracking-tight text-white">
+              {title}
             </h2>
-            {block.description && (
-              <p className="mt-2 text-[#DBD7D5] text-body-md max-w-xl">{block.description}</p>
+            {description && (
+              <p className="mt-2 text-[#DBD7D5] text-body-md max-w-xl">{description}</p>
             )}
           </div>
           <Link
             href="/portofolio"
-            className="inline-flex items-center gap-1.5 text-xs font-mono text-[#F2C7A0] hover:underline"
+            className="inline-flex items-center gap-1.5 text-xs font-mono text-[#FFD600] hover:underline"
           >
             <span>Semua Portofolio</span>
             <ChevronRight className="w-3.5 h-3.5" />
@@ -1078,7 +1227,7 @@ export function PortfolioProofGridBlock({
             <Link
               key={idx}
               href={`/portofolio/${p.slug}`}
-              className="group block rounded-2xl overflow-hidden bg-[#181818] border border-white/10 hover:border-[#F2C7A0]/50 transition-all shadow-lg"
+              className="group block rounded-2xl overflow-hidden bg-[#181818] border border-white/10 hover:border-[#FFD600]/50 transition-all shadow-lg"
             >
               {p.heroImage ? (
                 <div className="relative aspect-[16/10] overflow-hidden">
@@ -1101,9 +1250,9 @@ export function PortfolioProofGridBlock({
                   <span>{p.category || 'Case Study'}</span>
                   {p.client && <span>{p.client}</span>}
                 </div>
-                <h3 className="font-display text-lg font-bold text-white group-hover:text-[#F2C7A0] transition-colors flex items-center justify-between">
+                <h3 className="font-syne text-lg font-bold text-white group-hover:text-[#FFD600] transition-colors flex items-center justify-between">
                   <span>{p.title}</span>
-                  <ArrowUpRight className="w-4 h-4 text-neutral-400 group-hover:text-[#F2C7A0] transition-colors" />
+                  <ArrowUpRight className="w-4 h-4 text-neutral-400 group-hover:text-[#FFD600] transition-colors" />
                 </h3>
               </div>
             </Link>
@@ -1116,22 +1265,30 @@ export function PortfolioProofGridBlock({
 
 // ─── 14. FAQ Accordion ─────────────────────────────────────────────────────────
 export function FaqAccordionBlock({ block }: { block: any }) {
+  const data = block?.data || block || {}
   const fallbackFaqs = [
     { question: 'Berapa lama estimasi pengerjaan proyek?', answer: 'Timeline pengerjaan berkisar antara 2 hingga 8 minggu tergantung pada kompleksitas modul, integrasi sistem, dan cakupan fitur.' },
     { question: 'Apakah kode sumber diserahkan kepada klien?', answer: 'Ya, seluruh kode sumber, aset, dan dokumentasi teknis menjadi hak milik penuh klien dengan standar clean code enterprise.' },
     { question: 'Bagaimana dukungan dan pemeliharaan pasca peluncuran?', answer: 'Kami menyediakan garansi teknis pasca peluncuran, monitoring performa 24/7, serta opsi pemeliharaan berkala.' },
   ]
-  const faqs = (block.faqs && block.faqs.length > 0)
-    ? block.faqs
-    : (block.items && block.items.length > 0)
-    ? block.items
-    : fallbackFaqs
+  const faqs =
+    Array.isArray(block?.faqs) && block.faqs.length > 0
+      ? block.faqs
+      : Array.isArray(data.faqs) && data.faqs.length > 0
+      ? data.faqs
+      : Array.isArray(block?.items) && block.items.length > 0
+      ? block.items
+      : Array.isArray(data.items) && data.items.length > 0
+      ? data.items
+      : fallbackFaqs
+
+  const title = block?.title || data.title || 'Pertanyaan Umum'
 
   return (
     <section className="py-20 sm:py-24 bg-[#0E0E0E] text-white border-b border-white/[0.08]">
       <div className="container max-w-4xl mx-auto px-4 sm:px-6">
-        <h2 className="font-display text-2xl sm:text-3xl font-bold tracking-tight text-white mb-8">
-          {block.title || 'Pertanyaan Umum'}
+        <h2 className="font-syne text-2xl sm:text-3xl font-bold tracking-tight text-white mb-8">
+          {title}
         </h2>
         <div className="space-y-4">
           {faqs.map((faq: any, idx: number) => (
@@ -1139,9 +1296,9 @@ export function FaqAccordionBlock({ block }: { block: any }) {
               key={idx}
               className="group p-5 rounded-2xl bg-[#161616] border border-white/10 transition-colors"
             >
-              <summary className="cursor-pointer font-display font-medium text-base sm:text-lg text-white flex items-center justify-between list-none">
+              <summary className="cursor-pointer font-syne font-medium text-base sm:text-lg text-white flex items-center justify-between list-none">
                 <span>{faq.question}</span>
-                <span className="text-[#F2C7A0] transition-transform group-open:rotate-45 font-mono text-xl">
+                <span className="text-[#FFD600] transition-transform group-open:rotate-45 font-mono text-xl">
                   +
                 </span>
               </summary>
@@ -1174,11 +1331,11 @@ export function StudioCTA({
 
   return (
     <section className="section-py relative overflow-hidden bg-gradient-to-b from-[#2B2B2B] via-[#242424] to-[#2B2B2B] text-white border-t border-[#2B2B2B]" aria-label="Ajakan Bertindak">
-      <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-[550px] w-[900px] rounded-full bg-gradient-to-r from-[#F2C7A0]/12 via-[#B29279]/08 to-[#F2C7A0]/12 blur-[150px]" />
+      <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-[550px] w-[900px] rounded-full bg-gradient-to-r from-[#FFD600]/12 via-[#B29279]/08 to-[#FFD600]/12 blur-[150px]" />
       <div className="container relative z-10 max-w-5xl mx-auto px-4 sm:px-6">
         <div className="rounded-[32px] sm:rounded-[40px] border border-[#2B2B2B] bg-[#191919] p-8 sm:p-14 lg:p-16 text-center shadow-[0_20px_60px_rgba(0,0,0,0.6)] backdrop-blur-2xl relative overflow-hidden">
-          <div className="absolute top-0 left-1/4 right-1/4 h-[1px] bg-gradient-to-r from-transparent via-[#F2C7A0]/40 to-transparent" />
-          <h2 className="font-display text-display-md sm:text-display-lg lg:text-display-xl font-bold tracking-tight text-white max-w-3xl mx-auto leading-tight">
+          <div className="absolute top-0 left-1/4 right-1/4 h-[1px] bg-gradient-to-r from-transparent via-[#FFD600]/40 to-transparent" />
+          <h2 className="font-syne text-display-md sm:text-display-lg lg:text-display-xl font-bold tracking-tight text-white max-w-3xl mx-auto leading-tight">
             {headline}
           </h2>
           <p className="mt-6 text-body-lg sm:text-body-xl text-[#DBD7D5] max-w-2xl mx-auto leading-relaxed font-normal">
@@ -1189,14 +1346,14 @@ export function StudioCTA({
               href={whatsappUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 rounded-full bg-[#F2C7A0] hover:bg-[#D3AD8D] active:bg-[#B29279] px-8 py-4 font-sans text-sm sm:text-base font-bold text-[#000000] shadow-[0_4px_25px_rgba(242,199,160,0.35)] transition-all duration-300 hover:scale-[1.03] active:scale-95"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 rounded-full bg-[#FFD600] hover:bg-[#FFE855] active:bg-[#B29279] px-8 py-4 font-sans text-sm sm:text-base font-bold text-[#000000] shadow-[0_4px_25px_rgba(255, 214, 0,0.35)] transition-all duration-300 hover:scale-[1.03] active:scale-95"
             >
               <MessageSquare className="w-4 h-4 fill-[#000000] text-[#000000]" />
               <span>Konsultasi Proyek (WhatsApp)</span>
             </a>
             <Link
               href={secondaryHref}
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-full border border-[#2B2B2B] bg-transparent px-8 py-4 font-sans text-sm sm:text-base font-semibold text-white backdrop-blur-md transition-all duration-300 hover:border-[#B29279] hover:text-[#F2C7A0] active:scale-95"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-full border border-[#2B2B2B] bg-transparent px-8 py-4 font-sans text-sm sm:text-base font-semibold text-white backdrop-blur-md transition-all duration-300 hover:border-[#B29279] hover:text-[#FFD600] active:scale-95"
             >
               <span>{secondaryLabel}</span>
               <ArrowRight className="w-4 h-4" />
@@ -1204,21 +1361,21 @@ export function StudioCTA({
           </div>
           <div className="mt-8 text-xs font-mono text-[#999898]">
             Atau kirimkan brief sistem via email ke{' '}
-            <a href={`mailto:${siteConfig.email}`} className="text-[#F2C7A0] hover:underline font-semibold">
+            <a href={`mailto:${siteConfig.email}`} className="text-[#FFD600] hover:underline font-semibold">
               {siteConfig.email}
             </a>
           </div>
           <div className="mt-10 pt-8 border-t border-[#2B2B2B] grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs font-mono text-[#DBD7D5] max-w-2xl mx-auto">
             <div className="flex items-center justify-center gap-2">
-              <Clock className="w-4 h-4 text-[#F2C7A0] shrink-0" />
+              <Clock className="w-4 h-4 text-[#FFD600] shrink-0" />
               <span>Respon Cepat &lt; 24 Jam</span>
             </div>
             <div className="flex items-center justify-center gap-2">
-              <FileCode className="w-4 h-4 text-[#F2C7A0] shrink-0" />
+              <FileCode className="w-4 h-4 text-[#FFD600] shrink-0" />
               <span>Arsitektur &amp; Estimasi Gratis</span>
             </div>
             <div className="flex items-center justify-center gap-2">
-              <ShieldCheck className="w-4 h-4 text-[#F2C7A0] shrink-0" />
+              <ShieldCheck className="w-4 h-4 text-[#FFD600] shrink-0" />
               <span>Perjanjian NDA Resmi</span>
             </div>
           </div>
@@ -1229,19 +1386,21 @@ export function StudioCTA({
 }
 
 export function StudioCtaBlock({ block }: { block: any }) {
+  const data = block?.data || block || {}
   return (
     <StudioCTA
-      headline={block.title || 'Mulai Proyek Digital Anda'}
-      subheadline={block.description || 'Konsultasikan arsitektur dan kebutuhan spesifik sistem Anda.'}
-      secondaryLabel={block.buttonText || 'Konsultasi Sekarang'}
-      secondaryHref={block.buttonUrl || `https://wa.me/${siteConfig.whatsapp || '6281234567890'}`}
+      headline={block?.headline || data.headline || block?.title || data.title || 'Mulai Proyek Digital Anda'}
+      subheadline={block?.subheadline || data.subheadline || block?.description || data.description || 'Konsultasikan arsitektur dan kebutuhan spesifik sistem Anda.'}
+      secondaryLabel={block?.buttonText || data.buttonText || block?.ctaText || data.ctaText || 'Konsultasi Sekarang'}
+      secondaryHref={block?.buttonUrl || data.buttonUrl || block?.ctaUrl || data.ctaUrl || `https://wa.me/${siteConfig.whatsapp || '6281234567890'}`}
     />
   )
 }
 
 // ─── 16. Editorial Paragraph / Heading Blocks ──────────────────────────────────
 export function EditorialParagraphBlock({ block }: { block: any }) {
-  const text = block.text || block.content || ''
+  const data = block?.data || block || {}
+  const text = block?.text || data.text || block?.content || data.content || ''
   return (
     <section className="py-8 bg-[#0D0D0D] text-white">
       <div className="container max-w-3xl mx-auto px-4 sm:px-6 text-base sm:text-lg leading-relaxed text-[#DBD7D5]">
@@ -1252,17 +1411,18 @@ export function EditorialParagraphBlock({ block }: { block: any }) {
 }
 
 export function EditorialHeadingBlock({ block }: { block: any }) {
-  const isH2 = block.type === 'heading2'
-  const text = block.text || block.content || block.title || ''
+  const data = block?.data || block || {}
+  const isH2 = (block?.type || data.type) === 'heading2'
+  const text = block?.text || data.text || block?.content || data.content || block?.title || data.title || ''
   return (
     <section className="pt-10 pb-4 bg-[#0D0D0D] text-white">
       <div className="container max-w-3xl mx-auto px-4 sm:px-6">
         {isH2 ? (
-          <h2 className="font-display text-2xl sm:text-3xl font-bold tracking-tight text-white">
+          <h2 className="font-syne text-2xl sm:text-3xl font-bold tracking-tight text-white">
             {text}
           </h2>
         ) : (
-          <h3 className="font-display text-xl sm:text-2xl font-bold tracking-tight text-white">
+          <h3 className="font-syne text-xl sm:text-2xl font-bold tracking-tight text-white">
             {text}
           </h3>
         )}
@@ -1279,6 +1439,7 @@ export function DepartmentServiceListBlock({
   block: any
   contextServices?: any[]
 }) {
+  const data = block?.data || block || {}
   const resolveImage = (img: any): string | null => {
     if (!img) return null
     if (typeof img === 'string') {
@@ -1312,9 +1473,11 @@ export function DepartmentServiceListBlock({
   ]
 
   const items =
-    (block.services && block.services.length > 0)
+    Array.isArray(block?.services) && block.services.length > 0
       ? block.services
-      : (contextServices && contextServices.length > 0)
+      : Array.isArray(data.services) && data.services.length > 0
+      ? data.services
+      : Array.isArray(contextServices) && contextServices.length > 0
       ? contextServices.map((cs) => {
           return {
             slug: cs.slug,
@@ -1329,22 +1492,25 @@ export function DepartmentServiceListBlock({
         })
       : fallbackServices
 
+  const title = block?.title || data.title || 'Layanan Pembuatan Website & Aplikasi yang Kami Sediakan'
+  const description = block?.description || data.description
+
   return (
     <section className="py-20 sm:py-28 bg-[#0D0D0D] text-white border-b border-white/[0.08] relative overflow-hidden">
-      <div className="pointer-events-none absolute right-0 top-1/4 w-[500px] h-[500px] bg-[#F2C7A0]/[0.04] rounded-full blur-[160px]" />
-      <div className="pointer-events-none absolute left-0 bottom-10 w-[450px] h-[450px] bg-[#C68D5D]/[0.03] blur-[150px]" />
+      <div className="pointer-events-none absolute right-0 top-1/4 w-[500px] h-[500px] bg-[#FFD600]/[0.04] rounded-full blur-[160px]" />
+      <div className="pointer-events-none absolute left-0 bottom-10 w-[450px] h-[450px] bg-[#0F3A79]/[0.03] blur-[150px]" />
 
       <div className="container max-w-6xl mx-auto px-4 sm:px-6 relative z-10">
         <div className="mb-14 max-w-3xl">
-          <span className="font-mono text-xs uppercase tracking-widest text-[#F2C7A0] font-semibold block mb-2">
+          <span className="font-mono text-xs uppercase tracking-widest text-[#FFD600] font-semibold block mb-2">
             Pilihan Solusi Digital
           </span>
-          <h2 className="font-display text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-white leading-tight">
-            {block.title || 'Layanan Pembuatan Website & Aplikasi yang Kami Sediakan'}
+          <h2 className="font-syne text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-white leading-tight">
+            {title}
           </h2>
-          {block.description && (
+          {description && (
             <p className="mt-3 text-body-md text-[#DBD7D5] leading-relaxed">
-              {block.description}
+              {description}
             </p>
           )}
         </div>
@@ -1356,7 +1522,7 @@ export function DepartmentServiceListBlock({
               <Link
                 key={idx}
                 href={`/layanan/${item.slug}`}
-                className="group rounded-3xl bg-[#141414] border border-white/10 hover:border-[#F2C7A0]/50 transition-all duration-300 hover:-translate-y-1 overflow-hidden shadow-xl flex flex-col justify-between"
+                className="group rounded-3xl bg-[#141414] border border-white/10 hover:border-[#FFD600]/50 transition-all duration-300 hover:-translate-y-1 overflow-hidden shadow-xl flex flex-col justify-between"
               >
                 <div>
                   {/* Visual Thumbnail Image */}
@@ -1371,14 +1537,14 @@ export function DepartmentServiceListBlock({
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-[#141414] via-transparent to-transparent opacity-60" />
                       <div className="absolute top-4 left-4">
-                        <span className="font-mono text-[11px] px-3 py-1 rounded-full bg-black/75 backdrop-blur-md border border-white/15 text-[#F2C7A0] font-medium shadow-md">
+                        <span className="font-mono text-[11px] px-3 py-1 rounded-full bg-black/75 backdrop-blur-md border border-white/15 text-[#FFD600] font-medium shadow-md">
                           {item.badge}
                         </span>
                       </div>
                     </div>
                   ) : (
                     <div className="p-6 pb-0 flex items-center justify-between">
-                      <span className="font-mono text-[11px] px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[#F2C7A0] font-medium shadow-md">
+                      <span className="font-mono text-[11px] px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[#FFD600] font-medium shadow-md">
                         {item.badge}
                       </span>
                     </div>
@@ -1387,10 +1553,10 @@ export function DepartmentServiceListBlock({
                   {/* Content Details */}
                   <div className="p-6 sm:p-7">
                     <div className="flex items-start justify-between gap-4 mb-3">
-                      <h3 className="font-display text-xl font-bold text-white group-hover:text-[#F2C7A0] transition-colors leading-snug">
+                      <h3 className="font-syne text-xl font-bold text-white group-hover:text-[#FFD600] transition-colors leading-snug">
                         {item.name}
                       </h3>
-                      <div className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-neutral-400 group-hover:bg-[#F2C7A0] group-hover:text-[#191919] group-hover:border-[#F2C7A0] transition-all shrink-0">
+                      <div className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-neutral-400 group-hover:bg-[#FFD600] group-hover:text-[#191919] group-hover:border-[#FFD600] transition-all shrink-0">
                         <ArrowUpRight className="w-4 h-4" />
                       </div>
                     </div>
@@ -1416,7 +1582,7 @@ export function DepartmentServiceListBlock({
                       )
                     })}
                   </div>
-                  <span className="text-xs font-mono text-[#F2C7A0] group-hover:translate-x-1 transition-transform inline-flex items-center gap-1 pt-3">
+                  <span className="text-xs font-mono text-[#FFD600] group-hover:translate-x-1 transition-transform inline-flex items-center gap-1 pt-3">
                     Detail Layanan &rarr;
                   </span>
                 </div>
@@ -1431,6 +1597,7 @@ export function DepartmentServiceListBlock({
 
 // ─── 18. Visual Showcase Gallery (NEW) ─────────────────────────────────────────
 export function VisualShowcaseGalleryBlock({ block }: { block: any }) {
+  const data = block?.data || block || {}
   const fallbackItems = [
     {
       image: '',
@@ -1454,25 +1621,32 @@ export function VisualShowcaseGalleryBlock({ block }: { block: any }) {
       desc: 'Keandalan arsitektur multi-zone dengan orkestrasi otomatis dan perlindungan keamanan berlapis.',
     },
   ]
-  const items = (block.items && Array.isArray(block.items) && block.items.length > 0)
-    ? block.items
-    : fallbackItems
+  const items =
+    Array.isArray(block?.items) && block.items.length > 0
+      ? block.items
+      : Array.isArray(data.items) && data.items.length > 0
+      ? data.items
+      : fallbackItems
+
+  const badge = block?.badge || data.badge || 'Bukti Portofolio Nyata'
+  const title = block?.title || data.title || 'Bukti Hasil Pengerjaan Nyata untuk Klien Kami'
+  const description = block?.description || data.description
 
   return (
     <section className="py-20 sm:py-28 bg-[#090909] text-white border-b border-white/[0.08] relative overflow-hidden">
-      <div className="pointer-events-none absolute left-1/2 -top-20 -translate-x-1/2 w-[800px] h-[400px] bg-[#F2C7A0]/[0.04] blur-[160px] rounded-full" />
+      <div className="pointer-events-none absolute left-1/2 -top-20 -translate-x-1/2 w-[800px] h-[400px] bg-[#FFD600]/[0.04] blur-[160px] rounded-full" />
 
       <div className="container max-w-6xl mx-auto px-4 sm:px-6 relative z-10">
         <div className="text-center max-w-2xl mx-auto mb-14">
-          <span className="font-mono text-xs uppercase tracking-widest text-[#F2C7A0] font-semibold block mb-2">
-            {block.badge || 'Bukti Portofolio Nyata'}
+          <span className="font-mono text-xs uppercase tracking-widest text-[#FFD600] font-semibold block mb-2">
+            {badge}
           </span>
-          <h2 className="font-display text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-white">
-            {block.title || 'Bukti Hasil Pengerjaan Nyata untuk Klien Kami'}
+          <h2 className="font-syne text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-white">
+            {title}
           </h2>
-          {block.description && (
+          {description && (
             <p className="mt-3 text-body-md text-[#DBD7D5]">
-              {block.description}
+              {description}
             </p>
           )}
         </div>
@@ -1481,7 +1655,7 @@ export function VisualShowcaseGalleryBlock({ block }: { block: any }) {
           {items.map((item: any, idx: number) => (
             <div
               key={idx}
-              className="rounded-3xl bg-[#141414] border border-white/10 hover:border-[#F2C7A0]/40 transition-all duration-300 hover:-translate-y-1.5 overflow-hidden shadow-2xl group flex flex-col justify-between"
+              className="rounded-3xl bg-[#141414] border border-white/10 hover:border-[#FFD600]/40 transition-all duration-300 hover:-translate-y-1.5 overflow-hidden shadow-2xl group flex flex-col justify-between"
             >
               <div>
                 <div className="relative aspect-[16/10] w-full overflow-hidden bg-black">
@@ -1510,11 +1684,11 @@ export function VisualShowcaseGalleryBlock({ block }: { block: any }) {
 
                 <div className="p-6">
                   {item.category && (
-                    <span className="font-mono text-xs uppercase tracking-wider text-[#F2C7A0] font-semibold block mb-2">
+                    <span className="font-mono text-xs uppercase tracking-wider text-[#FFD600] font-semibold block mb-2">
                       {item.category}
                     </span>
                   )}
-                  <h3 className="font-display text-lg font-bold text-white mb-2 group-hover:text-[#F2C7A0] transition-colors">
+                  <h3 className="font-syne text-lg font-bold text-white mb-2 group-hover:text-[#FFD600] transition-colors">
                     {item.title}
                   </h3>
                   {item.desc && (
@@ -1531,7 +1705,7 @@ export function VisualShowcaseGalleryBlock({ block }: { block: any }) {
                     <Eye className="w-3.5 h-3.5 text-neutral-500" />
                     <span>Karya Produksi Aktif</span>
                   </span>
-                  <span className="text-[#F2C7A0]">Terverifikasi</span>
+                  <span className="text-[#FFD600]">Terverifikasi</span>
                 </div>
               </div>
             </div>
@@ -1544,15 +1718,18 @@ export function VisualShowcaseGalleryBlock({ block }: { block: any }) {
 
 // ─── 20. Media Showcase / Editorial Image Block ─────────────────────────────
 export function MediaShowcaseBlock({ block }: { block: any }) {
-  const image = block.image || block.imageUrl || block.heroImage || ''
-  const alt = block.alt || block.altText || block.title || 'Tampilan Visual Sistem'
-  const caption = block.caption || block.description
-  const rawFrameStyle = block.frameStyle || 'immersive'
+  const data = block?.data || block || {}
+  const image = block?.image || data.image || block?.imageUrl || data.imageUrl || block?.heroImage || data.heroImage || ''
+  const alt = block?.alt || data.alt || block?.altText || data.altText || block?.title || data.title || 'Tampilan Visual Sistem'
+  const caption = block?.caption || data.caption || block?.description || data.description
+  const rawFrameStyle = block?.frameStyle || data.frameStyle || 'immersive'
   const frameStyle = rawFrameStyle === 'browser' ? 'immersive' : rawFrameStyle // Backward compatible mapping
-  const aspectRatio = block.aspectRatio || '16/10' // '16/9' | '16/10' | '21/9' | '4/3' | '1/1'
-  const imageLabel = block.imageLabel || block.windowTitle || block.title || 'Dokumentasi Visual Antarmuka'
-  const badge = block.badge || 'Showcase Visual'
-  const floatingBadges = block.floatingBadges || []
+  const aspectRatio = block?.aspectRatio || data.aspectRatio || '16/10' // '16/9' | '16/10' | '21/9' | '4/3' | '1/1'
+  const imageLabel = block?.imageLabel || data.imageLabel || block?.windowTitle || data.windowTitle || block?.title || data.title || 'Dokumentasi Visual Antarmuka'
+  const badge = block?.badge || data.badge || 'Showcase Visual'
+  const title = block?.title || data.title
+  const subtitle = block?.subtitle || data.subtitle
+  const floatingBadges = Array.isArray(block?.floatingBadges) ? block.floatingBadges : Array.isArray(data.floatingBadges) ? data.floatingBadges : []
 
   const getAspectClass = () => {
     switch (aspectRatio) {
@@ -1572,24 +1749,24 @@ export function MediaShowcaseBlock({ block }: { block: any }) {
 
   return (
     <section className="py-16 sm:py-24 bg-[#0A0A0A] text-white border-b border-white/[0.08] relative overflow-hidden">
-      <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[350px] bg-[#F2C7A0]/[0.03] blur-[150px] rounded-full" />
+      <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[350px] bg-[#FFD600]/[0.03] blur-[150px] rounded-full" />
 
       <div className="container max-w-6xl mx-auto px-4 sm:px-6 relative z-10">
-        {(block.title || block.badge) && (
+        {(title || badge) && (
           <div className="text-center max-w-3xl mx-auto mb-10">
             {badge && (
-              <span className="font-mono text-xs uppercase tracking-widest text-[#F2C7A0] font-semibold block mb-2">
+              <span className="font-mono text-xs uppercase tracking-widest text-[#FFD600] font-semibold block mb-2">
                 {badge}
               </span>
             )}
-            {block.title && (
-              <h2 className="font-display text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-white">
-                {block.title}
+            {title && (
+              <h2 className="font-syne text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-white">
+                {title}
               </h2>
             )}
-            {block.subtitle && (
+            {subtitle && (
               <p className="mt-3 text-body-md text-[#DBD7D5]">
-                {block.subtitle}
+                {subtitle}
               </p>
             )}
           </div>
@@ -1598,9 +1775,9 @@ export function MediaShowcaseBlock({ block }: { block: any }) {
         {/* Clean, Minimalist Media Frame Container */}
         <div className={`mx-auto max-w-5xl ${
           frameStyle === 'immersive'
-            ? 'rounded-3xl border border-white/10 bg-[#121212] overflow-hidden shadow-[0_25px_70px_rgba(0,0,0,0.85)] group hover:border-[#F2C7A0]/30 transition-all'
+            ? 'rounded-3xl border border-white/10 bg-[#121212] overflow-hidden shadow-[0_25px_70px_rgba(0,0,0,0.85)] group hover:border-[#FFD600]/30 transition-all'
             : frameStyle === 'floating-card'
-            ? 'rounded-3xl border border-white/10 bg-[#141414] overflow-hidden shadow-2xl p-2.5 sm:p-3 hover:border-[#F2C7A0]/30 transition-all'
+            ? 'rounded-3xl border border-white/10 bg-[#141414] overflow-hidden shadow-2xl p-2.5 sm:p-3 hover:border-[#FFD600]/30 transition-all'
             : 'overflow-hidden rounded-2xl shadow-xl'
         }`}>
           {/* Minimalist Context Bar for Immersive style */}
@@ -1612,7 +1789,7 @@ export function MediaShowcaseBlock({ block }: { block: any }) {
                   {imageLabel}
                 </span>
               </div>
-              <span className="font-mono text-[11px] text-[#F2C7A0] px-2.5 py-0.5 rounded-full bg-[#F2C7A0]/10 border border-[#F2C7A0]/20 hidden sm:inline-block">
+              <span className="font-mono text-[11px] text-[#FFD600] px-2.5 py-0.5 rounded-full bg-[#FFD600]/10 border border-[#FFD600]/20 hidden sm:inline-block">
                 {badge}
               </span>
             </div>
@@ -1630,10 +1807,10 @@ export function MediaShowcaseBlock({ block }: { block: any }) {
               />
             ) : (
               <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-b from-[#1a1a1a] to-[#111111] border border-dashed border-white/20 p-6 text-center">
-                <div className="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-[#F2C7A0] mb-3">
+                <div className="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-[#FFD600] mb-3">
                   <Eye className="w-8 h-8 opacity-70" />
                 </div>
-                <p className="font-display text-sm font-semibold text-white mb-1">
+                <p className="font-syne text-sm font-semibold text-white mb-1">
                   Placeholder Showcase Media
                 </p>
                 <p className="text-xs text-[#DBD7D5] max-w-sm">

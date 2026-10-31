@@ -76,7 +76,7 @@ export function extractWordPressSeo(
   title: string,
   excerpt: string,
   coverUrl: string | null = null,
-  siteUrl: string = 'https://www.segiatech.com',
+  siteUrl: string = 'https://www.unimasi.com',
   options: { imageAlt?: string; fallbackTags?: string[] } = {}
 ): ExtractedWordPressSeo {
   const yoast = post.yoast_head_json || {}
@@ -91,7 +91,7 @@ export function extractWordPressSeo(
     getMetaString(meta._yoast_wpseo_title) ||
     getMetaString(meta.rank_math_title) ||
     getMetaString(meta._aioseo_title) ||
-    `${title} — SegiaTech`
+    `${title} — UNIMASI`
 
   // 2. Description
   const metaDescription =

@@ -80,7 +80,7 @@ type DimensionTab = 'queries' | 'pages' | 'dates' | 'devices' | 'countries'
 
 export function StudioGscDashboard() {
   const { role } = useAuth()
-  const [siteUrl, setSiteUrl] = useState('https://www.segiatech.com')
+  const [siteUrl, setSiteUrl] = useState('https://www.unimasi.com')
   const [overview, setOverview] = useState<GscData | null>(null)
   const [queries, setQueries] = useState<QueryItem[]>([])
   const [pages, setPages] = useState<PageItem[]>([])
@@ -205,8 +205,8 @@ export function StudioGscDashboard() {
   // Format Device Icon & Name
   const renderDeviceIcon = (dev: string) => {
     const d = dev.toUpperCase()
-    if (d.includes('MOBILE')) return <Smartphone className="w-4 h-4 text-[#F2C7A0]" />
-    if (d.includes('TABLET')) return <Tablet className="w-4 h-4 text-[#D3AD8D]" />
+    if (d.includes('MOBILE')) return <Smartphone className="w-4 h-4 text-[#FFD600]" />
+    if (d.includes('TABLET')) return <Tablet className="w-4 h-4 text-[#FFE855]" />
     return <Laptop className="w-4 h-4 text-emerald-400" />
   }
 
@@ -223,7 +223,7 @@ export function StudioGscDashboard() {
   if (loading) {
     return (
       <div className="p-12 text-center bg-[#191919] border border-white/10 rounded-2xl space-y-4">
-        <div className="w-9 h-9 border-2 border-[#F2C7A0] border-t-transparent rounded-full animate-spin mx-auto" />
+        <div className="w-9 h-9 border-2 border-[#FFD600] border-t-transparent rounded-full animate-spin mx-auto" />
         <div className="space-y-1">
           <p className="text-sm font-medium text-white">Menghubungkan ke Google Search Console API...</p>
           <p className="text-xs text-[#999898]">Mengambil data analitik resmi dari Google Cloud</p>
@@ -250,14 +250,14 @@ export function StudioGscDashboard() {
 
         <div className="p-4 bg-[#242424] border border-white/10 rounded-xl space-y-3 text-xs">
           <p className="font-semibold text-white flex items-center gap-2">
-            <Globe className="w-4 h-4 text-[#F2C7A0]" />
+            <Globe className="w-4 h-4 text-[#FFD600]" />
             Cara Menghubungkan Google Search Console:
           </p>
           <p className="text-[#999898] leading-relaxed">
             {connection.howToConnect ||
               'Tambahkan Service Account Google Cloud (GSC_CLIENT_EMAIL dan GSC_PRIVATE_KEY) ke file web/.env.local.'}
           </p>
-          <div className="font-mono text-[11px] text-[#F2C7A0] bg-[#191919] p-3 rounded-lg border border-white/10 space-y-1">
+          <div className="font-mono text-[11px] text-[#FFD600] bg-[#191919] p-3 rounded-lg border border-white/10 space-y-1">
             <div>GSC_CLIENT_EMAIL=seo-engine@your-project.iam.gserviceaccount.com</div>
             <div>GSC_PRIVATE_KEY=&quot;-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n&quot;</div>
           </div>
@@ -290,7 +290,7 @@ export function StudioGscDashboard() {
           <div className="flex items-center gap-2.5">
             <div className="w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.5)]" />
             <h2 className="text-base font-bold text-white tracking-tight">Google Search Console</h2>
-            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-mono font-medium bg-[#F2C7A0]/10 text-[#F2C7A0] border border-[#F2C7A0]/20">
+            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-mono font-medium bg-[#FFD600]/10 text-[#FFD600] border border-[#FFD600]/20">
               Live Verified
             </span>
           </div>
@@ -304,7 +304,7 @@ export function StudioGscDashboard() {
             type="button"
             disabled={syncing || !canSync}
             onClick={handleSync}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#F2C7A0] hover:bg-[#D3AD8D] active:bg-[#B29279] text-[#191919] font-bold text-xs shadow-md transition-all hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#FFD600] hover:bg-[#FFE855] active:bg-[#B29279] text-[#191919] font-bold text-xs shadow-md transition-all hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${syncing ? 'animate-spin' : ''}`} />
             <span>{syncing ? 'Menyinkronkan...' : 'Sinkronkan Data GSC'}</span>
@@ -369,7 +369,7 @@ export function StudioGscDashboard() {
             <span className="text-[11px] font-mono font-semibold uppercase tracking-wider text-[#999898]">
               Total Impresi
             </span>
-            <span className="px-2 py-0.5 rounded text-[10px] font-mono font-medium bg-[#F2C7A0]/10 text-[#F2C7A0] border border-[#F2C7A0]/20">
+            <span className="px-2 py-0.5 rounded text-[10px] font-mono font-medium bg-[#FFD600]/10 text-[#FFD600] border border-[#FFD600]/20">
               Pencarian
             </span>
           </div>
@@ -395,7 +395,7 @@ export function StudioGscDashboard() {
               {(overview?.averageCtr ?? 0) >= 3 ? 'Di Atas Rata-rata' : 'Stabil'}
             </span>
           </div>
-          <div className="text-3xl font-bold text-[#F2C7A0] font-mono tracking-tight">
+          <div className="text-3xl font-bold text-[#FFD600] font-mono tracking-tight">
             {overview?.averageCtr ?? 0}%
           </div>
           <p className="text-xs text-[#999898] leading-tight">Click-through rate (rasio klik tayang)</p>
@@ -412,7 +412,7 @@ export function StudioGscDashboard() {
                 (overview?.averagePosition ?? 0) <= 10
                   ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
                   : (overview?.averagePosition ?? 0) <= 20
-                  ? 'bg-[#F2C7A0]/10 text-[#F2C7A0] border border-[#F2C7A0]/20'
+                  ? 'bg-[#FFD600]/10 text-[#FFD600] border border-[#FFD600]/20'
                   : 'bg-white/5 text-[#DBD7D5] border border-white/10'
               }`}
             >
@@ -423,7 +423,7 @@ export function StudioGscDashboard() {
                 : `Halaman ${Math.ceil((overview?.averagePosition ?? 0) / 10)}`}
             </span>
           </div>
-          <div className="text-3xl font-bold text-[#D3AD8D] font-mono tracking-tight">
+          <div className="text-3xl font-bold text-[#FFE855] font-mono tracking-tight">
             #{overview?.averagePosition ?? 0}
           </div>
           <p className="text-xs text-[#999898] leading-tight">Peringkat rata-rata kata kunci di Google</p>
@@ -440,7 +440,7 @@ export function StudioGscDashboard() {
               onClick={() => { setActiveTab('queries'); setSearchTerm(''); }}
               className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all ${
                 activeTab === 'queries'
-                  ? 'bg-[#F2C7A0] text-[#191919] shadow-sm'
+                  ? 'bg-[#FFD600] text-[#191919] shadow-sm'
                   : 'text-[#999898] hover:text-white hover:bg-white/5'
               }`}
             >
@@ -453,7 +453,7 @@ export function StudioGscDashboard() {
               onClick={() => { setActiveTab('pages'); setSearchTerm(''); }}
               className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all ${
                 activeTab === 'pages'
-                  ? 'bg-[#F2C7A0] text-[#191919] shadow-sm'
+                  ? 'bg-[#FFD600] text-[#191919] shadow-sm'
                   : 'text-[#999898] hover:text-white hover:bg-white/5'
               }`}
             >
@@ -466,7 +466,7 @@ export function StudioGscDashboard() {
               onClick={() => { setActiveTab('dates'); setSearchTerm(''); }}
               className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all ${
                 activeTab === 'dates'
-                  ? 'bg-[#F2C7A0] text-[#191919] shadow-sm'
+                  ? 'bg-[#FFD600] text-[#191919] shadow-sm'
                   : 'text-[#999898] hover:text-white hover:bg-white/5'
               }`}
             >
@@ -479,7 +479,7 @@ export function StudioGscDashboard() {
               onClick={() => { setActiveTab('devices'); setSearchTerm(''); }}
               className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all ${
                 activeTab === 'devices'
-                  ? 'bg-[#F2C7A0] text-[#191919] shadow-sm'
+                  ? 'bg-[#FFD600] text-[#191919] shadow-sm'
                   : 'text-[#999898] hover:text-white hover:bg-white/5'
               }`}
             >
@@ -492,7 +492,7 @@ export function StudioGscDashboard() {
               onClick={() => { setActiveTab('countries'); setSearchTerm(''); }}
               className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all ${
                 activeTab === 'countries'
-                  ? 'bg-[#F2C7A0] text-[#191919] shadow-sm'
+                  ? 'bg-[#FFD600] text-[#191919] shadow-sm'
                   : 'text-[#999898] hover:text-white hover:bg-white/5'
               }`}
             >
@@ -516,7 +516,7 @@ export function StudioGscDashboard() {
                 }
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-8 pr-3 py-1.5 rounded-xl bg-black/40 border border-white/15 text-xs text-white placeholder-[#999898] focus:outline-none focus:border-[#F2C7A0] transition-colors w-full sm:w-56"
+                className="pl-8 pr-3 py-1.5 rounded-xl bg-black/40 border border-white/15 text-xs text-white placeholder-[#999898] focus:outline-none focus:border-[#FFD600] transition-colors w-full sm:w-56"
               />
             </div>
           )}
@@ -550,7 +550,7 @@ export function StudioGscDashboard() {
                       <td className="py-3.5 px-5 font-medium text-white">
                         <div className="flex items-center gap-3">
                           <span className="text-xs text-[#999898] font-mono w-6">#{idx + 1}</span>
-                          <span className="font-semibold text-white group-hover:text-[#F2C7A0] transition-colors">
+                          <span className="font-semibold text-white group-hover:text-[#FFD600] transition-colors">
                             {q.query}
                           </span>
                           <button
@@ -573,7 +573,7 @@ export function StudioGscDashboard() {
                       <td className="py-3.5 px-4 text-right font-mono text-[#DBD7D5]">
                         {q.impressions.toLocaleString('id-ID')}
                       </td>
-                      <td className="py-3.5 px-4 text-right font-mono text-[#F2C7A0] font-medium">
+                      <td className="py-3.5 px-4 text-right font-mono text-[#FFD600] font-medium">
                         {q.ctr}%
                       </td>
                       <td className="py-3.5 px-5 text-right">
@@ -582,7 +582,7 @@ export function StudioGscDashboard() {
                             q.position <= 3
                               ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30'
                               : q.position <= 10
-                              ? 'bg-[#F2C7A0]/15 text-[#F2C7A0] border border-[#F2C7A0]/30'
+                              ? 'bg-[#FFD600]/15 text-[#FFD600] border border-[#FFD600]/30'
                               : q.position <= 20
                               ? 'bg-amber-500/15 text-amber-300 border border-amber-500/30'
                               : 'bg-white/5 text-[#999898] border border-white/10'
@@ -627,7 +627,7 @@ export function StudioGscDashboard() {
                       <td className="py-3.5 px-5 font-medium text-white max-w-md">
                         <div className="flex items-center gap-3">
                           <span className="text-xs text-[#999898] font-mono w-6">#{idx + 1}</span>
-                          <span className="font-mono text-xs text-[#DBD7D5] group-hover:text-[#F2C7A0] transition-colors truncate">
+                          <span className="font-mono text-xs text-[#DBD7D5] group-hover:text-[#FFD600] transition-colors truncate">
                             {cleanPageUrl(p.page)}
                           </span>
                           <a
@@ -647,7 +647,7 @@ export function StudioGscDashboard() {
                       <td className="py-3.5 px-4 text-right font-mono text-[#DBD7D5]">
                         {p.impressions.toLocaleString('id-ID')}
                       </td>
-                      <td className="py-3.5 px-4 text-right font-mono text-[#F2C7A0] font-medium">
+                      <td className="py-3.5 px-4 text-right font-mono text-[#FFD600] font-medium">
                         {p.ctr}%
                       </td>
                       <td className="py-3.5 px-5 text-right">
@@ -656,7 +656,7 @@ export function StudioGscDashboard() {
                             p.position <= 3
                               ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30'
                               : p.position <= 10
-                              ? 'bg-[#F2C7A0]/15 text-[#F2C7A0] border border-[#F2C7A0]/30'
+                              ? 'bg-[#FFD600]/15 text-[#FFD600] border border-[#FFD600]/30'
                               : p.position <= 20
                               ? 'bg-amber-500/15 text-amber-300 border border-amber-500/30'
                               : 'bg-white/5 text-[#999898] border border-white/10'
@@ -701,7 +701,7 @@ export function StudioGscDashboard() {
                       <tr key={idx} className="hover:bg-white/[0.03] transition-colors">
                         <td className="py-3.5 px-5 font-mono text-xs text-white">
                           <div className="flex items-center gap-2">
-                            <Calendar className="w-3.5 h-3.5 text-[#F2C7A0]" />
+                            <Calendar className="w-3.5 h-3.5 text-[#FFD600]" />
                             <span>{formatDateId(t.date)}</span>
                             <span className="text-[10px] text-[#999898]">({t.date})</span>
                           </div>
@@ -715,12 +715,12 @@ export function StudioGscDashboard() {
                         <td className="py-3.5 px-4">
                           <div className="w-full bg-white/5 rounded-full h-2 overflow-hidden max-w-[200px]">
                             <div
-                              className="bg-[#F2C7A0] h-2 rounded-full transition-all"
+                              className="bg-[#FFD600] h-2 rounded-full transition-all"
                               style={{ width: `${percent}%` }}
                             />
                           </div>
                         </td>
-                        <td className="py-3.5 px-5 text-right font-mono text-xs text-[#D3AD8D]">
+                        <td className="py-3.5 px-5 text-right font-mono text-xs text-[#FFE855]">
                           #{t.position}
                         </td>
                       </tr>
@@ -752,7 +752,7 @@ export function StudioGscDashboard() {
                         {renderDeviceIcon(dev.device)}
                         <span>{dev.device}</span>
                       </div>
-                      <span className="px-2 py-0.5 rounded text-[11px] font-mono font-semibold bg-[#F2C7A0]/10 text-[#F2C7A0]">
+                      <span className="px-2 py-0.5 rounded text-[11px] font-mono font-semibold bg-[#FFD600]/10 text-[#FFD600]">
                         Posisi #{dev.position}
                       </span>
                     </div>
@@ -777,11 +777,11 @@ export function StudioGscDashboard() {
                     <div className="pt-2">
                       <div className="flex justify-between text-xs text-[#999898] mb-1 font-mono">
                         <span>CTR Perangkat</span>
-                        <span className="text-[#F2C7A0] font-semibold">{dev.ctr}%</span>
+                        <span className="text-[#FFD600] font-semibold">{dev.ctr}%</span>
                       </div>
                       <div className="w-full bg-white/5 rounded-full h-2 overflow-hidden">
                         <div
-                          className="bg-[#F2C7A0] h-2 rounded-full"
+                          className="bg-[#FFD600] h-2 rounded-full"
                           style={{ width: `${Math.min(100, dev.ctr * 20)}%` }}
                         />
                       </div>
@@ -818,7 +818,7 @@ export function StudioGscDashboard() {
                     <tr key={idx} className="hover:bg-white/[0.03] transition-colors">
                       <td className="py-3.5 px-5 font-mono text-xs text-white">
                         <div className="flex items-center gap-2">
-                          <Globe className="w-3.5 h-3.5 text-[#F2C7A0]" />
+                          <Globe className="w-3.5 h-3.5 text-[#FFD600]" />
                           <span className="font-bold uppercase">{c.country}</span>
                           {c.country.toLowerCase() === 'idn' && (
                             <span className="text-xs text-neutral-400 font-sans">(Indonesia)</span>
@@ -831,10 +831,10 @@ export function StudioGscDashboard() {
                       <td className="py-3.5 px-4 text-right font-mono text-[#DBD7D5]">
                         {c.impressions.toLocaleString('id-ID')}
                       </td>
-                      <td className="py-3.5 px-4 text-right font-mono text-[#F2C7A0] font-medium">
+                      <td className="py-3.5 px-4 text-right font-mono text-[#FFD600] font-medium">
                         {c.ctr}%
                       </td>
-                      <td className="py-3.5 px-5 text-right font-mono text-xs text-[#D3AD8D]">
+                      <td className="py-3.5 px-5 text-right font-mono text-xs text-[#FFE855]">
                         #{c.position}
                       </td>
                     </tr>

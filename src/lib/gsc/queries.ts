@@ -53,7 +53,7 @@ export interface GscCountryItem {
  * Fetch Search Console performance metrics with SQLite caching and real Google API.
  * Zero-mock compliant: returns honest disconnected state when credentials are not configured or API fails.
  */
-export async function getGscOverview(siteUrl = 'https://www.segiatech.com'): Promise<Integration<GscOverview>> {
+export async function getGscOverview(siteUrl = 'https://www.unimasi.com'): Promise<Integration<GscOverview>> {
   const serviceEmail = process.env.GSC_CLIENT_EMAIL
   const privateKey = process.env.GSC_PRIVATE_KEY
 
@@ -154,7 +154,7 @@ export async function getGscOverview(siteUrl = 'https://www.segiatech.com'): Pro
  * Fetch top queries for keyword suggestions and SEO analysis.
  * Zero-mock compliant: queries live Google Search Console API or returns honest error/disconnected state.
  */
-export async function getGscTopQueries(limit = 20, siteUrl = 'https://www.segiatech.com'): Promise<Integration<GscQueryItem[]>> {
+export async function getGscTopQueries(limit = 20, siteUrl = 'https://www.unimasi.com'): Promise<Integration<GscQueryItem[]>> {
   const serviceEmail = process.env.GSC_CLIENT_EMAIL
   const privateKey = process.env.GSC_PRIVATE_KEY
 
@@ -196,7 +196,7 @@ export async function getGscTopQueries(limit = 20, siteUrl = 'https://www.segiat
 /**
  * Fetch top landing pages from Google Search Console API.
  */
-export async function getGscPages(limit = 50, siteUrl = 'https://www.segiatech.com'): Promise<Integration<GscPageItem[]>> {
+export async function getGscPages(limit = 50, siteUrl = 'https://www.unimasi.com'): Promise<Integration<GscPageItem[]>> {
   const serviceEmail = process.env.GSC_CLIENT_EMAIL
   const privateKey = process.env.GSC_PRIVATE_KEY
 
@@ -238,7 +238,7 @@ export async function getGscPages(limit = 50, siteUrl = 'https://www.segiatech.c
 /**
  * Fetch device breakdown (DESKTOP, MOBILE, TABLET) from Google Search Console API.
  */
-export async function getGscDevices(siteUrl = 'https://www.segiatech.com'): Promise<Integration<GscDeviceItem[]>> {
+export async function getGscDevices(siteUrl = 'https://www.unimasi.com'): Promise<Integration<GscDeviceItem[]>> {
   const serviceEmail = process.env.GSC_CLIENT_EMAIL
   const privateKey = process.env.GSC_PRIVATE_KEY
 
@@ -279,7 +279,7 @@ export async function getGscDevices(siteUrl = 'https://www.segiatech.com'): Prom
 /**
  * Fetch country breakdown from Google Search Console API.
  */
-export async function getGscCountries(limit = 50, siteUrl = 'https://www.segiatech.com'): Promise<Integration<GscCountryItem[]>> {
+export async function getGscCountries(limit = 50, siteUrl = 'https://www.unimasi.com'): Promise<Integration<GscCountryItem[]>> {
   const serviceEmail = process.env.GSC_CLIENT_EMAIL
   const privateKey = process.env.GSC_PRIVATE_KEY
 

@@ -1,3 +1,5 @@
+@import '../tokens/tokens.css';
+
 /* ==========================================================================
    UNIMASI — Design tokens
    Navy · Vibrant yellow · White
@@ -14,8 +16,8 @@
   --navy-500: #2a437a;
   --navy-400: #3b5fa3;
 
-  --yellow: #ffde00;
-  --yellow-500: #f5cf00;
+  --yellow: #ffd600;
+  --yellow-500: #ffd600;
   --yellow-600: #e0bc00;
   --yellow-soft: #ffe855;
 
@@ -46,7 +48,8 @@
   --text-ink-muted: rgba(7, 14, 30, 0.65);
 
   /* --- Typography ------------------------------------------------------- */
-  --font-display: var(--font-syne), 'Syne', system-ui, -apple-system, sans-serif;
+  /* Official brand heading font (AGENTS.md): Montserrat. */
+  --font-display: var(--font-montserrat), 'Montserrat', system-ui, -apple-system, sans-serif;
   --font-body: var(--font-plus-jakarta), 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
   --font-mono: var(--font-dm-mono), 'DM Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
 
@@ -98,7 +101,7 @@
   --shadow-sm: 0 2px 10px rgba(4, 9, 26, 0.18);
   --shadow-md: 0 18px 44px -22px rgba(4, 9, 26, 0.65);
   --shadow-lg: 0 44px 90px -40px rgba(4, 9, 26, 0.85);
-  --shadow-yellow: 0 24px 60px -28px rgba(255, 212, 0, 0.5);
+  --shadow-yellow: 0 24px 60px -28px rgba(255, 214, 0, 0.5);
 
   /* --- Motion ----------------------------------------------------------- */
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
@@ -123,7 +126,7 @@
   --color-brand-primary: var(--yellow);
   --color-brand-primary-hover: var(--yellow-soft);
   --color-brand-primary-active: var(--yellow-600);
-  --color-brand-primary-subtle: rgba(255, 222, 0, 0.12);
+  --color-brand-primary-subtle: rgba(255, 214, 0, 0.12);
 
   /* Surface Semantic */
   --color-surface-base: var(--bg);
@@ -141,7 +144,7 @@
   /* Border Semantic */
   --color-border: var(--line);
   --color-border-subtle: rgba(255, 255, 255, 0.04);
-  --color-border-strong: rgba(255, 222, 0, 0.25);
+  --color-border-strong: rgba(255, 214, 0, 0.25);
 
   /* Status */
   --color-success: var(--success);
@@ -155,10 +158,10 @@
   --studio-topbar-bg: rgba(6, 10, 23, 0.85);
   --studio-accent: var(--yellow);
   --studio-accent-hover: var(--yellow-soft);
-  --studio-border: rgba(255, 222, 0, 0.10);
+  --studio-border: rgba(255, 214, 0, 0.10);
   --studio-text: var(--text);
   --studio-text-muted: var(--text-muted);
-  --studio-nav-active: rgba(255, 222, 0, 0.10);
+  --studio-nav-active: rgba(255, 214, 0, 0.10);
   --studio-nav-active-indicator: var(--yellow);
 
   /* Radius Scale */

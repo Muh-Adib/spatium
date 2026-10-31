@@ -28,7 +28,7 @@ export interface AiPromptLog {
   meta?: Record<string, any>
 }
 
-const STORAGE_LOGS_KEY = 'segiatech_ai_prompt_logs'
+const STORAGE_LOGS_KEY = 'unimasi_ai_prompt_logs'
 const MAX_LOGS = 200
 
 export function getAiPromptLogs(): AiPromptLog[] {
@@ -80,7 +80,7 @@ export function exportLogsAsJson(logs?: AiPromptLog[]): void {
   const a = document.createElement('a')
   const dateStr = new Date().toISOString().slice(0, 10)
   a.href = url
-  a.download = `segiatech-ai-prompt-audit-log-${dateStr}.json`
+  a.download = `unimasi-ai-prompt-audit-log-${dateStr}.json`
   document.body.appendChild(a)
   a.click()
   document.body.removeChild(a)
@@ -118,7 +118,7 @@ export function exportLogsAsCsv(logs?: AiPromptLog[]): void {
   const a = document.createElement('a')
   const dateStr = new Date().toISOString().slice(0, 10)
   a.href = url
-  a.download = `segiatech-ai-prompt-audit-log-${dateStr}.csv`
+  a.download = `unimasi-ai-prompt-audit-log-${dateStr}.csv`
   document.body.appendChild(a)
   a.click()
   document.body.removeChild(a)

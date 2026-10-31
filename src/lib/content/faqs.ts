@@ -12,7 +12,7 @@ export interface FAQItem {
 export const SEED_FAQS: Record<'homepage' | 'services' | 'portfolio', FAQItem[]> = {
   homepage: [
     {
-      question: 'Berapa lama proses pengerjaan website atau aplikasi di SegiaTech?',
+      question: 'Berapa lama proses pengerjaan website atau aplikasi di UNIMASI?',
       answer:
         'Waktu pengerjaan bervariasi tergantung kompleksitas sistem. Untuk landing page atau website profil korporat umumnya memakan waktu 2–3 minggu. Sedangkan untuk aplikasi web kustom, sistem PMB, atau CRM enterprise biasanya membutuhkan waktu 6–10 minggu dengan metode pengembangan agile bertahap.',
     },
@@ -22,12 +22,12 @@ export const SEED_FAQS: Record<'homepage' | 'services' | 'portfolio', FAQItem[]>
         'Ya, seluruh website dan aplikasi dibangun dengan prinsip SEO-first sejak awal arsitektur. Kami mengimplementasikan Next.js server-side rendering, struktur heading semantik, schema JSON-LD terverifikasi, canonical tags otomatis, performa Core Web Vitals tinggi, dan peta situs XML otomatis.',
     },
     {
-      question: 'Apakah SegiaTech menyediakan layanan pemeliharaan (maintenance) berkala?',
+      question: 'Apakah UNIMASI menyediakan layanan pemeliharaan (maintenance) berkala?',
       answer:
         'Tentu. Setiap proyek kami sertakan garansi pasca-peluncuran, pembaruan keamanan, backup data otomatis, serta opsi SLA maintenance bulanan untuk penambahan fitur dan pemantauan performa server 24/7.',
     },
     {
-      question: 'Teknologi apa saja yang menjadi keunggulan utama SegiaTech?',
+      question: 'Teknologi apa saja yang menjadi keunggulan utama UNIMASI?',
       answer:
         'Kami berspesialisasi dalam ekosistem modern: Next.js (App Router), React, TypeScript, Tailwind CSS, PostgreSQL via Prisma ORM, GSAP untuk animasi interaktif, serta infrastruktur cloud berbasis Docker.',
     },
@@ -44,7 +44,7 @@ export const SEED_FAQS: Record<'homepage' | 'services' | 'portfolio', FAQItem[]>
         'Untuk website profil korporat standar atau landing page konversi tinggi, proses pengerjaan memakan waktu antara 2 hingga 3 minggu. Sementara untuk portal institusi kompleks atau platform akademik skala kampus, waktu pengerjaan berkisar 4 hingga 8 minggu mencakup fase discovery arsitektur, riset pengguna, wireframing Figma, pengkodean arsitektur Next.js 16 SSR, hingga uji beban (load testing) dan optimasi Technical SEO menyeluruh.',
     },
     {
-      question: 'Apakah SegiaTech menyediakan layanan pemeliharaan (maintenance) server & software?',
+      question: 'Apakah UNIMASI menyediakan layanan pemeliharaan (maintenance) server & software?',
       answer:
         'Ya, seluruh solusi rekayasa software dan website kami didukung opsi Service Level Agreement (SLA) pemeliharaan berkala. Cakupan layanan mencakup pemantauan uptime 99.9%, backup otomatis database terenkripsi, pembaruan patch keamanan sistem operasi & dependensi, perbaikan bug teknis, audit Core Web Vitals berkala, serta konsultasi optimasi query data.',
     },
@@ -54,14 +54,14 @@ export const SEED_FAQS: Record<'homepage' | 'services' | 'portfolio', FAQItem[]>
         'Kami menyediakan solusi turnkey end-to-end: mulai dari kalkulasi throw ratio lensa dan lumens proyektor, pemilihan spesifikasi mini-PC GPU industri, pengadaan dan kalibrasi sensor LiDAR/depth camera sentuh milidetik (<15ms latency), hingga perakitan stasiun scanner kertas fisik. Seluruh software dikonfigurasi untuk berjalan stabil secara offline (on-premise) tanpa ketergantungan koneksi internet.',
     },
     {
-      question: 'Apakah sistem software yang dibangun SegiaTech dapat diintegrasikan dengan API internal perusahaan?',
+      question: 'Apakah sistem software yang dibangun UNIMASI dapat diintegrasikan dengan API internal perusahaan?',
       answer:
         'Tentu. Seluruh arsitektur software dan portal kami dirancang dengan pendekatan API-first (RESTful API & Webhooks aman). Kami berpengalaman mengintegrasikan sistem dengan berbagai pihak ketiga seperti payment gateway (Midtrans, Xendit, QRIS), WhatsApp Official Business API, ERP SAP/Oracle, hingga sistem informasi akademik (SIAKAD) perguruan tinggi.',
     },
     {
       question: 'Bagaimana perlindungan hak cipta dan kepemilikan source code proyek?',
       answer:
-        'Transparansi dan kepemilikan penuh adalah prinsip kerja SegiaTech. Kami selalu menandatangani Non-Disclosure Agreement (NDA) resmi sebelum proyek dimulai. Setelah serah terima dan termin pembayaran selesai, seluruh hak cipta intelektual (IP), repositori kode sumber (source code), dan aset desain diserahkan 100% kepada pihak klien tanpa adanya royalti atau biaya sewa lisensi tahunan tersembunyi.',
+        'Transparansi dan kepemilikan penuh adalah prinsip kerja UNIMASI. Kami selalu menandatangani Non-Disclosure Agreement (NDA) resmi sebelum proyek dimulai. Setelah serah terima dan termin pembayaran selesai, seluruh hak cipta intelektual (IP), repositori kode sumber (source code), dan aset desain diserahkan 100% kepada pihak klien tanpa adanya royalti atau biaya sewa lisensi tahunan tersembunyi.',
     },
   ],
   portfolio: [
@@ -71,7 +71,7 @@ export const SEED_FAQS: Record<'homepage' | 'services' | 'portfolio', FAQItem[]>
         'Setiap proyek diawali dengan tahap Discovery & Arsitektur untuk membedah proses bisnis, kebutuhan pengguna, dan skema data. Selanjutnya, tim merancang wireframe visual dan prototype interaktif sebelum penulisan kode dimulai. Pengerjaan dilakukan secara bertahap (agile sprint), diakhiri dengan uji performa Core Web Vitals, audit keamanan, dan peluncuran produksi tanpa downtime.',
     },
     {
-      question: 'Apakah SegiaTech menyediakan layanan maintenance sistem dan web?',
+      question: 'Apakah UNIMASI menyediakan layanan maintenance sistem dan web?',
       answer:
         'Ya, seluruh proyek yang kami kerjakan dilengkapi dengan masa garansi pasca-peluncuran dan opsi Service Level Agreement (SLA) berkelanjutan. Layanan maintenance mencakup pemantauan uptime 99.9%, backup database berkala terenkripsi, pembaruan patch keamanan sistem operasi & dependensi, serta optimalisasi performa berkala.',
     },
@@ -108,7 +108,7 @@ export function getFaqsByScopeSync(
         answer: `Waktu pengerjaan umumnya berkisar antara 2 hingga 4 minggu untuk website profil perusahaan (Company Profile) dan 4 hingga 8 minggu untuk platform korporat atau sistem aplikasi khusus. Jadwal disesuaikan dengan kompleksitas fitur dan kesiapan materi dari klien.`,
       },
       {
-        question: `Apa saja cakupan layanan dalam paket pembuatan website SegiaTech?`,
+        question: `Apa saja cakupan layanan dalam paket pembuatan website UNIMASI?`,
         answer: `Setiap proyek mencakup arsitektur modern Next.js, desain UI/UX bespoke responsif (mobile, tablet, desktop), optimasi SEO teknis & On-Page, integrasi Google Search Console, keamanan SSL, panduan manajemen konten, serta garansi pemeliharaan teknis.`,
       },
       {

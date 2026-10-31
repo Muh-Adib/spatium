@@ -186,11 +186,11 @@ export async function getSiteSettings(): Promise<SiteSetting> {
   } catch {}
   return {
     id: 1,
-    siteName: process.env.NEXT_PUBLIC_SITE_NAME || 'SegiaTech',
+    siteName: process.env.NEXT_PUBLIC_SITE_NAME || 'UNIMASI',
     siteDescription: 'Solusi Digital untuk Masa Depan Bisnis Anda',
-    siteUrl: process.env.NEXT_PUBLIC_SITE_URL || 'https://www.segiatech.com',
+    siteUrl: process.env.NEXT_PUBLIC_SITE_URL || 'https://www.unimasi.com',
     whatsapp: process.env.NEXT_PUBLIC_WHATSAPP || '6285227702811',
-    email: 'contact@segiatech.com',
+    email: 'contact@unimasi.com',
     phone: '+62 852-2770-2811',
     address: 'Yogyakarta, Indonesia',
   }
@@ -284,8 +284,8 @@ export interface ArticleParams {
 
 function buildArticleFromRaw(a: any, index: number): Article {
   const category = resolveArticleCategory(a)
-  const rawAuthor = a.author?.name || (typeof a.author === 'string' ? a.author : 'Tim SegiaTech')
-  const authorName = !rawAuthor || rawAuthor.toLowerCase().includes('indra') ? 'Tim SegiaTech' : rawAuthor
+  const rawAuthor = a.author?.name || (typeof a.author === 'string' ? a.author : 'Tim UNIMASI')
+  const authorName = !rawAuthor || rawAuthor.toLowerCase().includes('indra') ? 'Tim UNIMASI' : rawAuthor
   const excerpt = formatArticleExcerpt(a)
 
   return {
@@ -296,7 +296,7 @@ function buildArticleFromRaw(a: any, index: number): Article {
     excerpt,
     content: a.content,
     category,
-    author: { id: 1, documentId: 'author-default', name: authorName, slug: 'tim-segiatech' },
+    author: { id: 1, documentId: 'author-default', name: authorName, slug: 'tim-unimasi' },
     coverUrl: a.coverUrl,
     featuredImage: a.featuredImage || (a.coverUrl ? {
       id: 1, documentId: `media-${a.slug}`, name: a.title,

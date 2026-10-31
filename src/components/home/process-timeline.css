@@ -49,7 +49,7 @@
 
 .process-step.is-active {
   background: var(--surface-2);
-  border-color: rgba(255, 212, 0, 0.4);
+  border-color: rgba(255, 214, 0, 0.4);
 }
 
 .process-step__index {
@@ -79,7 +79,7 @@
 .process-step.is-active .process-step__dot {
   background: var(--yellow);
   border-color: var(--yellow);
-  box-shadow: 0 0 0 6px rgba(255, 212, 0, 0.18);
+  box-shadow: 0 0 0 6px rgba(255, 214, 0, 0.18);
 }
 
 .process-step__title {

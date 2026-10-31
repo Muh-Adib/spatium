@@ -45,7 +45,7 @@ export function normalizeIndexingUrl(rawUrl: string, baseSiteUrl?: string): stri
     throw new Error('URL tidak boleh kosong.')
   }
 
-  const base = baseSiteUrl || siteConfig.url || 'https://www.segiatech.com'
+  const base = baseSiteUrl || siteConfig.url || 'https://www.unimasi.com'
   const trimmed = rawUrl.trim()
 
   let urlObj: URL

@@ -123,7 +123,7 @@ export function blocksToPlainText(blocks: StudioBlock[]): string {
         return `${b.quote || ''} — ${b.author || ''}`
       }
       if (b.type === 'comparison-matrix') {
-        return `${b.title || ''}. ${(b.rows || []).map((r: any) => `${r.feature}: SegiaTech (${r.segia}) vs Traditional (${r.traditional})`).join('. ')}`
+        return `${b.title || ''}. ${(b.rows || []).map((r: any) => `${r.feature}: UNIMASI (${r.segia}) vs Traditional (${r.traditional})`).join('. ')}`
       }
       if (b.type === 'architecture-blueprint') {
         return `${b.title || ''}. ${(b.layers || []).map((l: any) => `${l.level} ${l.title}: ${l.desc} (${l.tech})`).join('. ')}`
@@ -288,7 +288,7 @@ export default function StudioBlockCanvas({
       newBlock.quote = 'Komitmen kualitas rekayasa tanpa kompromi performa.'
       newBlock.author = 'Nama Pimpinan'
       newBlock.role = 'Role'
-      newBlock.company = 'SegiaTech'
+      newBlock.company = 'UNIMASI'
     }
     if (type === 'engineering-pillars') {
       newBlock.title = '3 Pilar Rekayasa Kami'
@@ -327,7 +327,7 @@ export default function StudioBlockCanvas({
       newBlock.portfolios = allPortfolios.slice(0, 2)
     }
     if (type === 'comparison-matrix') {
-      newBlock.title = 'Standar Rekayasa SegiaTech vs Konvensional'
+      newBlock.title = 'Standar Rekayasa UNIMASI vs Konvensional'
       newBlock.description = 'Komparasi parameter teknis dan jaminan kualitas arsitektur sistem kami'
       newBlock.rows = [
         {
@@ -463,7 +463,7 @@ export default function StudioBlockCanvas({
       ]
     }
     if (type === 'interactive-tech-matrix') {
-      newBlock.title = 'Matriks Standar Teknologi SegiaTech'
+      newBlock.title = 'Matriks Standar Teknologi UNIMASI'
       newBlock.description = 'Teknologi modern yang dipilih dengan pertimbangan skalabilitas jangka panjang'
       newBlock.categories = [
         {
@@ -523,13 +523,13 @@ export default function StudioBlockCanvas({
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2">
             <span className="font-mono text-xs text-neutral-400">Total Blok:</span>
-            <span className="px-2 py-0.5 rounded-full bg-[#F2C7A0]/20 text-xs font-mono font-bold text-[#F2C7A0]">
+            <span className="px-2 py-0.5 rounded-full bg-[#FFD600]/20 text-xs font-mono font-bold text-[#FFD600]">
               {blocks.length}
             </span>
           </div>
           {selectedBlockId && (
             <span className="text-xs font-mono text-neutral-400 hidden sm:inline">
-              • Blok Terpilih: <span className="text-[#F2C7A0]">{selectedBlockId}</span>
+              • Blok Terpilih: <span className="text-[#FFD600]">{selectedBlockId}</span>
             </span>
           )}
         </div>
@@ -538,9 +538,9 @@ export default function StudioBlockCanvas({
           <button
             type="button"
             onClick={handleOpenTemplates}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-xs font-mono text-neutral-200 hover:text-[#F2C7A0] hover:border-[#F2C7A0]/40 transition-colors"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-xs font-mono text-neutral-200 hover:text-[#FFD600] hover:border-[#FFD600]/40 transition-colors"
           >
-            <LayoutTemplate className="w-3.5 h-3.5 text-[#F2C7A0]" />
+            <LayoutTemplate className="w-3.5 h-3.5 text-[#FFD600]" />
             <span>Pustaka Template (Elementor Presets)</span>
           </button>
 
@@ -559,7 +559,7 @@ export default function StudioBlockCanvas({
       {blocks.length === 0 ? (
         <div className="p-12 text-center rounded-3xl border-2 border-dashed border-white/10 bg-[#191919]">
           <Layers className="w-10 h-10 text-neutral-500 mx-auto mb-3" />
-          <h3 className="font-display text-lg font-bold text-white">Belum Ada Blok Konten</h3>
+          <h3 className="font-syne text-lg font-bold text-white">Belum Ada Blok Konten</h3>
           <p className="text-xs text-neutral-400 max-w-md mx-auto mt-1 mb-6">
             Mulai susun halaman ini dengan memilih template bawaan atau menambahkan blok pertama Anda.
           </p>
@@ -567,7 +567,7 @@ export default function StudioBlockCanvas({
             <button
               type="button"
               onClick={handleOpenTemplates}
-              className="px-4 py-2 rounded-xl bg-[#F2C7A0] text-[#191919] font-medium text-xs hover:bg-[#ebd5c1] transition-all"
+              className="px-4 py-2 rounded-xl bg-[#FFD600] text-[#191919] font-medium text-xs hover:bg-[#ffe855] transition-all"
             >
               Muat Template Bawaan
             </button>
@@ -596,9 +596,9 @@ export default function StudioBlockCanvas({
                   onClick={() => onSelectBlock && onSelectBlock(block.id)}
                   className={`rounded-2xl border transition-all duration-200 cursor-pointer ${
                     draggedIndex === idx
-                      ? 'opacity-40 border-dashed border-[#F2C7A0]'
+                      ? 'opacity-40 border-dashed border-[#FFD600]'
                       : isSelected
-                      ? 'ring-2 ring-[#F2C7A0] border-[#F2C7A0]/60 bg-[#1c1c1c] shadow-[0_0_30px_rgba(242,199,160,0.18)]'
+                      ? 'ring-2 ring-[#FFD600] border-[#FFD600]/60 bg-[#1c1c1c] shadow-[0_0_30px_rgba(255, 214, 0,0.18)]'
                       : 'border-white/10 bg-[#191919] hover:border-white/25 hover:bg-[#1b1b1b]'
                   }`}
                 >
@@ -612,14 +612,14 @@ export default function StudioBlockCanvas({
                       >
                         <GripVertical className="w-4 h-4" />
                       </div>
-                      <span className="font-mono text-[10px] text-[#F2C7A0] uppercase tracking-wider font-semibold px-2 py-0.5 rounded bg-[#F2C7A0]/10 border border-[#F2C7A0]/20">
+                      <span className="font-mono text-[10px] text-[#FFD600] uppercase tracking-wider font-semibold px-2 py-0.5 rounded bg-[#FFD600]/10 border border-[#FFD600]/20">
                         {block.type}
                       </span>
                       <span className="text-xs text-neutral-400 font-mono">#{idx + 1}</span>
 
                       {isSelected && (
-                        <span className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-[#F2C7A0]/20 border border-[#F2C7A0]/40 text-[10px] font-mono text-[#F2C7A0] font-bold animate-pulse">
-                          <span className="w-1.5 h-1.5 rounded-full bg-[#F2C7A0]" />
+                        <span className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-[#FFD600]/20 border border-[#FFD600]/40 text-[10px] font-mono text-[#FFD600] font-bold animate-pulse">
+                          <span className="w-1.5 h-1.5 rounded-full bg-[#FFD600]" />
                           AKTIF DI INSPECTOR
                         </span>
                       )}
@@ -676,7 +676,7 @@ export default function StudioBlockCanvas({
                           onFocus={() => onSelectBlock && onSelectBlock(block.id)}
                           value={block.text || ''}
                           onChange={(val) => updateBlockField(idx, 'text', val)}
-                          className="w-full px-3 py-2 rounded-xl bg-[#121212] border border-white/10 text-white text-sm focus:outline-none focus:border-[#F2C7A0]"
+                          className="w-full px-3 py-2 rounded-xl bg-[#121212] border border-white/10 text-white text-sm focus:outline-none focus:border-[#FFD600]"
                           placeholder="Ketik paragraf konten di sini..."
                         />
                       </div>
@@ -696,7 +696,7 @@ export default function StudioBlockCanvas({
                           type="text"
                           value={block.text || ''}
                           onChange={(e) => updateBlockField(idx, 'text', e.target.value)}
-                          className="w-full px-3 py-2 rounded-xl bg-[#121212] border border-white/10 text-white font-bold text-base focus:outline-none focus:border-[#F2C7A0]"
+                          className="w-full px-3 py-2 rounded-xl bg-[#121212] border border-white/10 text-white font-bold text-base focus:outline-none focus:border-[#FFD600]"
                         />
                       </div>
                     )}
@@ -750,7 +750,7 @@ export default function StudioBlockCanvas({
                           {(block.keyOutcomes || []).map((m: any, mIdx: number) => (
                             <span
                               key={mIdx}
-                              className="px-2.5 py-1 rounded-lg bg-black/40 border border-white/10 text-xs font-mono text-[#F2C7A0]"
+                              className="px-2.5 py-1 rounded-lg bg-black/40 border border-white/10 text-xs font-mono text-[#FFD600]"
                             >
                               {m.label}: <strong>{m.value}</strong>
                             </span>
@@ -829,7 +829,7 @@ export default function StudioBlockCanvas({
                           {(block.metrics || []).map((m: any, mIdx: number) => (
                             <span
                               key={mIdx}
-                              className="px-2.5 py-1 rounded-lg bg-black/40 border border-white/10 text-xs font-mono text-[#F2C7A0]"
+                              className="px-2.5 py-1 rounded-lg bg-black/40 border border-white/10 text-xs font-mono text-[#FFD600]"
                             >
                               {m.label}: <strong>{m.value}</strong>
                             </span>
@@ -885,7 +885,7 @@ export default function StudioBlockCanvas({
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                           {(block.pillars || []).map((p: any, pIdx: number) => (
                             <div key={pIdx} className="p-2.5 rounded-xl bg-black/30 border border-white/5 space-y-1">
-                              <span className="text-xs font-bold text-[#F2C7A0] block">{p.title}</span>
+                              <span className="text-xs font-bold text-[#FFD600] block">{p.title}</span>
                               <p className="text-[11px] text-neutral-400 line-clamp-2">{p.description}</p>
                             </div>
                           ))}
@@ -915,7 +915,7 @@ export default function StudioBlockCanvas({
                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                           {(block.phases || []).map((ph: any, phIdx: number) => (
                             <div key={phIdx} className="p-2.5 rounded-xl bg-black/30 border border-white/5 space-y-1">
-                              <span className="text-[10px] font-mono text-[#F2C7A0] block">FASE {ph.step || `0${phIdx + 1}`}</span>
+                              <span className="text-[10px] font-mono text-[#FFD600] block">FASE {ph.step || `0${phIdx + 1}`}</span>
                               <span className="text-xs font-bold text-white block truncate">{ph.title}</span>
                             </div>
                           ))}
@@ -948,7 +948,7 @@ export default function StudioBlockCanvas({
                             (block.portfolios || []).map((p: any) => (
                               <span
                                 key={p.id}
-                                className="px-2.5 py-1 rounded-lg bg-[#F2C7A0]/10 border border-[#F2C7A0]/30 text-white"
+                                className="px-2.5 py-1 rounded-lg bg-[#FFD600]/10 border border-[#FFD600]/30 text-white"
                               >
                                 {p.title}
                               </span>
@@ -978,8 +978,8 @@ export default function StudioBlockCanvas({
                             placeholder="Teks ikhtisar eksekutif..."
                           />
                         </div>
-                        <div className="text-xs font-mono text-[#F2C7A0]">
-                          — {block.author || 'Pimpinan SegiaTech'} {block.role ? `(${block.role})` : ''}
+                        <div className="text-xs font-mono text-[#FFD600]">
+                          — {block.author || 'Pimpinan UNIMASI'} {block.role ? `(${block.role})` : ''}
                         </div>
                       </div>
                     )}
@@ -1093,7 +1093,7 @@ export default function StudioBlockCanvas({
                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
                           {(block.layers || []).slice(0, 4).map((layer: any, lIdx: number) => (
                             <div key={lIdx} className="p-2 rounded-xl bg-[#141414] border border-white/5 space-y-0.5">
-                              <span className="text-[10px] font-mono text-[#F2C7A0] block font-semibold">{layer.level || `Layer 0${lIdx + 1}`}</span>
+                              <span className="text-[10px] font-mono text-[#FFD600] block font-semibold">{layer.level || `Layer 0${lIdx + 1}`}</span>
                               <p className="text-xs font-semibold text-white truncate">{layer.title}</p>
                               <span className="text-[10px] text-neutral-400 block truncate">{layer.badge || 'Active'}</span>
                             </div>
@@ -1119,7 +1119,7 @@ export default function StudioBlockCanvas({
                               className="w-full px-3 py-2 rounded-xl bg-[#121212] border border-white/10 text-white text-sm font-semibold"
                             />
                           </div>
-                          <span className="text-[10px] font-mono px-2.5 py-1 rounded-full bg-[#F2C7A0]/15 border border-[#F2C7A0]/30 text-[#F2C7A0] whitespace-nowrap">
+                          <span className="text-[10px] font-mono px-2.5 py-1 rounded-full bg-[#FFD600]/15 border border-[#FFD600]/30 text-[#FFD600] whitespace-nowrap">
                             Mode: {block.frameStyle || 'immersive'}
                           </span>
                         </div>
@@ -1137,7 +1137,7 @@ export default function StudioBlockCanvas({
                               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none" />
                               <div className="absolute bottom-2.5 left-3 right-3 flex items-center justify-between text-xs font-mono text-neutral-300">
                                 <span className="truncate">{block.caption || block.imageLabel || 'Media Aktif'}</span>
-                                <span className="text-[#F2C7A0] shrink-0 font-semibold">{block.badge || 'Terverifikasi'}</span>
+                                <span className="text-[#FFD600] shrink-0 font-semibold">{block.badge || 'Terverifikasi'}</span>
                               </div>
                             </>
                           ) : (
@@ -1173,7 +1173,7 @@ export default function StudioBlockCanvas({
                                 </div>
                               )}
                               <div className="p-2.5">
-                                <span className="text-[10px] font-mono text-[#F2C7A0] block truncate">{item.category}</span>
+                                <span className="text-[10px] font-mono text-[#FFD600] block truncate">{item.category}</span>
                                 <p className="text-xs font-semibold text-white truncate">{item.title}</p>
                                 {item.metric && (
                                   <span className="text-[10px] font-mono text-emerald-400 font-semibold block mt-1">
@@ -1196,19 +1196,19 @@ export default function StudioBlockCanvas({
                             type="text"
                             value={block.title || ''}
                             onChange={(e) => updateBlockField(idx, 'title', e.target.value)}
-                            placeholder="Standar Rekayasa SegiaTech vs Konvensional"
+                            placeholder="Standar Rekayasa UNIMASI vs Konvensional"
                             className="w-full px-3 py-2 rounded-xl bg-[#121212] border border-white/10 text-white text-sm font-bold"
                           />
                         </div>
                         <div className="p-3 rounded-xl bg-[#141414] border border-white/10 space-y-2">
                           <div className="flex items-center justify-between text-xs font-mono text-neutral-400 border-b border-white/5 pb-1.5">
                             <span>Parameter Teknis</span>
-                            <span className="text-[#F2C7A0] font-semibold">Standar SegiaTech</span>
+                            <span className="text-[#FFD600] font-semibold">Standar UNIMASI</span>
                           </div>
                           {(block.rows || []).slice(0, 3).map((row: any, rIdx: number) => (
                             <div key={rIdx} className="flex items-center justify-between text-xs">
                               <span className="text-neutral-300 truncate max-w-[200px]">{row.feature}</span>
-                              <span className="text-[#F2C7A0] font-mono text-[11px] truncate max-w-[200px] font-semibold">{row.segia}</span>
+                              <span className="text-[#FFD600] font-mono text-[11px] truncate max-w-[200px] font-semibold">{row.segia}</span>
                             </div>
                           ))}
                         </div>
@@ -1231,7 +1231,7 @@ export default function StudioBlockCanvas({
                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                           {(block.stats || []).map((st: any, sIdx: number) => (
                             <div key={sIdx} className="p-2.5 rounded-xl bg-[#141414] border border-white/10 text-center">
-                              <span className="font-display text-base font-bold text-[#F2C7A0] block">{st.value}</span>
+                              <span className="font-syne text-base font-bold text-[#FFD600] block">{st.value}</span>
                               <span className="text-[11px] text-neutral-300 font-medium block truncate mt-0.5">{st.label}</span>
                             </div>
                           ))}
@@ -1255,7 +1255,7 @@ export default function StudioBlockCanvas({
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                           {(block.items || []).slice(0, 4).map((it: any, itIdx: number) => (
                             <div key={itIdx} className="p-2.5 rounded-xl bg-[#141414] border border-white/10 flex items-start gap-2">
-                              <CheckCircle2 className="w-4 h-4 text-[#F2C7A0] shrink-0 mt-0.5" />
+                              <CheckCircle2 className="w-4 h-4 text-[#FFD600] shrink-0 mt-0.5" />
                               <div className="truncate">
                                 <p className="text-xs font-semibold text-white truncate">{it.title}</p>
                                 <p className="text-[11px] text-neutral-400 truncate">{it.desc}</p>
@@ -1280,7 +1280,7 @@ export default function StudioBlockCanvas({
                           />
                         </div>
                         <div className="text-xs font-mono text-neutral-400 flex items-center gap-2">
-                          <Layers className="w-3.5 h-3.5 text-[#F2C7A0]" />
+                          <Layers className="w-3.5 h-3.5 text-[#FFD600]" />
                           <span>{(block.services || []).length || 4} Layanan Spesialisasi Terdaftar (Konfigurasi di Panel Kiri)</span>
                         </div>
                       </div>
@@ -1295,14 +1295,14 @@ export default function StudioBlockCanvas({
                             type="text"
                             value={block.title || ''}
                             onChange={(e) => updateBlockField(idx, 'title', e.target.value)}
-                            placeholder="Matriks Standar Teknologi SegiaTech"
+                            placeholder="Matriks Standar Teknologi UNIMASI"
                             className="w-full px-3 py-2 rounded-xl bg-[#121212] border border-white/10 text-white text-sm font-bold"
                           />
                         </div>
                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                           {(block.categories || []).map((cat: any, cIdx: number) => (
                             <div key={cIdx} className="p-2 rounded-xl bg-[#141414] border border-white/10 space-y-1">
-                              <span className="text-[10px] font-mono text-[#F2C7A0] font-semibold block">{cat.name}</span>
+                              <span className="text-[10px] font-mono text-[#FFD600] font-semibold block">{cat.name}</span>
                               <div className="flex flex-wrap gap-1">
                                 {(cat.items || []).slice(0, 2).map((item: any, iIdx: number) => {
                                   const label = typeof item === 'string' ? item : (item?.name || item?.title || '')
@@ -1353,7 +1353,7 @@ export default function StudioBlockCanvas({
                             {block.description || 'Pilih blok ini untuk mengedit konfigurasi lengkap pada panel inspector.'}
                           </span>
                         </div>
-                        <span className="text-[11px] font-mono px-2.5 py-1 rounded-lg bg-white/5 border border-white/10 text-[#F2C7A0] shrink-0">
+                        <span className="text-[11px] font-mono px-2.5 py-1 rounded-lg bg-white/5 border border-white/10 text-[#FFD600] shrink-0">
                           Edit di Inspector
                         </span>
                       </div>
@@ -1366,18 +1366,18 @@ export default function StudioBlockCanvas({
                   <button
                     type="button"
                     onClick={() => setInsertAtIndex(insertAtIndex === idx + 1 ? null : idx + 1)}
-                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#1e1e1e] border border-white/10 text-[11px] font-mono text-neutral-400 hover:text-[#F2C7A0] hover:border-[#F2C7A0]/40 transition-all shadow-md group-hover:scale-105"
+                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#1e1e1e] border border-white/10 text-[11px] font-mono text-neutral-400 hover:text-[#FFD600] hover:border-[#FFD600]/40 transition-all shadow-md group-hover:scale-105"
                   >
-                    <Plus className="w-3 h-3 text-[#F2C7A0]" />
+                    <Plus className="w-3 h-3 text-[#FFD600]" />
                     <span>Sisipkan Blok di Sini</span>
                   </button>
                 </div>
 
                 {/* Inserter Popover if active */}
                 {insertAtIndex === idx + 1 && (
-                  <div className="p-4 rounded-2xl bg-[#1c1c1c] border border-[#F2C7A0]/40 shadow-2xl space-y-3 animate-in fade-in zoom-in-95 duration-150">
+                  <div className="p-4 rounded-2xl bg-[#1c1c1c] border border-[#FFD600]/40 shadow-2xl space-y-3 animate-in fade-in zoom-in-95 duration-150">
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-mono font-semibold text-[#F2C7A0]">Pilih Jenis Blok untuk Disisipkan:</span>
+                      <span className="text-xs font-mono font-semibold text-[#FFD600]">Pilih Jenis Blok untuk Disisipkan:</span>
                       <button
                         type="button"
                         onClick={() => setInsertAtIndex(null)}
@@ -1390,63 +1390,63 @@ export default function StudioBlockCanvas({
                       <button
                         type="button"
                         onClick={() => addBlockAt(idx + 1, 'comparison-matrix')}
-                        className="p-2.5 rounded-xl bg-[#141414] hover:bg-white/10 border border-[#F2C7A0]/30 text-left transition-all group"
+                        className="p-2.5 rounded-xl bg-[#141414] hover:bg-white/10 border border-[#FFD600]/30 text-left transition-all group"
                       >
-                        <ShieldCheck className="w-4 h-4 text-[#F2C7A0] mb-1 group-hover:scale-110 transition-transform" />
+                        <ShieldCheck className="w-4 h-4 text-[#FFD600] mb-1 group-hover:scale-110 transition-transform" />
                         <div className="text-xs font-bold text-white">Standar Rekayasa</div>
-                        <div className="text-[10px] text-[#F2C7A0]">Matrix Komparasi</div>
+                        <div className="text-[10px] text-[#FFD600]">Matrix Komparasi</div>
                       </button>
                       <button
                         type="button"
                         onClick={() => addBlockAt(idx + 1, 'architecture-blueprint')}
-                        className="p-2.5 rounded-xl bg-[#141414] hover:bg-white/10 border border-[#F2C7A0]/30 text-left transition-all group"
+                        className="p-2.5 rounded-xl bg-[#141414] hover:bg-white/10 border border-[#FFD600]/30 text-left transition-all group"
                       >
-                        <Terminal className="w-4 h-4 text-[#F2C7A0] mb-1 group-hover:scale-110 transition-transform" />
+                        <Terminal className="w-4 h-4 text-[#FFD600] mb-1 group-hover:scale-110 transition-transform" />
                         <div className="text-xs font-bold text-white">4-Layer Blueprint</div>
-                        <div className="text-[10px] text-[#F2C7A0]">Arsitektur sistem</div>
+                        <div className="text-[10px] text-[#FFD600]">Arsitektur sistem</div>
                       </button>
                       <button
                         type="button"
                         onClick={() => addBlockAt(idx + 1, 'client-stats-impact')}
-                        className="p-2.5 rounded-xl bg-[#141414] hover:bg-white/10 border border-[#F2C7A0]/30 text-left transition-all group"
+                        className="p-2.5 rounded-xl bg-[#141414] hover:bg-white/10 border border-[#FFD600]/30 text-left transition-all group"
                       >
-                        <BarChart3 className="w-4 h-4 text-[#F2C7A0] mb-1 group-hover:scale-110 transition-transform" />
+                        <BarChart3 className="w-4 h-4 text-[#FFD600] mb-1 group-hover:scale-110 transition-transform" />
                         <div className="text-xs font-bold text-white">Metrik Dampak</div>
-                        <div className="text-[10px] text-[#F2C7A0]">SLA & TTFB stats</div>
+                        <div className="text-[10px] text-[#FFD600]">SLA & TTFB stats</div>
                       </button>
                       <button
                         type="button"
                         onClick={() => addBlockAt(idx + 1, 'deliverables-checklist')}
-                        className="p-2.5 rounded-xl bg-[#141414] hover:bg-white/10 border border-[#F2C7A0]/30 text-left transition-all group"
+                        className="p-2.5 rounded-xl bg-[#141414] hover:bg-white/10 border border-[#FFD600]/30 text-left transition-all group"
                       >
-                        <CheckCircle2 className="w-4 h-4 text-[#F2C7A0] mb-1 group-hover:scale-110 transition-transform" />
+                        <CheckCircle2 className="w-4 h-4 text-[#FFD600] mb-1 group-hover:scale-110 transition-transform" />
                         <div className="text-xs font-bold text-white">Checklist Garansi</div>
-                        <div className="text-[10px] text-[#F2C7A0]">Scope serah terima</div>
+                        <div className="text-[10px] text-[#FFD600]">Scope serah terima</div>
                       </button>
                       <button
                         type="button"
                         onClick={() => addBlockAt(idx + 1, 'department-service-list')}
-                        className="p-2.5 rounded-xl bg-[#141414] hover:bg-white/10 border border-[#F2C7A0]/30 text-left transition-all group"
+                        className="p-2.5 rounded-xl bg-[#141414] hover:bg-white/10 border border-[#FFD600]/30 text-left transition-all group"
                       >
-                        <Layers className="w-4 h-4 text-[#F2C7A0] mb-1 group-hover:scale-110 transition-transform" />
+                        <Layers className="w-4 h-4 text-[#FFD600] mb-1 group-hover:scale-110 transition-transform" />
                         <div className="text-xs font-bold text-white">Sub-Layanan Dept</div>
-                        <div className="text-[10px] text-[#F2C7A0]">Grid 4 kartu visual</div>
+                        <div className="text-[10px] text-[#FFD600]">Grid 4 kartu visual</div>
                       </button>
                       <button
                         type="button"
                         onClick={() => addBlockAt(idx + 1, 'visual-showcase-gallery')}
-                        className="p-2.5 rounded-xl bg-[#141414] hover:bg-white/10 border border-[#F2C7A0]/30 text-left transition-all group"
+                        className="p-2.5 rounded-xl bg-[#141414] hover:bg-white/10 border border-[#FFD600]/30 text-left transition-all group"
                       >
-                        <ImageIcon className="w-4 h-4 text-[#F2C7A0] mb-1 group-hover:scale-110 transition-transform" />
+                        <ImageIcon className="w-4 h-4 text-[#FFD600] mb-1 group-hover:scale-110 transition-transform" />
                         <div className="text-xs font-bold text-white">Galeri Visual</div>
-                        <div className="text-[10px] text-[#F2C7A0]">Mockup antarmuka</div>
+                        <div className="text-[10px] text-[#FFD600]">Mockup antarmuka</div>
                       </button>
                       <button
                         type="button"
                         onClick={() => addBlockAt(idx + 1, 'interactive-tech-matrix')}
                         className="p-2.5 rounded-xl bg-[#141414] hover:bg-white/10 border border-white/10 text-left transition-all group"
                       >
-                        <Database className="w-4 h-4 text-[#F2C7A0] mb-1 group-hover:scale-110 transition-transform" />
+                        <Database className="w-4 h-4 text-[#FFD600] mb-1 group-hover:scale-110 transition-transform" />
                         <div className="text-xs font-bold text-white">Matriks Teknologi</div>
                         <div className="text-[10px] text-neutral-400">Stack 4 kategori</div>
                       </button>
@@ -1455,7 +1455,7 @@ export default function StudioBlockCanvas({
                         onClick={() => addBlockAt(idx + 1, 'feature-bento-grid')}
                         className="p-2.5 rounded-xl bg-[#141414] hover:bg-white/10 border border-white/10 text-left transition-all"
                       >
-                        <CheckCircle2 className="w-4 h-4 text-[#F2C7A0] mb-1" />
+                        <CheckCircle2 className="w-4 h-4 text-[#FFD600] mb-1" />
                         <div className="text-xs font-bold text-white">Feature Bento</div>
                         <div className="text-[10px] text-neutral-400">Grid kapabilitas</div>
                       </button>
@@ -1464,7 +1464,7 @@ export default function StudioBlockCanvas({
                         onClick={() => addBlockAt(idx + 1, 'engineering-pillars')}
                         className="p-2.5 rounded-xl bg-[#141414] hover:bg-white/10 border border-white/10 text-left transition-all"
                       >
-                        <Cpu className="w-4 h-4 text-[#F2C7A0] mb-1" />
+                        <Cpu className="w-4 h-4 text-[#FFD600] mb-1" />
                         <div className="text-xs font-bold text-white">3 Pilar Rekayasa</div>
                         <div className="text-[10px] text-neutral-400">Arsitektur sistem</div>
                       </button>
@@ -1473,7 +1473,7 @@ export default function StudioBlockCanvas({
                         onClick={() => addBlockAt(idx + 1, 'workflow-phases')}
                         className="p-2.5 rounded-xl bg-[#141414] hover:bg-white/10 border border-white/10 text-left transition-all"
                       >
-                        <Sparkles className="w-4 h-4 text-[#F2C7A0] mb-1" />
+                        <Sparkles className="w-4 h-4 text-[#FFD600] mb-1" />
                         <div className="text-xs font-bold text-white">Workflow Phases</div>
                         <div className="text-[10px] text-neutral-400">4 fase metodologi</div>
                       </button>
@@ -1482,7 +1482,7 @@ export default function StudioBlockCanvas({
                         onClick={() => addBlockAt(idx + 1, 'portfolio-proof-grid')}
                         className="p-2.5 rounded-xl bg-[#141414] hover:bg-white/10 border border-white/10 text-left transition-all"
                       >
-                        <FolderKanban className="w-4 h-4 text-[#F2C7A0] mb-1" />
+                        <FolderKanban className="w-4 h-4 text-[#FFD600] mb-1" />
                         <div className="text-xs font-bold text-white">Portofolio Relasi</div>
                         <div className="text-[10px] text-neutral-400">Studi kasus nyata</div>
                       </button>
@@ -1491,7 +1491,7 @@ export default function StudioBlockCanvas({
                         onClick={() => addBlockAt(idx + 1, 'executive-quote-card')}
                         className="p-2.5 rounded-xl bg-[#141414] hover:bg-white/10 border border-white/10 text-left transition-all"
                       >
-                        <Type className="w-4 h-4 text-[#F2C7A0] mb-1" />
+                        <Type className="w-4 h-4 text-[#FFD600] mb-1" />
                         <div className="text-xs font-bold text-white">Executive Quote</div>
                         <div className="text-[10px] text-neutral-400">Kutipan strategis</div>
                       </button>
@@ -1500,7 +1500,7 @@ export default function StudioBlockCanvas({
                         onClick={() => addBlockAt(idx + 1, 'tech-stack-chips')}
                         className="p-2.5 rounded-xl bg-[#141414] hover:bg-white/10 border border-white/10 text-left transition-all"
                       >
-                        <Cpu className="w-4 h-4 text-[#F2C7A0] mb-1" />
+                        <Cpu className="w-4 h-4 text-[#FFD600] mb-1" />
                         <div className="text-xs font-bold text-white">Tech Stack</div>
                         <div className="text-[10px] text-neutral-400">Framework chips</div>
                       </button>
@@ -1509,7 +1509,7 @@ export default function StudioBlockCanvas({
                         onClick={() => addBlockAt(idx + 1, 'faq-accordion')}
                         className="p-2.5 rounded-xl bg-[#141414] hover:bg-white/10 border border-white/10 text-left transition-all"
                       >
-                        <HelpCircle className="w-4 h-4 text-[#F2C7A0] mb-1" />
+                        <HelpCircle className="w-4 h-4 text-[#FFD600] mb-1" />
                         <div className="text-xs font-bold text-white">FAQ Accordion</div>
                         <div className="text-[10px] text-neutral-400">Tanya jawab SEO</div>
                       </button>
@@ -1518,7 +1518,7 @@ export default function StudioBlockCanvas({
                         onClick={() => addBlockAt(idx + 1, 'studio-cta')}
                         className="p-2.5 rounded-xl bg-[#141414] hover:bg-white/10 border border-white/10 text-left transition-all"
                       >
-                        <MessageSquare className="w-4 h-4 text-[#F2C7A0] mb-1" />
+                        <MessageSquare className="w-4 h-4 text-[#FFD600] mb-1" />
                         <div className="text-xs font-bold text-white">Studio CTA</div>
                         <div className="text-[10px] text-neutral-400">Banner konversi</div>
                       </button>
@@ -1552,70 +1552,70 @@ export default function StudioBlockCanvas({
           <button
             type="button"
             onClick={() => addBlockAt(blocks.length, 'comparison-matrix')}
-            className="px-3 py-1.5 rounded-xl bg-[#F2C7A0]/10 border border-[#F2C7A0]/30 text-xs font-mono text-[#F2C7A0] hover:bg-[#F2C7A0]/20 transition-colors"
+            className="px-3 py-1.5 rounded-xl bg-[#FFD600]/10 border border-[#FFD600]/30 text-xs font-mono text-[#FFD600] hover:bg-[#FFD600]/20 transition-colors"
           >
             + Standar Rekayasa Matrix
           </button>
           <button
             type="button"
             onClick={() => addBlockAt(blocks.length, 'architecture-blueprint')}
-            className="px-3 py-1.5 rounded-xl bg-[#F2C7A0]/10 border border-[#F2C7A0]/30 text-xs font-mono text-[#F2C7A0] hover:bg-[#F2C7A0]/20 transition-colors"
+            className="px-3 py-1.5 rounded-xl bg-[#FFD600]/10 border border-[#FFD600]/30 text-xs font-mono text-[#FFD600] hover:bg-[#FFD600]/20 transition-colors"
           >
             + 4-Layer Blueprint
           </button>
           <button
             type="button"
             onClick={() => addBlockAt(blocks.length, 'department-service-list')}
-            className="px-3 py-1.5 rounded-xl bg-[#F2C7A0]/10 border border-[#F2C7A0]/30 text-xs font-mono text-[#F2C7A0] hover:bg-[#F2C7A0]/20 transition-colors"
+            className="px-3 py-1.5 rounded-xl bg-[#FFD600]/10 border border-[#FFD600]/30 text-xs font-mono text-[#FFD600] hover:bg-[#FFD600]/20 transition-colors"
           >
             + Sub-Layanan Dept
           </button>
           <button
             type="button"
             onClick={() => addBlockAt(blocks.length, 'visual-showcase-gallery')}
-            className="px-3 py-1.5 rounded-xl bg-[#F2C7A0]/10 border border-[#F2C7A0]/30 text-xs font-mono text-[#F2C7A0] hover:bg-[#F2C7A0]/20 transition-colors"
+            className="px-3 py-1.5 rounded-xl bg-[#FFD600]/10 border border-[#FFD600]/30 text-xs font-mono text-[#FFD600] hover:bg-[#FFD600]/20 transition-colors"
           >
             + Galeri Visual
           </button>
           <button
             type="button"
             onClick={() => addBlockAt(blocks.length, 'client-stats-impact')}
-            className="px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-xs font-mono text-neutral-300 hover:text-[#F2C7A0] hover:bg-white/10 transition-colors"
+            className="px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-xs font-mono text-neutral-300 hover:text-[#FFD600] hover:bg-white/10 transition-colors"
           >
             + Metrik Dampak
           </button>
           <button
             type="button"
             onClick={() => addBlockAt(blocks.length, 'deliverables-checklist')}
-            className="px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-xs font-mono text-neutral-300 hover:text-[#F2C7A0] hover:bg-white/10 transition-colors"
+            className="px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-xs font-mono text-neutral-300 hover:text-[#FFD600] hover:bg-white/10 transition-colors"
           >
             + Checklist Garansi
           </button>
           <button
             type="button"
             onClick={() => addBlockAt(blocks.length, 'interactive-tech-matrix')}
-            className="px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-xs font-mono text-neutral-300 hover:text-[#F2C7A0] hover:bg-white/10 transition-colors"
+            className="px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-xs font-mono text-neutral-300 hover:text-[#FFD600] hover:bg-white/10 transition-colors"
           >
             + Matriks Teknologi
           </button>
           <button
             type="button"
             onClick={() => addBlockAt(blocks.length, 'feature-bento-grid')}
-            className="px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-xs font-mono text-neutral-300 hover:text-[#F2C7A0] hover:bg-white/10 transition-colors"
+            className="px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-xs font-mono text-neutral-300 hover:text-[#FFD600] hover:bg-white/10 transition-colors"
           >
             + Feature Bento
           </button>
           <button
             type="button"
             onClick={() => addBlockAt(blocks.length, 'faq-accordion')}
-            className="px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-xs font-mono text-neutral-300 hover:text-[#F2C7A0] hover:bg-white/10 transition-colors"
+            className="px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-xs font-mono text-neutral-300 hover:text-[#FFD600] hover:bg-white/10 transition-colors"
           >
             + FAQ Accordion
           </button>
           <button
             type="button"
             onClick={() => addBlockAt(blocks.length, 'studio-cta')}
-            className="px-3 py-1.5 rounded-xl bg-[#F2C7A0]/10 border border-[#F2C7A0]/30 text-xs font-mono text-[#F2C7A0] hover:bg-[#F2C7A0]/20 transition-colors"
+            className="px-3 py-1.5 rounded-xl bg-[#FFD600]/10 border border-[#FFD600]/30 text-xs font-mono text-[#FFD600] hover:bg-[#FFD600]/20 transition-colors"
           >
             + Studio CTA
           </button>
@@ -1628,10 +1628,10 @@ export default function StudioBlockCanvas({
           <div className="w-full max-w-2xl rounded-3xl bg-[#1e1e1e] border border-white/10 shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
             <div className="flex items-center justify-between p-5 border-b border-white/10 bg-[#191919]">
               <div>
-                <span className="text-[10px] font-mono text-[#F2C7A0] uppercase tracking-wider font-semibold">
+                <span className="text-[10px] font-mono text-[#FFD600] uppercase tracking-wider font-semibold">
                   Elementor-Style Preset Library
                 </span>
-                <h3 className="font-display text-lg font-bold text-white">Pustaka Template Blok</h3>
+                <h3 className="font-syne text-lg font-bold text-white">Pustaka Template Blok</h3>
               </div>
               <button
                 type="button"
@@ -1660,7 +1660,7 @@ export default function StudioBlockCanvas({
                   {savedTemplates.map((tpl) => (
                     <div
                       key={tpl.id}
-                      className="p-4 rounded-2xl bg-[#141414] border border-white/10 hover:border-[#F2C7A0]/50 transition-all flex items-center justify-between"
+                      className="p-4 rounded-2xl bg-[#141414] border border-white/10 hover:border-[#FFD600]/50 transition-all flex items-center justify-between"
                     >
                       <div>
                         <div className="flex items-center gap-2">
@@ -1676,7 +1676,7 @@ export default function StudioBlockCanvas({
                       <button
                         type="button"
                         onClick={() => handleApplyTemplate(tpl.blocks)}
-                        className="px-4 py-2 rounded-xl bg-[#F2C7A0] text-[#191919] font-medium text-xs font-mono uppercase tracking-wider hover:bg-[#ebd5c1] transition-all shrink-0 ml-4"
+                        className="px-4 py-2 rounded-xl bg-[#FFD600] text-[#191919] font-medium text-xs font-mono uppercase tracking-wider hover:bg-[#ffe855] transition-all shrink-0 ml-4"
                       >
                         Terapkan
                       </button>
@@ -1693,7 +1693,7 @@ export default function StudioBlockCanvas({
       {saveTemplateModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
           <div className="w-full max-w-md rounded-3xl bg-[#1e1e1e] border border-white/10 shadow-2xl overflow-hidden p-6 space-y-4">
-            <h3 className="font-display text-lg font-bold text-white">Simpan Sebagai Preset Template</h3>
+            <h3 className="font-syne text-lg font-bold text-white">Simpan Sebagai Preset Template</h3>
             <p className="text-xs text-neutral-400">
               Susunan {blocks.length} blok saat ini akan disimpan ke library database agar dapat dipakai ulang di halaman lain.
             </p>
@@ -1703,7 +1703,7 @@ export default function StudioBlockCanvas({
                 type="text"
                 value={newTemplateName}
                 onChange={(e) => setNewTemplateName(e.target.value)}
-                placeholder="mis. Template Standard Departemen SegiaTech"
+                placeholder="mis. Template Standard Departemen UNIMASI"
                 className="w-full px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-white text-sm"
               />
             </div>
@@ -1719,7 +1719,7 @@ export default function StudioBlockCanvas({
                 type="button"
                 onClick={handleSaveCurrentAsTemplate}
                 disabled={!newTemplateName.trim()}
-                className="px-4 py-2 rounded-xl bg-[#F2C7A0] text-[#191919] font-medium text-xs font-mono uppercase tracking-wider hover:bg-[#ebd5c1] disabled:opacity-50"
+                className="px-4 py-2 rounded-xl bg-[#FFD600] text-[#191919] font-medium text-xs font-mono uppercase tracking-wider hover:bg-[#ffe855] disabled:opacity-50"
               >
                 Simpan ke Library
               </button>

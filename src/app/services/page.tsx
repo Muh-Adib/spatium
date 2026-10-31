@@ -10,6 +10,7 @@ import { SectionHead } from '@/components/ui/SectionHead'
 import { Icon } from '@/components/Icon'
 import { CORE_SERVICES, SERVICES } from '@/data/services'
 import { INDUSTRIES } from '@/data/site'
+import { getCoreServices } from '@/lib/core'
 import '@/pages/services.css'
 
 const SITE_URL = 'https://unimasi.studio'
@@ -33,7 +34,8 @@ const jsonLd = SERVICES.map((service) => ({
   provider: { '@type': 'Organization', name: 'UNIMASI', url: SITE_URL },
 }))
 
-export default function ServicesPage() {
+export default async function ServicesPage() {
+  const services = await getCoreServices()
   return (
     <>
       <script
@@ -65,7 +67,7 @@ export default function ServicesPage() {
         }
       />
 
-      <ServicesShowcase />
+      <ServicesShowcase initialServices={services} />
 
       <section className="section services-compare" aria-labelledby="compare-title">
         <div className="container container--wide">

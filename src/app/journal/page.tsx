@@ -34,7 +34,7 @@ export default async function JournalPage({
   const page = Math.max(1, parseInt(params.page || '1', 10) || 1)
   const pageSize = 12
 
-  // Fetch articles from SegiaTech Core Delivery API
+  // Fetch articles from UNIMASI Core Delivery API
   const [articlesData, categoriesData] = await Promise.all([
     getCoreArticles({
       page,

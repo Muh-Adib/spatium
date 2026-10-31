@@ -22,7 +22,7 @@ export function ProjectCard({ project, featured = false }: ProjectCardProps) {
     <article className={`project-card card card--hover${featured ? ' project-card--featured' : ''}`}>
       <Link href={`/portfolio/${project.slug}`} className="project-card__link" aria-label={`${project.title} — view case study`}>
         <div className="project-card__media">
-          <StudioArt variant={project.variant} />
+          <StudioArt variant={project.variant ?? 0} />
           <span className="project-card__overlay" aria-hidden="true">
             <span className="project-card__cta">
               View case study
@@ -36,12 +36,12 @@ export function ProjectCard({ project, featured = false }: ProjectCardProps) {
 
         <div className="project-card__body">
           <div className="project-card__meta">
-            <span className="pill pill--accent">{CATEGORY_LABEL[project.category]}</span>
-            <span className="project-card__year mono">{project.year}</span>
+            <span className="pill pill--accent">{CATEGORY_LABEL[project.category] || (project.category ? String(project.category).toUpperCase() : 'Studio Case')}</span>
+            <span className="project-card__year mono">{project.year || 2024}</span>
           </div>
           <h3 className="project-card__title">{project.title}</h3>
-          <p className="project-card__tagline">{project.tagline}</p>
-          <p className="project-card__discipline mono">{project.discipline}</p>
+          <p className="project-card__tagline">{project.tagline || project.client || ''}</p>
+          <p className="project-card__discipline mono">{project.discipline || 'Production'}</p>
         </div>
       </Link>
     </article>

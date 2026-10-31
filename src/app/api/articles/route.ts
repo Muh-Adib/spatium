@@ -215,7 +215,7 @@ export async function POST(request: NextRequest) {
       ? content
       : `<p>${content.replace(/\n\n/g, '</p><p>').replace(/\n/g, '<br/>')}</p>`
 
-    const finalMetaTitle = metaTitle || `${title} — SegiaTech`
+    const finalMetaTitle = metaTitle || `${title} — UNIMASI`
     const finalMetaDesc = metaDescription || excerpt || title
 
     // Enforce Publication Gate if publishing (Section 3.4)

@@ -38,13 +38,13 @@ interface SiteConfig {
 }
 
 const DEFAULT_CONFIG: SiteConfig = {
-  siteName: 'SegiaTech',
-  tagline: 'Creative Technology & Digital Experience Platform',
-  canonicalUrl: 'https://www.segiatech.com',
-  contactEmail: 'contact@segiatech.com',
-  titleTemplate: '%s — SegiaTech',
-  defaultMetaDescription: 'SegiaTech adalah creative technology studio dan digital experience platform terdepan yang menghadirkan web arsitektur Next.js skala enterprise, visual motion GSAP, dan WebGL.',
-  googleVerification: 'google-site-verification=segia-tech-gsc-verified-production',
+  siteName: 'UNIMASI Studio',
+  tagline: 'We Make Ideas Move — 2D & 3D Animation, Motion Graphics & Videotron',
+  canonicalUrl: 'https://unimasi.studio',
+  contactEmail: 'hello@unimasi.studio',
+  titleTemplate: '%s — UNIMASI Studio',
+  defaultMetaDescription: 'UNIMASI adalah studio animasi 2D, 3D, motion graphics, dan visual production untuk edukasi, industri, dan brand terkemuka.',
+  googleVerification: 'google-site-verification=unimasi-studio-gsc-verified',
   robotsIndex: true,
   defaultArticleStatus: 'draft',
   maxUploadMb: 10,
@@ -160,7 +160,7 @@ export function StudioSettings() {
     setModalState({
       open: true,
       title: 'Kembalikan Pengaturan Bawaan',
-      message: 'Apakah Anda yakin ingin mengembalikan seluruh konfigurasi situs ke pengaturan bawaan SegiaTech?',
+      message: 'Apakah Anda yakin ingin mengembalikan seluruh konfigurasi situs ke pengaturan bawaan UNIMASI?',
       type: 'confirm',
       confirmText: 'Kembalikan Bawaan',
       onConfirm: async () => {
@@ -452,7 +452,7 @@ export function StudioSettings() {
           </div>
 
           <p className="text-xs text-neutral-300 leading-relaxed">
-            Kelola mandiri API Key untuk Google AI Studio (Gemini) atau OpenRouter (Minimax, DeepSeek, Claude), atur model default, dan aktifkan 8 tools native SegiaTech untuk akses SQLite lokal, SERP, dan SEO.
+            Kelola mandiri API Key untuk Google AI Studio (Gemini) atau OpenRouter (Minimax, DeepSeek, Claude), atur model default, dan aktifkan 8 tools native UNIMASI untuk akses basis data lokal, SERP, dan SEO.
           </p>
 
           <div className="pt-1">

@@ -70,7 +70,7 @@ export async function GET(request: NextRequest) {
       seo = {
         id: siteProfile.id,
         metaTitle: siteProfile.name + (siteProfile.tagline ? ` — ${siteProfile.tagline}` : ''),
-        metaDescription: siteProfile.description || 'SegiaTech Digital Experience Platform',
+        metaDescription: siteProfile.description || 'UNIMASI Digital Experience Platform',
         canonicalUrl: siteProfile.url + (cleanPath === '/' ? '' : cleanPath),
         robotsIndex: true,
         robotsFollow: true,

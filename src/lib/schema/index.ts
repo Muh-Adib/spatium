@@ -162,9 +162,9 @@ function generateServicesListSchema(
   return {
     '@context': 'https://schema.org',
     '@type': 'ItemList',
-    name: 'Layanan Rekayasa Software & Solusi Imersif SegiaTech',
+    name: 'Layanan Rekayasa Software & Solusi Imersif UNIMASI',
     description:
-      'Katalog lengkap layanan rekayasa software kustom, wahana interaktif 3D, sensorik LiDAR, arsitektur web modern, dan sistem digital oleh SegiaTech.',
+      'Katalog lengkap layanan rekayasa software kustom, wahana interaktif 3D, sensorik LiDAR, arsitektur web modern, dan sistem digital oleh UNIMASI.',
     itemListElement: services.map((svc, idx) => ({
       '@type': 'ListItem',
       position: idx + 1,

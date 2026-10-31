@@ -171,7 +171,7 @@ export function ArticleLivePreview({
           {/* Simulated Public Article Hero */}
           <div className="relative overflow-hidden bg-[#222222] px-6 py-10 sm:px-10 sm:py-14 border-b border-white/10">
             {/* Ambient Lighting Glow */}
-            <div className="absolute top-0 right-0 w-80 h-80 bg-[#F2C7A0]/15 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute top-0 right-0 w-80 h-80 bg-[#FFD600]/15 rounded-full blur-3xl pointer-events-none" />
             <div className="absolute bottom-0 left-0 w-64 h-64 bg-accent-500/10 rounded-full blur-2xl pointer-events-none" />
 
             <div className="relative z-10 space-y-4">
@@ -181,11 +181,11 @@ export function ArticleLivePreview({
                 <span>/</span>
                 <span>Artikel</span>
                 <span>/</span>
-                <span className="text-[#F2C7A0] font-semibold">{category}</span>
+                <span className="text-[#FFD600] font-semibold">{category}</span>
               </div>
 
               {/* Category Badge */}
-              <span className="inline-block px-3 py-1 rounded-full bg-[#1A1A1A] text-[#F2C7A0] border border-[#F2C7A0]/30 font-mono text-xs font-semibold">
+              <span className="inline-block px-3 py-1 rounded-full bg-[#1A1A1A] text-[#FFD600] border border-[#FFD600]/30 font-mono text-xs font-semibold">
                 {category}
               </span>
 
@@ -197,17 +197,17 @@ export function ArticleLivePreview({
               {/* Metadata row */}
               <div className="flex flex-wrap items-center gap-4 text-xs font-mono text-neutral-300 pt-4 border-t border-white/10">
                 <div className="flex items-center gap-1.5">
-                  <User className="w-3.5 h-3.5 text-[#F2C7A0]" />
+                  <User className="w-3.5 h-3.5 text-[#FFD600]" />
                   <span>
-                    Oleh: <strong className="text-white">{author || 'Tim SegiaTech'}</strong>
+                    Oleh: <strong className="text-white">{author || 'Tim UNIMASI'}</strong>
                   </span>
                 </div>
                 <div className="flex items-center gap-1.5">
-                  <Calendar className="w-3.5 h-3.5 text-[#F2C7A0]" />
+                  <Calendar className="w-3.5 h-3.5 text-[#FFD600]" />
                   <span>{dateString}</span>
                 </div>
                 <div className="flex items-center gap-1.5">
-                  <Clock className="w-3.5 h-3.5 text-[#F2C7A0]" />
+                  <Clock className="w-3.5 h-3.5 text-[#FFD600]" />
                   <span>{readingTimeMinutes} menit baca</span>
                 </div>
               </div>
@@ -232,7 +232,7 @@ export function ArticleLivePreview({
           <div className="p-6 sm:p-10 space-y-6">
             {/* Excerpt Lead Box */}
             {excerpt && (
-              <div className="rounded-2xl border-l-4 border-[#F2C7A0] bg-[#F2C7A0]/[0.05] p-5">
+              <div className="rounded-2xl border-l-4 border-[#FFD600] bg-[#FFD600]/[0.05] p-5">
                 <p className="text-sm sm:text-base font-medium text-neutral-200 italic leading-relaxed">
                   &ldquo;{excerpt}&rdquo;
                 </p>

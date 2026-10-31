@@ -180,9 +180,9 @@ export async function localizeAndOptimizeContentImages(
     const fullImgTag = match[0]
     const remoteSrc = match[1]
 
-    // Only process images from segiatech or common uploads
+    // Only process images from unimasi or common uploads
     if (
-      remoteSrc.includes('segiatech.com') ||
+      remoteSrc.includes('unimasi.com') ||
       remoteSrc.includes('wp-content/uploads')
     ) {
       try {

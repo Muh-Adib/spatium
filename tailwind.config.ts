@@ -14,10 +14,10 @@ const config: Config = {
       // ─── Brand Tokens via CSS Variables ────────────────────────────
       colors: {
         brand: {
-          primary: 'var(--color-brand-primary, #FFDE00)',
+          primary: 'var(--color-brand-primary, #FFD600)',
           hover: 'var(--color-brand-primary-hover, #FFE855)',
           active: 'var(--color-brand-primary-active, #F5CF00)',
-          subtle: 'var(--color-brand-primary-subtle, rgba(255, 222, 0, 0.12))',
+          subtle: 'var(--color-brand-primary-subtle, rgba(255, 214, 0, 0.12))',
         },
         surface: {
           base: 'var(--color-surface-base, #060A17)',
@@ -30,24 +30,24 @@ const config: Config = {
           secondary: 'var(--color-text-secondary, #94A3B8)',
           muted: 'var(--color-text-muted, #64748B)',
           inverse: 'var(--color-text-inverse, #070E1E)',
-          accent: 'var(--color-text-accent, #FFDE00)',
+          accent: 'var(--color-text-accent, #FFD600)',
         },
         border: {
           DEFAULT: 'var(--color-border, rgba(255, 255, 255, 0.08))',
           subtle: 'var(--color-border-subtle, rgba(255, 255, 255, 0.04))',
-          strong: 'var(--color-border-strong, rgba(255, 222, 0, 0.25))',
+          strong: 'var(--color-border-strong, rgba(255, 214, 0, 0.25))',
         },
         studio: {
           bg: 'var(--studio-bg, #030611)',
           sidebar: 'var(--studio-sidebar-bg, #060A17)',
-          accent: 'var(--studio-accent, #FFDE00)',
-          border: 'var(--studio-border, rgba(255, 222, 0, 0.10))',
+          accent: 'var(--studio-accent, #FFD600)',
+          border: 'var(--studio-border, rgba(255, 214, 0, 0.10))',
         },
         // Electric Yellow / Cyber scale
         yellow: {
-          DEFAULT: '#FFDE00',
+          DEFAULT: '#FFD600',
           soft: '#FFE855',
-          500: '#F5CF00',
+          500: '#FFD600',
           600: '#E0BC00',
         },
         // Deep Navy scale
@@ -63,19 +63,21 @@ const config: Config = {
         },
         // accent maps to yellow for Studio
         accent: {
-          DEFAULT: '#FFDE00',
+          DEFAULT: '#FFD600',
           300: '#FFE855',
-          400: '#FFDE00',
-          500: '#F5CF00',
+          400: '#FFD600',
+          500: '#FFD600',
           950: '#030611',
         },
       },
       fontFamily: {
-        heading: ['var(--font-display)', 'Syne', 'sans-serif'],
-        body: ['var(--font-body)', 'Plus Jakarta Sans', 'sans-serif'],
-        sans: ['var(--font-body)', 'Plus Jakarta Sans', 'sans-serif'],
-        display: ['var(--font-display)', 'Syne', 'sans-serif'],
-        mono: ['var(--font-mono)', 'DM Mono', 'monospace'],
+        // Official brand heading font (AGENTS.md): Montserrat.
+        heading: ['var(--font-montserrat)', 'var(--font-display)', 'Montserrat', 'sans-serif'],
+        syne: ['var(--font-syne)', 'Syne', 'sans-serif'],
+        body: ['var(--font-plus-jakarta)', 'var(--font-body)', 'Plus Jakarta Sans', 'sans-serif'],
+        sans: ['var(--font-plus-jakarta)', 'var(--font-body)', 'Plus Jakarta Sans', 'sans-serif'],
+        display: ['var(--font-montserrat)', 'var(--font-display)', 'Montserrat', 'sans-serif'],
+        mono: ['var(--font-dm-mono)', 'var(--font-mono)', 'DM Mono', 'monospace'],
       },
       borderRadius: {
         sm: 'var(--radius-sm, 0.375rem)',
@@ -87,8 +89,8 @@ const config: Config = {
         sm: 'var(--shadow-sm, 0 1px 3px rgba(0, 0, 0, 0.6))',
         md: 'var(--shadow-md, 0 4px 16px rgba(0, 0, 0, 0.7))',
         lg: 'var(--shadow-lg, 0 12px 40px rgba(0, 0, 0, 0.8))',
-        yellow: 'var(--shadow-yellow, 0 0 24px rgba(255, 222, 0, 0.25))',
-        'yellow-glow': '0 10px 25px -3px rgba(255, 222, 0, 0.3)',
+        yellow: 'var(--shadow-yellow, 0 0 24px rgba(255, 214, 0, 0.25))',
+        'yellow-glow': '0 10px 25px -3px rgba(255, 214, 0, 0.3)',
       },
       animation: {
         'marquee-left': 'marquee-left 30s linear infinite',

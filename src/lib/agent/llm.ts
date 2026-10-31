@@ -293,7 +293,7 @@ function cleanContentAndExtractThoughts(rawContent: string, existingThoughts?: s
   cleaned = cleaned.replace(tagRegex, '').trim()
 
   // 2. Extract leading thinking scratchpad (e.g. "Here's a thinking process: ...", "Thinking Process: ...")
-  const leadingThinkRegex = /^(?:Here'?s a thinking process[:\n]|Thinking Process[:\n]|Thinking[:\n])([\s\S]*?)(?=(?:#+\s+|[A-Z][a-z0-9\s]+:|```|<h[1-6]>|\n\n(?:Di|Dalam|Pada|Untuk|Sebagai|Berikut|Halo|Hai|SegiaTech)))/i
+  const leadingThinkRegex = /^(?:Here'?s a thinking process[:\n]|Thinking Process[:\n]|Thinking[:\n])([\s\S]*?)(?=(?:#+\s+|[A-Z][a-z0-9\s]+:|```|<h[1-6]>|\n\n(?:Di|Dalam|Pada|Untuk|Sebagai|Berikut|Halo|Hai|UNIMASI)))/i
   const leadingMatch = cleaned.match(leadingThinkRegex)
   if (leadingMatch && leadingMatch[1]?.trim()) {
     thoughtsCollector = (thoughtsCollector ? thoughtsCollector + '\n\n' : '') + leadingMatch[0].trim()
@@ -880,7 +880,7 @@ ATURAN REKAYASA & KEAMANAN (AGENTS.md & ZERO-MOCK):
      * Tanyakan klarifikasi secara ramah, ringkas, dan proaktif dengan menyajikan 2-3 pilihan opsi terarah agar pengguna dapat memutuskan langkah selanjutnya dengan cepat.
    - PENGECUALIAN: Jika pengguna meminta perbaikan dan data artikel aktif SUDAH TERSEDIA di editor (tercantum pada bagian DATA LENGKAP ARTIKEL AKTIF di atas), gunakan langsung data tersebut dan uraikan masalah serta perbaikannya tanpa meminta ulang teks artikel kepada pengguna.
 7. DINAMIKA BLOK KONTEN & ARSITEKTUR HALAMAN (DYNAMIC BLOCK ONTOLOGY):
-   - Platform SegiaTech menggunakan katalog blok modular terstruktur yang terus bertambah. Pahami peran, urutan narasi (#10 Hero s/d #80 CTA), blok wajib (anchor), dan efek visual berikut:
+   - Platform UNIMASI menggunakan katalog blok modular terstruktur yang terus bertambah. Pahami peran, urutan narasi (#10 Hero s/d #80 CTA), blok wajib (anchor), dan efek visual berikut:
 ${blockOntology.generateLlmManifest()}
 8. [ATURAN KETAT PEMANGGILAN TOOLS]:
    - DILARANG KERAS mengarang nama fungsi fiktif atau menggunakan contoh dokumentasi seperti "example_function_name", "...", "my_func", atau placeholder lainnya.

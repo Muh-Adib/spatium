@@ -86,7 +86,7 @@
   padding: 0.9rem 1.1rem;
   border-radius: var(--r-md);
   border: 1px dashed var(--line-strong);
-  background: rgba(255, 212, 0, 0.05);
+  background: rgba(255, 214, 0, 0.05);
   color: var(--text-dim);
   font-size: 0.82rem;
   max-width: 76ch;

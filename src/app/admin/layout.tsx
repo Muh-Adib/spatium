@@ -293,7 +293,7 @@ function AdminNavContent({ children }: AdminLayoutProps) {
             {avatar('h-8 w-8')}
             <div className="min-w-0 flex-1">
               <p className="truncate font-semibold text-white leading-tight">{actorName || 'Admin'}</p>
-              <p className="truncate text-[10px] text-neutral-400 mt-0.5">{email || 'admin@segiatech.com'}</p>
+              <p className="truncate text-[10px] text-neutral-400 mt-0.5">{email || 'admin@unimasi.com'}</p>
               <span className={`mt-1 inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[9px] font-medium border ${roleMeta.badge}`}>
                 <RoleIcon className="h-2.5 w-2.5" />
                 {roleLabel}

@@ -160,7 +160,7 @@ export function isPlaceholderValue(val?: string | null): boolean {
     lower.includes('berbobot (40-65') ||
     lower.includes('kata kunci fokus') ||
     lower.includes('judul baru yang dioptimalkan') ||
-    lower.includes('judul seo | segiatech') ||
+    lower.includes('judul seo | unimasi') ||
     lower.includes('deskripsi meta memikat') ||
     lower.includes('deskripsi visual gambar') ||
     lower.includes('ringkasan perubahan editorial') ||
@@ -438,7 +438,7 @@ export async function handleAiAssistantChat(
           category: dbArt.category?.name || 'Website Development',
           status: dbArt.status,
           locale: dbArt.locale || 'id',
-          author: dbArt.author?.name || context?.actorName || 'Tim SegiaTech',
+          author: dbArt.author?.name || context?.actorName || 'Tim UNIMASI',
           focusKeyphrase: dbArt.focusKeyphrase || dbArt.primaryKeyword || '',
           relatedKeyphrases: dbArt.relatedKeyphrases,
           seoTitle: dbArt.seo?.metaTitle || dbArt.title,
@@ -462,7 +462,7 @@ export async function handleAiAssistantChat(
   }
 
   // -------------------------------------------------------------------
-  // INTENT & AUTONOMOUS TOOL DISPATCHER (SegiaTech Domain Tools)
+  // INTENT & AUTONOMOUS TOOL DISPATCHER (UNIMASI Domain Tools)
   // -------------------------------------------------------------------
 
   // Tool 1: Articles Query (if asking about articles, count, drafts, or searching content)
@@ -1171,7 +1171,7 @@ Gunakan data aktual dari hasil eksekusi tool di atas untuk menjawab secara akura
     ]
 
     const baseTitle = (effectiveArticle.title || 'Draf Artikel').split('—')[0].trim()
-    const fixedTitle = baseTitle.includes('SegiaTech') ? baseTitle : `${baseTitle} | SegiaTech`
+    const fixedTitle = baseTitle.includes('UNIMASI') ? baseTitle : `${baseTitle} | UNIMASI`
     const fixedMeta = effectiveArticle.metaDescription && effectiveArticle.metaDescription.length >= 120 && effectiveArticle.metaDescription.length <= 160
       ? effectiveArticle.metaDescription
       : `Ulasan dan panduan mendalam mengenai ${baseTitle}. Pelajari analisis terstruktur dan informasi penting selengkapnya.`
@@ -1196,7 +1196,7 @@ Saya telah memeriksa seluruh konten dan pengaturan artikel **"${effectiveArticle
 - **Skor SEO On-Page**: \`${seoScore}/100\`
 - **Skor Keterbacaan (Readability)**: \`${readScore}/100\`
 - **Jumlah Kata**: ${effectiveArticle.wordCount || 0} kata
-- **Tautan Internal SegiaTech**: ${effectiveArticle.internalLinksCount || 0} tautan
+- **Tautan Internal UNIMASI**: ${effectiveArticle.internalLinksCount || 0} tautan
 
 **Masalah yang Ditemukan pada Halaman:**
 ${issues.length > 0 ? issues.map((i) => `- ${i}`).join('\n') : '- Seluruh indikator saat ini telah memenuhi standar kelulusan.'}
@@ -1230,7 +1230,7 @@ Klik tombol **"Terapkan Perubahan ke Editor"** di bawah ini untuk menerapkan per
   // If no API Key is configured and no tools were executed, prompt user to add API key
   if (!apiKey && executedToolCalls.length === 0) {
     return {
-      reply: '⚠️ **Kunci API Belum Dikonfigurasi**\n\nUntuk berinteraksi dengan AI Assistant Studio SegiaTech (menjalankan inferensi model, analisis kueri, dan pembuatan konten), silakan masukkan API Key Google AI Studio atau OpenRouter Anda di panel Pengaturan AI.',
+      reply: '⚠️ **Kunci API Belum Dikonfigurasi**\n\nUntuk berinteraksi dengan AI Assistant Studio UNIMASI (menjalankan inferensi model, analisis kueri, dan pembuatan konten), silakan masukkan API Key Google AI Studio atau OpenRouter Anda di panel Pengaturan AI.',
       toolCalls: executedToolCalls,
       needsKey: true,
       meta: {
@@ -1306,7 +1306,7 @@ ${
     const artCall = executedToolCalls.find((t) => t.toolName === 'db_articles_query')
     const out = artCall?.output
 
-    syntheticReply = `Berikut data artikel pada basis data PostgreSQL lokal SegiaTech:
+    syntheticReply = `Berikut data artikel pada basis data PostgreSQL lokal UNIMASI:
 
 - **Total Artikel Terdata**: ${out?.totalArticles || 878}
 - **Artikel Terbit**: ${out?.publishedCount || 878}
@@ -1323,9 +1323,9 @@ ${
     const loc = context?.locationName || `Workspace ${activeTab.toUpperCase()}`
     const pageInfo = context?.pageTitle ? ` pada "${context.pageTitle}"` : ''
     const fallbackNotice = failoverHistory.length > 0
-      ? `> *Model AI eksternal (${failoverHistory.map((f) => `\`${f.model}\``).join(', ')}) mengalami kendala/limit kuota. Sistem otomatis beralih ke Mesin Editorial Native SegiaTech (Zero-Mock).* \n\n`
+      ? `> *Model AI eksternal (${failoverHistory.map((f) => `\`${f.model}\``).join(', ')}) mengalami kendala/limit kuota. Sistem otomatis beralih ke Mesin Editorial Native UNIMASI (Zero-Mock).* \n\n`
       : ''
-    syntheticReply = `${fallbackNotice}Halo! Saya AI Assistant Studio SegiaTech. Saat ini Anda sedang berada di **${loc}**${pageInfo}.
+    syntheticReply = `${fallbackNotice}Halo! Saya AI Assistant Studio UNIMASI. Saat ini Anda sedang berada di **${loc}**${pageInfo}.
 
 Basis data terhubung aktif, siap menjalankan kueri data artikel, portofolio, analitik GSC, dan audit SEO.`
   }

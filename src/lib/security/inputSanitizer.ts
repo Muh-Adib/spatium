@@ -1,5 +1,5 @@
 /**
- * SegiaTech Security Parser & Input Sanitizer
+ * UNIMASI Security Parser & Input Sanitizer
  * 
  * Provides defense-in-depth against:
  * 1. Cross-Site Scripting (XSS)

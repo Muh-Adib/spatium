@@ -42,10 +42,10 @@ export interface AiConnectionConfig {
   openrouterPool?: string
 }
 
-const STORAGE_KEYS_KEY = 'segiatech_ai_keys'
-const STORAGE_CONN_CONFIG_KEY = 'segiatech_ai_conn_config'
-const STORAGE_SELECTED_MODELS_KEY = 'segiatech_ai_selected_models'
-const LEGACY_CONFIG_KEY = 'segiatech_ai_config'
+const STORAGE_KEYS_KEY = 'unimasi_ai_keys'
+const STORAGE_CONN_CONFIG_KEY = 'unimasi_ai_conn_config'
+const STORAGE_SELECTED_MODELS_KEY = 'unimasi_ai_selected_models'
+const LEGACY_CONFIG_KEY = 'unimasi_ai_config'
 
 /**
  * Mengambil daftar model aktif yang tersedia untuk digunakan
@@ -96,7 +96,7 @@ export function saveSelectedAiModel(model: AiModelItem): AiModelItem[] {
   if (typeof window !== 'undefined') {
     try {
       localStorage.setItem(STORAGE_SELECTED_MODELS_KEY, JSON.stringify(updated))
-      window.dispatchEvent(new CustomEvent('segiatech:ai-models-updated'))
+      window.dispatchEvent(new CustomEvent('unimasi:ai-models-updated'))
     } catch (_) {}
   }
 
@@ -128,7 +128,7 @@ export function saveSelectedAiModelsBatch(models: AiModelItem[]): AiModelItem[] 
   if (typeof window !== 'undefined') {
     try {
       localStorage.setItem(STORAGE_SELECTED_MODELS_KEY, JSON.stringify(list))
-      window.dispatchEvent(new CustomEvent('segiatech:ai-models-updated'))
+      window.dispatchEvent(new CustomEvent('unimasi:ai-models-updated'))
     } catch (_) {}
   }
 
@@ -152,7 +152,7 @@ export function removeSelectedAiModel(modelId: string, provider: 'google' | 'ope
   if (typeof window !== 'undefined') {
     try {
       localStorage.setItem(STORAGE_SELECTED_MODELS_KEY, JSON.stringify(updated))
-      window.dispatchEvent(new CustomEvent('segiatech:ai-models-updated'))
+      window.dispatchEvent(new CustomEvent('unimasi:ai-models-updated'))
     } catch (_) {}
   }
 
@@ -555,7 +555,7 @@ function syncLegacyConfig(keys: ApiKeyItem[]) {
 
     if (typeof window !== 'undefined') {
       window.dispatchEvent(
-        new CustomEvent('segiatech:ai-key-updated', {
+        new CustomEvent('unimasi:ai-key-updated', {
           detail: {
             googleKey: updated.googleApiKey,
             openrouterKey: updated.openrouterApiKey,
@@ -595,7 +595,7 @@ export interface AiKeyPromptEventDetail {
  */
 export function triggerAiKeyPrompt(detail?: AiKeyPromptEventDetail): void {
   if (typeof window === 'undefined') return
-  window.dispatchEvent(new CustomEvent('segiatech:open-ai-key-modal', { detail }))
+  window.dispatchEvent(new CustomEvent('unimasi:open-ai-key-modal', { detail }))
   window.dispatchEvent(new CustomEvent('open-ai-key-modal', { detail }))
 }
 

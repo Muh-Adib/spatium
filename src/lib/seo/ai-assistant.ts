@@ -48,7 +48,7 @@ export function generateTemplateFallback(
   ctx: SeoAiContext,
   extraParams?: { fileName?: string; imageContext?: string }
 ): string | string[] {
-  const brand = ctx.brandName || 'SegiaTech'
+  const brand = ctx.brandName || 'UNIMASI'
   const title = (ctx.title || '').trim()
   const kw = (ctx.focusKeyphrase || '').trim()
   const locale = ctx.locale || 'id'
@@ -172,7 +172,7 @@ export async function suggestSeoWithAi(
   }
 
   // Define prompts per field
-  const systemPrompt = `You are an elite Technical SEO and Editorial Director for ${ctx.brandName || 'SegiaTech'}.
+  const systemPrompt = `You are an elite Technical SEO and Editorial Director for ${ctx.brandName || 'UNIMASI'}.
 Target Language: ${locale === 'id' ? 'Bahasa Indonesia (formal, professional, compelling)' : 'English (authoritative, clear, crisp)'}.
 Strict Rules:
 - Return ONLY valid JSON formatted as { "value": string | string[], "variants": string[] }.

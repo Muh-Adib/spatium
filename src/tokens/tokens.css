@@ -1,0 +1,68 @@
+/* Design Tokens - Auto-generated */
+/* Do not edit directly - modify tokens.json instead */
+
+/* === PRIMITIVES === */
+:root {
+  --primitive-color-yellow-50: #FFFDE6;
+  --primitive-color-yellow-100: #FFF9BF;
+  --primitive-color-yellow-200: #FFF480;
+  --primitive-color-yellow-300: #FFEE40;
+  --primitive-color-yellow-400: #FFE41A;
+  --primitive-color-yellow-500: #FFD600;
+  --primitive-color-yellow-600: #D6B400;
+  --primitive-color-yellow-700: #A38900;
+  --primitive-color-darkBlue-400: #1C58B3;
+  --primitive-color-darkBlue-500: #0F3A79;
+  --primitive-color-darkBlue-600: #0A2854;
+  --primitive-color-darkBlue-700: #061A36;
+  --primitive-color-navy-800: #0E1E3D;
+  --primitive-color-navy-900: #0A1730;
+  --primitive-color-navy-950: #060A17;
+  --primitive-color-white: #FFFFFF;
+  --primitive-color-black: #000000;
+  --primitive-typography-fontHeading: Montserrat, Syne, sans-serif;
+  --primitive-typography-fontBody: Plus Jakarta Sans, sans-serif;
+  --primitive-typography-fontMono: Space Mono, monospace;
+  --primitive-fontSize-xs: 0.75rem;
+  --primitive-fontSize-sm: 0.875rem;
+  --primitive-fontSize-base: 1rem;
+  --primitive-fontSize-lg: 1.125rem;
+  --primitive-fontSize-xl: 1.25rem;
+  --primitive-fontSize-2xl: 1.5rem;
+  --primitive-fontSize-3xl: 1.875rem;
+  --primitive-fontSize-4xl: 2.25rem;
+  --primitive-fontSize-display: 3.5rem;
+  --primitive-radius-sm: 0.25rem;
+  --primitive-radius-md: 0.5rem;
+  --primitive-radius-lg: 0.75rem;
+  --primitive-radius-xl: 1rem;
+  --primitive-radius-full: 9999px;
+}
+
+/* === SEMANTIC === */
+:root {
+  --color-primary: #FFD600;
+  --color-primaryHover: #FFE41A;
+  --color-primaryForeground: #060A17;
+  --color-background: #060A17;
+  --color-foreground: #FFFFFF;
+  --color-surface: #0A1730;
+  --color-surfaceElevated: #0F3A79;
+  --color-textMuted: #8C9BB3;
+  --color-border: rgba(255, 214, 0, 0.2);
+  --color-borderSubtle: rgba(255, 255, 255, 0.08);
+}
+
+/* === COMPONENTS === */
+:root {
+  --button-primaryBg: #FFD600;
+  --button-primaryFg: #060A17;
+  --button-primaryHoverBg: #FFE41A;
+  --card-bg: #0A1730;
+  --card-border: rgba(255, 255, 255, 0.08);
+  --card-borderHover: rgba(255, 214, 0, 0.2);
+  --studio-bg: #060A17;
+  --studio-sidebarBg: #0A1730;
+  --studio-accent: #FFD600;
+  --studio-border: rgba(255, 214, 0, 0.15);
+}

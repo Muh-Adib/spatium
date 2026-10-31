@@ -11,13 +11,13 @@ export async function GET() {
   const spec = {
     openapi: '3.1.0',
     info: {
-      title: 'SegiaTech Core Delivery API',
+      title: 'UNIMASI Core Delivery API',
       version: '1.0.0',
       description:
-        'Enterprise multi-tenant headless content delivery API for SegiaTech satellite websites and microsites. Provides typed access to published articles, dynamic pages, services, portfolios, technical SEO metadata, and 301 redirects.',
+        'Enterprise multi-tenant headless content delivery API for UNIMASI satellite websites and microsites. Provides typed access to published articles, dynamic pages, services, portfolios, technical SEO metadata, and 301 redirects.',
       contact: {
-        name: 'SegiaTech Engineering',
-        url: 'https://segiatech.com',
+        name: 'UNIMASI Engineering',
+        url: 'https://unimasi.com',
       },
     },
     servers: [

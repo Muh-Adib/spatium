@@ -303,7 +303,7 @@ export function StudioAiSettings({ onSaved }: StudioAiSettingsProps) {
     reloadData()
 
     try {
-      const raw = localStorage.getItem('segiatech_ai_config')
+      const raw = localStorage.getItem('unimasi_ai_config')
       if (raw) {
         const parsed = JSON.parse(raw)
         if (parsed.provider) setSelectedProvider(parsed.provider)
@@ -322,7 +322,7 @@ export function StudioAiSettings({ onSaved }: StudioAiSettingsProps) {
 
   useEffect(() => {
     try {
-      const raw = localStorage.getItem('segiatech_ai_config')
+      const raw = localStorage.getItem('unimasi_ai_config')
       if (raw) {
         const parsed = JSON.parse(raw)
         const savedModel = selectedProvider === 'google' ? (parsed.googleModel || '') : (parsed.openrouterModel || '')
@@ -345,7 +345,7 @@ export function StudioAiSettings({ onSaved }: StudioAiSettingsProps) {
       const activeGoogle = apiKeys.find((k) => k.provider === 'google' && k.isActive) || apiKeys.find((k) => k.provider === 'google')
       const activeOpenrouter = apiKeys.find((k) => k.provider === 'openrouter' && k.isActive) || apiKeys.find((k) => k.provider === 'openrouter')
 
-      const rawExisting = localStorage.getItem('segiatech_ai_config')
+      const rawExisting = localStorage.getItem('unimasi_ai_config')
       const existing = rawExisting ? JSON.parse(rawExisting) : {}
 
       const config = {
@@ -364,13 +364,13 @@ export function StudioAiSettings({ onSaved }: StudioAiSettingsProps) {
         enabledTools,
         toolsCollapsed,
       }
-      localStorage.setItem('segiatech_ai_config', JSON.stringify(config))
+      localStorage.setItem('unimasi_ai_config', JSON.stringify(config))
 
       saveConnectionConfig(connConfig)
       saveTokenOptimizationConfig(tokenOpt)
 
       window.dispatchEvent(
-        new CustomEvent('segiatech:ai-key-updated', {
+        new CustomEvent('unimasi:ai-key-updated', {
           detail: {
             provider: selectedProvider,
             apiKey: activeKey?.key || (selectedProvider === 'google' ? config.googleApiKey : config.openrouterApiKey),
@@ -390,14 +390,14 @@ export function StudioAiSettings({ onSaved }: StudioAiSettingsProps) {
   const handleSelectActiveModel = (modelId: string) => {
     setActiveModel(modelId)
     try {
-      const raw = localStorage.getItem('segiatech_ai_config')
+      const raw = localStorage.getItem('unimasi_ai_config')
       const parsed = raw ? JSON.parse(raw) : {}
       const updated = {
         ...parsed,
         model: modelId,
         ...(selectedProvider === 'google' ? { googleModel: modelId } : { openrouterModel: modelId }),
       }
-      localStorage.setItem('segiatech_ai_config', JSON.stringify(updated))
+      localStorage.setItem('unimasi_ai_config', JSON.stringify(updated))
     } catch (_) {}
   }
 
@@ -838,7 +838,7 @@ export function StudioAiSettings({ onSaved }: StudioAiSettingsProps) {
       if (toolId === 'gsc_keyword_intelligence') sampleParams = { days: 28, limit: 3 }
       if (toolId === 'technical_seo_audit') sampleParams = { checkType: 'all', limit: 3 }
       if (toolId === 'redirect_301_inspector') sampleParams = { limit: 3 }
-      if (toolId === 'create_article_draft') sampleParams = { topic: 'Uji Native Tool SegiaTech' }
+      if (toolId === 'create_article_draft') sampleParams = { topic: 'Uji Native Tool UNIMASI' }
       if (toolId === 'system_health_inspector') sampleParams = { deepCheck: true }
 
       const res = await fetch('/api/ai/tools', {

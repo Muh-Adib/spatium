@@ -227,10 +227,10 @@ export function ClientLogoSlider({ items = [] }: { items?: ClientLogoItem[] }) {
             aria-live="polite"
             className="absolute -top-12 left-1/2 -translate-x-1/2 z-40 whitespace-nowrap
                        px-3.5 py-1 rounded-full bg-[#191919]/95 border border-[#2B2B2B] backdrop-blur-md
-                       text-[11px] sm:text-xs font-medium text-white shadow-[0_4px_16px_rgba(0,0,0,0.5),0_0_12px_rgba(242, 199, 160,0.15)]
+                       text-[11px] sm:text-xs font-medium text-white shadow-[0_4px_16px_rgba(0,0,0,0.5),0_0_12px_rgba(255, 214, 0,0.15)]
                        flex items-center gap-1.5 animate-in fade-in zoom-in-95 duration-200 pointer-events-none"
           >
-            <span className="w-1.5 h-1.5 rounded-full bg-[#F2C7A0] shrink-0" />
+            <span className="w-1.5 h-1.5 rounded-full bg-[#FFD600] shrink-0" />
             <span>{item.name}</span>
             {/* Arrow pointer */}
             <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-[#191919] border-r border-b border-[#2B2B2B] rotate-45" />
@@ -247,8 +247,8 @@ export function ClientLogoSlider({ items = [] }: { items?: ClientLogoItem[] }) {
                      filter brightness-100 contrast-110 drop-shadow-[0_2px_6px_rgba(0,0,0,0.4)]
                      pointer-events-none select-none ${item.imgClass || ''} ${
             isActive
-              ? 'opacity-100 scale-110 brightness-120 drop-shadow-[0_0_14px_rgba(242, 199, 160,0.35)]'
-              : 'opacity-70 group-hover:opacity-100 group-hover:scale-106 group-hover:drop-shadow-[0_0_10px_rgba(242, 199, 160,0.2)]'
+              ? 'opacity-100 scale-110 brightness-120 drop-shadow-[0_0_14px_rgba(255, 214, 0,0.35)]'
+              : 'opacity-70 group-hover:opacity-100 group-hover:scale-106 group-hover:drop-shadow-[0_0_10px_rgba(255, 214, 0,0.2)]'
           }`}
         />
       </div>
@@ -263,12 +263,12 @@ export function ClientLogoSlider({ items = [] }: { items?: ClientLogoItem[] }) {
     <section
       className="relative overflow-hidden border-b border-white/10 py-6 sm:py-8 select-none"
       style={{ background: 'linear-gradient(180deg, #000000 0%, #0C0C0C 100%)' }}
-      aria-label="Klien dan institusi yang telah mempercayai SegiaTech"
+      aria-label="Klien dan institusi yang telah mempercayai UNIMASI"
     >
       {/* ── Section label: Kolaborasi & Kepercayaan (Minimalis & Elegan) ── */}
       <div className="text-center mb-5 px-4 pointer-events-none">
-        <span className="inline-flex items-center gap-2 text-[10px] sm:text-[11px] font-mono uppercase tracking-[0.25em] text-[#F2C7A0] font-semibold px-3 py-1 rounded-full bg-[#191919] border border-[#2B2B2B] backdrop-blur-sm shadow-[0_0_12px_rgba(242, 199, 160,0.1)]">
-          <span className="w-1.5 h-1.5 rounded-full bg-[#F2C7A0]" />
+        <span className="inline-flex items-center gap-2 text-[10px] sm:text-[11px] font-mono uppercase tracking-[0.25em] text-[#FFD600] font-semibold px-3 py-1 rounded-full bg-[#191919] border border-[#2B2B2B] backdrop-blur-sm shadow-[0_0_12px_rgba(255, 214, 0,0.1)]">
+          <span className="w-1.5 h-1.5 rounded-full bg-[#FFD600]" />
           Kolaborasi &amp; Kepercayaan
         </span>
       </div>

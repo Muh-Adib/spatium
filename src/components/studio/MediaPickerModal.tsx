@@ -192,7 +192,7 @@ export default function MediaPickerModal({
                 {title}
               </h3>
               <p className="text-[11px] font-mono text-neutral-400">
-                Pustaka Media Digital SegiaTech ({pagination.total} Aset Tersedia)
+                Pustaka Media Digital UNIMASI ({pagination.total} Aset Tersedia)
               </p>
             </div>
           </div>
@@ -414,7 +414,7 @@ export default function MediaPickerModal({
                   {uploading ? 'Mengunggah Gambar ke Server...' : 'Pilih atau Drag File Gambar'}
                 </h4>
                 <p className="text-xs text-neutral-400 mb-6 font-mono max-w-sm mx-auto leading-relaxed">
-                  Mendukung format WebP, AVIF, PNG, JPG, dan GIF. Otomatis disimpan dan dioptimasi di server SegiaTech.
+                  Mendukung format WebP, AVIF, PNG, JPG, dan GIF. Otomatis disimpan dan dioptimasi di server UNIMASI.
                 </p>
 
                 {uploadError && (

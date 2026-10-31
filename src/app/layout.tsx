@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next'
-import { Syne, Plus_Jakarta_Sans, DM_Mono } from 'next/font/google'
+import { Syne, Plus_Jakarta_Sans, DM_Mono, Montserrat, Inter } from 'next/font/google'
 import { SiteShell } from '@/components/layout/SiteShell'
 import '@/styles/tokens.css'
 import '@/styles/globals.css'
@@ -23,6 +23,23 @@ const dmMono = DM_Mono({
   subsets: ['latin'],
   weight: ['400', '500'],
   variable: '--font-dm-mono',
+  display: 'swap',
+})
+
+// Official brand fonts (AGENTS.md): Montserrat for headings, Inter for body.
+// Used by the immersive hero + landing motion layer only; existing pages keep
+// their current fonts until a dedicated pass migrates them.
+const montserrat = Montserrat({
+  subsets: ['latin'],
+  weight: ['400', '500', '700', '800'],
+  variable: '--font-montserrat',
+  display: 'swap',
+})
+
+const inter = Inter({
+  subsets: ['latin'],
+  weight: ['400', '500'],
+  variable: '--font-inter',
   display: 'swap',
 })
 
@@ -70,7 +87,10 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" className={`${syne.variable} ${plusJakartaSans.variable} ${dmMono.variable}`}>
+    <html
+      lang="en"
+      className={`${syne.variable} ${plusJakartaSans.variable} ${dmMono.variable} ${montserrat.variable} ${inter.variable}`}
+    >
       <body>
         <SiteShell>{children}</SiteShell>
       </body>

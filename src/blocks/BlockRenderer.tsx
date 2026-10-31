@@ -21,14 +21,16 @@ export function BlockRenderer({ blocks, className = '' }: BlockRendererProps) {
   return (
     <div className={`blocks-container ${className}`}>
       {blocks.map((block, idx) => {
-        const Component = BLOCK_COMPONENT_REGISTRY[block.type]
+        if (!block) return null
+        const blockType = (block as any)?.type || (block as any)?.__component
+        const Component = BLOCK_COMPONENT_REGISTRY[blockType]
 
         if (!Component) {
-          console.warn(`[BlockRenderer] Unknown block type: "${(block as any)?.type}" at index ${idx}`)
+          console.warn(`[BlockRenderer] Unknown block type: "${blockType}" at index ${idx}`)
           return null
         }
 
-        return <Component key={block.id || `${block.type}-${idx}`} block={block} />
+        return <Component key={block.id || `${blockType}-${idx}`} block={block} />
       })}
     </div>
   )

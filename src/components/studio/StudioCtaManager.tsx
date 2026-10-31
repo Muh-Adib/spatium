@@ -85,7 +85,7 @@ export function StudioCtaManager() {
     setName('')
     setSlug('')
     setTitle('Konsultasikan Transformasi Digital Bisnis Anda')
-    setDescription('Diskusikan kebutuhan arsitektur Next.js enterprise dan sistem kustom bersama lead software engineer SegiaTech.')
+    setDescription('Diskusikan kebutuhan arsitektur Next.js enterprise dan sistem kustom bersama lead software engineer UNIMASI.')
     setPrimaryLabel('Jadwalkan Konsultasi')
     setPrimaryHref('/kontak')
     setVariant('banner')

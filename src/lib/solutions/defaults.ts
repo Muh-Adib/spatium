@@ -518,7 +518,7 @@ export const DEFAULT_STORED_TAXONOMY: SolutionTaxonomyItemStored[] = [
     },
     "technologies": [
       "Next.js 16 App Router",
-      "SegiaTech Studio CMS",
+      "UNIMASI Studio CMS",
       "PostgreSQL",
       "Payment Gateway API"
     ]
@@ -585,7 +585,7 @@ export const DEFAULT_STORED_TAXONOMY: SolutionTaxonomyItemStored[] = [
     },
     "technologies": [
       "Next.js 16 App Router",
-      "SegiaTech Studio CMS",
+      "UNIMASI Studio CMS",
       "PostgreSQL",
       "Tailwind CSS"
     ]
@@ -650,7 +650,7 @@ export const DEFAULT_STORED_TAXONOMY: SolutionTaxonomyItemStored[] = [
     },
     "technologies": [
       "Next.js 16 App Router",
-      "SegiaTech Studio CMS",
+      "UNIMASI Studio CMS",
       "PostgreSQL",
       "Docker"
     ]
@@ -782,7 +782,7 @@ export const DEFAULT_STORED_TAXONOMY: SolutionTaxonomyItemStored[] = [
     "relatedPortfolio": {
       "slug": "interactive-wall-projection-museum",
       "title": "Sistem Manajemen Data & Prospek Klien B2B",
-      "client": "Institusi Mitra Strategis SegiaTech",
+      "client": "Institusi Mitra Strategis UNIMASI",
       "category": "Software Enterprise & CRM Kustom",
       "image": "/images/companies/unicam-creative-studio.jpg",
       "highlight": "Meningkatkan konversi penutupan penjualan hingga 35% dengan alur kerja terstruktur."
@@ -851,7 +851,7 @@ export const DEFAULT_STORED_TAXONOMY: SolutionTaxonomyItemStored[] = [
     "relatedPortfolio": {
       "slug": "interactive-wall-projection-museum",
       "title": "Sistem Operasional & Platform Data Terintegrasi",
-      "client": "Mitra Korporasi SegiaTech",
+      "client": "Mitra Korporasi UNIMASI",
       "category": "Software Enterprise & ERP Kustom",
       "image": "/images/companies/unicam-creative-studio.jpg",
       "highlight": "Menghemat lebih dari 120 jam kerja manual per bulan melalui otomatisasi alur kerja."
@@ -975,7 +975,7 @@ export const DEFAULT_STORED_TAXONOMY: SolutionTaxonomyItemStored[] = [
       "Arsitektur Next.js App Router dengan Server-Side Rendering (SSR)",
       "Skor audit Google Lighthouse 95-100% pada performa & Core Web Vitals",
       "Struktur schema JSON-LD terverifikasi, OpenGraph, dan sitemap dinamis",
-      "Pengelolaan artikel & portofolio mudah via SegiaTech Studio Control Center",
+      "Pengelolaan artikel & portofolio mudah via UNIMASI Studio Control Center",
       "Desain editorial modern tanpa ketergantungan plugin pihak ketiga yang rentan"
     ],
     "businessBenefits": [
@@ -1000,7 +1000,7 @@ export const DEFAULT_STORED_TAXONOMY: SolutionTaxonomyItemStored[] = [
     },
     "technologies": [
       "Next.js 16 App Router",
-      "SegiaTech Studio CMS",
+      "UNIMASI Studio CMS",
       "Tailwind CSS",
       "GSAP Motion"
     ]
@@ -1201,7 +1201,7 @@ export const DEFAULT_STORED_TAXONOMY: SolutionTaxonomyItemStored[] = [
 
 export const DEFAULT_PRACTICAL_SOLUTIONS_FAQ = [
   {
-    "question": "Apakah SegiaTech menyediakan hardware (seperti layar touchscreen atau proyektor)?",
+    "question": "Apakah UNIMASI menyediakan hardware (seperti layar touchscreen atau proyektor)?",
     "answer": "Fokus keahlian utama kami adalah merancang software, interaksi sensor, dan visualnya. Namun kami selalu memberikan panduan spesifikasi hardware yang tepat, serta siap berkolaborasi langsung dengan vendor rental hardware Anda di lokasi agar semuanya terpasang presisi."
   },
   {
@@ -1213,7 +1213,7 @@ export const DEFAULT_PRACTICAL_SOLUTIONS_FAQ = [
     "answer": "Untuk pameran berdurasi singkat hingga menengah, proses perancangan konsep hingga software siap uji biasanya membutuhkan 2–4 minggu. Untuk instalasi permanen di wahana wisata atau sistem kampus, umumnya memakan waktu 4–8 minggu termasuk uji ketahanan."
   },
   {
-    "question": "Apakah tim SegiaTech bisa mendampingi pemasangan langsung di lokasi acara?",
+    "question": "Apakah tim UNIMASI bisa mendampingi pemasangan langsung di lokasi acara?",
     "answer": "Tentu saja. Tim teknis kami siap hadir langsung di lokasi pameran atau institusi Anda (di berbagai kota di Indonesia) untuk melakukan kalibrasi sensor, pengujian akhir, dan pendampingan di hari pembukaan."
   },
   {

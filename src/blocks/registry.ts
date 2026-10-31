@@ -127,6 +127,46 @@ export const UNIMASI_BLOCK_MANIFEST: BlockManifestEntry[] = [
     },
   },
   {
+    type: 'comparison-matrix',
+    name: 'Perbandingan Kualitas UNIMASI Cinema',
+    category: 'showcase',
+    description: 'Tabel perbandingan visual animasi 3D bioskop vs aset stok konvensional.',
+    dataSchema: {
+      title: { type: 'string' },
+      items: { type: 'array' },
+    },
+    settingsSchema: {
+      theme: ['dark'],
+    },
+    samplePayload: {
+      type: 'comparison-matrix',
+      data: {
+        title: 'Perbandingan Kualitas: Mengapa Memilih UNIMASI',
+      },
+    },
+  },
+  {
+    type: 'visual-showcase-gallery',
+    name: 'Galeri Showcase 3D Render',
+    category: 'showcase',
+    description: 'Showcase karya render 3D, turntable karakter, dan videotron billboard.',
+    dataSchema: {
+      badge: { type: 'string' },
+      title: { type: 'string' },
+      items: { type: 'array' },
+    },
+    settingsSchema: {
+      theme: ['dark'],
+    },
+    samplePayload: {
+      type: 'visual-showcase-gallery',
+      data: {
+        badge: 'Karya Nyata UNIMASI',
+        title: 'Showcase Produksi Animasi 3D',
+      },
+    },
+  },
+  {
     type: 'text-editorial',
     name: 'Editorial Text & Aside Note',
     category: 'narrative',

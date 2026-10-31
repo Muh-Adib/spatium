@@ -7,19 +7,21 @@ import { ProjectCard } from '@/components/portfolio/ProjectCard'
 import { CTASection } from '@/components/ui/CTASection'
 import { Reveal } from '@/components/ui/Reveal'
 import { Icon } from '@/components/Icon'
-import { PROJECTS, PROJECT_CATEGORIES, type ProjectCategory } from '@/data/projects'
+import { PROJECTS, PROJECT_CATEGORIES, type ProjectCategory, type Project } from '@/data/projects'
 import '@/pages/portfolio.css'
 
 type Filter = 'all' | ProjectCategory
 
 const VALID: Filter[] = ['all', '2d', '3d', 'motion', 'assets']
 
-export function PortfolioClient() {
+export function PortfolioClient({ initialProjects }: { initialProjects?: Project[] }) {
   const searchParams = useSearchParams()
   const router = useRouter()
   const raw = searchParams ? (searchParams.get('category') as Filter | null) : null
   const initial: Filter = raw && VALID.includes(raw) ? raw : 'all'
   const [filter, setFilter] = useState<Filter>(initial)
+
+  const allProjects = initialProjects && initialProjects.length > 0 ? initialProjects : PROJECTS
 
   useEffect(() => {
     const next = searchParams ? (searchParams.get('category') as Filter | null) : null
@@ -39,8 +41,8 @@ export function PortfolioClient() {
   }
 
   const visible = useMemo(
-    () => (filter === 'all' ? PROJECTS : PROJECTS.filter((p) => p.category === filter)),
-    [filter],
+    () => (filter === 'all' ? allProjects : allProjects.filter((p) => p.category === filter)),
+    [filter, allProjects],
   )
 
   return (

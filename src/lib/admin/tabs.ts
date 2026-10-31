@@ -33,6 +33,7 @@ export const ADMIN_TABS = [
   'portfolio',
   'services',
   'solutions',
+  'blocks',
   'media',
   'cta',
   'keywords',
@@ -66,6 +67,7 @@ export const TAB_META: Record<AdminTab, TabMeta> = {
   portfolio: { label: 'Portofolio', description: 'Studi kasus dan katalog proyek interaktif.', icon: Briefcase },
   services: { label: 'Layanan', description: 'Departemen layanan beserta layanan turunannya.', icon: Boxes },
   solutions: { label: 'Solusi', description: 'Solusi bisnis, venue, dan finder quiz.', icon: Sparkles },
+  blocks: { label: 'Blok Elemen', description: 'Katalog dynamic block contracts, schema variabel, animasi, dan AI agent blueprints.', icon: Boxes },
   media: { label: 'Media', description: 'Pustaka gambar, rename otomatis dengan 301, audit alt-text, dan optimasi WebP.', icon: ImageIcon },
   cta: { label: 'Blok CTA', description: 'Preset ajakan bertindak yang bisa disisipkan di artikel, layanan, dan portofolio.', icon: Megaphone },
   keywords: { label: 'Keyword', description: 'Bank keyword dan peluang kueri dari data GSC.', icon: Target },
@@ -90,7 +92,7 @@ export const WRITE_ARTICLE_META: TabMeta = {
 
 /** Groups are separated by a divider in the nav rail (no text headings needed). */
 export const NAV_GROUPS: { id: string; tabs: AdminTab[] }[] = [
-  { id: 'content', tabs: ['overview', 'articles', 'portfolio', 'services', 'solutions', 'media', 'cta'] },
+  { id: 'content', tabs: ['overview', 'articles', 'portfolio', 'services', 'solutions', 'blocks', 'media', 'cta'] },
   { id: 'seo', tabs: ['keywords', 'audit', 'perf', 'gsc', 'redirects', 'migration'] },
   { id: 'ai', tabs: ['ai-settings'] },
   { id: 'engine', tabs: ['import', 'system'] },

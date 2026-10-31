@@ -65,11 +65,11 @@ export function StudioAiKeyPromptModal() {
       setIsOpen(true)
     }
 
-    window.addEventListener('segiatech:open-ai-key-modal', handlePrompt)
+    window.addEventListener('unimasi:open-ai-key-modal', handlePrompt)
     window.addEventListener('open-ai-key-modal', handlePrompt)
 
     return () => {
-      window.removeEventListener('segiatech:open-ai-key-modal', handlePrompt)
+      window.removeEventListener('unimasi:open-ai-key-modal', handlePrompt)
       window.removeEventListener('open-ai-key-modal', handlePrompt)
     }
   }, [])
@@ -106,9 +106,9 @@ export function StudioAiKeyPromptModal() {
         testedModel: model.trim(),
       })
 
-      // 2. Sinkronisasi ke legacy localStorage `segiatech_ai_config`
+      // 2. Sinkronisasi ke legacy localStorage `unimasi_ai_config`
       try {
-        const raw = localStorage.getItem('segiatech_ai_config')
+        const raw = localStorage.getItem('unimasi_ai_config')
         const current = raw ? JSON.parse(raw) : {}
         const updated = {
           ...current,
@@ -116,12 +116,12 @@ export function StudioAiKeyPromptModal() {
           [provider === 'google' ? 'googleApiKey' : 'openrouterApiKey']: cleanKey,
           [provider === 'google' ? 'googleModel' : 'openrouterModel']: model.trim(),
         }
-        localStorage.setItem('segiatech_ai_config', JSON.stringify(updated))
+        localStorage.setItem('unimasi_ai_config', JSON.stringify(updated))
       } catch (_) {}
 
       // 3. Dispatch notifikasi perubahan key ke seluruh listener
       window.dispatchEvent(
-        new CustomEvent('segiatech:ai-key-updated', {
+        new CustomEvent('unimasi:ai-key-updated', {
           detail: { provider, apiKey: cleanKey, model: model.trim() },
         })
       )

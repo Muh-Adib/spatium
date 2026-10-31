@@ -66,7 +66,7 @@ export function buildArticleSchema(props: ArticleJsonLdProps) {
     imageUrl,
     publishedAt,
     updatedAt,
-    authorName = 'SegiaTech Editorial Team',
+    authorName = 'UNIMASI Editorial Team',
     authorUrl = siteConfig.url,
     inLanguage = 'id-ID',
   } = props
@@ -191,13 +191,13 @@ export function buildOrganizationSchema() {
       logo: `${siteConfig.url}/logo.png`,
       description: siteConfig.description,
       sameAs: [
-        'https://github.com/segiatech',
-        'https://www.linkedin.com/company/segiatech',
+        'https://github.com/unimasi',
+        'https://www.linkedin.com/company/unimasi',
       ],
       contactPoint: {
         '@type': 'ContactPoint',
         contactType: 'customer support',
-        email: siteConfig.email || 'info@segiatech.com',
+        email: siteConfig.email || 'info@unimasi.com',
       },
     },
     {

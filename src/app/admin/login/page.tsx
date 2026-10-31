@@ -48,30 +48,30 @@ export default function AdminLoginPage() {
         {/* Brand Header */}
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-2.5 mb-4 group">
-            <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center shadow-lg group-hover:border-accent-400/50 transition-colors">
+            <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center shadow-lg group-hover:border-[#FFD600]/50 transition-colors">
               <Image
-                src="/images/logo.png"
-                alt="SegiaTech"
-                width={28}
-                height={28}
+                src="/logo/logo-color.webp"
+                alt="UNIMASI"
+                width={32}
+                height={32}
                 className="object-contain"
               />
             </div>
             <div className="text-left">
-              <span className="font-display font-bold text-lg text-white group-hover:text-accent-300 transition-colors">
-                SegiaTech
+              <span className="font-syne font-bold text-lg text-white group-hover:text-[#FFD600] transition-colors">
+                UNIMASI
               </span>
-              <span className="block text-[10px] font-mono text-accent-400 uppercase tracking-widest font-semibold">
+              <span className="block text-[10px] font-mono text-[#FFD600] uppercase tracking-widest font-semibold">
                 Studio Workspace
               </span>
             </div>
           </Link>
 
-          <h1 className="text-2xl font-bold font-display tracking-tight text-white mt-2">
+          <h1 className="text-2xl font-bold font-syne tracking-tight text-white mt-2">
             Autentikasi Studio
           </h1>
-          <p className="text-xs text-neutral-400 mt-1.5">
-            Masuk ke panel manajemen konten, audit SEO, dan operasional platform SegiaTech.
+          <p className="text-xs text-neutral-400 mt-1.5 font-sans">
+            Masuk ke panel manajemen konten, katalog animasi, dan operasional platform UNIMASI.
           </p>
         </div>
 
@@ -145,7 +145,7 @@ export default function AdminLoginPage() {
 
         {/* Footer info */}
         <p className="text-center text-[11px] text-neutral-500 mt-6 font-mono">
-          © {new Date().getFullYear()} SegiaTech. Arsitektur Terproteksi NextAuth.js
+          © {new Date().getFullYear()} UNIMASI Studio. Arsitektur Terproteksi NextAuth.js
         </p>
       </div>
     </div>
