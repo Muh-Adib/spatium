@@ -295,8 +295,20 @@ export function AnimationWebGL({ progressRef, onStatus, className }: AnimationWe
     }
 
     try {
+      // Probe the context ourselves first: when WebGL is unavailable,
+      // canvas.getContext returns null and letting THREE.WebGLRenderer
+      // discover it logs its own internal console.error before we could
+      // fall back — keep the degradation fully silent.
+      const glContext =
+        canvas.getContext('webgl2', { alpha: true, antialias: tier === 'high', powerPreference: 'high-performance' }) ??
+        canvas.getContext('webgl', { alpha: true, antialias: tier === 'high', powerPreference: 'high-performance' })
+      if (!glContext || typeof glContext.getParameter !== 'function') {
+        reportFailure()
+        return undefined
+      }
       renderer = new THREE.WebGLRenderer({
         canvas,
+        context: glContext,
         alpha: true,
         antialias: tier === 'high',
         powerPreference: 'high-performance',
