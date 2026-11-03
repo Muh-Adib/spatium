@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { checkRateLimit, clientKey, rateLimitResponse } from '@/lib/security/rate-limit'
 import path from 'path'
 import fs from 'fs'
 
@@ -24,6 +25,9 @@ import {
 export async function POST(request: NextRequest) {
   const auth = await requireUser(request)
   if (auth.error) return auth.error
+
+  const rl = checkRateLimit({ key: clientKey(request, 'upload'), limit: 30, windowMs: 60_000 })
+  if (!rl.allowed) return rateLimitResponse(rl.retryAfterSeconds)
 
   try {
     const formData = await request.formData()

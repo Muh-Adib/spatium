@@ -3,6 +3,7 @@ import { prisma } from '@/lib/db/prisma'
 import { checkPublicationGate } from '@/lib/seo/validation'
 import { extractContentImages } from './validation'
 import { normalizeIndexingUrl } from '@/lib/seo/indexing-rate-limit'
+import { siteConfig } from '@/config/site'
 import { triggerAutomatedIndexing } from '@/lib/seo/indexing-dispatcher'
 
 /** Database rows survive restarts. Row locks prevent duplicate publication across replicas. */
@@ -54,16 +55,16 @@ export async function publishDueArticles(now = new Date()) {
   if (slugs.length) {
     try {
       const { revalidatePath } = await import('next/cache')
-      revalidatePath('/artikel')
+      revalidatePath(siteConfig.articlesBasePath)
       revalidatePath('/sitemap.xml')
-      for (const slug of slugs) revalidatePath(`/artikel/${slug}`)
+      for (const slug of slugs) revalidatePath(`${siteConfig.articlesBasePath}/${slug}`)
     } catch (error) { console.warn('[scheduler] Published successfully; cache invalidation unavailable outside a request', error) }
 
     // Automated Indexing for newly published scheduled articles
     // Executes outside the DB transaction without blocking the scheduler tick
     for (const item of publishedArticles) {
       try {
-        const targetUrl = normalizeIndexingUrl(`/artikel/${item.slug}`)
+        const targetUrl = normalizeIndexingUrl(`${siteConfig.articlesBasePath}/${item.slug}`)
         void triggerAutomatedIndexing({
           url: targetUrl,
           entityType: 'article',

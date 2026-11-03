@@ -1,107 +1,89 @@
 import React from 'react'
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
-import { BlockRenderer } from '@/blocks/BlockRenderer'
-import { UnimasiBlockInstance } from '@/blocks/contracts'
+import { BlockRenderer } from '@/components/blocks/BlockRenderer'
+import { getPage, getPages } from '@/lib/content/queries'
+import { siteConfig } from '@/config/site'
 
 interface PageProps {
   params: Promise<{ slug: string }>
 }
 
-export const revalidate = 300 // 5 minutes cache
+export const revalidate = 300 // 5 minutes cache, ISR supported
+
+export async function generateStaticParams() {
+  try {
+    const pages = await getPages()
+    return pages.map((page) => ({ slug: page.slug }))
+  } catch (err) {
+    console.error('Failed to generate static params for /p/[slug]:', err)
+    return []
+  }
+}
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params
+  const page = await getPage(slug)
+
+  if (!page) {
+    return {
+      title: 'Halaman Tidak Ditemukan · UNIMASI Studio',
+    }
+  }
+
+  const title = page.seo?.metaTitle || `${page.title} — UNIMASI Studio`
+  const description =
+    page.seo?.metaDescription ||
+    page.excerpt ||
+    'Landing page resmi UNIMASI Studio.'
+  const canonical = page.canonical || `${siteConfig.url}/p/${slug}`
+
   return {
-    title: `${slug.replace(/-/g, ' ').toUpperCase()} — UNIMASI Studio`,
-    description: `Dynamic landing experience rendered via Server-Driven UI block system.`,
+    title,
+    description,
+    alternates: { canonical },
+    openGraph: {
+      type: 'website',
+      title,
+      description,
+      url: canonical,
+      siteName: 'UNIMASI Studio',
+    },
   }
 }
 
 export default async function DynamicBlockPage({ params }: PageProps) {
   const { slug } = await params
+  const page = await getPage(slug)
 
-  // Sample Server-Driven UI blocks (as returned by Core CMS Delivery API)
-  const blocks: UnimasiBlockInstance[] = [
-    {
-      type: 'hero-cinema',
-      data: {
-        badge: 'Iconic 3D Studio',
-        headline: 'We engineer CGI animations that command attention.',
-        subheadline:
-          'From architectural visual effects to anamorphic 3D videotron billboards, our production pipeline brings complex narratives to life.',
-        primaryCta: { label: 'Start Project Consultation', href: '/contact' },
-        secondaryCta: { label: 'Explore Our Work', href: '/portfolio' },
-      },
-      settings: {
-        height: 'large',
-        animation: 'reveal-stagger',
-        alignment: 'left',
-      },
-    },
-    {
-      type: 'stats-ticker',
-      data: {
-        eyebrow: 'Proven Scale',
-        title: 'Studio metrics that validate precision',
-        metrics: [
-          { value: '1,140+', label: 'Delivered Projects', detail: 'Across Indonesia & Southeast Asia' },
-          { value: '4K/60fps', label: 'Mastering Fidelity', detail: 'Realtime GPU render farm' },
-          { value: '100%', label: 'Delivery Guarantee', detail: 'Milestone-based sprints' },
-        ],
-      },
-      settings: {
-        columns: 3,
-      },
-    },
-    {
-      type: 'process-timeline',
-      data: {
-        eyebrow: 'Our Methodology',
-        title: 'The 4-stage studio production pipeline',
-        steps: [
-          {
-            stepNumber: '01',
-            title: 'Brief & Treatment',
-            summary: 'Aligning business objectives, core messaging, and tone-of-voice before a single frame is drawn.',
-            deliverables: ['Creative Brief', 'Style Frames'],
-          },
-          {
-            stepNumber: '02',
-            title: 'Storyboarding & Animatics',
-            summary: 'Creating timed 2D animatics with rough audio to lock pacing, camera angles, and transitions.',
-            deliverables: ['Full Animatic Deck', 'Voiceover Timing'],
-          },
-          {
-            stepNumber: '03',
-            title: '3D Look-Dev & Simulation',
-            summary: 'Building custom 3D geometries, materials, lighting, and physics simulations in Blender and Houdini.',
-            deliverables: ['Clay Renders', 'Shading Passes'],
-          },
-          {
-            stepNumber: '04',
-            title: 'Compositing & Sound Mastering',
-            summary: 'Color grading, motion blur passes, sound design, and exporting in multi-display aspect ratios.',
-            deliverables: ['DCP/ProRes 4K', 'Social Crops'],
-          },
-        ],
-      },
-    },
-    {
-      type: 'interactive-cta',
-      data: {
-        eyebrow: 'Start Your Brief',
-        headline: 'Bring us the idea that feels impossible to explain.',
-        body: 'Our creative directors will review your brief within 24 hours and advise the optimal visual pipeline.',
-        primaryCta: { label: 'Schedule Studio Briefing', href: '/contact' },
-        secondaryCta: { label: 'Read Journal Articles', href: '/journal' },
-      },
-    },
-  ]
+  if (!page) {
+    notFound()
+  }
+
+  const blocks = Array.isArray(page.blocks) ? page.blocks : []
 
   return (
-    <main className="min-h-screen bg-black">
-      <BlockRenderer blocks={blocks} />
+    <main className="min-h-screen bg-[var(--color-background)] text-white">
+      {blocks.length > 0 ? (
+        <BlockRenderer blocks={blocks} />
+      ) : page.content ? (
+        <div className="container max-w-4xl mx-auto py-32 px-4 sm:px-6">
+          <h1 className="text-display-md font-bold mb-6 font-heading">{page.title}</h1>
+          <div
+            className="text-body-md text-[var(--text-muted)] leading-relaxed space-y-4"
+            dangerouslySetInnerHTML={{ __html: page.content }}
+          />
+        </div>
+      ) : (
+        <div className="container max-w-4xl mx-auto py-32 px-4 text-center">
+          <h1 className="text-display-md font-bold font-heading">{page.title}</h1>
+          {page.excerpt && (
+            <p className="mt-4 text-body-md text-[var(--text-muted)] max-w-xl mx-auto">
+              {page.excerpt}
+            </p>
+          )}
+        </div>
+      )}
     </main>
   )
 }

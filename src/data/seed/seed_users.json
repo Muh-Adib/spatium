@@ -1,0 +1,74 @@
+[
+  {
+    "id": "usr_wp_11_adib_it",
+    "name": "Adib IT",
+    "email": "adib@udp.co.id",
+    "role": "super_admin",
+    "passwordHash": "scrypt:090c1da37865984a1d9d7bfcc216928f:0ac9ccd9041d156f50650b3d26f75f78b411625caac4a0560b8e69369db9e03186c6a62f204c73d38b7b4c38f69448960f19688e44b42abbe5a36966a57c3211",
+    "wpUserId": 11,
+    "createdAt": "2026-11-03T08:00:00.000Z"
+  },
+  {
+    "id": "usr_wp_9_admin_it",
+    "name": "Admin IT",
+    "email": "budy@unicamstudio.com",
+    "role": "super_admin",
+    "passwordHash": "scrypt:943eb3c254374c391f970b8ff0ca65e5:79978b5f92f014bc258000b01149646c5d585762935af8af5aa1b7fe6bc450c6d589fcefa6569aa199c73e50048ec0be885779fff91da56d477875e3bd4ab548",
+    "wpUserId": 9,
+    "createdAt": "2026-11-03T08:00:00.000Z"
+  },
+  {
+    "id": "usr_wp_8_admin_unimasi",
+    "name": "Admin Unimasi",
+    "email": "magangunicam@gmail.com",
+    "role": "editor",
+    "passwordHash": "scrypt:943eb3c254374c391f970b8ff0ca65e5:79978b5f92f014bc258000b01149646c5d585762935af8af5aa1b7fe6bc450c6d589fcefa6569aa199c73e50048ec0be885779fff91da56d477875e3bd4ab548",
+    "wpUserId": 8,
+    "createdAt": "2026-11-03T08:00:00.000Z"
+  },
+  {
+    "id": "usr_wp_2_anima",
+    "name": "Anima",
+    "email": "budymkurniawan@gmail.com",
+    "role": "editor",
+    "passwordHash": "scrypt:943eb3c254374c391f970b8ff0ca65e5:79978b5f92f014bc258000b01149646c5d585762935af8af5aa1b7fe6bc450c6d589fcefa6569aa199c73e50048ec0be885779fff91da56d477875e3bd4ab548",
+    "wpUserId": 2,
+    "createdAt": "2026-11-03T08:00:00.000Z"
+  },
+  {
+    "id": "usr_wp_1_emailunicam",
+    "name": "Unicam Master Admin",
+    "email": "emailunicam@gmail.com",
+    "role": "super_admin",
+    "passwordHash": "scrypt:943eb3c254374c391f970b8ff0ca65e5:79978b5f92f014bc258000b01149646c5d585762935af8af5aa1b7fe6bc450c6d589fcefa6569aa199c73e50048ec0be885779fff91da56d477875e3bd4ab548",
+    "wpUserId": 1,
+    "createdAt": "2026-11-03T08:00:00.000Z"
+  },
+  {
+    "id": "usr_wp_4_fadhel",
+    "name": "Fadhel",
+    "email": "fadhel3546@gmail.com",
+    "role": "super_admin",
+    "passwordHash": "scrypt:943eb3c254374c391f970b8ff0ca65e5:79978b5f92f014bc258000b01149646c5d585762935af8af5aa1b7fe6bc450c6d589fcefa6569aa199c73e50048ec0be885779fff91da56d477875e3bd4ab548",
+    "wpUserId": 4,
+    "createdAt": "2026-11-03T08:00:00.000Z"
+  },
+  {
+    "id": "usr_wp_10_randa_unimasi",
+    "name": "Randa Unimasi",
+    "email": "randa@udp.co.id",
+    "role": "super_admin",
+    "passwordHash": "scrypt:943eb3c254374c391f970b8ff0ca65e5:79978b5f92f014bc258000b01149646c5d585762935af8af5aa1b7fe6bc450c6d589fcefa6569aa199c73e50048ec0be885779fff91da56d477875e3bd4ab548",
+    "wpUserId": 10,
+    "createdAt": "2026-11-03T08:00:00.000Z"
+  },
+  {
+    "id": "usr_wp_3_unima",
+    "name": "Unima (Unifams)",
+    "email": "budymindful@gmail.com",
+    "role": "super_admin",
+    "passwordHash": "scrypt:943eb3c254374c391f970b8ff0ca65e5:79978b5f92f014bc258000b01149646c5d585762935af8af5aa1b7fe6bc450c6d589fcefa6569aa199c73e50048ec0be885779fff91da56d477875e3bd4ab548",
+    "wpUserId": 3,
+    "createdAt": "2026-11-03T08:00:00.000Z"
+  }
+]

@@ -1,0 +1,46 @@
+[
+  {
+    "slug": "2d-animation",
+    "title": "2D Animation",
+    "tag": "01",
+    "shortDescription": "Animasi dua dimensi untuk edukasi, penjelasan konsep, komunikasi, dan storytelling.",
+    "order": 1,
+    "status": "published",
+    "showInNav": true,
+    "metaTitle": "2D Animation — UNIMASI",
+    "metaDescription": "Animasi dua dimensi untuk edukasi, penjelasan konsep, komunikasi, dan storytelling."
+  },
+  {
+    "slug": "3d-animation-visual-production",
+    "title": "3D Animation & Visual Production",
+    "tag": "02",
+    "shortDescription": "Produksi animasi tiga dimensi untuk memvisualkan produk, objek, mesin, lingkungan, atau proses yang sulit direkam secara langsung.",
+    "order": 2,
+    "status": "published",
+    "showInNav": true,
+    "metaTitle": "3D Animation & Visual Production — UNIMASI",
+    "metaDescription": "Produksi animasi tiga dimensi untuk memvisualkan produk, objek, mesin, lingkungan, atau proses yang sulit direkam secara langsung."
+  },
+  {
+    "slug": "motion-graphics",
+    "title": "Motion Graphics",
+    "tag": "03",
+    "shortDescription": "Animasi grafis, tipografi bergerak, infografis, visualisasi data, dan grafis untuk video.",
+    "order": 3,
+    "status": "published",
+    "showInNav": true,
+    "metaTitle": "Motion Graphics — UNIMASI",
+    "metaDescription": "Animasi grafis, tipografi bergerak, infografis, visualisasi data, dan grafis untuk video."
+  },
+  {
+    "slug": "digital-visual-assets-ai-assisted-production",
+    "title": "Digital Visual Assets & AI-Assisted Production",
+    "tag": "04",
+    "shortDescription": "Pembuatan aset visual digital untuk berbagai kebutuhan, termasuk aset 3D dan produksi visual dengan bantuan AI.",
+    "order": 4,
+    "status": "published",
+    "showInNav": true,
+    "metaTitle": "Digital Visual Assets & AI-Assisted Production — UNIMASI",
+    "metaDescription": "Pembuatan aset visual digital untuk berbagai kebutuhan, termasuk aset 3D dan produksi visual dengan bantuan AI."
+  }
+]

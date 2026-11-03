@@ -9,7 +9,7 @@ import '@/pages/contact.css'
 const SITE_URL = 'https://unimasi.studio'
 
 export const metadata: Metadata = {
-  title: 'Contact',
+  title: 'Start a Project with UNIMASI',
   description:
     'Start a project with UNIMASI. Send your brief, service interest, budget range and timeline and the studio will respond within two working days.',
   alternates: {

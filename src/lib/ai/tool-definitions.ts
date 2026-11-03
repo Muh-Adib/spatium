@@ -320,14 +320,14 @@ export const SEGIA_TOOLS_CATALOG: ToolDefinition[] = [
   {
     id: 'redirect_301_inspector',
     name: 'redirect_301_inspector',
-    label: 'Pengawas Redirect 301 WordPress',
+    label: 'Pengawas Redirect 301',
     category: 'seo',
-    description: 'Pemeriksaan integritas 887+ aturan pengalihan URL legacy WordPress ke URL kanonikal Next.js untuk mencegah broken link 404.',
+    description: 'Pemeriksaan integritas aturan pengalihan URL legacy ke URL kanonikal Next.js untuk mencegah broken link 404.',
     parameters: [
       {
         name: 'path',
         type: 'string',
-        description: 'Path URL lama WordPress yang ingin diuji pencocokan aturan 301-nya.',
+        description: 'Path URL lama yang ingin diuji pencocokan aturan 301-nya.',
         required: false,
         example: '/jasa-pembuatan-website-bogor/',
       },

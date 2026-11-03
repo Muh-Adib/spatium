@@ -110,7 +110,7 @@ export function buildServiceSchema(props: ServiceJsonLdProps) {
     description,
     url,
     imageUrl,
-    serviceType = 'Web Development & Creative Technology',
+    serviceType = 'Animation & Motion Design Studio',
     providerName = siteConfig.name,
     areaServed = 'Indonesia',
     faqs = [],

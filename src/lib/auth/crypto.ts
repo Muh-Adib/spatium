@@ -36,6 +36,11 @@ export function verifyPasswordScrypt(password: string, storedHash: string): Prom
       return resolve(false)
     }
 
+    // Strictly validate salt and keyHex structure to prevent 0-length scrypt bypass
+    if (!/^[0-9a-f]{32,}$/i.test(salt) || !/^[0-9a-f]{64,}$/i.test(keyHex)) {
+      return resolve(false)
+    }
+
     let expectedKey: Buffer
     try {
       expectedKey = Buffer.from(keyHex, 'hex')

@@ -1,86 +1,227 @@
 [
   {
-    "id": 1,
-    "documentId": "svc-2d-animation",
-    "title": "2D Animation",
-    "name": "2D Animation",
-    "slug": "2d-animation",
-    "index": "01",
-    "shortName": "2D Animation",
-    "tagline": "Clear narratives, expressive character motion, and stylized storytelling.",
-    "shortDescription": "Animasi 2D frame-by-frame, karakter naratif, explainer video, dan visualisasi konsep berkarakter kuat.",
-    "summary": "Animasi 2D frame-by-frame, karakter naratif, explainer video, dan visualisasi konsep berkarakter kuat.",
-    "fullDescription": "UNIMASI menghadirkan animasi 2D berstandar studio internasional. Dari sketsa awal, desain karakter orisinal, hingga animasi frame-by-frame yang luwes untuk mengomunikasikan pesan rumit secara emosional dan berkesan.",
-    "deliverables": [
-      "Frame-by-frame Character Animation",
-      "Vector Explainer Videos",
-      "Storyboard & Animatic Development",
-      "Social & Campaign Short Videos"
-    ],
+    "slug": "2d-explainer-animation",
+    "name": "2D Explainer Animation",
+    "categorySlug": "2d-animation",
+    "indexNumber": "01.1",
+    "shortDescription": "2D Explainer Animation — bagian dari 2D Animation.",
     "order": 1,
-    "isActive": true
+    "status": "published"
   },
   {
-    "id": 2,
-    "documentId": "svc-3d-animation-visual-production",
-    "title": "3D Animation & Visual Production",
-    "name": "3D Animation & Visual Production",
-    "slug": "3d-animation",
-    "index": "02",
-    "shortName": "3D Animation",
-    "tagline": "Cinematic CGI, architectural wireframes, and mechanical precision.",
-    "shortDescription": "Produksi visual 3D CGI sinematik, wireframe produk kompleks, visualisasi arsitektur, dan simulasi industri.",
-    "summary": "Produksi visual 3D CGI sinematik, wireframe produk kompleks, visualisasi arsitektur, dan simulasi industri.",
-    "fullDescription": "Spesialisasi kami dalam CGI photorealistic dan animasi mekanikal memungkinkan perusahaan memperlihatkan cara kerja mesin rumit, rancangan arsitektur megah, atau produk inovatif sebelum fisik aslinya diproduksi massal.",
-    "deliverables": [
-      "Cinematic 3D Product Renders & Wireframes",
-      "Architectural & Industrial Walkthroughs",
-      "Mechanical Exploded-View Animations",
-      "Look Development & Photorealistic Texturing"
-    ],
+    "slug": "2d-educational-animation",
+    "name": "2D Educational Animation",
+    "categorySlug": "2d-animation",
+    "indexNumber": "01.2",
+    "shortDescription": "2D Educational Animation — bagian dari 2D Animation.",
     "order": 2,
-    "isActive": true
+    "status": "published"
   },
   {
-    "id": 3,
-    "documentId": "svc-motion-graphic",
-    "title": "Motion Graphic",
-    "name": "Motion Graphic",
-    "slug": "motion-graphics",
-    "index": "03",
-    "shortName": "Motion Graphics",
-    "tagline": "Kinetic typography, dynamic data infographics, and brand ident packages.",
-    "shortDescription": "Desain grafis bergerak, tipografi kinetik, infografis data animasi, dan paket identitas gerak korporat.",
-    "summary": "Desain grafis bergerak, tipografi kinetik, infografis data animasi, dan paket identitas gerak korporat.",
-    "fullDescription": "Mengubah data statistik dan laporan korporat yang kaku menjadi infografis animasi dinamis yang memikat perhatian penonton dalam hitungan detik. Cocok untuk presentasi investor, kampanye media sosial, dan video profil korporat.",
-    "deliverables": [
-      "Animated Infographics & Data Visualization",
-      "Kinetic Typography & Broadcast Packages",
-      "Brand Identity Motion & Bumper Idents",
-      "UI Interaction & Micro-Animations"
-    ],
+    "slug": "2d-character-animation",
+    "name": "2D Character Animation",
+    "categorySlug": "2d-animation",
+    "indexNumber": "01.3",
+    "shortDescription": "2D Character Animation — bagian dari 2D Animation.",
     "order": 3,
-    "isActive": true
+    "status": "published"
   },
   {
-    "id": 4,
-    "documentId": "svc-digital-visual-assets-ai-assisted-production",
-    "title": "Digital Visual Assets & AI-Assisted Production",
-    "name": "Digital Visual Assets & AI-Assisted Production",
-    "slug": "digital-assets-ai",
-    "index": "04",
-    "shortName": "Visual Assets & AI",
-    "tagline": "Scalable visual asset pipelines assisted by generative AI and real-time engines.",
-    "shortDescription": "Pipeline aset visual digital skala besar yang dipercepat dengan teknologi AI generatif dan engine real-time.",
-    "summary": "Pipeline aset visual digital skala besar yang dipercepat dengan teknologi AI generatif dan engine real-time.",
-    "fullDescription": "Memadukan keahlian artist senior dengan akselerasi alat kecerdasan buatan untuk eksplorasi konsep gaya (style frames), pembuatan variasi aset visual massal, dan rendering real-time dengan efisiensi waktu hingga 60%.",
-    "deliverables": [
-      "AI-Assisted Concept Art & Style Frames",
-      "Massive Asset Production Pipelines",
-      "Real-time Unreal Engine / Blender Visuals",
-      "Digital Brand Asset Libraries"
-    ],
+    "slug": "2d-infographic-animation",
+    "name": "2D Infographic Animation",
+    "categorySlug": "2d-animation",
+    "indexNumber": "01.4",
+    "shortDescription": "2D Infographic Animation — bagian dari 2D Animation.",
     "order": 4,
-    "isActive": true
+    "status": "published"
+  },
+  {
+    "slug": "2d-illustration-animation",
+    "name": "2D Illustration Animation",
+    "categorySlug": "2d-animation",
+    "indexNumber": "01.5",
+    "shortDescription": "2D Illustration Animation — bagian dari 2D Animation.",
+    "order": 5,
+    "status": "published"
+  },
+  {
+    "slug": "2d-training-safety-animation",
+    "name": "2D Training & Safety Animation",
+    "categorySlug": "2d-animation",
+    "indexNumber": "01.6",
+    "shortDescription": "2D Training & Safety Animation — bagian dari 2D Animation.",
+    "order": 6,
+    "status": "published"
+  },
+  {
+    "slug": "3d-product-animation",
+    "name": "3D Product Animation",
+    "categorySlug": "3d-animation-visual-production",
+    "indexNumber": "02.1",
+    "shortDescription": "3D Product Animation — bagian dari 3D Animation & Visual Production.",
+    "order": 1,
+    "status": "published"
+  },
+  {
+    "slug": "3d-industrial-animation",
+    "name": "3D Industrial Animation",
+    "categorySlug": "3d-animation-visual-production",
+    "indexNumber": "02.2",
+    "shortDescription": "3D Industrial Animation — bagian dari 3D Animation & Visual Production.",
+    "order": 2,
+    "status": "published"
+  },
+  {
+    "slug": "3d-architectural-visualization",
+    "name": "3D Architectural Visualization",
+    "categorySlug": "3d-animation-visual-production",
+    "indexNumber": "02.3",
+    "shortDescription": "3D Architectural Visualization — bagian dari 3D Animation & Visual Production.",
+    "order": 3,
+    "status": "published"
+  },
+  {
+    "slug": "3d-modeling-texturing",
+    "name": "3D Modeling & Texturing",
+    "categorySlug": "3d-animation-visual-production",
+    "indexNumber": "02.4",
+    "shortDescription": "3D Modeling & Texturing — bagian dari 3D Animation & Visual Production.",
+    "order": 4,
+    "status": "published"
+  },
+  {
+    "slug": "3d-character-animation",
+    "name": "3D Character Animation",
+    "categorySlug": "3d-animation-visual-production",
+    "indexNumber": "02.5",
+    "shortDescription": "3D Character Animation — bagian dari 3D Animation & Visual Production.",
+    "order": 5,
+    "status": "published"
+  },
+  {
+    "slug": "3d-process-visualization",
+    "name": "3D Process Visualization",
+    "categorySlug": "3d-animation-visual-production",
+    "indexNumber": "02.6",
+    "shortDescription": "3D Process Visualization — bagian dari 3D Animation & Visual Production.",
+    "order": 6,
+    "status": "published"
+  },
+  {
+    "slug": "3d-asset-production",
+    "name": "3D Asset Production",
+    "categorySlug": "3d-animation-visual-production",
+    "indexNumber": "02.7",
+    "shortDescription": "3D Asset Production — bagian dari 3D Animation & Visual Production.",
+    "order": 7,
+    "status": "published"
+  },
+  {
+    "slug": "corporate-motion-graphics",
+    "name": "Corporate Motion Graphics",
+    "categorySlug": "motion-graphics",
+    "indexNumber": "03.1",
+    "shortDescription": "Corporate Motion Graphics — bagian dari Motion Graphics.",
+    "order": 1,
+    "status": "published"
+  },
+  {
+    "slug": "kinetic-typography",
+    "name": "Kinetic Typography",
+    "categorySlug": "motion-graphics",
+    "indexNumber": "03.2",
+    "shortDescription": "Kinetic Typography — bagian dari Motion Graphics.",
+    "order": 2,
+    "status": "published"
+  },
+  {
+    "slug": "animated-infographics",
+    "name": "Animated Infographics",
+    "categorySlug": "motion-graphics",
+    "indexNumber": "03.3",
+    "shortDescription": "Animated Infographics — bagian dari Motion Graphics.",
+    "order": 3,
+    "status": "published"
+  },
+  {
+    "slug": "logo-animation",
+    "name": "Logo Animation",
+    "categorySlug": "motion-graphics",
+    "indexNumber": "03.4",
+    "shortDescription": "Logo Animation — bagian dari Motion Graphics.",
+    "order": 4,
+    "status": "published"
+  },
+  {
+    "slug": "ui-motion-graphics",
+    "name": "UI Motion Graphics",
+    "categorySlug": "motion-graphics",
+    "indexNumber": "03.5",
+    "shortDescription": "UI Motion Graphics — bagian dari Motion Graphics.",
+    "order": 5,
+    "status": "published"
+  },
+  {
+    "slug": "motion-graphics-package",
+    "name": "Motion Graphics Package",
+    "categorySlug": "motion-graphics",
+    "indexNumber": "03.6",
+    "shortDescription": "Motion Graphics Package — bagian dari Motion Graphics.",
+    "order": 6,
+    "status": "published"
+  },
+  {
+    "slug": "video-graphics-compositing",
+    "name": "Video Graphics & Compositing",
+    "categorySlug": "motion-graphics",
+    "indexNumber": "03.7",
+    "shortDescription": "Video Graphics & Compositing — bagian dari Motion Graphics.",
+    "order": 7,
+    "status": "published"
+  },
+  {
+    "slug": "3d-asset-library",
+    "name": "3D Asset Library",
+    "categorySlug": "digital-visual-assets-ai-assisted-production",
+    "indexNumber": "04.1",
+    "shortDescription": "3D Asset Library — bagian dari Digital Visual Assets & AI-Assisted Production.",
+    "order": 1,
+    "status": "published"
+  },
+  {
+    "slug": "real-time-3d-assets",
+    "name": "Real-Time 3D Assets",
+    "categorySlug": "digital-visual-assets-ai-assisted-production",
+    "indexNumber": "04.2",
+    "shortDescription": "Real-Time 3D Assets — bagian dari Digital Visual Assets & AI-Assisted Production.",
+    "order": 2,
+    "status": "published"
+  },
+  {
+    "slug": "animation-assets",
+    "name": "Animation Assets",
+    "categorySlug": "digital-visual-assets-ai-assisted-production",
+    "indexNumber": "04.3",
+    "shortDescription": "Animation Assets — bagian dari Digital Visual Assets & AI-Assisted Production.",
+    "order": 3,
+    "status": "published"
+  },
+  {
+    "slug": "ai-assisted-visual-production",
+    "name": "AI-Assisted Visual Production",
+    "categorySlug": "digital-visual-assets-ai-assisted-production",
+    "indexNumber": "04.4",
+    "shortDescription": "AI-Assisted Visual Production — bagian dari Digital Visual Assets & AI-Assisted Production.",
+    "order": 4,
+    "status": "published"
+  },
+  {
+    "slug": "high-volume-visual-production",
+    "name": "High-Volume Visual Production",
+    "categorySlug": "digital-visual-assets-ai-assisted-production",
+    "indexNumber": "04.5",
+    "shortDescription": "High-Volume Visual Production — bagian dari Digital Visual Assets & AI-Assisted Production.",
+    "order": 5,
+    "status": "published"
   }
 ]

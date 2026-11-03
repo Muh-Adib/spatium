@@ -7,7 +7,8 @@ export async function validateCredentials(emailInput?: unknown, passwordInput?: 
     return null
   }
 
-  const email = String(emailInput).toLowerCase().trim()
+  const rawInput = String(emailInput).trim()
+  const email = rawInput.toLowerCase()
   const password = String(passwordInput)
 
   if (!email || !password) {
@@ -16,7 +17,17 @@ export async function validateCredentials(emailInput?: unknown, passwordInput?: 
 
   // 2. Check Database users table with scrypt password verification
   try {
-    const u = await prisma.orm.public.User.where({ email }).first()
+    let u = await prisma.orm.public.User.where({ email }).first()
+    if (!u) {
+      // Support login via WordPress username / display name
+      const allUsers = await prisma.orm.public.User.all()
+      u = allUsers.find(
+        (user) =>
+          user.name.toLowerCase() === rawInput.toLowerCase() ||
+          user.id.toLowerCase() === `usr_${rawInput.toLowerCase().replace(/[^a-z0-9]+/g, '_')}`
+      ) || null
+    }
+
     if (u && !u.passwordHash) return null
     if (u && u.passwordHash) {
       const isValid = await verifyPasswordScrypt(password, u.passwordHash)
@@ -24,6 +35,8 @@ export async function validateCredentials(emailInput?: unknown, passwordInput?: 
 
       const roleMap: Record<string, string> = {
         super_admin: 'SUPER_ADMIN',
+        administrator: 'SUPER_ADMIN',
+        admin: 'SUPER_ADMIN',
         content_admin: 'CONTENT_ADMIN',
         editor: 'EDITOR',
         author: 'AUTHOR',
@@ -31,8 +44,7 @@ export async function validateCredentials(emailInput?: unknown, passwordInput?: 
         seo_manager: 'SEO_MANAGER',
         media_manager: 'MEDIA_MANAGER',
       }
-      const role = roleMap[u.role.toLowerCase()]
-      if (!role) return null
+      const role = roleMap[u.role.toLowerCase()] || 'EDITOR'
       return {
         id: u.id,
         name: u.name,

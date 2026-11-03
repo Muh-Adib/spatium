@@ -25,6 +25,8 @@ export const siteConfig = {
   defaultOgImage: '/favicon.svg',
   locale: 'id_ID',
   alternateLocale: 'en_US',
+  /** Canonical public route for the articles index (brand-specific). */
+  articlesBasePath: '/journal',
 } as const
 
 export type SiteConfig = typeof siteConfig

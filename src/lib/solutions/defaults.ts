@@ -641,12 +641,12 @@ export const DEFAULT_STORED_TAXONOMY: SolutionTaxonomyItemStored[] = [
       "SLA Monitoring & Garansi Server 99.9%"
     ],
     "relatedPortfolio": {
-      "slug": "website-pmb-umby",
-      "title": "Sistem PMB Online & Portal Terintegrasi",
-      "client": "Universitas Mercu Buana Yogyakarta",
-      "category": "Portal PMB & Web Arsitektur",
-      "image": "/images/schools/ugm-kampus-boulevard.jpg",
-      "highlight": "Menangani ribuan pendaftar mahasiswa baru setiap semester dengan reliabilitas SLA 99.9%."
+      "slug": "mercu-buana-branding",
+      "title": "Transformasi Akademik Digital Mercu Buana",
+      "client": "Universitas Mercu Buana",
+      "category": "3D Educational Visualization",
+      "image": "/images/portfolio/mercu-buana.webp",
+      "highlight": "Visualisasi 3D sinematik kampus modern dan program studi akademik untuk menarik minat mahasiswa baru."
     },
     "technologies": [
       "Next.js 16 App Router",
@@ -991,12 +991,12 @@ export const DEFAULT_STORED_TAXONOMY: SolutionTaxonomyItemStored[] = [
       "Garansi Performa Core Web Vitals Hijau"
     ],
     "relatedPortfolio": {
-      "slug": "website-smk-pb-soedirman-2",
-      "title": "Website Institusi & Profil Kredibilitas Tinggi",
-      "client": "Yayasan Panglima Besar Soedirman",
-      "category": "Web Profil Institusi & Arsitektur",
-      "image": "/images/schools/ugm-kampus-boulevard.jpg",
-      "highlight": "Meningkatkan citra institusi dengan performa sub-detik dan struktur informasi yang jelas."
+      "slug": "telkom-dfe-explainer",
+      "title": "Telkom Digital Future Enterprise: Menembus Batas Konektivitas",
+      "client": "Telkom Indonesia",
+      "category": "Motion Graphics · Tech Explainer",
+      "image": "/images/portfolio/telkom-dfe.webp",
+      "highlight": "Animasi teknologi futuristik memvisualisasikan jaringan fiber optik dan hybrid cloud berskala nasional."
     },
     "technologies": [
       "Next.js 16 App Router",
@@ -1240,19 +1240,19 @@ export const DEFAULT_REAL_PORTFOLIO_PROOF = [
     "image": "/images/portfolio/interactive-3d-aquarium.png"
   },
   {
-    "slug": "website-pmb-umby",
-    "title": "Sistem PMB Online & Portal Terintegrasi",
-    "client": "Universitas Mercu Buana Yogyakarta",
-    "category": "Portal PMB & Web Arsitektur",
-    "highlight": "Menangani ribuan pendaftar mahasiswa baru setiap semester dengan reliabilitas SLA 99.9%.",
-    "image": "/images/schools/ugm-kampus-boulevard.jpg"
+    "slug": "telkom-dfe-explainer",
+    "title": "Telkom Digital Future Enterprise: Menembus Batas Konektivitas",
+    "client": "Telkom Indonesia",
+    "category": "Motion Graphics · Tech Explainer",
+    "highlight": "Animasi teknologi futuristik memvisualisasikan jaringan fiber optik dan hybrid cloud berskala nasional.",
+    "image": "/images/portfolio/telkom-dfe.webp"
   },
   {
     "slug": "virtual-exhibition-ugm",
-    "title": "Virtual Exhibition & Interactive Showcase",
+    "title": "Visualisasi Riset & Inovasi Teknologi UGM",
     "client": "Universitas Gadjah Mada",
-    "category": "Virtual 360° & Pameran Online",
-    "highlight": "Pameran virtual 360° yang dapat dijelajahi audiens dari seluruh dunia tanpa hambatan jarak.",
-    "image": "/images/schools/ugm-kampus-boulevard.jpg"
+    "category": "Spatial & 3D Experience",
+    "highlight": "Pameran virtual 3D yang dapat dijelajahi audiens dari seluruh dunia tanpa hambatan jarak.",
+    "image": "/images/portfolio/ugm.webp"
   }
 ]

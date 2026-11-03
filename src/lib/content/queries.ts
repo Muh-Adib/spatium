@@ -387,7 +387,7 @@ export async function getServices(): Promise<Service[]> {
 // --- Portfolio --------------------------------------------------------------
 
 export async function getPortfolio(slug: string): Promise<Portfolio | null> {
-  let normalizedSlug = slug === 'website-smk-mahanain' ? 'website-smk-mahanaim' : slug
+  let normalizedSlug = slug
   if (normalizedSlug === 'interactive-3d-aquarium') normalizedSlug = 'interactive-3d-aquarium-edutainment'
 
   // 1. Try SQLite first

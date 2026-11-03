@@ -3,15 +3,19 @@
   "private": true,
   "version": "1.0.0",
   "type": "module",
-  "description": "UNIMASI — Animation & Motion Design Studio. Premium interactive studio website with integrated WebShift Core Backend & Studio Admin.",
+  "description": "UNIMASI \u2014 Animation & Motion Design Studio. Premium interactive studio website with integrated WebShift Core Backend & Studio Admin.",
   "scripts": {
     "dev": "next dev -p 3001",
     "build": "next build",
     "start": "next start -p 3001",
+    "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "type-check": "tsc --noEmit",
     "db:push": "prisma db update",
-    "db:seed": "tsx --conditions=react-server scripts/seed.ts"
+    "db:seed": "tsx --conditions=react-server scripts/seed.ts",
+    "dev:wp-sync": "tsx --conditions=react-server scripts/dev/wp-sync.ts",
+    "validate-seed": "tsx --conditions=react-server scripts/validate-seed.ts",
+    "seo-audit": "tsx scripts/seo-audit.ts"
   },
   "dependencies": {
     "@gsap/react": "^2.1.0",

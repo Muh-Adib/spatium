@@ -160,7 +160,8 @@ export function StudioServicesManager() {
       setDepOrder(String(cat.order ?? 0))
       setDepStatus(cat.status || 'published')
       setDepShowInNav(Boolean(cat.showInNav ?? true))
-      setDepBlocks(Array.isArray(cat.blocks) ? cat.blocks : [])
+      const depParsed = typeof cat.blocks === 'string' ? (cat.blocks ? JSON.parse(cat.blocks) : []) : cat.blocks
+      setDepBlocks(Array.isArray(depParsed) ? depParsed : [])
       setSeoTitle(cat.metaTitle || cat.title)
       setMetaDesc(cat.metaDescription || cat.shortDescription || '')
       setFocusKeyphrase(cat.focusKeyphrase || cat.title)
@@ -1159,7 +1160,13 @@ export function StudioServicesManager() {
                   <div className="mt-4 flex flex-wrap gap-2 text-[11px] font-mono text-neutral-400">
                     <span className="px-2 py-0.5 rounded bg-white/5">/{cat.slug}</span>
                     <span className="px-2 py-0.5 rounded bg-white/5">
-                      {Array.isArray(cat.blocks) ? cat.blocks.length : 0} Blok
+                      {(() => {
+                        if (Array.isArray(cat.blocks)) return cat.blocks.length
+                        if (typeof cat.blocks === 'string') {
+                          try { return JSON.parse(cat.blocks).length } catch { return 0 }
+                        }
+                        return 0
+                      })()} Blok
                     </span>
                     {cat.showInNav && (
                       <span className="px-2 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20">

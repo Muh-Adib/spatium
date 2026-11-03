@@ -3,7 +3,7 @@ import type { PageBlock } from '@/lib/content/types'
 import Image from 'next/image'
 import Link from 'next/link'
 import { normalizeImage } from '@/lib/content/transform'
-import { cleanWpHtml } from '@/lib/import/transform'
+import { cleanRichHtml } from '@/lib/content/html'
 import { sanitizeHtmlContent } from '@/lib/security/sanitize-html'
 import { IframeEmbed } from '@/components/ui/IframeEmbed'
 import {
@@ -27,6 +27,10 @@ import {
   DepartmentServiceListBlock,
   VisualShowcaseGalleryBlock,
   MediaShowcaseBlock,
+  HeroPortfolioBlock,
+  PortfolioCaseStudyBlock,
+  HeroSolutionBlock,
+  CaseStudyChapterBlock,
 } from './CatalogBlocks'
 import { HeroCinemaBlock } from '@/blocks/HeroCinemaBlock'
 import { ProcessTimelineBlock } from '@/blocks/ProcessTimelineBlock'
@@ -76,6 +80,15 @@ function renderBlockContent(block: any, idx: number, contextData?: BlockRenderer
     // UNIMASI Dedicated Cinema Blocks
     case 'hero-cinema':
       return <HeroCinemaBlock block={block} />
+    case 'hero-portfolio':
+    case 'hero-case-study':
+      return <HeroPortfolioBlock block={block} />
+    case 'portfolio-case-study':
+      return <PortfolioCaseStudyBlock block={block} />
+    case 'hero-solution':
+      return <HeroSolutionBlock block={block} />
+    case 'case-study-chapter':
+      return <CaseStudyChapterBlock block={block} />
     case 'process-timeline':
       return <ProcessTimelineBlock block={block} />
     case 'stats-ticker':
@@ -260,7 +273,7 @@ function FeatureGridBlockComponent({ block }: { block: any }) {
 }
 
 function RichTextBlockComponent({ block }: { block: any }) {
-  const content = typeof block.content === 'string' ? cleanWpHtml(block.content) : ''
+  const content = typeof block.content === 'string' ? cleanRichHtml(block.content) : ''
   const sanitizedContent = sanitizeHtmlContent(content)
   return (
     <section className="py-16 sm:py-24 bg-[var(--color-background)] text-white border-b border-white/[0.08]">

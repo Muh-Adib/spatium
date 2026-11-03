@@ -22,6 +22,12 @@ export const PUBLIC_API_RULES: PublicApiRule[] = [
     exact: false,
   },
   {
+    path: '/api/health',
+    methods: ['GET'],
+    reason: 'Container liveness/readiness probe for Docker & Coolify healthchecks',
+    exact: true,
+  },
+  {
     path: '/api/vitals',
     methods: ['POST'],
     reason: 'Public Core Web Vitals RUM metrics collection from end-user browsers',

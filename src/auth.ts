@@ -7,7 +7,22 @@ export { validateCredentials, getValidatedAuthSecret }
 export const { handlers, signIn, signOut, auth } = NextAuth({
   secret: getValidatedAuthSecret(),
   trustHost: true,
-  session: { strategy: 'jwt' },
+  session: {
+    strategy: 'jwt',
+    maxAge: 8 * 60 * 60,
+  },
+  useSecureCookies: process.env.NODE_ENV === 'production',
+  cookies: {
+    sessionToken: {
+      name: process.env.NODE_ENV === 'production' ? '__Secure-authjs.session-token' : 'authjs.session-token',
+      options: {
+        httpOnly: true,
+        sameSite: 'lax',
+        path: '/',
+        secure: process.env.NODE_ENV === 'production',
+      },
+    },
+  },
   pages: {
     signIn: '/admin/login',
   },

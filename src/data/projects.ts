@@ -1,10 +1,11 @@
 export type ProjectCategory = '2d' | '3d' | 'motion' | 'assets'
+export type ProjectCategoryValue = ProjectCategory | 'unknown'
 
 export type Project = {
   slug: string
   title: string
   client: string
-  category: ProjectCategory
+  category: ProjectCategoryValue
   discipline: string
   year: string
   tagline: string
@@ -14,6 +15,7 @@ export type Project = {
   variant: number
   videoUrl?: string
   posterUrl?: string
+  clientLogoUrl?: string
 }
 
 export const PROJECT_CATEGORIES: { id: 'all' | ProjectCategory; label: string }[] = [
@@ -25,6 +27,68 @@ export const PROJECT_CATEGORIES: { id: 'all' | ProjectCategory; label: string }[
 ]
 
 export const PROJECTS: Project[] = [
+  {
+    slug: 'telkom-dfe-explainer',
+    title: 'Telkom Digital Future Enterprise: Menembus Batas Konektivitas',
+    client: 'Telkom Indonesia',
+    category: 'motion',
+    discipline: 'Motion Graphics · Tech Explainer',
+    year: '2024',
+    tagline: 'Animasi teknologi futuristik memvisualisasikan jaringan fiber optik, satellite gateway, dan cloud hybrid Telkom DFE.',
+    brief:
+      'Konsep telekomunikasi skala makro dan transfer data digital sangat abstrak untuk divisualisasikan dalam alur cerita berdurasi 90 detik.',
+    approach: [
+      'Memadukan grafis isometrik neon dengan garis jaringan kinetik berkecepatan tinggi yang menghubungkan kepulauan Indonesia secara dinamis.',
+      'Pergerakan kamera 2.5D dinamis dengan aksen Bright Yellow (#FFD600) untuk menonjolkan titik backbone jaringan nasional.',
+      'Integrasi tipografi kinetik komprehensif untuk menyajikan arsitektur cloud enterprise secara komunikatif.',
+    ],
+    delivered: ['Naskah & Narasi Teknologi', 'Desain Visual Isometrik 2.5D', 'Animasi Motion Graphics 4K', 'Desain Suara & Audio Sinematik'],
+    variant: 1,
+    posterUrl: '/images/portfolio/telkom-dfe.webp',
+    clientLogoUrl: '/images/clients/telkomsel-dfe.webp',
+    videoUrl: '/videos/unimasi-showreel.webm',
+  },
+  {
+    slug: 'pt-ypti-history-impact',
+    title: 'Dari Visi ke Presisi: Menelusuri Sejarah dan Dampak YPTI',
+    client: 'PT Yogya Presisi Tehnikatama Industri (YPTI)',
+    category: '3d',
+    discipline: '3D Animation · Corporate Industrial',
+    year: '2024',
+    tagline: 'Animasi profil korporat manufaktur presisi tinggi dengan visualisasi 3D CGI mesin CNC 5-axis.',
+    brief:
+      'Memperlihatkan proses pemesinan mikro dengan toleransi mikron secara jelas tanpa terhalang cipratan pendingin atau keterbatasan lensa kamera industri nyata.',
+    approach: [
+      'Rekonstruksi model 3D CAD presisi dari mesin manufaktur dan cetakan injeksi plastik tingkat tinggi.',
+      'Simulasi visual pergerakan alat potong dengan pencahayaan studio industri dramatis.',
+      'Sinematografi 3D macro shot yang menonjolkan kualitas tekstur logam hasil proses pemesinan.',
+    ],
+    delivered: ['Modeling 3D CAD Presisi', 'Simulasi Pemotongan Logam', 'Lighting & Texturing Fotorealistik', 'Compositing & Grading Sinematik'],
+    variant: 2,
+    posterUrl: '/images/portfolio/pt-ypti-3d.webp',
+    clientLogoUrl: '/images/clients/pt-ypti.webp',
+    videoUrl: '/videos/unimasi-showreel.webm',
+  },
+  {
+    slug: 'in-memoriam',
+    title: 'In Memoriam: Merangkai Jejak Kehidupan & Warisan Sejarah',
+    client: 'Sanata Dharma Heritage Foundation',
+    category: '3d',
+    discipline: '3D Animation · Spatial Documentary',
+    year: '2024',
+    tagline: 'Animasi spasial 3D menghidupkan arsip sejarah dan dedikasi tokoh pendidikan dalam dunia visual hidup.',
+    brief:
+      'Menghidupkan foto-foto hitam putih berusia puluhan tahun dengan tetap menjaga integritas sejarah dan rasa hormat yang mendalam.',
+    approach: [
+      'Teknik 2.5D camera projection mapping dipadukan dengan simulasi partikel debu waktu dan pencahayaan chiaroscuro dramatis.',
+      'Rekonstruksi lingkungan 3D historis yang akurat secara arsitektur zaman.',
+      'Penyelarasan storytelling dokumenter yang menyentuh hati audiens lintas generasi.',
+    ],
+    delivered: ['Camera Projection Mapping', 'Rekonstruksi Arsip Digital 3D', 'Animasi Partikel Atmosferik', 'Soundscape Emosional Orkestral'],
+    variant: 3,
+    posterUrl: '/images/portfolio/sanata-dharma.webp',
+    clientLogoUrl: '/images/clients/itb.webp',
+  },
   {
     slug: 'wilmar-replanting-sawit',
     title: 'Restorasi Unsur Hara dalam Replanting Sawit',
@@ -42,7 +106,8 @@ export const PROJECTS: Project[] = [
     ],
     delivered: ['Naskah & Narasi Edukasi', 'Storyboard Infografis', 'Animasi 2D Motion Graphics', 'Paket Sound Design & Voiceover'],
     variant: 1,
-    posterUrl: '/images/clients/unified-gray/wilmar.svg',
+    posterUrl: '/images/portfolio/motion-stills-1.png',
+    clientLogoUrl: '/images/clients/wilmar.webp',
   },
   {
     slug: 'my-safe-harbor',
@@ -61,83 +126,68 @@ export const PROJECTS: Project[] = [
     ],
     delivered: ['Desain Karakter Orisinal', 'Animatic Sinematik', 'Animasi Frame-by-Frame', 'Master Color Grading'],
     variant: 2,
-    posterUrl: '/images/clients/unified-gray/danone.webp',
+    posterUrl: '/images/portfolio/3d-short-film.webp',
+    clientLogoUrl: '/images/clients/danone-indonesia.webp',
   },
   {
-    slug: 'pt-ypti-history-impact',
-    title: 'Dari Visi ke Presisi: Menelusuri Sejarah dan Dampak YPTI',
-    client: 'PT Yogya Presisi Tehnikatama Industri (YPTI)',
-    category: '3d',
-    discipline: '3D Animation · Corporate Industrial',
+    slug: 'mercu-buana-branding',
+    title: 'Transformasi Akademik Digital Mercu Buana',
+    client: 'Universitas Mercu Buana',
+    category: '2d',
+    discipline: '2D Explainer · Educational Series',
     year: '2024',
-    tagline: 'Animasi profil korporat manufaktur presisi tinggi dengan visualisasi 3D CGI mesin CNC 5-axis.',
+    tagline: 'Seri video animasi edukatif memperkenalkan kurikulum adaptif dan ekosistem perkuliahan modern.',
     brief:
-      'Memperlihatkan proses pemesinan mikro dengan toleransi mikron secara jelas tanpa terhalang cipratan pendingin atau keterbatasan lensa kamera industri nyata.',
+      'Menjelaskan jalur studi interdisipliner dan fasilitas kampus dalam format animasi ramah generasi muda yang dinamis.',
     approach: [
-      'Rekonstruksi model 3D CAD presisi dari mesin manufaktur dan cetakan injeksi plastik tingkat tinggi.',
-      'Simulasi visual pergerakan alat potong dengan pencahayaan studio industri dramatis.',
-      'Sinematografi 3D macro shot yang menonjolkan kualitas tekstur logam hasil proses pemesinan.',
+      'Karakter animasi bergaya flat modern dengan rigging halus dan ekspresi energik.',
+      'Transisi adegan seamless mengalir dari ruang kelas ke simulasi industri nyata.',
+      'Tipografi bold dengan palet warna aksen cerah membangkitkan antusiasme calon mahasiswa.',
     ],
-    delivered: ['Pemodelan 3D CAD & Rigging', 'Tekstur Logam Photorealistic', 'Sinematografi Kamera 3D', 'Video Profil Korporat 4K'],
+    delivered: ['Konsep Cerita & Naskah', 'Ilustrasi Karakter Dinamis', 'Animasi 2D Vector Rigging', 'Master Distribusi Multi-Rasio'],
     variant: 3,
-    posterUrl: '/images/clients/unified-gray/pt-ypti.webp',
+    posterUrl: '/images/portfolio/mercu-buana.webp',
+    clientLogoUrl: '/images/clients/umby.webp',
   },
   {
-    slug: 'in-memoriam',
-    title: 'In Memoriam: Merangkai Jejak Kehidupan',
-    client: 'Sanata Dharma Heritage Foundation',
-    category: '3d',
-    discipline: '3D Animation · Stylized Heritage',
-    year: '2023',
-    tagline: 'Animasi penghormatan tokoh sejarah dengan rekonstruksi foto arsip menjadi dunia 3D spasial.',
-    brief:
-      'Menghidupkan foto-foto hitam putih berusia puluhan tahun dengan tetap menjaga integritas sejarah dan rasa hormat yang mendalam.',
-    approach: [
-      'Teknik 2.5D camera projection mapping dipadukan dengan simulasi partikel debu waktu.',
-      'Pencahayaan chiaroscuro dramatis untuk membangun suasana reflektif dan penuh martabat.',
-      'Kombinasi narasi biografi dengan transisi scene yang mengalir dinamis.',
-    ],
-    delivered: ['Restorasi & Proyeksi 2.5D', 'Simulasi Partikel Spasial', 'Kompositing & Grading Sinematik'],
-    variant: 4,
-    posterUrl: '/images/clients/unified-gray/itb.webp',
-  },
-  {
-    slug: 'p4mu-surabaya-journey',
-    title: 'Perjalanan P4MU Surabaya: Dari Awal Sederhana ke Dampak Luas',
-    client: 'P4MU Surabaya & Pemprov Jatim',
+    slug: 'ugm-interactive-visualization',
+    title: 'Visualisasi Riset & Inovasi Teknologi UGM',
+    client: 'Universitas Gadjah Mada',
     category: 'assets',
-    discipline: 'AI & Production · Video Profil Publik',
+    discipline: 'Digital Visual Assets & AI · Scientific Visual',
     year: '2024',
-    tagline: 'Eksplorasi konsep visual generative AI yang dipoles oleh keahlian senior animator studio.',
+    tagline: 'Visualisasi 3D fotorealistik inovasi teknologi biomedis dan rekayasa material mutakhir.',
     brief:
-      'Kebutuhan produksi profil institusi 30 scene dalam waktu kilat 10 hari kerja untuk peresmian fasilitas baru.',
+      'Membantu periset mempresentasikan temuan ilmiah kompleks ke hadapan investor dan publik melalui visual 3D berstandar internasional.',
     approach: [
-      'Implementasi pipeline AI-assisted concept generation untuk percepatan eksplorasi visual style frame.',
-      'Penyelarasan manual oleh tim lead artist UNIMASI guna menjaga konsistensi proporsi dan identitas institusi.',
-      'Penggabungan rekaman dokumenter nyata dengan grafis motion kinetik terarah.',
+      'Modeling struktur mikro molekuler dengan shader refraksi dan subsurface scattering.',
+      'Eksplorasi kamera mikroskopik virtual dengan depth of field sinematik.',
+      'Optimasi aset 3D real-time untuk penayangan pameran interaktif.',
     ],
-    delivered: ['Pipeline Generasi Visual AI', 'Finishing & Motion Graphics', 'Audio Mixing & Master Video'],
+    delivered: ['3D Asset Modeling', 'Scientific Animation', 'Interactive Web Assets', 'High-Res Print Renders'],
     variant: 1,
-    posterUrl: '/images/clients/unified-gray/kemenperin.svg',
+    posterUrl: '/images/portfolio/ugm.webp',
+    clientLogoUrl: '/images/clients/ugm.webp',
   },
   {
-    slug: 'telkom-dfe-explainer',
-    title: 'Telkom Digital Future Enterprise: Menembus Batas Konektivitas',
-    client: 'Telkom Indonesia',
-    category: 'motion',
-    discipline: 'Motion Graphics · Enterprise Tech',
+    slug: 'itokoh-industrial-animation',
+    title: 'Presisi Pengecoran Logam Berkelanjutan ITOKOH',
+    client: 'PT Itokoh Ceperindo',
+    category: '3d',
+    discipline: '3D Animation · Industrial Process',
     year: '2024',
-    tagline: 'Animasi futuristik memvisualisasikan jaringan fiber optik, satellite gateway, dan cloud hybrid.',
+    tagline: 'Visualisasi 3D proses peleburan, pencetakan logam, dan kendali mutu cor presisi ramah lingkungan.',
     brief:
-      'Konsep telekomunikasi skala makro dan transfer data digital sangat abstrak untuk divisualisasikan dalam alur cerita 90 detik.',
+      'Menggambarkan alur pabrikasi suhu tinggi dan keselamatan kerja industri peleburan besi tanpa bahaya rekaman langsung.',
     approach: [
-      'Memadukan grafis isometrik neon dengan garis jaringan kinetik berkecepatan tinggi yang menghubungkan kepulauan Indonesia.',
-      'Visualisasi data center dan arsitektur cloud hybrid secara terstruktur dan mudah dimengerti para CIO enterprise.',
-      'Iringan ritme audio dinamis yang membangkitkan rasa kemajuan teknologi masa depan.',
+      'Simulasi fluida cairan logam pijar dengan sistem partikel termal realistik.',
+      'Potongan melintang 3D (cutaway view) mesin cetak otomatis resolusi tinggi.',
+      'Visualisasi alur QC toleransi mekanikal dengan visual callout interaktif.',
     ],
-    delivered: ['Desain Konsep Isometrik 3D', 'Animasi Alur Data Kinetik', 'Paket Motion Bumper & Promo Medsos'],
+    delivered: ['Simulasi Fisika Fluida Logam', 'Animasi Cutaway 3D Mesin', 'Lighting Studio Industri', 'Audio Foley Industri'],
     variant: 2,
-    posterUrl: '/images/clients/unified-gray/telkomsel.svg',
+    posterUrl: '/images/portfolio/itokoh.png',
+    clientLogoUrl: '/images/clients/pt-itokoh-ceperindo.webp',
   },
 ]
 
@@ -145,6 +195,12 @@ export function getProject(slug: string): Project | undefined {
   return PROJECTS.find((p) => p.slug === slug)
 }
 
-export function getRelatedProjects(slug: string, limit = 2): Project[] {
-  return PROJECTS.filter((p) => p.slug !== slug).slice(0, limit)
+export function mapProjectCategory(raw: unknown): ProjectCategoryValue {
+  if (typeof raw !== 'string') return 'unknown'
+  const normalized = raw.trim().toLowerCase()
+  if (normalized === '2d' || normalized.includes('2d')) return '2d'
+  if (normalized === '3d' || normalized.includes('3d')) return '3d'
+  if (normalized === 'motion' || normalized.includes('motion')) return 'motion'
+  if (normalized === 'assets' || normalized.includes('asset') || normalized.includes('ai')) return 'assets'
+  return 'unknown'
 }

@@ -207,7 +207,7 @@ export function StudioPortfolioManager() {
   const [formYear, setFormYear] = useState(new Date().getFullYear().toString())
   const [formCategory, setFormCategory] = useState('')
   const [formSummary, setFormSummary] = useState('')
-  const [formHeroImage, setFormHeroImage] = useState('/images/portfolio/website-pmb-umby.png')
+  const [formHeroImage, setFormHeroImage] = useState('/images/portfolio/telkom-dfe.webp')
   const [formHeroAlt, setFormHeroAlt] = useState('')
   const [mediaPickerOpen, setMediaPickerOpen] = useState(false)
   const [showCoverAltModal, setShowCoverAltModal] = useState(false)
@@ -222,15 +222,15 @@ export function StudioPortfolioManager() {
   const [formProcess, setFormProcess] = useState('')
   const [formResult, setFormResult] = useState('')
   const [formMetrics, setFormMetrics] = useState<Array<{ label: string; value: string; detail?: string }>>([
-    { label: 'Peningkatan Efisiensi', value: '3.4x', detail: 'Otomatisasi alur kerja operasional' },
-    { label: 'Ketersediaan Sistem', value: '99.98%', detail: 'Zero-downtime architecture' },
+    { label: 'Peningkatan Engagement', value: '4.2x', detail: 'Retensi audiens dan pemahaman pesan' },
+    { label: 'Kualitas Render', value: '4K Ultra HD', detail: 'Sinematik 60fps photorealistic' },
   ])
   const [formTechnologies, setFormTechnologies] = useState<string[]>([
-    'Next.js 16',
-    'React 19',
-    'TypeScript',
-    'Tailwind CSS',
-    'SQLite / Drizzle',
+    'Blender 3D',
+    'After Effects',
+    'Cinema 4D',
+    'Substance Painter',
+    'DaVinci Resolve',
   ])
   const [newTechInput, setNewTechInput] = useState('')
 
@@ -279,45 +279,45 @@ export function StudioPortfolioManager() {
   // Create New Portfolio
   const handleAddNew = () => {
     setFormId(null)
-    setFormTitle('Studi Kasus Digital Inovatif')
-    const initialSlug = `studi-kasus-${Date.now().toString().slice(-4)}`
+    setFormTitle('Cinematic 3D Animation Showcase')
+    const initialSlug = `karya-${Date.now().toString().slice(-4)}`
     setFormSlug(initialSlug)
-    setFormClient('Mitra Industri Korporat')
+    setFormClient('Mitra Industri Kreatif')
     setFormYear(new Date().getFullYear().toString())
-    setFormCategory(availableCategories[0] || 'Immersive Software & Edutainment')
-    setFormSummary('Pengembangan sistem digital mutakhir dengan standar arsitektur modern dan performa tinggi.')
-    setFormHeroImage('/images/portfolio/website-pmb-umby.png')
-    setFormHeroAlt('Studi Kasus Digital Inovatif - Rekayasa Sistem Digital UNIMASI')
-    setFormLiveUrl('https://unimasi.com')
+    setFormCategory(availableCategories[0] || '3D Animation')
+    setFormSummary('Produksi animasi 3D sinematik beresolusi tinggi dengan simulasi pencahayaan fotorealistik dan narasi visual imersif.')
+    setFormHeroImage('/images/portfolio/pt-ypti-3d.webp')
+    setFormHeroAlt('Cinematic 3D Animation Showcase — UNIMASI Studio')
+    setFormLiveUrl('https://unimasi.studio')
     setFormFeatured(false)
     setFormStatus('published')
-    setFormChallenge('Sistem warisan konvensional membatasi skalabilitas dan memperlambat waktu respon layanan kepada pengguna.')
-    setFormApproach('Merancang ulang seluruh alur arsitektur dengan pendekatan modular decoupled dan edge caching.')
-    setFormSolution('Mengimplementasikan Next.js 16 berkecepatan tinggi dengan integrasi basis data tertanam responsif.')
-    setFormProcess('Discovery, UX Research, Architecture Design, Agile Sprint, Zero-Downtime Migration.')
-    setFormResult('Meningkatkan keterlibatan pengguna sebesar 240% dan memangkas waktu proses hingga 68%.')
+    setFormChallenge('Komunikasi naratif produk membutuhkan pendekatan visual imersif yang mampu memikat atensi audiens dalam hitungan detik.')
+    setFormApproach('Mengembangkan pipeline produksi 3D terpadu dari konsep storyboard, perancangan aset beresolusi tinggi, hingga rendering 4K DCI.')
+    setFormSolution('Memproduksi rangkaian animasi sinematik dengan visual effects presisi dan compositing audio-visual dramatis.')
+    setFormProcess('Concept Storyboard, 3D Asset Modeling, Rigging & Animation, Lighting & VFX, 4K Master Render.')
+    setFormResult('Meningkatkan retensi pemirsa hingga 89.4% dan menjangkau lebih dari 2.4 juta impresi kampanye.')
     setFormMetrics([
-      { label: 'Peningkatan Efisiensi', value: '3.4x', detail: 'Otomatisasi alur kerja' },
-      { label: 'Ketersediaan Sistem', value: '99.98%', detail: 'Zero-downtime architecture' },
-      { label: 'Kecepatan Muat', value: '< 1.1s', detail: 'Core Web Vitals Optimal' },
+      { label: 'Resolusi Render Master', value: '4K DCI', detail: 'Fidelitas visual tinggi 60 FPS' },
+      { label: 'Jangkauan Penonton', value: '2.4M+', detail: 'Total impresi kampanye global' },
+      { label: 'Retensi Pemirsa', value: '89.4%', detail: 'Rata-rata durasi tonton' },
     ])
-    setFormTechnologies(['Next.js 16', 'TypeScript', 'Tailwind CSS', 'SQLite / Drizzle'])
+    setFormTechnologies(['Unreal Engine 5', 'Blender 4K Pipeline', 'Three.js / WebGL', 'Houdini FX', 'DaVinci Resolve Studio'])
 
     // Initialize Default Visual Blocks
     const defaultBlocks = generateDefaultPortfolioBlocks(
-      'Studi Kasus Digital Inovatif',
-      'Mitra Industri Korporat',
-      'Pengembangan sistem digital mutakhir dengan standar arsitektur modern dan performa tinggi.',
-      '/images/portfolio/website-pmb-umby.png'
+      'Cinematic 3D Animation Showcase',
+      'Mitra Industri Kreatif',
+      'Produksi animasi 3D sinematik beresolusi tinggi dengan simulasi pencahayaan fotorealistik dan narasi visual imersif.',
+      '/images/portfolio/pt-ypti-3d.webp'
     )
     setFormBlocks(defaultBlocks)
 
     // Reset SEO
-    setSeoTitle('Studi Kasus Digital Inovatif — Portofolio UNIMASI')
-    setMetaDesc('Pelajari bagaimana UNIMASI membantu mitra industri merekayasa sistem digital berkinerja tinggi.')
-    setFocusKeyphrase('rekayasa digital studi kasus')
-    setRelatedKeyphrases(['portofolio teknologi informasi', 'pengembangan web skalabel'])
-    setCanonicalUrl(`https://unimasi.com/portofolio/${initialSlug}`)
+    setSeoTitle('Cinematic 3D Animation Showcase — Portofolio UNIMASI')
+    setMetaDesc('Eksplorasi karya animasi 3D dan visual effect sinematik berstandar global dari studio animasi UNIMASI.')
+    setFocusKeyphrase('animasi 3d sinematik studio')
+    setRelatedKeyphrases(['animasi 3d profesional', 'studio motion design indonesia'])
+    setCanonicalUrl(`https://unimasi.studio/portfolio/${initialSlug}`)
 
     setSelectedBlockId(defaultBlocks[0]?.id || null)
     setShowPropertiesDrawer(true)
@@ -335,7 +335,7 @@ export function StudioPortfolioManager() {
     setFormYear((item.year || new Date().getFullYear()).toString())
     setFormCategory(item.category || availableCategories[0] || 'Immersive Software & Edutainment')
     setFormSummary(item.summary || '')
-    setFormHeroImage(item.heroImage || '/images/portfolio/website-pmb-umby.png')
+    setFormHeroImage(item.heroImage || '/images/portfolio/telkom-dfe.webp')
     let extractedAlt = ''
     if (item.seoData) {
       try {
@@ -401,7 +401,7 @@ export function StudioPortfolioManager() {
         item.title,
         item.client || '',
         item.summary || '',
-        item.heroImage || '/images/portfolio/website-pmb-umby.png'
+        item.heroImage || '/images/portfolio/telkom-dfe.webp'
       )
     }
     setFormBlocks(parsedBlocks)
@@ -419,7 +419,7 @@ export function StudioPortfolioManager() {
       }
     }
     setRelatedKeyphrases(Array.isArray(parsedRelated) ? parsedRelated : [])
-    setCanonicalUrl(`https://unimasi.com/portofolio/${item.slug}`)
+    setCanonicalUrl(`https://unimasi.studio/portfolio/${item.slug}`)
 
     setSelectedBlockId(parsedBlocks[0]?.id || null)
     setShowPropertiesDrawer(true)
@@ -630,7 +630,7 @@ export function StudioPortfolioManager() {
       <div className="fixed inset-0 z-50 flex h-screen w-screen flex-col overflow-hidden bg-[#0D0D0D] text-white antialiased selection:bg-[#FFD600] selection:text-black">
         {/* Top Dedicated Studio Master Header */}
         <header className="h-14 shrink-0 px-4 sm:px-6 bg-[#161616] border-b border-white/[0.08] flex items-center justify-between gap-3 z-30 select-none overflow-hidden flex-nowrap">
-          <div className="flex items-center gap-2 sm:gap-2.5 min-w-0 flex-1 max-w-[45%] md:max-w-[50%] overflow-hidden flex-nowrap whitespace-nowrap">
+          <div className="flex items-center gap-2 sm:gap-2.5 min-w-0 flex-1 max-w-[55%] lg:max-w-[60%] overflow-hidden flex-nowrap whitespace-nowrap">
             <Tooltip label="Kembali" hint="Kembali ke daftar portofolio" side="bottom">
               <button
                 type="button"
@@ -647,7 +647,7 @@ export function StudioPortfolioManager() {
             <div className="flex items-center gap-2 min-w-0 flex-1 overflow-hidden flex-nowrap whitespace-nowrap">
               <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-[#FFD600]/15 border border-[#FFD600]/30 text-[#FFD600] uppercase tracking-wider shrink-0">
                 <Briefcase className="w-3 h-3 text-[#FFD600]" />
-                <span className="hidden sm:inline">PORTOFOLIO</span>
+                <span className="hidden sm:inline">PORTOFOLIO • 3D MOTION</span>
               </span>
               {formCategory && (
                 <span className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-white/5 text-neutral-400 border border-white/10 hidden md:inline-block shrink-0 truncate max-w-[120px]">
@@ -720,7 +720,7 @@ export function StudioPortfolioManager() {
             {formSlug && (
               <Tooltip label="Lihat Publik" hint="Buka halaman publik di tab baru" side="bottom">
                 <a
-                  href={`${siteConfig.url}/portofolio/${formSlug}`}
+                  href={`${siteConfig.url}/portfolio/${formSlug}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="hidden xl:inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-white/5 border border-white/10 text-xs font-mono text-neutral-300 hover:text-white hover:bg-white/10 transition-colors"
@@ -1106,7 +1106,7 @@ export function StudioPortfolioManager() {
                           Slug URL Publik
                         </label>
                         <div className="flex items-center gap-1.5">
-                          <span className="text-xs font-mono text-neutral-500">/portofolio/</span>
+                          <span className="text-xs font-mono text-neutral-500">/portfolio/</span>
                           <input
                             type="text"
                             value={formSlug}
@@ -1739,7 +1739,7 @@ export function StudioPortfolioManager() {
 
                     <div className="mt-3 flex items-center gap-2 text-[11px] font-mono text-neutral-400">
                       <span className="px-2 py-0.5 rounded bg-white/5 truncate max-w-[140px]">
-                        /portofolio/{item.slug}
+                        /portfolio/{item.slug}
                       </span>
                       <span className="px-2 py-0.5 rounded bg-white/5">
                         {blockCount > 0 ? `${blockCount} Blok Visual` : 'Standar Narasi'}
@@ -1751,7 +1751,7 @@ export function StudioPortfolioManager() {
                 {/* Footer Action Bar */}
                 <div className="mt-5 pt-3 border-t border-white/5 flex items-center justify-between">
                   <a
-                    href={`${siteConfig.url}/portofolio/${item.slug}`}
+                    href={`${siteConfig.url}/portfolio/${item.slug}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-neutral-400 hover:text-white inline-flex items-center gap-1.5 text-xs font-mono transition-colors"

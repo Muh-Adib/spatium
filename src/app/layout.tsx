@@ -72,12 +72,14 @@ export const metadata: Metadata = {
     description:
       'We make ideas move. 2D animation, 3D animation and visual production, and motion graphics for education, industry, and brands.',
     url: 'https://unimasi.studio/',
+    images: [{ url: '/icon-512.png', width: 512, height: 512, alt: 'UNIMASI' }],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'UNIMASI — Animation & Motion Design Studio',
     description:
       'We make ideas move. 2D animation, 3D animation and visual production, and motion graphics for education, industry, and brands.',
+    images: ['/icon-512.png'],
   },
 }
 

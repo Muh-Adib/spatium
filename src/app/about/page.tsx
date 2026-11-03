@@ -15,7 +15,7 @@ import '@/pages/about.css'
 const SITE_URL = 'https://unimasi.studio'
 
 export const metadata: Metadata = {
-  title: 'About',
+  title: 'About the UNIMASI Animation Studio',
   description:
     'UNIMASI is an animation and motion design studio built to make complex subjects understandable through 2D animation, 3D animation and motion graphics.',
   alternates: {
@@ -83,7 +83,7 @@ export default function AboutPage() {
         meta={
           <>
             <span className="pill">
-              <Icon name="layers" size={13} /> 3 core disciplines
+              <Icon name="layers" size={13} /> 4 core disciplines
             </span>
             <span className="pill">
               <Icon name="globe" size={13} /> Remote-first, worldwide

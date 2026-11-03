@@ -636,3 +636,24 @@ p {
     transform: none !important;
   }
 }
+
+/* Container Query Adaptations for Studio Visual Canvas */
+@container (max-width: 680px) {
+  .cq-stack {
+    flex-direction: column !important;
+  }
+  .cq-cols-1 {
+    grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
+  }
+  .cq-cols-2 {
+    grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
+  }
+  .cq-text-sm {
+    font-size: 0.875rem !important;
+  }
+}
+@container (min-width: 681px) and (max-width: 960px) {
+  .cq-cols-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}

@@ -25,7 +25,7 @@ export default async function AdminEntityPreviewPage({ params }: Props) {
   const decodedId = decodeURIComponent(id)
 
   if (type === 'article') {
-    redirect(`${siteConfig.url}/artikel/${encodeURIComponent(decodedId)}?preview=true`)
+    redirect(`${siteConfig.url}/journal/${encodeURIComponent(decodedId)}`)
   }
 
   let entity: any = null
@@ -76,7 +76,17 @@ export default async function AdminEntityPreviewPage({ params }: Props) {
     )
   }
 
-  const blocks = Array.isArray(entity.blocks) ? entity.blocks : []
+  const rawBlocks = entity.blocks
+  let blocks: any[] = []
+  if (Array.isArray(rawBlocks)) {
+    blocks = rawBlocks
+  } else if (typeof rawBlocks === 'string' && rawBlocks.trim().length > 0) {
+    try {
+      blocks = JSON.parse(rawBlocks)
+    } catch {
+      blocks = []
+    }
+  }
 
   return (
     <div className="min-h-screen bg-[#0A0A0A] text-white">

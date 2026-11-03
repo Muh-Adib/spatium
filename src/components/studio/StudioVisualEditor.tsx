@@ -138,6 +138,30 @@ const BLOCK_DEFINITIONS: BlockDefinition[] = [
     description: 'Header halaman layanan dengan highlight kata, deskripsi solusi, dan tombol konsultasi WhatsApp.',
     icon: Sparkles,
   },
+  {
+    type: 'hero-portfolio',
+    name: 'Hero Portofolio / Kasus',
+    category: 'hero',
+    badge: 'Studi Kasus',
+    description: 'Header studi kasus animasi dengan klien, tahun rilis, disiplin visual, video player, dan hero cover.',
+    icon: Sparkles,
+  },
+  {
+    type: 'portfolio-case-study',
+    name: 'Studi Kasus Naratif',
+    category: 'value',
+    badge: 'Problem-Solution',
+    description: 'Grid modular 4 bagian: Challenge, Approach Artistik, Technical Solution CGI, dan Result.',
+    icon: LayoutTemplate,
+  },
+  {
+    type: 'hero-solution',
+    name: 'Hero Solusi Industri',
+    category: 'hero',
+    badge: 'Solusi Bisnis',
+    description: 'Header solusi dengan badge industri, daftar poin manfaat utama, dan tombol aksi konsultasi.',
+    icon: Zap,
+  },
 
   // 2. Layanan & Portofolio
   {
@@ -514,6 +538,21 @@ export default function StudioVisualEditor({
   const [activeCategory, setActiveCategory] = useState<string>('all')
   const [hoveredBlockId, setHoveredBlockId] = useState<string | null>(null)
 
+  // Live Auto-detection of canvas container width from sidepanel resizing
+  const canvasContainerRef = useRef<HTMLDivElement>(null)
+  const [canvasWidth, setCanvasWidth] = useState<number>(0)
+
+  React.useEffect(() => {
+    if (!canvasContainerRef.current) return
+    const ro = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        setCanvasWidth(Math.round(entry.contentRect.width))
+      }
+    })
+    ro.observe(canvasContainerRef.current)
+    return () => ro.disconnect()
+  }, [])
+
   // Real-time block validation via Zod discriminated union schema (L3-T1)
   const validationResult = React.useMemo(() => {
     return parseBlocks(blocks)
@@ -874,82 +913,124 @@ export default function StudioVisualEditor({
       Object.assign(newBlock, editorialData)
     } else if (type === 'hero-department') {
       newBlock.variant = 'cinematic'
-      newBlock.badge = 'Solusi Digital Terpadu'
-      newBlock.title = 'Pembuatan Website & Aplikasi Bisnis'
+      newBlock.badge = 'Solusi Animasi & Motion Design'
+      newBlock.title = 'Produksi Animasi 2D, 3D & Motion Graphics'
       newBlock.description =
-        'Kami membangun website profil perusahaan, sistem informasi portal, dan aplikasi web modern yang cepat dibuka, mudah dikelola mandiri, dan meningkatkan konversi bisnis Anda.'
-      newBlock.heroImage = '/images/portfolio/website-pmb-umby.png'
-      newBlock.imageCaption = 'Karya Nyata Klien: Portal PMB & Sistem Pendaftaran Mahasiswa Baru'
+        'UNIMASI Studio mengubah konsep teknis yang kompleks menjadi alur visual naratif yang memukau, komunikatif, dan meninggalkan kesan mendalam bagi audiens Anda.'
+      newBlock.heroImage = '/images/portfolio/telkom-dfe.webp'
+      newBlock.imageCaption = 'Karya Nyata UNIMASI: Telkom Digital Future Enterprise (DFE)'
       newBlock.imageBadge = 'Hasil Produksi Aktif'
       newBlock.keyOutcomes = [
-        { label: 'Waktu Muat Halaman', value: '< 1 Detik' },
-        { label: 'Peningkatan Konversi', value: '+40%' },
-        { label: 'Status Kepemilikan', value: '100% Hak Milik' },
+        { label: 'Resolusi Produksi', value: '4K Ultra HD' },
+        { label: 'Peningkatan Retensi', value: '+55%' },
+        { label: 'Kualitas Aset', value: '100% Hak Cipta Klien' },
       ]
       newBlock.floatingBadges = [
-        { label: 'Waktu Muat < 1 Detik' },
-        { label: 'Sistem Stabil & Siap 24/7' },
+        { label: 'Motion & CGI Specialist' },
+        { label: 'Alur Kerja Transparan' },
       ]
     } else if (type === 'hero-service') {
-      newBlock.name = 'Pengembangan Website Profesional'
-      newBlock.highlightWord = '& Berkecepatan Tinggi'
-      newBlock.categoryBadge = 'Layanan Rekayasa'
+      newBlock.name = 'Produksi Animasi & Motion Design Profesional'
+      newBlock.highlightWord = '& Storytelling Sinematik'
+      newBlock.categoryBadge = 'Layanan Spesialis'
       newBlock.description =
-        'Website modern yang cepat dibuka, ramah SEO Google, dan memikat calon pelanggan Anda.'
+        'Animasi berkualitas tinggi yang merangkum ide rumit menjadi visual memikat dan mudah dipahami oleh audiens Anda.'
       newBlock.whatsappPrompt = 'Halo UNIMASI, saya ingin konsultasi mengenai layanan animasi ini.'
+    } else if (type === 'hero-portfolio' || type === 'hero-case-study') {
+      const portData = {
+        title: 'Produksi Animasi 3D Sinematik & Visual Storytelling',
+        headline: 'Produksi Animasi 3D Sinematik & Visual Storytelling',
+        client: 'Mitra Industri UNIMASI',
+        year: `${new Date().getFullYear()}`,
+        category: '3D Animation',
+        discipline: 'CGI & Motion Design',
+        summary: 'Penerjemahan brief teknis menjadi narasi visual beresolusi tinggi dengan alur kerja terstruktur dan detail pencahayaan bioskop.',
+        primaryCta: { label: 'Konsultasi Proyek Serupa', href: '/contact' },
+      }
+      newBlock.data = portData
+      Object.assign(newBlock, portData)
+    } else if (type === 'portfolio-case-study') {
+      const caseData = {
+        eyebrow: 'Production Case Study',
+        title: 'Tantangan, Pendekatan & Solusi Teknis',
+        description: 'Bagaimana UNIMASI merancang solusi visual presisi untuk mengatasi hambatan komunikasi ide rumit.',
+        challenge: 'Menjelaskan alur kerja mekanik dan proses industri yang tidak dapat didokumentasikan dengan kamera fisik.',
+        approach: 'Mengembangkan animasi 3D fotorealistik dengan cutaway perspektif dinamis dan storyboard berorientasi storytelling.',
+        solution: 'Penerapan pipeline CGI modern (Maya, Unreal Engine 5, Blender) untuk simulasi partikel presisi dan compositing warna akurat.',
+        result: 'Meningkatkan retensi pemahaman audiens hingga 88% dan menjadi standar baru presentasi teknis perusahaan.',
+      }
+      newBlock.data = caseData
+      Object.assign(newBlock, caseData)
+    } else if (type === 'hero-solution') {
+      const solData = {
+        badge: 'Solusi Industri',
+        title: 'Solusi Visualisasi 3D untuk Sektor Manufaktur & Industri',
+        headline: 'Solusi Visualisasi 3D untuk Sektor Manufaktur & Industri',
+        category: 'Enterprise Solution',
+        shortDescription: 'Tingkatkan efisiensi komunikasi teknis dan keselamatan operasional melalui simulasi visual 3D fotorealistik.',
+        keyBenefits: [
+          'Simulasi akurat tanpa risiko kecelakaan kerja operasional',
+          'Edukasi tim teknis dan operator mesin 3x lebih cepat',
+          'Aset visual reusable untuk berbagai materi pelatihan korporat',
+        ],
+        primaryCta: { label: 'Konsultasi Solusi Ini', href: '/contact' },
+        secondaryCta: { label: 'Jelajahi Portofolio Terkait', href: '/portfolio' },
+      }
+      newBlock.data = solData
+      Object.assign(newBlock, solData)
     } else if (type === 'department-service-list') {
-      newBlock.title = 'Layanan Pembuatan Website & Aplikasi yang Kami Sediakan'
+      newBlock.title = 'Layanan Produksi Animasi & Visual yang Kami Sediakan'
       newBlock.description =
-        'Pilih solusi yang paling sesuai dengan kebutuhan dan target perkembangan organisasi Anda saat ini.'
+        'Pilih solusi kreatif yang paling sesuai dengan kebutuhan komunikasi dan strategi bisnis brand Anda.'
     } else if (type === 'visual-showcase-gallery') {
-      newBlock.badge = 'Bukti Portofolio Nyata'
-      newBlock.title = 'Bukti Hasil Pengerjaan Nyata untuk Klien Kami'
+      newBlock.badge = 'Karya Terpilih UNIMASI'
+      newBlock.title = 'Portofolio Produksi Animasi & Motion Design Nyata'
       newBlock.description =
-        'Lihat bagaimana sistem yang kami bangun telah aktif digunakan dan membantu kemajuan operasional klien.'
+        'Jelajahi bagaimana visualisasi 2D, 3D, dan motion graphics kami membantu berbagai brand mengomunikasikan ide berharga mereka.'
       newBlock.items = [
         {
-          title: 'Portal PMB Universitas Mercu Buana Yogyakarta',
-          category: 'Sektor Pendidikan Tinggi',
-          image: '/images/portfolio/website-pmb-umby.png',
-          metric: 'Ribuan Pendaftar',
-          desc: 'Sistem pendaftaran online berkecepatan tinggi yang menangani ribuan calon mahasiswa baru tanpa kendala server down.',
+          title: 'Telkom Digital Future Enterprise (DFE)',
+          category: 'Motion Graphics · Tech Explainer',
+          image: '/images/portfolio/telkom-dfe.webp',
+          metric: '500K+ Views',
+          desc: 'Visualisasi jaringan serat optik, gateway satelit, dan hybrid cloud Telkom secara dinamis dan futuristik.',
         },
         {
-          title: 'Platform Digital SMK PB Soedirman 2 Jakarta',
-          category: 'Institusi Pendidikan',
-          image: '/images/portfolio/website-smk-pb-soedirman-2.png',
-          metric: 'Responsif Ponsel',
-          desc: 'Website profil sekolah interaktif yang memudahkan orang tua dan calon murid menjelajahi program keahlian dan info akademik.',
+          title: 'PT Yogya Presisi Tehnikatama Industri (YPTI)',
+          category: '3D Animation · Corporate Industrial',
+          image: '/images/portfolio/pt-ypti-3d.webp',
+          metric: 'Hannover Messe Showcase',
+          desc: 'Rekonstruksi model 3D CAD presisi mesin manufaktur CNC 5-axis dan simulasi pemesinan mikro tingkat tinggi.',
         },
         {
-          title: 'Katalog Properti Eksklusif Kalasan Valley',
-          category: 'Properti & Real Estate',
-          image: '/images/portfolio/website-kalasan-valley.webp',
-          metric: 'Leads WhatsApp',
-          desc: 'Katalog hunian visual beresolusi tinggi dengan formulir pendaftaran leads instan yang langsung terhubung ke tim penjualan.',
+          title: 'Sanata Dharma Heritage Foundation',
+          category: '3D Animation · Spatial Documentary',
+          image: '/images/portfolio/sanata-dharma.webp',
+          metric: 'Arsip Sejarah 3D',
+          desc: 'Visualisasi 3D sinematik merangkai jejak kehidupan dan warisan sejarah institusi dengan visual megah.',
         },
       ]
     } else if (type === 'media-showcase' || type === 'editorial-image') {
-      newBlock.title = 'Pratinjau Antarmuka & Ekosistem Sistem'
-      newBlock.subtitle = 'Tampilan responsif berkecepatan tinggi yang dioptimalkan untuk kenyamanan pengunjung.'
-      newBlock.badge = 'Tangkapan Layar Nyata'
-      newBlock.image = '/images/portfolio/website-pmb-umby.png'
-      newBlock.alt = 'Tampilan Sistem PMB Universitas Mercu Buana Yogyakarta'
-      newBlock.caption = 'Implementasi arsitektur Next.js 16 dengan performa Core Web Vitals sub-detik.'
+      newBlock.title = 'Visual Sinematik & Standar Mutu Produksi'
+      newBlock.subtitle = 'Setiap frame dirancang dengan perhatian mendalam pada storytelling, komposisi warna, dan pencahayaan.'
+      newBlock.badge = 'Tangkapan Visual Asli'
+      newBlock.image = '/images/portfolio/telkom-dfe.webp'
+      newBlock.alt = 'Visual Motion Graphics Telkom DFE UNIMASI'
+      newBlock.caption = 'Animasi motion graphics kinetik dengan aksen Bright Yellow (#FFD600) berkecepatan tinggi.'
       newBlock.frameStyle = 'immersive'
       newBlock.aspectRatio = '16/10'
-      newBlock.imageLabel = 'Karya Nyata Klien: Portal PMB & Sistem Pendaftaran Mahasiswa Baru'
+      newBlock.imageLabel = 'Karya Nyata UNIMASI: Telkom Digital Future Enterprise'
       newBlock.floatingBadges = [
-        { label: 'Waktu Muat < 1 Detik' },
-        { label: 'Sistem Stabil & Siap 24/7' },
+        { label: 'Resolusi 4K Sinematik' },
+        { label: 'Story-Driven Narrative' },
       ]
     } else if (type === 'architecture-blueprint') {
       newBlock.badge = 'Standar Keunggulan'
       newBlock.title = '4 Jaminan Kualitas untuk Pertumbuhan Bisnis Anda'
       newBlock.description =
         'Kami mengeliminasi kendala teknis agar Anda dapat fokus mengembangkan bisnis dengan tenang dan nyaman.'
-      newBlock.image = '/images/portfolio/website-smk-pb-soedirman-2.png'
-      newBlock.imageLabel = 'Karya Nyata Klien: Portal Edukasi & Informasi'
+      newBlock.image = '/images/portfolio/pt-ypti-3d.webp'
+      newBlock.imageLabel = 'Karya Nyata UNIMASI: Visualisasi 3D Mesin Industri PT YPTI'
       newBlock.imageBadge = 'Hasil Produksi Aktif'
       newBlock.hudTitle = 'Kecepatan Akses Nyata'
       newBlock.hudMetric = 'Waktu Muat < 1 Detik'
@@ -1025,7 +1106,7 @@ export default function StudioVisualEditor({
           title: 'Pengalaman Visual Modern di Semua Perangkat',
           description:
             'Tampilan website menyesuaikan secara mulus saat dibuka lewat smartphone, tablet, maupun laptop.',
-          image: '/images/portfolio/website-kalasan-valley.webp',
+          image: '/images/portfolio/3d-commercial.webp',
         },
         {
           title: 'Optimalisasi SEO Google',
@@ -1183,17 +1264,74 @@ export default function StudioVisualEditor({
     return matchesCategory && matchesQuery
   })
 
+function getUnimasiBlockMeta(type: string) {
+  switch (type) {
+    case 'hero-cinema':
+      return { label: 'Hero Sinematik 3D & Motion', tag: 'HERO CINEMA', icon: Zap, color: '#FFDE00' }
+    case 'process-timeline':
+      return { label: 'Alur Pipeline Produksi 3D', tag: 'PIPELINE', icon: History, color: '#FFDE00' }
+    case 'stats-ticker':
+      return { label: 'Metrik Kreatif & Produksi', tag: 'METRIK STUDIO', icon: BarChart3, color: '#FFDE00' }
+    case 'interactive-cta':
+      return { label: 'CTA Kolaborasi Kreatif', tag: 'KOLABORASI', icon: ArrowUpRight, color: '#FFDE00' }
+    case 'hero-service':
+      return { label: 'Hero Layanan Visual', tag: 'HERO', icon: Sparkles, color: '#FFDE00' }
+    case 'hero-portfolio':
+    case 'hero-case-study':
+      return { label: 'Hero Portofolio & Kasus', tag: 'HERO KASUS', icon: Sparkles, color: '#FFDE00' }
+    case 'portfolio-case-study':
+      return { label: 'Studi Kasus Naratif (Problem-Solution)', tag: 'STUDI NARATIF', icon: LayoutTemplate, color: '#FFDE00' }
+    case 'hero-solution':
+      return { label: 'Hero Solusi Industri & Bisnis', tag: 'HERO SOLUSI', icon: Zap, color: '#FFDE00' }
+    case 'catalog':
+      return { label: 'Katalog Layanan Studio', tag: 'KATALOG', icon: Boxes, color: '#FFDE00' }
+    case 'service-detail':
+      return { label: 'Detail Spesifikasi Visual', tag: 'SPESIFIKASI', icon: FileText, color: '#FFDE00' }
+    case 'faq-accordion':
+      return { label: 'Tanya Jawab (FAQ)', tag: 'FAQ', icon: HelpCircle, color: '#FFDE00' }
+    case 'cta-banner':
+      return { label: 'Banner Kontak Studio', tag: 'CTA', icon: MessageSquare, color: '#FFDE00' }
+    case 'architecture-blueprint':
+      return { label: 'Standar Mutu Produksi', tag: 'STANDAR', icon: ShieldCheck, color: '#FFDE00' }
+    case 'comparison-matrix':
+      return { label: 'Komparasi Kualitas Render', tag: 'KOMPARASI', icon: Sliders, color: '#FFDE00' }
+    case 'feature-bento-grid':
+      return { label: 'Fitur Unggulan Studio', tag: 'BENTO', icon: LayoutTemplate, color: '#FFDE00' }
+    case 'workflow-phases':
+      return { label: 'Tahapan Produksi Studio', tag: 'TAHAPAN', icon: History, color: '#FFDE00' }
+    case 'deliverables-checklist':
+      return { label: 'Master File & Deliverables', tag: 'DELIVERABLE', icon: CheckCircle2, color: '#FFDE00' }
+    case 'executive-quote-card':
+      return { label: 'Kutipan Sutradara Kreatif', tag: 'KUTIPAN', icon: FileText, color: '#FFDE00' }
+    case 'portfolio-proof-grid':
+      return { label: 'Galeri Studi Kasus Animasi', tag: 'PORTOFOLIO', icon: ArrowUpRight, color: '#FFDE00' }
+    case 'media-showcase':
+      return { label: 'Showcase Frame Sinematik', tag: 'MEDIA', icon: ImageIcon, color: '#FFDE00' }
+    default:
+      return {
+        label: type.split('-').map((s) => s.charAt(0).toUpperCase() + s.slice(1)).join(' '),
+        tag: 'BLOK',
+        icon: Layers,
+        color: '#FFDE00',
+      }
+  }
+}
+
   // Canvas renderer for Canvas mode and Split mode
   const renderCanvas = () => (
-    <div className={`flex-1 min-w-0 overflow-y-auto bg-[#0a0a0a] flex justify-center items-start relative w-full scrollbar-thin studio-canvas-root ${device === 'desktop' ? 'p-0' : 'p-4 sm:p-6'}`}>
+    <div
+      ref={canvasContainerRef}
+      className={`flex-1 min-w-0 overflow-y-auto bg-[#0a0a0a] flex justify-center items-start relative w-full scrollbar-thin studio-canvas-root ${device === 'desktop' ? 'p-0' : 'p-4 sm:p-6'}`}
+    >
       <div
         key={refreshKey}
-        className={`transition-all duration-300 ${
+        style={{ containerType: 'inline-size' }}
+        className={`@container transition-all duration-300 ${
           device === 'desktop'
             ? 'w-full max-w-full'
             : device === 'tablet'
-            ? 'w-full max-w-[768px] rounded-[32px] border-[8px] border-[#1C1C1E] shadow-[0_25px_60px_rgba(0,0,0,0.85)] ring-1 ring-white/10 overflow-hidden bg-black my-4'
-            : 'w-full max-w-[390px] min-h-[844px] rounded-[48px] border-[10px] border-[#1C1C1E] shadow-[0_25px_70px_rgba(0,0,0,0.95)] ring-1 ring-white/10 overflow-hidden bg-black my-4'
+            ? 'w-[768px] max-w-full min-h-[1024px] rounded-[32px] border-[8px] border-[#1C1C1E] shadow-[0_25px_60px_rgba(0,0,0,0.85)] ring-1 ring-white/10 overflow-hidden bg-black my-4'
+            : 'w-[390px] max-w-full min-h-[844px] rounded-[48px] border-[10px] border-[#1C1C1E] shadow-[0_25px_70px_rgba(0,0,0,0.95)] ring-1 ring-white/10 overflow-hidden bg-black my-4'
         }`}
       >
         {/* Real Mobile Bezel (Dynamic Island & Speaker) */}
@@ -1301,6 +1439,8 @@ export default function StudioVisualEditor({
               const isHovered = hoveredBlockId === block.id
               const blockErrors = issuesByIndex.get(idx) || []
               const hasBlockError = blockErrors.length > 0
+              const meta = getUnimasiBlockMeta(block.type)
+              const BlockIcon = meta.icon
 
               return (
                 <div key={block.id || idx} className="w-full relative group/block">
@@ -1321,7 +1461,7 @@ export default function StudioVisualEditor({
                   >
                     {/* Integrated Block Action Header Bar */}
                     <div
-                      className={`w-full px-4 py-2 border-b transition-all duration-200 flex items-center justify-between gap-2 select-none ${
+                      className={`w-full px-3 sm:px-4 py-2 border-b transition-all duration-200 flex items-center justify-between gap-2 select-none ${
                         isSelected
                           ? 'bg-[#181818] border-[#FFD600]/40'
                           : isHovered
@@ -1333,21 +1473,27 @@ export default function StudioVisualEditor({
                         onSelectBlock(block.id)
                       }}
                     >
-                      {/* Left: Block Identifier Badge */}
-                      <div className="flex items-center gap-2">
-                        <GripVertical className="w-3.5 h-3.5 text-neutral-500" />
-                        <span className="text-[#FFD600] font-mono font-bold uppercase tracking-wider text-[11px]">
-                          {block.type}
+                      {/* Left: Block Identifier Badge with Brand Styling */}
+                      <div className="flex items-center gap-2 min-w-0">
+                        <GripVertical className="w-3.5 h-3.5 text-neutral-500 shrink-0 cursor-grab" />
+                        <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-[#FFD600]/15 border border-[#FFD600]/30 shrink-0">
+                          <BlockIcon className="w-3 h-3 text-[#FFD600]" />
+                          <span className="text-[#FFD600] font-mono font-bold uppercase tracking-wider text-[10px]">
+                            {meta.tag}
+                          </span>
+                        </div>
+                        <span className="text-white text-xs font-semibold truncate hidden sm:inline">
+                          {meta.label}
                         </span>
-                        <span className="text-neutral-500 font-mono text-[11px]">#{idx + 1}</span>
+                        <span className="text-neutral-400 font-mono text-[11px] shrink-0">#{idx + 1}</span>
                         {isSelected && (
-                          <span className="px-1.5 py-0.2 rounded bg-[#FFD600]/20 text-[#FFD600] text-[9px] font-mono font-bold uppercase">
+                          <span className="px-1.5 py-0.5 rounded bg-[#FFD600]/20 text-[#FFD600] text-[9px] font-mono font-bold uppercase shrink-0 border border-[#FFD600]/40">
                             Aktif
                           </span>
                         )}
                         {perfAudit.lcpCandidateBlockIndex === idx && (
                           <Tooltip label="Kandidat LCP" hint="Blok ini memuat hero gambar utama (Largest Contentful Paint)" side="top">
-                            <span className="inline-flex items-center gap-1 text-[10px] font-mono px-2 py-0.5 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-300 font-semibold cursor-help">
+                            <span className="inline-flex items-center gap-1 text-[10px] font-mono px-2 py-0.5 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-300 font-semibold cursor-help shrink-0">
                               <Zap className="w-2.5 h-2.5 text-amber-400" />
                               LCP
                             </span>
@@ -1518,7 +1664,7 @@ export default function StudioVisualEditor({
         <div className="flex items-center gap-2">
           {/* Responsive device frames (always accessible) */}
           <div className="flex items-center gap-1 p-1 rounded-xl bg-[#121212] border border-white/10">
-            <Tooltip label="Desktop" hint="Viewport layar lebar (100% rasio web publik)" side="bottom">
+            <Tooltip label="Desktop" hint={`Viewport adaptif layar lebar (${canvasWidth || 1200}px auto deteksi)`} side="bottom">
               <button
                 type="button"
                 onClick={() => setDevice('desktop')}
@@ -1531,7 +1677,7 @@ export default function StudioVisualEditor({
                 <Monitor className="w-4 h-4" />
               </button>
             </Tooltip>
-            <Tooltip label="Tablet" hint="Viewport tablet (768px)" side="bottom">
+            <Tooltip label="Tablet" hint="Viewport tablet nyata (768 × 1024 px • rasio 3:4)" side="bottom">
               <button
                 type="button"
                 onClick={() => setDevice('tablet')}
@@ -1544,7 +1690,7 @@ export default function StudioVisualEditor({
                 <Tablet className="w-4 h-4" />
               </button>
             </Tooltip>
-            <Tooltip label="Ponsel" hint="Viewport smartphone nyata (390px)" side="bottom">
+            <Tooltip label="Ponsel" hint="Viewport smartphone nyata (390 × 844 px • rasio 9:19.5)" side="bottom">
               <button
                 type="button"
                 onClick={() => setDevice('mobile')}
@@ -1557,6 +1703,24 @@ export default function StudioVisualEditor({
                 <Smartphone className="w-4 h-4" />
               </button>
             </Tooltip>
+          </div>
+
+          {/* Real-time Viewport Dimensions Pill (Auto-detects Sidepanel Width) */}
+          <div className="hidden xl:flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-black/50 border border-white/10 text-[11px] font-mono">
+            <span className={`w-1.5 h-1.5 rounded-full ${device === 'mobile' ? 'bg-amber-400' : device === 'tablet' ? 'bg-sky-400' : 'bg-[#FFD600] animate-pulse'}`} />
+            <span className="text-neutral-400">Dimensi:</span>
+            <span className="text-white font-bold">
+              {device === 'mobile'
+                ? '390 × 844 px (Ponsel)'
+                : device === 'tablet'
+                ? '768 × 1024 px (Tablet)'
+                : `${canvasWidth || '100%'} px (Auto Deteksi)`}
+            </span>
+            {isInspectorOpen && device === 'desktop' && (
+              <span className="text-[10px] text-[#FFD600] font-medium hidden 2xl:inline">
+                • Panel Aktif
+              </span>
+            )}
           </div>
 
           {/* Undo & Redo Controls (L3-T4) */}

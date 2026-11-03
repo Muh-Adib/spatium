@@ -11,7 +11,6 @@ import {
   Sliders,
   Sparkles,
   Bot,
-  Download,
   Calendar,
   Check,
   CheckCircle2,
@@ -45,7 +44,6 @@ interface ArticleEditorHeaderProps {
   onToggleInspector: () => void
   isAiOpen: boolean
   onToggleAi: () => void
-  onOpenWpModal: () => void
   onSave: (targetStatus?: 'draft' | 'in_review' | 'approved' | 'scheduled' | 'published') => void
   permissions: {
     canPublish?: boolean
@@ -78,7 +76,6 @@ export function ArticleEditorHeader({
   onToggleInspector,
   isAiOpen,
   onToggleAi,
-  onOpenWpModal,
   onSave,
   permissions,
   publicationDate,
@@ -355,17 +352,6 @@ export function ArticleEditorHeader({
             <ExternalLink className="w-3.5 h-3.5" />
           </a>
         )}
-
-        {/* WP Import Button */}
-        <button
-          type="button"
-          onClick={onOpenWpModal}
-          title="Tarik dan sinkronkan artikel dari website WordPress"
-          className="hidden md:inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-neutral-300 hover:text-white border border-white/10 text-xs font-medium transition-colors"
-        >
-          <Download className="w-3.5 h-3.5 text-blue-400" />
-          <span className="hidden xl:inline">Tarik WP</span>
-        </button>
 
         {/* AI Copilot Toggle Button */}
         <button

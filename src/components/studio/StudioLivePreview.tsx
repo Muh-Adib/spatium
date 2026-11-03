@@ -67,7 +67,14 @@ export default function StudioLivePreview({
   const previewUrl = `${siteConfig.url}/${previewBasePath}/${slug || 'preview'}`
 
   const firstBlockType = blocks && blocks.length > 0 ? (blocks[0]?.type || blocks[0]?.__component) : null
-  const hasFirstHeroBlock = firstBlockType === 'hero-department' || firstBlockType === 'hero-service' || firstBlockType === 'blocks.hero'
+  const hasFirstHeroBlock =
+    firstBlockType === 'hero-department' ||
+    firstBlockType === 'hero-service' ||
+    firstBlockType === 'hero-portfolio' ||
+    firstBlockType === 'hero-case-study' ||
+    firstBlockType === 'hero-solution' ||
+    firstBlockType === 'hero-cinema' ||
+    firstBlockType === 'blocks.hero'
 
   const targetTypeLabel =
     targetType === 'department'

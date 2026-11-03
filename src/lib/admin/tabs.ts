@@ -13,9 +13,9 @@ import {
   TrendingUp,
   ArrowRightLeft,
   History,
+  CalendarDays,
   Bot,
   Sliders,
-  Download,
   Server,
   Shield,
   Settings,
@@ -42,9 +42,9 @@ export const ADMIN_TABS = [
   'gsc',
   'redirects',
   'migration',
+  'calendar',
   'ai',
   'ai-settings',
-  'import',
   'system',
   'users',
   'settings',
@@ -75,10 +75,10 @@ export const TAB_META: Record<AdminTab, TabMeta> = {
   perf: { label: 'Performa', description: 'Lighthouse, Core Web Vitals (LCP, INP, CLS), dan pengiriman IndexNow.', icon: Gauge },
   gsc: { label: 'Search Console', description: 'Performa SERP, kata kunci bernilai tinggi, dan peluang CTR.', icon: TrendingUp },
   redirects: { label: 'Redirect', description: 'Aturan 301 menjaga otoritas domain dan mencegah error 404.', icon: ArrowRightLeft },
+  calendar: { label: 'Kalender', description: 'Jadwal terbit semua tipe konten dalam WIB, dengan penanda gagal-jadwal.', icon: CalendarDays },
   migration: { label: 'URL Legacy', description: 'Pemetaan URL WordPress lama, redirect, dan hasil pemeriksaan HTTP.', icon: History },
   ai: { label: 'Asisten AI', description: 'Asisten dengan akses database lokal, analitik GSC, dan alur draf yang aman.', icon: Bot },
   'ai-settings': { label: 'Pengaturan AI', description: 'Penyedia AI, model inferensi, dan tools bawaan platform.', icon: Sliders },
-  import: { label: 'Impor WordPress', description: 'Migrasi artikel, kategori, dan media dari REST API atau file XML.', icon: Download },
   system: { label: 'Sistem', description: 'Kesehatan database, sinkronisasi data, dan server MCP.', icon: Server },
   users: { label: 'Pengguna', description: 'Kelola akun pengguna studio, peran tim editorial, dan kredensial akses.', icon: Users },
   settings: { label: 'Pengaturan', description: 'Konfigurasi global situs dan SEO.', icon: Settings },
@@ -92,10 +92,10 @@ export const WRITE_ARTICLE_META: TabMeta = {
 
 /** Groups are separated by a divider in the nav rail (no text headings needed). */
 export const NAV_GROUPS: { id: string; tabs: AdminTab[] }[] = [
-  { id: 'content', tabs: ['overview', 'articles', 'portfolio', 'services', 'solutions', 'blocks', 'media', 'cta'] },
+  { id: 'content', tabs: ['overview', 'articles', 'portfolio', 'services', 'solutions', 'blocks', 'media', 'cta', 'calendar'] },
   { id: 'seo', tabs: ['keywords', 'audit', 'perf', 'gsc', 'redirects', 'migration'] },
   { id: 'ai', tabs: ['ai-settings'] },
-  { id: 'engine', tabs: ['import', 'system'] },
+  { id: 'engine', tabs: ['system'] },
   { id: 'governance', tabs: ['users', 'settings'] },
 ]
 

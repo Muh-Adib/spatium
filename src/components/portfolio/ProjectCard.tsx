@@ -11,21 +11,33 @@ export const CATEGORY_LABEL: Record<ProjectCategory, string> = {
   assets: 'Digital Assets',
 }
 
+const UNKNOWN_CATEGORY_LABEL = 'Animation Studio'
+
 type ProjectCardProps = {
   project: Project
-  /** Larger presentation for the featured slot. */
   featured?: boolean
 }
 
 export function ProjectCard({ project, featured = false }: ProjectCardProps) {
+  const categoryLabel = CATEGORY_LABEL[project.category as ProjectCategory] || UNKNOWN_CATEGORY_LABEL
+
   return (
     <article className={`project-card card card--hover${featured ? ' project-card--featured' : ''}`}>
       <Link href={`/portfolio/${project.slug}`} className="project-card__link" aria-label={`${project.title} — view case study`}>
         <div className="project-card__media">
-          <StudioArt variant={project.variant ?? 0} />
+          {project.posterUrl ? (
+            <img
+              src={project.posterUrl}
+              alt={project.title}
+              loading="lazy"
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <StudioArt variant={project.variant ?? 0} />
+          )}
           <span className="project-card__overlay" aria-hidden="true">
             <span className="project-card__cta">
-              View case study
+              Lihat Case Study
               <Icon name="arrow-up-right" size={16} />
             </span>
           </span>
@@ -36,12 +48,17 @@ export function ProjectCard({ project, featured = false }: ProjectCardProps) {
 
         <div className="project-card__body">
           <div className="project-card__meta">
-            <span className="pill pill--accent">{CATEGORY_LABEL[project.category] || (project.category ? String(project.category).toUpperCase() : 'Studio Case')}</span>
-            <span className="project-card__year mono">{project.year || 2024}</span>
+            <span className="pill pill--accent">{categoryLabel}</span>
+            {project.client ? (
+              <span className="text-xs text-[var(--text-muted)] font-medium truncate max-w-[140px]">
+                {project.client}
+              </span>
+            ) : null}
+            <span className="project-card__year mono ml-auto">{project.year || 2024}</span>
           </div>
           <h3 className="project-card__title">{project.title}</h3>
-          <p className="project-card__tagline">{project.tagline || project.client || ''}</p>
-          <p className="project-card__discipline mono">{project.discipline || 'Production'}</p>
+          <p className="project-card__tagline">{project.tagline || project.brief || ''}</p>
+          <p className="project-card__discipline mono">{project.discipline || 'Animation Studio'}</p>
         </div>
       </Link>
     </article>

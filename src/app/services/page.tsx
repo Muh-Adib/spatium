@@ -16,9 +16,9 @@ import '@/pages/services.css'
 const SITE_URL = 'https://unimasi.studio'
 
 export const metadata: Metadata = {
-  title: 'Services',
+  title: 'Animation & Motion Design Services',
   description:
-    '2D animation, 3D animation and visual production, motion graphics, and digital visual assets with AI-assisted production — the four capabilities of the UNIMASI studio.',
+    '2D animation, 3D animation, motion graphics, and digital visual assets with AI-assisted production — the four UNIMASI capabilities.',
   alternates: {
     canonical: `${SITE_URL}/services`,
   },
@@ -55,7 +55,7 @@ export default async function ServicesPage() {
         meta={
           <>
             <span className="pill">
-              <Icon name="layers" size={13} /> 3 core disciplines
+              <Icon name="layers" size={13} /> 4 core disciplines
             </span>
             <span className="pill">
               <Icon name="sparkle" size={13} /> AI-assisted production

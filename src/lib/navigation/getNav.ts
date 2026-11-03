@@ -75,7 +75,7 @@ export async function getNavigationEntries(): Promise<NavEntry[]> {
             href: `/solusi/${s.slug}`,
             description: s.shortDescription || '',
             isPopular: Boolean(s.featured),
-            image: resolveNavImageUrl(s.heroImage, '/images/portfolio/interactive-wall-projection.webp'),
+            image: resolveNavImageUrl(s.heroImage, '/images/portfolio/telkom-dfe.webp'),
           })),
         })
         if (solSections.length >= 3) break
@@ -179,30 +179,30 @@ export async function getNavigationEntries(): Promise<NavEntry[]> {
           title: catName,
           items: items.slice(0, 3).map((p: any) => ({
             label: p.title,
-            href: `/portofolio/${p.slug}`,
+            href: `/portfolio/${p.slug}`,
             description: p.summary || p.client || '',
             isPopular: Boolean(p.featured),
-            image: resolveNavImageUrl(p.heroMedia?.url || p.heroImage, '/images/portfolio/interactive-3d-aquarium.png'),
+            image: resolveNavImageUrl(p.heroMedia?.url || p.heroImage, '/images/portfolio/telkom-dfe.webp'),
           })),
         })
         if (portSections.length >= 3) break
       }
 
       entries.push({
-        label: 'Portofolio',
-        href: '/portofolio',
+        label: 'Portfolio',
+        href: '/portfolio',
         mega: portSections.length > 0,
         megaHeader: {
           tag: 'CASE STUDIES',
           viewAllLabel: 'SEMUA STUDI KASUS & KARYA',
-          viewAllHref: '/portofolio',
+          viewAllHref: '/portfolio',
         },
         sections: portSections,
       })
     } else {
       entries.push({
-        label: 'Portofolio',
-        href: '/portofolio',
+        label: 'Portfolio',
+        href: '/portfolio',
       })
     }
 
@@ -269,11 +269,11 @@ export async function getNavigationEntries(): Promise<NavEntry[]> {
   } catch (err: any) {
     console.error('Error fetching dynamic navigation from DB:', err)
     return [
-      { label: 'Solusi', href: '/solusi' },
-      { label: 'Layanan', href: '/layanan' },
-      { label: 'Portofolio', href: '/portofolio' },
-      { label: 'Artikel', href: '/artikel' },
-      { label: 'Tentang', href: '/tentang' },
+      { label: 'Services', href: '/services' },
+      { label: 'Portfolio', href: '/portfolio' },
+      { label: 'Journal', href: '/journal' },
+      { label: 'About', href: '/about' },
+      { label: 'Contact', href: '/contact' },
     ]
   }
 }
@@ -294,46 +294,32 @@ export async function getFooterNavEntries(): Promise<FooterNavSection[]> {
     // 1. Layanan Column
     if (allServices.length > 0) {
       sections.push({
-        title: 'Layanan',
+        title: 'Services',
         items: allServices.slice(0, 5).map((s: any) => ({
           label: s.name,
-          href: `/layanan/${s.slug}`,
+          href: `/services/${s.slug}`,
         })),
       })
     }
 
-    // 2. Solusi Column
-    const publishedSolutions = allSolutions.filter((s: any) => s.status === 'published' || !s.status)
-    if (publishedSolutions.length > 0) {
-      sections.push({
-        title: 'Solusi',
-        items: publishedSolutions.slice(0, 5).map((s: any) => ({
-          label: s.title,
-          href: `/solusi/${s.slug}`,
-        })),
-      })
-    }
-
-    // 3. Wawasan / Artikel Column
+    // 2. Wawasan / Journal Column
     if (allCategories.length > 0) {
       sections.push({
-        title: 'Wawasan',
+        title: 'Journal',
         items: allCategories.slice(0, 5).map((c: any) => ({
           label: c.name,
-          href: `/artikel?kategori=${c.slug}`,
+          href: `/journal?kategori=${c.slug}`,
         })),
       })
     }
 
-    // 4. Perusahaan Column
+    // 3. Studio Column
     sections.push({
-      title: 'Perusahaan',
+      title: 'UNIMASI Studio',
       items: [
-        { label: 'Tentang Kami', href: '/tentang' },
-        { label: 'Portofolio', href: '/portofolio' },
-        { label: 'Kontak', href: '/kontak' },
-        { label: 'Kebijakan Privasi', href: '/privasi' },
-        { label: 'Syarat & Ketentuan', href: '/syarat-ketentuan' },
+        { label: 'Tentang Kami', href: '/about' },
+        { label: 'Portfolio', href: '/portfolio' },
+        { label: 'Kontak', href: '/contact' },
       ],
     })
 
@@ -342,14 +328,12 @@ export async function getFooterNavEntries(): Promise<FooterNavSection[]> {
     console.error('Error fetching footer navigation from DB:', err)
     return [
       {
-        title: 'Perusahaan',
+        title: 'UNIMASI Studio',
         items: [
-          { label: 'Tentang Kami', href: '/tentang' },
-          { label: 'Layanan', href: '/layanan' },
-          { label: 'Portofolio', href: '/portofolio' },
-          { label: 'Kontak', href: '/kontak' },
-          { label: 'Kebijakan Privasi', href: '/privasi' },
-          { label: 'Syarat & Ketentuan', href: '/syarat-ketentuan' },
+          { label: 'About', href: '/about' },
+          { label: 'Services', href: '/services' },
+          { label: 'Portfolio', href: '/portfolio' },
+          { label: 'Contact', href: '/contact' },
         ],
       },
     ]

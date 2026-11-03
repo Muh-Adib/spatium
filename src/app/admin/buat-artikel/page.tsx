@@ -35,7 +35,6 @@ import { ArticleEditorHeader, EditorViewMode } from '@/components/studio/editor/
 import { ArticleEditorCanvas } from '@/components/studio/editor/ArticleEditorCanvas'
 import { ArticleEditorInspector } from '@/components/studio/editor/ArticleEditorInspector'
 import { ArticleLivePreview } from '@/components/studio/editor/ArticleLivePreview'
-import { ArticleWordpressModal } from '@/components/studio/editor/ArticleWordpressModal'
 import { ArticlePublicationGateModal } from '@/components/studio/editor/ArticlePublicationGateModal'
 import { ArticleLinkModal } from '@/components/studio/editor/ArticleLinkModal'
 import { ArticleUnsavedModal } from '@/components/studio/editor/ArticleUnsavedModal'
@@ -48,6 +47,12 @@ function ArticleEditorInner() {
   const locallySavedSlugRef = useRef<string | null>(null)
 
   const { role, actorName, permissions, getAuthHeaders } = useAuth()
+
+  // Multi-User Presence & Safe Concurrency Locks
+  const [loadedUpdatedAt, setLoadedUpdatedAt] = useState<string | null>(null)
+  const [activeLockUser, setActiveLockUser] = useState<{ name: string; email: string } | null>(null)
+  const [conflictModalOpen, setConflictModalOpen] = useState(false)
+  const [conflictServerUpdatedAt, setConflictServerUpdatedAt] = useState<string | null>(null)
 
   // Layout & View Modes
   const [viewMode, setViewMode] = useState<EditorViewMode>('split-inspector')
@@ -122,7 +127,6 @@ function ArticleEditorInner() {
   const [gateViolations, setGateViolations] = useState<string[]>([])
 
   // Modals
-  const [wpModalOpen, setWpModalOpen] = useState(false)
   const [linkModalOpen, setLinkModalOpen] = useState(false)
   const [activeLinkBlockId, setActiveLinkBlockId] = useState<string | null>(null)
   const [linkUrlInput, setLinkUrlInput] = useState('')
@@ -180,6 +184,7 @@ function ArticleEditorInner() {
 
         setTitle(art.title || '')
         setSlug(art.slug || editSlug)
+        setLoadedUpdatedAt(art.updatedAt || null)
         setTagInput((art.tags || []).map((tag: { name: string }) => tag.name).join(', '))
         setCategory(art.category?.name || art.category || 'Website Development')
         setAuthor(art.author?.name || art.author || actorName || '')
@@ -251,6 +256,61 @@ function ArticleEditorInner() {
       isMounted = false
     }
   }, [editSlug, actorName])
+
+  // Multi-user lock heartbeat & collision detection
+  useEffect(() => {
+    const activeTargetSlug = editSlug || slug
+    if (!activeTargetSlug) return
+
+    let isMounted = true
+    const checkAndAcquireLock = async () => {
+      try {
+        const res = await fetch(`/api/articles/lock?slug=${encodeURIComponent(activeTargetSlug)}`, {
+          headers: getAuthHeaders(),
+        })
+        if (res.ok) {
+          const data = await res.json()
+          if (data.isLocked && data.lockInfo) {
+            if (isMounted) {
+              setActiveLockUser({
+                name: data.lockInfo.userName,
+                email: data.lockInfo.userEmail,
+              })
+            }
+            return
+          } else {
+            if (isMounted) setActiveLockUser(null)
+          }
+        }
+
+        await fetch('/api/articles/lock', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...getAuthHeaders(),
+          },
+          body: JSON.stringify({ slug: activeTargetSlug }),
+        })
+      } catch (err) {
+        console.warn('[ArticleEditor] Lock heartbeat warning:', err)
+      }
+    }
+
+    checkAndAcquireLock()
+    const interval = setInterval(checkAndAcquireLock, 25_000)
+
+    return () => {
+      isMounted = false
+      clearInterval(interval)
+      if (activeTargetSlug) {
+        fetch(`/api/articles/lock?slug=${encodeURIComponent(activeTargetSlug)}`, {
+          method: 'DELETE',
+          headers: getAuthHeaders(),
+          keepalive: true,
+        }).catch(() => {})
+      }
+    }
+  }, [editSlug, slug, getAuthHeaders])
 
   // Auto-slug on title change if not editing
   const handleTitleChange = (val: string) => {
@@ -787,9 +847,10 @@ function ArticleEditorInner() {
     setMediaPickerOpen(false)
   }
 
-  // Handle Save / Publish
+  // Handle Save / Publish (Multi-User Safe Concurrency)
   const handleSave = async (
-    targetStatus?: 'draft' | 'in_review' | 'approved' | 'scheduled' | 'published'
+    targetStatus?: 'draft' | 'in_review' | 'approved' | 'scheduled' | 'published',
+    forceOverwrite?: boolean
   ): Promise<boolean> => {
     if (!title.trim()) {
       setErrorMessage('Judul artikel wajib diisi.')
@@ -860,6 +921,8 @@ function ArticleEditorInner() {
         status: finalStatus,
         scheduledAt: finalStatus === 'scheduled' && scheduleLocal ? new Date(scheduleLocal).toISOString() : undefined,
         publicationTimezone,
+        expectedUpdatedAt: loadedUpdatedAt,
+        forceOverwrite: Boolean(forceOverwrite),
 
         metaTitle: finalMetaTitle,
         metaDescription: finalMetaDesc,
@@ -916,11 +979,21 @@ function ArticleEditorInner() {
 
       const data = await res.json()
       if (!res.ok) {
+        if (res.status === 409 && data.conflict) {
+          setConflictServerUpdatedAt(data.serverUpdatedAt || null)
+          setConflictModalOpen(true)
+          setErrorMessage(data.error || 'Konflik pengeditan: Artikel ini telah diperbarui oleh pengguna lain.')
+          return false
+        }
         if (res.status === 422 && data.violations) {
           setGateViolations(data.violations.map((v: any) => v.message || v))
           throw new Error('Gerbang publikasi terkunci. Mohon lengkapi syarat SEO/Aksesibilitas.')
         }
         throw new Error(data.error || 'Gagal menyimpan artikel.')
+      }
+
+      if (data.updatedAt) {
+        setLoadedUpdatedAt(data.updatedAt)
       }
 
       setStatus(finalStatus)
@@ -1106,14 +1179,13 @@ function ArticleEditorInner() {
           return
         }
         if (gateViolations.length > 0) setGateViolations([])
-        if (wpModalOpen) setWpModalOpen(false)
         if (linkModalOpen) setLinkModalOpen(false)
         if (aiMode !== 'idle') setAiMode('idle')
       }
     }
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [status, gateViolations, wpModalOpen, linkModalOpen, aiMode, title, blocks, rawContent, showUnsavedModal])
+  }, [status, gateViolations, linkModalOpen, aiMode, title, blocks, rawContent, showUnsavedModal])
 
   // View Mode Switcher Handling
   const handleViewModeChange = (mode: EditorViewMode) => {
@@ -1133,84 +1205,6 @@ function ArticleEditorInner() {
     }
   }
 
-  const handleWordPressSyncSuccess = (d: any) => {
-    setIsDirty(true)
-    setTitle(d.title || '')
-    setSlug(d.slug || '')
-    setExcerpt(d.excerpt || '')
-    setCoverUrl(d.coverUrl || '/images/articles/web-architecture.jpg')
-    setCoverAlt(d.coverAlt || '')
-    setCategory(d.category || 'Website Development')
-    setAuthor(d.author || actorName || '')
-
-    // Tags
-    if (Array.isArray(d.tags)) {
-      setTagInput(d.tags.map((tag: any) => (typeof tag === 'string' ? tag : tag.name)).filter(Boolean).join(', '))
-    } else if (typeof d.tags === 'string') {
-      setTagInput(d.tags)
-    }
-
-    // SEO Titles & Metadata
-    setSeoTitle(d.metaTitle || d.seoData?.seoTitle || d.title || '')
-    setMetaDescription(d.metaDescription || d.seoData?.metaDescription || d.excerpt || '')
-    setCanonicalUrl(d.canonicalUrl || d.seoData?.canonicalUrl || '')
-
-    // Target Keywords (Focus Keyphrase & Related)
-    const kw = d.focusKeyphrase || d.seoData?.focusKeyphrase || ''
-    setFocusKeyphrase(kw)
-    if (kw) setTargetKeyword(kw)
-    const relKws = Array.isArray(d.relatedKeyphrases)
-      ? d.relatedKeyphrases
-      : Array.isArray(d.seoData?.relatedKeyphrases)
-      ? d.seoData.relatedKeyphrases
-      : []
-    setRelatedKeyphrases(relKws)
-
-    // Cornerstone & Breadcrumbs
-    setIsCornerstone(Boolean(d.isCornerstone ?? d.seoData?.isCornerstone))
-    setBreadcrumbTitle(d.breadcrumbTitle || d.seoData?.breadcrumbTitle || d.title || '')
-
-    // Robots Directives
-    if (d.robots) {
-      setRobots(d.robots)
-    } else if (d.seoData?.robots) {
-      setRobots(d.seoData.robots)
-    }
-
-    // Social Metadata
-    if (d.socialOg) {
-      setSocialOg(d.socialOg)
-    } else if (d.seoData?.openGraph) {
-      setSocialOg(d.seoData.openGraph)
-    }
-
-    if (d.socialTwitter) {
-      setSocialTwitter(d.socialTwitter)
-    } else if (d.seoData?.twitter) {
-      setSocialTwitter(d.seoData.twitter)
-    }
-
-    // Base SEO Data & Schema
-    if (d.seoData) {
-      setBaseSeoData(d.seoData)
-    }
-
-    setPublicationDate(d.publishedAt || '')
-
-    // Blocks
-    if (Array.isArray(d.blocks) && d.blocks.length > 0) {
-      setBlocks(d.blocks)
-    } else if (d.contentHtml) {
-      setBlocks(contentToBlocks(d.contentHtml))
-    }
-
-    // Reveal SEO Inspector Tab so the editor immediately shows Yoast metrics & keyphrase
-    setInspectorTab('seo')
-    setIsInspectorOpen(true)
-    if (viewMode === 'focus' || viewMode === 'full-preview') {
-      setViewMode('split-inspector')
-    }
-  }
 
   if (loadingInitial) {
     return (
@@ -1242,7 +1236,6 @@ function ArticleEditorInner() {
         onToggleInspector={() => setIsInspectorOpen((v) => !v)}
         isAiOpen={aiMode !== 'idle'}
         onToggleAi={() => setAiMode((prev) => (prev === 'idle' ? 'docked' : 'idle'))}
-        onOpenWpModal={() => setWpModalOpen(true)}
         onSave={handleSave}
         permissions={permissions}
         publicationDate={publicationDate}
@@ -1253,6 +1246,28 @@ function ArticleEditorInner() {
         onOpenSeoTab={handleOpenSeoTab}
         onNavigateBack={() => handleRequestNavigate('/admin?tab=articles')}
       />
+
+      {/* Multi-User Real-time Presence Banner */}
+      {activeLockUser && (
+        <div className="mx-4 mt-2 p-3 bg-amber-500/15 border border-amber-500/40 rounded-xl flex items-center justify-between gap-3 text-amber-300 text-xs animate-fadeIn z-20">
+          <div className="flex items-center gap-2.5">
+            <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0" />
+            <span>
+              <strong>Perhatian Multi-User:</strong> Artikel ini sedang aktif diedit oleh{' '}
+              <span className="font-semibold underline text-white">{activeLockUser.name}</span> ({activeLockUser.email}).
+              Perubahan Anda dapat bertabrakan jika disimpan bersamaan.
+            </span>
+          </div>
+          <button
+            type="button"
+            onClick={() => setActiveLockUser(null)}
+            className="text-amber-400 hover:text-white p-1 rounded transition-colors text-[11px]"
+            title="Tutup pemberitahuan"
+          >
+            <X className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      )}
 
       {/* Notification / Toast Banner */}
       {errorMessage && (
@@ -1516,12 +1531,6 @@ function ArticleEditorInner() {
       </div>
 
       {/* ---------------- 4. MODALS ---------------- */}
-      <ArticleWordpressModal
-        isOpen={wpModalOpen}
-        onClose={() => setWpModalOpen(false)}
-        onSuccess={handleWordPressSyncSuccess}
-      />
-
       <ArticlePublicationGateModal
         violations={gateViolations}
         onClose={() => setGateViolations([])}
@@ -1576,6 +1585,51 @@ function ArticleEditorInner() {
         onConfirmDiscard={handleConfirmDiscard}
         onSaveAndLeave={handleSaveAndLeave}
       />
+
+      {/* Multi-User Concurrency Collision & Conflict Modal */}
+      {conflictModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fadeIn">
+          <div className="bg-[#18181B] border border-amber-500/50 rounded-2xl p-6 max-w-md w-full shadow-2xl shadow-black/90">
+            <div className="flex items-center gap-3 text-amber-400 mb-3">
+              <AlertTriangle className="w-6 h-6 shrink-0" />
+              <h3 className="text-base font-bold text-white">Konflik Pengeditan Multi-User</h3>
+            </div>
+            <p className="text-xs text-neutral-300 leading-relaxed mb-6">
+              Artikel ini telah disimpan dan diperbarui oleh editor lain di database sejak Anda membukanya.
+              Untuk mencegah menimpa tulisan editor lain tanpa sengaja, silakan tentukan tindakan Anda:
+            </p>
+            <div className="flex flex-col gap-2.5">
+              <button
+                type="button"
+                onClick={() => {
+                  setConflictModalOpen(false)
+                  window.location.reload()
+                }}
+                className="w-full py-2.5 px-4 bg-sky-600 hover:bg-sky-500 text-white font-medium rounded-xl text-xs transition-colors"
+              >
+                Muat Ulang Versi Terbaru dari Database (Disarankan)
+              </button>
+              <button
+                type="button"
+                onClick={async () => {
+                  setConflictModalOpen(false)
+                  await handleSave(undefined, true)
+                }}
+                className="w-full py-2.5 px-4 bg-white/10 hover:bg-white/15 text-amber-300 font-medium rounded-xl text-xs transition-colors border border-amber-500/30"
+              >
+                Paksa Simpan & Timpa Perubahan (Force Overwrite)
+              </button>
+              <button
+                type="button"
+                onClick={() => setConflictModalOpen(false)}
+                className="w-full py-2 px-4 text-neutral-400 hover:text-neutral-200 text-xs transition-colors"
+              >
+                Kembali ke Editor Tanpa Menyimpan
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

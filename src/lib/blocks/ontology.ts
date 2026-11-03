@@ -453,18 +453,18 @@ blockOntology.register({
   ],
   examplePayload: {
     type: 'internal-links',
-    title: 'Layanan Terkait UNIMASI',
+    title: 'Layanan Terkait UNIMASI Studio',
     links: [
-      { title: 'Jasa Pembuatan Website Next.js 16', slug: 'website-development', url: '/layanan/website-development' },
-      { title: 'Simulasi Interaktif WebGL & Three.js', slug: 'interactive-3d-aquarium', url: '/layanan/interactive-3d-aquarium' },
+      { title: 'Jasa Animasi 2D & Explainer Video', slug: '2d-animation', url: '/services/2d-animation' },
+      { title: 'Produksi Animasi 3D & Visual CGI', slug: '3d-animation', url: '/services/3d-animation' },
     ],
   },
   generateDefault: () => ({
     type: 'internal-links',
     id: generateBlockId('links'),
-    title: 'Rekomendasi Layanan Terkait',
+    title: 'Rekomendasi Layanan Animasi Terkait',
     links: [
-      { title: 'Website Development', slug: 'website-development', url: '/layanan/website-development' },
+      { title: 'Motion Graphics & Kinetic Typography', slug: 'motion-graphics', url: '/services/motion-graphics' },
     ],
   }),
 })

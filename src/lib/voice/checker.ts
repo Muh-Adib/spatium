@@ -65,7 +65,7 @@ export async function getActiveVoiceProfile(): Promise<VoiceProfileData | null> 
  * Checks:
  * 1. Stylometric divergence (sentence length, POV consistency, passive ratio)
  * 2. Lexicon rules (banned phrases, signature phrases)
- * 3. WordPress alur kerja editorial rules (Email Ban, anti-stuffing)
+ * 3. Alur kerja editorial rules (Email Ban, anti-stuffing)
  */
 export function evaluateContentVoice(
   rawText: string,
@@ -75,7 +75,7 @@ export function evaluateContentVoice(
   const deviations: VoiceDeviation[] = []
   const textLower = rawText.toLowerCase()
 
-  // 1. Email Ban Rule (ADR-0012 §4: aturan alur kerja WordPress tanpa alamat email di body konten)
+  // 1. Email Ban Rule (ADR-0012 §4: aturan alur kerja editorial tanpa alamat email di body konten)
   const emailRegex = /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g
   const foundEmails = rawText.match(emailRegex)
   if (foundEmails && foundEmails.length > 0) {

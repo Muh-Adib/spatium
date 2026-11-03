@@ -17,6 +17,19 @@
   border-bottom: 1px solid var(--line);
 }
 
+.project-card__media > img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform var(--dur) var(--ease-out);
+}
+
+.project-card__link:hover .project-card__media > img,
+.project-card__link:focus-visible .project-card__media > img {
+  transform: scale(1.06);
+}
+
 .project-card--featured .project-card__media {
   aspect-ratio: 16 / 10;
 }

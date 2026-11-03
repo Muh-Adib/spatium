@@ -17,6 +17,7 @@ export interface SolutionEntity {
   status: 'draft' | 'in_review' | 'approved' | 'published' | 'archived'
   createdAt: string | null
   updatedAt: string | null
+  canonicalUrl?: string | null
   metaTitle: string | null
   metaDescription: string | null
   focusKeyphrase: string | null
@@ -59,6 +60,7 @@ export function mapSolutionRow(row: any): SolutionEntity {
     status: row.status || 'published',
     createdAt: row.createdAt || null,
     updatedAt: row.updatedAt || null,
+    canonicalUrl: row.canonicalUrl || null,
     metaTitle: row.metaTitle || null,
     metaDescription: row.metaDescription || null,
     focusKeyphrase: row.focusKeyphrase || null,

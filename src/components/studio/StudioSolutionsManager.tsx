@@ -140,7 +140,8 @@ export function StudioSolutionsManager() {
       setSolOrder(String(sol.order ?? 0))
       setSolFeatured(Boolean(sol.featured))
       setSolStatus(sol.status || 'published')
-      setSolBlocks(Array.isArray(sol.blocks) ? sol.blocks : [])
+      const solParsed = typeof sol.blocks === 'string' ? (sol.blocks ? JSON.parse(sol.blocks) : []) : sol.blocks
+      setSolBlocks(Array.isArray(solParsed) ? solParsed : [])
       setSolSelectedPortfolios([])
 
       setSeoTitle(sol.metaTitle || sol.title)
@@ -823,7 +824,13 @@ export function StudioSolutionsManager() {
                 <div className="mt-3 flex items-center gap-2 text-[11px] font-mono text-neutral-400">
                   <span className="px-2 py-0.5 rounded bg-white/5">/{sol.slug}</span>
                   <span className="px-2 py-0.5 rounded bg-white/5">
-                    {Array.isArray(sol.blocks) ? sol.blocks.length : 0} Blok
+                    {(() => {
+                      if (Array.isArray(sol.blocks)) return sol.blocks.length
+                      if (typeof sol.blocks === 'string') {
+                        try { return JSON.parse(sol.blocks).length } catch { return 0 }
+                      }
+                      return 0
+                    })()} Blok
                   </span>
                 </div>
               </div>

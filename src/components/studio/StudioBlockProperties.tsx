@@ -107,6 +107,13 @@ export default function StudioBlockProperties({
     switch (type) {
       case 'hero-cinema':
         return { label: 'Hero Sinematik 3D', icon: Sparkles, desc: 'Header sinematik imersif dengan showcase motion reel & 3D' }
+      case 'hero-portfolio':
+      case 'hero-case-study':
+        return { label: 'Hero Portofolio / Kasus', icon: FolderKanban, desc: 'Header studi kasus animasi dengan klien, tahun, dan video/poster' }
+      case 'portfolio-case-study':
+        return { label: 'Studi Kasus Naratif', icon: Layers, desc: 'Grid tantangan, pendekatan artistik, solusi teknis, dan hasil' }
+      case 'hero-solution':
+        return { label: 'Hero Solusi Industri', icon: Zap, desc: 'Header solusi dengan badge industri, manfaat utama, dan dual CTA' }
       case 'process-timeline':
         return { label: 'Timeline Produksi Animasi', icon: Layers, desc: 'Tahapan pipeline kreatif produksi 3D end-to-end' }
       case 'stats-ticker':
@@ -931,6 +938,253 @@ export default function StudioBlockProperties({
           </>
         )}
 
+        {/* ─── 2B. HERO PORTFOLIO / CASE STUDY ──────────────────────── */}
+        {(type === 'hero-portfolio' || type === 'hero-case-study') && (
+          <>
+            <div>
+              <FieldHeader label="Judul Proyek" tooltip="Judul utama studi kasus portofolio" />
+              <input
+                type="text"
+                value={block.title || block.headline || ''}
+                onChange={(e) => {
+                  setField('title', e.target.value)
+                  setField('headline', e.target.value)
+                }}
+                placeholder="cth: Wilmar Replanting Sawit 3D Explainer"
+                className="w-full bg-[#1e1e1e] border border-white/10 rounded-lg px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-accent"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <FieldHeader label="Nama Klien" tooltip="Perusahaan atau brand klien" />
+                <input
+                  type="text"
+                  value={block.client || ''}
+                  onChange={(e) => setField('client', e.target.value)}
+                  placeholder="cth: Wilmar International"
+                  className="w-full bg-[#1e1e1e] border border-white/10 rounded-lg px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-accent"
+                />
+              </div>
+              <div>
+                <FieldHeader label="Tahun Rilis" tooltip="Tahun produksi selesai" />
+                <input
+                  type="text"
+                  value={block.year || ''}
+                  onChange={(e) => setField('year', e.target.value)}
+                  placeholder="2024"
+                  className="w-full bg-[#1e1e1e] border border-white/10 rounded-lg px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-accent"
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <FieldHeader label="Kategori" tooltip="Kategori animasi (3D, 2D, Motion)" />
+                <input
+                  type="text"
+                  value={block.category || ''}
+                  onChange={(e) => setField('category', e.target.value)}
+                  placeholder="3D Industrial"
+                  className="w-full bg-[#1e1e1e] border border-white/10 rounded-lg px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-accent"
+                />
+              </div>
+              <div>
+                <FieldHeader label="Disiplin" tooltip="Spesialisasi rekayasa visual" />
+                <input
+                  type="text"
+                  value={block.discipline || ''}
+                  onChange={(e) => setField('discipline', e.target.value)}
+                  placeholder="Visual Production"
+                  className="w-full bg-[#1e1e1e] border border-white/10 rounded-lg px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-accent"
+                />
+              </div>
+            </div>
+            <div>
+              <FieldHeader label="Ringkasan Eksekutif" tooltip="Paragraf naratif pengantar studi kasus" />
+              <textarea
+                rows={3}
+                value={block.summary || block.description || ''}
+                onChange={(e) => {
+                  setField('summary', e.target.value)
+                  setField('description', e.target.value)
+                }}
+                placeholder="Penjelasan ringkas tentang brief proyek..."
+                className="w-full bg-[#1e1e1e] border border-white/10 rounded-lg px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-accent"
+              />
+            </div>
+            <div>
+              <FieldHeader label="URL Hero Image / Poster" tooltip="Path gambar poster resolusi tinggi" />
+              <input
+                type="text"
+                value={block.heroImage || block.posterUrl || ''}
+                onChange={(e) => {
+                  setField('heroImage', e.target.value)
+                  setField('posterUrl', e.target.value)
+                }}
+                placeholder="/images/portfolio/cover.jpg"
+                className="w-full bg-[#1e1e1e] border border-white/10 rounded-lg px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-accent"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <FieldHeader label="URL Video Embed" tooltip="YouTube, Vimeo, atau MP4 embed" />
+                <input
+                  type="text"
+                  value={block.videoUrl || ''}
+                  onChange={(e) => setField('videoUrl', e.target.value)}
+                  placeholder="https://..."
+                  className="w-full bg-[#1e1e1e] border border-white/10 rounded-lg px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-accent"
+                />
+              </div>
+              <div>
+                <FieldHeader label="Live URL" tooltip="Tautan eksternal proyek" />
+                <input
+                  type="text"
+                  value={block.liveUrl || ''}
+                  onChange={(e) => setField('liveUrl', e.target.value)}
+                  placeholder="https://..."
+                  className="w-full bg-[#1e1e1e] border border-white/10 rounded-lg px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-accent"
+                />
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* ─── 2C. PORTFOLIO CASE STUDY NARRATIVE ────────────────────── */}
+        {type === 'portfolio-case-study' && (
+          <>
+            <div>
+              <FieldHeader label="Judul Bagian" tooltip="Judul narasi studi kasus" />
+              <input
+                type="text"
+                value={block.title || ''}
+                onChange={(e) => setField('title', e.target.value)}
+                placeholder="Tantangan, Pendekatan & Solusi Produksi"
+                className="w-full bg-[#1e1e1e] border border-white/10 rounded-lg px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-accent"
+              />
+            </div>
+            <div>
+              <FieldHeader label="01. The Challenge (Tantangan)" tooltip="Masalah atau kebutuhan klien" />
+              <textarea
+                rows={4}
+                value={block.challenge || ''}
+                onChange={(e) => setField('challenge', e.target.value)}
+                placeholder="Jelaskan tantangan teknis / komunikasi yang dihadapi..."
+                className="w-full bg-[#1e1e1e] border border-white/10 rounded-lg px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-accent"
+              />
+            </div>
+            <div>
+              <FieldHeader label="02. Creative Approach (Pendekatan)" tooltip="Arah kreatif dan seni visual" />
+              <textarea
+                rows={4}
+                value={block.approach || ''}
+                onChange={(e) => setField('approach', e.target.value)}
+                placeholder="Jelaskan pendekatan storytelling dan art direction..."
+                className="w-full bg-[#1e1e1e] border border-white/10 rounded-lg px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-accent"
+              />
+            </div>
+            <div>
+              <FieldHeader label="03. Technical Solution (Solusi CGI)" tooltip="Eksekusi software dan pipeline" />
+              <textarea
+                rows={4}
+                value={block.solution || ''}
+                onChange={(e) => setField('solution', e.target.value)}
+                placeholder="Jelaskan tools 3D, simulasi partikel, dan compositing..."
+                className="w-full bg-[#1e1e1e] border border-white/10 rounded-lg px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-accent"
+              />
+            </div>
+            <div>
+              <FieldHeader label="04. Impact & Result (Hasil Akhir)" tooltip="Dampak dan apresiasi hasil" />
+              <textarea
+                rows={4}
+                value={block.result || ''}
+                onChange={(e) => setField('result', e.target.value)}
+                placeholder="Jelaskan hasil terukur atau dampak komunikasi bagi klien..."
+                className="w-full bg-[#1e1e1e] border border-white/10 rounded-lg px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-accent"
+              />
+            </div>
+          </>
+        )}
+
+        {/* ─── 2D. HERO SOLUTION ───────────────────────────────────────── */}
+        {type === 'hero-solution' && (
+          <>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <FieldHeader label="Badge Solusi" tooltip="Label kecil di atas judul" />
+                <input
+                  type="text"
+                  value={block.badge || ''}
+                  onChange={(e) => setField('badge', e.target.value)}
+                  placeholder="Solusi Industri"
+                  className="w-full bg-[#1e1e1e] border border-white/10 rounded-lg px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-accent"
+                />
+              </div>
+              <div>
+                <FieldHeader label="Kategori" tooltip="Sektor target industri" />
+                <input
+                  type="text"
+                  value={block.category || ''}
+                  onChange={(e) => setField('category', e.target.value)}
+                  placeholder="Enterprise"
+                  className="w-full bg-[#1e1e1e] border border-white/10 rounded-lg px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-accent"
+                />
+              </div>
+            </div>
+            <div>
+              <FieldHeader label="Judul Solusi" tooltip="Headline utama solusi bisnis" />
+              <input
+                type="text"
+                value={block.title || block.headline || ''}
+                onChange={(e) => {
+                  setField('title', e.target.value)
+                  setField('headline', e.target.value)
+                }}
+                placeholder="cth: Solusi Visualisasi 3D Manufaktur"
+                className="w-full bg-[#1e1e1e] border border-white/10 rounded-lg px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-accent"
+              />
+            </div>
+            <div>
+              <FieldHeader label="Deskripsi Singkat" tooltip="Pengantar solusi dan problem statement" />
+              <textarea
+                rows={3}
+                value={block.shortDescription || block.description || ''}
+                onChange={(e) => {
+                  setField('shortDescription', e.target.value)
+                  setField('description', e.target.value)
+                }}
+                placeholder="Jelaskan bagaimana solusi ini mengatasi hambatan industri..."
+                className="w-full bg-[#1e1e1e] border border-white/10 rounded-lg px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-accent"
+              />
+            </div>
+            <div>
+              <FieldHeader label="Daftar Manfaat Utama (1 per baris)" tooltip="Poin-poin benefit solusi" />
+              <textarea
+                rows={4}
+                value={
+                  Array.isArray(block.keyBenefits)
+                    ? block.keyBenefits.join('\n')
+                    : typeof block.keyBenefits === 'string'
+                    ? block.keyBenefits
+                    : ''
+                }
+                onChange={(e) => setField('keyBenefits', e.target.value.split('\n').filter(Boolean))}
+                placeholder="Simulasi aman tanpa downtime pabrik&#10;Edukasi operator 3x lebih cepat"
+                className="w-full bg-[#1e1e1e] border border-white/10 rounded-lg px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-accent"
+              />
+            </div>
+            <div>
+              <FieldHeader label="URL Hero Image" tooltip="Gambar visual solusi" />
+              <input
+                type="text"
+                value={block.heroImage || ''}
+                onChange={(e) => setField('heroImage', e.target.value)}
+                placeholder="/images/solutions/hero.jpg"
+                className="w-full bg-[#1e1e1e] border border-white/10 rounded-lg px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-accent"
+              />
+            </div>
+          </>
+        )}
+
         {/* ─── 3. FEATURE BENTO GRID ───────────────────────────────────── */}
         {type === 'feature-bento-grid' && (
           <>
@@ -1010,7 +1264,7 @@ export default function StudioBlockProperties({
                       <StudioImageControl
                         label="Gambar Spotlight Bento #1"
                         description="Pratinjau visual antarmuka pada kartu utama bento."
-                        value={f.image || '/images/portfolio/website-kalasan-valley.webp'}
+                        value={f.image || '/images/portfolio/telkom-dfe.webp'}
                         onChange={(url) => {
                           const copy = [...(block.features || [])]
                           copy[0] = { ...copy[0], image: url }
@@ -2278,36 +2532,36 @@ export default function StudioBlockProperties({
                   onClick={() => {
                     const current = block.services || [
                       {
-                        slug: 'website-development',
-                        name: 'Website Korporat & Landing Page Penjualan',
-                        badge: 'Tingkatkan Kredibilitas',
-                        description: 'Pembangunan website profil perusahaan profesional dan landing page yang cepat dibuka.',
-                        image: '/images/portfolio/website-pmb-umby.png',
-                        tags: ['Desain Eksklusif', 'Waktu Muat < 1 Detik', 'SEO Google'],
+                        slug: '2d-animation',
+                        name: '2D Animation & Explainer Video',
+                        badge: 'Storytelling Visual',
+                        description: 'Produksi animasi 2D explainer, edukasi, karakter, dan infografis naratif berkualitas tinggi.',
+                        image: '/images/portfolio/3d-short-film.webp',
+                        tags: ['2D Explainer', 'Karakter & Cerita', 'Frame-by-Frame'],
                       },
                       {
-                        slug: 'ui-ux-design',
-                        name: 'Desain Antarmuka & Riset Pengguna (UI/UX)',
-                        badge: 'Kemudahan Pengguna',
-                        description: 'Riset pengguna dan perancangan desain antarmuka visual yang modern, elegan, serta intuitif.',
-                        image: '/images/nav/ui-ux.jpg',
-                        tags: ['Riset Pengguna', 'Prototipe Interaktif', 'Mudah Dipahami'],
+                        slug: '3d-animation-production',
+                        name: '3D Animation & Visual Production',
+                        badge: 'CGI & Rekonstruksi',
+                        description: 'Visualisasi 3D produk, simulasi mesin industri CNC CAD, dan rendering sinematik photorealistic.',
+                        image: '/images/portfolio/pt-ypti-3d.webp',
+                        tags: ['3D Industrial', 'Sinematik 4K', 'Substance & Octane'],
                       },
                       {
-                        slug: 'custom-web-application',
-                        name: 'Sistem Informasi & Aplikasi Web Kustom',
-                        badge: 'Otomatisasi Bisnis',
-                        description: 'Pengembangan aplikasi web khusus, portal internal perusahaan, dan sistem manajemen data.',
-                        image: '/images/portfolio/website-itskes-icme.png',
-                        tags: ['Otomatisasi Kerja', 'Database Terintegrasi', 'Akses Multi-User'],
+                        slug: 'motion-graphics',
+                        name: 'Motion Graphics & Kinetic Typography',
+                        badge: 'Dinamis & Modern',
+                        description: 'Pengembangan grafis gerak korporat, infografis animasi, logo motion, dan paket video grafis.',
+                        image: '/images/portfolio/telkom-dfe.webp',
+                        tags: ['Kinetic Typography', 'Brand Motion', 'High-Retention'],
                       },
                       {
-                        slug: 'mobile-first-application',
-                        name: 'Aplikasi Mobile Siap Pasang (PWA)',
-                        badge: 'Aplikasi Smartphone',
-                        description: 'Aplikasi web modern yang dapat langsung diinstal di layar utama smartphone iOS & Android.',
-                        image: '/images/portfolio/website-kalasan-valley.webp',
-                        tags: ['Instal di HP', 'Hemat Kuota', 'Notifikasi Cepat'],
+                        slug: 'digital-visual-assets-ai',
+                        name: 'Digital Visual Assets & AI-Assisted Production',
+                        badge: 'Aset Digital Cepat',
+                        description: 'Library aset visual 3D real-time dan pipeline produksi visual skala besar berbantuan AI terkontrol.',
+                        image: '/images/portfolio/ugm.webp',
+                        tags: ['3D Library', 'High-Volume', 'Real-Time Engine'],
                       },
                     ]
                     setField('services', [
@@ -2316,9 +2570,9 @@ export default function StudioBlockProperties({
                         slug: 'layanan-baru',
                         name: 'Sub-Layanan Tambahan',
                         badge: 'Solusi Unggulan',
-                        description: 'Deskripsi lengkap keunggulan sub-layanan ini bagi klien...',
-                        image: '/images/portfolio/website-kalasan-valley.webp',
-                        tags: ['Fitur Utama', 'Keamanan Tinggi'],
+                        description: 'Deskripsi lengkap keunggulan sub-layanan animasi ini bagi klien...',
+                        image: '/images/portfolio/pt-ypti-3d.webp',
+                        tags: ['Fitur Utama', 'Spesialis Senior'],
                       },
                     ])
                   }}
@@ -2408,7 +2662,7 @@ export default function StudioBlockProperties({
                               copy[sIdx] = { ...copy[sIdx], slug: e.target.value }
                               setField('services', copy)
                             }}
-                            placeholder="website-development"
+                            placeholder="2d-animation"
                             className="w-full px-2.5 py-1.5 rounded-lg bg-black/40 border border-white/10 text-neutral-300 text-xs font-mono"
                           />
                         </div>
@@ -2490,7 +2744,7 @@ export default function StudioBlockProperties({
                       {
                         title: 'Proyek Klien Baru',
                         category: 'Sektor Industri',
-                        image: '/images/portfolio/website-kalasan-valley.webp',
+                        image: '/images/portfolio/sanata-dharma.webp',
                         desc: 'Deskripsi hasil pengerjaan dan solusi...',
                         metric: '100% Hak Milik',
                       },

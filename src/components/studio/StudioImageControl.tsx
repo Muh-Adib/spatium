@@ -20,57 +20,71 @@ import {
 } from 'lucide-react'
 import MediaPickerModal from './MediaPickerModal'
 
-// Preset template visual nyata dari UNIMASI
-export const SEGIA_IMAGE_PRESETS = [
+// Preset template visual nyata dari UNIMASI Studio Animasi & Motion Design
+export const UNIMASI_IMAGE_PRESETS = [
   {
-    name: 'Portal PMB Universitas Mercu Buana Yogyakarta',
-    url: '/images/portfolio/website-pmb-umby.png',
-    category: 'Pendidikan Tinggi',
-    defaultAlt: 'Tampilan antarmuka sistem pendaftaran PMB Universitas Mercu Buana Yogyakarta',
+    name: 'Telkom Digital Future Enterprise (DFE)',
+    url: '/images/portfolio/telkom-dfe.webp',
+    category: 'Motion Graphics',
+    defaultAlt: 'Animasi Motion Graphics Telkom Digital Future Enterprise UNIMASI',
   },
   {
-    name: 'Website & Portal SMK PB Soedirman 2',
-    url: '/images/portfolio/website-smk-pb-soedirman-2.png',
-    category: 'Sekolah & Vokasi',
-    defaultAlt: 'Desain portal interaktif sekolah kejuruan SMK PB Soedirman 2',
+    name: 'PT Yogya Presisi Tehnikatama Industri (YPTI)',
+    url: '/images/portfolio/pt-ypti-3d.webp',
+    category: '3D Industrial',
+    defaultAlt: 'Animasi 3D CGI Mesin Manufaktur Presisi Tinggi PT YPTI',
   },
   {
-    name: 'Website Kalasan Valley Hunian Modern',
-    url: '/images/portfolio/website-kalasan-valley.webp',
-    category: 'Properti & Residensial',
-    defaultAlt: 'Website profil arsitektur hunian eksklusif Kalasan Valley',
+    name: 'Sanata Dharma Heritage Foundation (In Memoriam)',
+    url: '/images/portfolio/sanata-dharma.webp',
+    category: '3D Animation',
+    defaultAlt: 'Visualisasi 3D Sinematik Dokumenter Sejarah Sanata Dharma',
   },
   {
-    name: 'Simulator 3D Virtual Aquarium Interaktif',
-    url: '/images/portfolio/interactive-3d-aquarium.png',
-    category: 'Edutainment & 3D WebGL',
-    defaultAlt: 'Visualisasi simulasi interaktif 3D akuarium virtual UNIMASI',
+    name: 'Wilmar International Sawit Replanting',
+    url: '/images/portfolio/motion-stills-1.png',
+    category: 'Motion Graphics',
+    defaultAlt: 'Animasi Motion Graphics Edukasi Replanting Sawit Wilmar',
   },
   {
-    name: 'Interactive Sensing Wall & Projection Mapping',
-    url: '/images/portfolio/interactive-wall-projection.webp',
-    category: 'Instalasi & Museum',
-    defaultAlt: 'Instalasi dinding sensor interaktif dan pemetaan proyeksi',
+    name: 'My Safe Harbor Short Animation Film',
+    url: '/images/portfolio/3d-short-film.webp',
+    category: '2D & 3D Character',
+    defaultAlt: 'Visualisasi Film Pendek Animasi 3D Karakter My Safe Harbor',
   },
   {
-    name: 'Virtual Exhibition Experience UGM',
-    url: '/images/portfolio/virtual-exhibition-ugm.png',
-    category: 'Pameran Virtual',
-    defaultAlt: 'Ruang pameran virtual interaktif Universitas Gadjah Mada',
+    name: 'Transformasi Akademik Mercu Buana',
+    url: '/images/portfolio/mercu-buana.webp',
+    category: '3D Visualization',
+    defaultAlt: 'Animasi 3D Visualisasi Kampus Modern Universitas Mercu Buana',
   },
   {
-    name: 'Portal Akademik ITSK Soepraoen / ICME',
-    url: '/images/portfolio/website-itskes-icme.png',
-    category: 'Pendidikan Tinggi',
-    defaultAlt: 'Sistem portal terpadu institusi teknologi kesehatan',
+    name: 'Visualisasi Riset & Inovasi Teknologi UGM',
+    url: '/images/portfolio/ugm.webp',
+    category: 'Spatial & 3D Experience',
+    defaultAlt: 'Virtual Exhibition 3D & Inovasi Teknologi Universitas Gadjah Mada',
   },
   {
-    name: 'Website ERFO Studio & Multimedia',
-    url: '/images/portfolio/website-erfo-multimedia.webp',
-    category: 'Kreatif & Media',
-    defaultAlt: 'Website portofolio agensi multimedia kreatif modern',
+    name: 'ITOKOH Presisi Pengecoran Logam Berkelanjutan',
+    url: '/images/portfolio/itokoh.png',
+    category: '3D Industrial',
+    defaultAlt: 'Visualisasi 3D Proses Pengecoran Logam Berkelanjutan ITOKOH',
+  },
+  {
+    name: '3D Anamorphic Videotron Display Production',
+    url: '/images/portfolio/3d-anamorphic.webp',
+    category: '3D Anamorphic',
+    defaultAlt: 'Produksi Animasi 3D Anamorphic Videotron Display UNIMASI',
+  },
+  {
+    name: '3D Commercial CGI Advertising Production',
+    url: '/images/portfolio/3d-commercial.webp',
+    category: '3D Commercial',
+    defaultAlt: 'Produksi Iklan Komersial 3D CGI Sinematik UNIMASI',
   },
 ]
+
+export const SEGIA_IMAGE_PRESETS = UNIMASI_IMAGE_PRESETS
 
 export interface StudioImageControlProps {
   label: string

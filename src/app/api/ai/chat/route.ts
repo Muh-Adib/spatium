@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { handleAiAssistantChat, classifyAiError } from '@/lib/ai/chat'
 import { requireUser } from '@/lib/auth/rbac'
+import { checkRateLimit, clientKey, rateLimitResponse } from '@/lib/security/rate-limit'
 import { z } from 'zod'
 import { validateBody } from '@/lib/validation/api-schemas'
 import {
@@ -25,6 +26,9 @@ const aiChatBodySchema = z.object({
 export async function POST(req: NextRequest) {
   const auth = await requireUser(req)
   if (auth.error) return auth.error
+
+  const rl = checkRateLimit({ key: clientKey(req, 'ai-chat'), limit: 20, windowMs: 60_000 })
+  if (!rl.allowed) return rateLimitResponse(rl.retryAfterSeconds)
 
   try {
     const rawBody = await req.json().catch(() => null)

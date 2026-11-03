@@ -1639,11 +1639,9 @@ export function StudioAiSidebar({
       case 'redirects':
         return { name: '301 Redirect Rules', scope: 'Pencegahan Broken Link SEO', icon: ArrowRightLeft }
       case 'migration':
-        return { name: 'Audit 887 URL Legacy', scope: 'Integritas URL & Status 200/410', icon: History }
+        return { name: 'Audit URL Legacy', scope: 'Integritas URL & Status 200/410', icon: History }
       case 'ai-settings':
         return { name: 'Pengaturan AI & Tools', scope: 'Konfigurasi Model Inferensi & Tools', icon: Sliders }
-      case 'import':
-        return { name: 'Migrasi WordPress', scope: 'Engine Importer REST / XML', icon: Download }
       case 'system':
         return { name: 'Database & Sistem MCP', scope: 'Status PostgreSQL & Server MCP', icon: Server }
       case 'users':

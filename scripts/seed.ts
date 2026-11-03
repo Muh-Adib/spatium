@@ -14,6 +14,7 @@ async function seed() {
 
   const rawArticles = readSeed('seed_articles.json')
   const rawPortfolios = readSeed('seed_portfolio.json')
+  const rawServiceCategories = readSeed('seed_service_categories.json')
   const rawServices = readSeed('seed_services.json')
   const rawPages = readSeed('seed_pages.json')
   const rawRedirects = readSeed('seed_redirects.json')
@@ -112,6 +113,7 @@ async function seed() {
   console.log(`Inserting ${rawPortfolios.length} portfolios...`)
   for (const port of rawPortfolios) {
     const existing = await prisma.orm.public.Portfolio.where({ slug: port.slug }).first()
+    const heroImg = port.heroMedia?.url || port.heroImage || null
     if (!existing) {
       await prisma.orm.public.Portfolio.create({
         documentId: port.documentId || `port-${port.slug}`,
@@ -119,15 +121,15 @@ async function seed() {
         title: port.title,
         client: port.client || null,
         year: port.year || 2024,
-        category: port.industry?.name || port.projectType || 'Web Development',
+        category: port.category || port.discipline || port.projectType || '3D Animation',
         summary: port.summary || '',
         challenge: port.challenge || null,
         approach: port.approach || null,
         solution: port.solution || null,
         process: port.process || null,
         result: port.result || null,
-        heroImage: port.heroMedia?.url || null,
-        liveUrl: port.livePreviewUrl || null,
+        heroImage: heroImg,
+        liveUrl: port.livePreviewUrl || port.liveUrl || null,
         featured: Boolean(port.featured),
         status: 'published',
         metrics: port.metrics ? JSON.stringify(port.metrics) : null,
@@ -136,32 +138,85 @@ async function seed() {
         metaTitle: port.seo?.metaTitle || port.title,
         metaDescription: port.seo?.metaDescription || port.summary,
       })
+    } else {
+      await prisma.orm.public.Portfolio.where({ id: existing.id }).update({
+        heroImage: heroImg,
+        title: port.title,
+        client: port.client || existing.client,
+        category: port.category || existing.category,
+        summary: port.summary || existing.summary,
+        metaTitle: port.seo?.metaTitle || port.title,
+        metaDescription: port.seo?.metaDescription || port.summary,
+      })
     }
   }
   console.log(`✓ Inserted portfolios.`)
 
-  // 5. Services
+  // 5a. Service categories (core services) — idempotent upsert by slug
+  console.log(`Inserting ${rawServiceCategories.length} service categories...`)
+  const categoryIdBySlug = new Map<string, number>()
+  for (const cat of rawServiceCategories) {
+    const existing = await prisma.orm.public.ServiceCategory.where({ slug: cat.slug }).first()
+    if (existing) {
+      categoryIdBySlug.set(cat.slug, existing.id)
+      await prisma.orm.public.ServiceCategory.where({ id: existing.id }).update({
+        title: cat.title,
+        tag: cat.tag ?? null,
+        shortDescription: cat.shortDescription ?? null,
+        order: cat.order ?? 0,
+        status: cat.status ?? 'published',
+        showInNav: cat.showInNav ?? true,
+        metaTitle: cat.metaTitle ?? cat.title,
+        metaDescription: cat.metaDescription ?? cat.shortDescription ?? null,
+      })
+    } else {
+      const created = await prisma.orm.public.ServiceCategory.create({
+        slug: cat.slug,
+        title: cat.title,
+        tag: cat.tag ?? null,
+        shortDescription: cat.shortDescription ?? null,
+        order: cat.order ?? 0,
+        status: cat.status ?? 'published',
+        showInNav: cat.showInNav ?? true,
+        metaTitle: cat.metaTitle ?? cat.title,
+        metaDescription: cat.metaDescription ?? cat.shortDescription ?? null,
+      })
+      categoryIdBySlug.set(cat.slug, created.id)
+    }
+  }
+  console.log(`✓ Inserted service categories.`)
+
+  // 5b. Services (children) — idempotent upsert by slug, linked to category
   console.log(`Inserting ${rawServices.length} services...`)
   for (let idx = 0; idx < rawServices.length; idx++) {
     const svc = rawServices[idx]
+    const categoryId = svc.categorySlug ? categoryIdBySlug.get(svc.categorySlug) ?? null : null
+    const payload = {
+      name: svc.name || svc.title || svc.slug,
+      categoryId,
+      indexNumber: svc.indexNumber ?? null,
+      shortDescription: svc.shortDescription || svc.summary || null,
+      description: svc.description || svc.fullDescription || svc.summary || null,
+      icon: svc.icon || null,
+      heroImage: svc.heroImage?.url || null,
+      features: svc.features ? JSON.stringify(svc.features) : null,
+      deliverables: svc.deliverables ? JSON.stringify(svc.deliverables) : null,
+      technologies: svc.technologies ? JSON.stringify(svc.technologies) : null,
+      faq: svc.faq ? JSON.stringify(svc.faq) : null,
+      order: svc.order ?? idx + 1,
+      status: svc.status ?? 'published',
+      featured: idx < 6,
+      metaTitle: svc.seo?.metaTitle || svc.name || svc.title,
+      metaDescription: svc.seo?.metaDescription || svc.shortDescription || svc.summary,
+    }
     const existing = await prisma.orm.public.Service.where({ slug: svc.slug }).first()
-    if (!existing) {
+    if (existing) {
+      await prisma.orm.public.Service.where({ id: existing.id }).update(payload)
+    } else {
       await prisma.orm.public.Service.create({
         documentId: svc.documentId || `svc-${svc.slug}`,
         slug: svc.slug,
-        name: svc.name || svc.title || svc.slug,
-        shortDescription: svc.shortDescription || svc.summary || null,
-        description: svc.description || svc.fullDescription || svc.summary || null,
-        icon: svc.icon || null,
-        heroImage: svc.heroImage?.url || null,
-        features: svc.features ? JSON.stringify(svc.features) : null,
-        deliverables: svc.deliverables ? JSON.stringify(svc.deliverables) : null,
-        technologies: svc.technologies ? JSON.stringify(svc.technologies) : null,
-        faq: svc.faq ? JSON.stringify(svc.faq) : null,
-        order: idx + 1,
-        featured: idx < 6,
-        metaTitle: svc.seo?.metaTitle || svc.name || svc.title,
-        metaDescription: svc.seo?.metaDescription || svc.shortDescription || svc.summary,
+        ...payload,
       })
     }
   }
@@ -233,6 +288,21 @@ async function seed() {
     })
   }
   console.log(`✓ Inserted site config.`)
+
+  // 8b. Delivery API Multi-Tenant Site Entity
+  console.log('Inserting default Delivery API Site tenant entity...')
+  const existingSite = await prisma.orm.public.Site.where({ slug: 'unimasi' }).first()
+  if (!existingSite) {
+    await prisma.orm.public.Site.create({
+      slug: 'unimasi',
+      name: 'UNIMASI Studio',
+      domain: 'unimasi.studio',
+      apiKey: process.env.SITE_API_KEY || 'site_sec_unimasi',
+      isActive: true,
+      settings: JSON.stringify({}),
+    })
+  }
+  console.log(`✓ Inserted Delivery API Site tenant entity.`)
 
   // 9. Locations
   console.log('Inserting default locations...')
@@ -387,6 +457,41 @@ async function seed() {
       })
     }
   }
+
+  // 12. WordPress Users & Authors
+  console.log('Inserting WordPress users & authors...')
+  const rawUsers = readSeed('seed_users.json')
+  for (const u of rawUsers) {
+    const existingUser = await prisma.orm.public.User.where({ email: u.email }).first()
+    if (existingUser) {
+      await prisma.orm.public.User.where({ id: existingUser.id }).update({
+        name: u.name,
+        role: u.role,
+        passwordHash: u.passwordHash,
+      })
+    } else {
+      await prisma.orm.public.User.create({
+        id: u.id,
+        name: u.name,
+        email: u.email,
+        role: u.role,
+        passwordHash: u.passwordHash,
+      })
+    }
+
+    // Also ensure Author record exists
+    const authorSlug = `user-${u.id}`
+    const existingAuthor = await prisma.orm.public.Author.where({ slug: authorSlug }).first()
+    if (!existingAuthor) {
+      await prisma.orm.public.Author.create({
+        name: u.name,
+        slug: authorSlug,
+        email: u.email,
+        bio: `Editorial Contributor - UNIMASI Studio`,
+      })
+    }
+  }
+  console.log(`✓ Synchronized ${rawUsers.length} WordPress users and authors.`)
 
   console.log('🎉 Seeding successfully completed with Prisma 8!')
 }

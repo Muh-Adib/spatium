@@ -1,13 +1,13 @@
 import { Suspense } from 'react'
 import type { Metadata } from 'next'
-import { PROJECTS, type Project, type ProjectCategory } from '@/data/projects'
+import { PROJECTS, mapProjectCategory, type Project, type ProjectCategory } from '@/data/projects'
 import { getCorePortfolios } from '@/lib/core'
 import { PortfolioClient } from './PortfolioClient'
 
 const SITE_URL = 'https://unimasi.studio'
 
 export const metadata: Metadata = {
-  title: 'Portfolio',
+  title: 'Animation Portfolio & Case Studies',
   description:
     'Selected 2D animation, 3D animation, motion graphics and digital asset work from the UNIMASI studio, presented as capability case studies.',
   alternates: {
@@ -19,11 +19,10 @@ export const revalidate = 300
 
 function mapCoreToUnimasiProject(p: any): Project {
   const fallback = PROJECTS.find((lp) => lp.slug === p.slug) || PROJECTS[0]
-  const cat = (p.category?.toLowerCase() || '3d')
-  let category: ProjectCategory = '3d'
-  if (cat.includes('2d')) category = '2d'
-  else if (cat.includes('motion') || cat.includes('grafis')) category = 'motion'
-  else if (cat.includes('asset') || cat.includes('ai')) category = 'assets'
+  const cat = p.category || p.discipline
+  let category: ProjectCategory = fallback.category === 'unknown' ? 'motion' : fallback.category
+  const mapped = mapProjectCategory(cat)
+  if (mapped !== 'unknown') category = mapped
 
   return {
     slug: p.slug,
@@ -38,14 +37,16 @@ function mapCoreToUnimasiProject(p: any): Project {
     delivered: Array.isArray(p.technologies) ? p.technologies.map((t: any) => t.name) : fallback.delivered,
     variant: fallback.variant || 1,
     videoUrl: p.videoUrl || fallback.videoUrl,
-    posterUrl: p.heroImage?.url || fallback.posterUrl,
+    posterUrl: p.heroMedia?.url || (typeof p.heroImage === 'string' ? p.heroImage : p.heroImage?.url) || fallback.posterUrl,
   }
 }
 
 export default async function PortfolioPage() {
   const corePortfolios = await getCorePortfolios()
-  const initialProjects: Project[] = corePortfolios.length > 0
-    ? corePortfolios.map(mapCoreToUnimasiProject)
+  // Draft items (unverified metrics / missing assets) never reach the public list.
+  const visibleCore = corePortfolios.filter((p: any) => p.status !== 'draft')
+  const initialProjects: Project[] = visibleCore.length > 0
+    ? visibleCore.map(mapCoreToUnimasiProject)
     : PROJECTS
 
   const jsonLd = [

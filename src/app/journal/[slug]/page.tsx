@@ -107,16 +107,28 @@ export async function generateMetadata({
   if (!resolved) return { title: 'Article Not Found' }
   const { article } = resolved
 
+  const desc =
+    article.metaDescription.length > 160
+      ? `${article.metaDescription.slice(0, 157).trimEnd()}…`
+      : article.metaDescription
+  // The article title from Core may already carry a brand suffix; strip it so
+  // the root layout template does not produce "… · UNIMASI · UNIMASI".
+  const cleanTitle = article.title
+    .replace(/\s*[·|–—-]\s*UNIMASI\s*$/i, '')
+    .replace(/\s*UNIMASI\s*$/i, '')
+    .trim()
+  const title = cleanTitle.length > 55 ? `${cleanTitle.slice(0, 52).trimEnd()}…` : cleanTitle
+
   return {
-    title: `${article.title} · UNIMASI`,
-    description: article.metaDescription,
+    title,
+    description: desc,
     alternates: {
       canonical: `${SITE_URL}/journal/${article.slug}`,
     },
     openGraph: {
       type: 'article',
-      title: `${article.title} · UNIMASI`,
-      description: article.metaDescription,
+      title,
+      description: desc,
       publishedTime: article.date,
       authors: [article.author],
       url: `${SITE_URL}/journal/${article.slug}`,
@@ -124,8 +136,8 @@ export async function generateMetadata({
     },
     twitter: {
       card: 'summary_large_image',
-      title: article.title,
-      description: article.metaDescription,
+      title,
+      description: desc,
       images: [`${SITE_URL}/favicon.svg`],
     },
   }

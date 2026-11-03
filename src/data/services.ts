@@ -236,9 +236,7 @@ export const SERVICES: Service[] = [
   },
 ]
 
-export const CORE_SERVICES = SERVICES.filter((service) =>
-  ['2d-animation', '3d-animation', 'motion-graphics'].includes(service.slug),
-)
+export const CORE_SERVICES = SERVICES
 
 export function getService(slug: string): Service | undefined {
   return SERVICES.find((service) => service.slug === slug)

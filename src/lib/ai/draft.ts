@@ -7,7 +7,7 @@ import { createArticle } from '@/lib/db/articles'
 import { callLlm } from '@/lib/agent/llm'
 import { getSiteProfile } from '@/lib/db/siteProfile'
 import { sanitizeHtmlContent } from '@/lib/security/sanitize-html'
-import { slugify, calculateReadingTime } from '@/lib/import/transform'
+import { slugify, calculateReadingTime } from '@/lib/content/html'
 import { compressToolOutput, buildOptimizerSystemDirectives } from './token-optimizer'
 
 function generateEditorialBannerSvg(title: string, category: string, brandName: string): string {

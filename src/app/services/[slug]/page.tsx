@@ -11,6 +11,9 @@ import { Icon } from '@/components/Icon'
 import { PROCESS } from '@/data/site'
 import { getService, SERVICES } from '@/data/services'
 import { PROJECTS, type ProjectCategory } from '@/data/projects'
+import { getServiceCategoryWithServices } from '@/lib/db/serviceCategories'
+import { getServiceBySlug } from '@/lib/db/services'
+import { BlockRenderer } from '@/components/blocks/BlockRenderer'
 import '@/pages/service-detail.css'
 
 const SITE_URL = 'https://unimasi.studio'
@@ -34,20 +37,36 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>
 }): Promise<Metadata> {
   const { slug } = await params
+  const dbCat = await getServiceCategoryWithServices(slug)
+  const dbSvc = !dbCat ? await getServiceBySlug(slug) : null
+  const dbItem: any = dbCat || dbSvc
+
   const service = getService(slug)
-  if (!service) return { title: 'Service Not Found' }
+  if (!dbItem && !service) return { title: 'Service Not Found' }
+
+  const fullTitle = dbItem?.metaTitle || (service ? `${service.name} Services` : `${dbItem?.title || dbItem?.name} Services`)
+  const serpTitle = fullTitle.length > 52 ? `${fullTitle.slice(0, 48).trimEnd()}…` : fullTitle
+  const desc =
+    dbItem?.metaDescription ||
+    dbItem?.shortDescription ||
+    (service?.metaDescription ? (service.metaDescription.length > 160 ? `${service.metaDescription.slice(0, 157).trimEnd()}…` : service.metaDescription) : '')
+  const ogImg = dbItem?.heroImage || '/icon-512.png'
 
   return {
-    title: service.name,
-    description: service.metaDescription,
+    title: serpTitle,
+    description: desc,
     alternates: {
-      canonical: `${SITE_URL}/services/${service.slug}`,
+      canonical: `${SITE_URL}/services/${slug}`,
     },
     openGraph: {
-      title: `${service.name} · UNIMASI`,
-      description: service.metaDescription,
-      url: `${SITE_URL}/services/${service.slug}`,
+      type: 'website',
+      title: `${serpTitle} · UNIMASI`,
+      description: desc,
+      url: `${SITE_URL}/services/${slug}`,
+      siteName: 'UNIMASI',
+      images: [{ url: ogImg, width: 512, height: 512, alt: 'UNIMASI' }],
     },
+    twitter: { card: 'summary_large_image', title: `${serpTitle} · UNIMASI`, description: desc, images: [ogImg] },
   }
 }
 
@@ -57,43 +76,26 @@ export default async function ServiceDetailPage({
   params: Promise<{ slug: string }>
 }) {
   const { slug } = await params
+  const dbCat = await getServiceCategoryWithServices(slug)
+  const dbSvc = !dbCat ? await getServiceBySlug(slug) : null
+  const dbItem: any = dbCat || dbSvc
+  const dbBlocks = dbItem?.blocks && Array.isArray(dbItem.blocks) ? dbItem.blocks : []
+
   const service = getService(slug)
+  if (!dbItem && !service) notFound()
 
-  if (!service) notFound()
+  const serviceName = dbItem?.title || dbItem?.name || service?.name || ''
+  const serviceDesc = dbItem?.metaDescription || dbItem?.shortDescription || service?.metaDescription || ''
 
-  const relatedProjects = PROJECTS.filter(
-    (project) => project.category === CATEGORY_BY_SERVICE[service.slug],
-  ).slice(0, 3)
-
-  const otherServices = SERVICES.filter((item) => item.slug !== service.slug)
-
-  const jsonLd = [
+  const jsonLd: any[] = [
     {
       '@context': 'https://schema.org',
       '@type': 'Service',
-      name: service.name,
-      serviceType: service.name,
-      description: service.metaDescription,
-      url: `${SITE_URL}/services/${service.slug}`,
+      name: serviceName,
+      serviceType: serviceName,
+      description: serviceDesc,
+      url: `${SITE_URL}/services/${slug}`,
       provider: { '@type': 'Organization', name: 'UNIMASI', url: SITE_URL },
-      hasOfferCatalog: {
-        '@type': 'OfferCatalog',
-        name: `${service.name} capabilities`,
-        itemListElement: service.capabilities.map((cap, i) => ({
-          '@type': 'Offer',
-          position: i + 1,
-          itemOffered: { '@type': 'Service', name: cap.title, description: cap.description },
-        })),
-      },
-    },
-    {
-      '@context': 'https://schema.org',
-      '@type': 'FAQPage',
-      mainEntity: service.faqs.map((faq) => ({
-        '@type': 'Question',
-        name: faq.q,
-        acceptedAnswer: { '@type': 'Answer', text: faq.a },
-      })),
     },
     {
       '@context': 'https://schema.org',
@@ -104,12 +106,47 @@ export default async function ServiceDetailPage({
         {
           '@type': 'ListItem',
           position: 3,
-          name: service.name,
-          item: `${SITE_URL}/services/${service.slug}`,
+          name: serviceName,
+          item: `${SITE_URL}/services/${slug}`,
         },
       ],
     },
   ]
+
+  if (service?.faqs && service.faqs.length > 0) {
+    jsonLd.push({
+      '@context': 'https://schema.org',
+      '@type': 'FAQPage',
+      mainEntity: service.faqs.map((faq) => ({
+        '@type': 'Question',
+        name: faq.q,
+        acceptedAnswer: { '@type': 'Answer', text: faq.a },
+      })),
+    })
+  }
+
+  if (dbBlocks.length > 0) {
+    const contextData = dbCat
+      ? { subServices: dbCat.subServices || [] }
+      : { portfolios: (dbSvc as any)?.portfolioItems || [] }
+    return (
+      <main className="min-h-screen bg-[var(--color-background)] text-white">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+        <BlockRenderer blocks={dbBlocks} contextData={contextData} />
+      </main>
+    )
+  }
+
+  if (!service) notFound()
+
+  const relatedProjects = PROJECTS.filter(
+    (project) => project.category === CATEGORY_BY_SERVICE[service.slug],
+  ).slice(0, 3)
+
+  const otherServices = SERVICES.filter((item) => item.slug !== service.slug)
 
   return (
     <>

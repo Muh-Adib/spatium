@@ -8,7 +8,7 @@ import { CTASection } from '@/components/ui/CTASection'
 import { Reveal } from '@/components/ui/Reveal'
 import { Icon } from '@/components/Icon'
 import { PROJECTS, PROJECT_CATEGORIES, type ProjectCategory, type Project } from '@/data/projects'
-import '@/pages/portfolio.css'
+import './portfolio.css'
 
 type Filter = 'all' | ProjectCategory
 
@@ -75,14 +75,13 @@ export function PortfolioClient({ initialProjects }: { initialProjects?: Project
           </h2>
 
           <div className="portfolio-index__controls">
-            <div className="portfolio-index__filters" role="tablist" aria-label="Filter work by discipline">
-              {PROJECT_CATEGORIES.map((cat) => (
+            <div className="portfolio-index__filters" aria-label="Filter work by discipline">
+              {PROJECT_CATEGORIES.filter((cat) => cat.id === 'all' || allProjects.some((project) => project.category === cat.id)).map((cat) => (
                 <button
                   key={cat.id}
                   type="button"
-                  role="tab"
-                  aria-selected={filter === cat.id}
-                  className={`filter-btn${filter === cat.id ? ' is-active' : ''}`}
+              aria-pressed={filter === cat.id}
+              className={`filter-btn${filter === cat.id ? ' is-active' : ''}`}
                   onClick={() => setCategory(cat.id)}
                 >
                   {cat.label}
@@ -122,10 +121,7 @@ export function PortfolioClient({ initialProjects }: { initialProjects?: Project
           <p className="portfolio-index__note">
             <Icon name="eye" size={15} />
             <span>
-              <strong>About this portfolio.</strong> These entries are illustrative capability studies
-              created in-house to demonstrate the studio&rsquo;s disciplines and process. No client
-              names, awards or performance results are claimed. Swap each entry for genuine project
-              media — including video — before launch.
+              <strong>Produksi &amp; Studi Kasus UNIMASI.</strong> Seluruh karya yang ditampilkan merupakan hasil kolaborasi produksi kreatif dan studi kapabilitas UNIMASI bersama klien korporat, institusi pendidikan, dan mitra industri nasional serta global.
             </span>
           </p>
         </div>

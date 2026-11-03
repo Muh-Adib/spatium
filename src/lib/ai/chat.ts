@@ -6,7 +6,7 @@ import { getArticleBySlug } from '@/lib/db/articles'
 import { analyzeContentSeo } from '@/lib/seo/analyzer'
 import { executeAgenticArticleLoop } from './agent-loop'
 import { contentToBlocks } from '@/lib/articles/blockEditor'
-import { slugify } from '@/lib/import/transform'
+import { slugify } from '@/lib/content/html'
 import { toolRegistry } from '@/lib/agent/registry'
 import { executeCopilotAgentRunner } from './copilot-agent-runner'
 
@@ -1292,7 +1292,7 @@ Kata kunci di atas memiliki potensi konversi tinggi untuk studi kasus dan penawa
 - **Total Artikel Terinspeksi**: ${seoCall?.output?.totalArticlesInspected || 878}
 - **Status Metadata**: ${missingCount === 0 ? 'Semua artikel memiliki deskripsi meta.' : `Ditemukan ${missingCount} artikel sampel yang belum mengisi deskripsi meta khusus.`}
 - **Schema JSON-LD**: Aktif untuk Article, WebSite, Organization, dan BreadcrumbList.
-- **Integritas URL**: 887 aturan pengalihan 301 aktif melindungi ranking WordPress lama.
+- **Integritas URL**: aturan pengalihan 301 melindungi URL lama dari broken link.
 
 ${
   sample.length > 0

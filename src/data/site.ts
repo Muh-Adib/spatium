@@ -132,8 +132,10 @@ export const TIMELINES = [
 ] as const
 
 export const SOCIALS = [
-  { label: 'Behance', href: 'https://www.behance.net/' },
-  { label: 'Vimeo', href: 'https://vimeo.com/' },
-  { label: 'LinkedIn', href: 'https://www.linkedin.com/' },
-  { label: 'Instagram', href: 'https://www.instagram.com/' },
+  // Handles await owner confirmation — generic platform roots were removed
+  // because they send visitors nowhere useful (see docs/CONTENT_GAPS.md).
+  { label: 'Behance', href: 'https://www.behance.net/unimasi' },
+  { label: 'Vimeo', href: 'https://vimeo.com/unimasi' },
+  { label: 'LinkedIn', href: 'https://www.linkedin.com/company/unimasi' },
+  { label: 'Instagram', href: 'https://www.instagram.com/unimasi' },
 ] as const

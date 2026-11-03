@@ -7,6 +7,7 @@ import { normalizeSchedule, extractContentImages } from '@/lib/publishing/valida
 import { prisma } from '@/lib/db/prisma'
 import { revalidatePath } from 'next/cache'
 import { dispatchRevalidationWebhook } from '@/lib/webhooks/dispatcher'
+import { releaseArticleLock } from '@/lib/articles/locks'
 import fs from 'fs'
 import path from 'path'
 
@@ -492,6 +493,23 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: 'Artikel tidak ditemukan di basis data.' }, { status: 404 })
     }
 
+    // Optimistic Concurrency Control (Multi-User Safe Editing)
+    if (body.expectedUpdatedAt && existingArticle.updatedAt && !body.forceOverwrite) {
+      const expectedTime = new Date(body.expectedUpdatedAt).getTime()
+      const serverTime = new Date(existingArticle.updatedAt).getTime()
+      if (Number.isFinite(expectedTime) && Number.isFinite(serverTime) && serverTime - expectedTime > 2500) {
+        return NextResponse.json(
+          {
+            error: 'Konflik Pengeditan: Artikel ini telah diperbarui oleh pengguna lain sejak Anda membukanya.',
+            conflict: true,
+            serverUpdatedAt: existingArticle.updatedAt,
+            message: 'Silakan periksa perubahan terbaru atau pilih "Simpan & Timpa" jika Anda yakin.',
+          },
+          { status: 409 }
+        )
+      }
+    }
+
     if (existingArticle.status === 'scheduled' && !ROLE_PERMISSIONS[user.role]?.canPublish) return NextResponse.json({ error: 'Tidak berwenang mengubah artikel terjadwal.' }, { status: 403 })
     if (!ROLE_PERMISSIONS[user.role]?.canEditAnyDraft && user.role !== 'AUTHOR') {
       const permission = ROLE_PERMISSIONS[user.role]
@@ -696,10 +714,14 @@ export async function PATCH(request: NextRequest) {
       }
     }
 
+    // Release multi-user editing lock on successful save
+    releaseArticleLock(lookupSlug, user.id)
+
     return NextResponse.json({
       success: true,
       message: `Artikel "${title || existingArticle?.title || slug}" berhasil diperbarui.`,
       status: nextStatus || currentStatus,
+      updatedAt: timestamp,
     })
   } catch (error) {
     if (error instanceof Error && /Jadwal|Zona waktu/.test(error.message)) return NextResponse.json({ error: error.message }, { status: 400 })

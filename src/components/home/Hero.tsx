@@ -2,56 +2,142 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import dynamic from 'next/dynamic'
-import { ArrowRight, Play } from 'lucide-react'
+import { ArrowRight, Play, Pause, Volume2, VolumeX, Maximize2, Sparkles, Layers, Box, Film, Cpu } from 'lucide-react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { useGSAP } from '@gsap/react'
-import { Icon } from '@/components/Icon'
-import { usePointerParallax, useReducedMotion } from '@/hooks'
+import { useReducedMotion } from '@/hooks'
 import type { AnimationWebGLStatus } from '@/components/webgl/AnimationWebGL'
 import './hero.css'
 
-/**
- * "Kinetic Storyboard" WebGL scene — raw three.js, client-only. Renders null
- * for reduced-motion visitors or on WebGL failure, in which case the CSS
- * fallback stage below stays visible.
- */
 const AnimationWebGL = dynamic(() => import('@/components/webgl/AnimationWebGL'), {
   ssr: false,
-  // No loading UI: the CSS fallback stage is visible until the scene mounts.
 })
 
-const STORYBOARD_FRAMES = [
-  { label: 'Frame 01', art: 'frames' },
-  { label: 'Frame 04', art: 'char' },
-  { label: 'Frame 07', art: 'camera' },
+type StudioDiscipline = 'reel' | '2d' | '3d' | 'motion' | 'assets'
+
+const DISCIPLINES: {
+  id: StudioDiscipline
+  label: string
+  pill: string
+  client: string
+  title: string
+  description: string
+  image?: string
+  icon: typeof Film
+}[] = [
+  {
+    id: 'reel',
+    label: 'Studio Reel',
+    pill: 'MASTER REEL 2024',
+    client: 'Selected Works',
+    title: 'UNIMASI Studio Showreel 4K',
+    description: 'Rangkuman karya animasi 2D, 3D CGI, dan motion design untuk mitra korporat & institusi global.',
+    icon: Film,
+  },
+  {
+    id: '3d',
+    label: '3D CGI & Industrial',
+    pill: '3D VISUAL PRODUCTION',
+    client: 'PT YPTI & Industrial Clients',
+    title: 'Presisi Manufaktur CNC & Mekanikal 5-Axis',
+    description: 'Visualisasi CAD fotorealistik, sinematografi makro industri, dan simulasi proses produksi presisi tinggi.',
+    image: '/images/showcase/pt-ypti-3d.webp',
+    icon: Box,
+  },
+  {
+    id: 'motion',
+    label: 'Motion Graphics',
+    pill: 'KINETIC & TECH EXPLAINER',
+    client: 'Telkom DFE & Wilmar',
+    title: 'Visualisasi Jaringan & Ekosistem Digital',
+    description: 'Tipografi kinetik dinamis, animasi infografis interaktif, dan arsitektur data visual berskala besar.',
+    image: '/images/showcase/telkom-dfe.webp',
+    icon: Layers,
+  },
+  {
+    id: '2d',
+    label: '2D Animation',
+    pill: 'NARRATIVE & EXPLAINER',
+    client: 'Danone & Universitas Mercu Buana',
+    title: 'Storytelling Emosional & Karakter Frame-by-Frame',
+    description: 'Desain karakter ekspresif, alur cerita berkesan, dan animasi 2D berstandar festival serta kampanye publik.',
+    image: '/images/showcase/3d-short-film.webp',
+    icon: Sparkles,
+  },
+  {
+    id: 'assets',
+    label: 'Digital Visual Assets',
+    pill: 'SPATIAL & AI WORKFLOW',
+    client: 'UGM & Experiential Partners',
+    title: 'Aset Spasial Real-Time & Riset Visual',
+    description: 'Visualisasi molekuler sains, asset library 3D real-time, dan pipeline produksi visual berbantuan AI terkurasi.',
+    image: '/images/showcase/ugm.webp',
+    icon: Cpu,
+  },
 ]
 
-const DISCIPLINES = ['2D Animation', '3D Animation', 'Motion Graphics']
-
 export function Hero() {
-  const { ref, onPointerMove, onPointerLeave } = usePointerParallax<HTMLDivElement>()
   const sectionRef = useRef<HTMLElement | null>(null)
+  const videoRef = useRef<HTMLVideoElement | null>(null)
   const morphProgressRef = useRef(0)
   const [webglReady, setWebglReady] = useState(false)
+  const [activeDiscipline, setActiveDiscipline] = useState<StudioDiscipline>('reel')
+  const [isPlaying, setIsPlaying] = useState(true)
+  const [isMuted, setIsMuted] = useState(true)
+  const [videoProgress, setVideoProgress] = useState(0)
+  const [fullscreenModal, setFullscreenModal] = useState(false)
   const reduced = useReducedMotion()
 
   const handleWebglStatus = useCallback((status: AnimationWebGLStatus) => {
     if (status === 'ready') setWebglReady(true)
   }, [])
 
+  // Video playback listeners
+  useEffect(() => {
+    const video = videoRef.current
+    if (!video) return
+
+    const handleTimeUpdate = () => {
+      if (video.duration) {
+        setVideoProgress((video.currentTime / video.duration) * 100)
+      }
+    }
+
+    video.addEventListener('timeupdate', handleTimeUpdate)
+    return () => {
+      video.removeEventListener('timeupdate', handleTimeUpdate)
+    }
+  }, [])
+
+  const togglePlay = () => {
+    const video = videoRef.current
+    if (!video) return
+    if (video.paused) {
+      video.play()
+      setIsPlaying(true)
+    } else {
+      video.pause()
+      setIsPlaying(false)
+    }
+  }
+
+  const toggleMute = () => {
+    const video = videoRef.current
+    if (!video) return
+    video.muted = !video.muted
+    setIsMuted(video.muted)
+  }
+
   useGSAP(
     () => {
       const section = sectionRef.current
-      if (!section) return
+      if (!section || reduced) return
 
-      // ScrollTrigger is registered inside this client effect only.
       gsap.registerPlugin(ScrollTrigger)
 
-      if (reduced) return
-
-      // Share the hero scroll progress (0..1) with the WebGL morph driver.
       ScrollTrigger.create({
         trigger: section,
         start: 'top top',
@@ -61,53 +147,33 @@ export function Hero() {
         },
       })
 
-      // Staggered entrance for the hero copy — load-time, not scroll-gated.
-      const eyebrow = section.querySelector('.hero__eyebrow')
+      const eyebrow = section.querySelector('.hero__badge-row')
       const titleLines = section.querySelectorAll('.hero__title-line')
       const kicker = section.querySelector('.hero__kicker')
       const lede = section.querySelector('.hero__lede')
       const actions = section.querySelector('.hero__actions')
-      const disciplines = section.querySelector('.hero__disciplines')
+      const stats = section.querySelector('.hero__stats-row')
+      const cinemaFrame = section.querySelector('.hero__cinema-frame')
 
-      gsap.set([eyebrow, titleLines, kicker, lede, actions, disciplines], {
-        y: 26,
+      gsap.set([eyebrow, titleLines, kicker, lede, actions, stats, cinemaFrame], {
+        y: 28,
         autoAlpha: 0,
       })
 
       gsap
-        .timeline({ defaults: { duration: 0.7, ease: 'power3.out' } })
+        .timeline({ defaults: { duration: 0.8, ease: 'power3.out' } })
         .to(eyebrow, { y: 0, autoAlpha: 1 }, 0.05)
-        .to(titleLines, { y: 0, autoAlpha: 1, stagger: 0.12 }, 0.15)
-        .to(kicker, { y: 0, autoAlpha: 1 }, 0.42)
-        .to(lede, { y: 0, autoAlpha: 1 }, 0.5)
+        .to(titleLines, { y: 0, autoAlpha: 1, stagger: 0.1 }, 0.15)
+        .to(kicker, { y: 0, autoAlpha: 1 }, 0.38)
+        .to(lede, { y: 0, autoAlpha: 1 }, 0.48)
         .to(actions, { y: 0, autoAlpha: 1 }, 0.58)
-        .to(disciplines, { y: 0, autoAlpha: 1 }, 0.68)
+        .to(stats, { y: 0, autoAlpha: 1 }, 0.68)
+        .to(cinemaFrame, { y: 0, autoAlpha: 1, scale: 1 }, 0.3)
     },
     { scope: sectionRef },
   )
 
-  // CSS fallback: subtle stage scale while the hero scrolls away.
-  useEffect(() => {
-    if (reduced) return
-    const node = sectionRef.current
-    if (!node) return
-    let frame = 0
-    const onScroll = () => {
-      if (frame) return
-      frame = window.requestAnimationFrame(() => {
-        frame = 0
-        const rect = node.getBoundingClientRect()
-        const progress = Math.min(1, Math.max(0, -rect.top / (rect.height || 1)))
-        node.style.setProperty('--hero-scroll', progress.toFixed(4))
-      })
-    }
-    onScroll()
-    window.addEventListener('scroll', onScroll, { passive: true })
-    return () => {
-      window.removeEventListener('scroll', onScroll)
-      if (frame) window.cancelAnimationFrame(frame)
-    }
-  }, [reduced])
+  const currentItem = DISCIPLINES.find((d) => d.id === activeDiscipline) || DISCIPLINES[0]
 
   return (
     <section
@@ -115,155 +181,244 @@ export function Hero() {
       ref={sectionRef}
       aria-labelledby="hero-title"
     >
+      {/* Dynamic Background Atmosphere */}
       <div className="bg-grid hero__grid" aria-hidden="true" />
       <div className="bg-glow bg-glow--blue hero__glow hero__glow--1" aria-hidden="true" />
       <div className="bg-glow bg-glow--yellow hero__glow hero__glow--2" aria-hidden="true" />
 
-      {/* WebGL "Kinetic Storyboard" — purely decorative, behind the copy. */}
+      {/* Interactive WebGL Spatial Viewport */}
       <div className="hero__webgl" aria-hidden="true">
         <AnimationWebGL progressRef={morphProgressRef} onStatus={handleWebglStatus} />
       </div>
 
       <div className="container container--wide hero__inner">
+        {/* Left Column: Bold Editorial Copy */}
         <div className="hero__copy">
-          <p className="eyebrow hero__eyebrow" data-hero-reveal>
-            Animation &amp; Motion Design Studio — Yogyakarta
-          </p>
+          <div className="hero__badge-row">
+            <span className="hero-status-pill">
+              <span className="hero-status-dot" />
+              STUDIO SHOWREEL 4K · 24 FPS
+            </span>
+            <span className="hero-studio-location">YOGYAKARTA &amp; GLOBAL</span>
+          </div>
 
           <h1 className="hero__title display-xl" id="hero-title">
-            <span className="hero__line hero__title-line" data-hero-reveal>
-              WE MAKE
-            </span>
-            <span className="hero__line hero__title-line" data-hero-reveal>
+            <span className="hero__line hero__title-line">WE MAKE</span>
+            <span className="hero__line hero__title-line">
               IDEAS <em>MOVE.</em>
             </span>
           </h1>
 
-          <p className="hero__kicker" data-hero-reveal>
-            2D &amp; 3D Animation, Motion Graphics &amp; Videotron
+          <p className="hero__kicker">
+            2D Animation · 3D CGI &amp; Industrial · Motion Graphics · Visual Assets
           </p>
 
-          <p className="hero__lede lede" data-hero-reveal>
-            We transform complex ideas into compelling visual experiences through animation and motion
-            design.
+          <p className="hero__lede lede">
+            Mengubah konsep teknis dan gagasan kompleks menjadi visual sinematik yang memukau.
+            Dikerjakan frame demi frame oleh tim spesialis senior untuk kejelasan dan impresi maksimal.
           </p>
 
-          <div className="hero__actions" data-hero-reveal>
-            <Link href="/contact" className="btn btn--primary">
-              Start a Project
+          <div className="hero__actions">
+            <Link href="/portfolio" className="btn btn--primary">
+              Eksplorasi Karya Terpilih
               <span className="btn__icon">
                 <ArrowRight size={17} aria-hidden="true" />
               </span>
             </Link>
-            <Link href="/portfolio" className="btn btn--ghost">
-              <Play size={15} aria-hidden="true" />
-              Lihat Karya
+            <Link href="/contact" className="btn btn--ghost">
+              Mulai Diskusi Proyek
             </Link>
           </div>
 
-          <ul className="hero__disciplines" data-hero-reveal>
-            {DISCIPLINES.map((item) => (
-              <li key={item}>
-                <span className="hero__discipline-dot" aria-hidden="true" />
-                {item}
-              </li>
-            ))}
-          </ul>
+          {/* Quick Studio Metrics & Pipeline Row */}
+          <div className="hero__stats-row">
+            <div className="hero-stat-item">
+              <span className="hero-stat-val">100+</span>
+              <span className="hero-stat-lbl">Proyek Visual Diselesaikan</span>
+            </div>
+            <div className="hero-stat-sep" />
+            <div className="hero-stat-item">
+              <span className="hero-stat-val">4 Inti</span>
+              <span className="hero-stat-lbl">Spesialisasi Produksi</span>
+            </div>
+            <div className="hero-stat-sep" />
+            <div className="hero-stat-item">
+              <span className="hero-stat-val">24 FPS</span>
+              <span className="hero-stat-lbl">Bespoke Senior Craft</span>
+            </div>
+          </div>
         </div>
 
-        {/* CSS fallback stage — visible until the WebGL scene reports ready. */}
-        <div
-          className="hero__stage"
-          ref={ref}
-          onPointerMove={onPointerMove}
-          onPointerLeave={onPointerLeave}
-          aria-hidden="true"
-        >
-          <div className="hero__stage-inner">
-            <div className="hero__orbit">
-              <div className="hero__orbit-ring hero__orbit-ring--outer" />
-              <div className="hero__orbit-ring hero__orbit-ring--inner" />
+        {/* Right Column: Immersive Cinema Viewport & Discipline Switcher */}
+        <div className="hero__stage">
+          <div className="hero__cinema-frame">
+            {/* Top Discipline Switcher Tabs */}
+            <div className="hero__discipline-tabs" role="tablist" aria-label="Layanan Unggulan">
+              {DISCIPLINES.map((d) => {
+                const IconComponent = d.icon
+                const isActive = activeDiscipline === d.id
+                return (
+                  <button
+                    key={d.id}
+                    type="button"
+                    role="tab"
+                    aria-selected={isActive}
+                    className={`hero-tab-btn ${isActive ? 'is-active' : ''}`}
+                    onClick={() => setActiveDiscipline(d.id)}
+                  >
+                    <IconComponent size={13} aria-hidden="true" />
+                    <span>{d.label}</span>
+                  </button>
+                )
+              })}
             </div>
 
-            {/* Central dimensional object */}
-            <div className="hero-cube">
-              {['2D', '3D', 'MOTION', 'AI', 'MOTION', 'AI'].map((face, i) => (
-                <span key={i} className={`hero-cube__face hero-cube__face--${i}`}>
-                  <em>{face}</em>
-                </span>
-              ))}
-            </div>
+            {/* Central Cinema Monitor Viewport */}
+            <div className="hero-viewport-monitor">
+              {activeDiscipline === 'reel' ? (
+                <div className="hero-video-wrapper">
+                  <video
+                    ref={videoRef}
+                    src="/videos/unimasi-showreel.webm"
+                    autoPlay
+                    loop
+                    muted={isMuted}
+                    playsInline
+                    className="hero-viewport-video"
+                    onClick={togglePlay}
+                  />
 
-            {/* Floating storyboard frames + previews */}
-            {STORYBOARD_FRAMES.map((frame, i) => (
-              <div key={frame.label} className={`hero-float hero-float--${i + 1}`} data-depth={i + 1}>
-                <div className="hero-float__frame">
-                  <div className="hero-float__art">
-                    <svg viewBox="0 0 160 100" preserveAspectRatio="none">
-                      {frame.art === 'frames' && (
-                        <>
-                          <rect x="14" y="20" width="60" height="44" rx="4" fill="none" stroke="#FFD600" strokeWidth="2" />
-                          <rect x="86" y="34" width="60" height="44" rx="4" fill="none" stroke="#ffffff" strokeWidth="2" opacity="0.5" />
-                          <path d="M10 82h140" stroke="#ffffff" strokeWidth="1.5" opacity="0.28" />
-                        </>
-                      )}
-                      {frame.art === 'char' && (
-                        <>
-                          <circle cx="80" cy="34" r="16" fill="#FFD600" opacity="0.9" />
-                          <path d="M62 74c0-11 8-18 18-18s18 7 18 18" fill="none" stroke="#ffffff" strokeWidth="2.5" opacity="0.7" />
-                          <path d="M24 20v60M136 20v60" stroke="#ffffff" strokeWidth="1.5" opacity="0.25" />
-                        </>
-                      )}
-                      {frame.art === 'camera' && (
-                        <>
-                          <rect x="40" y="30" width="52" height="40" rx="6" fill="none" stroke="#ffffff" strokeWidth="2" opacity="0.6" />
-                          <path d="M92 42l26-10v34l-26-10z" fill="#FFD600" opacity="0.9" />
-                          <path d="M14 84h132" stroke="#ffffff" strokeWidth="1.5" opacity="0.25" />
-                        </>
-                      )}
-                    </svg>
+                  {/* Video Overlays */}
+                  <div className="hero-video-controls">
+                    <button
+                      type="button"
+                      className="hero-ctrl-btn"
+                      onClick={togglePlay}
+                      aria-label={isPlaying ? 'Jeda video' : 'Putar video'}
+                    >
+                      {isPlaying ? <Pause size={15} /> : <Play size={15} />}
+                    </button>
+                    <button
+                      type="button"
+                      className="hero-ctrl-btn"
+                      onClick={toggleMute}
+                      aria-label={isMuted ? 'Nyalakan suara' : 'Bisukan suara'}
+                    >
+                      {isMuted ? <VolumeX size={15} /> : <Volume2 size={15} />}
+                    </button>
+                    <div className="hero-ctrl-bar">
+                      <div
+                        className="hero-ctrl-progress"
+                        style={{ width: `${videoProgress}%` }}
+                      />
+                    </div>
+                    <span className="hero-ctrl-time">SHOWREEL 4K</span>
+                    <button
+                      type="button"
+                      className="hero-ctrl-btn"
+                      onClick={() => setFullscreenModal(true)}
+                      aria-label="Lihat ukuran penuh"
+                    >
+                      <Maximize2 size={14} />
+                    </button>
                   </div>
-                  <span className="hero-float__label">{frame.label}</span>
                 </div>
-              </div>
-            ))}
+              ) : (
+                <div className="hero-discipline-preview">
+                  {currentItem.image && (
+                    <Image
+                      src={currentItem.image}
+                      alt={currentItem.title}
+                      fill
+                      className="hero-discipline-img"
+                      priority
+                      sizes="(max-width: 1024px) 100vw, 640px"
+                    />
+                  )}
+                  <div className="hero-discipline-scrim">
+                    <div className="hero-discipline-content">
+                      <span className="hero-pill-badge">{currentItem.pill}</span>
+                      <p className="hero-client-tag">Klien: {currentItem.client}</p>
+                      <h3 className="hero-discipline-title">{currentItem.title}</h3>
+                      <p className="hero-discipline-desc">{currentItem.description}</p>
+                      <Link
+                        href="/portfolio"
+                        className="hero-discipline-link"
+                      >
+                        Lihat Case Study Selengkapnya &rarr;
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              )}
 
-            <div className="hero-panel hero-panel--render" data-depth="2">
-              <span className="hero-panel__tag">Render</span>
-              <div className="hero-panel__bars">
-                {[38, 62, 48, 84, 56].map((h, i) => (
-                  <span key={i} style={{ height: `${h}%`, animationDelay: `${i * 0.14}s` }} />
-                ))}
-              </div>
+              {/* Viewport HUD Corner Markers */}
+              <div className="hero-hud-bracket hero-hud--tl" />
+              <div className="hero-hud-bracket hero-hud--tr" />
+              <div className="hero-hud-bracket hero-hud--bl" />
+              <div className="hero-hud-bracket hero-hud--br" />
+              <div className="hero-hud-timecode">REC ● 00:01:24 : 24fps</div>
+              <div className="hero-hud-format">UHD 3840×2160 · 10-BIT</div>
             </div>
 
-            <div className="hero-panel hero-panel--timeline" data-depth="3">
-              <span className="hero-panel__tag">Timeline</span>
-              <div className="hero-panel__track">
-                <span className="hero-panel__playhead" />
-                {Array.from({ length: 14 }, (_, i) => (
-                  <i key={i} style={{ opacity: 0.25 + ((i * 7) % 10) / 14 }} />
-                ))}
+            {/* Bottom Pipeline Track */}
+            <div className="hero-pipeline-track">
+              <div className="hero-pipeline-step">
+                <span className="hero-step-num">01</span>
+                <span className="hero-step-name">Brief &amp; Script</span>
               </div>
-            </div>
-
-            <div className="hero-chip hero-chip--a" data-depth="1">
-              <Icon name="layers" size={14} /> Storyboard
-            </div>
-            <div className="hero-chip hero-chip--b" data-depth="3">
-              <Icon name="cube" size={14} /> Look dev
-            </div>
-            <div className="hero-chip hero-chip--c" data-depth="2">
-              <Icon name="chart" size={14} /> Data motion
+              <div className="hero-step-arrow">&rarr;</div>
+              <div className="hero-pipeline-step">
+                <span className="hero-step-num">02</span>
+                <span className="hero-step-name">Storyboard 2D</span>
+              </div>
+              <div className="hero-step-arrow">&rarr;</div>
+              <div className="hero-pipeline-step">
+                <span className="hero-step-num">03</span>
+                <span className="hero-step-name">CGI &amp; Motion</span>
+              </div>
+              <div className="hero-step-arrow">&rarr;</div>
+              <div className="hero-pipeline-step">
+                <span className="hero-step-num">04</span>
+                <span className="hero-step-name">Master Delivery</span>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
+      {/* Seamless Transition to Next Section */}
       <div className="hero__scroll-cue" aria-hidden="true">
-        <span className="mono">Scroll</span>
+        <span className="mono">Scroll to Explore</span>
         <span className="hero__scroll-line" />
       </div>
+
+      {/* Fullscreen Video Modal */}
+      {fullscreenModal && (
+        <div
+          className="hero-modal-backdrop"
+          onClick={() => setFullscreenModal(false)}
+          role="dialog"
+          aria-modal="true"
+        >
+          <div className="hero-modal-body" onClick={(e) => e.stopPropagation()}>
+            <button
+              type="button"
+              className="hero-modal-close"
+              onClick={() => setFullscreenModal(false)}
+              aria-label="Tutup modal"
+            >
+              &times;
+            </button>
+            <video
+              src="/videos/unimasi-showreel.webm"
+              controls
+              autoPlay
+              className="hero-modal-video"
+            />
+          </div>
+        </div>
+      )}
     </section>
   )
 }

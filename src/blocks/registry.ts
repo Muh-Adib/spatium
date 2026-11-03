@@ -7,6 +7,11 @@ import { HeroCinemaBlock } from './HeroCinemaBlock'
 import { ProcessTimelineBlock } from './ProcessTimelineBlock'
 import { StatsTickerBlock } from './StatsTickerBlock'
 import { InteractiveCtaBlock, TextEditorialBlock } from './InteractiveCtaBlock'
+import {
+  HeroPortfolioBlock,
+  PortfolioCaseStudyBlock,
+  HeroSolutionBlock,
+} from '@/components/blocks/CatalogBlocks'
 
 /**
  * Manifest definitions describing every block for Core CMS & AI Agents.
@@ -190,6 +195,89 @@ export const UNIMASI_BLOCK_MANIFEST: BlockManifestEntry[] = [
       settings: { layout: 'split' },
     },
   },
+  {
+    type: 'hero-portfolio',
+    name: 'Hero Portofolio / Studi Kasus',
+    category: 'hero',
+    description: 'Header studi kasus animasi dengan klien, tahun, disiplin, video embed, dan poster showcase.',
+    dataSchema: {
+      title: { type: 'string', required: true },
+      client: { type: 'string' },
+      year: { type: 'string' },
+      category: { type: 'string' },
+      summary: { type: 'string' },
+      heroImage: { type: 'string' },
+      videoUrl: { type: 'string' },
+    },
+    settingsSchema: {
+      theme: ['dark'],
+      animation: ['fade-up', 'reveal-stagger'],
+    },
+    samplePayload: {
+      type: 'hero-portfolio',
+      data: {
+        title: 'Wilmar Replanting Sawit 3D Explainer',
+        client: 'Wilmar International',
+        year: '2024',
+        category: '3D Industrial',
+        summary: 'Visualisasi proses mekanisasi penanaman sawit ramah lingkungan berstandar industri internasional.',
+        heroImage: '/images/portfolio/wilmar-cover.jpg',
+      },
+    },
+  },
+  {
+    type: 'portfolio-case-study',
+    name: 'Studi Kasus Naratif (Challenge & Solution)',
+    category: 'narrative',
+    description: 'Grid modular 4 bagian: Challenge, Approach, Creative Solution, dan Result.',
+    dataSchema: {
+      eyebrow: { type: 'string' },
+      title: { type: 'string', required: true },
+      challenge: { type: 'string' },
+      approach: { type: 'string' },
+      solution: { type: 'string' },
+      result: { type: 'string' },
+    },
+    settingsSchema: {
+      theme: ['dark', 'charcoal'],
+    },
+    samplePayload: {
+      type: 'portfolio-case-study',
+      data: {
+        eyebrow: 'Production Case Study',
+        title: 'Tantangan, Pendekatan & Solusi Teknis',
+        challenge: 'Menjelaskan alur penanaman sawit yang rumit agar mudah dipahami stakeholder non-teknis.',
+        approach: 'Menggunakan visual 3D photorealistic dengan cutaway kamera dinamis.',
+        solution: 'Pipeline Maya dan Unreal Engine 5 untuk simulasi pencahayaan realistik dan partikel debu.',
+        result: 'Meningkatkan pemahaman SOP hingga 92% dan diapresiasi pimpinan korporat.',
+      },
+    },
+  },
+  {
+    type: 'hero-solution',
+    name: 'Hero Solusi Bisnis & Industri',
+    category: 'hero',
+    description: 'Header solusi dengan badge industri, deskripsi, daftar manfaat utama, dan CTA konsultasi.',
+    dataSchema: {
+      badge: { type: 'string' },
+      title: { type: 'string', required: true },
+      shortDescription: { type: 'string' },
+      keyBenefits: { type: 'array' },
+      primaryCta: { type: 'object' },
+    },
+    settingsSchema: {
+      theme: ['dark'],
+    },
+    samplePayload: {
+      type: 'hero-solution',
+      data: {
+        badge: 'Enterprise Animation',
+        title: 'Solusi Visualisasi 3D untuk Sektor Manufaktur & Industri',
+        shortDescription: 'Optimalkan penjelasan mesin berat dan alur pabrik melalui visualisasi CGI 3D fotorealistik presisi.',
+        keyBenefits: ['Simulasi akurat tanpa risiko kecelakaan kerja', 'Edukasi operator 3x lebih cepat'],
+      },
+    },
+  },
 ]
 
 /**
@@ -201,4 +289,8 @@ export const BLOCK_COMPONENT_REGISTRY: Record<string, React.ComponentType<{ bloc
   'stats-ticker': StatsTickerBlock,
   'interactive-cta': InteractiveCtaBlock,
   'text-editorial': TextEditorialBlock,
+  'hero-portfolio': HeroPortfolioBlock,
+  'hero-case-study': HeroPortfolioBlock,
+  'portfolio-case-study': PortfolioCaseStudyBlock,
+  'hero-solution': HeroSolutionBlock,
 }

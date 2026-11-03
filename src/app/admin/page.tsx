@@ -9,7 +9,6 @@ import { useAuth } from '@/lib/auth/AuthContext'
 import { Role, ArticleStatus, ROLE_PERMISSIONS } from '@/lib/auth/rbac'
 import { StudioAiSettings } from '@/components/studio/StudioAiSettings'
 import { StudioGscDashboard } from '@/components/studio/StudioGscDashboard'
-import { StudioWpImporter } from '@/components/studio/StudioWpImporter'
 import { StudioSettings } from '@/components/studio/StudioSettings'
 import { StudioPortfolioManager } from '@/components/studio/StudioPortfolioManager'
 import { StudioServicesManager } from '@/components/studio/StudioServicesManager'
@@ -21,6 +20,7 @@ import { StudioSiteAudit } from '@/components/studio/StudioSiteAudit'
 import { StudioCtaManager } from '@/components/studio/StudioCtaManager'
 import { StudioPerformanceManager } from '@/components/studio/StudioPerformanceManager'
 import { StudioCategoryManager } from '@/components/studio/StudioCategoryManager'
+import { StudioCalendar } from '@/components/studio/StudioCalendar'
 import { IconButton } from '@/components/admin/AdminUi'
 import { Tooltip } from '@/components/ui/Tooltip'
 import { IndexingMicroBadge } from '@/components/studio/IndexingMicroBadge'
@@ -65,7 +65,7 @@ import {
 } from 'lucide-react'
 
 export type UserRole = Role | 'admin' | 'writer'
-export type AdminTab = 'brands' | 'matrix' | 'articles' | 'publisher' | 'overview' | 'portfolio' | 'services' | 'solutions' | 'blocks' | 'media' | 'keywords' | 'audit' | 'cta' | 'perf' | 'ai' | 'ai-settings' | 'gsc' | 'import' | 'migration' | 'redirects' | 'system' | 'roles' | 'settings'
+export type AdminTab = 'brands' | 'matrix' | 'articles' | 'publisher' | 'overview' | 'portfolio' | 'services' | 'solutions' | 'blocks' | 'media' | 'keywords' | 'audit' | 'cta' | 'perf' | 'ai' | 'ai-settings' | 'gsc' | 'calendar' | 'migration' | 'redirects' | 'system' | 'roles' | 'settings'
 
 interface ArticleItem {
   id?: number
@@ -472,8 +472,8 @@ function AdminDashboardContent() {
       'ai',
       'ai-settings',
       'gsc',
-      'import',
       'migration',
+      'calendar',
       'redirects',
       'system',
       'roles',
@@ -1217,13 +1217,6 @@ node mcp/server.js`
         </div>
       )}
 
-      {/* --- TAB: WORDPRESS IMPORTER --------------------------------- */}
-      {activeTab === 'import' && (
-        <div className="space-y-6">
-          <StudioWpImporter />
-        </div>
-      )}
-
       {/* --- TAB 2: ARTIKEL MANAGEMENT (Both Admin & Writer) ----------- */}
       {activeTab === 'articles' && (
         <div className="space-y-4">
@@ -1482,6 +1475,13 @@ node mcp/server.js`
       )}
 
       {/* --- TAB 3: REGISTRI 887 URL (Audit & Live URL Resolver) --------- */}
+      {/* --- TAB: EDITORIAL CALENDAR ----------------------------------- */}
+      {activeTab === 'calendar' && (
+        <div className="space-y-6">
+          <StudioCalendar />
+        </div>
+      )}
+
       {activeTab === 'migration' && (
         <div className="space-y-6">
           {/* Header & Controls */}
@@ -1489,13 +1489,13 @@ node mcp/server.js`
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div>
                 <h2 className="text-display-xs font-bold text-white flex items-center gap-2">
-                  <span>Registri Validasi URL WordPress</span>
+                  <span>Registri Validasi URL Legacy</span>
                   <span className="badge bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-mono text-body-xs">
                     {migrationRegistry.length > 0 ? `${migrationRegistry.length} URLs` : 'Active'}
                   </span>
                 </h2>
                 <p className="text-body-xs text-neutral-300 mt-1">
-                  100% jejak tautan WordPress lama terverifikasi tanpa broken link (404) untuk proteksi ranking Google.
+                  100% jejak tautan lama terverifikasi tanpa broken link (404) untuk proteksi ranking Google.
                 </p>
               </div>
 
@@ -1531,7 +1531,7 @@ node mcp/server.js`
                   type="text"
                   value={testUrlInput}
                   onChange={(e) => setTestUrlInput(e.target.value)}
-                  placeholder="Ketik path atau URL lama (contoh: /website-smk-mahanain/ atau /category/web/)..."
+                  placeholder="Ketik path atau URL lama (contoh: /animasi-3d-lama/ atau /portfolio-lama/)..."
                   className="flex-1 rounded-xl border border-white/15 bg-neutral-900 px-3.5 py-2 text-xs text-white focus:outline-none focus:border-sky-400 font-mono"
                 />
                 <button
@@ -1650,7 +1650,7 @@ node mcp/server.js`
                   301 Redirect Rules Manager
                 </h2>
                 <p className="text-body-xs text-neutral-300 mt-1">
-                  Aturan pengalihan otomatis untuk memastikan tautan rusak dari WordPress lama dialihkan secara permanen.
+                  Aturan pengalihan otomatis untuk memastikan tautan rusak dialihkan secara permanen.
                 </p>
               </div>
 
@@ -1669,7 +1669,7 @@ node mcp/server.js`
                   type="text"
                   value={redirectTestInput}
                   onChange={(e) => handleTestRedirect(e.target.value)}
-                  placeholder="Ketik path yang ingin diuji (contoh: /website-smk-mahanain atau /category/news)..."
+                  placeholder="Ketik path yang ingin diuji (contoh: /animasi-3d-lama atau /portfolio-lama)..."
                   className="flex-1 rounded-xl border border-white/15 bg-neutral-900 px-3.5 py-2 text-xs text-white focus:outline-none focus:border-sky-400 font-mono"
                 />
               </div>
@@ -1916,7 +1916,7 @@ node mcp/server.js`
                   </div>
                   <div className="p-3.5 rounded-xl bg-white/[0.04] border border-white/10">
                     <div className="font-bold text-sky-300">check_redirect</div>
-                    <div className="text-neutral-400 text-[11px] mt-1 font-sans">Menguji dan memvalidasi URL lama WordPress terhadap 887 aturan 301.</div>
+                    <div className="text-neutral-400 text-[11px] mt-1 font-sans">Menguji dan memvalidasi URL lama terhadap aturan 301.</div>
                   </div>
                   <div className="p-3.5 rounded-xl bg-white/[0.04] border border-white/10">
                     <div className="font-bold text-purple-400">add_redirect_rule</div>

@@ -1858,4 +1858,397 @@ export function MediaShowcaseBlock({ block }: { block: any }) {
   )
 }
 
+// ─── 21. Hero Portfolio / Case Study ──────────────────────────────────────────
+export function HeroPortfolioBlock({ block }: { block: any }) {
+  const data = block?.data || block || {}
+  const title = block?.title || data.title || block?.headline || data.headline || 'Studi Kasus Animasi & Motion'
+  const client = block?.client || data.client || 'UNIMASI Studio Partner'
+  const year = block?.year || data.year || new Date().getFullYear()
+  const category = block?.category || data.category || '3D Animation'
+  const discipline = block?.discipline || data.discipline || 'Animation & Visual Production'
+  const summary = block?.summary || data.summary || block?.description || data.description || ''
+  const heroImage = block?.heroImage || data.heroImage || block?.posterUrl || data.posterUrl || ''
+  const videoUrl = block?.videoUrl || data.videoUrl || ''
+  const liveUrl = block?.liveUrl || data.liveUrl || ''
+  const primaryCta = block?.primaryCta || data.primaryCta || { label: 'Mulai Proyek Serupa', href: '/contact' }
+  const tags = Array.isArray(block?.tags) ? block.tags : Array.isArray(data.tags) ? data.tags : [category, discipline].filter(Boolean)
+
+  return (
+    <section className="relative overflow-hidden pt-28 pb-16 md:pt-36 md:pb-24 bg-[var(--color-background)] text-white border-b border-[var(--card-border)]">
+      <ThematicWave opacity={0.65} showBottomWave={true} />
+      <div className="pointer-events-none absolute -left-20 top-20 w-[600px] h-[600px] rounded-full bg-accent/[0.04] blur-[160px]" />
+      <div className="pointer-events-none absolute right-0 top-1/3 w-[500px] h-[500px] rounded-full bg-[#0F3A79]/[0.08] blur-[150px]" />
+
+      <div className="container relative z-10 max-w-5xl mx-auto px-4 sm:px-6">
+        {/* Breadcrumb & Metadata Badges */}
+        <div className="flex flex-wrap items-center gap-2 mb-6">
+          <Link href="/portfolio" className="text-xs font-mono text-[var(--text-muted)] hover:text-white transition-colors flex items-center gap-1.5">
+            <span>Portofolio</span>
+            <ChevronRight className="w-3.5 h-3.5 text-neutral-600" />
+          </Link>
+          <span className="px-3 py-1 rounded-full bg-[var(--color-surface)] text-accent border border-[var(--card-border)] text-xs font-mono font-medium">
+            {category}
+          </span>
+          <span className="px-3 py-1 rounded-full bg-[var(--color-surface)] text-[var(--text-muted)] border border-[var(--card-border)] text-xs font-mono">
+            Tahun {year}
+          </span>
+          <span className="px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-xs font-mono flex items-center gap-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            Production Ready
+          </span>
+        </div>
+
+        {/* Headline */}
+        <h1 className="text-display-md sm:text-display-lg font-bold tracking-tight text-white leading-[1.15]">
+          {title}
+        </h1>
+
+        {/* Client & Discipline Info */}
+        <div className="mt-4 flex flex-wrap items-center gap-4 text-xs sm:text-sm font-mono text-[var(--text-muted)]">
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-accent" />
+            <span>Klien: <strong className="text-white">{client}</strong></span>
+          </div>
+          {discipline && (
+            <div className="flex items-center gap-2">
+              <span className="text-neutral-600">•</span>
+              <span>Disiplin: <strong className="text-white">{discipline}</strong></span>
+            </div>
+          )}
+        </div>
+
+        {/* Summary Narrative */}
+        {summary && (
+          <p className="mt-6 text-base sm:text-lg text-[var(--text-muted)] leading-relaxed max-w-3xl">
+            {summary}
+          </p>
+        )}
+
+        {/* Hero Media Showcase (Poster or Video Embed) */}
+        {(heroImage || videoUrl) && (
+          <div className="mt-10 rounded-3xl border border-[var(--card-border)] bg-[var(--color-surface)] overflow-hidden shadow-[0_25px_70px_rgba(0,0,0,0.85)] relative group">
+            {videoUrl ? (
+              <IframeEmbed url={videoUrl} title={title} aspectRatio="16/9" />
+            ) : (
+              <div className="relative aspect-video w-full overflow-hidden bg-black/60">
+                <Image
+                  src={heroImage}
+                  alt={title}
+                  fill
+                  sizes="(max-width: 1024px) 100vw, 1024px"
+                  className="object-cover group-hover:scale-105 transition-transform duration-700"
+                  priority
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/20" />
+                <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between text-xs font-mono text-neutral-300">
+                  <span className="px-3 py-1 rounded-full bg-black/60 backdrop-blur border border-white/10 text-white">
+                    {client} &bull; {category}
+                  </span>
+                  {liveUrl && (
+                    <a
+                      href={liveUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-accent text-black font-bold hover:bg-[#ffe855] transition-colors shadow"
+                    >
+                      <span>Lihat Live Preview</span>
+                      <ExternalLink className="w-3.5 h-3.5 text-black" />
+                    </a>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Action Bar */}
+        <div className="mt-8 flex flex-wrap items-center justify-between gap-4 pt-6 border-t border-[var(--card-border)]">
+          <div className="flex flex-wrap items-center gap-2">
+            {tags.map((tag: string, idx: number) => (
+              <span key={idx} className="px-2.5 py-1 rounded-lg bg-[var(--color-surface)] border border-[var(--card-border)] text-[11px] font-mono text-[var(--text-muted)]">
+                #{tag}
+              </span>
+            ))}
+          </div>
+          {primaryCta?.href && (
+            <Link
+              href={primaryCta.href}
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-accent text-[var(--color-primaryForeground)] font-bold text-xs font-mono uppercase tracking-wider hover:bg-[#ffe855] transition-all shadow-[0_0_20px_rgba(255,214,0,0.25)]"
+            >
+              <span>{primaryCta.label || 'Konsultasi Brief Ini'}</span>
+              <ArrowRight className="w-4 h-4 text-[var(--color-primaryForeground)]" />
+            </Link>
+          )}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+// ─── 22. Portfolio Case Study Narrative ───────────────────────────────────────
+export function PortfolioCaseStudyBlock({ block }: { block: any }) {
+  const data = block?.data || block || {}
+  const eyebrow = block?.eyebrow || data.eyebrow || 'Studi Naratif & Rekayasa'
+  const title = block?.title || data.title || 'Tantangan, Pendekatan & Solusi Produksi'
+  const description = block?.description || data.description || 'Bagaimana UNIMASI menerjemahkan brief rumit klien menjadi eksekusi visual berkualitas tinggi.'
+  const challenge = block?.challenge || data.challenge
+  const approach = block?.approach || data.approach
+  const solution = block?.solution || data.solution
+  const result = block?.result || data.result
+  const highlights = Array.isArray(block?.highlights) ? block.highlights : Array.isArray(data.highlights) ? data.highlights : []
+
+  const sections = [
+    {
+      num: '01',
+      badge: 'The Challenge',
+      title: 'Tantangan & Problem Statement',
+      content: challenge,
+      borderColor: 'border-amber-500/30',
+      badgeColor: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
+    },
+    {
+      num: '02',
+      badge: 'Creative Approach',
+      title: 'Pendekatan Artistik & Storytelling',
+      content: approach,
+      borderColor: 'border-sky-500/30',
+      badgeColor: 'bg-sky-500/10 text-sky-400 border-sky-500/20',
+    },
+    {
+      num: '03',
+      badge: 'CGI & Engineering',
+      title: 'Solusi Teknis & Eksekusi Pipeline',
+      content: solution,
+      borderColor: 'border-accent/40',
+      badgeColor: 'bg-accent/10 text-accent border-accent/30',
+    },
+    {
+      num: '04',
+      badge: 'Impact & Result',
+      title: 'Hasil Akhir & Dampak Klien',
+      content: result,
+      borderColor: 'border-emerald-500/30',
+      badgeColor: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+    },
+  ].filter((s) => Boolean(s.content))
+
+  return (
+    <section className="py-20 sm:py-28 bg-[var(--color-surface)] text-white border-b border-[var(--card-border)] relative overflow-hidden">
+      <div className="pointer-events-none absolute left-1/3 top-10 w-[500px] h-[350px] bg-accent/[0.03] blur-[150px] rounded-full" />
+
+      <div className="container max-w-6xl mx-auto px-4 sm:px-6 relative z-10">
+        {/* Header */}
+        <div className="text-center max-w-3xl mx-auto mb-16">
+          <span className="font-mono text-xs uppercase tracking-widest text-accent font-semibold block mb-2">
+            {eyebrow}
+          </span>
+          <h2 className="font-heading text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-white">
+            {title}
+          </h2>
+          {description && (
+            <p className="mt-4 text-body-md text-[var(--text-muted)] max-w-2xl mx-auto leading-relaxed">
+              {description}
+            </p>
+          )}
+        </div>
+
+        {/* Narrative Cards Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
+          {sections.map((sec, idx) => (
+            <div
+              key={idx}
+              className={`rounded-3xl border ${sec.borderColor} bg-[var(--color-background)] p-6 sm:p-8 relative flex flex-col justify-between group hover:border-accent/50 transition-all shadow-xl`}
+            >
+              <div>
+                <div className="flex items-center justify-between gap-3 mb-4">
+                  <span className={`px-3 py-1 rounded-full text-xs font-mono font-semibold border ${sec.badgeColor}`}>
+                    {sec.badge}
+                  </span>
+                  <span className="font-mono text-xs text-neutral-600 font-bold">
+                    {sec.num}
+                  </span>
+                </div>
+                <h3 className="font-heading text-lg sm:text-xl font-bold text-white mb-3 group-hover:text-accent transition-colors">
+                  {sec.title}
+                </h3>
+                <div className="text-sm sm:text-base text-[var(--text-muted)] leading-relaxed space-y-3 whitespace-pre-line">
+                  {sec.content}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Highlights Bar if available */}
+        {highlights.length > 0 && (
+          <div className="mt-12 p-6 rounded-2xl border border-[var(--card-border)] bg-[var(--color-background)]/60 grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+            {highlights.map((h: any, i: number) => (
+              <div key={i} className="p-3">
+                <p className="text-xl sm:text-2xl font-bold text-accent font-mono">{h.value}</p>
+                <p className="text-xs text-white font-medium mt-1">{h.label}</p>
+                {h.detail && <p className="text-[11px] text-[var(--text-dim)] mt-0.5">{h.detail}</p>}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </section>
+  )
+}
+
+// ─── 23. Hero Solution ────────────────────────────────────────────────────────
+export function HeroSolutionBlock({ block }: { block: any }) {
+  const data = block?.data || block || {}
+  const badge = block?.badge || data.badge || 'Solusi Bisnis & Industri'
+  const title = block?.title || data.title || block?.headline || data.headline || 'Solusi Animasi & Motion Berorientasi Hasil'
+  const shortDescription = block?.shortDescription || data.shortDescription || block?.description || data.description || ''
+  const heroImage = block?.heroImage || data.heroImage || ''
+  const category = block?.category || data.category || 'Enterprise Solution'
+  const rawBenefits = block?.keyBenefits || data.keyBenefits || []
+  const benefits: string[] = Array.isArray(rawBenefits)
+    ? rawBenefits
+    : typeof rawBenefits === 'string'
+    ? rawBenefits.split('\n').filter(Boolean)
+    : []
+  const primaryCta = block?.primaryCta || data.primaryCta || { label: 'Konsultasi Solusi Ini', href: '/contact' }
+  const secondaryCta = block?.secondaryCta || data.secondaryCta || { label: 'Lihat Studi Kasus', href: '/portfolio' }
+
+  return (
+    <section className="relative overflow-hidden pt-28 pb-16 md:pt-36 md:pb-24 bg-[var(--color-background)] text-white border-b border-[var(--card-border)]">
+      <ThematicWave opacity={0.65} showBottomWave={true} />
+      <div className="pointer-events-none absolute -left-20 top-20 w-[600px] h-[600px] rounded-full bg-accent/[0.04] blur-[160px]" />
+      <div className="pointer-events-none absolute right-0 top-1/3 w-[500px] h-[500px] rounded-full bg-[#0F3A79]/[0.08] blur-[150px]" />
+
+      <div className="container relative z-10 max-w-6xl mx-auto px-4 sm:px-6">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">
+          {/* Left Text Column */}
+          <div className="lg:col-span-7 space-y-6">
+            <div className="flex items-center gap-2">
+              <span className="px-3 py-1 rounded-full bg-accent/10 text-accent border border-accent/20 text-xs font-mono font-semibold">
+                {badge}
+              </span>
+              <span className="px-3 py-1 rounded-full bg-[var(--color-surface)] text-[var(--text-muted)] border border-[var(--card-border)] text-xs font-mono">
+                {category}
+              </span>
+            </div>
+
+            <h1 className="text-display-md sm:text-display-lg font-bold tracking-tight text-white leading-[1.15]">
+              {title}
+            </h1>
+
+            {shortDescription && (
+              <p className="text-base sm:text-lg text-[var(--text-muted)] leading-relaxed">
+                {shortDescription}
+              </p>
+            )}
+
+            {/* Key Benefits List */}
+            {benefits.length > 0 && (
+              <div className="pt-2 space-y-2.5">
+                <p className="text-xs font-mono uppercase tracking-wider text-neutral-400 font-semibold">
+                  Manfaat Utama Solusi:
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                  {benefits.map((b, i) => (
+                    <div key={i} className="flex items-start gap-2 text-xs sm:text-sm text-neutral-200">
+                      <CheckCircle2 className="w-4 h-4 text-accent shrink-0 mt-0.5" />
+                      <span>{b.replace(/^[-*•]\s*/, '')}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* CTA Buttons */}
+            <div className="pt-4 flex flex-wrap items-center gap-4">
+              {primaryCta?.href && (
+                <Link
+                  href={primaryCta.href}
+                  className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-accent text-[var(--color-primaryForeground)] font-bold text-xs font-mono uppercase tracking-wider hover:bg-[#ffe855] transition-all shadow-[0_0_25px_rgba(255,214,0,0.3)]"
+                >
+                  <span>{primaryCta.label || 'Konsultasi Solusi'}</span>
+                  <ArrowRight className="w-4 h-4 text-[var(--color-primaryForeground)]" />
+                </Link>
+              )}
+              {secondaryCta?.href && (
+                <Link
+                  href={secondaryCta.href}
+                  className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[var(--color-surface)] border border-[var(--card-border)] text-white font-mono text-xs hover:border-accent hover:text-accent transition-all"
+                >
+                  <span>{secondaryCta.label || 'Lihat Portfolio Terkait'}</span>
+                  <ChevronRight className="w-4 h-4" />
+                </Link>
+              )}
+            </div>
+          </div>
+
+          {/* Right Image / Showcase Column */}
+          <div className="lg:col-span-5">
+            <div className="rounded-3xl border border-[var(--card-border)] bg-[var(--color-surface)] overflow-hidden shadow-[0_25px_70px_rgba(0,0,0,0.85)] relative group p-3">
+              <div className="relative aspect-square sm:aspect-[4/3] w-full rounded-2xl overflow-hidden bg-black/60">
+                {heroImage ? (
+                  <Image
+                    src={heroImage}
+                    alt={title}
+                    fill
+                    sizes="(max-width: 1024px) 100vw, 500px"
+                    className="object-cover group-hover:scale-105 transition-transform duration-700"
+                  />
+                ) : (
+                  <div className="w-full h-full flex flex-col items-center justify-center p-6 text-center bg-gradient-to-br from-[#181818] to-[#101010]">
+                    <Sparkles className="w-12 h-12 text-accent mb-3 opacity-60" />
+                    <p className="font-heading text-lg font-bold text-white">{title}</p>
+                    <p className="text-xs font-mono text-[var(--text-muted)] mt-1">{category}</p>
+                  </div>
+                )}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none" />
+                <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between text-[11px] font-mono text-neutral-300">
+                  <span className="px-2.5 py-1 rounded-full bg-black/70 backdrop-blur border border-white/10 text-accent font-semibold">
+                    UNIMASI Engine
+                  </span>
+                  <span className="text-white/80">Tailored Production</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+// ─── 24. Case Study Chapter ───────────────────────────────────────────────────
+export function CaseStudyChapterBlock({ block }: { block: any }) {
+  const data = block?.data || block || {}
+  const chapterNumber = block?.chapterNumber || data.chapterNumber || '01'
+  const title = block?.title || data.title || ''
+  const subtitle = block?.subtitle || data.subtitle || ''
+  const content = block?.content || data.content || ''
+
+  return (
+    <section className="py-16 sm:py-20 bg-[var(--color-background)] text-white border-b border-[var(--card-border)]">
+      <div className="container max-w-4xl mx-auto px-4 sm:px-6">
+        <div className="flex items-center gap-3 mb-4">
+          <span className="px-2.5 py-1 rounded-lg bg-[var(--color-surface)] border border-[var(--card-border)] text-xs font-mono text-accent font-bold">
+            Bab {chapterNumber}
+          </span>
+          {subtitle && (
+            <span className="text-xs font-mono text-[var(--text-muted)] uppercase tracking-wider">
+              {subtitle}
+            </span>
+          )}
+        </div>
+        <h3 className="font-heading text-xl sm:text-2xl md:text-3xl font-bold text-white mb-6">
+          {title}
+        </h3>
+        <div
+          className="text-body-md text-[var(--text-muted)] leading-relaxed space-y-4"
+          dangerouslySetInnerHTML={{ __html: content }}
+        />
+      </div>
+    </section>
+  )
+}
+
+
 

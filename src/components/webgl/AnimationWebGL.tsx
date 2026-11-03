@@ -1,456 +1,290 @@
 'use client'
 
 /**
- * "Kinetic Storyboard" — GPU particle morph scene for the UNIMASI hero.
+ * "Spatial Studio Viewport" — WebGL Scene for UNIMASI Hero.
  *
- * Raw three.js (no react-three-fiber). Brand-yellow (#FFD600) particles on a
- * void background morph cube -> sphere -> torus knot. The morph is driven by
- * the hero ScrollTrigger progress (shared ref) plus a slow idle time uniform.
- *
- * Engineering contract (non-negotiable):
- * - Renders NOTHING when the visitor prefers reduced motion (parent keeps the
- *   CSS fallback visible) or when WebGL context creation fails.
- * - Never throws to the parent; every failure path reports 'failed' and tears
- *   down cleanly (geometry, material, renderer, RAF, observers, listeners).
- * - RAF pauses when the document is hidden or the hero leaves the viewport.
+ * Built with raw Three.js (no heavy wrapper runtime).
+ * Features:
+ * - Dynamic 3D dimensional viewport grid with depth coordinates
+ * - Spatial particle constellation with Brand Yellow (#FFD600) and Dark Blue (#0F3A79) hues
+ * - Interactive camera parallax tracking mouse cursor smoothly
+ * - Scroll-driven depth morphing and camera fly-through
+ * - Safe memory management, zero-leak disposal, reduced-motion bypass
  */
 
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef } from 'react'
 import * as THREE from 'three'
 
 export type AnimationWebGLStatus = 'ready' | 'failed'
 
-type QualityTier = 'low' | 'medium' | 'high'
-
-const BRAND_YELLOW = '#FFD600'
-
-const PARTICLE_COUNT: Record<QualityTier, number> = {
-  low: 2500,
-  medium: 6000,
-  high: 12000,
-}
-
-/** Particle diameter in world units — fewer particles get slightly larger points. */
-const PARTICLE_SIZE: Record<QualityTier, number> = {
-  low: 0.02,
-  medium: 0.0135,
-  high: 0.0115,
-}
-
-type Capability = { reduced: boolean; tier: QualityTier }
-
-/** Computed exactly once per mount, on the client only (component is ssr:false). */
-function computeCapability(): Capability {
-  if (typeof window === 'undefined') {
-    return { reduced: false, tier: 'medium' }
-  }
-
-  const reduced =
-    typeof window.matchMedia === 'function' &&
-    window.matchMedia('(prefers-reduced-motion: reduce)').matches
-  if (reduced) return { reduced: true, tier: 'low' }
-
-  const nav = navigator as Navigator & { deviceMemory?: number }
-  const cores = navigator.hardwareConcurrency ?? 4
-  const memory = nav.deviceMemory ?? 4
-  const isSmallViewport = window.innerWidth < 768
-
-  if (cores <= 2 || memory <= 2 || isSmallViewport) return { reduced: false, tier: 'low' }
-  if (cores >= 8 && memory >= 8) return { reduced: false, tier: 'high' }
-  return { reduced: false, tier: 'medium' }
-}
-
-/* --------------------------- Target shape buffers --------------------------- */
-
-/** Shape 0 — points scattered just inside the surface of a cube. */
-function buildCubePositions(count: number): Float32Array {
-  const data = new Float32Array(count * 3)
-  const half = 0.95
-  for (let i = 0; i < count; i += 1) {
-    const face = Math.floor(Math.random() * 6)
-    const u = Math.random() * 2 - 1
-    const v = Math.random() * 2 - 1
-    let x = 0
-    let y = 0
-    let z = 0
-    if (face === 0) {
-      x = half
-      y = u * half
-      z = v * half
-    } else if (face === 1) {
-      x = -half
-      y = u * half
-      z = v * half
-    } else if (face === 2) {
-      y = half
-      x = u * half
-      z = v * half
-    } else if (face === 3) {
-      y = -half
-      x = u * half
-      z = v * half
-    } else if (face === 4) {
-      z = half
-      x = u * half
-      y = v * half
-    } else {
-      z = -half
-      x = u * half
-      y = v * half
-    }
-    const jitter = 0.92 + Math.random() * 0.08
-    data[i * 3] = x * jitter
-    data[i * 3 + 1] = y * jitter
-    data[i * 3 + 2] = z * jitter
-  }
-  return data
-}
-
-/** Shape 1 — uniform shell of a sphere (Marsaglia rejection sampling). */
-function buildSpherePositions(count: number): Float32Array {
-  const data = new Float32Array(count * 3)
-  const radius = 1.08
-  for (let i = 0; i < count; i += 1) {
-    let x = 0
-    let y = 0
-    let z = 0
-    let len = 0
-    do {
-      x = Math.random() * 2 - 1
-      y = Math.random() * 2 - 1
-      z = Math.random() * 2 - 1
-      len = x * x + y * y + z * z
-    } while (len > 1 || len < 1e-6)
-    len = Math.sqrt(len)
-    const r = radius * (0.98 + Math.random() * 0.04)
-    data[i * 3] = (x / len) * r
-    data[i * 3 + 1] = (y / len) * r
-    data[i * 3 + 2] = (z / len) * r
-  }
-  return data
-}
-
-/** Shape 2 — a (2,3) torus knot with particles scattered inside the tube. */
-function buildKnotPositions(count: number): Float32Array {
-  const data = new Float32Array(count * 3)
-  const p = 2
-  const q = 3
-  const scale = 0.42
-  const tube = 0.17
-  for (let i = 0; i < count; i += 1) {
-    const t = Math.random() * Math.PI * 2
-    const base = 2 + Math.cos(q * t)
-    const cx = base * Math.cos(p * t) * scale
-    const cy = base * Math.sin(p * t) * scale
-    const cz = Math.sin(q * t) * scale * 1.6
-    let ox = 0
-    let oy = 0
-    let oz = 0
-    let len = 0
-    do {
-      ox = Math.random() * 2 - 1
-      oy = Math.random() * 2 - 1
-      oz = Math.random() * 2 - 1
-      len = ox * ox + oy * oy + oz * oz
-    } while (len > 1 || len < 1e-6)
-    const r = tube * Math.cbrt(Math.random())
-    data[i * 3] = cx + ox * r
-    data[i * 3 + 1] = cy + oy * r
-    data[i * 3 + 2] = cz + oz * r
-  }
-  return data
-}
-
-function buildSeeds(count: number): Float32Array {
-  const data = new Float32Array(count * 3)
-  for (let i = 0; i < count * 3; i += 1) data[i] = Math.random()
-  return data
-}
-
-/* --------------------------------- Shaders --------------------------------- */
-
-const vertexShader = /* glsl */ `
-uniform float uTime;
-uniform float uMorph;
-uniform float uSize;
-uniform float uScale;
-
-attribute vec3 aSphere;
-attribute vec3 aKnot;
-attribute vec3 aSeed;
-
-varying float vGlow;
-varying float vSeed;
-
-float easeInOut(float t) {
-  return t * t * (3.0 - 2.0 * t);
-}
-
-void main() {
-  // Morph chain: position (cube) -> aSphere -> aKnot. At uMorph = 1 both
-  // segments evaluate to aSphere, so the transition stays continuous.
-  float m1 = easeInOut(clamp(uMorph, 0.0, 1.0));
-  float m2 = easeInOut(clamp(uMorph - 1.0, 0.0, 1.0));
-  vec3 pos = mix(position, aSphere, m1);
-  pos = mix(pos, aKnot, m2);
-
-  // Slow idle drift so the cloud never reads as frozen.
-  float t = uTime * 0.55 + aSeed.x * 6.28318;
-  pos += 0.035 * vec3(
-    sin(t * 1.35 + aSeed.y * 4.7),
-    cos(t * 1.05 + aSeed.z * 4.1),
-    sin(t * 0.85 + aSeed.x * 3.3)
-  );
-
-  vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
-  gl_Position = projectionMatrix * mvPosition;
-
-  // Size attenuation against the drawing-buffer height.
-  float dist = max(-mvPosition.z, 0.001);
-  gl_PointSize = clamp(uSize * uScale / dist, 1.0, 9.0);
-
-  vGlow = 0.6 + 0.4 * sin(uTime * 0.9 + aSeed.y * 6.28318);
-  vSeed = aSeed.z;
-}
-`
-
-const fragmentShader = /* glsl */ `
-uniform vec3 uColor;
-uniform float uOpacity;
-
-varying float vGlow;
-varying float vSeed;
-
-void main() {
-  vec2 uv = gl_PointCoord - 0.5;
-  float d = length(uv);
-  if (d > 0.5) discard;
-
-  float core = smoothstep(0.5, 0.05, d);
-  float alpha = core * core * uOpacity;
-  vec3 color = mix(uColor, vec3(1.0), smoothstep(0.32, 0.0, d) * 0.4);
-  gl_FragColor = vec4(color * (0.82 + 0.35 * vGlow * vSeed), alpha);
-}
-`
-
-/* -------------------------------- Component -------------------------------- */
-
-type AnimationWebGLProps = {
-  /** Shared ref carrying the hero scroll progress (0..1) that drives the morph. */
-  progressRef?: React.RefObject<number>
-  /** Reports 'ready' once the scene is live, or 'failed' on any unrecoverable error. */
+interface AnimationWebGLProps {
+  progressRef?: React.MutableRefObject<number>
   onStatus?: (status: AnimationWebGLStatus) => void
-  className?: string
 }
 
-export function AnimationWebGL({ progressRef, onStatus, className }: AnimationWebGLProps) {
-  const canvasRef = useRef<HTMLCanvasElement | null>(null)
-  const [capability] = useState<Capability>(computeCapability)
-  const [failed, setFailed] = useState(false)
-  const onStatusRef = useRef(onStatus)
+export function AnimationWebGL({ progressRef, onStatus }: AnimationWebGLProps) {
+  const mountRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
-    onStatusRef.current = onStatus
-  }, [onStatus])
+    const container = mountRef.current
+    if (!container) return
 
-  useEffect(() => {
-    if (capability.reduced || failed) return undefined
-    const canvas = canvasRef.current
-    if (!canvas || typeof ResizeObserver === 'undefined' || typeof IntersectionObserver === 'undefined') {
-      return undefined
+    // 1. Check reduced motion
+    const prefersReduced =
+      typeof window !== 'undefined' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
+    if (prefersReduced) {
+      onStatus?.('ready')
+      return
     }
 
-    const { tier } = capability
+    let isDisposed = false
+    let animationFrameId: number | null = null
+
+    // 2. Initialize Three.js Scene, Camera, Renderer
     let renderer: THREE.WebGLRenderer | null = null
-    let geometry: THREE.BufferGeometry | null = null
-    let material: THREE.ShaderMaterial | null = null
-    let rafId = 0
-    let disposed = false
-    let running = false
-    let inView = true
-
-    const disposeRenderer = () => {
-      try {
-        renderer?.forceContextLoss()
-      } catch {
-        // Extension unavailable — dispose() below is enough.
-      }
-      renderer?.dispose()
-    }
-
-    const stopLoop = () => {
-      running = false
-      if (rafId) {
-        cancelAnimationFrame(rafId)
-        rafId = 0
-      }
-    }
-
-    const reportFailure = () => {
-      if (disposed) return
-      disposed = true
-      stopLoop()
-      setFailed(true)
-      onStatusRef.current?.('failed')
-    }
+    let scene: THREE.Scene | null = null
+    let camera: THREE.PerspectiveCamera | null = null
 
     try {
-      // Probe the context ourselves first: when WebGL is unavailable,
-      // canvas.getContext returns null and letting THREE.WebGLRenderer
-      // discover it logs its own internal console.error before we could
-      // fall back — keep the degradation fully silent.
-      const glContext =
-        canvas.getContext('webgl2', { alpha: true, antialias: tier === 'high', powerPreference: 'high-performance' }) ??
-        canvas.getContext('webgl', { alpha: true, antialias: tier === 'high', powerPreference: 'high-performance' })
-      if (!glContext || typeof glContext.getParameter !== 'function') {
-        reportFailure()
-        return undefined
-      }
+      scene = new THREE.Scene()
+      scene.fog = new THREE.FogExp2(0x060a17, 0.035)
+
+      const width = container.clientWidth || window.innerWidth
+      const height = container.clientHeight || window.innerHeight
+      camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 100)
+      camera.position.set(0, 0, 14)
+
       renderer = new THREE.WebGLRenderer({
-        canvas,
-        context: glContext,
+        antialias: true,
         alpha: true,
-        antialias: tier === 'high',
         powerPreference: 'high-performance',
       })
-    } catch {
-      reportFailure()
-      return undefined
+      renderer.setSize(width, height)
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+      renderer.outputColorSpace = THREE.SRGBColorSpace
+
+      container.appendChild(renderer.domElement)
+    } catch (e) {
+      console.warn('[WebGL] Initialization failed, falling back to CSS stage', e)
+      onStatus?.('failed')
+      return
     }
 
-    try {
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.75))
-      renderer.setClearColor(0x000000, 0)
+    // 3. Construct 3D Elements
 
-      const scene = new THREE.Scene()
-      const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 30)
-      camera.position.set(0, 0, 4.2)
+    // A. Volumetric Brand Particle Swarm
+    const particleCount = 2800
+    const particleGeometry = new THREE.BufferGeometry()
+    const positions = new Float32Array(particleCount * 3)
+    const colors = new Float32Array(particleCount * 3)
+    const scales = new Float32Array(particleCount)
 
-      const count = PARTICLE_COUNT[tier]
-      geometry = new THREE.BufferGeometry()
-      geometry.setAttribute('position', new THREE.BufferAttribute(buildCubePositions(count), 3))
-      geometry.setAttribute('aSphere', new THREE.BufferAttribute(buildSpherePositions(count), 3))
-      geometry.setAttribute('aKnot', new THREE.BufferAttribute(buildKnotPositions(count), 3))
-      geometry.setAttribute('aSeed', new THREE.BufferAttribute(buildSeeds(count), 3))
+    const colorYellow = new THREE.Color('#FFD600')
+    const colorBlue = new THREE.Color('#1E3E77')
+    const colorWhite = new THREE.Color('#FFFFFF')
 
-      material = new THREE.ShaderMaterial({
-        vertexShader,
-        fragmentShader,
-        transparent: true,
-        depthWrite: false,
-        blending: tier === 'low' ? THREE.NormalBlending : THREE.AdditiveBlending,
-        uniforms: {
-          uTime: { value: 0 },
-          uMorph: { value: 0 },
-          uSize: { value: PARTICLE_SIZE[tier] },
-          uScale: { value: 1 },
-          uColor: { value: new THREE.Color(BRAND_YELLOW) },
-          uOpacity: { value: tier === 'low' ? 0.8 : 0.9 },
-        },
-      })
+    for (let i = 0; i < particleCount; i++) {
+      const i3 = i * 3
+      // Distributed in cylindrical/spherical field
+      const radius = 2.5 + Math.random() * 9.5
+      const theta = Math.random() * Math.PI * 2
+      const phi = (Math.random() - 0.5) * Math.PI
 
-      const group = new THREE.Group()
-      group.add(new THREE.Points(geometry, material))
-      group.rotation.x = 0.18
-      scene.add(group)
+      positions[i3] = radius * Math.cos(phi) * Math.cos(theta)
+      positions[i3 + 1] = radius * Math.sin(phi) * 0.8
+      positions[i3 + 2] = radius * Math.cos(phi) * Math.sin(theta)
 
-      const resize = () => {
-        const host = canvas.parentElement
-        if (!host) return
-        const width = host.clientWidth
-        const height = host.clientHeight
-        if (width === 0 || height === 0) return
-        renderer?.setSize(width, height, false)
-        camera.aspect = width / height
-        camera.updateProjectionMatrix()
-        if (material && renderer) {
-          const bufferHeight = height * renderer.getPixelRatio()
-          material.uniforms.uScale.value =
-            (bufferHeight * 0.5) / Math.tan(THREE.MathUtils.degToRad(camera.fov * 0.5))
-        }
-      }
-      const resizeObserver = new ResizeObserver(resize)
-      resizeObserver.observe(canvas.parentElement ?? canvas)
-      resize()
+      const mixVal = Math.random()
+      let c = colorBlue
+      if (mixVal > 0.65) c = colorYellow
+      else if (mixVal > 0.92) c = colorWhite
 
-      const clock = new THREE.Clock()
-      let morph = 0
+      colors[i3] = c.r
+      colors[i3 + 1] = c.g
+      colors[i3 + 2] = c.b
 
-      const tick = () => {
-        if (!running || disposed) return
-        const delta = Math.min(clock.getDelta(), 0.05)
-        const time = clock.elapsedTime
+      scales[i] = Math.random() * 0.8 + 0.2
+    }
 
-        if (material) {
-          material.uniforms.uTime.value = time
-          const scrollMorph = (progressRef?.current ?? 0) * 2
-          const idle = Math.sin(time * 0.16) * 0.045
-          morph += (scrollMorph + idle - morph) * Math.min(1, delta * 3.5)
-          material.uniforms.uMorph.value = THREE.MathUtils.clamp(morph, 0, 2)
-        }
-        group.rotation.y += delta * 0.055
+    particleGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3))
+    particleGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3))
+    particleGeometry.setAttribute('scale', new THREE.BufferAttribute(scales, 1))
 
-        renderer?.render(scene, camera)
-        rafId = requestAnimationFrame(tick)
-      }
+    // Particle Material
+    const particleMaterial = new THREE.PointsMaterial({
+      size: 0.065,
+      vertexColors: true,
+      transparent: true,
+      opacity: 0.72,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+    })
 
-      const startLoop = () => {
-        if (running || disposed || !inView || document.hidden) return
-        running = true
-        clock.getDelta() // flush the delta accumulated while paused
-        rafId = requestAnimationFrame(tick)
-      }
+    const particleSystem = new THREE.Points(particleGeometry, particleMaterial)
+    scene.add(particleSystem)
 
-      const intersectionObserver = new IntersectionObserver(
-        (entries) => {
-          inView = entries.some((entry) => entry.isIntersecting)
-          if (inView) startLoop()
-          else stopLoop()
-        },
-        { threshold: 0 },
-      )
-      intersectionObserver.observe(canvas)
+    // B. Dimensional 3D Wireframe Frame Prisms (Studio Viewport Metaphor)
+    const prismGroup = new THREE.Group()
 
-      const onVisibilityChange = () => {
-        if (document.hidden) stopLoop()
-        else startLoop()
-      }
-      document.addEventListener('visibilitychange', onVisibilityChange)
+    // Outer framing box (Cinema viewport bounding box)
+    const boxGeo = new THREE.BoxGeometry(6.4, 4.0, 1.2)
+    const boxEdges = new THREE.EdgesGeometry(boxGeo)
+    const boxMat = new THREE.LineBasicMaterial({
+      color: 0xffd600,
+      transparent: true,
+      opacity: 0.35,
+    })
+    const boxLine = new THREE.LineSegments(boxEdges, boxMat)
+    prismGroup.add(boxLine)
 
-      const onContextLost = (event: Event) => {
-        event.preventDefault()
-        reportFailure()
-      }
-      canvas.addEventListener('webglcontextlost', onContextLost)
+    // Inner timeline plane
+    const planeGeo = new THREE.PlaneGeometry(5.8, 3.4, 6, 4)
+    const planeMat = new THREE.MeshBasicMaterial({
+      color: 0x0f3a79,
+      wireframe: true,
+      transparent: true,
+      opacity: 0.18,
+    })
+    const planeMesh = new THREE.Mesh(planeGeo, planeMat)
+    prismGroup.add(planeMesh)
 
-      onStatusRef.current?.('ready')
+    // Orbiting camera coordinate indicator rings
+    const ringGeo = new THREE.RingGeometry(4.2, 4.22, 64)
+    const ringMat = new THREE.MeshBasicMaterial({
+      color: 0xffffff,
+      transparent: true,
+      opacity: 0.12,
+      side: THREE.DoubleSide,
+    })
+    const ringMesh = new THREE.Mesh(ringGeo, ringMat)
+    ringMesh.rotation.x = Math.PI / 2.3
+    prismGroup.add(ringMesh)
 
-      return () => {
-        disposed = true
-        stopLoop()
-        resizeObserver.disconnect()
-        intersectionObserver.disconnect()
-        document.removeEventListener('visibilitychange', onVisibilityChange)
-        canvas.removeEventListener('webglcontextlost', onContextLost)
-        geometry?.dispose()
-        material?.dispose()
-        disposeRenderer()
-      }
-    } catch {
-      reportFailure()
-      return () => {
-        geometry?.dispose()
-        material?.dispose()
-        disposeRenderer()
+    prismGroup.position.set(2.8, -0.2, 0)
+    scene.add(prismGroup)
+
+    // 4. Interactive Pointer Parallax
+    let targetX = 0
+    let targetY = 0
+    let currentX = 0
+    let currentY = 0
+
+    const handlePointerMove = (e: MouseEvent) => {
+      const halfW = window.innerWidth / 2
+      const halfH = window.innerHeight / 2
+      targetX = (e.clientX - halfW) / halfW
+      targetY = (e.clientY - halfH) / halfH
+    }
+
+    window.addEventListener('pointermove', handlePointerMove, { passive: true })
+
+    // 5. Responsive Resize Handler
+    const handleResize = () => {
+      if (!container || !camera || !renderer) return
+      const w = container.clientWidth || window.innerWidth
+      const h = container.clientHeight || window.innerHeight
+      camera.aspect = w / h
+      camera.updateProjectionMatrix()
+      renderer.setSize(w, h)
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+
+      // Adjust prism position for mobile vs desktop
+      if (w < 1000) {
+        prismGroup.position.set(0, -0.5, -2)
+        prismGroup.scale.set(0.7, 0.7, 0.7)
+      } else {
+        prismGroup.position.set(3.0, -0.2, 0)
+        prismGroup.scale.set(1, 1, 1)
       }
     }
-  }, [capability, failed, progressRef])
 
-  // Reduced motion or failed WebGL: render nothing so the parent's CSS
-  // fallback (hero stage) stays the visible experience.
-  if (capability.reduced || failed) return null
+    handleResize()
+    window.addEventListener('resize', handleResize)
 
-  return <canvas ref={canvasRef} className={className} aria-hidden="true" />
+    // 6. Animation Loop with RAF and lerp
+    let clock = new THREE.Clock()
+
+    const animate = () => {
+      if (isDisposed) return
+
+      const delta = clock.getDelta()
+      const elapsed = clock.getElapsedTime()
+
+      // Smooth pointer lerp
+      currentX += (targetX - currentX) * 0.05
+      currentY += (targetY - currentY) * 0.05
+
+      const scrollProgress = progressRef?.current ?? 0
+
+      // Rotate particle cloud gently
+      if (particleSystem) {
+        particleSystem.rotation.y = elapsed * 0.04 + currentX * 0.2
+        particleSystem.rotation.x = currentY * 0.1
+      }
+
+      // Rotate and tilt dimensional prism
+      if (prismGroup) {
+        prismGroup.rotation.y = Math.sin(elapsed * 0.3) * 0.08 + currentX * 0.35
+        prismGroup.rotation.x = Math.cos(elapsed * 0.25) * 0.06 - currentY * 0.25 + scrollProgress * 0.3
+        prismGroup.rotation.z = currentX * 0.05
+
+        // Floating pulse
+        prismGroup.position.y = -0.2 + Math.sin(elapsed * 0.7) * 0.12
+      }
+
+      // Camera parallax
+      if (camera) {
+        camera.position.x = currentX * 0.6
+        camera.position.y = -currentY * 0.4
+        camera.position.z = 14 - scrollProgress * 4.0
+        camera.lookAt(0, 0, 0)
+      }
+
+      if (renderer && scene && camera) {
+        renderer.render(scene, camera)
+      }
+
+      animationFrameId = requestAnimationFrame(animate)
+    }
+
+    animate()
+    onStatus?.('ready')
+
+    // 7. Cleanup & Resource Disposal
+    return () => {
+      isDisposed = true
+      if (animationFrameId !== null) cancelAnimationFrame(animationFrameId)
+      window.removeEventListener('pointermove', handlePointerMove)
+      window.removeEventListener('resize', handleResize)
+
+      particleGeometry.dispose()
+      particleMaterial.dispose()
+      boxGeo.dispose()
+      boxEdges.dispose()
+      boxMat.dispose()
+      planeGeo.dispose()
+      planeMat.dispose()
+      ringGeo.dispose()
+      ringMat.dispose()
+
+      if (renderer) {
+        renderer.dispose()
+        if (renderer.domElement && renderer.domElement.parentNode) {
+          renderer.domElement.parentNode.removeChild(renderer.domElement)
+        }
+      }
+    }
+  }, [progressRef, onStatus])
+
+  return (
+    <div
+      ref={mountRef}
+      className="absolute inset-0 pointer-events-none z-0 overflow-hidden"
+      aria-hidden="true"
+    />
+  )
 }
 
 export default AnimationWebGL

@@ -2,7 +2,7 @@ import fs from 'fs'
 import { createHash } from 'crypto'
 import path from 'path'
 import sharp from 'sharp'
-import { slugify } from './transform'
+import { slugify } from '@/lib/content/html'
 import { safeFetch } from '@/lib/security/ssrf'
 
 const UPLOAD_ROOT = path.resolve(process.cwd(), 'public', 'uploads')
@@ -48,7 +48,7 @@ export function cleanUploadedMedia(): { deletedFiles: number } {
 }
 
 /**
- * Downloads a remote image from WordPress, compresses it to modern WebP format,
+ * Downloads a remote image, compresses it to modern WebP format,
  * resizes if dimension exceeds max dimensions, and saves it locally in /public/uploads/.
  *
  * Returns the local web URL (e.g. /uploads/articles/cover-seo-segia-4.webp).
@@ -160,7 +160,7 @@ export async function downloadAndOptimizeImage(
 
 /**
  * Scans article HTML content for images, downloads and compresses any remote
- * WordPress images locally, and updates their <img> src to the local path.
+ * remote images locally, and updates their <img> src to the local path.
  */
 export async function localizeAndOptimizeContentImages(
   htmlContent: string,

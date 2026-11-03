@@ -1,7 +1,7 @@
 /**
  * HTML Sanitizer Contract (K-3)
  *
- * Utilizes `sanitize-html` to sanitize untrusted HTML from CMS, WordPress imports,
+ * Utilizes `sanitize-html` to sanitize untrusted HTML from CMS imports,
  * studio blocks, and FAQs. Strips script execution, inline event handlers,
  * dangerous pseudo-protocols (javascript:), while preserving safe semantic formatting.
  */

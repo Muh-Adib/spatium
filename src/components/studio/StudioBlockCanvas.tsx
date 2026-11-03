@@ -361,8 +361,8 @@ export default function StudioBlockCanvas({
       newBlock.title = 'Spesifikasi Arsitektur Sistem 4-Layer'
       newBlock.title = '4 Jaminan Kualitas untuk Pertumbuhan Bisnis Anda'
       newBlock.description = 'Standar mutu pengerjaan untuk memastikan sistem bisnis Anda cepat, aman, dan mudah dikelola'
-      newBlock.image = '/images/portfolio/website-smk-pb-soedirman-2.png'
-      newBlock.imageLabel = 'Karya Nyata Klien: Portal Edukasi & Informasi'
+      newBlock.image = '/images/portfolio/pt-ypti-3d.webp'
+      newBlock.imageLabel = 'Karya Nyata UNIMASI: Produksi 3D Presisi'
       newBlock.imageBadge = 'Hasil Produksi Aktif'
       newBlock.hudTitle = 'Kecepatan Akses Nyata'
       newBlock.hudMetric = 'Waktu Muat < 1 Detik'
@@ -403,30 +403,30 @@ export default function StudioBlockCanvas({
       newBlock.description = 'Pilihan solusi digital terpadu untuk kebutuhan perkembangan bisnis Anda'
     }
     if (type === 'visual-showcase-gallery') {
-      newBlock.title = 'Bukti Hasil Pengerjaan Nyata untuk Klien Kami'
-      newBlock.description = 'Lihat bagaimana sistem yang kami bangun telah aktif digunakan dan membantu kemajuan operasional klien'
-      newBlock.badge = 'Bukti Portofolio Nyata'
+      newBlock.title = 'Karya Animasi & Visual Production Terpilih'
+      newBlock.description = 'Jelajahi portofolio animasi 2D, 3D, dan motion graphics yang telah membantu klien menyampaikan pesan secara memukau'
+      newBlock.badge = 'Karya Terpilih UNIMASI'
       newBlock.items = [
         {
-          title: 'Portal PMB Universitas Mercu Buana Yogyakarta',
-          category: 'Sektor Pendidikan Tinggi',
-          image: '/images/portfolio/website-pmb-umby.png',
-          metric: 'Ribuan Pendaftar',
-          desc: 'Sistem pendaftaran online berkecepatan tinggi yang menangani ribuan calon mahasiswa baru tanpa kendala server down.',
+          title: 'Telkom Digital Future Enterprise',
+          category: 'Motion Graphics · Tech Explainer',
+          image: '/images/portfolio/telkom-dfe.webp',
+          metric: '500K+ Views',
+          desc: 'Animasi motion graphics futuristik memvisualisasikan arsitektur jaringan fiber optik dan cloud hybrid nasional.',
         },
         {
-          title: 'Platform Digital SMK PB Soedirman 2 Jakarta',
-          category: 'Institusi Pendidikan',
-          image: '/images/portfolio/website-smk-pb-soedirman-2.png',
-          metric: 'Responsif Ponsel',
-          desc: 'Website profil sekolah interaktif yang memudahkan orang tua dan calon murid menjelajahi program keahlian dan info akademik.',
+          title: 'PT Yogya Presisi Tehnikatama Industri (YPTI)',
+          category: '3D Animation · Corporate Industrial',
+          image: '/images/portfolio/pt-ypti-3d.webp',
+          metric: 'Hannover Messe Showcase',
+          desc: 'Visualisasi 3D CGI mesin CNC 5-axis dan proses pemesinan mikro presisi tinggi untuk presentasi industri global.',
         },
         {
-          title: 'Katalog Properti Eksklusif Kalasan Valley',
-          category: 'Properti & Real Estate',
-          image: '/images/portfolio/website-kalasan-valley.webp',
-          metric: 'Leads WhatsApp',
-          desc: 'Katalog hunian visual beresolusi tinggi dengan formulir pendaftaran leads instan yang langsung terhubung ke tim penjualan.',
+          title: 'Sanata Dharma Heritage Foundation',
+          category: '3D Animation · Spatial Documentary',
+          image: '/images/portfolio/sanata-dharma.webp',
+          metric: 'Arsip Sejarah 3D',
+          desc: 'Visualisasi 3D sinematik merangkai dokumenter sejarah dan jejak warisan institusi dengan visual megah.',
         },
       ]
     }

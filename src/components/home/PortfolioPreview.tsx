@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react'
 import Link from 'next/link'
-import { PROJECTS, PROJECT_CATEGORIES, type ProjectCategory } from '@/data/projects'
+import { PROJECTS, PROJECT_CATEGORIES, mapProjectCategory, type Project, type ProjectCategory } from '@/data/projects'
 import { ProjectCard } from '@/components/portfolio/ProjectCard'
 import { Icon } from '@/components/Icon'
 import { Reveal } from '@/components/ui/Reveal'
@@ -11,7 +11,20 @@ import './portfolio-preview.css'
 
 export function PortfolioPreview({ initialProjects }: { initialProjects?: any[] } = {}) {
   const [filter, setFilter] = useState<'all' | ProjectCategory>('all')
-  const allProjects = initialProjects && initialProjects.length > 0 ? initialProjects : PROJECTS
+  const allProjects: Project[] = initialProjects && initialProjects.length > 0
+    ? initialProjects.map((project: any, index) => {
+        const fallback = PROJECTS.find((item) => item.slug === project.slug) || PROJECTS[index % PROJECTS.length]
+        return {
+          ...fallback,
+          ...project,
+          category: PROJECT_CATEGORIES.some((item) => item.id === project.category)
+            ? project.category
+            : mapProjectCategory(project.category || project.discipline),
+          posterUrl: project.posterUrl || project.coverImage || project.heroImage?.url || fallback.posterUrl,
+          variant: project.variant ?? fallback.variant,
+        }
+      })
+    : PROJECTS
 
   const visible = useMemo(() => {
     const list = filter === 'all' ? allProjects : allProjects.filter((p: any) => p.category === filter)
@@ -43,25 +56,24 @@ export function PortfolioPreview({ initialProjects }: { initialProjects?: any[] 
           }
         />
 
-        <div className="portfolio-preview__filters" role="tablist" aria-label="Filter work by discipline">
-          {PROJECT_CATEGORIES.map((cat) => (
+        <div className="portfolio-preview__filters" aria-label="Filter work by discipline">
+          {PROJECT_CATEGORIES.filter((cat) => cat.id === 'all' || allProjects.some((project) => project.category === cat.id)).map((cat) => (
             <button
               key={cat.id}
               type="button"
-              role="tab"
-              aria-selected={filter === cat.id}
+              aria-pressed={filter === cat.id}
               className={`filter-btn${filter === cat.id ? ' is-active' : ''}`}
               onClick={() => setFilter(cat.id)}
             >
               {cat.label}
               <span className="filter-btn__count">
-                {cat.id === 'all' ? allProjects.length : allProjects.filter((p: any) => p.category === cat.id).length}
+                {cat.id === 'all' ? allProjects.length : allProjects.filter((p) => p.category === cat.id).length}
               </span>
             </button>
           ))}
         </div>
 
-        <div className="portfolio-preview__grid" key={filter}>
+        <div className="portfolio-preview__grid" id="portfolio-preview-results" key={filter}>
           {visible.map((project: any, i: number) => (
             <Reveal key={project.slug} delay={i * 60} variant="scale" className="portfolio-preview__item">
               <ProjectCard project={project} />

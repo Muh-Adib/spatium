@@ -13,9 +13,9 @@ import type { ArticleCardItem } from '@/components/journal/ArticleCard'
 const SITE_URL = 'https://unimasi.studio'
 
 export const metadata: Metadata = {
-  title: 'Articles',
+  title: 'Animation & Motion Design Articles',
   description:
-    'Articles on 3D animation, videotron production, motion graphics, and CGI pipelines — written by UNIMASI studio.',
+    'Insight and process notes on 3D animation, videotron, motion graphics, and CGI pipelines from the UNIMASI studio team of specialists.',
   alternates: {
     canonical: `${SITE_URL}/journal`,
   },
