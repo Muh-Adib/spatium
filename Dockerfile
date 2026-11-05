@@ -4,13 +4,15 @@
 FROM node:22-alpine AS deps
 WORKDIR /app
 RUN apk add --no-cache libc6-compat openssl
+ENV PNPM_CONFIG_UPDATE_NOTIFIER=false
 RUN corepack enable && corepack prepare pnpm@11.18.0 --activate
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml* .npmrc* ./
-RUN pnpm install --frozen-lockfile
+RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store pnpm install --frozen-lockfile
 
 FROM node:22-alpine AS builder
 WORKDIR /app
 RUN apk add --no-cache libc6-compat openssl
+ENV PNPM_CONFIG_UPDATE_NOTIFIER=false
 RUN corepack enable && corepack prepare pnpm@11.18.0 --activate
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
@@ -31,7 +33,7 @@ ENV NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL \
     NEXT_TELEMETRY_DISABLED=1
 
 # Prisma contract generation needs no DB connection.
-RUN pnpm dlx prisma contract emit || true
+RUN pnpm exec prisma contract emit || true
 RUN pnpm run build
 
 FROM node:22-alpine AS runner
