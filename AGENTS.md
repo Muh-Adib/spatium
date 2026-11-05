@@ -145,7 +145,7 @@ unimasi/
 - **End-to-End Traceability**: Setiap perubahan yang disimpan melalui Studio Admin wajib tercermin pada halaman publik terkait tanpa "Ghost CMS" (`Admin CRUD → Database → Query/Service → Server Component/API → Public UI`).
 
 ### 3.12 Mandatory Package Manager: pnpm (STRICT)
-- **Hanya gunakan pnpm (`pnpm@11.18.0`+)**: Dilarang keras menggunakan `npm` atau `yarn`. File `package-lock.json` dan `yarn.lock` dilarang ada di repositori.
+- **Hanya gunakan pnpm (`pnpm@12.16.1`+)**: Dilarang keras menggunakan `npm` atau `yarn`. File `package-lock.json` dan `yarn.lock` dilarang ada di repositori.
 - Konfigurasi `.npmrc` dengan `auto-install-peers=true`, `strict-peer-dependencies=false`, dan `shamefully-hoist=true` adalah wajib.
 - Guard `preinstall: "npx only-allow pnpm"` terpasang aktif di `package.json`.
 - Seluruh script verifikasi, build, database, dan dev server wajib dieksekusi via `pnpm` (misal: `pnpm run dev`, `pnpm run build`, `pnpm run typecheck`, `pnpm run db:push`).
