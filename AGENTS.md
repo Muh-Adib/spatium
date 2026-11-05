@@ -144,6 +144,12 @@ unimasi/
 - **Pre-Implementation Source of Truth Definition**: Setiap data atau entitas baru wajib ditentukan dan didokumentasikan source of truth-nya di database sebelum implementasi kode.
 - **End-to-End Traceability**: Setiap perubahan yang disimpan melalui Studio Admin wajib tercermin pada halaman publik terkait tanpa "Ghost CMS" (`Admin CRUD → Database → Query/Service → Server Component/API → Public UI`).
 
+### 3.12 Mandatory Package Manager: pnpm (STRICT)
+- **Hanya gunakan pnpm (`pnpm@11.18.0`+)**: Dilarang keras menggunakan `npm` atau `yarn`. File `package-lock.json` dan `yarn.lock` dilarang ada di repositori.
+- Konfigurasi `.npmrc` dengan `auto-install-peers=true`, `strict-peer-dependencies=false`, dan `shamefully-hoist=true` adalah wajib.
+- Guard `preinstall: "npx only-allow pnpm"` terpasang aktif di `package.json`.
+- Seluruh script verifikasi, build, database, dan dev server wajib dieksekusi via `pnpm` (misal: `pnpm run dev`, `pnpm run build`, `pnpm run typecheck`, `pnpm run db:push`).
+
 ---
 
 ## 4. Agentic Architecture & Content Workflow
@@ -166,13 +172,13 @@ unimasi/
 ## 5. Verification & Quality Gates
 
 ```bash
-npm run typecheck     # tsc --noEmit (0 errors)
-npm run build         # Next.js 16 Turbopack build
-npm run db:push       # apply Prisma schema
-npm run db:seed       # seed starter content (tsx scripts/seed.ts)
+pnpm run typecheck     # tsc --noEmit (0 errors)
+pnpm run build         # Next.js 16 Turbopack build
+pnpm run db:push       # apply Prisma schema
+pnpm run db:seed       # seed starter content (pnpm dlx tsx scripts/seed.ts)
 ```
 
-Dev server: `npm run dev` → http://localhost:3001.
+Dev server: `pnpm run dev` → http://localhost:3001.
 
 ---
 

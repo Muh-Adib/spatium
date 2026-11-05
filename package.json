@@ -2,9 +2,11 @@
   "name": "unimasi-studio",
   "private": true,
   "version": "1.0.0",
+  "packageManager": "pnpm@11.18.0",
   "type": "module",
   "description": "UNIMASI — Animation & Motion Design Studio. Premium interactive studio website with integrated WebShift Core Backend & Studio Admin.",
   "scripts": {
+    "preinstall": "npx --yes only-allow pnpm",
     "dev": "next dev -p 3001",
     "build": "next build",
     "start": "next start -p 3001",
@@ -37,11 +39,13 @@
     "react-dom": "^19.3.1",
     "sanitize-html": "^2.18.1",
     "server-only": "^0.0.1",
+    "sharp": "^0.33.5",
     "tailwind-merge": "^2.5.2",
     "three": "^0.187.0",
     "zod": "^4.6.7"
   },
   "devDependencies": {
+    "@prisma/cli-engine": "0.9.0",
     "@tailwindcss/container-queries": "^0.1.1",
     "@types/node": "^22",
     "@types/qs": "^6.9.16",
@@ -53,6 +57,7 @@
     "react-devtools": "^8.0.0",
     "tailwindcss": "^3.4.12",
     "tsx": "^4.23.15",
-    "typescript": "^5.6.3"
+    "typescript": "^5.6.3",
+    "vitest": "^5.1.0"
   }
 }
