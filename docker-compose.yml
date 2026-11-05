@@ -30,7 +30,7 @@ services:
       target: builder
     restart: "no"
     exclude_from_hc: true
-    command: ["npx", "prisma", "db", "update"]
+    command: ["npx", "--yes", "prisma", "db", "update"]
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER:-uni}:${SERVICE_PASSWORD_POSTGRES}@postgres:5432/${POSTGRES_DB:-uni}?schema=public
     depends_on:
