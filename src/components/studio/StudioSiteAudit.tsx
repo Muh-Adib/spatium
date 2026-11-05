@@ -109,7 +109,7 @@ export function StudioSiteAudit() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-4">
         <div>
           <h2 className="text-base font-semibold text-white flex items-center gap-2">
-            <ShieldCheck className="w-5 h-5 text-sky-400" />
+            <ShieldCheck className="w-5 h-5 text-info" />
             <span>Audit Situs &amp; Integritas SEO Teknis (Section 15.3)</span>
           </h2>
           <p className="text-xs text-neutral-400 mt-0.5">
@@ -124,9 +124,9 @@ export function StudioSiteAudit() {
             className="flex items-center gap-1.5 px-3.5 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg text-xs font-medium transition-all disabled:opacity-50"
           >
             {runningType === 'internal_db' ? (
-              <RefreshCw className="w-4 h-4 animate-spin text-sky-400" />
+              <RefreshCw className="w-4 h-4 animate-spin text-info" />
             ) : (
-              <Database className="w-4 h-4 text-sky-400" />
+              <Database className="w-4 h-4 text-info" />
             )}
             <span>Audit Data DB (Cepat)</span>
           </button>
@@ -134,7 +134,7 @@ export function StudioSiteAudit() {
           <button
             onClick={() => runAudit('live_crawl')}
             disabled={runningType !== null}
-            className="flex items-center gap-1.5 px-3.5 py-2 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white rounded-lg text-xs font-semibold transition-all shadow-md disabled:opacity-50"
+            className="flex items-center gap-1.5 px-3.5 py-2 bg-accent-500 hover:bg-accent-300 text-accent-950 rounded-lg text-xs font-semibold transition-all shadow-md disabled:opacity-50"
           >
             {runningType === 'live_crawl' ? (
               <RefreshCw className="w-4 h-4 animate-spin text-white" />
@@ -148,7 +148,7 @@ export function StudioSiteAudit() {
 
       {loading ? (
         <div className="py-24 text-center">
-          <RefreshCw className="w-8 h-8 text-sky-400 animate-spin mx-auto mb-3" />
+          <RefreshCw className="w-8 h-8 text-info animate-spin mx-auto mb-3" />
           <p className="text-sm text-neutral-400">Memuat laporan audit situs...</p>
         </div>
       ) : summary ? (
@@ -188,7 +188,7 @@ export function StudioSiteAudit() {
 
             <div className="p-4 rounded-xl bg-neutral-900/60 border border-white/5">
               <div className="text-xs font-mono text-neutral-400 uppercase">Tipe &amp; Waktu Audit</div>
-              <div className="text-sm font-semibold text-sky-400 mt-1">
+              <div className="text-sm font-semibold text-info mt-1">
                 {summary.type === 'internal_db' ? 'Lapis 1: Database Internal' : 'Lapis 2: Live Crawler'}
               </div>
               <div className="text-[11px] text-neutral-500 mt-0.5">
@@ -219,7 +219,7 @@ export function StudioSiteAudit() {
               <select
                 value={selectedSeverity}
                 onChange={(e) => setSelectedSeverity(e.target.value)}
-                className="bg-black/40 border border-white/10 rounded-lg text-xs text-neutral-300 px-3 py-1 focus:outline-none focus:border-sky-500"
+                className="bg-black/40 border border-white/10 rounded-lg text-xs text-neutral-300 px-3 py-1 focus:outline-none focus:border-accent-500"
               >
                 <option value="all">Semua Tingkat Keparahan</option>
                 <option value="critical">Kritis Saja</option>
@@ -264,7 +264,7 @@ export function StudioSiteAudit() {
                         href={iss.urlOrPath.startsWith('/') ? `${siteConfig.url}${iss.urlOrPath}` : iss.urlOrPath}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="px-2.5 py-1 bg-white/10 hover:bg-white/20 text-sky-300 rounded text-xs font-mono flex items-center gap-1 shrink-0"
+                        className="px-2.5 py-1 bg-white/10 hover:bg-white/20 text-info-300 rounded text-xs font-mono flex items-center gap-1 shrink-0"
                       >
                         <span>{iss.urlOrPath}</span>
                         <ExternalLink className="w-3 h-3" />

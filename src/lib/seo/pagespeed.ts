@@ -108,7 +108,7 @@ export async function getPageSpeedHistory(limit = 10): Promise<PageSpeedReport[]
 
   return rows.map((r: any) => ({
     url: r.url,
-    device: r.device as any,
+    device: (r.device === 'mobile' ? 'mobile' : 'desktop') as 'mobile' | 'desktop',
     performanceScore: r.performanceScore || 0,
     seoScore: r.seoScore || 0,
     accessibilityScore: r.accessibilityScore || 0,

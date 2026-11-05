@@ -5,9 +5,10 @@ import { Icon } from '@/components/Icon'
 import { Reveal } from '@/components/ui/Reveal'
 import './capabilities.css'
 
-const service = getService('digital-assets-ai')!
+const service = getService('digital-assets-ai')
 
 export function Capabilities() {
+  if (!service) return null
   return (
     <section className="section capabilities" id="capabilities" aria-labelledby="capabilities-title">
       <div className="bg-grid capabilities__grid" aria-hidden="true" />

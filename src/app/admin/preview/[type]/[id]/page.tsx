@@ -60,7 +60,7 @@ export default async function AdminEntityPreviewPage({ params }: Props) {
   if (!entity) {
     return (
       <div className="min-h-screen bg-[#0A0A0A] text-white flex items-center justify-center p-6">
-        <div className="max-w-md w-full bg-[#141414] border border-white/10 rounded-2xl p-8 text-center space-y-4">
+        <div className="max-w-md w-full bg-[var(--studio-bg)] border border-white/10 rounded-2xl p-8 text-center space-y-4">
           <div className="w-12 h-12 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center mx-auto">
             <AlertCircle className="w-6 h-6" />
           </div>
@@ -88,6 +88,12 @@ export default async function AdminEntityPreviewPage({ params }: Props) {
     }
   }
 
+  const previewTargetType: 'department' | 'service' | 'portfolio' | 'solution' =
+    type === 'category' ? 'department' :
+    type === 'service' ? 'service' :
+    type === 'portfolio' ? 'portfolio' :
+    type === 'solution' ? 'solution' : 'department'
+
   return (
     <div className="min-h-screen bg-[#0A0A0A] text-white">
       <StudioLivePreview
@@ -95,7 +101,7 @@ export default async function AdminEntityPreviewPage({ params }: Props) {
         contextData={contextData}
         title={entityTitle}
         slug={decodedId}
-        targetType={type === 'category' ? 'department' : (type as any)}
+        targetType={previewTargetType}
       />
     </div>
   )

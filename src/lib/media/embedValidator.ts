@@ -1,11 +1,13 @@
 /**
- * Embed Validator & Security Policy for SEGIA Media Architecture
+ * Embed Validator & Security Policy for UNIMASI Media Architecture
  *
  * Enforces strict domain allowlists and protocol sanity checks
  * to prevent SSRF, XSS, and clickjacking attacks via CMS-driven iframe previews.
  */
 
 export const ALLOWED_EMBED_DOMAINS = [
+  'unimasi.id',
+  'www.unimasi.id',
   'unimasi.studio',
   'www.unimasi.studio',
   'unimasi.com',
@@ -84,7 +86,7 @@ export function validateEmbedUrl(rawUrl: string): EmbedValidationResult {
     return {
       isValid: false,
       domain: hostname,
-      reason: `Domain "${hostname}" tidak terdaftar dalam allowlist mitra resmi SEGIA.`,
+      reason: `Domain "${hostname}" tidak terdaftar dalam allowlist mitra resmi UNIMASI.`,
     }
   }
 

@@ -28,18 +28,19 @@ export async function GET(request: NextRequest) {
   const to = searchParams.get('to')
 
   const items: Array<Record<string, unknown>> = []
+  const ormPublic = prisma.orm.public as unknown as Record<string, { all: () => Promise<Array<Record<string, unknown>>> }>
 
   for (const entity of ENTITIES) {
-    const repo = (prisma.orm.public as any)[entity.model]
+    const repo = ormPublic[entity.model]
     if (!repo) continue
-    let rows: any[]
+    let rows: Array<Record<string, unknown>>
     try {
       rows = await repo.all()
     } catch {
       continue
     }
     for (const row of rows) {
-      const scheduledAt: string | null = row.scheduledAt ?? null
+      const scheduledAt: string | null = (row.scheduledAt as string | null) ?? null
       const hasError = Boolean(row.scheduleError)
       if (!scheduledAt && !hasError) continue
       if (scheduledAt && from && scheduledAt < from) continue

@@ -178,7 +178,7 @@ export default function MediaPickerModal({
       onClick={onClose}
     >
       <div
-        className="relative w-full max-w-5xl h-[90vh] max-h-[820px] bg-[#141414] border border-white/15 rounded-3xl shadow-2xl flex flex-col overflow-hidden text-neutral-200"
+        className="relative w-full max-w-5xl h-[90vh] max-h-[820px] bg-[var(--studio-bg)] border border-white/15 rounded-3xl shadow-2xl flex flex-col overflow-hidden text-neutral-200"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header Modal */}
@@ -251,7 +251,7 @@ export default function MediaPickerModal({
         </div>
 
         {/* Modal Body Container */}
-        <div className="flex-1 overflow-hidden flex flex-col bg-[#121212]">
+        <div className="flex-1 overflow-hidden flex flex-col bg-[var(--studio-bg)]">
           {/* TAB 1: LIBRARY */}
           {activeTab === 'library' && (
             <div className="flex-1 flex flex-col overflow-hidden">

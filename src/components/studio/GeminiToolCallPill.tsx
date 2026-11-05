@@ -28,7 +28,7 @@ export function GeminiToolCallPill({ toolCall }: GeminiToolCallPillProps) {
   const getCategoryIcon = (category: string) => {
     switch (category) {
       case 'database':
-        return <Database className="w-3.5 h-3.5 text-sky-400 shrink-0" />
+        return <Database className="w-3.5 h-3.5 text-info shrink-0" />
       case 'serp':
         return <Search className="w-3.5 h-3.5 text-purple-400 shrink-0" />
       case 'seo':
@@ -50,7 +50,7 @@ export function GeminiToolCallPill({ toolCall }: GeminiToolCallPillProps) {
   }
 
   return (
-    <div className="my-1.5 rounded-xl border border-white/10 bg-[#161616] overflow-hidden text-xs transition-all duration-200 hover:border-white/20">
+    <div className="my-1.5 rounded-xl border border-white/10 bg-[var(--studio-sidebar-bg)] overflow-hidden text-xs transition-all duration-200 hover:border-white/20">
       {/* Pill Header / Trigger Button */}
       <button
         type="button"
@@ -102,7 +102,7 @@ export function GeminiToolCallPill({ toolCall }: GeminiToolCallPillProps) {
 
       {/* Expanded Accordion Body (Like Gemini Inspector) */}
       {expanded && (
-        <div className="border-t border-white/10 bg-[#111111] p-3 space-y-2.5">
+        <div className="border-t border-white/10 bg-[var(--studio-bg)] p-3 space-y-2.5">
           <div className="flex items-center justify-between border-b border-white/5 pb-2">
             <div className="flex items-center gap-1">
               <button
@@ -110,7 +110,7 @@ export function GeminiToolCallPill({ toolCall }: GeminiToolCallPillProps) {
                 onClick={() => setActiveTab('output')}
                 className={`px-2.5 py-1 rounded-lg text-[11px] font-mono transition-colors ${
                   activeTab === 'output'
-                    ? 'bg-sky-500/20 text-sky-300 font-bold border border-sky-500/30'
+                    ? 'bg-info/20 text-info-300 font-bold border border-info/30'
                     : 'text-neutral-400 hover:text-white'
                 }`}
               >
@@ -121,7 +121,7 @@ export function GeminiToolCallPill({ toolCall }: GeminiToolCallPillProps) {
                 onClick={() => setActiveTab('input')}
                 className={`px-2.5 py-1 rounded-lg text-[11px] font-mono transition-colors ${
                   activeTab === 'input'
-                    ? 'bg-sky-500/20 text-sky-300 font-bold border border-sky-500/30'
+                    ? 'bg-info/20 text-info-300 font-bold border border-info/30'
                     : 'text-neutral-400 hover:text-white'
                 }`}
               >

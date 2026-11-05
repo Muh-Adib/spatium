@@ -188,7 +188,7 @@ export async function GET(request: NextRequest) {
               }
             }
           }
-        } catch {}
+        } catch (err) { console.warn("[API observable error]:", err) }
       }
 
       scanRecursive(entry.dir)

@@ -31,6 +31,8 @@ import {
   PortfolioCaseStudyBlock,
   HeroSolutionBlock,
   CaseStudyChapterBlock,
+  TableBlock,
+  InternalLinksBlock,
 } from './CatalogBlocks'
 import { HeroCinemaBlock } from '@/blocks/HeroCinemaBlock'
 import { ProcessTimelineBlock } from '@/blocks/ProcessTimelineBlock'
@@ -157,6 +159,10 @@ function renderBlockContent(block: any, idx: number, contextData?: BlockRenderer
     case 'heading2':
     case 'heading3':
       return <EditorialHeadingBlock block={block} />
+    case 'table':
+      return <TableBlock block={block} />
+    case 'internal-links':
+      return <InternalLinksBlock block={block} />
 
     // Legacy Strapi Components
     case 'blocks.hero':

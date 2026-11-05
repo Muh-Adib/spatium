@@ -71,7 +71,7 @@ export default async function LayananDetailPage({
   const blocks = Array.isArray(item.blocks) ? item.blocks : []
   const contextData = cat
     ? { subServices: cat.subServices || [] }
-    : { portfolios: (svc as any)?.portfolioItems || [] }
+    : { portfolios: (svc as { portfolioItems?: unknown[] })?.portfolioItems || [] }
 
   const jsonLd = [
     {

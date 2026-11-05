@@ -117,7 +117,7 @@ export function StudioAiKeyPromptModal() {
           [provider === 'google' ? 'googleModel' : 'openrouterModel']: model.trim(),
         }
         localStorage.setItem('unimasi_ai_config', JSON.stringify(updated))
-      } catch (_) {}
+      } catch (err) { console.warn("[observable error]:", err) }
 
       // 3. Dispatch notifikasi perubahan key ke seluruh listener
       window.dispatchEvent(
@@ -131,7 +131,7 @@ export function StudioAiKeyPromptModal() {
       if (onSuccessCallback) {
         try {
           onSuccessCallback()
-        } catch (_) {}
+        } catch (err) { console.warn("[observable error]:", err) }
       }
 
       setTimeout(() => {
@@ -156,7 +156,7 @@ export function StudioAiKeyPromptModal() {
       aria-labelledby="ai-key-modal-title"
     >
       <div
-        className="relative w-full max-w-lg bg-[#181818] border border-white/15 rounded-3xl p-6 sm:p-7 shadow-2xl text-neutral-200 overflow-hidden space-y-5"
+        className="relative w-full max-w-lg bg-surface-elevated border border-white/15 rounded-3xl p-6 sm:p-7 shadow-2xl text-neutral-200 overflow-hidden space-y-5"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Top Header */}

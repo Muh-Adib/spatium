@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
         try {
           revalidateTag(tag.trim(), { expire: 0 })
           revalidatedTags.push(tag.trim())
-        } catch {}
+        } catch (err) { console.warn("[API observable error]:", err) }
       }
     }
 
@@ -76,7 +76,7 @@ export async function POST(request: NextRequest) {
         try {
           revalidatePath(p.trim())
           revalidatedPaths.push(p.trim())
-        } catch {}
+        } catch (err) { console.warn("[API observable error]:", err) }
       }
     }
 
@@ -84,11 +84,11 @@ export async function POST(request: NextRequest) {
     if (body.entity) {
       const slug = body.slug ? String(body.slug).trim() : ''
       const safeTag = (t: string) => {
-        try { revalidateTag(t, { expire: 0 }) } catch {}
+        try { revalidateTag(t, { expire: 0 }) } catch (err) { console.warn('[revalidate/cache error]:', err) }
         revalidatedTags.push(t)
       }
       const safePath = (p: string) => {
-        try { revalidatePath(p) } catch {}
+        try { revalidatePath(p) } catch (err) { console.warn('[revalidate/cache error]:', err) }
         revalidatedPaths.push(p)
       }
 

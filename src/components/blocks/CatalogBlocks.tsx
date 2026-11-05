@@ -37,6 +37,7 @@ import {
 import { siteConfig } from '@/config/site'
 import { ThematicWave } from '@/components/ui/ThematicWave'
 import { IframeEmbed } from '@/components/ui/IframeEmbed'
+import { sanitizeHtmlContent } from '@/lib/security/sanitize-html'
 
 // ─── 1. Hero Department ───────────────────────────────────────────────────────
 export function HeroDepartmentBlock({ block }: { block: any }) {
@@ -150,7 +151,7 @@ export function HeroDepartmentBlock({ block }: { block: any }) {
               <div className="relative aspect-[16/10] sm:aspect-[21/9] w-full overflow-hidden bg-black">
                 <Image
                   src={heroImage}
-                  alt={title || 'Platform Showcase'}
+                  alt={block?.alt || (block as { data?: { alt?: string } })?.data?.alt || title || 'UNIMASI Showcase'}
                   fill
                   priority
                   className="object-cover object-top group-hover:scale-[1.02] transition-transform duration-700"
@@ -235,7 +236,7 @@ export function HeroDepartmentBlock({ block }: { block: any }) {
             <div className="relative aspect-[16/10] sm:aspect-[21/9] w-full overflow-hidden bg-black">
               <Image
                 src={heroImage}
-                alt={title || 'Platform Showcase'}
+                alt={block?.alt || (block as { data?: { alt?: string } })?.data?.alt || title || 'UNIMASI Showcase'}
                 fill
                 priority
                 className="object-cover object-top group-hover:scale-[1.015] transition-transform duration-700"
@@ -353,7 +354,7 @@ export function HeroServiceBlock({ block }: { block: any }) {
         {whatsappPrompt && (
           <div className="mt-8 flex flex-wrap gap-4 items-center">
             <Link
-              href={`https://wa.me/${siteConfig.whatsapp || '6281234567890'}?text=${encodeURIComponent(whatsappPrompt)}`}
+              href={`https://wa.me/${siteConfig.whatsapp}?text=${encodeURIComponent(whatsappPrompt)}`}
               target="_blank"
               rel="noopener noreferrer"
               className="btn btn--primary"
@@ -496,7 +497,7 @@ export function FeatureBentoGridBlock({ block }: { block: any }) {
                     <div className="relative aspect-[16/9] w-full overflow-hidden bg-[var(--color-background)]">
                       <Image
                         src={leadFeature.image}
-                        alt={leadFeature.title}
+                        alt={(leadFeature as { alt?: string; altText?: string; title?: string })?.alt || leadFeature.altText || leadFeature.title}
                         fill
                         className="object-cover object-top group-hover:scale-105 transition-transform duration-700"
                         sizes="(max-width: 1024px) 100vw, 750px"
@@ -776,18 +777,26 @@ export function WorkflowPhasesBlock({ block }: { block: any }) {
 // ─── 8. Comparison Matrix (NEW) ───────────────────────────────────────────────
 export function ComparisonMatrixBlock({ block }: { block: any }) {
   const data = block?.data || block || {}
+  const pickRows = (val: any): any[] | null =>
+    Array.isArray(val) && val.length > 0 ? val : null
   const rawRows =
-    Array.isArray(block?.rows) && block.rows.length > 0
-      ? block.rows
-      : Array.isArray(data.rows) && data.rows.length > 0
-      ? data.rows
-      : null
-  const rows =
+    pickRows(block?.rows) ||
+    pickRows(data.rows) ||
+    // Manifest documents the payload as `items`; normalise it here so an
+    // admin-authored block renders instead of falling back to defaults.
+    pickRows(block?.items) ||
+    pickRows(data.items)
+  const rows = (
     rawRows || [
-      { feature: 'Kecepatan Muat LCP', segia: 'Sub-detik (< 1.0s)', traditional: '3.0 - 5.0 detik' },
-      { feature: 'Ownership & Source Code', segia: '100% Hak Milik Klien', traditional: 'Terkunci Platform / Vendor' },
-      { feature: 'Arsitektur Sistem', segia: 'Next.js 16 App Router + Prisma 8', traditional: 'Template Monolitik Konvensional' },
+      { feature: 'Kualitas Produksi', unimasi: 'Standar studio sinematik 4K', traditional: 'Aset stok generik' },
+      { feature: 'Storytelling', unimasi: 'Narasi khusus sesuai tujuan komunikasi', traditional: 'Visual tanpa konteks' },
+      { feature: 'Hak Kepemilikan Aset', unimasi: '100% hak milik klien', traditional: 'Lisensi terbatas platform' },
     ]
+  ).map((row: any) => ({
+    feature: row.feature || row.aspect || row.title || '',
+    unimasi: row.unimasi || row.segia || '',
+    traditional: row.traditional || row.conventional || '',
+  }))
   const title = block?.title || data.title || 'Mengapa Memilih Layanan Kami untuk Proyek Anda'
   const description = block?.description || data.description
 
@@ -818,7 +827,7 @@ export function ComparisonMatrixBlock({ block }: { block: any }) {
             </div>
             <div className="p-4 md:col-span-4 bg-accent/10 text-accent font-bold uppercase tracking-wider flex items-center gap-2 border-l border-r border-accent/20">
               <Check className="w-4 h-4 text-accent" />
-              <span>Standar Enterprise</span>
+              <span>Standar UNIMASI</span>
             </div>
             <div className="p-4 md:col-span-4 text-[var(--text-muted)] font-semibold uppercase tracking-wider">
               Agensi Konvensional
@@ -838,7 +847,7 @@ export function ComparisonMatrixBlock({ block }: { block: any }) {
                 </div>
                 <div className="p-4 md:col-span-4 bg-accent/[0.04] border-l border-r border-accent/15 font-mono text-xs text-accent flex items-center gap-2">
                   <CheckCircle2 className="w-4 h-4 text-accent shrink-0" />
-                  <span>{row.segia}</span>
+                  <span>{row.unimasi}</span>
                 </div>
                 <div className="p-4 md:col-span-4 font-mono text-xs text-[var(--text-dim)] flex items-center gap-2">
                   <XCircle className="w-4 h-4 text-[var(--text-dim)] shrink-0" />
@@ -862,20 +871,15 @@ export function ArchitectureBlueprintBlock({ block }: { block: any }) {
       : Array.isArray(data.layers) && data.layers.length > 0
       ? data.layers
       : null
-  const layers =
-    rawLayers || [
-      { title: 'Performa Tinggi', desc: 'Arsitektur Next.js 16 dengan sub-second LCP', icon: 'zap' },
-      { title: 'Antarmuka Intuitif', desc: 'Desain responsif multi-perangkat berstandar Dogstudio', icon: 'sparkles' },
-      { title: 'Keamanan Data', desc: 'Validasi Zod & enkripsi PostgreSQL', icon: 'shield-check' },
-      { title: 'Garansi Sistem', desc: 'Dukungan pemeliharaan dan pemantauan SLA berkelanjutan', icon: 'check-circle' },
-    ]
+  if (!rawLayers || rawLayers.length === 0) return null
+  const layers = rawLayers
 
   const architectureImage = block?.image || data.image
-  const imageLabel = block?.imageLabel || data.imageLabel || 'Karya Nyata Klien: Portal Edukasi & Informasi'
-  const imageBadge = block?.imageBadge || data.imageBadge || 'Hasil Produksi Aktif'
-  const hudTitle = block?.hudTitle || data.hudTitle || 'Kecepatan Akses Nyata'
-  const hudMetric = block?.hudMetric || data.hudMetric || 'Waktu Muat < 1 Detik'
-  const hudDesc = block?.hudDesc || data.hudDesc || 'Pengunjung langsung masuk tanpa menunggu loading'
+  const imageLabel = block?.imageLabel || data.imageLabel || 'Karya Klien'
+  const imageBadge = block?.imageBadge || data.imageBadge || 'Hasil Produksi'
+  const hudTitle = block?.hudTitle || data.hudTitle || 'Kualitas Produksi'
+  const hudMetric = block?.hudMetric || data.hudMetric || 'Standar Studio'
+  const hudDesc = block?.hudDesc || data.hudDesc || 'Hasil akhir dengan detail dan konsistensi visual terjaga'
   const badge = block?.badge || data.badge || 'Standar Keunggulan'
   const title = block?.title || data.title || '4 Jaminan Kualitas untuk Pertumbuhan Bisnis Anda'
   const description = block?.description || data.description
@@ -919,7 +923,7 @@ export function ArchitectureBlueprintBlock({ block }: { block: any }) {
               <div className="relative aspect-square sm:aspect-[4/3] lg:aspect-[4/5] w-full overflow-hidden bg-black">
                 <Image
                   src={architectureImage}
-                  alt="Production Showcase"
+                  alt={block?.alt || data?.alt || imageLabel || title || 'Production Showcase'}
                   fill
                   className="object-cover object-top group-hover:scale-105 transition-transform duration-700"
                   sizes="(max-width: 1024px) 100vw, 450px"
@@ -951,22 +955,28 @@ export function ArchitectureBlueprintBlock({ block }: { block: any }) {
               >
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 mb-2.5">
                   <div className="flex items-center gap-3">
-                    <span className="font-mono text-xs px-2.5 py-1 rounded-lg bg-white/5 border border-[var(--card-border)] text-[var(--text-muted)] font-semibold">
-                      {layer.level}
-                    </span>
+                    {layer.level ? (
+                      <span className="font-mono text-xs px-2.5 py-1 rounded-lg bg-white/5 border border-[var(--card-border)] text-[var(--text-muted)] font-semibold">
+                        {layer.level}
+                      </span>
+                    ) : null}
                     <h3 className="font-heading text-base sm:text-lg font-bold text-white group-hover:text-accent transition-colors">
                       {layer.title}
                     </h3>
                   </div>
-                  <span className="inline-flex items-center font-mono text-[11px] px-2.5 py-0.5 rounded-full bg-accent/10 border border-accent/30 text-accent w-fit">
-                    {layer.badge}
-                  </span>
+                  {layer.badge ? (
+                    <span className="inline-flex items-center font-mono text-[11px] px-2.5 py-0.5 rounded-full bg-accent/10 border border-accent/30 text-accent w-fit">
+                      {layer.badge}
+                    </span>
+                  ) : null}
                 </div>
                 <p className="text-sm text-[var(--text-muted)] leading-relaxed mb-3">{layer.desc}</p>
-                <div className="flex items-center gap-2 pt-2.5 border-t border-white/5">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                  <span className="font-mono text-xs text-accent truncate">{layer.tech}</span>
-                </div>
+                {layer.tech ? (
+                  <div className="flex items-center gap-2 pt-2.5 border-t border-white/5">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                    <span className="font-mono text-xs text-accent truncate">{layer.tech}</span>
+                  </div>
+                ) : null}
               </div>
             ))}
           </div>
@@ -979,18 +989,14 @@ export function ArchitectureBlueprintBlock({ block }: { block: any }) {
 // ─── 10. Client Stats & Impact (NEW) ──────────────────────────────────────────
 export function ClientStatsImpactBlock({ block }: { block: any }) {
   const data = block?.data || block || {}
-  const fallbackStats = [
-    { value: '99.9%', label: 'Ketersediaan Sistem', detail: 'SLA uptime arsitektur cloud terdistribusi' },
-    { value: '<100ms', label: 'Latensi Akses', detail: 'Optimasi global Edge Caching & WebAssembly' },
-    { value: '10x', label: 'Efisiensi Operasional', detail: 'Automasi workflow cerdas terintegrasi' },
-    { value: '100%', label: 'Keamanan Data', detail: 'Enkripsi standar end-to-end multi-tenant' },
-  ]
   const stats =
     Array.isArray(block?.stats) && block.stats.length > 0
       ? block.stats
       : Array.isArray(data.stats) && data.stats.length > 0
       ? data.stats
-      : fallbackStats
+      : null
+
+  if (!stats || stats.length === 0) return null
 
   const title = block?.title || data.title || 'Dampak Performa Nyata & Metrik Teruji'
   const description = block?.description || data.description
@@ -1038,18 +1044,14 @@ export function ClientStatsImpactBlock({ block }: { block: any }) {
 // ─── 11. Deliverables Checklist (NEW) ─────────────────────────────────────────
 export function DeliverablesChecklistBlock({ block }: { block: any }) {
   const data = block?.data || block || {}
-  const fallbackItems = [
-    { title: 'Arsitektur & Kode Sumber Lengkap', desc: 'Hak milik penuh atas repository, dokumentasi teknis, dan clean-code standar enterprise.' },
-    { title: 'Deployment Pipeline Otomatis (CI/CD)', desc: 'Konfigurasi zero-downtime deployment, automated testing, dan backup database berkala.' },
-    { title: 'Optimasi SEO & Performa Core Web Vitals', desc: 'Skor Lighthouse 90+, struktur Schema JSON-LD, sitemap dinamis, dan index engine.' },
-    { title: 'Dukungan & Garansi Pemeliharaan', desc: 'Pemantauan sistem 24/7, perbaikan bug prioritas, dan transfer pengetahuan tim.' },
-  ]
   const items =
     Array.isArray(block?.items) && block.items.length > 0
       ? block.items
       : Array.isArray(data.items) && data.items.length > 0
       ? data.items
-      : fallbackItems
+      : null
+
+  if (!items || items.length === 0) return null
 
   const title = block?.title || data.title || 'Ruang Lingkup Serah Terima & Garansi Organisasi'
   const description = block?.description || data.description
@@ -1095,18 +1097,14 @@ export function DeliverablesChecklistBlock({ block }: { block: any }) {
 // ─── 12. Interactive Tech Matrix (Quality Standards) ──────────────────────────
 export function InteractiveTechMatrixBlock({ block }: { block: any }) {
   const data = block?.data || block || {}
-  const fallbackCategories = [
-    { name: 'Core Framework & Frontend', badge: 'Next.js 16 + React 19', items: ['TypeScript', 'Tailwind CSS', 'Turbopack', 'GSAP / Motion'] },
-    { name: 'Backend & Data Engine', badge: 'PostgreSQL + Prisma 8', items: ['Edge Runtime', 'Redis Caching', 'Vector Embeddings', 'GraphQL / REST'] },
-    { name: 'Keamanan & Kepatuhan', badge: 'Enterprise Ready', items: ['SSRF Protection', 'RBAC Multi-Level', 'Audit Trail', 'SSL Strict TLS 1.3'] },
-    { name: 'Infrastruktur & Cloud', badge: 'Zero Downtime', items: ['Docker Container', 'Coolify Edge Proxy', 'Cloudflare CDN', 'Prometheus Metrics'] },
-  ]
   const categories =
     Array.isArray(block?.categories) && block.categories.length > 0
       ? block.categories
       : Array.isArray(data.categories) && data.categories.length > 0
       ? data.categories
-      : fallbackCategories
+      : null
+
+  if (!categories || categories.length === 0) return null
 
   const title = block?.title || data.title || 'Standar Kualitas & Keandalan yang Anda Dapatkan'
   const description = block?.description || data.description
@@ -1171,22 +1169,6 @@ export function PortfolioProofGridBlock({
   contextPortfolios?: any[]
 }) {
   const data = block?.data || block || {}
-  const fallbackPortfolios = [
-    {
-      slug: 'sistem-informasi-enterprise',
-      title: 'Transformasi Digital Portal Enterprise',
-      category: 'Web Platform',
-      client: 'Enterprise Client',
-      heroImage: '',
-    },
-    {
-      slug: 'platform-ecommerce-omnichannel',
-      title: 'Platform E-Commerce Terdistribusi Skala Besar',
-      category: 'Full-Stack Ecosystem',
-      client: 'Retail Multi-National',
-      heroImage: '',
-    },
-  ]
   const portfolios =
     Array.isArray(block?.portfolios) && block.portfolios.length > 0
       ? block.portfolios
@@ -1198,7 +1180,9 @@ export function PortfolioProofGridBlock({
       ? block.items
       : Array.isArray(data.items) && data.items.length > 0
       ? data.items
-      : fallbackPortfolios
+      : null
+
+  if (!portfolios || portfolios.length === 0) return null
 
   const title = block?.title || data.title || 'Studi Kasus Terkait'
   const description = block?.description || data.description
@@ -1216,7 +1200,7 @@ export function PortfolioProofGridBlock({
             )}
           </div>
           <Link
-            href="/portofolio"
+            href="/portfolio"
             className="inline-flex items-center gap-1.5 text-xs font-mono text-accent hover:underline"
           >
             <span>Semua Portofolio</span>
@@ -1228,14 +1212,14 @@ export function PortfolioProofGridBlock({
           {portfolios.map((p: any, idx: number) => (
             <Link
               key={idx}
-              href={`/portofolio/${p.slug}`}
+              href={`/portfolio/${p.slug}`}
               className="group block rounded-2xl overflow-hidden bg-[var(--color-surface)] border border-[var(--card-border)] hover:border-accent/40 transition-all shadow-lg"
             >
               {p.heroImage ? (
                 <div className="relative aspect-[16/10] overflow-hidden">
                   <Image
                     src={p.heroImage}
-                    alt={p.title}
+                    alt={p.alt || p.title || 'Portofolio UNIMASI'}
                     fill
                     className="object-cover group-hover:scale-105 transition-transform duration-500"
                     sizes="(max-width: 640px) 100vw, 50vw"
@@ -1268,11 +1252,6 @@ export function PortfolioProofGridBlock({
 // ─── 14. FAQ Accordion ─────────────────────────────────────────────────────────
 export function FaqAccordionBlock({ block }: { block: any }) {
   const data = block?.data || block || {}
-  const fallbackFaqs = [
-    { question: 'Berapa lama estimasi pengerjaan proyek?', answer: 'Timeline pengerjaan berkisar antara 2 hingga 8 minggu tergantung pada kompleksitas modul, integrasi sistem, dan cakupan fitur.' },
-    { question: 'Apakah kode sumber diserahkan kepada klien?', answer: 'Ya, seluruh kode sumber, aset, dan dokumentasi teknis menjadi hak milik penuh klien dengan standar clean code enterprise.' },
-    { question: 'Bagaimana dukungan dan pemeliharaan pasca peluncuran?', answer: 'Kami menyediakan garansi teknis pasca peluncuran, monitoring performa 24/7, serta opsi pemeliharaan berkala.' },
-  ]
   const faqs =
     Array.isArray(block?.faqs) && block.faqs.length > 0
       ? block.faqs
@@ -1282,7 +1261,9 @@ export function FaqAccordionBlock({ block }: { block: any }) {
       ? block.items
       : Array.isArray(data.items) && data.items.length > 0
       ? data.items
-      : fallbackFaqs
+      : null
+
+  if (!faqs || faqs.length === 0) return null
 
   const title = block?.title || data.title || 'Pertanyaan Umum'
 
@@ -1398,7 +1379,7 @@ export function StudioCtaBlock({ block }: { block: any }) {
       headline={block?.headline || data.headline || block?.title || data.title || 'Mulai Proyek Digital Anda'}
       subheadline={block?.subheadline || data.subheadline || block?.description || data.description || 'Konsultasikan arsitektur dan kebutuhan spesifik sistem Anda.'}
       secondaryLabel={block?.buttonText || data.buttonText || block?.ctaText || data.ctaText || 'Konsultasi Sekarang'}
-      secondaryHref={block?.buttonUrl || data.buttonUrl || block?.ctaUrl || data.ctaUrl || `https://wa.me/${siteConfig.whatsapp || '6281234567890'}`}
+      secondaryHref={block?.buttonUrl || data.buttonUrl || block?.ctaUrl || data.ctaUrl || `https://wa.me/${siteConfig.whatsapp}`}
     />
   )
 }
@@ -1437,6 +1418,104 @@ export function EditorialHeadingBlock({ block }: { block: any }) {
   )
 }
 
+export function TableBlock({ block }: { block: any }) {
+  const data = block?.data || block || {}
+  const headers: string[] = block?.headers || data.headers || []
+  const rows: string[][] = block?.rows || data.rows || []
+  const caption: string = block?.caption || data.caption || ''
+  const title: string = block?.title || data.title || ''
+
+  if (!headers.length && !rows.length) return null
+
+  return (
+    <section className="py-8 bg-[var(--color-background)] text-white">
+      <div className="container max-w-4xl mx-auto px-4 sm:px-6">
+        {title && (
+          <h3 className="font-heading text-xl sm:text-2xl font-bold tracking-tight text-white mb-4">
+            {title}
+          </h3>
+        )}
+        <div className="overflow-x-auto rounded-lg border border-white/10 bg-white/[0.02]">
+          <table className="w-full text-left text-sm border-collapse">
+            {headers.length > 0 && (
+              <thead className="bg-[#0F3A79]/40 border-b border-white/10 text-white font-semibold">
+                <tr>
+                  {headers.map((h, i) => (
+                    <th key={i} className="py-3 px-4 text-xs font-mono tracking-wider uppercase">
+                      {h}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+            )}
+            <tbody className="divide-y divide-white/5">
+              {rows.map((row, rIdx) => (
+                <tr key={rIdx} className="hover:bg-white/[0.04] transition-colors">
+                  {row.map((cell, cIdx) => (
+                    <td key={cIdx} className="py-3 px-4 text-[var(--text-muted)]">
+                      {cell}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        {caption && (
+          <p className="mt-2 text-xs text-neutral-400 font-mono italic">
+            {caption}
+          </p>
+        )}
+      </div>
+    </section>
+  )
+}
+
+export function InternalLinksBlock({ block }: { block: any }) {
+  const data = block?.data || block || {}
+  const title = block?.title || data.title || 'Tautan Internal & Artikel Terkait'
+  const rawLinks = block?.links || data.links || []
+
+  if (!rawLinks.length) return null
+
+  return (
+    <section className="py-8 bg-[var(--color-background)] text-white">
+      <div className="container max-w-3xl mx-auto px-4 sm:px-6">
+        {title && (
+          <h3 className="font-heading text-lg sm:text-xl font-bold tracking-tight text-white mb-4 flex items-center gap-2">
+            <span className="w-1.5 h-4 bg-[#FFD600] rounded-sm inline-block" />
+            {title}
+          </h3>
+        )}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {rawLinks.map((link: any, idx: number) => {
+            const href = link.href || link.url || (link.slug ? `/journal/${link.slug}` : '#')
+            const text = link.title || link.text || link.name || 'Lihat Selengkapnya'
+            const desc = link.description || link.excerpt
+            return (
+              <Link
+                key={idx}
+                href={href}
+                className="group block p-4 rounded-lg border border-white/10 bg-white/[0.02] hover:bg-white/[0.05] hover:border-[#FFD600]/40 transition-all"
+              >
+                <div className="flex items-center justify-between text-sm font-medium text-white group-hover:text-[#FFD600] transition-colors">
+                  <span>{text}</span>
+                  <span className="text-xs text-[#FFD600] opacity-0 group-hover:opacity-100 transition-opacity">→</span>
+                </div>
+                {desc && (
+                  <p className="mt-1 text-xs text-[var(--text-muted)] line-clamp-2">
+                    {desc}
+                  </p>
+                )}
+              </Link>
+            )
+          })}
+        </div>
+      </div>
+    </section>
+  )
+}
+
 // ─── 17. Department Service List (NEW) ─────────────────────────────────────────
 export function DepartmentServiceListBlock({
   block,
@@ -1459,25 +1538,6 @@ export function DepartmentServiceListBlock({
     return null
   }
 
-  const fallbackServices = [
-    {
-      slug: 'pengembangan-web-modern',
-      name: 'Pengembangan Web Modern & Skalabel',
-      badge: 'Layanan Utama',
-      description: 'Arsitektur web berkecepatan tinggi dengan Next.js 16, SEO dinamis, dan pengalaman interaktif modern.',
-      image: '',
-      tags: ['Next.js 16', 'SSR/ISR', 'Core Web Vitals'],
-    },
-    {
-      slug: 'integrasi-ai-otomasi',
-      name: 'Integrasi AI & Automasi Alur Kerja',
-      badge: 'Teknologi Cerdas',
-      description: 'Solusi agen AI otonom, LLM reasoning engine, dan automasi proses bisnis enterprise.',
-      image: '',
-      tags: ['ReAct Engine', 'Function Calling', 'RAG'],
-    },
-  ]
-
   const items =
     Array.isArray(block?.services) && block.services.length > 0
       ? block.services
@@ -1493,12 +1553,14 @@ export function DepartmentServiceListBlock({
             image: resolveImage(cs.heroImage),
             tags: Array.isArray(cs.technologies)
               ? cs.technologies.slice(0, 3).map((t: any) => (typeof t === 'string' ? t : t?.name || 'Fitur'))
-              : ['Responsif Ponsel', 'Akses Cepat'],
+              : ['Animasi 4K', 'Master Delivery'],
           }
         })
-      : fallbackServices
+      : null
 
-  const title = block?.title || data.title || 'Layanan Pembuatan Website & Aplikasi yang Kami Sediakan'
+  if (!items || items.length === 0) return null
+
+  const title = block?.title || data.title || 'Layanan Animasi & Motion Design yang Kami Sediakan'
   const description = block?.description || data.description
 
   return (
@@ -1509,7 +1571,7 @@ export function DepartmentServiceListBlock({
       <div className="container max-w-6xl mx-auto px-4 sm:px-6 relative z-10">
         <div className="mb-14 max-w-3xl">
           <span className="font-mono text-xs uppercase tracking-widest text-accent font-semibold block mb-2">
-            Pilihan Solusi Digital
+            Layanan Studio UNIMASI
           </span>
           <h2 className="font-heading text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-white leading-tight">
             {title}
@@ -1527,7 +1589,7 @@ export function DepartmentServiceListBlock({
             return (
               <Link
                 key={idx}
-                href={`/layanan/${item.slug}`}
+                href={`/services/${item.slug}`}
                 className="group rounded-3xl bg-[var(--color-surface)] border border-[var(--card-border)] hover:border-accent/40 transition-all duration-300 hover:-translate-y-1 overflow-hidden shadow-xl flex flex-col justify-between"
               >
                 <div>
@@ -1536,7 +1598,7 @@ export function DepartmentServiceListBlock({
                     <div className="relative aspect-[16/9] w-full overflow-hidden bg-[var(--color-surface)] border-b border-white/5">
                       <Image
                         src={finalImg}
-                        alt={item.name}
+                        alt={item.alt || item.altText || item.name || 'Layanan Animasi UNIMASI'}
                         fill
                         className="object-cover object-top group-hover:scale-105 transition-transform duration-700"
                         sizes="(max-width: 768px) 100vw, 550px"
@@ -1604,35 +1666,14 @@ export function DepartmentServiceListBlock({
 // ─── 18. Visual Showcase Gallery (NEW) ─────────────────────────────────────────
 export function VisualShowcaseGalleryBlock({ block }: { block: any }) {
   const data = block?.data || block || {}
-  const fallbackItems = [
-    {
-      image: '',
-      metric: '99.98% Akurasi',
-      category: 'Dashboard Arsitektur',
-      title: 'Pusat Kontrol Operasional Real-Time',
-      desc: 'Visualisasi metrik operasional dan analitik transaksi data secara real-time dengan latensi rendah.',
-    },
-    {
-      image: '',
-      metric: '< 1.2s LCP',
-      category: 'Mobile First App',
-      title: 'Antarmuka Pengguna Responsif & Adaptif',
-      desc: 'Pengalaman pengguna interaktif dengan performa optimal di berbagai ukuran layar dan perangkat seluler.',
-    },
-    {
-      image: '',
-      metric: 'Zero Downtime',
-      category: 'Cloud Engineering',
-      title: 'Infrastruktur Cloud Terdistribusi',
-      desc: 'Keandalan arsitektur multi-zone dengan orkestrasi otomatis dan perlindungan keamanan berlapis.',
-    },
-  ]
   const items =
     Array.isArray(block?.items) && block.items.length > 0
       ? block.items
       : Array.isArray(data.items) && data.items.length > 0
       ? data.items
-      : fallbackItems
+      : null
+
+  if (!items || items.length === 0) return null
 
   const badge = block?.badge || data.badge || 'Bukti Portofolio Nyata'
   const title = block?.title || data.title || 'Bukti Hasil Pengerjaan Nyata untuk Klien Kami'
@@ -1668,7 +1709,7 @@ export function VisualShowcaseGalleryBlock({ block }: { block: any }) {
                   {item.image ? (
                     <Image
                       src={item.image}
-                      alt={item.title}
+                      alt={item.alt || item.altText || item.title || 'Karya Animasi UNIMASI'}
                       fill
                       className="object-cover object-top group-hover:scale-105 transition-transform duration-700"
                       sizes="(max-width: 1024px) 100vw, 400px"
@@ -1817,10 +1858,10 @@ export function MediaShowcaseBlock({ block }: { block: any }) {
                   <Eye className="w-8 h-8 opacity-70" />
                 </div>
                 <p className="font-heading text-sm font-semibold text-white mb-1">
-                  Placeholder Showcase Media
+                  Showcase Media
                 </p>
                 <p className="text-xs text-[var(--text-muted)] max-w-sm">
-                  Masukkan URL gambar atau pilih dari Media Manager pada pengaturan blok ini.
+                  Pratinjau visual belum tersedia.
                 </p>
               </div>
             )}
@@ -1933,7 +1974,7 @@ export function HeroPortfolioBlock({ block }: { block: any }) {
               <div className="relative aspect-video w-full overflow-hidden bg-black/60">
                 <Image
                   src={heroImage}
-                  alt={title}
+                  alt={block?.alt || (block as { data?: { alt?: string } })?.data?.alt || title}
                   fill
                   sizes="(max-width: 1024px) 100vw, 1024px"
                   className="object-cover group-hover:scale-105 transition-transform duration-700"
@@ -2189,7 +2230,7 @@ export function HeroSolutionBlock({ block }: { block: any }) {
                 {heroImage ? (
                   <Image
                     src={heroImage}
-                    alt={title}
+                    alt={block?.alt || (block as { data?: { alt?: string } })?.data?.alt || title}
                     fill
                     sizes="(max-width: 1024px) 100vw, 500px"
                     className="object-cover group-hover:scale-105 transition-transform duration-700"
@@ -2243,7 +2284,7 @@ export function CaseStudyChapterBlock({ block }: { block: any }) {
         </h3>
         <div
           className="text-body-md text-[var(--text-muted)] leading-relaxed space-y-4"
-          dangerouslySetInnerHTML={{ __html: content }}
+          dangerouslySetInnerHTML={{ __html: sanitizeHtmlContent(content) }}
         />
       </div>
     </section>

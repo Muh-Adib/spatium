@@ -131,7 +131,7 @@ export async function POST(request: NextRequest) {
             reason,
           }),
         })
-    } catch {}
+    } catch (err) { console.warn("[API observable error]:", err) }
 
     return NextResponse.json({
       success: true,
@@ -185,7 +185,7 @@ export async function DELETE(request: NextRequest) {
           actor: user.name,
           diff: JSON.stringify(existing),
         })
-    } catch {}
+    } catch (err) { console.warn("[API observable error]:", err) }
 
     return NextResponse.json({
       success: true,

@@ -32,9 +32,9 @@ export async function GET() {
         tagline: 'We Make Ideas Move — 2D & 3D Animation, Motion Graphics & Videotron',
         description: 'UNIMASI adalah studio animasi 2D, 3D, motion graphics, dan visual production untuk edukasi, industri, dan brands.',
         url: 'https://unimasi.studio',
-        whatsapp: '6283121138821',
+        whatsapp: process.env.NEXT_PUBLIC_WHATSAPP || '',
         email: 'hello@unimasi.studio',
-        phone: '+62 831-2113-8821',
+        phone: process.env.NEXT_PUBLIC_PHONE || '',
         address: 'Yogyakarta, Indonesia',
         logoUrl: '/logo/unimasi-coloured.webp',
         faviconUrl: '/favicon.svg',
@@ -69,20 +69,21 @@ export async function POST(request: NextRequest) {
     }
 
     const body = validation.data
+    const bodyRecord = body as Record<string, unknown>
 
     const existing = await prisma.orm.public.SiteConfig.where({ id: 1 }).first()
 
     const payload = {
-      name: String((body as any).siteName || body.name || 'UNIMASI Studio'),
+      name: String(bodyRecord.siteName || body.name || 'UNIMASI Studio'),
       tagline: body.tagline || null,
-      description: body.metaDescription || (body as any).description || null,
-      url: String((body as any).canonicalUrl || (body as any).url || 'https://www.unimasi.com'),
+      description: body.metaDescription || (typeof bodyRecord.description === 'string' ? bodyRecord.description : null),
+      url: String(bodyRecord.canonicalUrl || bodyRecord.url || 'https://www.unimasi.com'),
       whatsapp: body.whatsapp || null,
-      email: body.contactEmail || (body as any).email || null,
-      phone: (body as any).phone ? String((body as any).phone) : null,
+      email: body.contactEmail || (typeof bodyRecord.email === 'string' ? bodyRecord.email : null),
+      phone: bodyRecord.phone ? String(bodyRecord.phone) : (body.contactPhone || null),
       address: body.address || null,
-      logoUrl: (body as any).logoUrl || null,
-      faviconUrl: (body as any).faviconUrl || null,
+      logoUrl: typeof bodyRecord.logoUrl === 'string' ? bodyRecord.logoUrl : null,
+      faviconUrl: typeof bodyRecord.faviconUrl === 'string' ? bodyRecord.faviconUrl : null,
       socialLinks: body.socialLinks ? JSON.stringify(body.socialLinks) : null,
     }
 
@@ -108,7 +109,7 @@ export async function POST(request: NextRequest) {
       revalidatePath('/', 'layout')
       revalidatePath('/kontak')
       revalidatePath('/tentang')
-    } catch {}
+    } catch (err) { console.warn("[API observable error]:", err) }
 
     return NextResponse.json({
       success: true,

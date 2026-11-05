@@ -5,7 +5,72 @@ import sharp from 'sharp'
 import { slugify } from '@/lib/content/html'
 import { safeFetch } from '@/lib/security/ssrf'
 
+import { db as prisma } from '../../../prisma/db'
+
 const UPLOAD_ROOT = path.resolve(process.cwd(), 'public', 'uploads')
+
+export interface RegisterMediaItemInput {
+  fileName: string
+  url: string
+  altText?: string | null
+  title?: string | null
+  mimeType?: string | null
+  width?: number | null
+  height?: number | null
+  size?: number | null
+  usedIn?: string | null
+  uploadedBy?: string | null
+}
+
+/**
+ * Registers or updates a downloaded media item in the media_items table
+ */
+export async function registerMediaItem(data: RegisterMediaItemInput) {
+  try {
+    const existing = await prisma.orm.public.MediaItem.where({ url: data.url }).first()
+
+    const rawAlt = data.altText || data.title || ''
+    const altTextVal = rawAlt.startsWith('{')
+      ? rawAlt
+      : JSON.stringify({ id: rawAlt, en: rawAlt })
+
+    const usedInVal = data.usedIn
+      ? (data.usedIn.startsWith('[') ? data.usedIn : JSON.stringify([data.usedIn]))
+      : JSON.stringify(['articles'])
+
+    if (existing) {
+      const updateData: any = {}
+      if (!existing.width && data.width) updateData.width = data.width
+      if (!existing.height && data.height) updateData.height = data.height
+      if (!existing.size && data.size) updateData.size = data.size
+      if (!existing.title && data.title) updateData.title = data.title
+      if ((!existing.altText || existing.altText === '{"id":"","en":""}') && altTextVal !== '{"id":"","en":""}') {
+        updateData.altText = altTextVal
+      }
+      if (Object.keys(updateData).length > 0) {
+        await prisma.orm.public.MediaItem.where({ id: existing.id }).update(updateData)
+      }
+      return existing
+    }
+
+    const created = await prisma.orm.public.MediaItem.create({
+      fileName: data.fileName,
+      url: data.url,
+      altText: altTextVal,
+      title: data.title || data.fileName,
+      mimeType: data.mimeType || 'image/webp',
+      width: data.width || 1200,
+      height: data.height || 630,
+      size: data.size || 0,
+      usedIn: usedInVal,
+      uploadedBy: data.uploadedBy || 'wp-sync',
+    })
+    return created
+  } catch (err: any) {
+    console.warn(`[Media Optimizer] Failed to register media item for ${data.url}:`, err?.message || err)
+    return null
+  }
+}
 
 /**
  * Ensure upload directories exist
@@ -50,17 +115,46 @@ export function cleanUploadedMedia(): { deletedFiles: number } {
 /**
  * Downloads a remote image, compresses it to modern WebP format,
  * resizes if dimension exceeds max dimensions, and saves it locally in /public/uploads/.
+ * Automatically registers the image in media_items table.
  *
  * Returns the local web URL (e.g. /uploads/articles/cover-seo-segia-4.webp).
  */
 export async function downloadAndOptimizeImage(
   remoteUrl: string | null | undefined,
-  subfolder: string = 'articles'
+  subfolder: string = 'articles',
+  metadata?: { altText?: string; title?: string }
 ): Promise<string | null> {
   if (!remoteUrl || typeof remoteUrl !== 'string') return null
 
-  // If already a local URL, return as is
+  // If already a local URL, ensure it is registered in media_items if physically on disk
   if (remoteUrl.startsWith('/uploads/') || remoteUrl.startsWith('/images/')) {
+    const localPhysicalPath = path.join(process.cwd(), 'public', remoteUrl.replace(/^\//, ''))
+    if (fs.existsSync(localPhysicalPath)) {
+      const stat = fs.statSync(localPhysicalPath)
+      if (stat.isFile() && stat.size > 0) {
+        let width = 1200
+        let height = 630
+        try {
+          if (!remoteUrl.endsWith('.svg')) {
+            const meta = await sharp(localPhysicalPath).metadata()
+            width = meta.width || 1200
+            height = meta.height || 630
+          }
+        } catch (err) { console.warn("[observable error]:", err) }
+        await registerMediaItem({
+          fileName: path.basename(localPhysicalPath),
+          url: remoteUrl,
+          altText: metadata?.altText || metadata?.title,
+          title: metadata?.title || path.basename(localPhysicalPath),
+          mimeType: remoteUrl.endsWith('.svg') ? 'image/svg+xml' : 'image/webp',
+          width,
+          height,
+          size: stat.size,
+          usedIn: subfolder,
+          uploadedBy: 'wp-sync',
+        })
+      }
+    }
     return remoteUrl
   }
 
@@ -70,7 +164,11 @@ export async function downloadAndOptimizeImage(
   }
 
   let mediaLabel = '[media URL]'
-  try { const url = new URL(remoteUrl); mediaLabel = url.origin + url.pathname } catch {}
+  try {
+    const url = new URL(remoteUrl)
+    mediaLabel = url.origin + url.pathname
+  } catch (err) { console.warn("[observable error]:", err) }
+
   try {
     const dir = ensureUploadDir(subfolder)
 
@@ -84,10 +182,31 @@ export async function downloadAndOptimizeImage(
     const targetFilePath = path.join(dir, outputFilename)
     const relativeUrl = `/uploads/${subfolder}/${outputFilename}`
 
-    // Check if already downloaded and compressed
+    // Check if already downloaded and compressed (Idempotent)
     if (fs.existsSync(targetFilePath)) {
       const stat = fs.statSync(targetFilePath)
       if (stat.size > 0) {
+        let width = 1200
+        let height = 630
+        try {
+          const meta = await sharp(targetFilePath).metadata()
+          width = meta.width || 1200
+          height = meta.height || 630
+        } catch (err) { console.warn("[observable error]:", err) }
+
+        await registerMediaItem({
+          fileName: outputFilename,
+          url: relativeUrl,
+          altText: metadata?.altText || metadata?.title,
+          title: metadata?.title || outputFilename,
+          mimeType: 'image/webp',
+          width,
+          height,
+          size: stat.size,
+          usedIn: subfolder,
+          uploadedBy: 'wp-sync',
+        })
+
         return relativeUrl
       }
     }
@@ -124,7 +243,22 @@ export async function downloadAndOptimizeImage(
         return null
       }
       fs.writeFileSync(svgPath, Buffer.from(sanitizeResult.sanitized, 'utf-8'))
-      return `/uploads/${subfolder}/${cleanName}.svg`
+      const svgUrl = `/uploads/${subfolder}/${cleanName}.svg`
+
+      await registerMediaItem({
+        fileName: `${cleanName}.svg`,
+        url: svgUrl,
+        altText: metadata?.altText || metadata?.title,
+        title: metadata?.title || `${cleanName}.svg`,
+        mimeType: 'image/svg+xml',
+        width: 800,
+        height: 600,
+        size: fs.statSync(svgPath).size,
+        usedIn: subfolder,
+        uploadedBy: 'wp-sync',
+      })
+
+      return svgUrl
     }
 
     // Process with sharp (Compress to WebP, resize if > 1440px wide, auto-orient EXIF)
@@ -140,9 +274,8 @@ export async function downloadAndOptimizeImage(
         effort: 4,
       })
 
-    await sharpInstance.toFile(targetFilePath)
-
-    const newSize = fs.statSync(targetFilePath).size
+    const sharpInfo = await sharpInstance.toFile(targetFilePath)
+    const newSize = sharpInfo.size || fs.statSync(targetFilePath).size
     const savedPct = Math.round((1 - newSize / (originalSize || 1)) * 100)
     console.log(
       `[Media Optimizer] Saved & compressed ${outputFilename}: ${(originalSize / 1024).toFixed(
@@ -150,21 +283,34 @@ export async function downloadAndOptimizeImage(
       )}KB -> ${(newSize / 1024).toFixed(1)}KB (${savedPct}% saved)`
     )
 
+    await registerMediaItem({
+      fileName: outputFilename,
+      url: relativeUrl,
+      altText: metadata?.altText || metadata?.title,
+      title: metadata?.title || outputFilename,
+      mimeType: 'image/webp',
+      width: sharpInfo.width || 1200,
+      height: sharpInfo.height || 630,
+      size: newSize,
+      usedIn: subfolder,
+      uploadedBy: 'wp-sync',
+    })
+
     return relativeUrl
   } catch (err: any) {
     console.warn(`[Media Optimizer] Failed to process ${mediaLabel}:`, err.name || 'MediaError')
-    // Graceful fallback to original URL
     return remoteUrl
   }
 }
 
 /**
- * Scans article HTML content for images, downloads and compresses any remote
- * remote images locally, and updates their <img> src to the local path.
+ * Scans article HTML content for images, downloads and compresses any
+ * remote images locally, registers them in media_items, and updates <img> src to local path.
  */
 export async function localizeAndOptimizeContentImages(
   htmlContent: string,
-  subfolder: string = 'articles'
+  subfolder: string = 'articles',
+  articleTitle?: string
 ): Promise<string> {
   if (!htmlContent) return ''
 
@@ -180,13 +326,20 @@ export async function localizeAndOptimizeContentImages(
     const fullImgTag = match[0]
     const remoteSrc = match[1]
 
-    // Only process images from unimasi or common uploads
+    // Process images from wordpress uploads or relevant domains
     if (
+      remoteSrc.includes('segiatech.com') ||
       remoteSrc.includes('unimasi.com') ||
       remoteSrc.includes('wp-content/uploads')
     ) {
       try {
-        const localSrc = await downloadAndOptimizeImage(remoteSrc, subfolder)
+        const altMatch = fullImgTag.match(/alt=["']([^"']*)["']/i)
+        const extractedAlt = altMatch ? altMatch[1] : undefined
+
+        const localSrc = await downloadAndOptimizeImage(remoteSrc, subfolder, {
+          altText: extractedAlt || articleTitle,
+          title: articleTitle,
+        })
         if (localSrc && localSrc !== remoteSrc) {
           const newImgTag = fullImgTag.replace(remoteSrc, localSrc)
           updatedHtml = updatedHtml.replace(fullImgTag, newImgTag)

@@ -51,7 +51,9 @@ export async function POST(request: NextRequest) {
     try {
       revalidatePath('/artikel')
       revalidatePath('/admin')
-    } catch {}
+    } catch (err) {
+      console.warn('[revalidatePath error in /api/categories]:', err)
+    }
 
     return NextResponse.json({
       success: true,
@@ -98,7 +100,9 @@ export async function PATCH(request: NextRequest) {
     try {
       revalidatePath('/artikel')
       revalidatePath('/admin')
-    } catch {}
+    } catch (err) {
+      console.warn('[revalidatePath error in /api/categories]:', err)
+    }
 
     return NextResponse.json({
       success: true,
@@ -154,7 +158,9 @@ export async function DELETE(request: NextRequest) {
     try {
       revalidatePath('/artikel')
       revalidatePath('/admin')
-    } catch {}
+    } catch (err) {
+      console.warn('[revalidatePath error in /api/categories]:', err)
+    }
 
     const reassignMsg = result.destinationCategory
       ? `${result.reassignedCount} artikel telah dialihkan dengan aman ke kategori "${result.destinationCategory.name}".`

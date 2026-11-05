@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { SEGIA_TOOLS_CATALOG, executeSegiaTool } from '@/lib/ai/tools'
+import { UNIMASI_TOOLS_CATALOG, executeUnimasiTool } from '@/lib/ai/tools'
 import { requireUser, requireRole } from '@/lib/auth/rbac'
 
 export async function GET(req: NextRequest) {
@@ -8,7 +8,7 @@ export async function GET(req: NextRequest) {
 
   return NextResponse.json({
     success: true,
-    tools: SEGIA_TOOLS_CATALOG,
+    tools: UNIMASI_TOOLS_CATALOG,
   })
 }
 
@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    const execution = await executeSegiaTool(toolId, params || {})
+    const execution = await executeUnimasiTool(toolId, params || {})
     return NextResponse.json({
       success: execution.status !== 'error',
       execution,

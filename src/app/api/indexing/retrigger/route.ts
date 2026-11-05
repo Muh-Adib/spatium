@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db/prisma'
 import { getSiteProfile } from '@/lib/db/siteProfile'
-import { requireRole } from '@/lib/auth/rbac'
+import { requireRole, type Role } from '@/lib/auth/rbac'
 import { validateBody, retriggerIndexingSchema } from '@/lib/validation/api-schemas'
 import {
   checkIndexingCooldown,
@@ -14,7 +14,7 @@ import { submitToIndexNow } from '@/lib/seo/indexnow'
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
-const ALLOWED_ROLES = ['SUPER_ADMIN', 'CONTENT_ADMIN', 'EDITOR', 'SEO_MANAGER'] as const
+const ALLOWED_ROLES: Role[] = ['SUPER_ADMIN', 'CONTENT_ADMIN', 'EDITOR', 'SEO_MANAGER']
 
 interface InspectUrlGoogleResult {
   connected: boolean
@@ -88,7 +88,7 @@ async function inspectUrlGoogle(inspectionUrl: string, siteUrl: string): Promise
 
 export async function POST(request: NextRequest) {
   // 1. Auth & RBAC Gate
-  const auth = await requireRole(request, ALLOWED_ROLES as any)
+  const auth = await requireRole(request, ALLOWED_ROLES)
   if (auth.error) {
     return auth.error
   }
@@ -332,7 +332,7 @@ export async function POST(request: NextRequest) {
 
       if (preflightIndexNow?.id) {
         try {
-          const whereQuery = prisma.orm.public.IndexingSubmission.where({ id: preflightIndexNow.id }) as any
+          const whereQuery = prisma.orm.public.IndexingSubmission.where({ id: preflightIndexNow.id }) as unknown as { update?: (data: Record<string, unknown>) => Promise<unknown> }
           if (typeof whereQuery?.update === 'function') {
             await whereQuery.update({
               status: submissionStatus,
@@ -340,8 +340,8 @@ export async function POST(request: NextRequest) {
               responsePayload: JSON.stringify(inRes),
             })
           }
-        } catch {
-          // Fallback if update fails
+        } catch (err) {
+          console.warn("[indexing retrigger fallback]:", err)
         }
         preflightIndexNow.status = submissionStatus
         preflightIndexNow.httpStatus = httpStatus
@@ -365,18 +365,19 @@ export async function POST(request: NextRequest) {
         httpStatus,
         message: inRes.message,
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const errMsg = err instanceof Error ? err.message : 'Execution failed'
       if (preflightIndexNow?.id) {
         try {
-          const whereQuery = prisma.orm.public.IndexingSubmission.where({ id: preflightIndexNow.id }) as any
+          const whereQuery = prisma.orm.public.IndexingSubmission.where({ id: preflightIndexNow.id }) as unknown as { update?: (data: Record<string, unknown>) => Promise<unknown> }
           if (typeof whereQuery?.update === 'function') {
             await whereQuery.update({
               status: 'failed',
               httpStatus: 500,
-              responsePayload: JSON.stringify({ error: err.message || 'Execution failed' }),
+              responsePayload: JSON.stringify({ error: errMsg }),
             })
           }
-        } catch {}
+        } catch (err) { console.warn("[API observable error]:", err) }
         preflightIndexNow.status = 'failed'
         preflightIndexNow.httpStatus = 500
       } else {
@@ -387,12 +388,12 @@ export async function POST(request: NextRequest) {
           provider: 'indexnow',
           status: 'failed',
           httpStatus: 500,
-          responsePayload: JSON.stringify({ error: err.message || 'Execution failed' }),
+          responsePayload: JSON.stringify({ error: errMsg }),
           trigger: 'manual',
           actor: actorName,
         })
       }
-      results.indexnow = { status: 'failed', httpStatus: 500, message: err.message }
+      results.indexnow = { status: 'failed', httpStatus: 500, message: errMsg }
     }
   }
 
@@ -412,7 +413,7 @@ export async function POST(request: NextRequest) {
 
       if (preflightGoogle?.id) {
         try {
-          const whereQuery = prisma.orm.public.IndexingSubmission.where({ id: preflightGoogle.id }) as any
+          const whereQuery = prisma.orm.public.IndexingSubmission.where({ id: preflightGoogle.id }) as unknown as { update?: (data: Record<string, unknown>) => Promise<unknown> }
           if (typeof whereQuery?.update === 'function') {
             await whereQuery.update({
               status: submissionStatus,
@@ -420,7 +421,7 @@ export async function POST(request: NextRequest) {
               responsePayload: JSON.stringify(gscRes),
             })
           }
-        } catch {}
+        } catch (err) { console.warn("[API observable error]:", err) }
         preflightGoogle.status = submissionStatus
         preflightGoogle.httpStatus = httpStatus
         preflightGoogle.responsePayload = JSON.stringify(gscRes)
@@ -445,18 +446,19 @@ export async function POST(request: NextRequest) {
           gscRes.message ||
           (gscRes.connected ? 'Verifikasi Google berhasil.' : 'Google Search Console belum terhubung.'),
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const errMsg = err instanceof Error ? err.message : 'Execution failed'
       if (preflightGoogle?.id) {
         try {
-          const whereQuery = prisma.orm.public.IndexingSubmission.where({ id: preflightGoogle.id }) as any
+          const whereQuery = prisma.orm.public.IndexingSubmission.where({ id: preflightGoogle.id }) as unknown as { update?: (data: Record<string, unknown>) => Promise<unknown> }
           if (typeof whereQuery?.update === 'function') {
             await whereQuery.update({
               status: 'failed',
               httpStatus: 500,
-              responsePayload: JSON.stringify({ error: err.message }),
+              responsePayload: JSON.stringify({ error: errMsg }),
             })
           }
-        } catch {}
+        } catch (err) { console.warn("[API observable error]:", err) }
         preflightGoogle.status = 'failed'
         preflightGoogle.httpStatus = 500
       } else {
@@ -467,12 +469,12 @@ export async function POST(request: NextRequest) {
           provider: 'google',
           status: 'failed',
           httpStatus: 500,
-          responsePayload: JSON.stringify({ error: err.message }),
+          responsePayload: JSON.stringify({ error: errMsg }),
           trigger: 'manual',
           actor: actorName,
         })
       }
-      results.google = { status: 'failed', httpStatus: 500, message: err.message }
+      results.google = { status: 'failed', httpStatus: 500, message: errMsg }
     }
   }
 

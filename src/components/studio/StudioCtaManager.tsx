@@ -155,9 +155,9 @@ export function StudioCtaManager() {
   return (
     <div className="space-y-6">
       {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 sm:p-4 rounded-2xl bg-[#1e1e1e] border border-white/10 shadow-sm">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 sm:p-4 rounded-2xl bg-surface-overlay border border-white/10 shadow-sm">
         <div className="flex items-center gap-2">
-          <Boxes className="w-4 h-4 text-sky-400" />
+          <Boxes className="w-4 h-4 text-info" />
           <span className="text-xs font-mono font-medium text-neutral-300">
             Preset Blok CTA ({presets.length})
           </span>
@@ -168,7 +168,7 @@ export function StudioCtaManager() {
             <button
               onClick={() => setLocale('id')}
               className={`px-2.5 py-1 rounded-lg font-mono text-xs ${
-                locale === 'id' ? 'bg-sky-500 text-white font-semibold' : 'text-neutral-400 hover:text-white'
+                locale === 'id' ? 'bg-accent-500 text-accent-950 font-semibold' : 'text-neutral-400 hover:text-white'
               }`}
             >
               ID
@@ -176,7 +176,7 @@ export function StudioCtaManager() {
             <button
               onClick={() => setLocale('en')}
               className={`px-2.5 py-1 rounded-lg font-mono text-xs ${
-                locale === 'en' ? 'bg-sky-500 text-white font-semibold' : 'text-neutral-400 hover:text-white'
+                locale === 'en' ? 'bg-accent-500 text-accent-950 font-semibold' : 'text-neutral-400 hover:text-white'
               }`}
             >
               EN
@@ -186,7 +186,7 @@ export function StudioCtaManager() {
           <Tooltip label="Buat Preset CTA" hint="Tambahkan blok call-to-action baru yang dapat disisipkan di konten">
             <button
               onClick={openCreateModal}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-sky-500 hover:bg-sky-400 text-white rounded-xl text-xs font-semibold transition-all shadow-sm"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-accent-500 hover:bg-accent-300 text-accent-950 rounded-xl text-xs font-semibold transition-all shadow-sm"
             >
               <Plus className="w-3.5 h-3.5" />
               <span>Buat Preset</span>
@@ -197,7 +197,7 @@ export function StudioCtaManager() {
 
       {loading ? (
         <div className="py-20 text-center">
-          <RefreshCw className="w-8 h-8 text-sky-400 animate-spin mx-auto mb-3" />
+          <RefreshCw className="w-8 h-8 text-info animate-spin mx-auto mb-3" />
           <p className="text-sm text-neutral-400">Memuat preset CTA...</p>
         </div>
       ) : presets.length === 0 ? (
@@ -211,7 +211,7 @@ export function StudioCtaManager() {
           {presets.map((preset) => (
             <div
               key={preset.id}
-              className="p-5 rounded-2xl bg-neutral-900/70 border border-white/10 space-y-4 hover:border-sky-500/40 transition-all"
+              className="p-5 rounded-2xl bg-neutral-900/70 border border-white/10 space-y-4 hover:border-info/40 transition-all"
             >
               <div className="flex items-start justify-between">
                 <div>
@@ -219,7 +219,7 @@ export function StudioCtaManager() {
                   <span className="text-[11px] font-mono text-neutral-500">slug: {preset.slug}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="px-2 py-0.5 rounded text-[10px] font-mono uppercase bg-sky-500/10 text-sky-400 border border-sky-500/20">
+                  <span className="px-2 py-0.5 rounded text-[10px] font-mono uppercase bg-info/10 text-info border border-info/20">
                     {preset.style.variant}
                   </span>
                   <button
@@ -236,7 +236,7 @@ export function StudioCtaManager() {
                 <h4 className="text-xs font-semibold text-white">{preset.content.title}</h4>
                 <p className="text-[11px] text-neutral-400 leading-relaxed">{preset.content.description}</p>
                 <div className="pt-2">
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-sky-500 text-white rounded-md text-[11px] font-semibold">
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-accent-500 text-accent-950 rounded-md text-[11px] font-semibold">
                     <span>{preset.content.primary.label}</span>
                     <ArrowRight className="w-3 h-3" />
                   </span>
@@ -340,7 +340,7 @@ export function StudioCtaManager() {
                   <label className="text-neutral-400 font-mono">Varian Tampilan</label>
                   <select
                     value={variant}
-                    onChange={(e) => setVariant(e.target.value as any)}
+                    onChange={(e) => setVariant(e.target.value as 'banner' | 'card' | 'inline' | 'sticky' | 'split')}
                     className="w-full px-3 py-1.5 bg-black/50 border border-white/10 rounded-lg text-neutral-200"
                   >
                     <option value="banner">Banner Penuh</option>
@@ -354,7 +354,7 @@ export function StudioCtaManager() {
                   <label className="text-neutral-400 font-mono">Posisi Otomatis</label>
                   <select
                     value={placementMode}
-                    onChange={(e) => setPlacementMode(e.target.value as any)}
+                    onChange={(e) => setPlacementMode(e.target.value as 'after-paragraph' | 'end-of-article' | 'sidebar')}
                     className="w-full px-3 py-1.5 bg-black/50 border border-white/10 rounded-lg text-neutral-200"
                   >
                     <option value="after-paragraph">Setelah Paragraf ke-N</option>
@@ -375,7 +375,7 @@ export function StudioCtaManager() {
               <button
                 onClick={handleSave}
                 disabled={saving}
-                className="px-4 py-2 bg-sky-500 hover:bg-sky-400 text-white rounded-lg text-xs font-semibold transition-all shadow-md disabled:opacity-50"
+                className="px-4 py-2 bg-accent-500 hover:bg-accent-300 text-accent-950 rounded-lg text-xs font-semibold transition-all shadow-md disabled:opacity-50"
               >
                 {saving ? 'Menyimpan...' : 'Simpan Preset'}
               </button>

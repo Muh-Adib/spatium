@@ -166,7 +166,7 @@ export async function checkIndexingCooldown(
     // 1. Primary lookup by exact normalized URL with defensive error handling
     let latest: any = null
     try {
-      if ((prisma as any).orm?.public?.IndexingSubmission) {
+      if ((prisma as unknown as { orm?: { public?: { IndexingSubmission?: unknown } } }).orm?.public?.IndexingSubmission) {
         latest = await prisma.orm.public.IndexingSubmission
           .where(whereClause)
           .orderBy((s: any) => s.submittedAt.desc())

@@ -40,7 +40,7 @@ export default function AdminLoginPage() {
   }
 
   return (
-    <div className="min-h-screen w-full bg-[#1A1A1A] text-white flex flex-col justify-center items-center p-4 sm:p-6 relative overflow-hidden font-sans">
+    <div className="min-h-screen w-full bg-[var(--studio-bg)] text-white flex flex-col justify-center items-center p-4 sm:p-6 relative overflow-hidden font-sans">
       {/* Background Ambient Glow */}
       <div className="pointer-events-none absolute left-1/2 top-1/3 -translate-x-1/2 -translate-y-1/2 w-[650px] h-[350px] bg-gradient-to-tr from-accent-500/10 via-primary/05 to-transparent rounded-full blur-[140px]" />
 
@@ -48,7 +48,7 @@ export default function AdminLoginPage() {
         {/* Brand Header */}
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-2.5 mb-4 group">
-            <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center shadow-lg group-hover:border-[#FFD600]/50 transition-colors">
+            <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center shadow-lg group-hover:border-accent-400/50 transition-colors">
               <Image
                 src="/logo/logo-color.webp"
                 alt="UNIMASI"
@@ -58,16 +58,16 @@ export default function AdminLoginPage() {
               />
             </div>
             <div className="text-left">
-              <span className="font-syne font-bold text-lg text-white group-hover:text-[#FFD600] transition-colors">
+              <span className="font-heading font-bold text-lg text-white group-hover:text-accent-400 transition-colors">
                 UNIMASI
               </span>
-              <span className="block text-[10px] font-mono text-[#FFD600] uppercase tracking-widest font-semibold">
+              <span className="block text-[10px] font-mono text-accent-400 uppercase tracking-widest font-semibold">
                 Studio Workspace
               </span>
             </div>
           </Link>
 
-          <h1 className="text-2xl font-bold font-syne tracking-tight text-white mt-2">
+          <h1 className="text-2xl font-bold font-heading tracking-tight text-white mt-2">
             Autentikasi Studio
           </h1>
           <p className="text-xs text-neutral-400 mt-1.5 font-sans">
@@ -76,7 +76,7 @@ export default function AdminLoginPage() {
         </div>
 
         {/* Login Card */}
-        <div className="rounded-3xl border border-white/10 bg-[#242424]/90 p-7 sm:p-8 shadow-2xl backdrop-blur-xl">
+        <div className="rounded-3xl border border-accent-400/20 bg-surface-elevated/90 p-7 sm:p-8 shadow-2xl shadow-black/40 backdrop-blur-xl">
           {error && (
             <div className="mb-5 p-3 rounded-xl bg-rose-500/15 border border-rose-500/30 text-rose-300 text-xs leading-relaxed flex items-start gap-2">
               <span className="mt-0.5">•</span>
@@ -126,7 +126,7 @@ export default function AdminLoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full mt-2 py-3 px-4 rounded-xl font-medium text-sm text-[#1A1A1A] bg-accent-400 hover:bg-accent-300 transition-all font-display flex items-center justify-center gap-2 shadow-lg disabled:opacity-50"
+              className="w-full mt-2 py-3 px-4 rounded-xl font-medium text-sm text-accent-950 bg-accent-500 hover:bg-accent-300 transition-all font-heading flex items-center justify-center gap-2 shadow-lg shadow-yellow-glow disabled:opacity-50"
             >
               {loading ? (
                 <>

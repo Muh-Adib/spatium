@@ -399,7 +399,7 @@ export function StudioUsersManager() {
               <button
                 type="button"
                 onClick={handleOpenAdd}
-                className="inline-flex h-10 items-center gap-2 rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 px-4 text-xs font-semibold text-white shadow-sm transition-all hover:from-sky-400 hover:to-blue-500"
+                className="inline-flex h-10 items-center gap-2 rounded-xl bg-accent-500 px-4 text-xs font-semibold text-accent-950 shadow-yellow-glow transition-all hover:bg-accent-300"
               >
                 <UserPlus className="h-4 w-4" />
                 <span>Tambah Pengguna</span>
@@ -440,13 +440,13 @@ export function StudioUsersManager() {
                         <div className="flex items-center gap-3">
                           <span className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-accent-500 font-mono text-xs font-bold text-accent-950 ring-1 ring-white/15">
                             {initials(user.name)}
-                            <span className="absolute -bottom-0.5 -right-0.5 h-2 w-2 rounded-full bg-emerald-400 ring-1 ring-[#1A1A1A]" />
+                            <span className="absolute -bottom-0.5 -right-0.5 h-2 w-2 rounded-full bg-emerald-400 ring-1 ring-surface-elevated" />
                           </span>
                           <div className="min-w-0">
                             <div className="flex items-center gap-2">
                               <span className="truncate font-semibold text-white">{user.name}</span>
                               {isCurrent && (
-                                <span className="rounded bg-sky-500/20 px-1.5 py-0.5 text-[10px] font-medium text-sky-300">
+                                <span className="rounded bg-info/20 px-1.5 py-0.5 text-[10px] font-medium text-info-300">
                                   Anda
                                 </span>
                               )}
@@ -647,7 +647,7 @@ export function StudioUsersManager() {
                   setNewPassword(generateSecurePassword())
                   if (modalError) setModalError(null)
                 }}
-                className="text-[11px] text-sky-400 hover:text-sky-300 font-medium"
+                className="text-[11px] text-accent-400 hover:text-accent-300 font-medium"
               >
                 Generate Acak
               </button>
@@ -819,7 +819,7 @@ export function StudioUsersManager() {
                   setResetPassword(generateSecurePassword())
                   if (modalError) setModalError(null)
                 }}
-                className="text-[11px] text-sky-400 hover:text-sky-300 font-medium"
+                className="text-[11px] text-accent-400 hover:text-accent-300 font-medium"
               >
                 Generate Acak
               </button>

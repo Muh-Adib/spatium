@@ -292,7 +292,7 @@ export function StudioMediaManager() {
             onClick={() => setActiveTab('library')}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
               activeTab === 'library'
-                ? 'bg-sky-500/20 text-sky-300 border border-sky-500/30 shadow-sm'
+                ? 'bg-info/20 text-info-300 border border-info/30 shadow-sm'
                 : 'text-neutral-400 hover:text-white'
             }`}
           >
@@ -323,7 +323,7 @@ export function StudioMediaManager() {
           <button
             onClick={() => fileInputRef.current?.click()}
             disabled={isUploading}
-            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-sky-500 to-blue-600 text-white rounded-lg text-sm font-medium hover:from-sky-400 hover:to-blue-500 transition-all shadow-md disabled:opacity-50"
+            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-info to-blue-600 text-white rounded-lg text-sm font-medium hover:from-info-400 hover:to-blue-500 transition-all shadow-md disabled:opacity-50"
           >
             {isUploading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
             <span>Upload Media</span>
@@ -343,14 +343,14 @@ export function StudioMediaManager() {
                   placeholder="Cari media berdasarkan nama file, URL, atau alt text..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="w-full pl-9 pr-4 py-1.5 bg-black/40 border border-white/10 rounded-lg text-sm text-neutral-200 focus:outline-none focus:border-sky-500/50"
+                  className="w-full pl-9 pr-4 py-1.5 bg-black/40 border border-white/10 rounded-lg text-sm text-neutral-200 focus:outline-none focus:border-accent-500/50"
                 />
               </div>
 
               <select
                 value={filter}
-                onChange={(e) => setFilter(e.target.value as any)}
-                className="bg-black/40 border border-white/10 rounded-lg text-sm text-neutral-300 px-3 py-1.5 focus:outline-none focus:border-sky-500/50"
+                onChange={(e) => setFilter(e.target.value as 'all' | 'missing_alt' | 'unused' | 'oversized')}
+                className="bg-black/40 border border-white/10 rounded-lg text-sm text-neutral-300 px-3 py-1.5 focus:outline-none focus:border-accent-500/50"
               >
                 <option value="all">Semua Media</option>
                 <option value="missing_alt">Tanpa Alt Text (Wajib)</option>
@@ -388,7 +388,7 @@ export function StudioMediaManager() {
           {/* Media Items Grid / List */}
           {loading ? (
             <div className="py-24 text-center">
-              <RefreshCw className="w-8 h-8 text-sky-400 animate-spin mx-auto mb-3" />
+              <RefreshCw className="w-8 h-8 text-info animate-spin mx-auto mb-3" />
               <p className="text-sm text-neutral-400">Memuat berkas media...</p>
             </div>
           ) : items.length === 0 ? (
@@ -405,7 +405,7 @@ export function StudioMediaManager() {
                   <div
                     key={item.id}
                     onClick={() => openDrawer(item)}
-                    className="group relative bg-neutral-900/80 border border-white/10 rounded-xl overflow-hidden cursor-pointer hover:border-sky-500/50 hover:shadow-lg transition-all"
+                    className="group relative bg-neutral-900/80 border border-white/10 rounded-xl overflow-hidden cursor-pointer hover:border-info/50 hover:shadow-lg transition-all"
                   >
                     <div className="aspect-square relative bg-neutral-950 flex items-center justify-center overflow-hidden">
                       <Image
@@ -462,7 +462,7 @@ export function StudioMediaManager() {
                           <Image src={item.url} alt={item.fileName} fill className="object-cover" />
                         </div>
                       </td>
-                      <td className="py-2.5 px-4 font-mono text-sky-300">{item.fileName}</td>
+                      <td className="py-2.5 px-4 font-mono text-info-300">{item.fileName}</td>
                       <td className="py-2.5 px-4">
                         {item.altText?.id ? (
                           <span className="text-neutral-200 truncate max-w-[200px] block">{item.altText.id}</span>
@@ -524,9 +524,9 @@ export function StudioMediaManager() {
                   <div className="text-xs font-mono text-amber-300">Ukuran Besar (&gt;800 KB)</div>
                   <div className="text-2xl font-bold text-amber-400 mt-1">{auditReport.oversizedCount}</div>
                 </div>
-                <div className="p-4 rounded-xl bg-sky-500/10 border border-sky-500/20">
-                  <div className="text-xs font-mono text-sky-300">Nama File Kurang Deskriptif</div>
-                  <div className="text-2xl font-bold text-sky-400 mt-1">{auditReport.badFilenameCount}</div>
+                <div className="p-4 rounded-xl bg-info/10 border border-info/20">
+                  <div className="text-xs font-mono text-info-300">Nama File Kurang Deskriptif</div>
+                  <div className="text-2xl font-bold text-info mt-1">{auditReport.badFilenameCount}</div>
                 </div>
               </div>
 
@@ -536,7 +536,7 @@ export function StudioMediaManager() {
                   <h3 className="text-sm font-semibold text-white">Daftar Masalah Audit Media</h3>
                   <button
                     onClick={fetchAudit}
-                    className="flex items-center gap-1.5 text-xs text-sky-400 hover:text-sky-300 transition-colors"
+                    className="flex items-center gap-1.5 text-xs text-info hover:text-info-300 transition-colors"
                   >
                     <RefreshCw className="w-3.5 h-3.5" />
                     <span>Pindai Ulang</span>
@@ -571,7 +571,7 @@ export function StudioMediaManager() {
                               setActiveTab('library')
                               openDrawer(json.data)
                             }
-                          } catch {}
+                          } catch (err) { console.warn("[observable error]:", err) }
                         }}
                         className="px-3 py-1 bg-white/10 hover:bg-white/20 text-neutral-200 rounded-md text-xs font-medium transition-all"
                       >
@@ -634,7 +634,7 @@ export function StudioMediaManager() {
                   type="text"
                   value={newFileName}
                   onChange={(e) => setNewFileName(e.target.value)}
-                  className="flex-1 px-3 py-1.5 bg-black/50 border border-white/10 rounded-lg text-xs font-mono text-neutral-200 focus:outline-none focus:border-sky-500"
+                  className="flex-1 px-3 py-1.5 bg-black/50 border border-white/10 rounded-lg text-xs font-mono text-neutral-200 focus:outline-none focus:border-accent-500"
                 />
                 <button
                   onClick={handleRename}
@@ -670,7 +670,7 @@ export function StudioMediaManager() {
                 <button
                   onClick={() => handleGenerateAiAlt('id')}
                   disabled={aiSuggesting}
-                  className="text-[11px] text-sky-400 hover:text-sky-300 flex items-center gap-1 font-medium transition-colors"
+                  className="text-[11px] text-info hover:text-info-300 flex items-center gap-1 font-medium transition-colors"
                 >
                   <Sparkles className="w-3 h-3" />
                   <span>Saran AI Vision</span>
@@ -681,7 +681,7 @@ export function StudioMediaManager() {
                 value={altId}
                 onChange={(e) => setAltId(e.target.value)}
                 placeholder="Deskripsi gambar untuk pembaca tuna netra & SEO Google Gambar..."
-                className="w-full px-3 py-2 bg-black/50 border border-white/10 rounded-lg text-xs text-neutral-200 focus:outline-none focus:border-sky-500 resize-none"
+                className="w-full px-3 py-2 bg-black/50 border border-white/10 rounded-lg text-xs text-neutral-200 focus:outline-none focus:border-accent-500 resize-none"
               />
               <div className="flex justify-between text-[11px] text-neutral-500">
                 <span>Maksimal 125 karakter</span>
@@ -696,7 +696,7 @@ export function StudioMediaManager() {
                 <button
                   onClick={() => handleGenerateAiAlt('en')}
                   disabled={aiSuggesting}
-                  className="text-[11px] text-sky-400 hover:text-sky-300 flex items-center gap-1 font-medium transition-colors"
+                  className="text-[11px] text-info hover:text-info-300 flex items-center gap-1 font-medium transition-colors"
                 >
                   <Sparkles className="w-3 h-3" />
                   <span>Saran AI Vision (EN)</span>
@@ -707,7 +707,7 @@ export function StudioMediaManager() {
                 value={altEn}
                 onChange={(e) => setAltEn(e.target.value)}
                 placeholder="Image description in English..."
-                className="w-full px-3 py-2 bg-black/50 border border-white/10 rounded-lg text-xs text-neutral-200 focus:outline-none focus:border-sky-500 resize-none"
+                className="w-full px-3 py-2 bg-black/50 border border-white/10 rounded-lg text-xs text-neutral-200 focus:outline-none focus:border-accent-500 resize-none"
               />
             </div>
 
@@ -719,7 +719,7 @@ export function StudioMediaManager() {
                 value={caption}
                 onChange={(e) => setCaption(e.target.value)}
                 placeholder="Teks keterangan yang tampil di bawah gambar..."
-                className="w-full px-3 py-1.5 bg-black/50 border border-white/10 rounded-lg text-xs text-neutral-200 focus:outline-none focus:border-sky-500"
+                className="w-full px-3 py-1.5 bg-black/50 border border-white/10 rounded-lg text-xs text-neutral-200 focus:outline-none focus:border-accent-500"
               />
             </div>
 
@@ -730,7 +730,7 @@ export function StudioMediaManager() {
                 id="dec_check"
                 checked={decorative}
                 onChange={(e) => setDecorative(e.target.checked)}
-                className="rounded border-white/20 bg-black/40 text-sky-500 focus:ring-0"
+                className="rounded border-white/20 bg-black/40 text-info focus:ring-0"
               />
               <label htmlFor="dec_check" className="text-xs text-neutral-300 select-none cursor-pointer">
                 Tandai sebagai elemen dekoratif semata (alt=&quot;&quot; valid)
@@ -751,7 +751,7 @@ export function StudioMediaManager() {
             <button
               onClick={handleSaveMetadata}
               disabled={saving}
-              className="px-4 py-2 bg-sky-500 hover:bg-sky-400 text-white rounded-lg text-xs font-semibold transition-all shadow-md disabled:opacity-50"
+              className="px-4 py-2 bg-accent-500 hover:bg-accent-300 text-accent-950 rounded-lg text-xs font-semibold transition-all shadow-md disabled:opacity-50"
             >
               {saving ? 'Menyimpan...' : 'Simpan Metadata'}
             </button>

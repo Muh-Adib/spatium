@@ -20,9 +20,16 @@ function resolveNavImageUrl(img: any, fallback: string): string {
   if (!img) return fallback
   if (typeof img === 'string') {
     const trimmed = img.trim()
+    if (trimmed.startsWith('{')) {
+      try {
+        const parsed = JSON.parse(trimmed)
+        const url = parsed.url || parsed.src || parsed.imageUrl
+        if (typeof url === 'string' && url.trim().length > 0) return url.trim()
+      } catch (err) { console.warn("[observable error]:", err) }
+    }
     return trimmed.length > 0 ? trimmed : fallback
   }
-  if (typeof img === 'object') {
+  if (typeof img === 'object' && img !== null) {
     const url = img.url || img.src || img.imageUrl
     if (typeof url === 'string') {
       const trimmed = url.trim()
@@ -45,7 +52,7 @@ export async function getNavigationEntries(): Promise<NavEntry[]> {
         getSolutions().catch(() => []),
         getPortfolios().catch(() => []),
         getCategories().catch(() => []),
-        getArticlesDb({ pageSize: 4 }).catch(() => ({ data: [] } as any)),
+        getArticlesDb({ pageSize: 4 }).catch(() => ({ data: [], total: 0, page: 1, pageSize: 4, totalPages: 0 })),
       ])
 
     const entries: NavEntry[] = []
@@ -209,7 +216,7 @@ export async function getNavigationEntries(): Promise<NavEntry[]> {
     // ─────────────────────────────────────────────────────────────────────────
     // 4. ARTIKEL (Dynamic from database)
     // ─────────────────────────────────────────────────────────────────────────
-    const recentArticles = (recentArticlesResult as any).data || []
+    const recentArticles = (recentArticlesResult as { data?: unknown[] }).data || []
     if (allCategories.length > 0 || recentArticles.length > 0) {
       const articleSections: NavSection[] = []
 

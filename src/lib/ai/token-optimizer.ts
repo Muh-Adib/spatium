@@ -66,7 +66,7 @@ export function getTokenOptimizationConfig(): TokenOptimizationConfig {
         },
       }
     }
-  } catch (_) {}
+  } catch (err) { console.warn("[observable error]:", err) }
 
   return DEFAULT_TOKEN_OPTIMIZATION_CONFIG
 }
@@ -85,7 +85,7 @@ export function saveTokenOptimizationConfig(config: Partial<TokenOptimizationCon
   if (typeof window !== 'undefined') {
     try {
       localStorage.setItem(STORAGE_TOKEN_OPT_KEY, JSON.stringify(updated))
-    } catch (_) {}
+    } catch (err) { console.warn("[observable error]:", err) }
   }
 
   return updated

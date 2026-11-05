@@ -15,10 +15,13 @@ import '@/pages/project-detail.css'
 
 const SITE_URL = 'https://unimasi.studio'
 
-export function generateStaticParams() {
-  return PROJECTS.map((project) => ({
-    slug: project.slug,
-  }))
+export async function generateStaticParams() {
+  const slugs = new Set<string>(PROJECTS.map((project) => project.slug))
+  try {
+    const portfolios = await getPortfolios()
+    for (const portfolio of portfolios) slugs.add(portfolio.slug)
+  } catch (err) { console.warn("[observable error]:", err) }
+  return Array.from(slugs).map((slug) => ({ slug }))
 }
 
 export async function generateMetadata({
@@ -85,7 +88,7 @@ export default async function ProjectDetailPage({
 
   const projectTitle = dbProject?.title || project?.title || ''
   const projectDesc = dbProject?.seo?.metaDescription || dbProject?.summary || project?.tagline || ''
-  const projectDiscipline = (dbProject as any)?.discipline || project?.discipline || 'Animation'
+  const projectDiscipline = (dbProject as { discipline?: string })?.discipline || project?.discipline || 'Animation'
 
   const jsonLd = [
     {
@@ -125,11 +128,34 @@ export default async function ProjectDetailPage({
     )
   }
 
-  if (!project) notFound()
+  if (!dbProject && !project) notFound()
 
-  const related = PROJECTS.filter((p) => p.category === project.category && p.slug !== project.slug).slice(0, 3)
+  // Static fallback shell: DB row (admin-edited) supplies the editable copy;
+  // the static entry only pads fields the DB model carries differently.
+  const view = {
+    slug,
+    title: dbProject?.title || project?.title || '',
+    tagline: dbProject?.summary || project?.tagline || '',
+    discipline: dbProject?.category || project?.discipline || 'Animation',
+    year: dbProject?.year || project?.year || '',
+    client: dbProject?.client || project?.client || '',
+    category: (project?.category || (dbProject?.category as ProjectCategory) || '3d') as ProjectCategory,
+    brief: dbProject?.challenge || project?.brief || '',
+    approach:
+      (typeof dbProject?.approach === 'string' ? dbProject.approach.split(/\n+/).filter(Boolean) : undefined) ||
+      project?.approach ||
+      [],
+    delivered: (dbProject?.technologies || []).map((t: { name?: string }) => t.name).filter(Boolean).length
+      ? ((dbProject!.technologies || []) as Array<{ name?: string }>).map((t) => t.name).filter((name): name is string => Boolean(name))
+      : project?.delivered || [],
+    videoUrl: project?.videoUrl,
+    posterUrl: dbProject?.heroMedia?.url || project?.posterUrl,
+    variant: project?.variant ?? 1,
+  }
 
-  const catLabel = CATEGORY_LABEL[project.category as ProjectCategory] || 'Animation Studio'
+  const related = PROJECTS.filter((p) => p.category === view.category && p.slug !== view.slug).slice(0, 3)
+
+  const catLabel = CATEGORY_LABEL[view.category as ProjectCategory] || 'Animation Studio'
 
   return (
     <>
@@ -140,20 +166,20 @@ export default async function ProjectDetailPage({
 
       <PageHero
         eyebrow={catLabel}
-        title={project.title}
-        lede={project.tagline}
+        title={view.title}
+        lede={view.tagline}
         crumbs={[
           { label: 'Home', to: '/' },
           { label: 'Portfolio', to: '/portfolio' },
-          { label: project.title },
+          { label: view.title },
         ]}
         meta={
           <>
-            <span className="pill pill--accent">{project.discipline}</span>
-            <span className="pill">{project.year}</span>
-            {project.client ? (
+            <span className="pill pill--accent">{view.discipline}</span>
+            <span className="pill">{view.year}</span>
+            {view.client ? (
               <span className="pill">
-                <Icon name="award" size={13} /> {project.client}
+                <Icon name="award" size={13} /> {view.client}
               </span>
             ) : null}
           </>
@@ -165,31 +191,31 @@ export default async function ProjectDetailPage({
           <Reveal className="project-media__frame" variant="scale">
             <div className="project-media__head">
               <span className="mono">Production Showcase</span>
-              <span className="mono">{project.discipline} · {project.year}</span>
+              <span className="mono">{view.discipline} · {view.year}</span>
             </div>
 
-            {project.videoUrl ? (
+            {view.videoUrl ? (
               <video
                 className="project-media__video"
                 controls
                 playsInline
                 preload="metadata"
-                poster={project.posterUrl}
+                poster={view.posterUrl}
               >
-                <source src={project.videoUrl} />
+                <source src={view.videoUrl} />
                 Your browser does not support embedded video.
               </video>
-            ) : project.posterUrl ? (
+            ) : view.posterUrl ? (
               <div className="relative aspect-video w-full overflow-hidden bg-black/60 rounded-xl">
                 <img
-                  src={project.posterUrl}
-                  alt={project.title}
+                  src={view.posterUrl}
+                  alt={view.title}
                   className="w-full h-full object-cover"
                 />
               </div>
             ) : (
               <div className="project-media__placeholder">
-                <StudioArt variant={project.variant} />
+                <StudioArt variant={view.variant} />
               </div>
             )}
           </Reveal>
@@ -204,14 +230,14 @@ export default async function ProjectDetailPage({
               <h2 className="display-md project-body__title" id="project-brief">
                 Tantangan Komunikasi &amp; Visual yang Dipecahkan
               </h2>
-              <p className="project-body__text">{project.brief}</p>
+              <p className="project-body__text">{view.brief}</p>
             </Reveal>
 
             <Reveal delay={80}>
               <p className="eyebrow">Pendekatan Produksi (Approach)</p>
               <h2 className="display-md project-body__title">Metodologi &amp; Eksekusi Visual</h2>
               <ol className="project-body__approach">
-                {project.approach.map((step: string, i: number) => (
+                {view.approach.map((step: string, i: number) => (
                   <li key={step}>
                     <span className="project-body__step mono">{String(i + 1).padStart(2, '0')}</span>
                     <p>{step}</p>
@@ -224,7 +250,7 @@ export default async function ProjectDetailPage({
               <p className="eyebrow">Hasil Serah Terima (Delivered)</p>
               <h2 className="display-md project-body__title">Aset Produksi yang Dihasilkan</h2>
               <ul className="project-body__delivered">
-                {project.delivered.map((item: string) => (
+                {view.delivered.map((item: string) => (
                   <li key={item}>
                     <Icon name="check" size={15} />
                     {item}
@@ -240,11 +266,11 @@ export default async function ProjectDetailPage({
               <dl className="project-meta-list">
                 <div>
                   <dt>Klien</dt>
-                  <dd>{project.client || 'Klien Korporat'}</dd>
+                  <dd>{view.client || 'Klien Korporat'}</dd>
                 </div>
                 <div>
                   <dt>Tahun Rilis</dt>
-                  <dd className="mono">{project.year || 2024}</dd>
+                  <dd className="mono">{view.year || 2024}</dd>
                 </div>
                 <div>
                   <dt>Kategori</dt>
@@ -252,7 +278,7 @@ export default async function ProjectDetailPage({
                 </div>
                 <div>
                   <dt>Spesialisasi</dt>
-                  <dd>{project.discipline}</dd>
+                  <dd>{view.discipline}</dd>
                 </div>
                 <div>
                   <dt>Studio</dt>

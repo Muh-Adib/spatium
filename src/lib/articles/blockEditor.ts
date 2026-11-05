@@ -198,7 +198,8 @@ export function cleanHeadingText(text: string): string {
  */
 export function blocksToContent(blocks: ContentBlock[]): string {
   return blocks
-    .map((b) => {
+    .map((rawBlock) => {
+      const b = rawBlock
       switch (b.type) {
         case 'html': return b.html
         case 'paragraph':
@@ -250,120 +251,125 @@ export function blocksToContent(blocks: ContentBlock[]): string {
           const captionHtml = b.caption ? `<caption class="text-xs text-neutral-400 py-2 caption-bottom">${b.caption}</caption>` : ''
           return `<div class="article-table-wrapper my-6 overflow-x-auto rounded-xl border border-white/10"><table class="w-full text-left text-sm border-collapse">${colgroup}${captionHtml}${thead}${tbody}</table></div>`
         }
-        case 'feature-bento-grid' as any: {
-          const block = b as any
-          const features = (block.features || []).map((f: any) =>
-            `<div class="bento-card p-5 rounded-2xl bg-white/[0.03] border border-white/10 my-3">
-              ${f.tag ? `<span class="badge text-xs font-mono text-[#FFD600] mb-2 inline-block">${f.tag}</span>` : ''}
-              <h4 class="font-bold text-white text-lg">${f.title || ''}</h4>
-              <p class="text-sm text-neutral-300 mt-1">${f.description || ''}</p>
-            </div>`
-          ).join('')
-          return `<section class="article-bento-grid my-8">
-            ${block.title ? `<h3 class="text-2xl font-bold text-white mb-2">${block.title}</h3>` : ''}
-            ${block.description ? `<p class="text-neutral-400 mb-4">${block.description}</p>` : ''}
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">${features}</div>
-          </section>`
-        }
-        case 'comparison-matrix' as any: {
-          const block = b as any
-          const rows = (block.rows || []).map((r: any) =>
-            `<tr class="border-b border-white/10">
-              <td class="p-3 font-semibold text-white">${r.feature || ''}</td>
-              <td class="p-3 text-[#FFD600]">${r.us || ''}</td>
-              <td class="p-3 text-neutral-400">${r.standard || ''}</td>
-            </tr>`
-          ).join('')
-          return `<section class="article-comparison-matrix my-8 overflow-x-auto">
-            ${block.title ? `<h3 class="text-2xl font-bold text-white mb-3">${block.title}</h3>` : ''}
-            <table class="w-full text-left text-sm border-collapse border border-white/10 rounded-xl">
-              <thead><tr class="bg-white/5 border-b border-white/10"><th class="p-3">Fitur / Dimensi</th><th class="p-3">UNIMASI Enterprise</th><th class="p-3">Solusi Konvensional</th></tr></thead>
-              <tbody>${rows}</tbody>
-            </table>
-          </section>`
-        }
-        case 'client-stats-impact' as any: {
-          const block = b as any
-          const stats = (block.stats || []).map((s: any) =>
-            `<div class="stat-card p-4 rounded-2xl bg-white/[0.04] border border-white/10 text-center">
-              <span class="block text-3xl font-extrabold text-[#FFD600]">${s.value || ''}</span>
-              <strong class="block text-xs uppercase tracking-wider text-white mt-1">${s.label || ''}</strong>
-              ${s.detail ? `<span class="block text-xs text-neutral-400 mt-1">${s.detail}</span>` : ''}
-            </div>`
-          ).join('')
-          return `<section class="article-stats-impact my-8">
-            ${block.title ? `<h3 class="text-xl font-bold text-white mb-4 text-center">${block.title}</h3>` : ''}
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">${stats}</div>
-          </section>`
-        }
-        case 'architecture-blueprint' as any: {
-          const block = b as any
-          const layers = (block.layers || []).map((l: any) =>
-            `<div class="p-4 rounded-xl bg-white/[0.03] border border-white/10 mb-3">
-              <div class="flex justify-between items-center mb-1">
-                <span class="font-bold text-white text-base">${l.name || ''}</span>
-                <span class="text-xs font-mono text-[#FFD600]">${l.tech || ''}</span>
-              </div>
-              <p class="text-xs text-neutral-300">${l.desc || ''}</p>
-            </div>`
-          ).join('')
-          return `<section class="article-blueprint my-8">
-            ${block.title ? `<h3 class="text-2xl font-bold text-white mb-2">${block.title}</h3>` : ''}
-            ${block.description ? `<p class="text-neutral-400 text-sm mb-4">${block.description}</p>` : ''}
-            <div>${layers}</div>
-          </section>`
-        }
-        case 'deliverables-checklist' as any: {
-          const block = b as any
-          const items = (block.items || []).map((it: any) =>
-            `<li class="flex items-start gap-2 mb-3">
-              <span class="text-[#FFD600] font-bold">✓</span>
-              <div>
-                <strong class="text-white block">${it.title || ''}</strong>
-                <span class="text-neutral-300 text-sm">${it.desc || ''}</span>
-              </div>
-            </li>`
-          ).join('')
-          return `<section class="article-deliverables my-8 p-6 rounded-2xl bg-white/[0.02] border border-white/10">
-            ${block.title ? `<h3 class="text-xl font-bold text-white mb-4">${block.title}</h3>` : ''}
-            <ul class="list-none pl-0 space-y-2">${items}</ul>
-          </section>`
-        }
-        case 'faq-accordion' as any: {
-          const block = b as any
-          const faqs = (block.faqs || block.items || []).map((f: any) =>
-            `<details class="group p-4 rounded-xl bg-white/[0.03] border border-white/10 mb-3">
-              <summary class="cursor-pointer font-semibold text-white">${f.question || ''}</summary>
-              <p class="mt-2 text-sm text-neutral-300 leading-relaxed border-t border-white/5 pt-2">${f.answer || ''}</p>
-            </details>`
-          ).join('')
-          return `<section class="article-faqs my-8">
-            ${block.title ? `<h3 class="text-2xl font-bold text-white mb-4">${block.title}</h3>` : ''}
-            <div>${faqs}</div>
-          </section>`
-        }
-        case 'studio-cta' as any: {
-          const block = b as any
-          return `<div class="article-cta my-10 p-8 rounded-3xl bg-gradient-to-r from-neutral-900 to-neutral-950 border border-white/15 text-center">
-            <h3 class="text-2xl font-bold text-white mb-2">${block.title || 'Mulai Konsultasi Proyek Digital Anda'}</h3>
-            <p class="text-sm text-neutral-300 max-w-xl mx-auto mb-6">${block.description || 'Diskusikan arsitektur dan kebutuhan spesifik sistem Anda bersama tim spesialis UNIMASI.'}</p>
-            <a href="${block.buttonUrl || 'https://wa.me/6285227702811'}" target="_blank" rel="noopener noreferrer" class="inline-block px-6 py-3 rounded-xl bg-[#FFD600] text-neutral-900 font-bold text-sm hover:opacity-90 transition-opacity">
-              ${block.buttonText || 'Konsultasi Sekarang'}
-            </a>
-          </div>`
-        }
-        case 'media-showcase' as any:
-        case 'editorial-image' as any: {
-          const block = b as any
-          const img = block.image || block.imageUrl || block.url
-          if (!img) return ''
-          return `<figure class="article-media-showcase my-8 rounded-2xl overflow-hidden border border-white/10">
-            <img src="${img}" alt="${block.alt || block.title || 'Showcase Visual'}" class="w-full object-cover" loading="lazy" />
-            ${block.caption || block.title ? `<figcaption class="p-3 text-center text-xs text-neutral-400 bg-neutral-900/80">${block.caption || block.title}</figcaption>` : ''}
-          </figure>`
-        }
         default: {
-          const anyBlock = b as any
+          const block = rawBlock as unknown as Record<string, unknown>
+          const type = String(block.type || '')
+          if (type === 'feature-bento-grid') {
+            const rawFeatures = Array.isArray(block.features) ? block.features : []
+            const features = rawFeatures.map((f) => {
+              const item = f as Record<string, unknown>
+              return `<div class="bento-card p-5 rounded-2xl bg-white/[0.03] border border-white/10 my-3">
+                ${item.tag ? `<span class="badge text-xs font-mono text-[#FFD600] mb-2 inline-block">${item.tag}</span>` : ''}
+                <h4 class="font-bold text-white text-lg">${item.title || ''}</h4>
+                <p class="text-sm text-neutral-300 mt-1">${item.description || ''}</p>
+              </div>`
+            }).join('')
+            return `<section class="article-bento-grid my-8">
+              ${block.title ? `<h3 class="text-2xl font-bold text-white mb-2">${block.title}</h3>` : ''}
+              ${block.description ? `<p class="text-neutral-400 mb-4">${block.description}</p>` : ''}
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">${features}</div>
+            </section>`
+          }
+          if (type === 'comparison-matrix') {
+            const rawRows = Array.isArray(block.rows) ? block.rows : []
+            const rows = rawRows.map((r) => {
+              const item = r as Record<string, unknown>
+              return `<tr class="border-b border-white/10">
+                <td class="p-3 font-semibold text-white">${item.feature || ''}</td>
+                <td class="p-3 text-[#FFD600]">${item.us || ''}</td>
+                <td class="p-3 text-neutral-400">${item.standard || ''}</td>
+              </tr>`
+            }).join('')
+            return `<section class="article-comparison-matrix my-8 overflow-x-auto">
+              ${block.title ? `<h3 class="text-2xl font-bold text-white mb-3">${block.title}</h3>` : ''}
+              <table class="w-full text-left text-sm border-collapse border border-white/10 rounded-xl">
+                <thead><tr class="bg-white/5 border-b border-white/10"><th class="p-3">Fitur / Dimensi</th><th class="p-3">UNIMASI Enterprise</th><th class="p-3">Solusi Konvensional</th></tr></thead>
+                <tbody>${rows}</tbody>
+              </table>
+            </section>`
+          }
+          if (type === 'client-stats-impact') {
+            const rawStats = Array.isArray(block.stats) ? block.stats : []
+            const stats = rawStats.map((s) => {
+              const item = s as Record<string, unknown>
+              return `<div class="stat-card p-4 rounded-2xl bg-white/[0.04] border border-white/10 text-center">
+                <span class="block text-3xl font-extrabold text-[#FFD600]">${item.value || ''}</span>
+                <strong class="block text-xs uppercase tracking-wider text-white mt-1">${item.label || ''}</strong>
+                ${item.detail ? `<span class="block text-xs text-neutral-400 mt-1">${item.detail}</span>` : ''}
+              </div>`
+            }).join('')
+            return `<section class="article-stats-impact my-8">
+              ${block.title ? `<h3 class="text-xl font-bold text-white mb-4 text-center">${block.title}</h3>` : ''}
+              <div class="grid grid-cols-2 md:grid-cols-4 gap-4">${stats}</div>
+            </section>`
+          }
+          if (type === 'architecture-blueprint') {
+            const rawLayers = Array.isArray(block.layers) ? block.layers : []
+            const layers = rawLayers.map((l) => {
+              const item = l as Record<string, unknown>
+              return `<div class="p-4 rounded-xl bg-white/[0.03] border border-white/10 mb-3">
+                <div class="flex justify-between items-center mb-1">
+                  <span class="font-bold text-white text-base">${item.name || ''}</span>
+                  <span class="text-xs font-mono text-[#FFD600]">${item.tech || ''}</span>
+                </div>
+                <p class="text-xs text-neutral-300">${item.desc || ''}</p>
+              </div>`
+            }).join('')
+            return `<section class="article-blueprint my-8">
+              ${block.title ? `<h3 class="text-2xl font-bold text-white mb-2">${block.title}</h3>` : ''}
+              ${block.description ? `<p class="text-neutral-400 text-sm mb-4">${block.description}</p>` : ''}
+              <div>${layers}</div>
+            </section>`
+          }
+          if (type === 'deliverables-checklist') {
+            const rawItems = Array.isArray(block.items) ? block.items : []
+            const items = rawItems.map((it) => {
+              const item = it as Record<string, unknown>
+              return `<li class="flex items-start gap-2 mb-3">
+                <span class="text-[#FFD600] font-bold">✓</span>
+                <div>
+                  <strong class="text-white block">${item.title || ''}</strong>
+                  <span class="text-neutral-300 text-sm">${item.desc || ''}</span>
+                </div>
+              </li>`
+            }).join('')
+            return `<section class="article-deliverables my-8 p-6 rounded-2xl bg-white/[0.02] border border-white/10">
+              ${block.title ? `<h3 class="text-xl font-bold text-white mb-4">${block.title}</h3>` : ''}
+              <ul class="list-none pl-0 space-y-2">${items}</ul>
+            </section>`
+          }
+          if (type === 'faq-accordion') {
+            const rawFaqs = Array.isArray(block.faqs) ? block.faqs : Array.isArray(block.items) ? block.items : []
+            const faqs = rawFaqs.map((f) => {
+              const item = f as Record<string, unknown>
+              return `<details class="group p-4 rounded-xl bg-white/[0.03] border border-white/10 mb-3">
+                <summary class="cursor-pointer font-semibold text-white">${item.question || ''}</summary>
+                <p class="mt-2 text-sm text-neutral-300 leading-relaxed border-t border-white/5 pt-2">${item.answer || ''}</p>
+              </details>`
+            }).join('')
+            return `<section class="article-faqs my-8">
+              ${block.title ? `<h3 class="text-2xl font-bold text-white mb-4">${block.title}</h3>` : ''}
+              <div>${faqs}</div>
+            </section>`
+          }
+          if (type === 'studio-cta') {
+            return `<div class="article-cta my-10 p-8 rounded-3xl bg-gradient-to-r from-neutral-900 to-neutral-950 border border-white/15 text-center">
+              <h3 class="text-2xl font-bold text-white mb-2">${(block.title as string) || 'Mulai Konsultasi Proyek Digital Anda'}</h3>
+              <p class="text-sm text-neutral-300 max-w-xl mx-auto mb-6">${(block.description as string) || 'Diskusikan arsitektur dan kebutuhan spesifik sistem Anda bersama tim spesialis UNIMASI.'}</p>
+              <a href="${(block.buttonUrl as string) || (process.env.NEXT_PUBLIC_WHATSAPP ? `https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP}` : '/contact')}" target="_blank" rel="noopener noreferrer" class="inline-block px-6 py-3 rounded-xl bg-[#FFD600] text-neutral-900 font-bold text-sm hover:opacity-90 transition-opacity">
+                ${(block.buttonText as string) || 'Konsultasi Sekarang'}
+              </a>
+            </div>`
+          }
+          if (type === 'media-showcase' || type === 'editorial-image') {
+            const img = (block.image || block.imageUrl || block.url) as string | undefined
+            if (!img) return ''
+            return `<figure class="article-media-showcase my-8 rounded-2xl overflow-hidden border border-white/10">
+              <img src="${img}" alt="${(block.alt || block.title || 'Showcase Visual') as string}" class="w-full object-cover" loading="lazy" />
+              ${block.caption || block.title ? `<figcaption class="p-3 text-center text-xs text-neutral-400 bg-neutral-900/80">${(block.caption || block.title) as string}</figcaption>` : ''}
+            </figure>`
+          }
+          const anyBlock = block as Record<string, string | undefined>
           if (anyBlock?.text) return `<p>${anyBlock.text}</p>`
           if (anyBlock?.content) return `<p>${anyBlock.content}</p>`
           if (anyBlock?.title) return `<h3>${anyBlock.title}</h3>`

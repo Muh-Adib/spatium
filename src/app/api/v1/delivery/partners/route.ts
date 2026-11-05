@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server'
 import { authenticateDeliveryRequest } from '@/lib/delivery/auth'
 import { jsonResponse, handleOptions } from '@/lib/delivery/cors'
-import seedPartners from '@/data/seed/seed_partners.json'
+import { getClientLogos } from '@/lib/db/clientLogos'
 
 export async function OPTIONS() {
   return handleOptions()
@@ -16,11 +16,12 @@ export async function GET(request: NextRequest) {
   const limit = limitParam ? parseInt(limitParam, 10) : undefined
 
   try {
-    const list = limit ? seedPartners.slice(0, limit) : seedPartners
+    const dbLogos = await getClientLogos()
+    const list = limit ? dbLogos.slice(0, limit) : dbLogos
     return jsonResponse({
       data: list,
       meta: {
-        total: seedPartners.length,
+        total: dbLogos.length,
         count: list.length,
       }
     })

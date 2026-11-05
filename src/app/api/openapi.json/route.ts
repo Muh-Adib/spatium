@@ -241,48 +241,6 @@ export async function GET() {
           },
         },
       },
-      '/api/v1/delivery/pages': {
-        get: {
-          summary: 'List all published pages',
-          responses: {
-            '200': {
-              description: 'List of pages',
-              content: {
-                'application/json': {
-                  schema: {
-                    type: 'object',
-                    properties: {
-                      pages: { type: 'array', items: { $ref: '#/components/schemas/Page' } },
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-      '/api/v1/delivery/pages/{slug}': {
-        get: {
-          summary: 'Get page by slug with structured blocks',
-          parameters: [
-            { name: 'slug', in: 'path', required: true, schema: { type: 'string' } },
-          ],
-          responses: {
-            '200': {
-              description: 'Page entity with dynamic blocks for Server-Driven UI',
-              content: {
-                'application/json': {
-                  schema: {
-                    type: 'object',
-                    properties: { page: { $ref: '#/components/schemas/Page' } },
-                  },
-                },
-              },
-            },
-            '404': { $ref: '#/components/schemas/ErrorResponse' },
-          },
-        },
-      },
       '/api/v1/delivery/services': {
         get: {
           summary: 'List services and service categories',

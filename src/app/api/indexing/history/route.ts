@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { requireRole } from '@/lib/auth/rbac'
+import { requireRole, type Role } from '@/lib/auth/rbac'
 import { indexingHistoryQuerySchema } from '@/lib/validation/api-schemas'
 import { getIndexingHistory } from '@/lib/db/indexing'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
-const ALLOWED_ROLES = ['SUPER_ADMIN', 'CONTENT_ADMIN', 'EDITOR', 'SEO_MANAGER'] as const
+const ALLOWED_ROLES: Role[] = ['SUPER_ADMIN', 'CONTENT_ADMIN', 'EDITOR', 'SEO_MANAGER']
 
 function safeJsonParse(payload: string | null | undefined) {
   if (!payload) return null
@@ -19,7 +19,7 @@ function safeJsonParse(payload: string | null | undefined) {
 
 export async function GET(request: NextRequest) {
   // 1. Auth & RBAC Gate
-  const auth = await requireRole(request, ALLOWED_ROLES as any)
+  const auth = await requireRole(request, ALLOWED_ROLES)
   if (auth.error) {
     return auth.error
   }

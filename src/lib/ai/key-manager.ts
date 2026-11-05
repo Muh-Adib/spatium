@@ -61,13 +61,13 @@ export function getSelectedAiModels(): AiModelItem[] {
         return parsed
       }
     }
-  } catch (_) {}
+  } catch (err) { console.warn("[observable error]:", err) }
 
   // Simpan default jika belum ada
   if (typeof window !== 'undefined') {
     try {
       localStorage.setItem(STORAGE_SELECTED_MODELS_KEY, JSON.stringify(DEFAULT_SELECTED_MODELS))
-    } catch (_) {}
+    } catch (err) { console.warn("[observable error]:", err) }
   }
 
   return DEFAULT_SELECTED_MODELS
@@ -97,7 +97,7 @@ export function saveSelectedAiModel(model: AiModelItem): AiModelItem[] {
     try {
       localStorage.setItem(STORAGE_SELECTED_MODELS_KEY, JSON.stringify(updated))
       window.dispatchEvent(new CustomEvent('unimasi:ai-models-updated'))
-    } catch (_) {}
+    } catch (err) { console.warn("[observable error]:", err) }
   }
 
   return updated
@@ -129,7 +129,7 @@ export function saveSelectedAiModelsBatch(models: AiModelItem[]): AiModelItem[] 
     try {
       localStorage.setItem(STORAGE_SELECTED_MODELS_KEY, JSON.stringify(list))
       window.dispatchEvent(new CustomEvent('unimasi:ai-models-updated'))
-    } catch (_) {}
+    } catch (err) { console.warn("[observable error]:", err) }
   }
 
   return list
@@ -153,7 +153,7 @@ export function removeSelectedAiModel(modelId: string, provider: 'google' | 'ope
     try {
       localStorage.setItem(STORAGE_SELECTED_MODELS_KEY, JSON.stringify(updated))
       window.dispatchEvent(new CustomEvent('unimasi:ai-models-updated'))
-    } catch (_) {}
+    } catch (err) { console.warn("[observable error]:", err) }
   }
 
   return updated
@@ -186,7 +186,7 @@ export function updateModelTestStatus(
   if (typeof window !== 'undefined') {
     try {
       localStorage.setItem(STORAGE_SELECTED_MODELS_KEY, JSON.stringify(current))
-    } catch (_) {}
+    } catch (err) { console.warn("[observable error]:", err) }
   }
 }
 
@@ -206,7 +206,7 @@ export function getConnectionConfig(): AiConnectionConfig {
         openrouterPool: parsed.openrouterPool || '',
       }
     }
-  } catch (_) {}
+  } catch (err) { console.warn("[observable error]:", err) }
 
   return { strategy: 'priority', stickyCount: 1 }
 }
@@ -221,7 +221,7 @@ export function saveConnectionConfig(config: Partial<AiConnectionConfig>): AiCon
   if (typeof window !== 'undefined') {
     try {
       localStorage.setItem(STORAGE_CONN_CONFIG_KEY, JSON.stringify(updated))
-    } catch (_) {}
+    } catch (err) { console.warn("[observable error]:", err) }
   }
 
   return updated
@@ -289,7 +289,7 @@ export function getStoredApiKeys(): ApiKeyItem[] {
     if (needsUpdate && typeof window !== 'undefined') {
       try {
         localStorage.setItem(STORAGE_KEYS_KEY, JSON.stringify(keys))
-      } catch (_) {}
+      } catch (err) { console.warn("[observable error]:", err) }
     }
 
     return keys
@@ -372,7 +372,7 @@ export function saveApiKeyItem(data: {
     try {
       localStorage.setItem(STORAGE_KEYS_KEY, JSON.stringify(updatedList))
       syncLegacyConfig(updatedList)
-    } catch (_) {}
+    } catch (err) { console.warn("[observable error]:", err) }
   }
 
   return newItem
@@ -445,7 +445,7 @@ export function bulkImportApiKeys(input: {
       try {
         localStorage.setItem(STORAGE_KEYS_KEY, JSON.stringify(combined))
         syncLegacyConfig(combined)
-      } catch (_) {}
+      } catch (err) { console.warn("[observable error]:", err) }
     }
   }
 
@@ -466,7 +466,7 @@ export function deleteApiKeyItem(id: string): void {
     try {
       localStorage.setItem(STORAGE_KEYS_KEY, JSON.stringify(filtered))
       syncLegacyConfig(filtered)
-    } catch (_) {}
+    } catch (err) { console.warn("[observable error]:", err) }
   }
 }
 
@@ -485,7 +485,7 @@ export function setActiveApiKey(id: string): void {
     try {
       localStorage.setItem(STORAGE_KEYS_KEY, JSON.stringify(keys))
       syncLegacyConfig(keys)
-    } catch (_) {}
+    } catch (err) { console.warn("[observable error]:", err) }
   }
 }
 
@@ -522,7 +522,7 @@ export function updateKeyTestStatus(
     try {
       localStorage.setItem(STORAGE_KEYS_KEY, JSON.stringify(keys))
       syncLegacyConfig(keys)
-    } catch (_) {}
+    } catch (err) { console.warn("[observable error]:", err) }
   }
 }
 
@@ -564,7 +564,7 @@ function syncLegacyConfig(keys: ApiKeyItem[]) {
         })
       )
     }
-  } catch (_) {}
+  } catch (err) { console.warn("[observable error]:", err) }
 }
 
 export function maskApiKey(key: string): string {
@@ -629,7 +629,7 @@ export function getStoredAiCredentials(preferredProvider?: 'google' | 'openroute
       openrouterModel = parsed.openrouterModel || ''
       customModel = parsed.customModel || ''
     }
-  } catch (_) {}
+  } catch (err) { console.warn("[observable error]:", err) }
 
   let provider: 'google' | 'openrouter' = preferredProvider || configProvider
 
@@ -653,7 +653,7 @@ export function getStoredAiCredentials(preferredProvider?: 'google' | 'openroute
           proxyUrl = provider === 'google' ? parsed.googleProxyUrl : parsed.openrouterProxyUrl
         }
       }
-    } catch (_) {}
+    } catch (err) { console.warn("[observable error]:", err) }
   }
 
   // 4. If selected provider has no key, check alternative provider
@@ -668,7 +668,7 @@ export function getStoredAiCredentials(preferredProvider?: 'google' | 'openroute
           const parsed = JSON.parse(rawConfig)
           altKey = String(altProvider === 'google' ? parsed.googleApiKey : parsed.openrouterApiKey || '').trim()
         }
-      } catch (_) {}
+      } catch (err) { console.warn("[observable error]:", err) }
     }
     if (altKey) {
       provider = altProvider

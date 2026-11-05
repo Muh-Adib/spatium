@@ -73,9 +73,9 @@ export async function getGscOverview(siteUrl = 'https://www.unimasi.com'): Promi
       try {
         const data = JSON.parse(cached.payload)
         return connectedResult<GscOverview>(data)
-      } catch {}
+      } catch (err) { console.warn("[observable error]:", err) }
     }
-  } catch {}
+  } catch (err) { console.warn("[observable error]:", err) }
 
 
   try {
@@ -139,7 +139,7 @@ export async function getGscOverview(siteUrl = 'https://www.unimasi.com'): Promi
           expiresAt,
         })
       }
-    } catch {}
+    } catch (err) { console.warn("[observable error]:", err) }
 
     return connectedResult<GscOverview>(overview)
   } catch (err: any) {

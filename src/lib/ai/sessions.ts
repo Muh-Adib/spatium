@@ -103,10 +103,10 @@ export async function getAiSessionById(
       let agenticReport = null
       try {
         if (m.toolCalls) toolCalls = JSON.parse(m.toolCalls)
-      } catch (_) {}
+      } catch (err) { console.warn("[observable error]:", err) }
       try {
         if (m.agenticReport) agenticReport = JSON.parse(m.agenticReport)
-      } catch (_) {}
+      } catch (err) { console.warn("[observable error]:", err) }
 
       return {
         id: m.id,
@@ -162,7 +162,7 @@ export async function createAiSession(
         createdAt: now,
       })
     }
-  } catch (_) {}
+  } catch (err) { console.warn("[observable error]:", err) }
 
   await prisma.orm.public.AiSession.create({
     id: sessionId,
@@ -367,7 +367,7 @@ export async function compressAiSession(
     // Attempt AI-assisted summarization if API key available
     if (options?.apiKey) {
       try {
-        const compressPrompt = `Anda adalah asisten kompresi memori obrolan (Conversation Context Compressor) untuk platform SEGIA Studio.
+        const compressPrompt = `Anda adalah asisten kompresi memori obrolan (Conversation Context Compressor) untuk platform UNIMASI Studio.
 Tugas Anda adalah merangkum percakapan panjang menjadi satu blok ringkasan terstruktur dan padat untuk dimasukkan ke memori AI (Prompt Cache).
 
 Format Ringkasan Wajib:

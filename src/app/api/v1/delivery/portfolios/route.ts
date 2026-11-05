@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
       try {
         const seedPortfolio = require('@/data/seed/seed_portfolio.json')
         portfolios = limit ? seedPortfolio.slice(0, limit) : seedPortfolio
-      } catch {}
+      } catch (err) { console.warn("[API observable error]:", err) }
     }
     return jsonResponse({ portfolios })
   } catch (err) {

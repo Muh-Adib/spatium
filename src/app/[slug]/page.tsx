@@ -12,6 +12,7 @@ import {
   getMediaUrl,
   type CoreTag,
 } from '@/lib/core'
+import { sanitizeHtmlContent } from '@/lib/security/sanitize-html'
 import '@/pages/article.css'
 
 const SITE_URL = 'https://unimasi.studio'
@@ -307,7 +308,7 @@ export default async function BlogPostPage({
 
             <div
               className="article__rendered-content"
-              dangerouslySetInnerHTML={{ __html: processedContent }}
+              dangerouslySetInnerHTML={{ __html: sanitizeHtmlContent(processedContent) }}
             />
 
             <p className="article__back">

@@ -1,5 +1,5 @@
 /**
- * SEGIA Publication Gate (L3-T7 / Section 3.4)
+ * UNIMASI Publication Gate (L3-T7 / Section 3.4)
  * Strict validation rule preventing catalog content from publishing if critical SEO
  * or accessibility requirements (alt text, meta tags, schema validity) are violated.
  */

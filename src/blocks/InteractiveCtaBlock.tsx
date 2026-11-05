@@ -4,6 +4,7 @@ import React from 'react'
 import Link from 'next/link'
 import { InteractiveCtaBlockInstance, TextEditorialBlockInstance } from './contracts'
 import { Icon } from '@/components/Icon'
+import { sanitizeHtmlContent } from '@/lib/security/sanitize-html'
 
 export function InteractiveCtaBlock({ block }: { block: InteractiveCtaBlockInstance | any }) {
   const data = block?.data || block || {}
@@ -16,9 +17,9 @@ export function InteractiveCtaBlock({ block }: { block: InteractiveCtaBlockInsta
     (block?.ctaText || data.ctaText || block?.buttonText
       ? {
           label: block?.ctaText || data.ctaText || block?.buttonText || 'Mulai Sekarang',
-          href: block?.ctaLink || data.ctaLink || block?.buttonHref || '/kontak',
+          href: block?.ctaLink || data.ctaLink || block?.buttonHref || '/contact',
         }
-      : { label: 'Mulai Sekarang', href: '/kontak' })
+      : { label: 'Mulai Sekarang', href: '/contact' })
   const secondaryCta =
     block?.secondaryCta ||
     data.secondaryCta ||
@@ -44,7 +45,7 @@ export function InteractiveCtaBlock({ block }: { block: InteractiveCtaBlockInsta
 
         <div className="flex flex-wrap items-center justify-center gap-4">
           {primaryCta ? (
-            <Link href={primaryCta.href || '/kontak'} className="btn btn--primary">
+            <Link href={primaryCta.href || '/contact'} className="btn btn--primary">
               {primaryCta.label || 'Mulai Sekarang'}
               <span className="btn__icon">
                 <Icon name="arrow-right" size={16} />
@@ -53,7 +54,7 @@ export function InteractiveCtaBlock({ block }: { block: InteractiveCtaBlockInsta
           ) : null}
 
           {secondaryCta ? (
-            <Link href={secondaryCta.href || '/kontak'} className="btn btn--secondary">
+            <Link href={secondaryCta.href || '/contact'} className="btn btn--secondary">
               {secondaryCta.label}
             </Link>
           ) : null}
@@ -90,7 +91,7 @@ export function TextEditorialBlock({ block }: { block: TextEditorialBlockInstanc
 
           <div
             className={`prose prose-invert max-w-none ${isSplit ? 'lg:col-span-7' : ''}`}
-            dangerouslySetInnerHTML={{ __html: contentHtml }}
+            dangerouslySetInnerHTML={{ __html: sanitizeHtmlContent(contentHtml) }}
           />
         </div>
       </div>

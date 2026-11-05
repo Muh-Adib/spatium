@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { toolRegistry } from '@/lib/agent/registry'
+import { toolRegistry, type ToolScope, type ToolCategory } from '@/lib/agent/registry'
 import { requireUser } from '@/lib/auth/rbac'
 
 export async function GET(request: NextRequest) {
@@ -7,8 +7,10 @@ export async function GET(request: NextRequest) {
   if (auth.error) return auth.error
 
   const { searchParams } = new URL(request.url)
-  const category = (searchParams.get('category') as any) || undefined
-  const scope = (searchParams.get('scope') as any) || undefined
+  const categoryParam = searchParams.get('category')
+  const scopeParam = searchParams.get('scope')
+  const category = (categoryParam as ToolCategory) || undefined
+  const scope = (scopeParam as ToolScope) || undefined
 
   const tools = toolRegistry.list({ category, scope }).map((t) => ({
     name: t.name,

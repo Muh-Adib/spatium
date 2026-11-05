@@ -1,5 +1,5 @@
 /**
- * SEGIA Platform — Role & Editorial Lifecycle Definitions
+ * UNIMASI Platform — Role & Editorial Lifecycle Definitions
  * Shared between Server and Client Components.
  */
 

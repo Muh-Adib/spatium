@@ -411,8 +411,9 @@ export async function executeMultiQuerySearch(queries: string[], searchScope = '
     sourceType: 'internal_catalog' | 'web_search' | 'documentation'
   }> = []
 
-  const portfolios = Array.isArray(seedPortfolio) ? (seedPortfolio as any[]) : []
-  const services = Array.isArray(seedServices) ? (seedServices as any[]) : []
+  type SeedItem = Record<string, any>
+  const portfolios = Array.isArray(seedPortfolio) ? (seedPortfolio as SeedItem[]) : []
+  const services = Array.isArray(seedServices) ? (seedServices as SeedItem[]) : []
 
   for (const q of queries) {
     const qLower = q.toLowerCase().trim()
@@ -516,7 +517,8 @@ export async function executeFetchWebEvidence(urlStr: string, claimToVerify?: st
   // Case A: Internal path
   if (urlStr.startsWith('/') || urlStr.includes('unimasi.com')) {
     const slug = urlStr.split('/').filter(Boolean).pop() || ''
-    const portfolioMatch = (seedPortfolio as any[]).find((p) => p.slug === slug)
+    type SeedItem = Record<string, any>
+    const portfolioMatch = (seedPortfolio as SeedItem[]).find((p) => p.slug === slug)
     if (portfolioMatch) {
       const fullText = `${portfolioMatch.title}. ${portfolioMatch.summary} ${portfolioMatch.challenge} ${portfolioMatch.solution}`.replace(/<[^>]*>/g, ' ')
       return {
@@ -529,7 +531,7 @@ export async function executeFetchWebEvidence(urlStr: string, claimToVerify?: st
       }
     }
 
-    const serviceMatch = (seedServices as any[]).find((s) => s.slug === slug)
+    const serviceMatch = (seedServices as SeedItem[]).find((s) => s.slug === slug)
     if (serviceMatch) {
       const fullText = `${serviceMatch.name}. ${serviceMatch.shortDescription || ''} ${serviceMatch.description || ''}`.replace(/<[^>]*>/g, ' ')
       return {
@@ -1208,7 +1210,7 @@ Pengguna meminta Anda untuk MELANJUTKAN pekerjaan yang terputus atau belum seles
           executedTools,
           durationMs: Date.now() - t0,
           model: synthesisRes.model || lastModel,
-          provider: (synthesisRes.provider as any) || lastProvider,
+          provider: (synthesisRes.provider as 'google' | 'openrouter' | undefined) || lastProvider,
           circuitBreaker: {
             triggered: true,
             reason: circuitBreakerReason,

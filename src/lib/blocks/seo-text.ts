@@ -1,5 +1,5 @@
 /**
- * SEGIA SEO Text Extractor from Visual Blocks (L3-T7)
+ * UNIMASI SEO Text Extractor from Visual Blocks (L3-T7)
  * Extracts textual content, headings, and image accessibility data from visual block arrays
  * for SEO analysis, readability scoring, and snippet generation.
  */
@@ -111,7 +111,8 @@ export function blocksToSeoText(blocks: any[]): ExtractedSeoText {
       for (const row of block.rows) {
         if (!row || typeof row !== 'object') continue
         if (row.feature) paragraphs.push(row.feature)
-        if (row.segia) paragraphs.push(row.segia)
+        if (row.unimasi) paragraphs.push(row.unimasi)
+        else if (row.segia) paragraphs.push(row.segia)
         if (row.traditional) paragraphs.push(row.traditional)
       }
     }

@@ -2,8 +2,7 @@ export const STUDIO_EMAIL = process.env.NEXT_PUBLIC_STUDIO_EMAIL || 'hello@unima
 
 export const CONTACT = {
   email: STUDIO_EMAIL,
-  /* Placeholder studio details — replace with verified company information. */
-  phone: '+00 000 000 000',
+  phone: process.env.NEXT_PUBLIC_PHONE || '',
   location: 'Remote-first studio · working with teams worldwide',
   hours: 'Mon–Fri · 09:00–18:00',
 } as const

@@ -271,7 +271,7 @@ export function RichContentEditable({
               left: `${selectionToolbar.left}px`,
               transform: 'translateX(-50%)',
             }}
-            className="fixed z-50 flex items-center gap-0.5 bg-[#1C1C1C] border border-white/20 rounded-xl px-1.5 py-1 shadow-2xl backdrop-blur-xl animate-fadeIn text-xs text-white"
+            className="fixed z-50 flex items-center gap-0.5 bg-surface-elevated border border-white/20 rounded-xl px-1.5 py-1 shadow-2xl backdrop-blur-xl animate-fadeIn text-xs text-white"
             onMouseDown={(e) => e.preventDefault()}
           >
             {showLinkInput ? (
@@ -583,7 +583,7 @@ export function NotionTableEditor({
                         value={headers[colIdx] || ''}
                         onChange={(e) => handleUpdateHeader(colIdx, e.target.value)}
                         placeholder={`Kolom ${colIdx + 1}`}
-                        className="w-full bg-transparent border-0 border-b border-transparent focus:border-blue-400 font-semibold text-xs text-white focus:outline-none p-1 placeholder:text-neutral-500"
+                        className="w-full bg-transparent border-0 border-b border-transparent focus:border-accent-400 font-semibold text-xs text-white focus:outline-none p-1 placeholder:text-neutral-500"
                       />
                       {columnCount > 1 && (
                         <button
@@ -786,10 +786,10 @@ export function ArticleEditorCanvas({
             <button
               type="button"
               onClick={() => setIsImportModalOpen(true)}
-              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold text-sky-300 hover:text-white bg-sky-500/10 hover:bg-sky-500/20 border border-sky-400/25 transition-all shadow-sm cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold text-info-300 hover:text-white bg-info/10 hover:bg-info/20 border border-info/25 transition-all shadow-sm cursor-pointer"
               title="Tempel atau impor teks artikel dari ChatGPT / Claude dalam format Markdown"
             >
-              <Sparkles className="w-3.5 h-3.5 text-sky-400" />
+              <Sparkles className="w-3.5 h-3.5 text-info" />
               <span>Impor Markdown (AI)</span>
             </button>
 
@@ -823,15 +823,15 @@ export function ArticleEditorCanvas({
         </div>
 
         {importSuccessMessage && (
-          <div className="mb-4 p-3 rounded-xl bg-sky-500/15 border border-sky-400/30 flex items-center justify-between text-xs text-sky-200 animate-in fade-in duration-200">
+          <div className="mb-4 p-3 rounded-xl bg-info/15 border border-info/30 flex items-center justify-between text-xs text-info-300 animate-in fade-in duration-200">
             <div className="flex items-center gap-2">
-              <Check className="w-4 h-4 text-sky-400 shrink-0" />
+              <Check className="w-4 h-4 text-info shrink-0" />
               <span>{importSuccessMessage}</span>
             </div>
             <button
               type="button"
               onClick={() => setImportSuccessMessage(null)}
-              className="text-sky-400 hover:text-white"
+              className="text-info hover:text-white"
             >
               <X className="w-3.5 h-3.5" />
             </button>
@@ -881,7 +881,7 @@ export function ArticleEditorCanvas({
                 className="relative group rounded-xl py-1.5 px-3 -mx-3 transition-colors hover:bg-white/[0.02] border border-transparent hover:border-white/5"
               >
                 {/* Floating Gutter Controls on Hover */}
-                <div className="absolute -top-3.5 right-2 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-all z-10 flex items-center gap-1 bg-[#1A1A1A] border border-white/15 rounded-md px-1.5 py-0.5 shadow-xl text-[10px] text-neutral-300">
+                <div className="absolute -top-3.5 right-2 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-all z-10 flex items-center gap-1 bg-surface-elevated border border-white/15 rounded-md px-1.5 py-0.5 shadow-xl text-[10px] text-neutral-300">
                   {/* Type switcher dropdown */}
                   <div className="relative">
                     <button
@@ -908,7 +908,7 @@ export function ArticleEditorCanvas({
 
                     {activeTypeDropdownBlockId === block.id && (
                       <div
-                        className="absolute top-full right-0 mt-1.5 z-50 w-48 p-1 bg-[#1A1A1A]/95 border border-white/10 rounded-xl shadow-2xl shadow-black/80 backdrop-blur-xl animate-in fade-in zoom-in-95 duration-100"
+                        className="absolute top-full right-0 mt-1.5 z-50 w-48 p-1 bg-surface-elevated/95 border border-white/10 rounded-xl shadow-2xl shadow-black/80 backdrop-blur-xl animate-in fade-in zoom-in-95 duration-100"
                         onClick={(e) => e.stopPropagation()}
                       >
                         <div className="px-2.5 py-1 text-[9px] font-mono text-neutral-400 uppercase tracking-wider border-b border-white/[0.06] mb-1">
@@ -933,15 +933,15 @@ export function ArticleEditorCanvas({
                               onClick={() => onConvertBlockType(block.id, item.type)}
                               className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs text-left transition-colors cursor-pointer ${
                                 isCurrent
-                                  ? 'bg-sky-500/15 text-sky-300 font-semibold'
+                                  ? 'bg-info/15 text-info-300 font-semibold'
                                   : 'text-neutral-300 hover:bg-white/10 hover:text-white'
                               }`}
                             >
                               <div className="flex items-center gap-2">
-                                <Icon className={`w-3.5 h-3.5 ${isCurrent ? 'text-sky-400' : 'text-neutral-400'}`} />
+                                <Icon className={`w-3.5 h-3.5 ${isCurrent ? 'text-info' : 'text-neutral-400'}`} />
                                 <span>{item.label}</span>
                               </div>
-                              {isCurrent && <Check className="w-3.5 h-3.5 text-sky-400" />}
+                              {isCurrent && <Check className="w-3.5 h-3.5 text-info" />}
                             </button>
                           )
                         })}
@@ -1303,14 +1303,14 @@ export function ArticleEditorCanvas({
                         onChange={(e) => onUpdateBlock(block.id, { language: e.target.value })}
                         className="bg-white/10 border border-white/15 rounded px-2 py-0.5 text-[11px] font-mono text-white focus:outline-none"
                       >
-                        <option value="typescript" className="bg-[#1A1A1A]">TypeScript</option>
-                        <option value="javascript" className="bg-[#1A1A1A]">JavaScript</option>
-                        <option value="html" className="bg-[#1A1A1A]">HTML</option>
-                        <option value="css" className="bg-[#1A1A1A]">CSS</option>
-                        <option value="python" className="bg-[#1A1A1A]">Python</option>
-                        <option value="bash" className="bg-[#1A1A1A]">Bash / Shell</option>
-                        <option value="sql" className="bg-[#1A1A1A]">SQL</option>
-                        <option value="json" className="bg-[#1A1A1A]">JSON</option>
+                        <option value="typescript" className="bg-surface-elevated">TypeScript</option>
+                        <option value="javascript" className="bg-surface-elevated">JavaScript</option>
+                        <option value="html" className="bg-surface-elevated">HTML</option>
+                        <option value="css" className="bg-surface-elevated">CSS</option>
+                        <option value="python" className="bg-surface-elevated">Python</option>
+                        <option value="bash" className="bg-surface-elevated">Bash / Shell</option>
+                        <option value="sql" className="bg-surface-elevated">SQL</option>
+                        <option value="json" className="bg-surface-elevated">JSON</option>
                       </select>
                     </div>
                     <textarea
@@ -1514,7 +1514,7 @@ export function ArticleEditorCanvas({
                   onClick={() => onAddBlock('heading2')}
                   className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-xs text-neutral-300 hover:text-white flex items-center gap-1.5 transition-colors"
                 >
-                  <Heading2 className="w-3.5 h-3.5 text-sky-400" />
+                  <Heading2 className="w-3.5 h-3.5 text-info" />
                   <span>Subjudul H2</span>
                 </button>
                 <button
@@ -1522,7 +1522,7 @@ export function ArticleEditorCanvas({
                   onClick={() => onAddBlock('heading3')}
                   className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-xs text-neutral-300 hover:text-white flex items-center gap-1.5 transition-colors"
                 >
-                  <Heading3 className="w-3.5 h-3.5 text-sky-400" />
+                  <Heading3 className="w-3.5 h-3.5 text-info" />
                   <span>Subjudul H3</span>
                 </button>
                 <button
@@ -1616,16 +1616,16 @@ export function ArticleEditorCanvas({
         {/* Import Markdown Modal */}
         {isImportModalOpen && (
           <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
-            <div className="w-full max-w-2xl bg-[#141414] border border-white/15 rounded-2xl shadow-2xl p-5 sm:p-6 space-y-4 animate-in fade-in zoom-in-95 duration-150">
+            <div className="w-full max-w-2xl bg-[var(--studio-bg)] border border-white/15 rounded-2xl shadow-2xl p-5 sm:p-6 space-y-4 animate-in fade-in zoom-in-95 duration-150">
               <div className="flex items-start justify-between gap-3 pb-3 border-b border-white/10">
                 <div className="flex items-center gap-2.5">
-                  <div className="p-2 rounded-xl bg-sky-500/10 border border-sky-400/20 text-sky-400">
+                  <div className="p-2 rounded-xl bg-info/10 border border-info/20 text-info">
                     <Sparkles className="w-5 h-5" />
                   </div>
                   <div>
                     <h3 className="text-base font-bold text-white flex items-center gap-2">
                       <span>Impor Dokumen Markdown (ChatGPT / AI)</span>
-                      <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-sky-500/15 text-sky-300 border border-sky-500/20">
+                      <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-info/15 text-info-300 border border-info/20">
                         Auto Parser
                       </span>
                     </h3>
@@ -1650,7 +1650,7 @@ export function ArticleEditorCanvas({
                   value={importText}
                   onChange={(e) => setImportText(e.target.value)}
                   autoFocus
-                  className="w-full font-mono text-xs bg-black/70 border border-white/15 rounded-xl p-4 text-emerald-300 focus:outline-none focus:border-sky-400 leading-relaxed scrollbar-thin resize-none"
+                  className="w-full font-mono text-xs bg-black/70 border border-white/15 rounded-xl p-4 text-emerald-300 focus:outline-none focus:border-accent-400 leading-relaxed scrollbar-thin resize-none"
                   placeholder={`# Judul Artikel\n## Subjudul Bagian\n\n> **Kutipan penting.** Penjelasan kutipan...\n\nParagraf penjelasan dengan **tebal** dan [tautan](#link)...\n\n| Jenis Layanan | Cocok Untuk | Fokus Utama |\n|---|---|---|\n| Website Profil | Perusahaan Resmi | Kredibilitas |\n\n1. [Poin Daftar Isi](#poin-1)\n2. [Poin Kedua](#poin-2)`}
                 />
               </div>
@@ -1661,9 +1661,9 @@ export function ArticleEditorCanvas({
                     type="checkbox"
                     checked={useExtractedTitle}
                     onChange={(e) => setUseExtractedTitle(e.target.checked)}
-                    className="rounded border-white/20 bg-black/40 text-sky-500 focus:ring-0 focus:ring-offset-0"
+                    className="rounded border-white/20 bg-black/40 text-info focus:ring-0 focus:ring-offset-0"
                   />
-                  <span>Ambil judul otomatis dari baris pertama <code className="text-[11px] text-sky-300 font-mono"># Judul</code></span>
+                  <span>Ambil judul otomatis dari baris pertama <code className="text-[11px] text-info-300 font-mono"># Judul</code></span>
                 </label>
 
                 <div className="flex items-center justify-end gap-2 shrink-0">
@@ -1678,7 +1678,7 @@ export function ArticleEditorCanvas({
                     type="button"
                     onClick={handleExecuteImport}
                     disabled={!importText.trim()}
-                    className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-sky-500 hover:bg-sky-400 disabled:opacity-40 disabled:hover:bg-sky-500 text-white text-xs font-bold transition-all shadow-md cursor-pointer"
+                    className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-info hover:bg-info disabled:opacity-40 disabled:hover:bg-accent-500 text-accent-950 text-xs font-bold transition-all shadow-md cursor-pointer"
                   >
                     <Sparkles className="w-3.5 h-3.5" />
                     <span>Konversi ke Blok Visual</span>

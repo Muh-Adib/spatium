@@ -1,11 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { syncFrontendBlockManifest, ingestRemoteBlockManifest } from '@/lib/blocks/manifestSync'
 import { blockOntology } from '@/lib/blocks/ontology'
+import { requireUser } from '@/lib/auth/rbac'
 
 /**
  * GET: Lists all blocks known to the Core Backend, or syncs from query ?url=...
  */
 export async function GET(req: NextRequest) {
+  const auth = await requireUser(req)
+  if (auth.error) return auth.error
+
   const targetUrl = req.nextUrl.searchParams.get('url')
 
   if (targetUrl) {
@@ -35,6 +39,8 @@ export async function GET(req: NextRequest) {
  * POST: Directly ingest block manifest payload or trigger sync by URL
  */
 export async function POST(req: NextRequest) {
+  const auth = await requireUser(req)
+  if (auth.error) return auth.error
   try {
     const body = await req.json()
 

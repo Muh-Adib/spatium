@@ -39,7 +39,7 @@ export function IframeEmbed({
         </div>
         <h3 className="text-body-lg font-semibold text-white">Live Preview Ditangguhkan</h3>
         <p className="mt-2 text-body-sm text-neutral-400 max-w-md mx-auto">
-          {validation.reason ?? 'Domain embed tidak diizinkan oleh kebijakan keamanan SEGIA.'}
+          {validation.reason ?? 'Domain embed tidak diizinkan oleh kebijakan keamanan UNIMASI.'}
         </p>
         <div className="mt-6">
           <a

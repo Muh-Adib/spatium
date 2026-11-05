@@ -82,7 +82,7 @@ export function StudioBlocksCatalog() {
 
   if (loading) {
     return (
-      <div className="flex h-64 w-full items-center justify-center rounded-2xl border border-white/10 bg-[#161616]">
+      <div className="flex h-64 w-full items-center justify-center rounded-2xl border border-white/10 bg-[var(--studio-sidebar-bg)]">
         <div className="flex flex-col items-center gap-3 text-neutral-400">
           <div className="h-6 w-6 animate-spin rounded-full border-2 border-accent-400 border-t-transparent" />
           <span className="font-mono text-xs">Memuat Manifest Blok Frontend…</span>
@@ -130,7 +130,7 @@ export function StudioBlocksCatalog() {
         {/* Left Column: Block List (5 cols) */}
         <div className="lg:col-span-5 space-y-4">
           {/* Search & Category Filter */}
-          <div className="rounded-2xl border border-white/10 bg-[#161616] p-3 space-y-3">
+          <div className="rounded-2xl border border-white/10 bg-[var(--studio-sidebar-bg)] p-3 space-y-3">
             <div className="relative">
               <Search className="h-3.5 w-3.5 text-neutral-500 absolute left-3 top-1/2 -translate-y-1/2" />
               <input
@@ -170,7 +170,7 @@ export function StudioBlocksCatalog() {
                   className={`w-full text-left rounded-2xl p-4 transition-all border ${
                     isSelected
                       ? 'border-accent-400/50 bg-white/[0.08] shadow-lg ring-1 ring-accent-400/20'
-                      : 'border-white/5 bg-[#161616] hover:border-white/15 hover:bg-white/[0.04]'
+                      : 'border-white/5 bg-[var(--studio-sidebar-bg)] hover:border-white/15 hover:bg-white/[0.04]'
                   }`}
                 >
                   <div className="flex items-center justify-between gap-2 mb-1.5">
@@ -190,7 +190,7 @@ export function StudioBlocksCatalog() {
         {/* Right Column: Inspector Details (7 cols) */}
         <div className="lg:col-span-7">
           {activeBlock ? (
-            <div className="rounded-2xl border border-white/10 bg-[#161616] p-6 space-y-6 shadow-xl">
+            <div className="rounded-2xl border border-white/10 bg-[var(--studio-sidebar-bg)] p-6 space-y-6 shadow-xl">
               {/* Header */}
               <div className="flex items-start justify-between gap-4 border-b border-white/10 pb-5">
                 <div>
@@ -330,7 +330,7 @@ export function StudioBlocksCatalog() {
               )}
             </div>
           ) : (
-            <div className="flex h-64 items-center justify-center rounded-2xl border border-white/10 bg-[#161616] text-neutral-500 text-xs">
+            <div className="flex h-64 items-center justify-center rounded-2xl border border-white/10 bg-[var(--studio-sidebar-bg)] text-neutral-500 text-xs">
               Pilih salah satu blok dari daftar untuk melihat spesifikasi detail.
             </div>
           )}

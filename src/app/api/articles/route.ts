@@ -77,7 +77,7 @@ export async function GET(request: NextRequest) {
         authorIds: auth.user.role === 'AUTHOR' ? ownAuthors.map((author) => author.id) : undefined,
         category: category || undefined,
         search: search || undefined,
-        status: status ? (status as any) : undefined,
+        status: status ? (status as import('@/lib/auth/rbac').ArticleStatus | 'all') : undefined,
       })
 
       if (dbResult) {
@@ -162,13 +162,14 @@ export async function POST(request: NextRequest) {
       locale = 'id',
       focusKeyphrase,
     } = body
-    const coverUrl = featuredImage || rawBody.coverUrl
+    const coverUrl = featuredImage || (rawBody.coverUrl as string | undefined)
     const coverAlt = body.coverAlt ?? body.seoData?.openGraph?.imageAlt ?? ''
-    const translationGroupId = (rawBody as any).translationGroupId
-    const relatedKeyphrases = (rawBody as any).relatedKeyphrases
+    const rawBodyRecord = rawBody as Record<string, unknown>
+    const translationGroupId = typeof rawBodyRecord.translationGroupId === 'string' ? rawBodyRecord.translationGroupId : undefined
+    const relatedKeyphrases = Array.isArray(rawBodyRecord.relatedKeyphrases) ? (rawBodyRecord.relatedKeyphrases as string[]) : undefined
     const seoData = mergeEditorialSeo(undefined, body.seoData, { metaTitle, metaDescription, coverAlt })
-    const isCornerstone = (rawBody as any).isCornerstone
-    const primaryCategory = (rawBody as any).primaryCategory
+    const isCornerstone = Boolean(rawBodyRecord.isCornerstone)
+    const primaryCategory = typeof rawBodyRecord.primaryCategory === 'string' ? rawBodyRecord.primaryCategory : undefined
 
     if (!title || !content) {
       return NextResponse.json(
@@ -272,7 +273,7 @@ export async function POST(request: NextRequest) {
           slug: cleanSlug,
           excerpt: excerpt || title,
           content: formattedContent,
-          status: targetStatus as any,
+          status: targetStatus as 'draft' | 'in_review' | 'approved' | 'scheduled' | 'published',
           tags,
           categoryId: categoryRow.id,
           authorId: authorRow.id,
@@ -639,7 +640,7 @@ export async function PATCH(request: NextRequest) {
         ...schedule,
         ...(nextStatus === 'scheduled' ? { scheduledBy: user.id, scheduleError: null } : {}),
         ...(nextStatus && nextStatus !== 'scheduled' ? { scheduledAt: null } : {}),
-        ...(nextStatus ? { status: nextStatus as any } : {}),
+        ...(nextStatus ? { status: nextStatus as 'draft' | 'in_review' | 'approved' | 'scheduled' | 'published' } : {}),
         ...(explicitPublishedAt ? { publishedAt: explicitPublishedAt } : nextStatus === 'published' && !existingArticle.publishedAt ? { publishedAt: timestamp } : {}),
       })
     } catch (dbErr: any) {

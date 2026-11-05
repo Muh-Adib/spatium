@@ -41,7 +41,7 @@ export function ArticleUnsavedModal({
       aria-labelledby="unsaved-modal-title"
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fadeIn"
     >
-      <div className="relative max-w-md w-full rounded-2xl bg-[#181818] border border-amber-500/30 p-6 space-y-5 shadow-2xl shadow-black/80">
+      <div className="relative max-w-md w-full rounded-2xl bg-surface-elevated border border-amber-500/30 p-6 space-y-5 shadow-2xl shadow-black/80">
         {/* Header */}
         <div className="flex items-start justify-between pb-3 border-b border-white/10 gap-3">
           <div className="flex items-center gap-3">

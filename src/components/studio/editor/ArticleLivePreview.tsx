@@ -93,7 +93,7 @@ export function ArticleLivePreview({
   return (
     <div className="flex-1 h-full flex flex-col bg-[#0D0D0D] overflow-hidden select-none">
       {/* Top Device Bar */}
-      <div className="h-10 shrink-0 px-4 bg-[#141414] border-b border-white/[0.08] flex items-center justify-between">
+      <div className="h-10 shrink-0 px-4 bg-[var(--studio-bg)] border-b border-white/[0.08] flex items-center justify-between">
         <div className="flex items-center gap-2">
           <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[10px] font-mono text-emerald-400 font-semibold">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
@@ -160,7 +160,7 @@ export function ArticleLivePreview({
       {/* Preview Canvas Container */}
       <div className="flex-1 overflow-y-auto p-4 sm:p-6 flex items-start justify-center scrollbar-thin">
         <div
-          className={`transition-all duration-300 bg-[#161616] text-neutral-100 rounded-2xl border border-white/10 shadow-2xl overflow-hidden ${
+          className={`transition-all duration-300 bg-[var(--studio-sidebar-bg)] text-neutral-100 rounded-2xl border border-white/10 shadow-2xl overflow-hidden ${
             device === 'desktop'
               ? 'w-full max-w-[820px]'
               : device === 'tablet'
@@ -169,7 +169,7 @@ export function ArticleLivePreview({
           }`}
         >
           {/* Simulated Public Article Hero */}
-          <div className="relative overflow-hidden bg-[#222222] px-6 py-10 sm:px-10 sm:py-14 border-b border-white/10">
+          <div className="relative overflow-hidden bg-surface-overlay px-6 py-10 sm:px-10 sm:py-14 border-b border-white/10">
             {/* Ambient Lighting Glow */}
             <div className="absolute top-0 right-0 w-80 h-80 bg-[#FFD600]/15 rounded-full blur-3xl pointer-events-none" />
             <div className="absolute bottom-0 left-0 w-64 h-64 bg-accent-500/10 rounded-full blur-2xl pointer-events-none" />
@@ -185,7 +185,7 @@ export function ArticleLivePreview({
               </div>
 
               {/* Category Badge */}
-              <span className="inline-block px-3 py-1 rounded-full bg-[#1A1A1A] text-[#FFD600] border border-[#FFD600]/30 font-mono text-xs font-semibold">
+              <span className="inline-block px-3 py-1 rounded-full bg-surface-elevated text-[#FFD600] border border-[#FFD600]/30 font-mono text-xs font-semibold">
                 {category}
               </span>
 

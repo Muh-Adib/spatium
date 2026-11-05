@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
       category,
       search,
       locale,
-      status: status as any,
+      status: status as import('@/lib/db/articles').ArticleQueryOptions['status'],
     })
 
     if (!result?.data || result.data.length === 0) {
@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
         const pageCount = Math.ceil(total / pageSize)
         const data = seedArticles.slice((page - 1) * pageSize, page * pageSize)
         result = {
-          data,
+          data: data as import('@/lib/content/types').Article[],
           meta: {
             pagination: {
               page,
@@ -48,8 +48,8 @@ export async function GET(request: NextRequest) {
               total,
             }
           }
-        } as any
-      } catch {}
+        }
+      } catch (err) { console.warn("[API observable error]:", err) }
     }
 
     return jsonResponse(result)

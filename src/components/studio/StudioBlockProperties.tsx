@@ -168,9 +168,9 @@ export default function StudioBlockProperties({
   const Icon = meta.icon
 
   return (
-    <div className="flex flex-col h-full bg-[#1e1e1e] border-r border-white/10 select-none text-white overflow-hidden shadow-2xl">
+    <div className="flex flex-col h-full bg-surface-overlay border-r border-white/10 select-none text-white overflow-hidden shadow-2xl">
       {/* Top Header Bar */}
-      <div className="flex items-center justify-between px-4 py-2.5 border-b border-white/10 bg-[#191919]">
+      <div className="flex items-center justify-between px-4 py-2.5 border-b border-white/10 bg-[var(--studio-bg)]">
         <Tooltip label="Kembali ke Dokumen" hint="Deselect blok aktif dan kembali ke susunan kanvas" side="bottom">
           <button
             type="button"
@@ -236,7 +236,7 @@ export default function StudioBlockProperties({
       </div>
 
       {/* Block Badge & Info */}
-      <div className="px-4 py-3 border-b border-white/5 bg-[#141414] flex items-center justify-between gap-3">
+      <div className="px-4 py-3 border-b border-white/5 bg-[var(--studio-bg)] flex items-center justify-between gap-3">
         <div className="flex items-center gap-2.5 min-w-0">
           <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#FFD600]/10 border border-[#FFD600]/20 text-[#FFD600]">
             <Icon className="w-4 h-4" />
@@ -258,7 +258,7 @@ export default function StudioBlockProperties({
       {/* Form Properties Body */}
       <div className="flex-1 overflow-y-auto p-5 space-y-5">
         {/* ─── Shared: Animasi & Efek Immersive (GSAP / CSS) ──────────────── */}
-        <div className="rounded-2xl border border-white/10 bg-[#141414] overflow-hidden transition-all">
+        <div className="rounded-2xl border border-white/10 bg-[var(--studio-bg)] overflow-hidden transition-all">
           <button
             type="button"
             onClick={() => setAnimationExpanded(!animationExpanded)}
@@ -283,13 +283,13 @@ export default function StudioBlockProperties({
           </button>
 
           {animationExpanded && (
-            <div className="p-4 border-t border-white/10 space-y-3.5 bg-[#121212]/80">
+            <div className="p-4 border-t border-white/10 space-y-3.5 bg-[var(--studio-bg)]/80">
               <div>
                 <FieldHeader label="Preset" tooltip="Gaya transisi animasi saat blok memasuki viewport" />
                 <select
                   value={block.animation?.type || 'none'}
                   onChange={(e) => setAnimationField('type', e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl bg-[#181818] border border-white/10 text-[#FFD600] text-xs font-mono"
+                  className="w-full px-3 py-2 rounded-xl bg-surface-elevated border border-white/10 text-[#FFD600] text-xs font-mono"
                 >
                   <option value="none">Tanpa Animasi (Normal Static)</option>
                   <option value="fade-up">Fade Up Reveal (Smooth Modern)</option>
@@ -306,7 +306,7 @@ export default function StudioBlockProperties({
                   <select
                     value={block.animation?.duration || 'normal'}
                     onChange={(e) => setAnimationField('duration', e.target.value)}
-                    className="w-full px-3 py-1.5 rounded-xl bg-[#181818] border border-white/10 text-white text-xs font-mono"
+                    className="w-full px-3 py-1.5 rounded-xl bg-surface-elevated border border-white/10 text-white text-xs font-mono"
                   >
                     <option value="fast">Cepat (0.3s)</option>
                     <option value="normal">Normal (0.6s)</option>
@@ -318,7 +318,7 @@ export default function StudioBlockProperties({
                   <select
                     value={block.animation?.delay || 'none'}
                     onChange={(e) => setAnimationField('delay', e.target.value)}
-                    className="w-full px-3 py-1.5 rounded-xl bg-[#181818] border border-white/10 text-white text-xs font-mono"
+                    className="w-full px-3 py-1.5 rounded-xl bg-surface-elevated border border-white/10 text-white text-xs font-mono"
                   >
                     <option value="none">Langsung (0ms)</option>
                     <option value="short">Singkat (150ms)</option>
@@ -333,7 +333,7 @@ export default function StudioBlockProperties({
                 <select
                   value={block.animation?.responsivePadding || 'normal'}
                   onChange={(e) => setAnimationField('responsivePadding', e.target.value)}
-                  className="w-full px-3 py-1.5 rounded-xl bg-[#181818] border border-white/10 text-white text-xs font-mono"
+                  className="w-full px-3 py-1.5 rounded-xl bg-surface-elevated border border-white/10 text-white text-xs font-mono"
                 >
                   <option value="compact">Kompak (py-10)</option>
                   <option value="normal">Standar Editorial (py-16)</option>
@@ -371,7 +371,7 @@ export default function StudioBlockProperties({
                 value={block.badge || block.data?.badge || ''}
                 onChange={(e) => setField('badge', e.target.value)}
                 placeholder="UNIMASI ANIMATION STUDIO"
-                className="w-full px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-white text-xs font-mono"
+                className="w-full px-3 py-2 rounded-xl bg-[var(--studio-bg)] border border-white/10 text-white text-xs font-mono"
               />
             </div>
 
@@ -385,7 +385,7 @@ export default function StudioBlockProperties({
                   setField('title', e.target.value)
                 }}
                 placeholder="Cinematic Motion & 3D Animation Showcase"
-                className="w-full px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-white text-xs font-mono font-bold"
+                className="w-full px-3 py-2 rounded-xl bg-[var(--studio-bg)] border border-white/10 text-white text-xs font-mono font-bold"
               />
             </div>
 
@@ -399,7 +399,7 @@ export default function StudioBlockProperties({
                   setField('description', e.target.value)
                 }}
                 placeholder="Eksplorasi visual imersif, animasi 3D fidelitas tinggi..."
-                className="w-full px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-neutral-300 text-xs leading-relaxed"
+                className="w-full px-3 py-2 rounded-xl bg-[var(--studio-bg)] border border-white/10 text-neutral-300 text-xs leading-relaxed"
               />
             </div>
 
@@ -411,16 +411,68 @@ export default function StudioBlockProperties({
                   value={block.primaryCta?.label || block.data?.primaryCta?.label || 'Tonton Showreel'}
                   onChange={(e) => setField('primaryCta', { ...(block.primaryCta || block.data?.primaryCta || {}), label: e.target.value })}
                   placeholder="Label Tombol"
-                  className="px-3 py-1.5 rounded-lg bg-[#141414] border border-white/10 text-xs text-white font-mono"
+                  className="px-3 py-1.5 rounded-lg bg-[var(--studio-bg)] border border-white/10 text-xs text-white font-mono"
                 />
                 <input
                   type="text"
                   value={block.primaryCta?.href || block.data?.primaryCta?.href || '#reel'}
                   onChange={(e) => setField('primaryCta', { ...(block.primaryCta || block.data?.primaryCta || {}), href: e.target.value })}
                   placeholder="Tautan URL"
-                  className="px-3 py-1.5 rounded-lg bg-[#141414] border border-white/10 text-xs text-[#FFD600] font-mono"
+                  className="px-3 py-1.5 rounded-lg bg-[var(--studio-bg)] border border-white/10 text-xs text-[#FFD600] font-mono"
                 />
               </div>
+            </div>
+
+            <div className="pt-2 border-t border-white/10 space-y-3">
+              <FieldHeader label="Media Showcase Cinema" tooltip="Aset visual atau showreel video" />
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="block text-[11px] font-mono text-neutral-400 mb-1">Tipe Media</label>
+                  <select
+                    value={block.mediaType || block.media?.type || block.data?.mediaType || 'image'}
+                    onChange={(e) => {
+                      const val = e.target.value as 'image' | 'video'
+                      setField('mediaType', val)
+                      setField('media', { ...(block.media || block.data?.media || {}), type: val })
+                    }}
+                    className="w-full px-3 py-1.5 rounded-lg bg-[var(--studio-bg)] border border-white/10 text-xs text-white"
+                  >
+                    <option value="image">Gambar / Poster</option>
+                    <option value="video">Showreel Video (Iframe/URL)</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-[11px] font-mono text-neutral-400 mb-1">URL Video Showreel</label>
+                  <input
+                    type="text"
+                    value={block.showreelUrl || block.videoUrl || block.media?.url || ''}
+                    onChange={(e) => {
+                      setField('showreelUrl', e.target.value)
+                      setField('media', { ...(block.media || block.data?.media || {}), url: e.target.value, type: 'video' })
+                    }}
+                    placeholder="https://www.youtube.com/embed/..."
+                    className="w-full px-3 py-1.5 rounded-lg bg-[var(--studio-bg)] border border-white/10 text-xs text-white font-mono"
+                  />
+                </div>
+              </div>
+
+              <StudioImageControl
+                label="Poster / Gambar Hero Cinema"
+                description="Visual 3D sinematik utama untuk showcase karya animasi."
+                value={block.heroImage || block.mediaUrl || block.media?.src || block.media?.url || ''}
+                onChange={(url) => {
+                  setField('heroImage', url)
+                  setField('mediaUrl', url)
+                  setField('media', { ...(block.media || block.data?.media || {}), url, src: url, poster: url })
+                }}
+                altText={block.media?.alt || block.mediaAlt || block.alt || ''}
+                onChangeAltText={(alt) => {
+                  setField('alt', alt)
+                  setField('mediaAlt', alt)
+                  setField('media', { ...(block.media || block.data?.media || {}), alt })
+                }}
+                aspectHint="16:9"
+              />
             </div>
           </>
         )}
@@ -435,7 +487,7 @@ export default function StudioBlockProperties({
                 value={block.badge || block.data?.badge || ''}
                 onChange={(e) => setField('badge', e.target.value)}
                 placeholder="CREATIVE PRODUCTION PIPELINE"
-                className="w-full px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-white text-xs font-mono"
+                className="w-full px-3 py-2 rounded-xl bg-[var(--studio-bg)] border border-white/10 text-white text-xs font-mono"
               />
             </div>
             <div>
@@ -448,7 +500,7 @@ export default function StudioBlockProperties({
                   setField('title', e.target.value)
                 }}
                 placeholder="Dari Konseptual Hingga Rendering Resolusi 4K"
-                className="w-full px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-white text-xs font-mono font-bold"
+                className="w-full px-3 py-2 rounded-xl bg-[var(--studio-bg)] border border-white/10 text-white text-xs font-mono font-bold"
               />
             </div>
             <div>
@@ -460,7 +512,7 @@ export default function StudioBlockProperties({
                   setField('subheadline', e.target.value)
                   setField('description', e.target.value)
                 }}
-                className="w-full px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-neutral-300 text-xs leading-relaxed"
+                className="w-full px-3 py-2 rounded-xl bg-[var(--studio-bg)] border border-white/10 text-neutral-300 text-xs leading-relaxed"
               />
             </div>
           </>
@@ -479,7 +531,7 @@ export default function StudioBlockProperties({
                   setField('title', e.target.value)
                 }}
                 placeholder="Pencapaian Produksi Studio Animasi"
-                className="w-full px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-white text-xs font-mono font-bold"
+                className="w-full px-3 py-2 rounded-xl bg-[var(--studio-bg)] border border-white/10 text-white text-xs font-mono font-bold"
               />
             </div>
             <div>
@@ -491,7 +543,7 @@ export default function StudioBlockProperties({
                   setField('subheadline', e.target.value)
                   setField('description', e.target.value)
                 }}
-                className="w-full px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-neutral-300 text-xs leading-relaxed"
+                className="w-full px-3 py-2 rounded-xl bg-[var(--studio-bg)] border border-white/10 text-neutral-300 text-xs leading-relaxed"
               />
             </div>
           </>
@@ -510,7 +562,7 @@ export default function StudioBlockProperties({
                   setField('title', e.target.value)
                 }}
                 placeholder="Siap Mewujudkan Visi Animasi Anda?"
-                className="w-full px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-white text-xs font-mono font-bold"
+                className="w-full px-3 py-2 rounded-xl bg-[var(--studio-bg)] border border-white/10 text-white text-xs font-mono font-bold"
               />
             </div>
             <div>
@@ -522,7 +574,7 @@ export default function StudioBlockProperties({
                   setField('subheadline', e.target.value)
                   setField('description', e.target.value)
                 }}
-                className="w-full px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-neutral-300 text-xs leading-relaxed"
+                className="w-full px-3 py-2 rounded-xl bg-[var(--studio-bg)] border border-white/10 text-neutral-300 text-xs leading-relaxed"
               />
             </div>
             <div className="grid grid-cols-2 gap-2">
@@ -532,7 +584,7 @@ export default function StudioBlockProperties({
                   type="text"
                   value={block.ctaText || block.data?.ctaText || 'Mulai Kolaborasi Studio'}
                   onChange={(e) => setField('ctaText', e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-white text-xs font-mono"
+                  className="w-full px-3 py-2 rounded-xl bg-[var(--studio-bg)] border border-white/10 text-white text-xs font-mono"
                 />
               </div>
               <div>
@@ -541,7 +593,7 @@ export default function StudioBlockProperties({
                   type="text"
                   value={block.ctaLink || block.data?.ctaLink || '/kontak'}
                   onChange={(e) => setField('ctaLink', e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-[#FFD600] text-xs font-mono"
+                  className="w-full px-3 py-2 rounded-xl bg-[var(--studio-bg)] border border-white/10 text-[#FFD600] text-xs font-mono"
                 />
               </div>
             </div>
@@ -561,7 +613,7 @@ export default function StudioBlockProperties({
                   setField('lead', e.target.value)
                 }}
                 placeholder="Paragraf pengantar bernada editorial..."
-                className="w-full px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-white text-xs leading-relaxed"
+                className="w-full px-3 py-2 rounded-xl bg-[var(--studio-bg)] border border-white/10 text-white text-xs leading-relaxed"
               />
             </div>
             <div>
@@ -574,7 +626,7 @@ export default function StudioBlockProperties({
                   setField('content', e.target.value)
                 }}
                 placeholder="Isi narasi, penjelasan konteks karya, atau esai kreatif..."
-                className="w-full px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-neutral-300 text-xs leading-relaxed"
+                className="w-full px-3 py-2 rounded-xl bg-[var(--studio-bg)] border border-white/10 text-neutral-300 text-xs leading-relaxed"
               />
             </div>
             <div>
@@ -583,7 +635,7 @@ export default function StudioBlockProperties({
                 aria-label="Jumlah Kolom Editorial"
                 value={block.columns || block.data?.columns || 1}
                 onChange={(e) => setField('columns', Number(e.target.value) || 1)}
-                className="w-full px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-[#FFD600] text-xs font-mono"
+                className="w-full px-3 py-2 rounded-xl bg-[var(--studio-bg)] border border-white/10 text-[#FFD600] text-xs font-mono"
               >
                 <option value={1}>1 Kolom (Default Full Width)</option>
                 <option value={2}>2 Kolom Editorial</option>
@@ -602,7 +654,7 @@ export default function StudioBlockProperties({
                 aria-label="Varian Tampilan Hero"
                 value={block.variant || 'cinematic'}
                 onChange={(e) => setField('variant', e.target.value)}
-                className="w-full px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-[#FFD600] text-xs font-mono"
+                className="w-full px-3 py-2 rounded-xl bg-[var(--studio-bg)] border border-white/10 text-[#FFD600] text-xs font-mono"
               >
                 <option value="cinematic">Cinematic Ambient Glow (Default)</option>
                 <option value="showcase">Split Headline &amp; Standard Box (Showcase)</option>
@@ -617,7 +669,7 @@ export default function StudioBlockProperties({
                 value={block.badge || ''}
                 onChange={(e) => setField('badge', e.target.value)}
                 placeholder="DEPARTEMEN SPESIALISASI"
-                className="w-full px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-white text-xs font-mono"
+                className="w-full px-3 py-2 rounded-xl bg-[var(--studio-bg)] border border-white/10 text-white text-xs font-mono"
               />
             </div>
             <div>
@@ -629,7 +681,7 @@ export default function StudioBlockProperties({
                 value={block.title || ''}
                 onChange={(e) => setField('title', e.target.value)}
                 placeholder="Software & Product Engineering"
-                className="w-full px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-white text-xs font-semibold"
+                className="w-full px-3 py-2 rounded-xl bg-[var(--studio-bg)] border border-white/10 text-white text-xs font-semibold"
               />
             </div>
             <div>
@@ -641,7 +693,7 @@ export default function StudioBlockProperties({
                 onChange={(e) => setField('description', e.target.value)}
                 rows={3}
                 placeholder="Deskripsi nilai strategis..."
-                className="w-full px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-white text-xs"
+                className="w-full px-3 py-2 rounded-xl bg-[var(--studio-bg)] border border-white/10 text-white text-xs"
               />
             </div>
 
@@ -662,7 +714,7 @@ export default function StudioBlockProperties({
               </div>
               <div className="space-y-2">
                 {(block.keyOutcomes || []).map((metric: any, mIdx: number) => (
-                  <div key={mIdx} className="p-3 rounded-xl bg-[#141414] border border-white/10 flex items-center gap-2">
+                  <div key={mIdx} className="p-3 rounded-xl bg-[var(--studio-bg)] border border-white/10 flex items-center gap-2">
                     <label className="flex-1">
                       <span className="sr-only">Label Metrik {mIdx + 1}</span>
                       <input
@@ -772,7 +824,7 @@ export default function StudioBlockProperties({
                   value={block.indexNumber || block.index || ''}
                   onChange={(e) => setField('indexNumber', e.target.value)}
                   placeholder="01"
-                  className="w-full px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-white text-xs font-mono"
+                  className="w-full px-3 py-2 rounded-xl bg-[var(--studio-bg)] border border-white/10 text-white text-xs font-mono"
                 />
               </div>
               <div>
@@ -787,7 +839,7 @@ export default function StudioBlockProperties({
                     setField('badge', e.target.value)
                   }}
                   placeholder="ENTERPRISE SOLUTION"
-                  className="w-full px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-white text-xs font-mono"
+                  className="w-full px-3 py-2 rounded-xl bg-[var(--studio-bg)] border border-white/10 text-white text-xs font-mono"
                 />
               </div>
             </div>
@@ -803,7 +855,7 @@ export default function StudioBlockProperties({
                   setField('name', e.target.value)
                   setField('title', e.target.value)
                 }}
-                className="w-full px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-white text-xs font-semibold"
+                className="w-full px-3 py-2 rounded-xl bg-[var(--studio-bg)] border border-white/10 text-white text-xs font-semibold"
               />
             </div>
 
@@ -816,7 +868,7 @@ export default function StudioBlockProperties({
                 value={block.highlightWord || ''}
                 onChange={(e) => setField('highlightWord', e.target.value)}
                 placeholder="& Berkecepatan Tinggi"
-                className="w-full px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-white text-xs font-mono"
+                className="w-full px-3 py-2 rounded-xl bg-[var(--studio-bg)] border border-white/10 text-white text-xs font-mono"
               />
             </div>
 
@@ -832,7 +884,7 @@ export default function StudioBlockProperties({
                   setField('summary', e.target.value)
                 }}
                 rows={3}
-                className="w-full px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-white text-xs"
+                className="w-full px-3 py-2 rounded-xl bg-[var(--studio-bg)] border border-white/10 text-white text-xs"
               />
             </div>
 
@@ -845,7 +897,7 @@ export default function StudioBlockProperties({
                 value={block.whatsappPrompt || ''}
                 onChange={(e) => setField('whatsappPrompt', e.target.value)}
                 placeholder="Halo UNIMASI, saya ingin konsultasi..."
-                className="w-full px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-white text-xs"
+                className="w-full px-3 py-2 rounded-xl bg-[var(--studio-bg)] border border-white/10 text-white text-xs"
               />
             </div>
 
@@ -887,7 +939,7 @@ export default function StudioBlockProperties({
               </div>
               <div className="space-y-2">
                 {(block.metrics || []).map((m: any, mIdx: number) => (
-                  <div key={mIdx} className="p-3 rounded-xl bg-[#141414] border border-white/10 flex items-center gap-2">
+                  <div key={mIdx} className="p-3 rounded-xl bg-[var(--studio-bg)] border border-white/10 flex items-center gap-2">
                     <label className="flex-1">
                       <span className="sr-only">Label Metrik {mIdx + 1}</span>
                       <input
@@ -951,7 +1003,7 @@ export default function StudioBlockProperties({
                   setField('headline', e.target.value)
                 }}
                 placeholder="cth: Wilmar Replanting Sawit 3D Explainer"
-                className="w-full bg-[#1e1e1e] border border-white/10 rounded-lg px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-accent"
+                className="w-full bg-surface-overlay border border-white/10 rounded-lg px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-accent"
               />
             </div>
             <div className="grid grid-cols-2 gap-3">
@@ -962,7 +1014,7 @@ export default function StudioBlockProperties({
                   value={block.client || ''}
                   onChange={(e) => setField('client', e.target.value)}
                   placeholder="cth: Wilmar International"
-                  className="w-full bg-[#1e1e1e] border border-white/10 rounded-lg px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-accent"
+                  className="w-full bg-surface-overlay border border-white/10 rounded-lg px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-accent"
                 />
               </div>
               <div>
@@ -972,7 +1024,7 @@ export default function StudioBlockProperties({
                   value={block.year || ''}
                   onChange={(e) => setField('year', e.target.value)}
                   placeholder="2024"
-                  className="w-full bg-[#1e1e1e] border border-white/10 rounded-lg px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-accent"
+                  className="w-full bg-surface-overlay border border-white/10 rounded-lg px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-accent"
                 />
               </div>
             </div>
@@ -984,7 +1036,7 @@ export default function StudioBlockProperties({
                   value={block.category || ''}
                   onChange={(e) => setField('category', e.target.value)}
                   placeholder="3D Industrial"
-                  className="w-full bg-[#1e1e1e] border border-white/10 rounded-lg px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-accent"
+                  className="w-full bg-surface-overlay border border-white/10 rounded-lg px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-accent"
                 />
               </div>
               <div>
@@ -994,7 +1046,7 @@ export default function StudioBlockProperties({
                   value={block.discipline || ''}
                   onChange={(e) => setField('discipline', e.target.value)}
                   placeholder="Visual Production"
-                  className="w-full bg-[#1e1e1e] border border-white/10 rounded-lg px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-accent"
+                  className="w-full bg-surface-overlay border border-white/10 rounded-lg px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-accent"
                 />
               </div>
             </div>
@@ -1008,7 +1060,7 @@ export default function StudioBlockProperties({
                   setField('description', e.target.value)
                 }}
                 placeholder="Penjelasan ringkas tentang brief proyek..."
-                className="w-full bg-[#1e1e1e] border border-white/10 rounded-lg px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-accent"
+                className="w-full bg-surface-overlay border border-white/10 rounded-lg px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-accent"
               />
             </div>
             <div>
@@ -1021,7 +1073,7 @@ export default function StudioBlockProperties({
                   setField('posterUrl', e.target.value)
                 }}
                 placeholder="/images/portfolio/cover.jpg"
-                className="w-full bg-[#1e1e1e] border border-white/10 rounded-lg px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-accent"
+                className="w-full bg-surface-overlay border border-white/10 rounded-lg px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-accent"
               />
             </div>
             <div className="grid grid-cols-2 gap-3">
@@ -1032,7 +1084,7 @@ export default function StudioBlockProperties({
                   value={block.videoUrl || ''}
                   onChange={(e) => setField('videoUrl', e.target.value)}
                   placeholder="https://..."
-                  className="w-full bg-[#1e1e1e] border border-white/10 rounded-lg px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-accent"
+                  className="w-full bg-surface-overlay border border-white/10 rounded-lg px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-accent"
                 />
               </div>
               <div>
@@ -1042,7 +1094,7 @@ export default function StudioBlockProperties({
                   value={block.liveUrl || ''}
                   onChange={(e) => setField('liveUrl', e.target.value)}
                   placeholder="https://..."
-                  className="w-full bg-[#1e1e1e] border border-white/10 rounded-lg px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-accent"
+                  className="w-full bg-surface-overlay border border-white/10 rounded-lg px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-accent"
                 />
               </div>
             </div>
@@ -1059,7 +1111,7 @@ export default function StudioBlockProperties({
                 value={block.title || ''}
                 onChange={(e) => setField('title', e.target.value)}
                 placeholder="Tantangan, Pendekatan & Solusi Produksi"
-                className="w-full bg-[#1e1e1e] border border-white/10 rounded-lg px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-accent"
+                className="w-full bg-surface-overlay border border-white/10 rounded-lg px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-accent"
               />
             </div>
             <div>
@@ -1069,7 +1121,7 @@ export default function StudioBlockProperties({
                 value={block.challenge || ''}
                 onChange={(e) => setField('challenge', e.target.value)}
                 placeholder="Jelaskan tantangan teknis / komunikasi yang dihadapi..."
-                className="w-full bg-[#1e1e1e] border border-white/10 rounded-lg px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-accent"
+                className="w-full bg-surface-overlay border border-white/10 rounded-lg px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-accent"
               />
             </div>
             <div>
@@ -1079,7 +1131,7 @@ export default function StudioBlockProperties({
                 value={block.approach || ''}
                 onChange={(e) => setField('approach', e.target.value)}
                 placeholder="Jelaskan pendekatan storytelling dan art direction..."
-                className="w-full bg-[#1e1e1e] border border-white/10 rounded-lg px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-accent"
+                className="w-full bg-surface-overlay border border-white/10 rounded-lg px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-accent"
               />
             </div>
             <div>
@@ -1089,7 +1141,7 @@ export default function StudioBlockProperties({
                 value={block.solution || ''}
                 onChange={(e) => setField('solution', e.target.value)}
                 placeholder="Jelaskan tools 3D, simulasi partikel, dan compositing..."
-                className="w-full bg-[#1e1e1e] border border-white/10 rounded-lg px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-accent"
+                className="w-full bg-surface-overlay border border-white/10 rounded-lg px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-accent"
               />
             </div>
             <div>
@@ -1099,7 +1151,7 @@ export default function StudioBlockProperties({
                 value={block.result || ''}
                 onChange={(e) => setField('result', e.target.value)}
                 placeholder="Jelaskan hasil terukur atau dampak komunikasi bagi klien..."
-                className="w-full bg-[#1e1e1e] border border-white/10 rounded-lg px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-accent"
+                className="w-full bg-surface-overlay border border-white/10 rounded-lg px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-accent"
               />
             </div>
           </>
@@ -1116,7 +1168,7 @@ export default function StudioBlockProperties({
                   value={block.badge || ''}
                   onChange={(e) => setField('badge', e.target.value)}
                   placeholder="Solusi Industri"
-                  className="w-full bg-[#1e1e1e] border border-white/10 rounded-lg px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-accent"
+                  className="w-full bg-surface-overlay border border-white/10 rounded-lg px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-accent"
                 />
               </div>
               <div>
@@ -1126,7 +1178,7 @@ export default function StudioBlockProperties({
                   value={block.category || ''}
                   onChange={(e) => setField('category', e.target.value)}
                   placeholder="Enterprise"
-                  className="w-full bg-[#1e1e1e] border border-white/10 rounded-lg px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-accent"
+                  className="w-full bg-surface-overlay border border-white/10 rounded-lg px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-accent"
                 />
               </div>
             </div>
@@ -1140,7 +1192,7 @@ export default function StudioBlockProperties({
                   setField('headline', e.target.value)
                 }}
                 placeholder="cth: Solusi Visualisasi 3D Manufaktur"
-                className="w-full bg-[#1e1e1e] border border-white/10 rounded-lg px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-accent"
+                className="w-full bg-surface-overlay border border-white/10 rounded-lg px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-accent"
               />
             </div>
             <div>
@@ -1153,7 +1205,7 @@ export default function StudioBlockProperties({
                   setField('description', e.target.value)
                 }}
                 placeholder="Jelaskan bagaimana solusi ini mengatasi hambatan industri..."
-                className="w-full bg-[#1e1e1e] border border-white/10 rounded-lg px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-accent"
+                className="w-full bg-surface-overlay border border-white/10 rounded-lg px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-accent"
               />
             </div>
             <div>
@@ -1169,7 +1221,7 @@ export default function StudioBlockProperties({
                 }
                 onChange={(e) => setField('keyBenefits', e.target.value.split('\n').filter(Boolean))}
                 placeholder="Simulasi aman tanpa downtime pabrik&#10;Edukasi operator 3x lebih cepat"
-                className="w-full bg-[#1e1e1e] border border-white/10 rounded-lg px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-accent"
+                className="w-full bg-surface-overlay border border-white/10 rounded-lg px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-accent"
               />
             </div>
             <div>
@@ -1179,7 +1231,7 @@ export default function StudioBlockProperties({
                 value={block.heroImage || ''}
                 onChange={(e) => setField('heroImage', e.target.value)}
                 placeholder="/images/solutions/hero.jpg"
-                className="w-full bg-[#1e1e1e] border border-white/10 rounded-lg px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-accent"
+                className="w-full bg-surface-overlay border border-white/10 rounded-lg px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-accent"
               />
             </div>
           </>
@@ -1195,7 +1247,7 @@ export default function StudioBlockProperties({
                 aria-label="Varian Layout Bento"
                 value={block.variant || 'asymmetric-bento'}
                 onChange={(e) => setField('variant', e.target.value)}
-                className="w-full px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-[#FFD600] text-xs font-mono"
+                className="w-full px-3 py-2 rounded-xl bg-[var(--studio-bg)] border border-white/10 text-[#FFD600] text-xs font-mono"
               >
                 <option value="asymmetric-bento">Asymmetric Bento (Hero Spotlight Card + Grid)</option>
                 <option value="three-column">3-Column Uniform Matrix (Simetris)</option>
@@ -1210,7 +1262,7 @@ export default function StudioBlockProperties({
                 value={block.title || ''}
                 onChange={(e) => setField('title', e.target.value)}
                 placeholder="Fitur Utama & Standar Rekayasa"
-                className="w-full px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-white text-xs font-semibold"
+                className="w-full px-3 py-2 rounded-xl bg-[var(--studio-bg)] border border-white/10 text-white text-xs font-semibold"
               />
             </div>
             <div>
@@ -1221,7 +1273,7 @@ export default function StudioBlockProperties({
                 value={block.description || ''}
                 onChange={(e) => setField('description', e.target.value)}
                 rows={2}
-                className="w-full px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-white text-xs"
+                className="w-full px-3 py-2 rounded-xl bg-[var(--studio-bg)] border border-white/10 text-white text-xs"
               />
             </div>
 
@@ -1241,7 +1293,7 @@ export default function StudioBlockProperties({
               </div>
               <div className="space-y-3">
                 {(block.features || []).map((f: any, fIdx: number) => (
-                  <div key={fIdx} className="p-3.5 rounded-xl bg-[#141414] border border-white/10 space-y-2">
+                  <div key={fIdx} className="p-3.5 rounded-xl bg-[var(--studio-bg)] border border-white/10 space-y-2">
                     <div className="flex items-center justify-between">
                       <span className="text-[11px] font-mono text-neutral-400">
                         {fIdx === 0 ? 'Fitur #1 (Spotlight Card)' : `Fitur #${fIdx + 1}`}
@@ -1270,7 +1322,12 @@ export default function StudioBlockProperties({
                           copy[0] = { ...copy[0], image: url }
                           setField('features', copy)
                         }}
-                        altText={f.title || ''}
+                        altText={f.alt || f.altText || f.title || ''}
+                        onChangeAltText={(alt) => {
+                          const copy = [...(block.features || [])]
+                          copy[0] = { ...copy[0], alt, altText: alt }
+                          setField('features', copy)
+                        }}
                         aspectHint="16:9"
                       />
                     )}
@@ -1343,7 +1400,7 @@ export default function StudioBlockProperties({
                 aria-label="Varian Tampilan Pilar"
                 value={block.variant || 'blueprint'}
                 onChange={(e) => setField('variant', e.target.value)}
-                className="w-full px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-[#FFD600] text-xs font-mono"
+                className="w-full px-3 py-2 rounded-xl bg-[var(--studio-bg)] border border-white/10 text-[#FFD600] text-xs font-mono"
               >
                 <option value="blueprint">Blueprint Glow Cards (Modern Obsidian)</option>
                 <option value="cards">Classic Technical Cards</option>
@@ -1358,7 +1415,7 @@ export default function StudioBlockProperties({
                 value={block.title || ''}
                 onChange={(e) => setField('title', e.target.value)}
                 placeholder="3 Pilar Rekayasa Kami"
-                className="w-full px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-white text-xs font-semibold"
+                className="w-full px-3 py-2 rounded-xl bg-[var(--studio-bg)] border border-white/10 text-white text-xs font-semibold"
               />
             </div>
             <div>
@@ -1370,7 +1427,7 @@ export default function StudioBlockProperties({
                 onChange={(e) => setField('description', e.target.value)}
                 rows={3}
                 placeholder="Penjelasan detail arsitektur..."
-                className="w-full px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-white text-xs"
+                className="w-full px-3 py-2 rounded-xl bg-[var(--studio-bg)] border border-white/10 text-white text-xs"
               />
             </div>
 
@@ -1381,7 +1438,7 @@ export default function StudioBlockProperties({
               </div>
               <div className="space-y-3">
                 {(block.pillars || []).map((p: any, pIdx: number) => (
-                  <div key={pIdx} className="p-3 rounded-xl bg-[#141414] border border-white/10 space-y-2">
+                  <div key={pIdx} className="p-3 rounded-xl bg-[var(--studio-bg)] border border-white/10 space-y-2">
                     <FieldHeader label={`Pilar #${pIdx + 1}`} tooltip={`Detail spesifikasi pilar ke-${pIdx + 1}`} />
                     <input
                       type="text"
@@ -1426,7 +1483,7 @@ export default function StudioBlockProperties({
                 aria-label="Varian Alur Kerja"
                 value={block.variant || 'timeline-connected'}
                 onChange={(e) => setField('variant', e.target.value)}
-                className="w-full px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-[#FFD600] text-xs font-mono"
+                className="w-full px-3 py-2 rounded-xl bg-[var(--studio-bg)] border border-white/10 text-[#FFD600] text-xs font-mono"
               >
                 <option value="timeline-connected">Connected Step Pulse (Garis Alur Terhubung)</option>
                 <option value="cards-grid">4-Phases Modular Grid</option>
@@ -1441,7 +1498,7 @@ export default function StudioBlockProperties({
                 value={block.title || ''}
                 onChange={(e) => setField('title', e.target.value)}
                 placeholder="Metodologi Pelaksanaan Proyek"
-                className="w-full px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-white text-xs font-semibold"
+                className="w-full px-3 py-2 rounded-xl bg-[var(--studio-bg)] border border-white/10 text-white text-xs font-semibold"
               />
             </div>
             <div>
@@ -1452,14 +1509,14 @@ export default function StudioBlockProperties({
                 value={block.description || ''}
                 onChange={(e) => setField('description', e.target.value)}
                 rows={2}
-                className="w-full px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-white text-xs"
+                className="w-full px-3 py-2 rounded-xl bg-[var(--studio-bg)] border border-white/10 text-white text-xs"
               />
             </div>
 
             <div className="pt-2 border-t border-white/10 space-y-3">
               <span className="text-xs font-mono font-semibold text-[#FFD600] block">4 Fase Agile Pelaksanaan</span>
               {(block.phases || []).map((ph: any, phIdx: number) => (
-                <div key={phIdx} className="p-3.5 rounded-xl bg-[#141414] border border-white/10 space-y-2">
+                <div key={phIdx} className="p-3.5 rounded-xl bg-[var(--studio-bg)] border border-white/10 space-y-2">
                   <div className="flex items-center gap-2">
                     <span className="text-xs font-mono px-2 py-0.5 rounded bg-[#FFD600]/20 text-[#FFD600] font-bold">
                       FASE {ph.step || `0${phIdx + 1}`}
@@ -1515,7 +1572,7 @@ export default function StudioBlockProperties({
                 value={block.title || ''}
                 onChange={(e) => setField('title', e.target.value)}
                 placeholder="Bukti Kinerja Nyata & Studi Kasus"
-                className="w-full px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-white text-xs font-semibold"
+                className="w-full px-3 py-2 rounded-xl bg-[var(--studio-bg)] border border-white/10 text-white text-xs font-semibold"
               />
             </div>
 
@@ -1539,7 +1596,7 @@ export default function StudioBlockProperties({
                       className={`flex items-center gap-2.5 p-2.5 rounded-xl border transition-all cursor-pointer ${
                         isChecked
                           ? 'bg-[#FFD600]/10 border-[#FFD600]/40 text-white'
-                          : 'bg-[#141414] border-white/10 text-neutral-400 hover:text-white'
+                          : 'bg-[var(--studio-bg)] border-white/10 text-neutral-400 hover:text-white'
                       }`}
                     >
                       <input
@@ -1586,7 +1643,7 @@ export default function StudioBlockProperties({
                 onChange={(e) => setField('quote', e.target.value)}
                 rows={4}
                 placeholder="Pernyataan komitmen kualitas rekayasa..."
-                className="w-full px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-white text-xs leading-relaxed"
+                className="w-full px-3 py-2 rounded-xl bg-[var(--studio-bg)] border border-white/10 text-white text-xs leading-relaxed"
               />
             </div>
             <div>
@@ -1598,7 +1655,7 @@ export default function StudioBlockProperties({
                 value={block.author || ''}
                 onChange={(e) => setField('author', e.target.value)}
                 placeholder="Muh Adib"
-                className="w-full px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-white text-xs font-semibold"
+                className="w-full px-3 py-2 rounded-xl bg-[var(--studio-bg)] border border-white/10 text-white text-xs font-semibold"
               />
             </div>
             <div className="grid grid-cols-2 gap-2">
@@ -1611,7 +1668,7 @@ export default function StudioBlockProperties({
                   value={block.role || ''}
                   onChange={(e) => setField('role', e.target.value)}
                   placeholder="Lead System Architect"
-                  className="w-full px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-white text-xs"
+                  className="w-full px-3 py-2 rounded-xl bg-[var(--studio-bg)] border border-white/10 text-white text-xs"
                 />
               </div>
               <div>
@@ -1623,7 +1680,7 @@ export default function StudioBlockProperties({
                   value={block.company || ''}
                   onChange={(e) => setField('company', e.target.value)}
                   placeholder="UNIMASI"
-                  className="w-full px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-white text-xs"
+                  className="w-full px-3 py-2 rounded-xl bg-[var(--studio-bg)] border border-white/10 text-white text-xs"
                 />
               </div>
             </div>
@@ -1642,7 +1699,7 @@ export default function StudioBlockProperties({
                 value={block.title || ''}
                 onChange={(e) => setField('title', e.target.value)}
                 placeholder="Teknologi & Standar Industri"
-                className="w-full px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-white text-xs font-semibold"
+                className="w-full px-3 py-2 rounded-xl bg-[var(--studio-bg)] border border-white/10 text-white text-xs font-semibold"
               />
             </div>
             <div>
@@ -1664,7 +1721,7 @@ export default function StudioBlockProperties({
                 }}
                 rows={3}
                 placeholder="Next.js 16, TypeScript, Docker, SQLite, Tailwind CSS"
-                className="w-full px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-white text-xs font-mono"
+                className="w-full px-3 py-2 rounded-xl bg-[var(--studio-bg)] border border-white/10 text-white text-xs font-mono"
               />
             </div>
           </>
@@ -1682,7 +1739,7 @@ export default function StudioBlockProperties({
                 value={block.title || ''}
                 onChange={(e) => setField('title', e.target.value)}
                 placeholder="Pertanyaan yang Sering Diajukan"
-                className="w-full px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-white text-xs font-semibold"
+                className="w-full px-3 py-2 rounded-xl bg-[var(--studio-bg)] border border-white/10 text-white text-xs font-semibold"
               />
             </div>
 
@@ -1702,7 +1759,7 @@ export default function StudioBlockProperties({
               </div>
               <div className="space-y-3">
                 {(block.faqs || []).map((faq: any, qIdx: number) => (
-                  <div key={qIdx} className="p-3.5 rounded-xl bg-[#141414] border border-white/10 space-y-2">
+                  <div key={qIdx} className="p-3.5 rounded-xl bg-[var(--studio-bg)] border border-white/10 space-y-2">
                     <div className="flex items-center justify-between">
                       <span className="text-[11px] font-mono text-neutral-400">FAQ #{qIdx + 1}</span>
                       <button
@@ -1771,7 +1828,7 @@ export default function StudioBlockProperties({
                   setField('headline', e.target.value)
                 }}
                 placeholder="Mulai Proyek Anda Bersama Kami"
-                className="w-full px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-white text-xs font-bold"
+                className="w-full px-3 py-2 rounded-xl bg-[var(--studio-bg)] border border-white/10 text-white text-xs font-bold"
               />
             </div>
             <div>
@@ -1786,7 +1843,7 @@ export default function StudioBlockProperties({
                 }}
                 rows={3}
                 placeholder="Uraian ajakan konsultasi arsitektur..."
-                className="w-full px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-white text-xs"
+                className="w-full px-3 py-2 rounded-xl bg-[var(--studio-bg)] border border-white/10 text-white text-xs"
               />
             </div>
             <div>
@@ -1798,7 +1855,7 @@ export default function StudioBlockProperties({
                 value={block.buttonText || ''}
                 onChange={(e) => setField('buttonText', e.target.value)}
                 placeholder="Konsultasi via WhatsApp"
-                className="w-full px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-white text-xs"
+                className="w-full px-3 py-2 rounded-xl bg-[var(--studio-bg)] border border-white/10 text-white text-xs"
               />
             </div>
             <div>
@@ -1809,8 +1866,8 @@ export default function StudioBlockProperties({
                 aria-label="URL atau Link WhatsApp CTA"
                 value={block.buttonUrl || ''}
                 onChange={(e) => setField('buttonUrl', e.target.value)}
-                placeholder="https://wa.me/6285227702811"
-                className="w-full px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-white text-xs font-mono"
+                placeholder="https://wa.me/628... atau /contact"
+                className="w-full px-3 py-2 rounded-xl bg-[var(--studio-bg)] border border-white/10 text-white text-xs font-mono"
               />
             </div>
           </>
@@ -1828,7 +1885,7 @@ export default function StudioBlockProperties({
                 value={block.title || ''}
                 onChange={(e) => setField('title', e.target.value)}
                 placeholder="Standar Rekayasa UNIMASI vs Konvensional"
-                className="w-full px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-white text-xs font-bold"
+                className="w-full px-3 py-2 rounded-xl bg-[var(--studio-bg)] border border-white/10 text-white text-xs font-bold"
               />
             </div>
             <div>
@@ -1839,7 +1896,7 @@ export default function StudioBlockProperties({
                 value={block.description || ''}
                 onChange={(e) => setField('description', e.target.value)}
                 rows={2}
-                className="w-full px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-white text-xs"
+                className="w-full px-3 py-2 rounded-xl bg-[var(--studio-bg)] border border-white/10 text-white text-xs"
               />
             </div>
             <div className="pt-2 border-t border-white/10">
@@ -1853,6 +1910,7 @@ export default function StudioBlockProperties({
                       ...current,
                       {
                         feature: 'Parameter Baru',
+                        unimasi: 'Standar UNIMASI Modern',
                         segia: 'Standar UNIMASI Modern',
                         traditional: 'Pendekatan Tradisional',
                       },
@@ -1865,7 +1923,7 @@ export default function StudioBlockProperties({
               </div>
               <div className="space-y-3">
                 {(block.rows || []).map((row: any, rIdx: number) => (
-                  <div key={rIdx} className="p-3 rounded-2xl bg-[#141414] border border-white/10 space-y-2">
+                  <div key={rIdx} className="p-3 rounded-2xl bg-[var(--studio-bg)] border border-white/10 space-y-2">
                     <div className="flex items-center justify-between">
                       <span className="text-[10px] font-mono text-neutral-400">Parameter #{rIdx + 1}</span>
                       <button
@@ -1899,12 +1957,12 @@ export default function StudioBlockProperties({
                       <span className="block mb-1">Standar UNIMASI</span>
                       <input
                         type="text"
-                        name={`rowSegia-${rIdx}`}
+                        name={`rowUnimasi-${rIdx}`}
                         aria-label={`Standar UNIMASI ${rIdx + 1}`}
-                        value={row.segia || ''}
+                        value={row.unimasi || row.segia || ''}
                         onChange={(e) => {
                           const copy = [...(block.rows || [])]
-                          copy[rIdx] = { ...copy[rIdx], segia: e.target.value }
+                          copy[rIdx] = { ...copy[rIdx], unimasi: e.target.value, segia: e.target.value }
                           setField('rows', copy)
                         }}
                         className="w-full px-2.5 py-1.5 rounded-lg bg-black/40 border border-[#FFD600]/30 text-[#FFD600] text-xs font-mono"
@@ -1944,7 +2002,7 @@ export default function StudioBlockProperties({
                 value={block.title || ''}
                 onChange={(e) => setField('title', e.target.value)}
                 placeholder="Spesifikasi Arsitektur Sistem 4-Layer"
-                className="w-full px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-white text-xs font-bold"
+                className="w-full px-3 py-2 rounded-xl bg-[var(--studio-bg)] border border-white/10 text-white text-xs font-bold"
               />
             </div>
             <div>
@@ -1955,7 +2013,7 @@ export default function StudioBlockProperties({
                 value={block.description || ''}
                 onChange={(e) => setField('description', e.target.value)}
                 rows={2}
-                className="w-full px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-white text-xs"
+                className="w-full px-3 py-2 rounded-xl bg-[var(--studio-bg)] border border-white/10 text-white text-xs"
               />
             </div>
             <div className="pt-2 border-t border-white/10">
@@ -1983,7 +2041,7 @@ export default function StudioBlockProperties({
               </div>
               <div className="space-y-3">
                 {(block.layers || []).map((layer: any, lIdx: number) => (
-                  <div key={lIdx} className="p-3 rounded-2xl bg-[#141414] border border-white/10 space-y-2">
+                  <div key={lIdx} className="p-3 rounded-2xl bg-[var(--studio-bg)] border border-white/10 space-y-2">
                     <div className="flex items-center justify-between">
                       <span className="text-[10px] font-mono text-[#FFD600]">{layer.level || `Layer 0${lIdx + 1}`}</span>
                       <button
@@ -2167,7 +2225,7 @@ export default function StudioBlockProperties({
                 value={block.title || ''}
                 onChange={(e) => setField('title', e.target.value)}
                 placeholder="Dampak Performa Nyata & Metrik Teruji"
-                className="w-full px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-white text-xs font-bold"
+                className="w-full px-3 py-2 rounded-xl bg-[var(--studio-bg)] border border-white/10 text-white text-xs font-bold"
               />
             </div>
             <div>
@@ -2178,7 +2236,7 @@ export default function StudioBlockProperties({
                 value={block.description || ''}
                 onChange={(e) => setField('description', e.target.value)}
                 rows={2}
-                className="w-full px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-white text-xs"
+                className="w-full px-3 py-2 rounded-xl bg-[var(--studio-bg)] border border-white/10 text-white text-xs"
               />
             </div>
             <div className="pt-2 border-t border-white/10">
@@ -2200,7 +2258,7 @@ export default function StudioBlockProperties({
               </div>
               <div className="space-y-3">
                 {(block.stats || []).map((s: any, sIdx: number) => (
-                  <div key={sIdx} className="p-3 rounded-2xl bg-[#141414] border border-white/10 space-y-2">
+                  <div key={sIdx} className="p-3 rounded-2xl bg-[var(--studio-bg)] border border-white/10 space-y-2">
                     <div className="flex items-center justify-between">
                       <span className="text-[10px] font-mono text-neutral-400">Metrik #{sIdx + 1}</span>
                       <button
@@ -2284,7 +2342,7 @@ export default function StudioBlockProperties({
                 value={block.title || ''}
                 onChange={(e) => setField('title', e.target.value)}
                 placeholder="Ruang Lingkup Serah Terima & Garansi Organisasi"
-                className="w-full px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-white text-xs font-bold"
+                className="w-full px-3 py-2 rounded-xl bg-[var(--studio-bg)] border border-white/10 text-white text-xs font-bold"
               />
             </div>
             <div>
@@ -2295,7 +2353,7 @@ export default function StudioBlockProperties({
                 value={block.description || ''}
                 onChange={(e) => setField('description', e.target.value)}
                 rows={2}
-                className="w-full px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-white text-xs"
+                className="w-full px-3 py-2 rounded-xl bg-[var(--studio-bg)] border border-white/10 text-white text-xs"
               />
             </div>
             <div className="pt-2 border-t border-white/10">
@@ -2317,7 +2375,7 @@ export default function StudioBlockProperties({
               </div>
               <div className="space-y-3">
                 {(block.items || []).map((it: any, iIdx: number) => (
-                  <div key={iIdx} className="p-3 rounded-2xl bg-[#141414] border border-white/10 space-y-2">
+                  <div key={iIdx} className="p-3 rounded-2xl bg-[var(--studio-bg)] border border-white/10 space-y-2">
                     <div className="flex items-center justify-between">
                       <span className="text-[10px] font-mono text-neutral-400">Item #{iIdx + 1}</span>
                       <button
@@ -2381,7 +2439,7 @@ export default function StudioBlockProperties({
                 value={block.title || ''}
                 onChange={(e) => setField('title', e.target.value)}
                 placeholder="Matriks Standar Teknologi UNIMASI"
-                className="w-full px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-white text-xs font-bold"
+                className="w-full px-3 py-2 rounded-xl bg-[var(--studio-bg)] border border-white/10 text-white text-xs font-bold"
               />
             </div>
             <div>
@@ -2392,7 +2450,7 @@ export default function StudioBlockProperties({
                 value={block.description || ''}
                 onChange={(e) => setField('description', e.target.value)}
                 rows={2}
-                className="w-full px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-white text-xs"
+                className="w-full px-3 py-2 rounded-xl bg-[var(--studio-bg)] border border-white/10 text-white text-xs"
               />
             </div>
             <div className="pt-2 border-t border-white/10">
@@ -2414,7 +2472,7 @@ export default function StudioBlockProperties({
               </div>
               <div className="space-y-3">
                 {(block.categories || []).map((cat: any, cIdx: number) => (
-                  <div key={cIdx} className="p-3 rounded-2xl bg-[#141414] border border-white/10 space-y-2">
+                  <div key={cIdx} className="p-3 rounded-2xl bg-[var(--studio-bg)] border border-white/10 space-y-2">
                     <div className="flex items-center justify-between">
                       <span className="text-[10px] font-mono text-neutral-400">Kategori #{cIdx + 1}</span>
                       <button
@@ -2506,7 +2564,7 @@ export default function StudioBlockProperties({
                 value={block.title || ''}
                 onChange={(e) => setField('title', e.target.value)}
                 placeholder="Layanan Unggulan Rekayasa Sistem"
-                className="w-full px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-white text-xs font-bold"
+                className="w-full px-3 py-2 rounded-xl bg-[var(--studio-bg)] border border-white/10 text-white text-xs font-bold"
               />
             </div>
             <div>
@@ -2517,7 +2575,7 @@ export default function StudioBlockProperties({
                 value={block.description || ''}
                 onChange={(e) => setField('description', e.target.value)}
                 rows={2}
-                className="w-full px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-white text-xs"
+                className="w-full px-3 py-2 rounded-xl bg-[var(--studio-bg)] border border-white/10 text-white text-xs"
               />
             </div>
 
@@ -2585,7 +2643,7 @@ export default function StudioBlockProperties({
               {(block.services || []).length > 0 && (
                 <div className="space-y-4">
                   {(block.services || []).map((srv: any, sIdx: number) => (
-                    <div key={sIdx} className="p-3.5 rounded-2xl bg-[#141414] border border-white/10 space-y-3">
+                    <div key={sIdx} className="p-3.5 rounded-2xl bg-[var(--studio-bg)] border border-white/10 space-y-3">
                       <div className="flex items-center justify-between">
                         <span className="text-xs font-mono text-[#FFD600] font-semibold">
                           Sub-Layanan #{sIdx + 1}
@@ -2612,7 +2670,12 @@ export default function StudioBlockProperties({
                           copy[sIdx] = { ...copy[sIdx], image: url }
                           setField('services', copy)
                         }}
-                        altText={srv.name || ''}
+                        altText={srv.alt || srv.altText || srv.name || ''}
+                        onChangeAltText={(alt) => {
+                          const copy = [...(block.services || [])]
+                          copy[sIdx] = { ...copy[sIdx], alt, altText: alt }
+                          setField('services', copy)
+                        }}
                         aspectHint="16:9"
                       />
 
@@ -2702,7 +2765,7 @@ export default function StudioBlockProperties({
                 value={block.badge || ''}
                 onChange={(e) => setField('badge', e.target.value)}
                 placeholder="Bukti Portofolio Nyata"
-                className="w-full px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-[#FFD600] text-xs font-mono"
+                className="w-full px-3 py-2 rounded-xl bg-[var(--studio-bg)] border border-white/10 text-[#FFD600] text-xs font-mono"
               />
             </div>
             <div>
@@ -2714,7 +2777,7 @@ export default function StudioBlockProperties({
                 value={block.title || ''}
                 onChange={(e) => setField('title', e.target.value)}
                 placeholder="Bukti Hasil Pengerjaan Nyata untuk Klien Kami"
-                className="w-full px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-white text-xs font-bold"
+                className="w-full px-3 py-2 rounded-xl bg-[var(--studio-bg)] border border-white/10 text-white text-xs font-bold"
               />
             </div>
             <div>
@@ -2725,7 +2788,7 @@ export default function StudioBlockProperties({
                 value={block.description || ''}
                 onChange={(e) => setField('description', e.target.value)}
                 rows={2}
-                className="w-full px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-white text-xs"
+                className="w-full px-3 py-2 rounded-xl bg-[var(--studio-bg)] border border-white/10 text-white text-xs"
               />
             </div>
 
@@ -2758,7 +2821,7 @@ export default function StudioBlockProperties({
 
               <div className="space-y-4">
                 {(block.items || []).map((item: any, gIdx: number) => (
-                  <div key={gIdx} className="p-3.5 rounded-2xl bg-[#141414] border border-white/10 space-y-3">
+                  <div key={gIdx} className="p-3.5 rounded-2xl bg-[var(--studio-bg)] border border-white/10 space-y-3">
                     <div className="flex items-center justify-between">
                       <span className="text-xs font-mono text-[#FFD600] font-semibold">
                         Kartu #{gIdx + 1}
@@ -2786,7 +2849,12 @@ export default function StudioBlockProperties({
                         copy[gIdx] = { ...copy[gIdx], image: url }
                         setField('items', copy)
                       }}
-                      altText={item.title || ''}
+                      altText={item.alt || item.altText || item.title || ''}
+                      onChangeAltText={(alt) => {
+                        const copy = [...(block.items || [])]
+                        copy[gIdx] = { ...copy[gIdx], alt, altText: alt }
+                        setField('items', copy)
+                      }}
                       aspectHint="16:10"
                     />
 
@@ -2873,7 +2941,7 @@ export default function StudioBlockProperties({
               <select
                 value={block.frameStyle === 'browser' ? 'immersive' : (block.frameStyle || 'immersive')}
                 onChange={(e) => setField('frameStyle', e.target.value)}
-                className="w-full px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-[#FFD600] text-xs font-mono"
+                className="w-full px-3 py-2 rounded-xl bg-[var(--studio-bg)] border border-white/10 text-[#FFD600] text-xs font-mono"
               >
                 <option value="immersive">Immersive Editorial Surface (Bersih, Refined Specular Border)</option>
                 <option value="floating-card">Clean Floating Card (Kartu Melayang dengan Padding)</option>
@@ -2886,7 +2954,7 @@ export default function StudioBlockProperties({
               <select
                 value={block.aspectRatio || '16/10'}
                 onChange={(e) => setField('aspectRatio', e.target.value)}
-                className="w-full px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-white text-xs font-mono"
+                className="w-full px-3 py-2 rounded-xl bg-[var(--studio-bg)] border border-white/10 text-white text-xs font-mono"
               >
                 <option value="16/10">16:10 (Standar Layar Laptop Modern)</option>
                 <option value="16/9">16:9 (Widescreen Standar HD)</option>
@@ -2924,7 +2992,7 @@ export default function StudioBlockProperties({
                 value={block.title || ''}
                 onChange={(e) => setField('title', e.target.value)}
                 placeholder="Pratinjau Antarmuka Sistem Produksi"
-                className="w-full px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-white text-xs font-bold"
+                className="w-full px-3 py-2 rounded-xl bg-[var(--studio-bg)] border border-white/10 text-white text-xs font-bold"
               />
             </div>
 
@@ -2935,7 +3003,7 @@ export default function StudioBlockProperties({
                 value={block.subtitle || ''}
                 onChange={(e) => setField('subtitle', e.target.value)}
                 placeholder="Deskripsi ringkas konteks implementasi di lapangan..."
-                className="w-full px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-white text-xs"
+                className="w-full px-3 py-2 rounded-xl bg-[var(--studio-bg)] border border-white/10 text-white text-xs"
               />
             </div>
 
@@ -2984,14 +3052,14 @@ export default function StudioBlockProperties({
               value={block.text || ''}
               onChange={(e) => setField('text', e.target.value)}
               rows={type === 'paragraph' ? 6 : 2}
-              className="w-full px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-white text-xs leading-relaxed"
+              className="w-full px-3 py-2 rounded-xl bg-[var(--studio-bg)] border border-white/10 text-white text-xs leading-relaxed"
             />
           </div>
         )}
       </div>
 
       {/* Bottom Done Button */}
-      <div className="p-3 border-t border-white/10 bg-[#191919]">
+      <div className="p-3 border-t border-white/10 bg-[var(--studio-bg)]">
         <Tooltip label="Selesai" hint="Simpan perubahan dan tutup panel inspector blok" side="top">
           <button
             type="button"

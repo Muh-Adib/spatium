@@ -69,6 +69,16 @@ const config: Config = {
           500: '#FFD600',
           950: '#030611',
         },
+        // Info/status hue — kept separate from brand accent (yellow = primary,
+        // blue = info, amber = warning). Not part of the yellow brand palette.
+        info: {
+          DEFAULT: '#3B82F6',
+          300: '#93C5FD',
+          400: '#60A5FA',
+          500: '#3B82F6',
+          950: '#172554',
+          subtle: 'rgba(59, 130, 246, 0.12)',
+        },
       },
       fontFamily: {
         // Official brand heading font (AGENTS.md): Montserrat.

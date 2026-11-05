@@ -182,7 +182,7 @@ export async function runInternalDatabaseAudit(): Promise<{
 
     // Content Images Missing Alt Text
     const imgMatches = Array.from((art.content || '').matchAll(/<img[^>]+src=["']([^"']+)["'][^>]*>/gi))
-    for (const match of imgMatches as any[]) {
+    for (const match of (imgMatches as RegExpMatchArray[])) {
       const fullTag = match[0]
       const altMatch = fullTag.match(/alt=["']([^"']*)["']/i)
       const alt = altMatch ? altMatch[1].trim() : ''
@@ -208,7 +208,7 @@ export async function runInternalDatabaseAudit(): Promise<{
       let altObj = { id: '', en: '' }
       try {
         if (media.altText) altObj = JSON.parse(media.altText)
-      } catch {}
+      } catch (err) { console.warn("[observable error]:", err) }
 
       if (!altObj.id || !altObj.id.trim()) {
         issues.push({
@@ -296,7 +296,7 @@ export async function runInternalDatabaseAudit(): Promise<{
         newIssues: Math.max(0, issues.length - prevTotal),
         resolvedIssues: Math.max(0, prevTotal - issues.length),
       }
-    } catch {}
+    } catch (err) { console.warn("[observable error]:", err) }
   }
 
   const summary: SiteAuditSummary = {

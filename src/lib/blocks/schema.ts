@@ -281,6 +281,7 @@ export const comparisonMatrixBlockSchema = z.object({
   description: z.string().max(2000).optional(),
   badge: z.string().max(100).optional(),
   traditionalLabel: z.string().max(100).optional(),
+  unimasiLabel: z.string().max(100).optional(),
   segiaLabel: z.string().max(100).optional(),
   rows: z
     .array(
@@ -290,7 +291,8 @@ export const comparisonMatrixBlockSchema = z.object({
         title: z.string().max(200).optional(),
         desc: z.string().max(2000).optional(),
         traditional: z.string().max(2000),
-        segia: z.string().max(2000),
+        unimasi: z.string().max(2000).optional(),
+        segia: z.string().max(2000).optional(),
       })
     )
     .optional()
@@ -674,7 +676,9 @@ export const heroCinemaBlockSchema = z
         src: z.string().optional(),
         poster: z.string().optional(),
         url: z.string().optional(),
+        alt: z.string().optional(),
       })
+      .passthrough()
       .optional(),
     data: z.record(z.string(), z.any()).optional(),
   })
@@ -838,6 +842,33 @@ export const legacyLiveEmbedBlockSchema = z.object({
   type: z.literal('blocks.live-embed'),
 }).passthrough()
 
+export const tableBlockSchema = z.object({
+  id: z.string().optional(),
+  type: z.literal('table'),
+  title: z.string().max(300).optional(),
+  caption: z.string().max(500).optional(),
+  headers: z.array(z.string().max(500)).default([]),
+  rows: z.array(z.array(z.string().max(2000))).default([]),
+}).passthrough()
+
+export const internalLinksBlockSchema = z.object({
+  id: z.string().optional(),
+  type: z.literal('internal-links'),
+  title: z.string().max(300).optional(),
+  links: z.array(
+    z.object({
+      title: z.string().max(300).optional(),
+      text: z.string().max(300).optional(),
+      name: z.string().max(300).optional(),
+      href: z.string().max(1000).optional(),
+      url: z.string().max(1000).optional(),
+      slug: z.string().max(300).optional(),
+      description: z.string().max(1000).optional(),
+      excerpt: z.string().max(1000).optional(),
+    }).passthrough()
+  ).default([]),
+}).passthrough()
+
 // ─── Discriminated Union of All Blocks ────────────────────────────────────────
 export const blockSchema = z.discriminatedUnion('type', [
   heroCinemaBlockSchema,
@@ -865,6 +896,8 @@ export const blockSchema = z.discriminatedUnion('type', [
   studioCtaBlockSchema,
   editorialParagraphBlockSchema,
   editorialHeadingBlockSchema,
+  tableBlockSchema,
+  internalLinksBlockSchema,
   heroCaseStudyBlockSchema,
   heroPortfolioBlockSchema,
   portfolioCaseStudyBlockSchema,

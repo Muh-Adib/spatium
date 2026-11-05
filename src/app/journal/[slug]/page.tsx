@@ -18,6 +18,7 @@ import {
   type Block,
 } from '@/data/articles'
 import { getCoreArticleBySlug, getCoreArticles } from '@/lib/core'
+import { sanitizeHtmlContent } from '@/lib/security/sanitize-html'
 import '@/pages/article.css'
 
 const SITE_URL = 'https://unimasi.studio'
@@ -29,53 +30,58 @@ async function resolveArticle(slug: string): Promise<{
   const local = getArticle(slug)
   const core = await getCoreArticleBySlug(slug)
 
-  if (local) {
-    return {
-      article: local,
-      htmlContent: core?.content,
-    }
-  }
-
+  // DB/Core is the source of truth once an admin-edited article exists for
+  // this slug. Local static data only supplies the article shell (CTA links,
+  // art variant) — never its editable fields.
   if (core) {
     const categoryName =
       typeof core.category === 'string'
         ? core.category
-        : core.category?.name || 'Process'
+        : core.category?.name || local?.category || 'Process'
     const authorName =
       typeof core.author === 'string'
         ? core.author
-        : core.author?.name || 'UNIMASI'
+        : core.author?.name || local?.author || 'UNIMASI'
     const tagNames = core.tags
       ? core.tags.map((t) => (typeof t === 'string' ? t : t.name || ''))
-      : []
+      : local?.tags || []
 
-    const fallbackArticle: Article = {
+    const coreArticle: Article = {
       slug: core.slug,
       title: core.title,
-      category: categoryName as any,
+      category: categoryName as unknown as Article['category'],
       excerpt: core.excerpt || '',
-      metaDescription: core.seo?.metaDescription || core.excerpt || '',
+      metaDescription: core.seo?.metaDescription || core.seoData?.metaDescription || core.excerpt || '',
       date: core.publishedAt || core.createdAt || new Date().toISOString(),
       author: authorName,
-      readMinutes: core.readingTime || 5,
+      readMinutes: core.readingTime || local?.readMinutes || 5,
       tags: tagNames.filter(Boolean),
-      artVariant: 1,
+      // Non-editable presentation shell: reuse the static article's art/link
+      // scaffolding when the slug matches, otherwise sensible defaults.
+      artVariant: local?.artVariant ?? 1,
       body: [],
-      serviceCta: {
+      serviceCta: local?.serviceCta ?? {
         label: 'Need Animation Production?',
         to: '/contact',
         blurb: 'From explainer videos to 3D cinematics, we help brands move.',
       },
-      relatedLinks: [
+      relatedLinks: local?.relatedLinks ?? [
         { label: 'View our portfolio', to: '/portfolio' },
         { label: 'Browse services', to: '/services' },
       ],
-      relatedSlugs: [],
+      relatedSlugs: local?.relatedSlugs ?? [],
     }
 
     return {
-      article: fallbackArticle,
+      article: coreArticle,
       htmlContent: core.content,
+    }
+  }
+
+  if (local) {
+    return {
+      article: local,
+      htmlContent: undefined,
     }
   }
 
@@ -83,18 +89,15 @@ async function resolveArticle(slug: string): Promise<{
 }
 
 export async function generateStaticParams() {
+  const slugs = new Set<string>(SORTED_ARTICLES.map((article) => article.slug))
   try {
-    const core = await getCoreArticles({ pageSize: 50 })
-    if (core && core.articles && core.articles.length > 0) {
-      return core.articles.map((article) => ({
-        slug: article.slug,
-      }))
+    const core = await getCoreArticles({ pageSize: 100 })
+    if (core && core.articles) {
+      for (const article of core.articles) slugs.add(article.slug)
     }
-  } catch {}
+  } catch (err) { console.warn("[observable error]:", err) }
 
-  return SORTED_ARTICLES.map((article) => ({
-    slug: article.slug,
-  }))
+  return Array.from(slugs).map((slug) => ({ slug }))
 }
 
 export async function generateMetadata({
@@ -377,7 +380,7 @@ export default async function ArticleDetailPage({
             ) : htmlContent ? (
               <div
                 className="article-rendered-body"
-                dangerouslySetInnerHTML={{ __html: htmlContent }}
+                dangerouslySetInnerHTML={{ __html: sanitizeHtmlContent(htmlContent) }}
               />
             ) : null}
 

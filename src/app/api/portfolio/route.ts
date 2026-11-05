@@ -110,7 +110,7 @@ export async function POST(request: NextRequest) {
       revalidatePath('/', 'layout')
       revalidatePath('/portofolio')
       revalidatePath(`/portofolio/${payload.slug}`)
-    } catch {}
+    } catch (err) { console.warn("[API observable error]:", err) }
 
     return NextResponse.json({
       success: true,
@@ -149,7 +149,7 @@ export async function DELETE(request: NextRequest) {
       revalidatePath('/', 'layout')
       revalidatePath('/portofolio')
       if (slugParam) revalidatePath(`/portofolio/${slugParam}`)
-    } catch {}
+    } catch (err) { console.warn("[API observable error]:", err) }
 
     return NextResponse.json({ success: true, message: 'Portofolio berhasil dihapus.' })
   } catch (error: any) {

@@ -39,10 +39,10 @@ export async function syncContentNode(type: NodeType, idOrSlug: string | number)
             url: `/artikel/${a.slug}`,
             title: a.title,
             summary: a.excerpt || null,
-            primaryKeyword: (a as any).primaryKeyword || a.focusKeyphrase || null,
-            location: (a as any).targetCity || (a as any).targetLocation || null,
+            primaryKeyword: (a as unknown as { primaryKeyword?: string }).primaryKeyword || a.focusKeyphrase || null,
+            location: (a as unknown as { targetCity?: string; targetLocation?: string }).targetCity || (a as unknown as { targetCity?: string; targetLocation?: string }).targetLocation || null,
             image: a.coverUrl || a.featuredImage || null,
-            status: a.status as any,
+            status: a.status === 'published' || a.status === 'archived' ? a.status : 'draft',
             indexable: a.status === 'published',
           }
         }
@@ -64,7 +64,7 @@ export async function syncContentNode(type: NodeType, idOrSlug: string | number)
             primaryKeyword: s.name,
             location: null,
             image: s.heroImage || null,
-            status: (s as any).status || 'published',
+            status: (s as unknown as { status?: 'draft' | 'published' | 'archived' }).status || 'published',
             indexable: true,
           }
         }
@@ -86,7 +86,7 @@ export async function syncContentNode(type: NodeType, idOrSlug: string | number)
             primaryKeyword: sol.title,
             location: null,
             image: sol.heroImage || null,
-            status: sol.status as any,
+            status: sol.status === 'published' || sol.status === 'archived' ? sol.status : 'draft',
             indexable: sol.status === 'published',
           }
         }
@@ -108,7 +108,7 @@ export async function syncContentNode(type: NodeType, idOrSlug: string | number)
             primaryKeyword: p.title,
             location: null,
             image: p.heroImage || null,
-            status: p.status as any,
+            status: p.status === 'published' || p.status === 'archived' ? p.status : 'draft',
             indexable: p.status === 'published',
           }
         }
@@ -122,7 +122,7 @@ export async function syncContentNode(type: NodeType, idOrSlug: string | number)
           : await prisma.orm.public.Page.where({ slug: String(idOrSlug) }).first()
 
         if (pg) {
-          const isLanding = pg.kind === 'landing' || pg.slug.startsWith('jasa-pembuatan-website-')
+          const isLanding = pg.kind === 'landing' || pg.slug.startsWith('jasa-animasi-')
           nodeData = {
             type: isLanding ? 'landing' : 'page',
             refId: String(pg.id),
@@ -130,9 +130,9 @@ export async function syncContentNode(type: NodeType, idOrSlug: string | number)
             title: pg.title,
             summary: pg.excerpt || null,
             primaryKeyword: pg.focusKeyphrase || pg.title,
-            location: (pg as any).location || null,
+            location: (pg as unknown as { location?: string }).location || null,
             image: null,
-            status: pg.status as any,
+            status: pg.status === 'published' || pg.status === 'archived' ? pg.status : 'draft',
             indexable: pg.status === 'published' && (!pg.robots || !pg.robots.includes('noindex')),
           }
         }

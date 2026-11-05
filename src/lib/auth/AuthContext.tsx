@@ -23,19 +23,21 @@ const AuthContext = createContext<AuthContextValue | null>(null)
 
 function AuthConsumer({ children }: { children: React.ReactNode }) {
   const { data: sessionData, status } = useSession()
-  const session = sessionData as any
+  const session = sessionData as unknown as {
+    user?: { role?: Role; id?: string; name?: string | null; email?: string | null }
+  } | null
 
   const sessionRole = session?.user?.role as Role | undefined
   const hasValidatedRole = status === 'authenticated' && !!sessionRole && Object.hasOwn(ROLE_PERMISSIONS, sessionRole)
   const role: Role = hasValidatedRole ? sessionRole! : 'AUTHOR'
-  const actorName = hasValidatedRole ? session.user.name || '' : ''
-  const email = hasValidatedRole ? session.user.email || '' : ''
+  const actorName = hasValidatedRole ? session?.user?.name || '' : ''
+  const email = hasValidatedRole ? session?.user?.email || '' : ''
   const userId = hasValidatedRole ? String(session?.user?.id || 'usr_default_admin') : ''
 
   const logout = async () => {
     try {
-      localStorage.removeItem('segia_user_role')
-      localStorage.removeItem('segia_actor_name')
+      localStorage.removeItem('unimasi_user_role')
+      localStorage.removeItem('unimasi_actor_name')
       await nextAuthSignOut({ callbackUrl: '/admin/login' })
     } catch {
       window.location.href = '/admin/login'

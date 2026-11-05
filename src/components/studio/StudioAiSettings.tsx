@@ -50,7 +50,7 @@ import {
   Settings,
   Brain,
 } from 'lucide-react'
-import { ToolDefinition, ToolParameter, SEGIA_TOOLS_CATALOG, ToolCallExecution } from '@/lib/ai/tool-definitions'
+import { ToolDefinition, ToolParameter, UNIMASI_TOOLS_CATALOG, ToolCallExecution } from '@/lib/ai/tool-definitions'
 import {
   ApiKeyItem,
   getStoredApiKeys,
@@ -171,8 +171,7 @@ export function StudioAiSettings({ onSaved }: StudioAiSettingsProps) {
       if (data.success && Array.isArray(data.memories)) {
         setMemories(data.memories)
       }
-    } catch (_) {
-    } finally {
+    } catch (err) { console.warn("[observable error]:", err) } finally {
       setMemoriesLoading(false)
     }
   }
@@ -191,7 +190,7 @@ export function StudioAiSettings({ onSaved }: StudioAiSettingsProps) {
         setNewMemoryKey('')
         setNewMemoryContent('')
       }
-    } catch (_) {}
+    } catch (err) { console.warn("[observable error]:", err) }
   }
 
   const handleDeleteMemory = async (idOrKey: string) => {
@@ -202,7 +201,7 @@ export function StudioAiSettings({ onSaved }: StudioAiSettingsProps) {
       if (res.ok) {
         setMemories((prev) => prev.filter((m) => m.id !== idOrKey && m.key !== idOrKey))
       }
-    } catch (_) {}
+    } catch (err) { console.warn("[observable error]:", err) }
   }
 
   // --- Provider Selector & Interactive Provider Modal State ---
@@ -272,7 +271,7 @@ export function StudioAiSettings({ onSaved }: StudioAiSettingsProps) {
   const [tokenOpt, setTokenOpt] = useState<TokenOptimizationConfig>(DEFAULT_TOKEN_OPTIMIZATION_CONFIG)
 
   // --- Native Tools Catalog State ---
-  const [enabledTools, setEnabledTools] = useState<string[]>(SEGIA_TOOLS_CATALOG.map((t) => t.id))
+  const [enabledTools, setEnabledTools] = useState<string[]>(UNIMASI_TOOLS_CATALOG.map((t) => t.id))
   const [toolsCollapsed, setToolsCollapsed] = useState(false)
   const [searchTool, setSearchTool] = useState('')
   const [categoryFilter, setCategoryFilter] = useState<'all' | 'database' | 'seo' | 'serp' | 'editorial' | 'system'>('all')
@@ -317,7 +316,7 @@ export function StudioAiSettings({ onSaved }: StudioAiSettingsProps) {
         if (Array.isArray(parsed.enabledTools)) setEnabledTools(parsed.enabledTools)
         if (typeof parsed.toolsCollapsed === 'boolean') setToolsCollapsed(parsed.toolsCollapsed)
       }
-    } catch (_) {}
+    } catch (err) { console.warn("[observable error]:", err) }
   }, [])
 
   useEffect(() => {
@@ -328,7 +327,7 @@ export function StudioAiSettings({ onSaved }: StudioAiSettingsProps) {
         const savedModel = selectedProvider === 'google' ? (parsed.googleModel || '') : (parsed.openrouterModel || '')
         if (savedModel) setActiveModel(savedModel)
       }
-    } catch (_) {}
+    } catch (err) { console.warn("[observable error]:", err) }
   }, [selectedProvider])
 
   // Provider Keys
@@ -384,7 +383,7 @@ export function StudioAiSettings({ onSaved }: StudioAiSettingsProps) {
       setSaveSuccess(true)
       if (onSaved) onSaved()
       setTimeout(() => setSaveSuccess(false), 2500)
-    } catch (_) {}
+    } catch (err) { console.warn("[observable error]:", err) }
   }
 
   const handleSelectActiveModel = (modelId: string) => {
@@ -398,7 +397,7 @@ export function StudioAiSettings({ onSaved }: StudioAiSettingsProps) {
         ...(selectedProvider === 'google' ? { googleModel: modelId } : { openrouterModel: modelId }),
       }
       localStorage.setItem('unimasi_ai_config', JSON.stringify(updated))
-    } catch (_) {}
+    } catch (err) { console.warn("[observable error]:", err) }
   }
 
   // Handle Fetch Dynamic Models from Provider (Secara Otomatis Sinkron ke Daftar Model Aktif)
@@ -799,7 +798,7 @@ export function StudioAiSettings({ onSaved }: StudioAiSettingsProps) {
 
   // Filtered Tools
   const filteredTools = useMemo(() => {
-    return SEGIA_TOOLS_CATALOG.filter((tool) => {
+    return UNIMASI_TOOLS_CATALOG.filter((tool) => {
       const matchCat = categoryFilter === 'all' || tool.category === categoryFilter
       const matchSearch =
         !searchTool.trim() ||
@@ -886,7 +885,7 @@ export function StudioAiSettings({ onSaved }: StudioAiSettingsProps) {
               <h2 className="text-base font-semibold text-white tracking-tight">
                 Pengaturan AI &amp; Optimasi Platform
               </h2>
-              <span className="text-[10px] font-mono bg-sky-500/15 text-sky-300 border border-sky-500/30 px-1.5 py-0.2 rounded font-bold uppercase">
+              <span className="text-[10px] font-mono bg-info/15 text-info-300 border border-info/30 px-1.5 py-0.2 rounded font-bold uppercase">
                 Gateway &amp; Savers
               </span>
             </div>
@@ -907,7 +906,7 @@ export function StudioAiSettings({ onSaved }: StudioAiSettingsProps) {
                 setTopP(0.9)
                 setThinkingMode('auto')
                 setTokenOpt(DEFAULT_TOKEN_OPTIMIZATION_CONFIG)
-                setEnabledTools(SEGIA_TOOLS_CATALOG.map((t) => t.id))
+                setEnabledTools(UNIMASI_TOOLS_CATALOG.map((t) => t.id))
                 setTestResult(null)
               }}
               side="bottom"
@@ -915,7 +914,7 @@ export function StudioAiSettings({ onSaved }: StudioAiSettingsProps) {
             <button
               type="button"
               onClick={handleSave}
-              className="inline-flex h-8 items-center gap-2 rounded-lg bg-sky-500 px-3.5 text-xs font-semibold text-white shadow-sm transition-all hover:bg-sky-400 focus-visible:outline-none"
+              className="inline-flex h-8 items-center gap-2 rounded-lg bg-info px-3.5 text-xs font-semibold text-white shadow-sm transition-all hover:bg-info focus-visible:outline-none"
             >
               {saveSuccess ? (
                 <>
@@ -947,11 +946,11 @@ export function StudioAiSettings({ onSaved }: StudioAiSettingsProps) {
             onClick={() => setActiveTab('providers')}
             className={`inline-flex items-center gap-2 rounded-lg px-3 py-1.5 transition-colors ${
               activeTab === 'providers'
-                ? 'bg-sky-500/20 text-sky-300 border border-sky-500/35 font-semibold'
+                ? 'bg-info/20 text-info-300 border border-info/35 font-semibold'
                 : 'text-neutral-400 hover:text-white hover:bg-white/[0.05]'
             }`}
           >
-            <Key className="h-3.5 w-3.5 text-sky-400" />
+            <Key className="h-3.5 w-3.5 text-info" />
             <span>Penyedia AI &amp; Model</span>
             <span className="rounded-full bg-white/10 px-1.5 py-0.2 text-[10px] font-mono">
               {apiKeys.length} Kunci
@@ -963,7 +962,7 @@ export function StudioAiSettings({ onSaved }: StudioAiSettingsProps) {
             onClick={() => setActiveTab('token')}
             className={`inline-flex items-center gap-2 rounded-lg px-3 py-1.5 transition-colors ${
               activeTab === 'token'
-                ? 'bg-sky-500/20 text-sky-300 border border-sky-500/35 font-semibold'
+                ? 'bg-info/20 text-info-300 border border-info/35 font-semibold'
                 : 'text-neutral-400 hover:text-white hover:bg-white/[0.05]'
             }`}
           >
@@ -995,7 +994,7 @@ export function StudioAiSettings({ onSaved }: StudioAiSettingsProps) {
             onClick={() => setActiveTab('tools')}
             className={`inline-flex items-center gap-2 rounded-lg px-3 py-1.5 transition-colors ${
               activeTab === 'tools'
-                ? 'bg-sky-500/20 text-sky-300 border border-sky-500/35 font-semibold'
+                ? 'bg-info/20 text-info-300 border border-info/35 font-semibold'
                 : 'text-neutral-400 hover:text-white hover:bg-white/[0.05]'
             }`}
           >
@@ -1011,7 +1010,7 @@ export function StudioAiSettings({ onSaved }: StudioAiSettingsProps) {
             onClick={() => setActiveTab('logs')}
             className={`inline-flex items-center gap-2 rounded-lg px-3 py-1.5 transition-colors ${
               activeTab === 'logs'
-                ? 'bg-sky-500/20 text-sky-300 border border-sky-500/35 font-semibold'
+                ? 'bg-info/20 text-info-300 border border-info/35 font-semibold'
                 : 'text-neutral-400 hover:text-white hover:bg-white/[0.05]'
             }`}
           >
@@ -1032,7 +1031,7 @@ export function StudioAiSettings({ onSaved }: StudioAiSettingsProps) {
           {/* Header Info */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white/[0.02] border border-white/[0.06] rounded-xl p-3.5">
             <div className="flex items-center gap-2.5">
-              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-sky-500/15 border border-sky-500/30 text-sky-400 shrink-0">
+              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-info/15 border border-info/30 text-info shrink-0">
                 <Layers className="h-4 w-4" />
               </div>
               <div className="flex items-center gap-2">
@@ -1047,7 +1046,7 @@ export function StudioAiSettings({ onSaved }: StudioAiSettingsProps) {
 
             <Tooltip label="Model aktif untuk percakapan &amp; penulisan artikel dipilih langsung di panel Chat Copilot.">
               <div className="flex items-center gap-1.5 rounded-lg border border-white/[0.08] bg-black/40 px-2.5 py-1 text-[11px] text-neutral-300 cursor-help shrink-0">
-                <Info className="h-3 w-3 text-sky-400 shrink-0" />
+                <Info className="h-3 w-3 text-info shrink-0" />
                 <span>Model aktif dipilih di Chat Copilot</span>
               </div>
             </Tooltip>
@@ -1069,19 +1068,19 @@ export function StudioAiSettings({ onSaved }: StudioAiSettingsProps) {
                     setSelectedProvider('google')
                     setProviderModalOpen('google')
                   }}
-                  className="group relative cursor-pointer rounded-2xl border border-sky-500/25 bg-gradient-to-b from-sky-950/20 via-black/40 to-black/60 p-5 shadow-lg transition-all hover:border-sky-400/50 hover:shadow-sky-500/10 hover:shadow-2xl"
+                  className="group relative cursor-pointer rounded-2xl border border-info/25 bg-gradient-to-b from-info-950/20 via-black/40 to-black/60 p-5 shadow-lg transition-all hover:border-info/50 hover:shadow-info/10 hover:shadow-2xl"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-center gap-3">
-                      <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-sky-500/20 to-purple-500/20 border border-sky-400/30 shadow-inner group-hover:scale-105 transition-transform">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-info/20 to-purple-500/20 border border-info/30 shadow-inner group-hover:scale-105 transition-transform">
                         <GoogleGeminiLogo className="h-7 w-7" />
                       </div>
                       <div>
                         <div className="flex items-center gap-2">
-                          <h4 className="text-sm font-bold text-white group-hover:text-sky-300 transition-colors">
+                          <h4 className="text-sm font-bold text-white group-hover:text-info-300 transition-colors">
                             Google AI Studio
                           </h4>
-                          <span className="rounded bg-sky-500/20 border border-sky-500/40 text-sky-300 text-[10px] font-mono px-1.5 py-0.2 font-semibold">
+                          <span className="rounded bg-info/20 border border-info/40 text-info-300 text-[10px] font-mono px-1.5 py-0.2 font-semibold">
                             Gemini 2.5
                           </span>
                         </div>
@@ -1103,7 +1102,7 @@ export function StudioAiSettings({ onSaved }: StudioAiSettingsProps) {
                         </span>
                       )}
                       <Tooltip label="Buka Pengaturan &amp; Kunci Google">
-                        <div className="p-1.5 rounded-lg text-neutral-400 group-hover:text-sky-300 group-hover:bg-sky-500/10 transition-colors">
+                        <div className="p-1.5 rounded-lg text-neutral-400 group-hover:text-info-300 group-hover:bg-info/10 transition-colors">
                           <Settings className="h-4 w-4 transition-transform duration-300 group-hover:rotate-90" />
                         </div>
                       </Tooltip>
@@ -1125,7 +1124,7 @@ export function StudioAiSettings({ onSaved }: StudioAiSettingsProps) {
 
                     <div className="flex items-center justify-between text-[11px]">
                       <span className="text-neutral-400">Model Tersedia di Studio:</span>
-                      <span className="font-mono text-sky-400 font-semibold bg-sky-500/10 px-2 py-0.5 rounded border border-sky-500/20">
+                      <span className="font-mono text-info font-semibold bg-info/10 px-2 py-0.5 rounded border border-info/20">
                         {googleModelsCount} Model Aktif
                       </span>
                     </div>
@@ -1145,7 +1144,7 @@ export function StudioAiSettings({ onSaved }: StudioAiSettingsProps) {
                       Google Generative Language API
                     </span>
                     <Tooltip label="Buka Pengaturan &amp; Kunci Google">
-                      <div className="inline-flex items-center gap-1.5 rounded-lg bg-sky-500/10 border border-sky-500/25 px-2.5 py-1 text-sky-400 group-hover:bg-sky-500/20 group-hover:text-sky-300 transition-colors">
+                      <div className="inline-flex items-center gap-1.5 rounded-lg bg-info/10 border border-info/25 px-2.5 py-1 text-info group-hover:bg-info/20 group-hover:text-info-300 transition-colors">
                         <Settings className="h-3.5 w-3.5 transition-transform duration-300 group-hover:rotate-90" />
                         <CornerDownRight className="h-3 w-3" />
                       </div>
@@ -1274,13 +1273,13 @@ export function StudioAiSettings({ onSaved }: StudioAiSettingsProps) {
           {/* =========================================================================
               DAFTAR MODEL TERSEDIA LINTAS PENYEDIA (Persis media_1793209666517_98717548.png)
           ========================================================================= */}
-          <div className="rounded-2xl border border-neutral-800 bg-[#121316] p-5 space-y-4">
+          <div className="rounded-2xl border border-neutral-800 bg-surface-elevated p-5 space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="text-base font-bold text-white tracking-tight">Model Tersedia</h3>
               <div className="relative inline-flex items-center">
                 <select
                   value={thinkingMode}
-                  onChange={(e) => setThinkingMode(e.target.value as any)}
+                  onChange={(e) => setThinkingMode(e.target.value as 'auto' | 'on' | 'off')}
                   className="appearance-none bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-1.5 pr-8 text-xs font-mono text-neutral-200 focus:outline-none focus:border-neutral-500 cursor-pointer"
                 >
                   <option value="auto">Thinking: Auto</option>
@@ -1344,7 +1343,7 @@ export function StudioAiSettings({ onSaved }: StudioAiSettingsProps) {
                     key={`${m.provider}-${m.id}`}
                     className={`rounded-xl border p-3 flex flex-col justify-between gap-2.5 transition-all text-xs group ${
                       isTestingThisModel
-                        ? 'border-sky-500/60 bg-sky-500/10 shadow-md shadow-sky-500/10'
+                        ? 'border-info/60 bg-info/10 shadow-md shadow-info/10'
                         : m.testedStatus === 'valid'
                         ? 'border-emerald-500/40 bg-neutral-900/80 hover:border-emerald-500/60'
                         : m.testedStatus === 'invalid'
@@ -1357,7 +1356,7 @@ export function StudioAiSettings({ onSaved }: StudioAiSettingsProps) {
                         <div
                           className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border transition-colors ${
                             isTestingThisModel
-                              ? 'bg-sky-500/20 border-sky-500/40 text-sky-300'
+                              ? 'bg-info/20 border-info/40 text-info-300'
                               : m.testedStatus === 'valid'
                               ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-400'
                               : m.testedStatus === 'invalid'
@@ -1412,24 +1411,24 @@ export function StudioAiSettings({ onSaved }: StudioAiSettingsProps) {
                             disabled={isTestingThisModel}
                             className={`p-1.5 rounded-lg transition-all duration-200 cursor-pointer ${
                               isTestingThisModel
-                                ? 'bg-sky-500/20 text-sky-300 ring-1 ring-sky-500/50'
+                                ? 'bg-info/20 text-info-300 ring-1 ring-info/50'
                                 : m.testedStatus === 'valid'
                                 ? 'bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20'
                                 : m.testedStatus === 'invalid'
                                 ? 'bg-red-500/10 text-red-400 hover:bg-red-500/20'
-                                : 'text-neutral-400 hover:text-sky-300 hover:bg-neutral-800'
+                                : 'text-neutral-400 hover:text-info-300 hover:bg-neutral-800'
                             } disabled:opacity-40`}
                             title="Uji Model"
                           >
                             <Play
                               className={`h-4 w-4 transition-all duration-200 ${
                                 isTestingThisModel
-                                  ? 'fill-sky-400 text-sky-400 scale-110'
+                                  ? 'fill-info text-info scale-110'
                                   : m.testedStatus === 'valid'
                                   ? 'fill-emerald-400 text-emerald-400'
                                   : m.testedStatus === 'invalid'
                                   ? 'fill-red-400 text-red-400'
-                                  : 'text-neutral-400 hover:text-sky-300'
+                                  : 'text-neutral-400 hover:text-info-300'
                               }`}
                             />
                           </button>
@@ -1571,7 +1570,7 @@ export function StudioAiSettings({ onSaved }: StudioAiSettingsProps) {
                   <Tooltip label="Temperatur 0.0 untuk presisi koding, 0.4 seimbang, 0.8 kreatif.">
                     <span className="text-neutral-400 cursor-help border-b border-dotted border-neutral-600">Temperatur</span>
                   </Tooltip>
-                  <span className="font-mono text-sky-400 font-bold">{temperature.toFixed(2)}</span>
+                  <span className="font-mono text-info font-bold">{temperature.toFixed(2)}</span>
                 </div>
                 <input
                   type="range"
@@ -1580,7 +1579,7 @@ export function StudioAiSettings({ onSaved }: StudioAiSettingsProps) {
                   step="0.05"
                   value={temperature}
                   onChange={(e) => setTemperature(parseFloat(e.target.value))}
-                  className="w-full accent-sky-400 h-1.5 bg-neutral-800 rounded-lg cursor-pointer"
+                  className="w-full accent-info h-1.5 bg-neutral-800 rounded-lg cursor-pointer"
                 />
               </div>
 
@@ -1629,9 +1628,9 @@ export function StudioAiSettings({ onSaved }: StudioAiSettingsProps) {
       ========================================================================= */}
       {providerModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-          <div className="relative w-full max-w-4xl max-h-[92vh] flex flex-col rounded-2xl border border-white/20 bg-[#14161C] shadow-2xl overflow-hidden">
+          <div className="relative w-full max-w-4xl max-h-[92vh] flex flex-col rounded-2xl border border-white/20 bg-surface-elevated shadow-2xl overflow-hidden">
             {/* Header Modal */}
-            <div className="flex items-center justify-between border-b border-white/10 bg-[#1A1D24] px-6 py-4 shrink-0">
+            <div className="flex items-center justify-between border-b border-white/10 bg-surface-overlay px-6 py-4 shrink-0">
               <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/5 border border-white/10">
                   {providerModalOpen === 'google' ? (
@@ -1663,7 +1662,7 @@ export function StudioAiSettings({ onSaved }: StudioAiSettingsProps) {
                     }
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 rounded-lg bg-sky-500/15 hover:bg-sky-500/25 border border-sky-500/35 px-2.5 py-1.5 text-xs font-semibold text-sky-300 transition-colors shadow-sm"
+                    className="inline-flex items-center gap-1.5 rounded-lg bg-info/15 hover:bg-info/25 border border-info/35 px-2.5 py-1.5 text-xs font-semibold text-info-300 transition-colors shadow-sm"
                   >
                     <Key className="h-3.5 w-3.5" />
                     <span className="hidden sm:inline">Dapatkan API Key</span>
@@ -1731,10 +1730,10 @@ export function StudioAiSettings({ onSaved }: StudioAiSettingsProps) {
                   )
                 } else {
                   return (
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-4 rounded-xl border border-sky-500/30 bg-sky-950/20">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-4 rounded-xl border border-info/30 bg-info-950/20">
                       <div className="space-y-1">
                         <span className="text-[11px] text-neutral-400 font-medium">Endpoint Verifikasi:</span>
-                        <div className="text-xs font-mono font-bold text-sky-300">
+                        <div className="text-xs font-mono font-bold text-info-300">
                           Google Generative Language API
                         </div>
                       </div>
@@ -1780,7 +1779,7 @@ export function StudioAiSettings({ onSaved }: StudioAiSettingsProps) {
                         setNewKeyError('')
                         setAddKeyModalOpen(true)
                       }}
-                      className="inline-flex h-8 items-center gap-1.5 rounded-lg bg-sky-500/20 hover:bg-sky-500/30 border border-sky-500/40 px-3 text-xs font-semibold text-sky-300 transition-colors"
+                      className="inline-flex h-8 items-center gap-1.5 rounded-lg bg-info/20 hover:bg-info/30 border border-info/40 px-3 text-xs font-semibold text-info-300 transition-colors"
                     >
                       <Plus className="h-3.5 w-3.5" />
                       <span>Tambah Kunci</span>
@@ -1815,7 +1814,7 @@ export function StudioAiSettings({ onSaved }: StudioAiSettingsProps) {
                         }}
                         className={`px-2.5 py-0.5 rounded transition-colors ${
                           connConfig.strategy === 'priority'
-                            ? 'bg-sky-500/25 text-sky-300 font-semibold'
+                            ? 'bg-info/25 text-info-300 font-semibold'
                             : 'text-neutral-400 hover:text-white'
                         }`}
                       >
@@ -1830,7 +1829,7 @@ export function StudioAiSettings({ onSaved }: StudioAiSettingsProps) {
                         }}
                         className={`px-2.5 py-0.5 rounded transition-colors ${
                           connConfig.strategy === 'round-robin'
-                            ? 'bg-sky-500/25 text-sky-300 font-semibold'
+                            ? 'bg-info/25 text-info-300 font-semibold'
                             : 'text-neutral-400 hover:text-white'
                         }`}
                       >
@@ -1845,7 +1844,7 @@ export function StudioAiSettings({ onSaved }: StudioAiSettingsProps) {
                         }}
                         className={`px-2.5 py-0.5 rounded transition-colors ${
                           connConfig.strategy === 'sticky'
-                            ? 'bg-sky-500/25 text-sky-300 font-semibold'
+                            ? 'bg-info/25 text-info-300 font-semibold'
                             : 'text-neutral-400 hover:text-white'
                         }`}
                       >
@@ -1949,7 +1948,7 @@ export function StudioAiSettings({ onSaved }: StudioAiSettingsProps) {
                               )}
 
                               {k.proxyUrl && (
-                                <div className="font-mono text-[10px] text-sky-400/90 underline truncate pt-0.5">
+                                <div className="font-mono text-[10px] text-info/90 underline truncate pt-0.5">
                                   Proxy: {k.proxyUrl} {k.pool ? `(Pool: ${k.pool})` : ''}
                                 </div>
                               )}
@@ -1973,9 +1972,9 @@ export function StudioAiSettings({ onSaved }: StudioAiSettingsProps) {
                                 type="button"
                                 onClick={() => handleTestKey(k)}
                                 disabled={testingKeyId === k.id}
-                                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-[11px] font-medium bg-sky-500/15 hover:bg-sky-500/25 border border-sky-500/30 text-sky-300 transition-colors disabled:opacity-40"
+                                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-[11px] font-medium bg-info/15 hover:bg-info/25 border border-info/30 text-info-300 transition-colors disabled:opacity-40"
                               >
-                                <Play className={`h-2.5 w-2.5 transition-all ${testingKeyId === k.id ? 'fill-sky-400 text-sky-400 scale-110 animate-pulse' : ''}`} />
+                                <Play className={`h-2.5 w-2.5 transition-all ${testingKeyId === k.id ? 'fill-info text-info scale-110 animate-pulse' : ''}`} />
                                 <span>{testingKeyId === k.id ? 'Menguji...' : 'Uji'}</span>
                               </button>
 
@@ -2027,7 +2026,7 @@ export function StudioAiSettings({ onSaved }: StudioAiSettingsProps) {
                       handleFetchModels(providerModalOpen)
                     }}
                     disabled={fetchingModels}
-                    className="inline-flex h-8 items-center gap-1.5 rounded-lg bg-sky-500/20 hover:bg-sky-500/30 border border-sky-500/40 px-3 text-xs font-semibold text-sky-300 transition-colors disabled:opacity-40"
+                    className="inline-flex h-8 items-center gap-1.5 rounded-lg bg-info/20 hover:bg-info/30 border border-info/40 px-3 text-xs font-semibold text-info-300 transition-colors disabled:opacity-40"
                   >
                     <RefreshCw className={`h-3.5 w-3.5 ${fetchingModels ? 'animate-spin' : ''}`} />
                     <span>{fetchingModels ? 'Menyinkronkan...' : 'Sinkronkan Model'}</span>
@@ -2035,7 +2034,7 @@ export function StudioAiSettings({ onSaved }: StudioAiSettingsProps) {
                 </div>
 
                 {fetchNotice && (
-                  <div className="rounded-lg border border-sky-500/30 bg-sky-500/10 px-3.5 py-2 text-xs text-sky-300">
+                  <div className="rounded-lg border border-info/30 bg-info/10 px-3.5 py-2 text-xs text-info-300">
                     {fetchNotice}
                   </div>
                 )}
@@ -2097,14 +2096,14 @@ export function StudioAiSettings({ onSaved }: StudioAiSettingsProps) {
                         }}
                         onFocus={() => setAutocompleteOpen(true)}
                         placeholder={`Cari model ${providerModalOpen === 'google' ? 'Google (e.g. 2.5-flash)' : 'OpenRouter (e.g. nemotron, cohere, free)'}...`}
-                        className="w-full h-9 rounded-lg bg-black/60 border border-white/20 pl-9 pr-3 text-xs font-mono text-white placeholder-neutral-500 focus:outline-none focus:border-sky-400"
+                        className="w-full h-9 rounded-lg bg-black/60 border border-white/20 pl-9 pr-3 text-xs font-mono text-white placeholder-neutral-500 focus:outline-none focus:border-accent-400"
                       />
                     </div>
                   </div>
 
                   {/* Autocomplete Dropdown Menu */}
                   {autocompleteOpen && autocompleteQuery.trim() && (
-                    <div className="absolute z-20 mt-1.5 w-full rounded-xl border border-white/20 bg-[#1A1D24] shadow-2xl max-h-64 overflow-y-auto p-1.5 space-y-1">
+                    <div className="absolute z-20 mt-1.5 w-full rounded-xl border border-white/20 bg-surface-overlay shadow-2xl max-h-64 overflow-y-auto p-1.5 space-y-1">
                       {currentModelList
                         .filter((m: any) => {
                           const q = autocompleteQuery.toLowerCase().trim()
@@ -2169,7 +2168,7 @@ export function StudioAiSettings({ onSaved }: StudioAiSettingsProps) {
                                   </span>
                                 )}
                                 {caps.includes('vision') && (
-                                  <span className="rounded bg-sky-500/20 text-sky-300 text-[9px] font-mono px-1.5 py-0.2">
+                                  <span className="rounded bg-info/20 text-info-300 text-[9px] font-mono px-1.5 py-0.2">
                                     Vision
                                   </span>
                                 )}
@@ -2184,7 +2183,7 @@ export function StudioAiSettings({ onSaved }: StudioAiSettingsProps) {
                                     Tersimpan
                                   </span>
                                 ) : (
-                                  <span className="flex items-center gap-1 font-mono text-[10px] text-sky-300 bg-white/10 hover:bg-sky-500 hover:text-white px-1.5 py-0.5 rounded transition-colors">
+                                  <span className="flex items-center gap-1 font-mono text-[10px] text-info-300 bg-white/10 hover:bg-info hover:text-white px-1.5 py-0.5 rounded transition-colors">
                                     <Plus className="h-2.5 w-2.5" />
                                     Tambah
                                   </span>
@@ -2213,7 +2212,7 @@ export function StudioAiSettings({ onSaved }: StudioAiSettingsProps) {
                             key={m.id}
                             className={`flex flex-col justify-between p-2.5 rounded-lg border transition-all text-xs ${
                               isTestingThis
-                                ? 'border-sky-500/60 bg-sky-500/10 shadow-sm'
+                                ? 'border-info/60 bg-info/10 shadow-sm'
                                 : m.testedStatus === 'valid'
                                 ? 'border-emerald-500/40 bg-black/40'
                                 : m.testedStatus === 'invalid'
@@ -2247,24 +2246,24 @@ export function StudioAiSettings({ onSaved }: StudioAiSettingsProps) {
                                   disabled={isTestingThis}
                                   className={`px-2 py-1 rounded text-[10px] font-mono flex items-center gap-1 transition-all ${
                                     isTestingThis
-                                      ? 'bg-sky-500/25 text-sky-200 ring-1 ring-sky-500/50'
+                                      ? 'bg-info/25 text-info-300 ring-1 ring-info/50'
                                       : m.testedStatus === 'valid'
                                       ? 'bg-emerald-500/15 text-emerald-300 hover:bg-emerald-500/25'
                                       : m.testedStatus === 'invalid'
                                       ? 'bg-red-500/15 text-red-300 hover:bg-red-500/25'
-                                      : 'bg-sky-500/15 text-sky-300 hover:bg-sky-500/25'
+                                      : 'bg-info/15 text-info-300 hover:bg-info/25'
                                   }`}
                                   title="Uji Inferensi Model"
                                 >
                                   <Play
                                     className={`h-2.5 w-2.5 transition-all ${
                                       isTestingThis
-                                        ? 'fill-sky-400 text-sky-400 scale-110'
+                                        ? 'fill-info text-info scale-110'
                                         : m.testedStatus === 'valid'
                                         ? 'fill-emerald-400 text-emerald-400'
                                         : m.testedStatus === 'invalid'
                                         ? 'fill-red-400 text-red-400'
-                                        : 'text-sky-300'
+                                        : 'text-info-300'
                                     }`}
                                   />
                                   <span>{isTestingThis ? 'Menguji...' : 'Uji'}</span>
@@ -2305,11 +2304,11 @@ export function StudioAiSettings({ onSaved }: StudioAiSettingsProps) {
             </div>
 
             {/* Footer Modal */}
-            <div className="border-t border-white/10 bg-[#1A1D24] px-6 py-3 flex items-center justify-end shrink-0">
+            <div className="border-t border-white/10 bg-surface-overlay px-6 py-3 flex items-center justify-end shrink-0">
               <button
                 type="button"
                 onClick={() => setProviderModalOpen(null)}
-                className="px-4 py-1.5 rounded-lg bg-sky-500 hover:bg-sky-400 text-white font-semibold text-xs shadow-sm transition-colors"
+                className="px-4 py-1.5 rounded-lg bg-accent-500 hover:bg-accent-300 text-accent-950 font-semibold text-xs shadow-sm transition-colors"
               >
                 Selesai &amp; Tutup
               </button>
@@ -2347,7 +2346,7 @@ export function StudioAiSettings({ onSaved }: StudioAiSettingsProps) {
                     id="rtkEnabled"
                     checked={tokenOpt.rtkEnabled}
                     onChange={(e) => setTokenOpt({ ...tokenOpt, rtkEnabled: e.target.checked })}
-                    className="h-4 w-4 rounded accent-sky-500 cursor-pointer"
+                    className="h-4 w-4 rounded accent-info cursor-pointer"
                   />
                   <label htmlFor="rtkEnabled" className="text-xs font-semibold text-white cursor-pointer flex items-center gap-1.5">
                     <span>Kompresi keluaran alat</span>
@@ -2355,7 +2354,7 @@ export function StudioAiSettings({ onSaved }: StudioAiSettingsProps) {
                       href="https://github.com/rtk-ai/rtk"
                       target="_blank"
                       rel="noreferrer"
-                      className="text-sky-400 hover:underline inline-flex items-center gap-0.5"
+                      className="text-info hover:underline inline-flex items-center gap-0.5"
                     >
                       (RTK)
                       <ExternalLink className="h-2.5 w-2.5" />
@@ -2389,7 +2388,7 @@ export function StudioAiSettings({ onSaved }: StudioAiSettingsProps) {
                         type="number"
                         value={tokenOpt.rtkMaxOutputChars}
                         onChange={(e) => setTokenOpt({ ...tokenOpt, rtkMaxOutputChars: parseInt(e.target.value) || 2500 })}
-                        className="w-full h-8 rounded-lg bg-black/60 border border-white/15 px-2.5 text-xs text-white focus:outline-none focus:border-sky-400 font-mono"
+                        className="w-full h-8 rounded-lg bg-black/60 border border-white/15 px-2.5 text-xs text-white focus:outline-none focus:border-accent-400 font-mono"
                       />
                     </div>
                   </div>
@@ -2400,7 +2399,7 @@ export function StudioAiSettings({ onSaved }: StudioAiSettingsProps) {
                       id="smartCrusher"
                       checked={tokenOpt.rtkSmartCrusher}
                       onChange={(e) => setTokenOpt({ ...tokenOpt, rtkSmartCrusher: e.target.checked })}
-                      className="h-3.5 w-3.5 rounded accent-sky-500 cursor-pointer"
+                      className="h-3.5 w-3.5 rounded accent-info cursor-pointer"
                     />
                     <label htmlFor="smartCrusher" className="text-[11px] text-neutral-300 cursor-pointer">
                       SmartCrusher for JSON: Otomatis ringkas array database panjang dan hapus field kosong/null
@@ -2561,7 +2560,7 @@ export function StudioAiSettings({ onSaved }: StudioAiSettingsProps) {
                 value={tokenOpt.customSystemPrompt}
                 onChange={(e) => setTokenOpt({ ...tokenOpt, customSystemPrompt: e.target.value })}
                 placeholder="Tambahkan arahan persona khusus tim Anda, aturan styling kustom, atau instruksi domain..."
-                className="w-full rounded-xl bg-black/50 border border-white/15 p-3 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-sky-400 leading-relaxed font-mono"
+                className="w-full rounded-xl bg-black/50 border border-white/15 p-3 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-accent-400 leading-relaxed font-mono"
               />
             </div>
           </Panel>
@@ -2703,7 +2702,7 @@ export function StudioAiSettings({ onSaved }: StudioAiSettingsProps) {
                 {toolsCollapsed ? (
                   <>
                     <ChevronDown className="h-3.5 w-3.5 text-accent-400" />
-                    <span>Tampilkan Katalog ({SEGIA_TOOLS_CATALOG.length} Tools)</span>
+                    <span>Tampilkan Katalog ({UNIMASI_TOOLS_CATALOG.length} Tools)</span>
                   </>
                 ) : (
                   <>
@@ -2723,7 +2722,7 @@ export function StudioAiSettings({ onSaved }: StudioAiSettingsProps) {
                       value={searchTool}
                       onChange={(e) => setSearchTool(e.target.value)}
                       placeholder="Cari nama tool / deskripsi..."
-                      className="w-full h-8 rounded-lg bg-black/40 border border-white/15 px-2.5 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-sky-400"
+                      className="w-full h-8 rounded-lg bg-black/40 border border-white/15 px-2.5 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-accent-400"
                     />
                   </div>
 
@@ -2735,7 +2734,7 @@ export function StudioAiSettings({ onSaved }: StudioAiSettingsProps) {
                         onClick={() => setCategoryFilter(cat)}
                         className={`px-2.5 py-1 rounded-lg text-[11px] font-mono transition-colors ${
                           categoryFilter === cat
-                            ? 'bg-sky-500/25 text-sky-300 border border-sky-500/40 font-semibold'
+                            ? 'bg-info/25 text-info-300 border border-info/40 font-semibold'
                             : 'bg-white/5 border border-white/10 text-neutral-400 hover:text-white'
                         }`}
                       >
@@ -2769,7 +2768,7 @@ export function StudioAiSettings({ onSaved }: StudioAiSettingsProps) {
                                   setEnabledTools([...enabledTools, t.id])
                                 }
                               }}
-                              className="h-3.5 w-3.5 rounded accent-sky-500 cursor-pointer"
+                              className="h-3.5 w-3.5 rounded accent-info cursor-pointer"
                             />
                             <div className="font-semibold text-white text-xs truncate">{t.label}</div>
                           </div>
@@ -2786,7 +2785,7 @@ export function StudioAiSettings({ onSaved }: StudioAiSettingsProps) {
                           <button
                             type="button"
                             onClick={() => setSelectedParamTool(t)}
-                            className="inline-flex items-center gap-1 text-[11px] font-mono text-sky-400 hover:underline"
+                            className="inline-flex items-center gap-1 text-[11px] font-mono text-info hover:underline"
                           >
                             <Info className="h-3 w-3" />
                             <span>{t.parameters.length} Parameter (Lihat Spesifikasi)</span>
@@ -2798,7 +2797,7 @@ export function StudioAiSettings({ onSaved }: StudioAiSettingsProps) {
                             disabled={testingToolId === t.id}
                             className="inline-flex items-center gap-1 rounded bg-white/10 hover:bg-white/15 px-2 py-0.5 text-[11px] font-mono text-white transition-colors disabled:opacity-40"
                           >
-                            <Play className={`h-2.5 w-2.5 transition-all ${testingToolId === t.id ? 'fill-sky-400 text-sky-400 scale-110 animate-pulse' : ''}`} />
+                            <Play className={`h-2.5 w-2.5 transition-all ${testingToolId === t.id ? 'fill-info text-info scale-110 animate-pulse' : ''}`} />
                             <span>Uji Tool</span>
                           </button>
                         </div>
@@ -2856,7 +2855,7 @@ export function StudioAiSettings({ onSaved }: StudioAiSettingsProps) {
                   type="button"
                   onClick={() => exportLogsAsJson()}
                   disabled={promptLogs.length === 0}
-                  className="inline-flex h-8 items-center gap-1.5 rounded-lg bg-sky-500/15 hover:bg-sky-500/25 border border-sky-500/30 px-3 text-xs font-semibold text-sky-300 transition-colors disabled:opacity-40"
+                  className="inline-flex h-8 items-center gap-1.5 rounded-lg bg-info/15 hover:bg-info/25 border border-info/30 px-3 text-xs font-semibold text-info-300 transition-colors disabled:opacity-40"
                 >
                   <Download className="h-3.5 w-3.5" />
                   <span>Ekspor JSON</span>
@@ -2894,7 +2893,7 @@ export function StudioAiSettings({ onSaved }: StudioAiSettingsProps) {
                   value={searchLogQuery}
                   onChange={(e) => setSearchLogQuery(e.target.value)}
                   placeholder="Cari isi prompt / respon..."
-                  className="w-full h-8 rounded-lg bg-black/40 border border-white/15 px-2.5 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-sky-400"
+                  className="w-full h-8 rounded-lg bg-black/40 border border-white/15 px-2.5 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-accent-400"
                 />
               </div>
 
@@ -2995,7 +2994,7 @@ export function StudioAiSettings({ onSaved }: StudioAiSettingsProps) {
           <div className="w-full max-w-lg rounded-2xl border border-white/15 bg-neutral-900 p-6 shadow-2xl space-y-4">
             <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
               <div className="flex items-center gap-2">
-                <Key className="h-4 w-4 text-sky-400" />
+                <Key className="h-4 w-4 text-info" />
                 <h3 className="text-sm font-bold text-white">
                   Tambah Kunci API — {selectedProvider === 'google' ? 'Google Gemini' : 'OpenRouter'}
                 </h3>
@@ -3017,7 +3016,7 @@ export function StudioAiSettings({ onSaved }: StudioAiSettingsProps) {
                   value={newKeyName}
                   onChange={(e) => setNewKeyName(e.target.value)}
                   placeholder="Misal: Production Key, Backup Key #1"
-                  className="w-full h-9 rounded-lg bg-black/60 border border-white/15 px-3 text-white focus:outline-none focus:border-sky-400"
+                  className="w-full h-9 rounded-lg bg-black/60 border border-white/15 px-3 text-white focus:outline-none focus:border-accent-400"
                 />
               </div>
 
@@ -3029,7 +3028,7 @@ export function StudioAiSettings({ onSaved }: StudioAiSettingsProps) {
                     value={newKeyValue}
                     onChange={(e) => setNewKeyValue(e.target.value)}
                     placeholder={selectedProvider === 'google' ? 'AIzaSy...' : 'sk-or-v1-...'}
-                    className="w-full h-9 rounded-lg bg-black/60 border border-white/15 pl-3 pr-10 text-white font-mono focus:outline-none focus:border-sky-400"
+                    className="w-full h-9 rounded-lg bg-black/60 border border-white/15 pl-3 pr-10 text-white font-mono focus:outline-none focus:border-accent-400"
                   />
                   <button
                     type="button"
@@ -3050,7 +3049,7 @@ export function StudioAiSettings({ onSaved }: StudioAiSettingsProps) {
                     max="99"
                     value={newKeyPriority}
                     onChange={(e) => setNewKeyPriority(parseInt(e.target.value) || 1)}
-                    className="w-full h-9 rounded-lg bg-black/60 border border-white/15 px-3 text-white font-mono focus:outline-none focus:border-sky-400"
+                    className="w-full h-9 rounded-lg bg-black/60 border border-white/15 px-3 text-white font-mono focus:outline-none focus:border-accent-400"
                   />
                 </div>
 
@@ -3061,7 +3060,7 @@ export function StudioAiSettings({ onSaved }: StudioAiSettingsProps) {
                     value={newKeyPool}
                     onChange={(e) => setNewKeyPool(e.target.value)}
                     placeholder="Misal: cloudflare-relay"
-                    className="w-full h-9 rounded-lg bg-black/60 border border-white/15 px-3 text-white focus:outline-none focus:border-sky-400"
+                    className="w-full h-9 rounded-lg bg-black/60 border border-white/15 px-3 text-white focus:outline-none focus:border-accent-400"
                   />
                 </div>
               </div>
@@ -3073,7 +3072,7 @@ export function StudioAiSettings({ onSaved }: StudioAiSettingsProps) {
                   value={newKeyProxyUrl}
                   onChange={(e) => setNewKeyProxyUrl(e.target.value)}
                   placeholder="https://cloudflare-relay.adwk-project.workers.dev"
-                  className="w-full h-9 rounded-lg bg-black/60 border border-white/15 px-3 text-white font-mono text-[11px] focus:outline-none focus:border-sky-400"
+                  className="w-full h-9 rounded-lg bg-black/60 border border-white/15 px-3 text-white font-mono text-[11px] focus:outline-none focus:border-accent-400"
                 />
               </div>
 
@@ -3083,7 +3082,7 @@ export function StudioAiSettings({ onSaved }: StudioAiSettingsProps) {
                   id="newKeySetActive"
                   checked={newKeySetActive}
                   onChange={(e) => setNewKeySetActive(e.target.checked)}
-                  className="h-3.5 w-3.5 rounded accent-sky-500 cursor-pointer"
+                  className="h-3.5 w-3.5 rounded accent-info cursor-pointer"
                 />
                 <label htmlFor="newKeySetActive" className="text-neutral-300 cursor-pointer text-xs">
                   Jadikan kunci aktif langsung untuk penyedia {selectedProvider}
@@ -3124,7 +3123,7 @@ export function StudioAiSettings({ onSaved }: StudioAiSettingsProps) {
                   reloadData()
                   setAddKeyModalOpen(false)
                 }}
-                className="px-4 py-1.5 rounded-lg text-xs font-semibold bg-sky-500 hover:bg-sky-400 text-white shadow-sm"
+                className="px-4 py-1.5 rounded-lg text-xs font-semibold bg-accent-500 hover:bg-accent-300 text-accent-950 shadow-sm"
               >
                 Simpan Kunci
               </button>
@@ -3157,7 +3156,7 @@ export function StudioAiSettings({ onSaved }: StudioAiSettingsProps) {
 
             <div className="space-y-3 text-xs">
               <p className="text-neutral-400 leading-relaxed">
-                Satu kunci per baris. Format: <code className="text-sky-300 font-mono">name|apiKey</code> atau cukup <code className="text-sky-300 font-mono">apiKey</code> (auto-named by index).
+                Satu kunci per baris. Format: <code className="text-info-300 font-mono">name|apiKey</code> atau cukup <code className="text-info-300 font-mono">apiKey</code> (auto-named by index).
               </p>
 
               <textarea
@@ -3165,7 +3164,7 @@ export function StudioAiSettings({ onSaved }: StudioAiSettingsProps) {
                 value={bulkText}
                 onChange={(e) => setBulkText(e.target.value)}
                 placeholder={`name1|sk-key1\nname2|sk-key2\nsk-key-only-auto-named`}
-                className="w-full rounded-xl bg-black/60 border border-white/15 p-3 font-mono text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-sky-400"
+                className="w-full rounded-xl bg-black/60 border border-white/15 p-3 font-mono text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-accent-400"
               />
 
               <div className="grid grid-cols-2 gap-3">
@@ -3176,7 +3175,7 @@ export function StudioAiSettings({ onSaved }: StudioAiSettingsProps) {
                     value={bulkPool}
                     onChange={(e) => setBulkPool(e.target.value)}
                     placeholder="cloudflare-relay"
-                    className="w-full h-8 rounded-lg bg-black/60 border border-white/15 px-2.5 text-xs text-white focus:outline-none focus:border-sky-400"
+                    className="w-full h-8 rounded-lg bg-black/60 border border-white/15 px-2.5 text-xs text-white focus:outline-none focus:border-accent-400"
                   />
                 </div>
                 <div className="space-y-1">
@@ -3186,7 +3185,7 @@ export function StudioAiSettings({ onSaved }: StudioAiSettingsProps) {
                     value={bulkProxyUrl}
                     onChange={(e) => setBulkProxyUrl(e.target.value)}
                     placeholder="https://cloudflare-relay..."
-                    className="w-full h-8 rounded-lg bg-black/60 border border-white/15 px-2.5 text-xs text-white font-mono text-[11px] focus:outline-none focus:border-sky-400"
+                    className="w-full h-8 rounded-lg bg-black/60 border border-white/15 px-2.5 text-xs text-white font-mono text-[11px] focus:outline-none focus:border-accent-400"
                   />
                 </div>
               </div>
@@ -3240,7 +3239,7 @@ export function StudioAiSettings({ onSaved }: StudioAiSettingsProps) {
                     })
                   }
                 }}
-                className="px-4 py-1.5 rounded-lg text-xs font-semibold bg-sky-500 hover:bg-sky-400 text-white shadow-sm"
+                className="px-4 py-1.5 rounded-lg text-xs font-semibold bg-accent-500 hover:bg-accent-300 text-accent-950 shadow-sm"
               >
                 Impor Kunci Sekarang
               </button>
@@ -3259,7 +3258,7 @@ export function StudioAiSettings({ onSaved }: StudioAiSettingsProps) {
               <div>
                 <div className="flex items-center gap-2">
                   <h3 className="text-sm font-bold text-white">{selectedParamTool.label}</h3>
-                  <span className="font-mono text-[10px] bg-sky-500/15 text-sky-300 border border-sky-500/30 px-1.5 py-0.2 rounded">
+                  <span className="font-mono text-[10px] bg-info/15 text-info-300 border border-info/30 px-1.5 py-0.2 rounded">
                     {selectedParamTool.name}
                   </span>
                 </div>
@@ -3290,7 +3289,7 @@ export function StudioAiSettings({ onSaved }: StudioAiSettingsProps) {
                   <tbody className="divide-y divide-white/[0.04]">
                     {selectedParamTool.parameters.map((param) => (
                       <tr key={param.name}>
-                        <td className="px-3 py-2 font-mono text-sky-300 font-semibold">{param.name}</td>
+                        <td className="px-3 py-2 font-mono text-info-300 font-semibold">{param.name}</td>
                         <td className="px-3 py-2 font-mono text-neutral-400">{param.type}</td>
                         <td className="px-3 py-2">
                           {param.required ? (
@@ -3404,7 +3403,7 @@ export function StudioAiSettings({ onSaved }: StudioAiSettingsProps) {
                     onClick={() => {
                       navigator.clipboard.writeText(JSON.stringify(inspectingLog, null, 2))
                     }}
-                    className="inline-flex items-center gap-1 text-[11px] font-mono text-sky-400 hover:text-sky-300 transition-colors"
+                    className="inline-flex items-center gap-1 text-[11px] font-mono text-info hover:text-info-300 transition-colors"
                   >
                     <Copy className="h-3 w-3" />
                     <span>Salin JSON</span>

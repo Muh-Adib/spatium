@@ -15,11 +15,11 @@ export type Tone = 'neutral' | 'primary' | 'success' | 'warning' | 'danger' | 'i
 
 const BTN_TONES: Record<Tone, string> = {
   neutral: 'text-neutral-400 hover:text-white hover:bg-white/10',
-  primary: 'bg-sky-500 text-white hover:bg-sky-400',
+  primary: 'bg-accent-500 text-accent-950 hover:bg-accent-300',
   success: 'text-emerald-400 hover:bg-emerald-500/15',
   warning: 'text-amber-400 hover:bg-amber-500/15',
   danger: 'text-red-400 hover:bg-red-500/15',
-  info: 'text-sky-400 hover:bg-sky-500/15',
+  info: 'text-info hover:bg-info/15',
   purple: 'text-purple-400 hover:bg-purple-500/15',
 }
 
@@ -54,7 +54,7 @@ export function IconButton({
   active,
   className = '',
 }: IconButtonProps) {
-  const cls = `inline-flex ${size === 'sm' ? 'h-8 w-8' : 'h-9 w-9'} shrink-0 items-center justify-center rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/60 disabled:cursor-not-allowed disabled:opacity-40 ${
+  const cls = `inline-flex ${size === 'sm' ? 'h-8 w-8' : 'h-9 w-9'} shrink-0 items-center justify-center rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-400/60 disabled:cursor-not-allowed disabled:opacity-40 ${
     active ? 'bg-white/10 text-white' : BTN_TONES[tone]
   } ${className}`
   const icon = <Icon className={`h-4 w-4 ${spinning ? 'animate-spin' : ''}`} aria-hidden="true" />
@@ -79,11 +79,11 @@ export function IconButton({
 /* ------------------------------------------------------------------ */
 
 export function Panel({ children, className = '' }: { children: React.ReactNode; className?: string }) {
-  return <div className={`rounded-2xl border border-white/[0.08] bg-[#1B1B1B] ${className}`}>{children}</div>
+  return <div className={`rounded-2xl border border-white/[0.08] bg-surface-elevated ${className}`}>{children}</div>
 }
 
 const STAT_TONES = {
-  sky: 'bg-sky-500/10 text-sky-400',
+  sky: 'bg-info/10 text-info',
   emerald: 'bg-emerald-500/10 text-emerald-400',
   purple: 'bg-purple-500/10 text-purple-400',
   amber: 'bg-amber-500/10 text-amber-400',
@@ -105,7 +105,7 @@ export function StatCard({
   tone?: keyof typeof STAT_TONES
 }) {
   const body = (
-    <div className="flex w-full items-center gap-4 rounded-2xl border border-white/[0.08] bg-[#1B1B1B] p-5 transition-colors hover:border-white/20 hover:bg-[#202020]">
+    <div className="flex w-full items-center gap-4 rounded-2xl border border-white/[0.08] bg-surface-elevated p-5 transition-colors hover:border-accent-400/30 hover:bg-surface-overlay">
       <span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${STAT_TONES[tone]}`}>
         <Icon className="h-5 w-5" aria-hidden="true" />
       </span>
@@ -130,7 +130,7 @@ export function StatCard({
 
 const PILL_TONES = {
   amber: 'bg-amber-500/10 text-amber-300 border-amber-500/25',
-  sky: 'bg-sky-500/10 text-sky-300 border-sky-500/25',
+  sky: 'bg-info/10 text-info border-info/25',
   purple: 'bg-purple-500/10 text-purple-300 border-purple-500/25',
   emerald: 'bg-emerald-500/10 text-emerald-300 border-emerald-500/25',
   slate: 'bg-slate-500/10 text-slate-300 border-slate-500/25',
@@ -163,7 +163,7 @@ export function StatusPill({
 /* ------------------------------------------------------------------ */
 
 export const fieldCls =
-  'h-10 w-full rounded-xl border border-white/10 bg-white/[0.03] px-3.5 text-sm text-white placeholder:text-neutral-500 transition-colors focus:border-sky-400/60 focus:bg-white/[0.05] focus:outline-none'
+  'h-10 w-full rounded-xl border border-white/10 bg-white/[0.03] px-3.5 text-sm text-white placeholder:text-neutral-500 transition-colors focus:border-accent-400/60 focus:bg-white/[0.05] focus:outline-none'
 
 export function SearchField({
   icon: Icon,
@@ -315,7 +315,7 @@ export function SelectDropdown<T extends string = string>({
         aria-label={ariaLabel || placeholder}
         className={`group flex w-full items-center justify-between gap-2 rounded-xl border transition-all text-left select-none focus:outline-none ${heightCls} ${
           open
-            ? 'border-sky-400/60 bg-white/[0.06] text-white ring-2 ring-sky-400/20 shadow-lg shadow-sky-950/20'
+            ? 'border-accent-400/60 bg-white/[0.06] text-white ring-2 ring-accent-400/20 shadow-lg shadow-accent-950/20'
             : 'border-white/10 bg-white/[0.03] text-neutral-200 hover:border-white/20 hover:bg-white/[0.05] hover:text-white'
         } ${disabled ? 'cursor-not-allowed opacity-40' : 'cursor-pointer'}`}
       >
@@ -323,13 +323,13 @@ export function SelectDropdown<T extends string = string>({
           {Icon && (
             <Icon
               className={`h-4 w-4 shrink-0 transition-colors ${
-                open ? 'text-sky-400' : 'text-neutral-500 group-hover:text-neutral-400'
+                open ? 'text-accent-400' : 'text-neutral-500 group-hover:text-neutral-400'
               }`}
               aria-hidden="true"
             />
           )}
           {selectedOption?.icon && (
-            <selectedOption.icon className="h-4 w-4 shrink-0 text-sky-400" aria-hidden="true" />
+            <selectedOption.icon className="h-4 w-4 shrink-0 text-accent-400" aria-hidden="true" />
           )}
           <span className={`truncate ${selectedOption ? 'font-medium text-white' : 'text-neutral-500'}`}>
             {selectedOption ? selectedOption.label : placeholder}
@@ -338,7 +338,7 @@ export function SelectDropdown<T extends string = string>({
 
         <ChevronDown
           className={`h-4 w-4 shrink-0 text-neutral-400 transition-transform duration-200 ease-out ${
-            open ? 'rotate-180 text-sky-400' : 'group-hover:text-neutral-300'
+            open ? 'rotate-180 text-accent-400' : 'group-hover:text-neutral-300'
           }`}
           aria-hidden="true"
         />
@@ -350,7 +350,7 @@ export function SelectDropdown<T extends string = string>({
           ref={listRef}
           role="listbox"
           tabIndex={-1}
-          className="absolute left-0 top-[calc(100%+6px)] z-50 min-w-full w-max max-w-sm rounded-xl border border-white/10 bg-[#1A1A1A]/95 p-1 text-white shadow-2xl shadow-black/90 backdrop-blur-xl animate-in fade-in zoom-in-95 duration-100 max-h-60 overflow-y-auto scrollbar-thin"
+          className="absolute left-0 top-[calc(100%+6px)] z-50 min-w-full w-max max-w-sm rounded-xl border border-white/10 bg-surface-overlay/95 p-1 text-white shadow-2xl shadow-black/90 backdrop-blur-xl animate-in fade-in zoom-in-95 duration-100 max-h-60 overflow-y-auto scrollbar-thin"
         >
           {options.map((opt, idx) => {
             const isSelected = opt.value === value
@@ -370,7 +370,7 @@ export function SelectDropdown<T extends string = string>({
                 onMouseEnter={() => setHighlightedIndex(idx)}
                 className={`relative flex w-full items-center justify-between gap-3 rounded-lg px-2.5 py-2 text-left text-xs transition-colors cursor-pointer select-none ${
                   isSelected
-                    ? 'bg-sky-500/15 text-sky-300 font-semibold'
+                    ? 'bg-accent-500/15 text-accent-300 font-semibold'
                     : isHighlighted
                     ? 'bg-white/[0.08] text-white'
                     : 'text-neutral-300 hover:bg-white/[0.05] hover:text-white'
@@ -379,7 +379,7 @@ export function SelectDropdown<T extends string = string>({
                 <div className="flex min-w-0 items-center gap-2">
                   {ItemIcon && (
                     <ItemIcon
-                      className={`h-3.5 w-3.5 shrink-0 ${isSelected ? 'text-sky-400' : 'text-neutral-400'}`}
+                      className={`h-3.5 w-3.5 shrink-0 ${isSelected ? 'text-accent-400' : 'text-neutral-400'}`}
                       aria-hidden="true"
                     />
                   )}
@@ -392,7 +392,7 @@ export function SelectDropdown<T extends string = string>({
                       {opt.badge}
                     </span>
                   )}
-                  {isSelected && <Check className="h-3.5 w-3.5 text-sky-400 shrink-0" aria-hidden="true" />}
+                  {isSelected && <Check className="h-3.5 w-3.5 text-accent-400 shrink-0" aria-hidden="true" />}
                 </div>
               </button>
             )
@@ -454,7 +454,7 @@ const MODAL_ICON_TONES: Record<string, string> = {
   danger: 'bg-red-500/15 text-red-400',
   warning: 'bg-amber-500/15 text-amber-400',
   success: 'bg-emerald-500/15 text-emerald-400',
-  info: 'bg-sky-500/15 text-sky-400',
+  info: 'bg-info/15 text-info',
 }
 
 export function Modal({
@@ -505,7 +505,7 @@ export function Modal({
         role="dialog"
         aria-modal="true"
         aria-label={title}
-        className={`relative my-auto w-full max-w-md space-y-5 rounded-2xl border border-white/10 bg-[#1E1E1E] p-6 shadow-2xl animate-in zoom-in-95 duration-150 max-h-[90vh] overflow-y-auto scrollbar-thin ${className}`}
+        className={`relative my-auto w-full max-w-md space-y-5 rounded-2xl border border-white/10 bg-surface-overlay p-6 shadow-2xl animate-in zoom-in-95 duration-150 max-h-[90vh] overflow-y-auto scrollbar-thin ${className}`}
       >
         <div className="flex items-start gap-3">
           {Icon && (
@@ -513,7 +513,7 @@ export function Modal({
               <Icon className="h-5 w-5" aria-hidden="true" />
             </span>
           )}
-          <h3 className="min-w-0 flex-1 pt-2 text-sm font-semibold text-white">{title}</h3>
+          <h3 className="min-w-0 flex-1 pt-2 font-heading text-sm font-semibold text-white">{title}</h3>
           <IconButton icon={X} label="Tutup" size="sm" onClick={onClose} />
         </div>
         {children}
@@ -543,7 +543,7 @@ export function TextButton({
 }) {
   const t =
     tone === 'primary'
-      ? 'bg-sky-500 text-white hover:bg-sky-400 disabled:opacity-50 disabled:hover:bg-sky-500'
+      ? 'bg-accent-500 text-accent-950 hover:bg-accent-300 disabled:opacity-50 disabled:hover:bg-accent-500'
       : tone === 'danger'
       ? 'bg-red-500 text-white hover:bg-red-400 disabled:opacity-50 disabled:hover:bg-red-500'
       : 'text-neutral-300 hover:bg-white/10 hover:text-white disabled:opacity-50 disabled:hover:bg-transparent'

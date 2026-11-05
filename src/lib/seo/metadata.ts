@@ -59,6 +59,44 @@ export interface MetadataInput {
  * Generate Next.js Metadata object from CMS SEO data with automatic fallbacks.
  * Fully supports template variables, bilingual alternates (hreflang), and structured directives.
  */
+interface ExtendedSeoData {
+  metaTitle?: string
+  seoTitle?: string
+  metaDescription?: string
+  canonicalUrl?: string
+  openGraph?: {
+    title?: string
+    description?: string
+    image?: string | { url?: string }
+    imageAlt?: string
+  }
+  ogImage?: string | { url?: string }
+  ogTitle?: string
+  ogDescription?: string
+  twitter?: {
+    card?: string
+    title?: string
+    description?: string
+    image?: string | { url?: string }
+  }
+  twitterTitle?: string
+  twitterDescription?: string
+  twitterImage?: string | { url?: string }
+  robots?: {
+    index?: boolean
+    follow?: boolean
+    noarchive?: boolean
+    nosnippet?: boolean
+    maxVideoPreview?: number
+    maxImagePreview?: 'none' | 'standard' | 'large'
+    maxSnippet?: number
+  }
+  robotsIndex?: boolean
+  robotsFollow?: boolean
+  keywords?: string[] | string
+  [key: string]: unknown
+}
+
 export function generatePageMetadata(input: MetadataInput): Metadata {
   const {
     title: pageTitle,
@@ -77,7 +115,7 @@ export function generatePageMetadata(input: MetadataInput): Metadata {
   } = input
 
   const site = input.site || siteConfig
-  const s = (rawSeo || {}) as any
+  const s = (rawSeo || {}) as ExtendedSeoData
 
   // Resolve template variables
   const rawTitle = s.metaTitle || s.seoTitle || pageTitle || site.name
@@ -116,10 +154,12 @@ export function generatePageMetadata(input: MetadataInput): Metadata {
   let ogImageAlt: string = fullTitle
 
   if (s.openGraph && typeof s.openGraph === 'object' && s.openGraph.image) {
-    ogImageUrl = resolveMediaUrl(s.openGraph.image)
+    const img = typeof s.openGraph.image === 'string' ? s.openGraph.image : s.openGraph.image.url
+    if (img) ogImageUrl = resolveMediaUrl(img)
     if (s.openGraph.imageAlt) ogImageAlt = s.openGraph.imageAlt
   } else if (s.ogImage) {
-    ogImageUrl = resolveMediaUrl(typeof s.ogImage === 'string' ? s.ogImage : s.ogImage.url)
+    const img = typeof s.ogImage === 'string' ? s.ogImage : s.ogImage.url
+    if (img) ogImageUrl = resolveMediaUrl(img)
   } else if (featuredImage) {
     ogImageUrl = resolveMediaUrl(featuredImage.url)
     if (featuredImage.alternativeText) ogImageAlt = featuredImage.alternativeText
@@ -189,9 +229,9 @@ export function generatePageMetadata(input: MetadataInput): Metadata {
       title: s.twitter?.title || s.twitterTitle || s.ogTitle || fullTitle,
       description: s.twitter?.description || s.twitterDescription || s.ogDescription || metaDescription,
       images: s.twitter?.image
-        ? [resolveMediaUrl(s.twitter.image)]
+        ? [resolveMediaUrl(typeof s.twitter.image === 'string' ? s.twitter.image : s.twitter.image.url || '')]
         : s.twitterImage
-          ? [resolveMediaUrl(typeof s.twitterImage === 'string' ? s.twitterImage : s.twitterImage.url)]
+          ? [resolveMediaUrl(typeof s.twitterImage === 'string' ? s.twitterImage : s.twitterImage.url || '')]
           : ogImageUrl
             ? [ogImageUrl]
             : undefined,

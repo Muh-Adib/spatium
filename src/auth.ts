@@ -4,25 +4,25 @@ import { validateCredentials, getValidatedAuthSecret } from '@/lib/auth/credenti
 
 export { validateCredentials, getValidatedAuthSecret }
 
+declare module 'next-auth' {
+  interface User {
+    role?: string
+  }
+  interface Session {
+    user: {
+      id?: string
+      role?: string
+      name?: string | null
+      email?: string | null
+      image?: string | null
+    }
+  }
+}
+
 export const { handlers, signIn, signOut, auth } = NextAuth({
   secret: getValidatedAuthSecret(),
   trustHost: true,
-  session: {
-    strategy: 'jwt',
-    maxAge: 8 * 60 * 60,
-  },
-  useSecureCookies: process.env.NODE_ENV === 'production',
-  cookies: {
-    sessionToken: {
-      name: process.env.NODE_ENV === 'production' ? '__Secure-authjs.session-token' : 'authjs.session-token',
-      options: {
-        httpOnly: true,
-        sameSite: 'lax',
-        path: '/',
-        secure: process.env.NODE_ENV === 'production',
-      },
-    },
-  },
+  session: { strategy: 'jwt' },
   pages: {
     signIn: '/admin/login',
   },
@@ -41,15 +41,15 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.role = (user as any).role || 'EDITOR'
+        token.role = user.role || 'EDITOR'
         token.id = user.id
       }
       return token
     },
     async session({ session, token }) {
       if (session?.user) {
-        ;(session.user as any).role = token.role || 'EDITOR'
-        ;(session.user as any).id = token.id || token.sub
+        session.user.role = (token.role as string) || 'EDITOR'
+        session.user.id = String(token.id || token.sub || '')
       }
       return session
     },

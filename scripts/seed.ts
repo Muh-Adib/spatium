@@ -18,6 +18,24 @@ async function seed() {
   const rawServices = readSeed('seed_services.json')
   const rawPages = readSeed('seed_pages.json')
   const rawRedirects = readSeed('seed_redirects.json')
+  const rawPartners = readSeed('seed_partners.json')
+
+  // 0. Client Logos
+  console.log('Inserting client logos...')
+  for (let i = 0; i < rawPartners.length; i++) {
+    const p = rawPartners[i]
+    const existing = await (prisma.orm.public as any).ClientLogo.where({ name: p.name }).first()
+    if (!existing) {
+      await (prisma.orm.public as any).ClientLogo.create({
+        name: p.name,
+        logoUrl: p.logo || p.src,
+        altText: p.alt || p.name,
+        order: i + 1,
+        isActive: true,
+      })
+    }
+  }
+  console.log(`✓ Processed ${rawPartners.length} client logos.`)
 
   // 1. Categories Map
   console.log('Inserting categories...')

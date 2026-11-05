@@ -375,7 +375,7 @@ export default function StudioSeoInspector({
   return (
     <div className="space-y-4 max-w-full overflow-x-hidden">
       {/* ─── Top Control: Language & Cornerstone ───────────────────────── */}
-      <div className="rounded-2xl border border-white/10 bg-[#161616] p-3.5 space-y-3">
+      <div className="rounded-2xl border border-white/10 bg-[var(--studio-sidebar-bg)] p-3.5 space-y-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1.5">
             <Globe className="w-3.5 h-3.5 text-accent-400" />
@@ -439,7 +439,7 @@ export default function StudioSeoInspector({
 
       {/* ─── Score Overview Cards ───────────────────────────────────────── */}
       <div className="grid grid-cols-2 gap-2">
-        <div className="rounded-2xl border border-white/10 bg-[#161616] p-3 space-y-1.5">
+        <div className="rounded-2xl border border-white/10 bg-[var(--studio-sidebar-bg)] p-3 space-y-1.5">
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-mono uppercase text-neutral-400 font-bold">Skor SEO</span>
             <span
@@ -468,7 +468,7 @@ export default function StudioSeoInspector({
           </span>
         </div>
 
-        <div className="rounded-2xl border border-white/10 bg-[#161616] p-3 space-y-1.5">
+        <div className="rounded-2xl border border-white/10 bg-[var(--studio-sidebar-bg)] p-3 space-y-1.5">
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-mono uppercase text-neutral-400 font-bold">Keterbacaan</span>
             <span
@@ -556,7 +556,7 @@ export default function StudioSeoInspector({
             activeTab === 'readability' ? 'bg-white/15 text-white font-bold' : 'text-neutral-400 hover:text-white'
           }`}
         >
-          <FileText className="w-3 h-3 text-sky-400" />
+          <FileText className="w-3 h-3 text-info" />
           <span>Keterbacaan</span>
         </button>
         <button
@@ -585,7 +585,7 @@ export default function StudioSeoInspector({
       {activeTab === 'serp' && (
         <div className="space-y-4 max-w-full overflow-x-hidden">
           {/* Focus Keyphrase */}
-          <div className="rounded-2xl border border-white/10 bg-[#161616] p-4 space-y-3">
+          <div className="rounded-2xl border border-white/10 bg-[var(--studio-sidebar-bg)] p-4 space-y-3">
             <div className="flex items-center justify-between pb-2 border-b border-white/10">
               <label className="text-xs font-mono font-bold text-neutral-300 uppercase flex items-center gap-1.5">
                 <Search className="w-3.5 h-3.5 text-accent-400" />
@@ -668,7 +668,7 @@ export default function StudioSeoInspector({
           </div>
 
           {/* Google SERP Snippet Preview */}
-          <div className="rounded-2xl border border-white/10 bg-[#161616] p-4 space-y-3">
+          <div className="rounded-2xl border border-white/10 bg-[var(--studio-sidebar-bg)] p-4 space-y-3">
             <div className="flex items-center justify-between pb-2 border-b border-white/10">
               <span className="text-xs font-mono font-bold text-neutral-300 uppercase">Google SERP Preview</span>
               <div className="flex items-center gap-1 p-0.5 rounded-lg bg-black/50 border border-white/10">
@@ -776,7 +776,7 @@ export default function StudioSeoInspector({
           </div>
 
           {/* SEO Title & Meta Description Inputs */}
-          <div className="rounded-2xl border border-white/10 bg-[#161616] p-4 space-y-4">
+          <div className="rounded-2xl border border-white/10 bg-[var(--studio-sidebar-bg)] p-4 space-y-4">
             <div className="flex items-center justify-between pb-2 border-b border-white/10">
               <span className="text-xs font-mono font-bold text-neutral-300 uppercase">Input & Template Variabel</span>
               <button
@@ -897,7 +897,7 @@ export default function StudioSeoInspector({
           </div>
 
           {/* Cover / Hero Visual SEO & Aksesibilitas */}
-          <div className="rounded-2xl border border-white/10 bg-[#161616] p-4 space-y-3">
+          <div className="rounded-2xl border border-white/10 bg-[var(--studio-sidebar-bg)] p-4 space-y-3">
             <div className="flex items-center justify-between pb-2 border-b border-white/10">
               <div className="flex items-center gap-2">
                 <ImageIcon className="w-3.5 h-3.5 text-accent-400" />
@@ -1012,7 +1012,7 @@ export default function StudioSeoInspector({
           </div>
 
           {/* Real-time Checklist Audit */}
-          <div className="rounded-2xl border border-white/10 bg-[#161616] p-4 space-y-2.5">
+          <div className="rounded-2xl border border-white/10 bg-[var(--studio-sidebar-bg)] p-4 space-y-2.5">
             <h4 className="text-xs font-mono font-bold text-neutral-300 uppercase pb-2 border-b border-white/10">
               Checklist Analisis SEO Yoast-Parity
             </h4>
@@ -1054,7 +1054,7 @@ export default function StudioSeoInspector({
       {/* ─── TAB 2: READABILITY ────────────────────────────────────────── */}
       {activeTab === 'readability' && (
         <div className="space-y-4 max-w-full overflow-x-hidden">
-          <div className="rounded-2xl border border-white/10 bg-[#161616] p-4 space-y-3">
+          <div className="rounded-2xl border border-white/10 bg-[var(--studio-sidebar-bg)] p-4 space-y-3">
             <h4 className="text-xs font-mono font-bold text-neutral-300 uppercase pb-2 border-b border-white/10">
               Analisis Keterbacaan ({locale === 'id' ? 'Bahasa Indonesia' : 'English'})
             </h4>
@@ -1097,7 +1097,7 @@ export default function StudioSeoInspector({
       {activeTab === 'social' && (
         <div className="space-y-4 max-w-full overflow-x-hidden">
           {/* Facebook / LinkedIn Open Graph Card */}
-          <div className="rounded-2xl border border-white/10 bg-[#161616] p-4 space-y-3">
+          <div className="rounded-2xl border border-white/10 bg-[var(--studio-sidebar-bg)] p-4 space-y-3">
             <h4 className="text-xs font-mono font-bold text-neutral-300 uppercase pb-2 border-b border-white/10">
               Pratinjau Kartu Open Graph (Facebook / LinkedIn)
             </h4>
@@ -1119,7 +1119,7 @@ export default function StudioSeoInspector({
                 )}
               </div>
               <div className="p-3 bg-neutral-950/80 border-t border-white/10 space-y-1">
-                <span className="text-[9px] font-mono text-neutral-400 uppercase">SEGIATECH.COM</span>
+                <span className="text-[9px] font-mono text-neutral-400 uppercase">UNIMASI.ID</span>
                 <h5 className="text-xs font-bold text-white line-clamp-1">
                   {socialOg.title || effectiveTitle}
                 </h5>
@@ -1176,7 +1176,7 @@ export default function StudioSeoInspector({
           </div>
 
           {/* Twitter / X Card Preview */}
-          <div className="rounded-2xl border border-white/10 bg-[#161616] p-4 space-y-3">
+          <div className="rounded-2xl border border-white/10 bg-[var(--studio-sidebar-bg)] p-4 space-y-3">
             <h4 className="text-xs font-mono font-bold text-neutral-300 uppercase pb-2 border-b border-white/10">
               Twitter / X Card
             </h4>
@@ -1210,10 +1210,10 @@ export default function StudioSeoInspector({
       {activeTab === 'advanced' && (
         <div className="space-y-4 max-w-full overflow-x-hidden">
           {/* ─── REAL-TIME INDEXING CARD (GOOGLE & INDEXNOW) ─────────────── */}
-          <div className="rounded-2xl border border-white/10 bg-[#161616] p-4 space-y-4 shadow-soft-sm">
+          <div className="rounded-2xl border border-white/10 bg-[var(--studio-sidebar-bg)] p-4 space-y-4 shadow-soft-sm">
             <div className="flex items-center justify-between pb-2 border-b border-white/10">
               <div className="flex items-center gap-2">
-                <Globe className="w-4 h-4 text-sky-400" />
+                <Globe className="w-4 h-4 text-info" />
                 <h4 className="text-xs font-mono font-bold text-white uppercase tracking-wider">
                   Status Indeksasi Real-Time &amp; Retrigger
                 </h4>
@@ -1319,7 +1319,7 @@ export default function StudioSeoInspector({
               <div className="rounded-xl border border-white/5 bg-black/30 p-3 space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-[11px] font-mono font-bold text-neutral-200 flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-sky-400" />
+                    <span className="w-2 h-2 rounded-full bg-info" />
                     <span>IndexNow (Bing/Yandex)</span>
                   </span>
                   {(() => {
@@ -1427,7 +1427,7 @@ export default function StudioSeoInspector({
                 type="button"
                 onClick={() => handleRetriggerIndexing('all')}
                 disabled={!canRetrigger || isRetriggering}
-                className="px-4 py-2 rounded-xl bg-sky-500 hover:bg-sky-400 text-white text-xs font-semibold flex items-center gap-2 transition-all shadow-md disabled:opacity-40 disabled:cursor-not-allowed"
+                className="px-4 py-2 rounded-xl bg-accent-500 hover:bg-accent-300 text-accent-950 text-xs font-semibold flex items-center gap-2 transition-all shadow-md disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 <RefreshCw className={`w-3.5 h-3.5 ${isRetriggering ? 'animate-spin' : ''}`} />
                 <span>
@@ -1441,7 +1441,7 @@ export default function StudioSeoInspector({
             </div>
           </div>
 
-          <div className="rounded-2xl border border-white/10 bg-[#161616] p-4 space-y-4">
+          <div className="rounded-2xl border border-white/10 bg-[var(--studio-sidebar-bg)] p-4 space-y-4">
             <h4 className="text-xs font-mono font-bold text-neutral-300 uppercase pb-2 border-b border-white/10">
               Pengaturan Robot &amp; Indeksasi Mesin Pencari
             </h4>
@@ -1513,13 +1513,13 @@ export default function StudioSeoInspector({
               </label>
               <select
                 value={schemaType}
-                onChange={(e) => onChangeSchemaType(e.target.value as any)}
+                onChange={(e) => onChangeSchemaType(e.target.value as 'Article' | 'BlogPosting' | 'TechArticle' | 'NewsArticle')}
                 className="w-full rounded-xl bg-black/40 border border-white/15 p-2.5 text-xs text-white focus:outline-none focus:border-accent-400"
               >
-                <option value="Article" className="bg-[#1E1E1E]">Article (Umum)</option>
-                <option value="BlogPosting" className="bg-[#1E1E1E]">BlogPosting (Postingan Blog)</option>
-                <option value="TechArticle" className="bg-[#1E1E1E]">TechArticle (Teknikal & Arsitektur)</option>
-                <option value="NewsArticle" className="bg-[#1E1E1E]">NewsArticle (Berita & Rilis)</option>
+                <option value="Article" className="bg-surface-overlay">Article (Umum)</option>
+                <option value="BlogPosting" className="bg-surface-overlay">BlogPosting (Postingan Blog)</option>
+                <option value="TechArticle" className="bg-surface-overlay">TechArticle (Teknikal & Arsitektur)</option>
+                <option value="NewsArticle" className="bg-surface-overlay">NewsArticle (Berita & Rilis)</option>
               </select>
             </div>
           </div>
@@ -1529,7 +1529,7 @@ export default function StudioSeoInspector({
       {/* ─── Cover Image & Alt Text Quick-Fix Modal ─── */}
       {showAltFixModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fadeIn">
-          <div className="w-full max-w-lg rounded-2xl bg-[#141414] border border-white/15 shadow-2xl p-5 space-y-4 text-left">
+          <div className="w-full max-w-lg rounded-2xl bg-[var(--studio-bg)] border border-white/15 shadow-2xl p-5 space-y-4 text-left">
             <div className="flex items-center justify-between pb-3 border-b border-white/10">
               <div className="flex items-center gap-2">
                 <div className="p-1.5 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400">
@@ -1571,7 +1571,7 @@ export default function StudioSeoInspector({
                       }}
                       className="px-2 py-1 rounded bg-black/70 hover:bg-black border border-white/20 text-[10px] text-neutral-200 transition-colors flex items-center gap-1"
                     >
-                      <Layers className="w-3 h-3 text-sky-400" />
+                      <Layers className="w-3 h-3 text-info" />
                       <span>Ganti Media</span>
                     </button>
                   )}
@@ -1590,7 +1590,7 @@ export default function StudioSeoInspector({
                     }}
                     className="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/15 border border-white/15 text-xs text-white inline-flex items-center gap-1.5"
                   >
-                    <Layers className="w-3.5 h-3.5 text-sky-400" />
+                    <Layers className="w-3.5 h-3.5 text-info" />
                     <span>Pilih dari Galeri Media</span>
                   </button>
                 )}

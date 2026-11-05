@@ -178,7 +178,7 @@ export async function processNdjsonStream(
     try {
       const event: AiChatStreamEvent = JSON.parse(buffer.trim())
       onEvent(event)
-    } catch (_) {}
+    } catch (err) { console.warn("[observable error]:", err) }
   }
 }
 
@@ -469,7 +469,7 @@ export function renderFormattedToolOutput(name: string, output: any) {
                 <p className="text-neutral-400 italic text-[9px]">"{d.supportingQuote}"</p>
               )}
               {d.sourceUrl && (
-                <a href={d.sourceUrl} target="_blank" rel="noopener noreferrer" className="text-sky-400 hover:underline flex items-center gap-1 text-[9px] font-mono">
+                <a href={d.sourceUrl} target="_blank" rel="noopener noreferrer" className="text-info hover:underline flex items-center gap-1 text-[9px] font-mono">
                   <span>{d.sourceUrl}</span>
                 </a>
               )}
@@ -484,13 +484,13 @@ export function renderFormattedToolOutput(name: string, output: any) {
   if (name === 'web_search_multi_query' && Array.isArray(output.results)) {
     return (
       <div className="space-y-1.5 mt-1 font-sans">
-        <div className="text-[10px] text-sky-300 font-mono">
+        <div className="text-[10px] text-info-300 font-mono">
           Ditemukan {output.totalResultsFound || output.results.length} sumber kredibel
         </div>
         <div className="space-y-1 max-h-48 overflow-y-auto">
           {output.results.map((r: any, i: number) => (
             <div key={i} className="p-1.5 rounded bg-black/40 border border-white/5 text-[10px]">
-              <a href={r.url} target="_blank" rel="noopener noreferrer" className="font-semibold text-sky-300 hover:underline block truncate">
+              <a href={r.url} target="_blank" rel="noopener noreferrer" className="font-semibold text-info-300 hover:underline block truncate">
                 {r.title}
               </a>
               <p className="text-neutral-400 text-[9px] line-clamp-2 mt-0.5">{r.snippet}</p>
@@ -639,7 +639,7 @@ export function AgenticReActSteps({
 
       {/* Expanded Steps Timeline */}
       {isExpanded && (
-        <div className="p-2.5 space-y-2 border-t border-white/10 bg-[#121212]">
+        <div className="p-2.5 space-y-2 border-t border-white/10 bg-[var(--studio-bg)]">
           {unifiedSteps.map((step, sIdx) => {
             const isOpen = Boolean(openSteps[sIdx])
             return (
@@ -746,7 +746,7 @@ export function MarkdownRenderer({ content }: { content: string }) {
           elements.push(
             <pre
               key={`code-${i}`}
-              className="my-2 p-3 rounded-xl bg-[#121212] border border-white/10 text-neutral-300 font-mono text-[11px] overflow-x-auto"
+              className="my-2 p-3 rounded-xl bg-[var(--studio-bg)] border border-white/10 text-neutral-300 font-mono text-[11px] overflow-x-auto"
             >
               <code>{codeBlockLines.join('\n')}</code>
             </pre>
@@ -1023,7 +1023,7 @@ export function StudioAiSidebar({
         const parsed = JSON.parse(raw)
         if (parsed.googleApiKey) return String(parsed.googleApiKey).trim()
       }
-    } catch (_) {}
+    } catch (err) { console.warn("[observable error]:", err) }
     return ''
   })
   const [openrouterKey, setOpenrouterKey] = useState(() => {
@@ -1034,7 +1034,7 @@ export function StudioAiSidebar({
         const parsed = JSON.parse(raw)
         if (parsed.openrouterApiKey) return String(parsed.openrouterApiKey).trim()
       }
-    } catch (_) {}
+    } catch (err) { console.warn("[observable error]:", err) }
     return ''
   })
   const [googleModel, setGoogleModel] = useState('')
@@ -1069,7 +1069,7 @@ export function StudioAiSidebar({
             openrouterModel: targetModel,
           })
         )
-      } catch (_) {}
+      } catch (err) { console.warn("[observable error]:", err) }
       setQuotaError(null)
       showApplyNotice('Beralih ke OpenRouter')
     } else {
@@ -1088,7 +1088,7 @@ export function StudioAiSidebar({
             googleModel: targetModel,
           })
         )
-      } catch (_) {}
+      } catch (err) { console.warn("[observable error]:", err) }
       setQuotaError(null)
       showApplyNotice('Beralih ke Google AI Studio (gemini-3.8-flash)')
     }
@@ -1111,7 +1111,7 @@ export function StudioAiSidebar({
           openrouterModel: freeModel,
         })
       )
-    } catch (_) {}
+    } catch (err) { console.warn("[observable error]:", err) }
     setQuotaError(null)
     showApplyNotice('Mengaktifkan Model Gratis: Gemini 2.0 Flash Exp (OpenRouter)')
   }
@@ -1479,7 +1479,7 @@ export function StudioAiSidebar({
           if (parsed.customModel) setCustomModel(parsed.customModel)
           if (parsed.thinkingMode) setThinkingMode(parsed.thinkingMode)
         }
-      } catch (_) {}
+      } catch (err) { console.warn("[observable error]:", err) }
 
       // Check key pool
       const gCreds = getStoredAiCredentials('google')
@@ -1606,7 +1606,7 @@ export function StudioAiSidebar({
         setSaveSuccess(false)
         setSettingsOpen(false)
       }, 700)
-    } catch (_) {}
+    } catch (err) { console.warn("[observable error]:", err) }
   }
 
   // Label konteks yang mudah dibaca berdasarkan tab aktif
@@ -1831,7 +1831,7 @@ export function StudioAiSidebar({
       id: '@rules',
       label: '@rules',
       desc: `Sisipkan standar editorial & peran ${role || 'SUPER_ADMIN'}`,
-      insertText: `@rules [Standar Editorial SEGIA & Hak Akses: ${role || 'SUPER_ADMIN'}] `,
+      insertText: `@rules [Standar Editorial UNIMASI & Hak Akses: ${role || 'SUPER_ADMIN'}] `,
       icon: Shield,
     },
 
@@ -2111,13 +2111,13 @@ export function StudioAiSidebar({
       try {
         const raw = localStorage.getItem('unimasi_ai_config')
         if (raw) extraConfig = JSON.parse(raw)
-      } catch (_) {}
+      } catch (err) { console.warn("[observable error]:", err) }
 
       let tokenOptConfig: any = {}
       try {
         const rawOpt = localStorage.getItem('unimasi_ai_token_opt')
         if (rawOpt) tokenOptConfig = JSON.parse(rawOpt)
-      } catch (_) {}
+      } catch (err) { console.warn("[observable error]:", err) }
 
       const activeKeyObj = getActiveApiKey(aiProvider)
 
@@ -2301,7 +2301,7 @@ export function StudioAiSidebar({
                 category: 'system',
                 input: event.input,
                 durationMs: 0,
-                status: 'running' as any,
+                status: 'running',
               }
               streamingToolCalls = [...streamingToolCalls, newTool]
               setMessages((prev) =>
@@ -2322,7 +2322,7 @@ export function StudioAiSidebar({
                   ...streamingToolCalls[idx],
                   output: event.output,
                   durationMs: event.durationMs || 0,
-                  status: 'completed' as any,
+                  status: 'completed',
                 }
               } else {
                 streamingToolCalls.push({
@@ -2332,7 +2332,7 @@ export function StudioAiSidebar({
                   category: 'system',
                   output: event.output,
                   durationMs: event.durationMs || 0,
-                  status: 'completed' as any,
+                  status: 'completed',
                 })
               }
               setMessages((prev) =>
@@ -2673,7 +2673,7 @@ export function StudioAiSidebar({
       try {
         const rawOpt = localStorage.getItem('unimasi_ai_token_opt')
         if (rawOpt) tokenOptConfig = JSON.parse(rawOpt)
-      } catch (_) {}
+      } catch (err) { console.warn("[observable error]:", err) }
 
       const activeKeyObj = getActiveApiKey(aiProvider)
 
@@ -2708,7 +2708,7 @@ export function StudioAiSidebar({
           ...prev,
           {
             role: 'assistant',
-            content: `**Draf Konten Baru Dibuat (Status: DRAFT)**\n\n- **Judul**: ${data.article.title}\n- **Slug**: \`/artikel/${data.article.slug}\`\n- **Target Keyword**: \`${draftKeyword || draftTopic}\`\n- **Estimasi Baca**: ${data.article.readingTime} menit\n- **Waktu Eksekusi**: Tersimpan aman ke database SQLite lokal.\n\nSesuai standar editorial SEGIA Rule 8, konten disimpan dalam status draft untuk ditinjau oleh Editor/Admin sebelum dipublikasikan.`,
+            content: `**Draf Konten Baru Dibuat (Status: DRAFT)**\n\n- **Judul**: ${data.article.title}\n- **Slug**: \`/artikel/${data.article.slug}\`\n- **Target Keyword**: \`${draftKeyword || draftTopic}\`\n- **Estimasi Baca**: ${data.article.readingTime} menit\n- **Waktu Eksekusi**: Tersimpan aman ke basis data PostgreSQL.\n\nSesuai standar editorial UNIMASI Rule 8, konten disimpan dalam status draft untuk ditinjau oleh Editor/Admin sebelum dipublikasikan.`,
             timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
           }
         ])
@@ -2732,14 +2732,14 @@ export function StudioAiSidebar({
     <div
       className={
         variant === 'drawer'
-          ? "fixed inset-y-0 right-0 z-50 w-full max-w-sm sm:max-w-md bg-[#1F1F1F] border-l border-white/15 shadow-2xl flex flex-col animate-in slide-in-from-right duration-200"
-          : "h-full w-full bg-[#1F1F1F] flex flex-col overflow-hidden select-text border-l border-white/10"
+          ? "fixed inset-y-0 right-0 z-50 w-full max-w-sm sm:max-w-md bg-surface-overlay border-l border-white/15 shadow-2xl flex flex-col animate-in slide-in-from-right duration-200"
+          : "h-full w-full bg-surface-overlay flex flex-col overflow-hidden select-text border-l border-white/10"
       }
     >
       {/* -------------------------------------------------------------
           1. HEADER RINGKAS (identitas + konteks + aksi mode)
       ------------------------------------------------------------- */}
-      <div className="px-3 py-2.5 border-b border-white/10 bg-[#191919] flex items-center justify-between gap-2 shrink-0">
+      <div className="px-3 py-2.5 border-b border-white/10 bg-[var(--studio-bg)] flex items-center justify-between gap-2 shrink-0">
         <div className="flex items-center gap-2 min-w-0">
           <div className="w-7 h-7 rounded-lg bg-accent-500/15 border border-accent-400/30 flex items-center justify-center text-accent-400 shrink-0">
             <Bot className="w-4 h-4" />
@@ -2854,7 +2854,7 @@ export function StudioAiSidebar({
             onClick={() => setDraftMode(!draftMode)}
             className={`p-1.5 rounded-lg border text-xs font-medium transition-all ${
               draftMode
-                ? 'bg-sky-500/20 border-sky-400/40 text-sky-300'
+                ? 'bg-info/20 border-info/40 text-info-300'
                 : 'bg-white/5 border-white/10 text-neutral-400 hover:text-white'
             }`}
             title="Beralih ke Generator Draf Artikel"
@@ -2914,7 +2914,7 @@ export function StudioAiSidebar({
         const isCode = Boolean(currentModelObj?.capabilities?.includes('code') || currentModelId?.toLowerCase().includes('code'))
 
         return (
-          <div className="px-3 py-2 bg-[#141414] border-b border-white/[0.08] space-y-1.5 shrink-0 text-xs">
+          <div className="px-3 py-2 bg-[var(--studio-bg)] border-b border-white/[0.08] space-y-1.5 shrink-0 text-xs">
             <div className="flex items-center gap-1.5 min-w-0">
               {/* Universal Single Model Select Component */}
               <div className="relative flex-1 min-w-0">
@@ -2946,7 +2946,7 @@ export function StudioAiSidebar({
                             ...(aiProvider === 'google' ? { googleModel: val } : { openrouterModel: val, customModel: val }),
                           })
                         )
-                      } catch (_) {}
+                      } catch (err) { console.warn("[observable error]:", err) }
                     }}
                     placeholder="Ketik model kustom..."
                     className="w-full bg-white/5 border border-accent-400/50 rounded-lg px-2.5 py-1 text-[11px] font-mono text-[#FFD600] focus:outline-none focus:border-accent-400"
@@ -2998,9 +2998,9 @@ export function StudioAiSidebar({
                                 : { openrouterModel: val, customModel: val }),
                             })
                           )
-                        } catch (_) {}
+                        } catch (err) { console.warn("[observable error]:", err) }
                       }}
-                      className="w-full bg-black/40 border border-white/15 rounded-lg px-2.5 py-1 text-[11px] font-mono text-white focus:outline-none focus:border-sky-400 truncate cursor-pointer appearance-none pr-6 shadow-sm"
+                      className="w-full bg-black/40 border border-white/15 rounded-lg px-2.5 py-1 text-[11px] font-mono text-white focus:outline-none focus:border-accent-400 truncate cursor-pointer appearance-none pr-6 shadow-sm"
                     >
                       {/* Current selected option if not in groups */}
                       {currentModelId &&
@@ -3071,10 +3071,10 @@ export function StudioAiSidebar({
                 {/* Vision / Multimodal Detection */}
                 {hasVision ? (
                   <span
-                    className="inline-flex items-center gap-1 rounded bg-sky-500/15 border border-sky-500/30 px-1.5 py-0.2 text-sky-300 font-semibold"
+                    className="inline-flex items-center gap-1 rounded bg-info/15 border border-info/30 px-1.5 py-0.2 text-info-300 font-semibold"
                     title="Model mendukung analisis visual & gambar (Multimodal Vision)"
                   >
-                    <Eye className="w-2.5 h-2.5 text-sky-400" />
+                    <Eye className="w-2.5 h-2.5 text-info" />
                     <span>Vision</span>
                   </span>
                 ) : (
@@ -3112,7 +3112,7 @@ export function StudioAiSidebar({
                         const raw = localStorage.getItem('unimasi_ai_config')
                         const parsed = raw ? JSON.parse(raw) : {}
                         localStorage.setItem('unimasi_ai_config', JSON.stringify({ ...parsed, thinkingMode: nextMode }))
-                      } catch (_) {}
+                      } catch (err) { console.warn("[observable error]:", err) }
                     }}
                     className={`inline-flex items-center gap-1 rounded px-1.5 py-0.2 font-semibold transition-colors border ${
                       thinkingMode === 'on'
@@ -3134,7 +3134,7 @@ export function StudioAiSidebar({
                 <span
                   className={`px-1.5 py-0.2 rounded font-bold uppercase text-[9px] border ${
                     aiProvider === 'google'
-                      ? 'bg-sky-500/10 border-sky-500/20 text-sky-400'
+                      ? 'bg-info/10 border-info/20 text-info'
                       : 'bg-purple-500/10 border-purple-500/20 text-purple-400'
                   }`}
                 >
@@ -3151,7 +3151,7 @@ export function StudioAiSidebar({
           SESSIONS DRAWER (ChatGPT / Gemini style thread list)
       ------------------------------------------------------------- */}
       {sessionsDrawerOpen && (
-        <div className="border-b border-white/10 bg-[#161616] p-3 space-y-2.5 max-h-[300px] overflow-y-auto animate-fadeIn shrink-0">
+        <div className="border-b border-white/10 bg-[var(--studio-sidebar-bg)] p-3 space-y-2.5 max-h-[300px] overflow-y-auto animate-fadeIn shrink-0">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1.5 text-xs font-semibold text-white">
               <History className="w-3.5 h-3.5 text-accent-400" />
@@ -3275,9 +3275,9 @@ export function StudioAiSidebar({
           3. DRAFT GENERATOR MODAL VIEW (If draftMode is active)
       ------------------------------------------------------------- */}
       {draftMode ? (
-        <div className="flex-1 p-5 overflow-y-auto space-y-4 bg-[#1A1A1A]">
-          <div className="p-4 rounded-xl bg-sky-950/30 border border-sky-400/20 space-y-2">
-            <div className="flex items-center gap-2 text-sky-300 font-semibold text-xs">
+        <div className="flex-1 p-5 overflow-y-auto space-y-4 bg-surface-elevated">
+          <div className="p-4 rounded-xl bg-info-950/30 border border-info/20 space-y-2">
+            <div className="flex items-center gap-2 text-info-300 font-semibold text-xs">
               <Sparkles className="w-4 h-4" />
               <span>Pembuatan Draf Konten Otomatis</span>
             </div>
@@ -3295,7 +3295,7 @@ export function StudioAiSidebar({
                 value={draftTopic}
                 onChange={(e) => setDraftTopic(e.target.value)}
                 placeholder="Contoh: Optimasi Web Performance dengan Next.js 16"
-                className="w-full bg-[#141414] border border-white/15 rounded-lg px-3 py-2 text-xs text-white placeholder-neutral-600 focus:outline-none focus:border-accent-400"
+                className="w-full bg-[var(--studio-bg)] border border-white/15 rounded-lg px-3 py-2 text-xs text-white placeholder-neutral-600 focus:outline-none focus:border-accent-400"
                 required
               />
             </div>
@@ -3306,14 +3306,14 @@ export function StudioAiSidebar({
                 value={draftKeyword}
                 onChange={(e) => setDraftKeyword(e.target.value)}
                 placeholder="Contoh: performa web nextjs"
-                className="w-full bg-[#141414] border border-white/15 rounded-lg px-3 py-2 text-xs text-white placeholder-neutral-600 focus:outline-none focus:border-accent-400"
+                className="w-full bg-[var(--studio-bg)] border border-white/15 rounded-lg px-3 py-2 text-xs text-white placeholder-neutral-600 focus:outline-none focus:border-accent-400"
               />
             </div>
             <div className="flex items-center gap-2 pt-2">
               <button
                 type="submit"
                 disabled={drafting || !draftTopic.trim()}
-                className="flex-1 py-2 rounded-lg bg-gradient-to-r from-accent-500 to-sky-600 hover:from-accent-400 hover:to-sky-500 disabled:opacity-50 text-white text-xs font-semibold flex items-center justify-center gap-2 transition-all shadow-md"
+                className="flex-1 py-2 rounded-lg bg-gradient-to-r from-accent-500 to-info-500 hover:from-accent-400 hover:to-info-500 disabled:opacity-50 text-white text-xs font-semibold flex items-center justify-center gap-2 transition-all shadow-md"
               >
                 {drafting ? (
                   <>
@@ -3341,7 +3341,7 @@ export function StudioAiSidebar({
         /* -------------------------------------------------------------
             4. CHAT & AGENTIC EXECUTION STREAM
         ------------------------------------------------------------- */
-        <div className={`flex-1 overflow-y-auto bg-[#1A1A1A] ${
+        <div className={`flex-1 overflow-y-auto bg-surface-elevated ${
           isCompact ? 'p-2.5 space-y-2.5' : 'p-4 space-y-4'
         }`}>
           {/* Interactive Warning Banner for 429 Rate Limit & Quota Exhaustion */}
@@ -3488,9 +3488,9 @@ export function StudioAiSidebar({
                       setInput('Audit masalah SEO dan keterbacaan pada artikel ini serta jelaskan apa saja yang perlu diperbaiki.')
                       setTimeout(() => textareaRef.current?.focus(), 50)
                     }}
-                    className="w-full text-left p-2.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 hover:border-sky-400/40 text-xs text-neutral-200 transition-all group flex items-start gap-2"
+                    className="w-full text-left p-2.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 hover:border-info/40 text-xs text-neutral-200 transition-all group flex items-start gap-2"
                   >
-                    <Target className="w-4 h-4 text-sky-400 shrink-0 mt-0.5 group-hover:scale-110 transition-transform" />
+                    <Target className="w-4 h-4 text-info shrink-0 mt-0.5 group-hover:scale-110 transition-transform" />
                     <div>
                       <div className="font-semibold text-white">Audit Masalah On-Page</div>
                       <div className="text-[10px] text-neutral-400">Tinjau kepadatan keyword, heading, meta deskripsi, dan keterbacaan.</div>
@@ -3526,7 +3526,7 @@ export function StudioAiSidebar({
                 } ${
                   m.role === 'user'
                     ? 'bg-accent-500 text-accent-950 rounded-br-none shadow-md font-medium'
-                    : 'bg-[#262626] text-neutral-200 border border-white/10 rounded-bl-none shadow-sm'
+                    : 'bg-surface-3 text-neutral-200 border border-white/10 rounded-bl-none shadow-sm'
                 }`}
               >
                 {m.role === 'user' ? (
@@ -3731,12 +3731,12 @@ export function StudioAiSidebar({
           6. MINIMALIST CHAT INPUT WITH TRIGGERS (/, @, $)
       ------------------------------------------------------------- */}
       {!draftMode && (
-        <div className={`relative border-t border-white/10 bg-[#161616] flex flex-col gap-1.5 shrink-0 ${
+        <div className={`relative border-t border-white/10 bg-[var(--studio-sidebar-bg)] flex flex-col gap-1.5 shrink-0 ${
           isCompact ? 'p-2' : 'p-3'
         }`}>
           {/* Autocomplete Popup Menu */}
           {activeTrigger && filteredOptions.length > 0 && (
-            <div className="absolute bottom-full left-2 right-2 mb-1.5 bg-[#141414] border border-white/15 rounded-xl shadow-2xl overflow-hidden z-30 backdrop-blur-md">
+            <div className="absolute bottom-full left-2 right-2 mb-1.5 bg-[var(--studio-bg)] border border-white/15 rounded-xl shadow-2xl overflow-hidden z-30 backdrop-blur-md">
               <div className="px-3 py-1.5 bg-white/[0.03] border-b border-white/10 flex items-center justify-between text-[10px] text-neutral-400 font-mono">
                 <span className="flex items-center gap-1.5">
                   <span className="w-1.5 h-1.5 rounded-full bg-accent-400" />
@@ -3827,7 +3827,7 @@ export function StudioAiSidebar({
               onChange={handleInputChange}
               onKeyDown={handleInputKeyDown}
               placeholder={`Tanya AI atau ketik / @ $ (${contextInfo.name})...`}
-              className={`flex-1 bg-[#141414] border border-white/15 rounded-xl text-white placeholder-neutral-500 focus:outline-none focus:border-accent-400 resize-none min-h-[38px] max-h-[160px] overflow-y-auto leading-relaxed scrollbar-thin ${
+              className={`flex-1 bg-[var(--studio-bg)] border border-white/15 rounded-xl text-white placeholder-neutral-500 focus:outline-none focus:border-accent-400 resize-none min-h-[38px] max-h-[160px] overflow-y-auto leading-relaxed scrollbar-thin ${
                 isCompact ? 'px-2.5 py-2 text-xs' : 'px-3.5 py-2.5 text-xs'
               }`}
             />
@@ -3856,7 +3856,7 @@ export function StudioAiSidebar({
 
 
       {/* -------------------------------------------------------------
-          8. AI SETTINGS MODAL (Google AI Studio, OpenRouter & Segia Tools)
+          8. AI SETTINGS MODAL (Google AI Studio, OpenRouter & UNIMASI Tools)
       ------------------------------------------------------------- */}
       {settingsOpen && mounted && createPortal(
         <div
@@ -3864,7 +3864,7 @@ export function StudioAiSidebar({
           onClick={() => setSettingsOpen(false)}
         >
           <div
-            className="relative w-full max-w-4xl bg-[#181818] border border-white/15 rounded-3xl p-5 sm:p-7 shadow-2xl text-neutral-200 overflow-hidden max-h-[92vh] overflow-y-auto space-y-4"
+            className="relative w-full max-w-4xl bg-surface-elevated border border-white/15 rounded-3xl p-5 sm:p-7 shadow-2xl text-neutral-200 overflow-hidden max-h-[92vh] overflow-y-auto space-y-4"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between pb-3 border-b border-white/10 mb-2">
@@ -3903,7 +3903,7 @@ export function StudioAiSidebar({
                       fetchDynamicModels(prov, activeK)
                     }
                   }
-                } catch (_) {}
+                } catch (err) { console.warn("[observable error]:", err) }
               }}
             />
           </div>

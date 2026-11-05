@@ -3,7 +3,6 @@ import { authenticateDeliveryRequest } from '@/lib/delivery/auth'
 import { jsonResponse, handleOptions } from '@/lib/delivery/cors'
 import { getSiteProfile } from '@/lib/db/siteProfile'
 import { getArticleBySlug } from '@/lib/db/articles'
-import { getPage } from '@/lib/content/queries'
 import { getServiceBySlug } from '@/lib/db/services'
 import { getPortfolioBySlug } from '@/lib/db/portfolio'
 import type { SEOComponent } from '@/lib/content/types'
@@ -48,20 +47,6 @@ export async function GET(request: NextRequest) {
       const portfolio = await getPortfolioBySlug(portfolioMatch[1])
       if (portfolio?.seo) {
         seo = portfolio.seo
-      }
-    }
-
-    // Check Page: /[slug]
-    const pageSlug = cleanPath.replace(/^\//, '')
-    if (!seo && pageSlug) {
-      const page = await getPage(pageSlug)
-      if (page?.seo) {
-        seo = page.seo
-      }
-    } else if (!seo && cleanPath === '/') {
-      const homePage = (await getPage('home')) || (await getPage('index'))
-      if (homePage?.seo) {
-        seo = homePage.seo
       }
     }
 

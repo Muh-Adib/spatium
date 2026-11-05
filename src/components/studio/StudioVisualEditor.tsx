@@ -615,7 +615,7 @@ export default function StudioVisualEditor({
           blocks: newBlocks,
         })
       )
-    } catch {}
+    } catch (err) { console.warn("[observable error]:", err) }
   }
 
   const handleUndo = () => {
@@ -652,7 +652,7 @@ export default function StudioVisualEditor({
           setHasLocalDraft(true)
         }
       }
-    } catch {}
+    } catch (err) { console.warn("[observable error]:", err) }
   }, [draftKey])
 
   const restoreLocalDraft = () => {
@@ -666,13 +666,13 @@ export default function StudioVisualEditor({
           setHasLocalDraft(false)
         }
       }
-    } catch {}
+    } catch (err) { console.warn("[observable error]:", err) }
   }
 
   const discardLocalDraft = () => {
     try {
       localStorage.removeItem(draftKey)
-    } catch {}
+    } catch (err) { console.warn("[observable error]:", err) }
     setHasLocalDraft(false)
   }
 
@@ -720,7 +720,7 @@ export default function StudioVisualEditor({
       if (json.success && json.data) {
         setSavedTemplates(json.data)
       }
-    } catch {}
+    } catch (err) { console.warn("[observable error]:", err) }
     setLoadingTemplates(false)
   }
 
@@ -886,11 +886,15 @@ export default function StudioVisualEditor({
         title: 'Siap Menghidupkan Visi Cerita Anda Bersama UNIMASI?',
         subheadline: 'Diskusikan konsep animasi 3D, CGI komersial, atau videotron anamorphic bersama tim direktur kreatif kami.',
         description: 'Diskusikan konsep animasi 3D, CGI komersial, atau videotron anamorphic bersama tim direktur kreatif kami.',
-        ctaText: 'Mulai Komisi Proyek via WhatsApp',
-        ctaLink: 'https://wa.me/6283121138821?text=Halo%20UNIMASI,%20saya%20ingin%20berkonsultasi%20mengenai%20produksi%20animasi%203D',
+        ctaText: process.env.NEXT_PUBLIC_WHATSAPP ? 'Mulai Komisi Proyek via WhatsApp' : 'Hubungi Tim UNIMASI',
+        ctaLink: process.env.NEXT_PUBLIC_WHATSAPP
+          ? `https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP}?text=Halo%20UNIMASI,%20saya%20ingin%20berkonsultasi%20mengenai%20produksi%20animasi%203D`
+          : '/contact',
         primaryCta: {
-          label: 'Mulai Komisi Proyek via WhatsApp',
-          href: 'https://wa.me/6283121138821?text=Halo%20UNIMASI,%20saya%20ingin%20berkonsultasi%20mengenai%20produksi%20animasi%203D',
+          label: process.env.NEXT_PUBLIC_WHATSAPP ? 'Mulai Komisi Proyek via WhatsApp' : 'Hubungi Tim UNIMASI',
+          href: process.env.NEXT_PUBLIC_WHATSAPP
+            ? `https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP}?text=Halo%20UNIMASI,%20saya%20ingin%20berkonsultasi%20mengenai%20produksi%20animasi%203D`
+            : '/contact',
         },
         secondaryCtaText: 'Jelajahi Galeri Portofolio',
         secondaryCtaLink: '/portfolio',
@@ -1071,29 +1075,34 @@ export default function StudioVisualEditor({
         'Transparansi bagaimana komitmen pengerjaan kami memberikan hasil yang jauh lebih menguntungkan untuk investasi jangka panjang Anda.'
       newBlock.rows = [
         {
-          feature: 'Kecepatan Buka Halaman',
-          segia: 'Membuka instan (< 1 detik), pengunjung betah & konversi naik',
-          traditional: 'Sering lemot (> 4 detik) akibat tumpukan plugin berat',
+          feature: 'Kualitas Visual & Kecepatan Rendering',
+          unimasi: 'Frame-by-frame precision & pipeline hybrid efisien',
+          segia: 'Frame-by-frame precision & pipeline hybrid efisien',
+          traditional: 'Pipeline manual lambat & aset generik',
         },
         {
-          feature: 'Kemudahan Kelola Mandiri',
-          segia: 'Dashboard simpel berbahasa Indonesia, siap pakai tanpa coding',
-          traditional: 'Antarmuka rumit, butuh panggil programmer tiap update',
+          feature: 'Kemudahan Kolaborasi & Review',
+          unimasi: 'Timeline transparan dengan milestone terstruktur',
+          segia: 'Timeline transparan dengan milestone terstruktur',
+          traditional: 'Proses black-box tanpa kejelasan tahapan revisi',
         },
         {
           feature: 'Status Kepemilikan Aset',
-          segia: '100% Hak Milik Anda seutuhnya, tanpa biaya sewa lisensi',
+          unimasi: '100% Hak Milik Anda seutuhnya, tanpa biaya lisensi tersembunyi',
+          segia: '100% Hak Milik Anda seutuhnya, tanpa biaya lisensi tersembunyi',
           traditional: 'Sewa sistem proprietary terkunci, ada biaya tersembunyi',
         },
         {
-          feature: 'Kenyamanan Tampilan di HP',
-          segia: 'Didesain presisi & responsif di semua ukuran layar smartphone',
-          traditional: 'Template standar umum yang sering berantakan di layar ponsel',
+          feature: 'Storytelling & Technical Clarity',
+          unimasi: 'Spesialis senior menerjemahkan proses kompleks ke alur visual lugas',
+          segia: 'Spesialis senior menerjemahkan proses kompleks ke alur visual lugas',
+          traditional: 'Jargon industri membingungkan tanpa narasi berbobot',
         },
         {
-          feature: 'Garansi & Pelatihan Tim',
-          segia: 'Garansi perbaikan bug & pendampingan operasional tim Anda',
-          traditional: 'Lepas tangan setelah proyek selesai tanpa panduan operasional',
+          feature: 'Garansi & Master File Handover',
+          unimasi: 'Handover source files lengkap & aset siap pakai',
+          segia: 'Handover source files lengkap & aset siap pakai',
+          traditional: 'Lepas tangan setelah render akhir tanpa source files',
         },
       ]
     } else if (type === 'feature-bento-grid') {
@@ -1230,9 +1239,10 @@ export default function StudioVisualEditor({
       newBlock.title = 'Siap Menghidupkan Cerita Visual Anda dalam Kualitas Bioskop?'
       newBlock.description =
         'Diskusikan konsep animasi 3D, CGI komersial, atau videotron bersama tim sutradara kreatif UNIMASI Studio.'
-      newBlock.buttonText = 'Konsultasi Produksi via WhatsApp'
-      newBlock.buttonUrl =
-        'https://wa.me/6283121138821?text=Halo%20UNIMASI,%20saya%20ingin%20berkonsultasi%20mengenai%20produksi%20animasi%203D'
+      newBlock.buttonText = process.env.NEXT_PUBLIC_WHATSAPP ? 'Konsultasi Produksi via WhatsApp' : 'Konsultasi Produksi'
+      newBlock.buttonUrl = process.env.NEXT_PUBLIC_WHATSAPP
+        ? `https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP}?text=Halo%20UNIMASI,%20saya%20ingin%20berkonsultasi%20mengenai%20produksi%20animasi%203D`
+        : '/contact'
     } else if (type === 'paragraph') {
       newBlock.text =
         'Kami menghadirkan solusi teknologi yang tepat guna dan terukur, dirancang khusus untuk memenuhi standar mutu bisnis Anda.'
@@ -1339,7 +1349,7 @@ function getUnimasiBlockMeta(type: string) {
           <div className="sticky top-0 left-0 right-0 h-7 bg-[#1C1C1E] flex items-center justify-center z-50 rounded-b-2xl mb-1 px-4">
             <div className="w-24 h-4 bg-black rounded-full flex items-center justify-between px-2.5">
               <div className="w-2 h-2 rounded-full bg-neutral-800" />
-              <div className="w-2 h-2 rounded-full bg-blue-950/60 ring-1 ring-blue-500/30" />
+              <div className="w-2 h-2 rounded-full bg-blue-950/60 ring-1 ring-info/30" />
             </div>
           </div>
         )}
@@ -1353,7 +1363,7 @@ function getUnimasiBlockMeta(type: string) {
 
         {/* Empty Canvas Placeholder */}
         {blocks.length === 0 ? (
-          <div className="py-24 px-6 text-center border-2 border-dashed border-white/10 bg-[#121212] m-6">
+          <div className="py-24 px-6 text-center border-2 border-dashed border-white/10 bg-[var(--studio-bg)] m-6">
             <Layers className="w-12 h-12 text-[#FFD600] mx-auto mb-4 opacity-75 animate-bounce" />
             <h3 className="font-syne text-xl font-bold text-white mb-2">
               Halaman Ini Masih Kosong
@@ -1425,7 +1435,7 @@ function getUnimasiBlockMeta(type: string) {
                 <button
                   type="button"
                   onClick={() => openPaletteAt(0)}
-                  className="relative z-10 px-2.5 py-1 rounded-full bg-[#181818] border border-white/15 text-[10px] font-mono text-neutral-400 hover:text-[#FFD600] hover:border-[#FFD600]/60 transition-all opacity-0 group-hover/top:opacity-100 flex items-center gap-1 shadow-lg"
+                  className="relative z-10 px-2.5 py-1 rounded-full bg-surface-elevated border border-white/15 text-[10px] font-mono text-neutral-400 hover:text-[#FFD600] hover:border-[#FFD600]/60 transition-all opacity-0 group-hover/top:opacity-100 flex items-center gap-1 shadow-lg"
                 >
                   <Plus className="w-3 h-3 text-[#FFD600]" />
                   <span>Tambah Blok di Atas</span>
@@ -1463,9 +1473,9 @@ function getUnimasiBlockMeta(type: string) {
                     <div
                       className={`w-full px-3 sm:px-4 py-2 border-b transition-all duration-200 flex items-center justify-between gap-2 select-none ${
                         isSelected
-                          ? 'bg-[#181818] border-[#FFD600]/40'
+                          ? 'bg-surface-elevated border-[#FFD600]/40'
                           : isHovered
-                          ? 'bg-[#141414] border-white/15'
+                          ? 'bg-[var(--studio-bg)] border-white/15'
                           : 'bg-[#0f0f0f] border-white/5'
                       }`}
                       onClick={(e) => {
@@ -1581,7 +1591,7 @@ function getUnimasiBlockMeta(type: string) {
                       <button
                         type="button"
                         onClick={() => openPaletteAt(idx + 1)}
-                        className="relative z-10 px-2.5 py-1 rounded-full bg-[#181818] border border-white/15 text-[10px] font-mono text-neutral-400 hover:text-[#FFD600] hover:border-[#FFD600]/60 transition-all opacity-0 group-hover/inserter:opacity-100 flex items-center gap-1 shadow-lg hover:scale-105"
+                        className="relative z-10 px-2.5 py-1 rounded-full bg-surface-elevated border border-white/15 text-[10px] font-mono text-neutral-400 hover:text-[#FFD600] hover:border-[#FFD600]/60 transition-all opacity-0 group-hover/inserter:opacity-100 flex items-center gap-1 shadow-lg hover:scale-105"
                       >
                         <Plus className="w-3 h-3 text-[#FFD600]" />
                         <span>Sisipkan Blok</span>
@@ -1619,9 +1629,9 @@ function getUnimasiBlockMeta(type: string) {
   )
 
   return (
-    <div className="flex flex-col flex-1 h-full w-full bg-[#141414] overflow-hidden select-none">
+    <div className="flex flex-col flex-1 h-full w-full bg-[var(--studio-bg)] overflow-hidden select-none">
       {/* ── Top Viewport Controls Bar ────────────────────────────────────────── */}
-      <div className="h-12 shrink-0 px-4 sm:px-5 bg-[#191919] border-b border-white/10 flex items-center justify-between gap-2 overflow-x-auto select-none no-scrollbar flex-nowrap">
+      <div className="h-12 shrink-0 px-4 sm:px-5 bg-[var(--studio-bg)] border-b border-white/10 flex items-center justify-between gap-2 overflow-x-auto select-none no-scrollbar flex-nowrap">
         <div className="flex items-center gap-2.5">
           <Tooltip label="Editor Visual Langsung" hint="Penyusun blok real-time dengan pratinjau instan" side="bottom">
             <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-[#FFD600]/10 border border-[#FFD600]/25 text-[#FFD600] font-mono text-xs font-semibold cursor-help">
@@ -1663,7 +1673,7 @@ function getUnimasiBlockMeta(type: string) {
         {/* Center: Device Switcher & History (Canvas Viewport Controls) */}
         <div className="flex items-center gap-2">
           {/* Responsive device frames (always accessible) */}
-          <div className="flex items-center gap-1 p-1 rounded-xl bg-[#121212] border border-white/10">
+          <div className="flex items-center gap-1 p-1 rounded-xl bg-[var(--studio-bg)] border border-white/10">
             <Tooltip label="Desktop" hint={`Viewport adaptif layar lebar (${canvasWidth || 1200}px auto deteksi)`} side="bottom">
               <button
                 type="button"
@@ -1707,7 +1717,7 @@ function getUnimasiBlockMeta(type: string) {
 
           {/* Real-time Viewport Dimensions Pill (Auto-detects Sidepanel Width) */}
           <div className="hidden xl:flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-black/50 border border-white/10 text-[11px] font-mono">
-            <span className={`w-1.5 h-1.5 rounded-full ${device === 'mobile' ? 'bg-amber-400' : device === 'tablet' ? 'bg-sky-400' : 'bg-[#FFD600] animate-pulse'}`} />
+            <span className={`w-1.5 h-1.5 rounded-full ${device === 'mobile' ? 'bg-amber-400' : device === 'tablet' ? 'bg-info' : 'bg-[#FFD600] animate-pulse'}`} />
             <span className="text-neutral-400">Dimensi:</span>
             <span className="text-white font-bold">
               {device === 'mobile'
@@ -1724,7 +1734,7 @@ function getUnimasiBlockMeta(type: string) {
           </div>
 
           {/* Undo & Redo Controls (L3-T4) */}
-          <div className="flex items-center gap-1 p-1 rounded-xl bg-[#121212] border border-white/10">
+          <div className="flex items-center gap-1 p-1 rounded-xl bg-[var(--studio-bg)] border border-white/10">
             <Tooltip label="Undo" hint="Batalkan perubahan (Ctrl/Cmd+Z)" side="bottom">
               <button
                 type="button"
@@ -1861,11 +1871,11 @@ function getUnimasiBlockMeta(type: string) {
           onClick={() => setPaletteOpen(false)}
         >
           <div
-            className="w-full max-w-4xl max-h-[85vh] rounded-3xl bg-[#181818] border border-white/15 shadow-2xl flex flex-col overflow-hidden"
+            className="w-full max-w-4xl max-h-[85vh] rounded-3xl bg-surface-elevated border border-white/15 shadow-2xl flex flex-col overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Header */}
-            <div className="flex items-center justify-between p-6 border-b border-white/10 bg-[#151515]">
+            <div className="flex items-center justify-between p-6 border-b border-white/10 bg-surface-overlay">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-2xl bg-[#FFD600]/10 border border-[#FFD600]/30 flex items-center justify-center text-[#FFD600]">
                   <LayoutTemplate className="w-5 h-5" />
@@ -1889,7 +1899,7 @@ function getUnimasiBlockMeta(type: string) {
             </div>
 
             {/* Search & Category Filter Bar */}
-            <div className="p-4 sm:px-6 bg-[#1a1a1a] border-b border-white/10 flex flex-col sm:flex-row gap-3 items-center justify-between">
+            <div className="p-4 sm:px-6 bg-surface-elevated border-b border-white/10 flex flex-col sm:flex-row gap-3 items-center justify-between">
               {/* Category Pills */}
               <div className="flex flex-wrap gap-1.5 w-full sm:w-auto">
                 {[
@@ -1923,7 +1933,7 @@ function getUnimasiBlockMeta(type: string) {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Cari blok..."
-                  className="w-full pl-9 pr-3 py-1.5 rounded-xl bg-[#121212] border border-white/10 text-white text-xs font-mono focus:outline-none focus:border-[#FFD600]/50 placeholder:text-neutral-500"
+                  className="w-full pl-9 pr-3 py-1.5 rounded-xl bg-[var(--studio-bg)] border border-white/10 text-white text-xs font-mono focus:outline-none focus:border-[#FFD600]/50 placeholder:text-neutral-500"
                 />
               </div>
             </div>
@@ -1941,7 +1951,7 @@ function getUnimasiBlockMeta(type: string) {
                     <div
                       key={b.type}
                       onClick={() => handleInsertBlock(b.type)}
-                      className="group p-4 rounded-2xl bg-[#151515] border border-white/10 hover:border-[#FFD600]/50 hover:bg-[#1a1a1a] transition-all cursor-pointer flex flex-col justify-between shadow-lg hover:-translate-y-0.5"
+                      className="group p-4 rounded-2xl bg-surface-overlay border border-white/10 hover:border-[#FFD600]/50 hover:bg-surface-elevated transition-all cursor-pointer flex flex-col justify-between shadow-lg hover:-translate-y-0.5"
                     >
                       <div>
                         {/* Mini Visual Wireframe Preview */}
@@ -1989,10 +1999,10 @@ function getUnimasiBlockMeta(type: string) {
           onClick={() => setTemplateModalOpen(false)}
         >
           <div
-            className="w-full max-w-3xl max-h-[85vh] rounded-3xl bg-[#181818] border border-white/15 shadow-2xl flex flex-col overflow-hidden"
+            className="w-full max-w-3xl max-h-[85vh] rounded-3xl bg-surface-elevated border border-white/15 shadow-2xl flex flex-col overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between p-6 border-b border-white/10 bg-[#151515]">
+            <div className="flex items-center justify-between p-6 border-b border-white/10 bg-surface-overlay">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-2xl bg-[#FFD600]/10 border border-[#FFD600]/30 flex items-center justify-center text-[#FFD600]">
                   <Bookmark className="w-5 h-5" />
@@ -2034,7 +2044,7 @@ function getUnimasiBlockMeta(type: string) {
                 savedTemplates.map((tpl) => (
                   <div
                     key={tpl.id}
-                    className="p-4 rounded-2xl bg-[#151515] border border-white/10 hover:border-[#FFD600]/40 transition-all flex items-center justify-between gap-4"
+                    className="p-4 rounded-2xl bg-surface-overlay border border-white/10 hover:border-[#FFD600]/40 transition-all flex items-center justify-between gap-4"
                   >
                     <div>
                       <div className="flex items-center gap-2 mb-1">
@@ -2075,7 +2085,7 @@ function getUnimasiBlockMeta(type: string) {
           onClick={() => setSaveTemplateModalOpen(false)}
         >
           <div
-            className="w-full max-w-md rounded-3xl bg-[#181818] border border-white/15 shadow-2xl p-6 overflow-hidden"
+            className="w-full max-w-md rounded-3xl bg-surface-elevated border border-white/15 shadow-2xl p-6 overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-4">
@@ -2105,7 +2115,7 @@ function getUnimasiBlockMeta(type: string) {
                   value={newTemplateName}
                   onChange={(e) => setNewTemplateName(e.target.value)}
                   placeholder="Contoh: Template Landing Page Edukasi"
-                  className="w-full px-3.5 py-2 rounded-xl bg-[#121212] border border-white/15 text-white text-xs font-mono focus:outline-none focus:border-[#FFD600]/60"
+                  className="w-full px-3.5 py-2 rounded-xl bg-[var(--studio-bg)] border border-white/15 text-white text-xs font-mono focus:outline-none focus:border-[#FFD600]/60"
                   autoFocus
                 />
               </div>
@@ -2139,7 +2149,7 @@ function getUnimasiBlockMeta(type: string) {
           onClick={() => setPerfModalOpen(false)}
         >
           <div
-            className="w-full max-w-lg rounded-3xl bg-[#181818] border border-white/15 shadow-2xl p-6 overflow-hidden"
+            className="w-full max-w-lg rounded-3xl bg-surface-elevated border border-white/15 shadow-2xl p-6 overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-4 pb-3 border-b border-white/10">

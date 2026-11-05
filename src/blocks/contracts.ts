@@ -38,6 +38,7 @@ export interface HeroCinemaBlockInstance {
     secondaryCta?: { label: string; href: string }
     mediaUrl?: string
     mediaType?: 'image' | 'video'
+    media?: { type?: 'image' | 'video'; url?: string; poster?: string; alt?: string; src?: string }
   }
   settings?: {
     height?: BlockSize
@@ -123,6 +124,50 @@ export interface TextEditorialBlockInstance {
   }
 }
 
+export interface TableBlockInstance {
+  id?: string
+  type: 'table'
+  data?: {
+    title?: string
+    caption?: string
+    headers: string[]
+    rows: string[][]
+  }
+  title?: string
+  caption?: string
+  headers?: string[]
+  rows?: string[][]
+  settings?: Record<string, any>
+}
+
+export interface InternalLinksBlockInstance {
+  id?: string
+  type: 'internal-links'
+  data?: {
+    title?: string
+    links: Array<{
+      title?: string
+      text?: string
+      href?: string
+      url?: string
+      slug?: string
+      description?: string
+      excerpt?: string
+    }>
+  }
+  title?: string
+  links?: Array<{
+    title?: string
+    text?: string
+    href?: string
+    url?: string
+    slug?: string
+    description?: string
+    excerpt?: string
+  }>
+  settings?: Record<string, any>
+}
+
 export interface GenericUnimasiBlockInstance {
   id?: string
   type: string
@@ -137,6 +182,8 @@ export type UnimasiBlockInstance =
   | StatsTickerBlockInstance
   | InteractiveCtaBlockInstance
   | TextEditorialBlockInstance
+  | TableBlockInstance
+  | InternalLinksBlockInstance
   | GenericUnimasiBlockInstance
 
 /**

@@ -29,13 +29,35 @@ export interface PaginatedArticles {
   }
 }
 
+function extractCleanImageUrl(raw: any): string | undefined {
+  if (!raw) return undefined
+  if (typeof raw === 'string') {
+    const trimmed = raw.trim()
+    if (trimmed.startsWith('{')) {
+      try {
+        const parsed = JSON.parse(trimmed)
+        const url = parsed.url || parsed.src || parsed.imageUrl
+        if (typeof url === 'string' && url.trim().length > 0) return url.trim()
+      } catch (err) { console.warn("[observable error]:", err) }
+    }
+    return trimmed.length > 0 ? trimmed : undefined
+  }
+  if (typeof raw === 'object' && raw !== null) {
+    const url = raw.url || raw.src || raw.imageUrl
+    if (typeof url === 'string' && url.trim().length > 0) return url.trim()
+  }
+  return undefined
+}
+
 function mapToArticle(row: any, siteUrl = siteConfig.url): Article {
   let parsedSeoData: any = null
   if (row.seoData) {
     try {
       parsedSeoData = JSON.parse(row.seoData)
-    } catch {}
+    } catch (err) { console.warn("[observable error]:", err) }
   }
+
+  const cleanCover = extractCleanImageUrl(row.coverUrl) || extractCleanImageUrl(row.featuredImage)
 
   const seo: SEOComponent = {
     id: row.id,
@@ -59,7 +81,7 @@ function mapToArticle(row: any, siteUrl = siteConfig.url): Article {
   if (row.relatedKeyphrases) {
     try {
       relatedKws = JSON.parse(row.relatedKeyphrases)
-    } catch {}
+    } catch (err) { console.warn("[observable error]:", err) }
   }
 
   const category: Category | undefined = row.category
@@ -78,7 +100,7 @@ function mapToArticle(row: any, siteUrl = siteConfig.url): Article {
         name: row.author.name,
         slug: row.author.slug,
         email: row.author.email || undefined,
-        avatar: row.author.avatar ? ({ url: row.author.avatar } as any) : undefined,
+        avatar: row.author.avatar ? ({ url: row.author.avatar } as unknown as import('../content/types').MediaImage) : undefined,
       }
     : undefined
 
@@ -90,7 +112,7 @@ function mapToArticle(row: any, siteUrl = siteConfig.url): Article {
     slug: row.slug,
     excerpt: row.excerpt || '',
     content: row.content || '',
-    featuredImage: row.featuredImage
+    featuredImage: cleanCover
       ? {
           id: row.id,
           documentId: `media-${row.slug}`,
@@ -100,12 +122,12 @@ function mapToArticle(row: any, siteUrl = siteConfig.url): Article {
           width: 1200,
           height: 630,
           formats: {},
-          url: row.featuredImage,
+          url: cleanCover,
           mime: 'image/jpeg',
           size: 0,
         }
       : undefined,
-    coverUrl: row.coverUrl || row.featuredImage || undefined,
+    coverUrl: cleanCover,
     readingTime: row.readingTime || 4,
     publishedAt: row.publishedAt,
     createdAt: row.createdAt,

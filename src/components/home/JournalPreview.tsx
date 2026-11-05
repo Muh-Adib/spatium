@@ -32,21 +32,10 @@ export async function JournalPreview() {
         featuredImageUrl: getMediaUrl(p.featuredImage, p.coverUrl),
       }))
     }
-  } catch {}
+  } catch (err) { console.warn("[observable error]:", err) }
 
   if (articles.length === 0) {
-    const [featuredLocal, ...restLocal] = SORTED_ARTICLES
-    articles = [featuredLocal, ...restLocal.slice(0, 3)].map((a) => ({
-      slug: a.slug,
-      href: `/journal/${a.slug}`,
-      title: a.title,
-      category: a.category,
-      excerpt: a.excerpt,
-      date: a.date,
-      author: a.author,
-      readMinutes: a.readMinutes,
-      artVariant: a.artVariant,
-    }))
+    return null
   }
 
   const [featured, ...recent] = articles

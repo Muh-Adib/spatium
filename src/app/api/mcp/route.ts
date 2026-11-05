@@ -173,7 +173,7 @@ Dengan pendekatan terukur ini, sistem digital perusahaan Anda siap melayani juta
         if (dbArticle) {
           articleConflict = dbArticle
         }
-      } catch {}
+      } catch (err) { console.warn("[API observable error]:", err) }
 
       try {
         const { prisma } = await import('@/lib/db/prisma')
@@ -186,7 +186,7 @@ Dengan pendekatan terukur ini, sistem digital perusahaan Anda siap melayani juta
         if (destMatches) {
           redirectConflict = destMatches
         }
-      } catch {}
+      } catch (err) { console.warn("[API observable error]:", err) }
 
       return NextResponse.json({
         success: true,

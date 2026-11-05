@@ -149,7 +149,7 @@ function ArticleEditorInner() {
         if (json.success && Array.isArray(json.data) && json.data.length > 0) {
           setCategoriesList(json.data.map((c: any) => ({ name: c.name, slug: c.slug })))
         }
-      } catch {}
+      } catch (err) { console.warn("[observable error]:", err) }
     }
     loadCategories()
   }, [])
@@ -190,7 +190,7 @@ function ArticleEditorInner() {
         setAuthor(art.author?.name || art.author || actorName || '')
         setCoverUrl(art.coverUrl || art.featuredImage?.url || '')
         setExcerpt(art.excerpt || '')
-        setStatus((art.status as any) || 'draft')
+        setStatus((art.status as 'draft' | 'in_review' | 'approved' | 'scheduled' | 'published') || 'draft')
         if (art.scheduledAt) {
           const scheduled = new Date(art.scheduledAt)
           setScheduleLocal(new Date(scheduled.getTime() - scheduled.getTimezoneOffset() * 60_000).toISOString().slice(0, 16))
@@ -201,23 +201,24 @@ function ArticleEditorInner() {
           if (parts[0]) setTargetKeyword(parts[0].trim().split(' ').slice(0, 3).join(' '))
         }
 
-        setLocale((art.locale as any) || 'id')
+        setLocale((art.locale as 'id' | 'en') || 'id')
         setTranslationGroupId(art.translationGroupId || '')
         setIsCornerstone(Boolean(art.isCornerstone))
-        const keyphrase = art.focusKeyphrase || art.targetKeyword || art.seo?.focusTopic || art.primaryKeyword || (art.seoData as any)?.focusKeyphrase || ''
+        const rawSeoData = (art.seoData && typeof art.seoData === 'object' ? art.seoData : {}) as Record<string, unknown>
+        const keyphrase = art.focusKeyphrase || art.targetKeyword || art.seo?.focusTopic || art.primaryKeyword || (typeof rawSeoData.focusKeyphrase === 'string' ? rawSeoData.focusKeyphrase : '')
         setFocusKeyphrase(keyphrase)
         if (keyphrase) setTargetKeyword(keyphrase)
         const relKws = Array.isArray(art.relatedKeyphrases)
           ? art.relatedKeyphrases
-          : Array.isArray((art.seoData as any)?.relatedKeyphrases)
-          ? (art.seoData as any).relatedKeyphrases
+          : Array.isArray(rawSeoData.relatedKeyphrases)
+          ? (rawSeoData.relatedKeyphrases as string[])
           : []
         setRelatedKeyphrases(relKws)
         setSeoTitle(art.metaTitle || art.seo?.metaTitle || '')
         setMetaDescription(art.metaDescription || art.seo?.metaDescription || '')
         setCoverAlt(art.featuredImage?.alternativeText || art.coverAlt || '')
         setCanonicalUrl(art.seo?.canonicalUrl || '')
-        setBreadcrumbTitle(art.seo?.breadcrumbTitle || (art.seoData as any)?.breadcrumbTitle || '')
+        setBreadcrumbTitle(art.seo?.breadcrumbTitle || (typeof rawSeoData.breadcrumbTitle === 'string' ? rawSeoData.breadcrumbTitle : ''))
         setBaseSeoData(art.seoData || {})
         setSchemaChanged(false)
         setPublicationDate(art.publishedAt || '')
@@ -448,7 +449,7 @@ function ArticleEditorInner() {
       images: [
         ...(coverUrl ? [{ url: coverUrl, alt: coverAlt }] : []),
         ...blocks
-          .filter((b): b is import('@/lib/articles/blockEditor').ImageBlock => b.type === 'image' && Boolean((b as any).url))
+          .filter((b): b is import('@/lib/articles/blockEditor').ImageBlock => b.type === 'image' && Boolean((b as { url?: string }).url))
           .map((b) => ({ url: b.url, alt: b.alt })),
       ],
     })
@@ -522,10 +523,10 @@ function ArticleEditorInner() {
       if (!changes.excerpt || isPlaceholderString(changes.excerpt)) setExcerpt(changes.metaDescription)
     }
     if (changes.canonicalUrl) setCanonicalUrl(changes.canonicalUrl)
-    if (changes.schemaType) setSchemaType(changes.schemaType as any)
+    if (changes.schemaType) setSchemaType(changes.schemaType as 'Article' | 'BlogPosting' | 'TechArticle' | 'NewsArticle')
 
     const cleanBlocks = changes.blocks && Array.isArray(changes.blocks)
-      ? changes.blocks.filter((b: any) => !isPlaceholderString(b?.text) && !isPlaceholderString(b?.title))
+      ? changes.blocks.filter((b: Record<string, unknown>) => !isPlaceholderString(typeof b?.text === 'string' ? b.text : '') && !isPlaceholderString(typeof b?.title === 'string' ? b.title : ''))
       : []
 
     if (cleanBlocks.length > 0) {
@@ -534,7 +535,7 @@ function ArticleEditorInner() {
     } else if (changes.content && !isPlaceholderString(changes.content)) {
       setRawContent(changes.content)
       const parsed = contentToBlocks(changes.content)
-      const nonDummy = parsed.filter((b: any) => !isPlaceholderString((b as any)?.text) && !isPlaceholderString((b as any)?.title))
+      const nonDummy = (parsed as Array<{ text?: string; title?: string }>).filter((b) => !isPlaceholderString(typeof b?.text === 'string' ? b.text : '') && !isPlaceholderString(typeof b?.title === 'string' ? b.title : '')) as typeof parsed
       if (nonDummy.length > 0) {
         setBlocks(nonDummy)
       } else {
@@ -701,8 +702,8 @@ function ArticleEditorInner() {
           type: 'internal-links',
           title: 'Indeks Tautan Internal Terkait (SEO Reference)',
           links: [
-            { text: 'Layanan Pembuatan Website SEGIA', href: '/layanan/web-development' },
-            { text: 'Konsultasi Arsitektur Digital', href: '/kontak' },
+            { text: 'Layanan Animasi 3D & Visual UNIMASI', href: '/services/3d-animation' },
+            { text: 'Konsultasi Produksi Animasi', href: '/contact' },
           ],
         }
         break
@@ -710,10 +711,10 @@ function ArticleEditorInner() {
         newBlock = {
           id,
           type: 'table',
-          headers: ['Fitur / Kebutuhan', 'Spesifikasi Standar', 'Rekomendasi'],
+          headers: ['Parameter Produksi', 'Standar UNIMASI Studio', 'Rekomendasi'],
           rows: [
-            ['Arsitektur Frontend', 'Next.js 16 App Router (Turbopack)', 'Disarankan'],
-            ['Kinerja SEO & Metrik', 'Core Web Vitals Optimal & Schema', 'Prioritas Utama'],
+            ['Pipeline Animasi', 'Hybrid 2D/3D & Real-time Assets', 'Disarankan'],
+            ['Akurasi Visual & Modeling', 'CAD-accurate 3D & Cinema Quality', 'Prioritas Utama'],
           ],
         }
         break
@@ -774,7 +775,7 @@ function ArticleEditorInner() {
           case 'heading3':
             return { id: block.id, type: 'heading3', text: textContent || 'Subjudul H3...' }
           case 'quote':
-            return { id: block.id, type: 'quote', text: textContent || 'Kutipan...', author: (block as any).author || '' }
+            return { id: block.id, type: 'quote', text: textContent || 'Kutipan...', author: (block as { author?: string }).author || '' }
           case 'list': {
             const rawLines = textContent
               ? textContent.split('\n').map((l) => l.replace(/^[-*•\d.]+\s*/, '').trim()).filter(Boolean)
@@ -1048,7 +1049,7 @@ function ArticleEditorInner() {
           router.push(parsed.pathname + parsed.search + parsed.hash)
           return
         }
-      } catch {}
+      } catch (err) { console.warn("[observable error]:", err) }
       window.location.href = target
     } else {
       router.push(target)
@@ -1070,7 +1071,7 @@ function ArticleEditorInner() {
             router.push(parsed.pathname + parsed.search + parsed.hash)
             return
           }
-        } catch {}
+        } catch (err) { console.warn("[observable error]:", err) }
         window.location.href = target
       } else {
         router.push(target)
@@ -1102,11 +1103,11 @@ function ArticleEditorInner() {
 
     // Push an additional history entry so pressing browser back triggers popstate instead of exiting
     const currentState = window.history.state || {}
-    window.history.pushState({ ...currentState, segia_guard: true }, '', window.location.href)
+    window.history.pushState({ ...currentState, unimasi_guard: true }, '', window.location.href)
 
     const handlePopState = () => {
       // Re-push history entry so the user stays on the page until they confirm
-      window.history.pushState({ ...currentState, segia_guard: true }, '', window.location.href)
+      window.history.pushState({ ...currentState, unimasi_guard: true }, '', window.location.href)
       setPendingNavigationUrl('/admin?tab=articles')
       setShowUnsavedModal(true)
     }
@@ -1147,7 +1148,7 @@ function ArticleEditorInner() {
         ) {
           return
         }
-      } catch {}
+      } catch (err) { console.warn("[observable error]:", err) }
 
       e.preventDefault()
       e.stopPropagation()
@@ -1208,7 +1209,7 @@ function ArticleEditorInner() {
 
   if (loadingInitial) {
     return (
-      <div className="flex flex-col items-center justify-center h-full w-full bg-[#111111] space-y-4">
+      <div className="flex flex-col items-center justify-center h-full w-full bg-[var(--studio-bg)] space-y-4">
         <RefreshCw className="w-8 h-8 text-accent-400 animate-spin" />
         <h3 className="text-sm font-bold text-white">Memuat Data Artikel...</h3>
         <p className="text-xs text-neutral-400 font-mono">Memuat konten editorial ({editSlug})</p>
@@ -1217,7 +1218,7 @@ function ArticleEditorInner() {
   }
 
   return (
-    <div className="flex h-screen w-screen flex-col overflow-hidden bg-[#111111] text-neutral-100 antialiased selection:bg-accent-500 selection:text-black">
+    <div className="flex h-screen w-screen flex-col overflow-hidden bg-[var(--studio-bg)] text-neutral-100 antialiased selection:bg-accent-500 selection:text-black">
       {/* ---------------- 1. COMPACT DEDICATED HEADER ---------------- */}
       <ArticleEditorHeader
         title={title}
@@ -1480,7 +1481,7 @@ function ArticleEditorInner() {
         {aiMode === 'docked' && (
           <div
             style={{ width: `${aiWidth}px` }}
-            className="relative z-30 h-full shrink-0 flex-col overflow-hidden border-l border-white/[0.08] bg-[#1A1A1A] flex shadow-2xl"
+            className="relative z-30 h-full shrink-0 flex-col overflow-hidden border-l border-white/[0.08] bg-surface-elevated flex shadow-2xl"
           >
             <StudioAiSidebar
               isOpen
@@ -1501,7 +1502,7 @@ function ArticleEditorInner() {
               onClick={() => setAiMode('docked')}
               aria-hidden="true"
             />
-            <div className="fixed inset-y-0 right-0 z-50 w-[min(780px,calc(100vw-4rem))] flex flex-col border-l border-white/10 bg-[#1A1A1A] shadow-2xl">
+            <div className="fixed inset-y-0 right-0 z-50 w-[min(780px,calc(100vw-4rem))] flex flex-col border-l border-white/10 bg-surface-elevated shadow-2xl">
               <StudioAiSidebar
                 isOpen
                 variant="panel"
@@ -1589,7 +1590,7 @@ function ArticleEditorInner() {
       {/* Multi-User Concurrency Collision & Conflict Modal */}
       {conflictModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fadeIn">
-          <div className="bg-[#18181B] border border-amber-500/50 rounded-2xl p-6 max-w-md w-full shadow-2xl shadow-black/90">
+          <div className="bg-surface-overlay border border-amber-500/50 rounded-2xl p-6 max-w-md w-full shadow-2xl shadow-black/90">
             <div className="flex items-center gap-3 text-amber-400 mb-3">
               <AlertTriangle className="w-6 h-6 shrink-0" />
               <h3 className="text-base font-bold text-white">Konflik Pengeditan Multi-User</h3>
@@ -1605,7 +1606,7 @@ function ArticleEditorInner() {
                   setConflictModalOpen(false)
                   window.location.reload()
                 }}
-                className="w-full py-2.5 px-4 bg-sky-600 hover:bg-sky-500 text-white font-medium rounded-xl text-xs transition-colors"
+                className="w-full py-2.5 px-4 bg-info-500 hover:bg-info text-white font-medium rounded-xl text-xs transition-colors"
               >
                 Muat Ulang Versi Terbaru dari Database (Disarankan)
               </button>
@@ -1638,7 +1639,7 @@ export default function BuatArtikelStudioPage() {
   return (
     <Suspense
       fallback={
-        <div className="flex h-screen w-screen items-center justify-center bg-[#111111] font-mono text-xs text-neutral-400">
+        <div className="flex h-screen w-screen items-center justify-center bg-[var(--studio-bg)] font-mono text-xs text-neutral-400">
           Memuat Editor Studio…
         </div>
       }

@@ -38,7 +38,7 @@ const BADGE_CONFIG: Record<
     hint: 'URL berhasil diserahkan ke Bing, Yandex, dan Seznam (HTTP 200/202).',
   },
   in_progress: {
-    toneClass: 'bg-sky-500/20 text-sky-300 border-sky-500/40 animate-pulse',
+    toneClass: 'bg-info/20 text-info-300 border-info/40 animate-pulse',
     label: 'Sedang Diproses',
     hint: 'Pengiriman paket HTTP sedang berjalan...',
   },

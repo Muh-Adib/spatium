@@ -22,7 +22,8 @@ export function BlockRenderer({ blocks, className = '' }: BlockRendererProps) {
     <div className={`blocks-container ${className}`}>
       {blocks.map((block, idx) => {
         if (!block) return null
-        const blockType = (block as any)?.type || (block as any)?.__component
+        const raw = block as unknown as Record<string, unknown>
+        const blockType = String(raw.type || raw.__component || '')
         const Component = BLOCK_COMPONENT_REGISTRY[blockType]
 
         if (!Component) {

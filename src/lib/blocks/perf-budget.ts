@@ -1,5 +1,5 @@
 /**
- * SEGIA Block Performance Budget Auditor (L3-T8)
+ * UNIMASI Block Performance Budget Auditor (L3-T8)
  * Evaluates visual blocks against Core Web Vitals (CWV), DOM complexity,
  * LCP candidate assignment, and heavy asset thresholds.
  */

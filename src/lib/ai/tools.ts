@@ -12,12 +12,14 @@ import type { StudioAiArticleContext } from '@/components/studio/StudioAiSidebar
 import {
   ToolDefinition,
   ToolCallExecution,
+  UNIMASI_TOOLS_CATALOG,
   SEGIA_TOOLS_CATALOG,
 } from './tool-definitions'
 
 export {
   type ToolDefinition,
   type ToolCallExecution,
+  UNIMASI_TOOLS_CATALOG,
   SEGIA_TOOLS_CATALOG,
 }
 
@@ -37,10 +39,10 @@ export async function handleInspectArticleSeo(input: {
   const focusKeyphrase = (input.focusKeyphrase ?? dbArticle?.focusKeyphrase ?? dbArticle?.seo?.focusTopic ?? '').trim()
   const metaTitle = (input.metaTitle ?? dbArticle?.seo?.metaTitle ?? title).trim()
   const metaDescription = (input.metaDescription ?? dbArticle?.seo?.metaDescription ?? dbArticle?.excerpt ?? '').trim()
-  const coverAlt = (input.coverAlt ?? dbArticle?.featuredImage?.alternativeText ?? (dbArticle as any)?.seoData?.openGraph?.imageAlt ?? '').trim()
+  const coverAlt = (input.coverAlt ?? dbArticle?.featuredImage?.alternativeText ?? (dbArticle as unknown as { seoData?: { openGraph?: { imageAlt?: string } } })?.seoData?.openGraph?.imageAlt ?? '').trim()
   const coverUrl = dbArticle?.coverUrl ?? dbArticle?.featuredImage?.url ?? ''
   const slug = input.slug || dbArticle?.slug || 'draf-artikel'
-  const locale = (dbArticle?.locale as any) || 'id'
+  const locale: 'id' | 'en' = dbArticle?.locale === 'en' ? 'en' : 'id'
 
   if (!title && !content) {
     throw new Error('Parameter slug atau konten artikel wajib diisi untuk melakukan inspeksi SEO.')
@@ -214,7 +216,7 @@ export async function handleUpdateArticleContent(
   }
 
   if (input.coverAlt !== undefined) {
-    const prevAlt = previous.featuredImage?.alternativeText || (previous as any).seoData?.openGraph?.imageAlt || ''
+    const prevAlt = previous.featuredImage?.alternativeText || (previous as unknown as { seoData?: { openGraph?: { imageAlt?: string } } }).seoData?.openGraph?.imageAlt || ''
     if (input.coverAlt !== prevAlt) {
       updatedFields.push('coverAlt')
       diffSummary.coverAlt = { before: prevAlt, after: input.coverAlt }
@@ -226,7 +228,7 @@ export async function handleUpdateArticleContent(
       if (rawArt?.imageMetadata) {
         existingMeta = JSON.parse(rawArt.imageMetadata)
       }
-    } catch {}
+    } catch (err) { console.warn("[observable error]:", err) }
     updatePayload.imageMetadata = JSON.stringify({ ...existingMeta, coverAlt: input.coverAlt })
   }
 
@@ -238,7 +240,7 @@ export async function handleUpdateArticleContent(
       if (rawArt?.seoData) {
         prevSeoData = JSON.parse(rawArt.seoData)
       }
-    } catch {}
+    } catch (err) { console.warn("[observable error]:", err) }
 
     updatePayload.seoData = mergeEditorialSeo(prevSeoData, undefined, {
       metaTitle: input.metaTitle,
@@ -351,7 +353,7 @@ export async function handleSuggestInternalLinks(input: {
       results.push({
         title: t.title,
         url: t.url,
-        type: t.type as any,
+        type: (t.type === 'page' ? 'landing' : t.type) as 'service' | 'portfolio' | 'article' | 'solution' | 'landing',
         relevance: t.reason || `Kecocokan semantik konten (${t.score})`,
         score: t.score,
         suggestedAnchors: anchors,
@@ -365,10 +367,18 @@ export async function handleSuggestInternalLinks(input: {
   // 2. Resilient Fallback: If results < limit, query Services & Portfolio directly from PostgreSQL
   if (results.length < limit) {
     try {
-      if (typeof (prisma as any)?.orm?.public?.Service?.all === 'function') {
-        const services = await (prisma as any).orm.public.Service.all()
+      const dbClient = prisma as unknown as {
+        orm?: {
+          public?: {
+            Service?: { all: () => Promise<Array<{ name: string; slug: string }>> }
+            Portfolio?: { all: () => Promise<Array<{ title: string; slug: string; client?: string }>> }
+          }
+        }
+      }
+      if (typeof dbClient.orm?.public?.Service?.all === 'function') {
+        const services = await dbClient.orm.public.Service.all()
         const matchedServices = topic
-          ? services.filter((s: any) => s.name?.toLowerCase().includes(topic.toLowerCase()) || s.slug?.includes(topic.toLowerCase()))
+          ? services.filter((s) => s.name?.toLowerCase().includes(topic.toLowerCase()) || s.slug?.includes(topic.toLowerCase()))
           : services.slice(0, 5)
 
         for (const s of matchedServices) {
@@ -388,10 +398,10 @@ export async function handleSuggestInternalLinks(input: {
         }
       }
 
-      if (results.length < limit && typeof (prisma as any)?.orm?.public?.Portfolio?.all === 'function') {
-        const portfolios = await (prisma as any).orm.public.Portfolio.all()
+      if (results.length < limit && typeof dbClient.orm?.public?.Portfolio?.all === 'function') {
+        const portfolios = await dbClient.orm.public.Portfolio.all()
         const matchedPortfolios = topic
-          ? portfolios.filter((p: any) => p.title?.toLowerCase().includes(topic.toLowerCase()) || (p.client && p.client.toLowerCase().includes(topic.toLowerCase())))
+          ? portfolios.filter((p) => p.title?.toLowerCase().includes(topic.toLowerCase()) || (p.client && p.client.toLowerCase().includes(topic.toLowerCase())))
           : portfolios.slice(0, 5)
 
         for (const p of matchedPortfolios) {
@@ -418,9 +428,9 @@ export async function handleSuggestInternalLinks(input: {
   // 3. Guaranteed Curated Fallback
   if (results.length === 0) {
     const curated = [
-      { title: 'Interactive Web Experience', slug: 'interactive-web-experience', type: 'service' },
-      { title: 'Fullstack Web Engineering', slug: 'fullstack-web-engineering', type: 'service' },
-      { title: 'Creative Technology & 3D WebGL', slug: 'creative-technology-webgl', type: 'service' },
+      { title: 'Interactive Web Experience', slug: 'interactive-web-experience', type: 'service' as const },
+      { title: 'Fullstack Web Engineering', slug: 'fullstack-web-engineering', type: 'service' as const },
+      { title: 'Creative Technology & 3D WebGL', slug: 'creative-technology-webgl', type: 'service' as const },
     ]
     for (const c of curated) {
       const url = `/layanan/${c.slug}`
@@ -428,7 +438,7 @@ export async function handleSuggestInternalLinks(input: {
       results.push({
         title: c.title,
         url,
-        type: c.type as any,
+        type: c.type,
         relevance: 'Layanan digital terverifikasi UNIMASI',
         score: 0.75,
         suggestedAnchors: [c.title, `layanan ${c.title.toLowerCase()}`],
@@ -453,12 +463,12 @@ function makeToolCallId(suffix: string): string {
   return `call_${Date.now()}_${Math.random().toString(36).substring(2, 7)}_${suffix}`
 }
 
-export async function executeSegiaTool(
+export async function executeUnimasiTool(
   toolId: string,
   params: Record<string, any> = {}
 ): Promise<ToolCallExecution> {
   const t0 = Date.now()
-  const def = SEGIA_TOOLS_CATALOG.find((t) => t.id === toolId)
+  const def = (UNIMASI_TOOLS_CATALOG || SEGIA_TOOLS_CATALOG).find((t) => t.id === toolId)
   const label = def?.label || toolId
   const category = def?.category || 'system'
 
@@ -612,7 +622,7 @@ export async function executeSegiaTool(
       }
 
       case 'update_article_content': {
-        const output = await handleUpdateArticleContent(params as any)
+        const output = await handleUpdateArticleContent(params as Parameters<typeof handleUpdateArticleContent>[0])
         return {
           id: makeToolCallId('upd_art'),
           toolName: toolId,
@@ -898,3 +908,6 @@ export async function executeSegiaTool(
     }
   }
 }
+
+export const executeSegiaTool = executeUnimasiTool
+

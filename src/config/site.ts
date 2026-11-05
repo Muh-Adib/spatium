@@ -9,9 +9,9 @@ export const siteConfig = {
     'UNIMASI adalah studio animasi 2D, 3D, motion graphics, dan visual production untuk edukasi, industri, dan brands.',
   url: process.env.NEXT_PUBLIC_SITE_URL ?? 'https://unimasi.studio',
   cmsUrl: process.env.CMS_URL ?? '/admin',
-  whatsapp: process.env.NEXT_PUBLIC_WHATSAPP ?? '6283121138821',
+  whatsapp: process.env.NEXT_PUBLIC_WHATSAPP || '',
   email: 'hello@unimasi.studio',
-  phone: '+62 831-2113-8821',
+  phone: process.env.NEXT_PUBLIC_PHONE || '',
   address: 'Yogyakarta, Indonesia',
   social: {
     instagram: 'https://instagram.com/unimasi.studio',

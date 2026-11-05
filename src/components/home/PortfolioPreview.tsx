@@ -26,6 +26,8 @@ export function PortfolioPreview({ initialProjects }: { initialProjects?: any[] 
       })
     : PROJECTS
 
+  if (!allProjects || allProjects.length === 0) return null
+
   const visible = useMemo(() => {
     const list = filter === 'all' ? allProjects : allProjects.filter((p: any) => p.category === filter)
     return list.slice(0, 6)

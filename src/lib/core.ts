@@ -120,7 +120,7 @@ async function coreFetch<T>(endpoint: string, options: RequestInit = {}): Promis
       next: {
         revalidate: 300, // 5 minutes cache
         tags: ['core-content', 'core-articles'],
-        ...((options as any).next || {}),
+        ...((options as { next?: Record<string, unknown> })?.next || {}),
       },
     })
 
@@ -368,13 +368,14 @@ export async function getCoreServices(): Promise<any[]> {
   if (res && Array.isArray(res.services) && res.services.length > 0) {
     return res.services.map((svc) => {
       const match = localServices.find((s) => s.slug === svc.slug)
+      const extendedSvc = svc as typeof svc & { shortName?: string; description?: string }
       return {
         ...match,
         ...svc,
         name: svc.name || match?.name || '',
-        shortName: (svc as any).shortName || match?.shortName || svc.name || '',
+        shortName: extendedSvc.shortName || match?.shortName || svc.name || '',
         tagline: svc.shortDescription || match?.tagline || '',
-        summary: svc.summary || (svc as any).description || match?.summary || '',
+        summary: svc.summary || extendedSvc.description || match?.summary || '',
         visual: match?.visual || '2d',
         capabilities: match?.capabilities || (svc.deliverables || []).map((d) => ({ title: d, description: d })),
         tools: match?.tools || ['Cinema 4D', 'Blender', 'After Effects'],
@@ -398,14 +399,23 @@ export async function getCorePortfolios(): Promise<CorePortfolioItem[]> {
 }
 
 export async function getCorePartners(): Promise<CorePartnerItem[]> {
-  const res = await coreFetch<{ data: CorePartnerItem[] }>('/api/v1/delivery/partners')
-  if (res && Array.isArray(res.data) && res.data.length > 0) {
-    return res.data
-  }
   try {
-    const seed = require('@/data/clients')
-    return seed.PARTNER_LOGOS || []
-  } catch {
+    const res = await coreFetch<{ data: CorePartnerItem[] }>('/api/v1/delivery/partners')
+    if (res && Array.isArray(res.data) && res.data.length > 0) {
+      return res.data
+    }
+  } catch (err) { console.warn("[observable error]:", err) }
+  try {
+    const { getClientLogos } = await import('@/lib/content/clients')
+    const dbItems = await getClientLogos()
+    return dbItems.map((c) => ({
+      id: c.id,
+      name: c.name,
+      logo: c.src,
+      alt: c.alt,
+    }))
+  } catch (err) {
+    console.error('Failed to get partners from DB:', err)
     return []
   }
 }

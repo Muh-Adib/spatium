@@ -19,7 +19,7 @@ export async function getSiteSetting(): Promise<SiteSetting> {
   if (row?.socialLinks) {
     try {
       socialLinks = typeof row.socialLinks === 'string' ? JSON.parse(row.socialLinks) : row.socialLinks
-    } catch {}
+    } catch (err) { console.warn("[observable error]:", err) }
   }
 
   return {

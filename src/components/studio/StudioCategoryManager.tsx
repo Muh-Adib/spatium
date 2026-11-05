@@ -528,7 +528,7 @@ export function StudioCategoryManager({
                           <span
                             className={`inline-flex items-center gap-1 font-mono text-[11px] px-2 py-0.5 rounded-full border ${
                               (cat.articleCount ?? 0) > 0
-                                ? 'bg-sky-500/10 text-sky-300 border-sky-500/20'
+                                ? 'bg-info/10 text-info border-info/20'
                                 : 'bg-neutral-800 text-neutral-400 border-white/10'
                             }`}
                           >

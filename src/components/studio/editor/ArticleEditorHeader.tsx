@@ -133,11 +133,11 @@ export function ArticleEditorHeader({
       : status === 'scheduled'
       ? 'bg-purple-500/15 text-purple-300 border-purple-500/30'
       : status === 'in_review'
-      ? 'bg-sky-500/15 text-sky-300 border-sky-500/30'
+      ? 'bg-info/15 text-info-300 border-info/30'
       : 'bg-white/5 text-neutral-400 border-white/10'
 
   return (
-    <header className="h-[52px] shrink-0 border-b border-white/[0.08] bg-[#161616] px-3 sm:px-4 flex items-center justify-between gap-2 z-30 select-none">
+    <header className="h-[52px] shrink-0 border-b border-white/[0.08] bg-[var(--studio-sidebar-bg)] px-3 sm:px-4 flex items-center justify-between gap-2 z-30 select-none">
       {/* ----------------- LEFT: NAV & STATUS ----------------- */}
       <div className="flex items-center gap-2 sm:gap-3 min-w-0">
         {onNavigateBack ? (
@@ -172,7 +172,7 @@ export function ArticleEditorHeader({
                   : status === 'scheduled'
                   ? 'bg-purple-400'
                   : status === 'in_review'
-                  ? 'bg-sky-400'
+                  ? 'bg-info'
                   : 'bg-neutral-500'
               }`}
             />
@@ -311,7 +311,7 @@ export function ArticleEditorHeader({
                 : 'text-neutral-400 hover:text-white'
             }`}
           >
-            <Columns className="w-3 h-3 text-sky-400" />
+            <Columns className="w-3 h-3 text-info" />
             <span className="hidden sm:inline">Split</span>
           </button>
 
@@ -401,7 +401,7 @@ export function ArticleEditorHeader({
             type="button"
             disabled={saving}
             onClick={() => onSave('in_review')}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 border border-sky-400/30 text-xs font-semibold transition-all disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-info/20 hover:bg-info/30 text-info-300 border border-info/30 text-xs font-semibold transition-all disabled:opacity-50"
           >
             <Clock className="w-3.5 h-3.5" />
             <span>Ajukan Review</span>
@@ -434,7 +434,7 @@ export function ArticleEditorHeader({
 
             {/* Schedule Dropdown Popover */}
             {scheduleOpen && (
-              <div className="absolute right-0 top-full mt-2 w-80 p-4 rounded-2xl bg-[#1A1A1A]/95 border border-white/10 shadow-2xl shadow-black/80 backdrop-blur-xl animate-in fade-in zoom-in-95 duration-100 z-50 text-xs space-y-3">
+              <div className="absolute right-0 top-full mt-2 w-80 p-4 rounded-2xl bg-surface-elevated/95 border border-white/10 shadow-2xl shadow-black/80 backdrop-blur-xl animate-in fade-in zoom-in-95 duration-100 z-50 text-xs space-y-3">
                 <div className="flex items-center justify-between pb-2 border-b border-white/10 font-semibold text-white">
                   <span className="flex items-center gap-1.5">
                     <Calendar className="w-3.5 h-3.5 text-accent-400" />

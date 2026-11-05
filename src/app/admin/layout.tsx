@@ -84,9 +84,9 @@ function AdminNavContent({ children }: AdminLayoutProps) {
   // Simpan preferensi sidebar
   useEffect(() => {
     try {
-      const saved = localStorage.getItem('segia_sidebar_collapsed')
+      const saved = localStorage.getItem('unimasi_sidebar_collapsed')
       if (saved !== null) setCollapsed(saved === 'true')
-    } catch {}
+    } catch (err) { console.warn("[observable error]:", err) }
   }, [])
 
   // Tutup user menu saat klik di luar atau tekan Esc
@@ -94,8 +94,8 @@ function AdminNavContent({ children }: AdminLayoutProps) {
     if (!userMenuOpen) return
     const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setUserMenuOpen(false)
     const onClick = (e: MouseEvent) => {
-      const el = document.getElementById('segia-user-menu-popover')
-      const trigger = document.getElementById('segia-user-menu-trigger')
+      const el = document.getElementById('unimasi-user-menu-popover')
+      const trigger = document.getElementById('unimasi-user-menu-trigger')
       if (el && !el.contains(e.target as Node) && trigger && !trigger.contains(e.target as Node)) {
         setUserMenuOpen(false)
       }
@@ -112,8 +112,8 @@ function AdminNavContent({ children }: AdminLayoutProps) {
     setCollapsed((prev) => {
       const next = !prev
       try {
-        localStorage.setItem('segia_sidebar_collapsed', String(next))
-      } catch {}
+        localStorage.setItem('unimasi_sidebar_collapsed', String(next))
+      } catch (err) { console.warn("[observable error]:", err) }
       return next
     })
 
@@ -198,7 +198,7 @@ function AdminNavContent({ children }: AdminLayoutProps) {
                         href={tabHref(tab)}
                         aria-label={m.label}
                         aria-current={active ? 'page' : undefined}
-                        className={`relative flex h-10 w-full items-center rounded-xl transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/60 ${
+                        className={`relative flex h-10 w-full items-center rounded-xl transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-400/60 ${
                           collapsed ? 'justify-center' : 'gap-3 px-3'
                         } ${active ? 'bg-white/10 text-white' : 'text-neutral-400 hover:bg-white/[0.05] hover:text-white'}`}
                       >
@@ -220,7 +220,7 @@ function AdminNavContent({ children }: AdminLayoutProps) {
             <div className="flex flex-col items-center gap-2">
               <Tooltip side="right" label={actorName || 'Admin'} hint={`${roleLabel} · Menu Akun`}>
                 <button
-                  id="segia-user-menu-trigger"
+                  id="unimasi-user-menu-trigger"
                   type="button"
                   onClick={() => setUserMenuOpen((v) => !v)}
                   aria-haspopup="menu"
@@ -243,7 +243,7 @@ function AdminNavContent({ children }: AdminLayoutProps) {
           ) : (
             <div className="space-y-1.5">
               <button
-                id="segia-user-menu-trigger"
+                id="unimasi-user-menu-trigger"
                 type="button"
                 onClick={() => setUserMenuOpen((v) => !v)}
                 aria-haspopup="menu"
@@ -280,13 +280,13 @@ function AdminNavContent({ children }: AdminLayoutProps) {
       {/* ----------------------- USER MENU POPOVER ----------------------- */}
       {userMenuOpen && (
         <div
-          id="segia-user-menu-popover"
+          id="unimasi-user-menu-popover"
           style={{
             left: collapsed ? '80px' : '10px',
             bottom: collapsed ? '16px' : '76px',
             width: collapsed ? '260px' : '220px',
           }}
-          className="fixed z-[95] overflow-hidden rounded-2xl border border-white/10 bg-[#161616]/95 p-1.5 text-xs text-white shadow-[0_20px_50px_rgba(0,0,0,0.8),inset_0_1px_1px_rgba(255,255,255,0.08)] backdrop-blur-2xl animate-in fade-in zoom-in-95 duration-100"
+          className="fixed z-[95] overflow-hidden rounded-2xl border border-white/10 bg-surface-overlay/95 p-1.5 text-xs text-white shadow-[0_20px_50px_rgba(0,0,0,0.8),inset_0_1px_1px_rgba(255,255,255,0.08)] backdrop-blur-2xl animate-in fade-in zoom-in-95 duration-100"
         >
           {/* Header Info */}
           <div className="flex items-center gap-2.5 border-b border-white/[0.06] p-2.5">
@@ -311,7 +311,7 @@ function AdminNavContent({ children }: AdminLayoutProps) {
               }}
               className="group flex w-full items-center gap-2.5 rounded-xl px-2.5 py-2 text-left text-neutral-300 transition-colors hover:bg-white/10 hover:text-white"
             >
-              <User className="h-4 w-4 text-sky-400 shrink-0" />
+              <User className="h-4 w-4 text-accent-400 shrink-0" />
               <div className="min-w-0 flex-1">
                 <span className="block font-medium">Profil &amp; Keamanan</span>
                 <span className="block text-[10px] text-neutral-500 group-hover:text-neutral-400">Nama, email &amp; kata sandi</span>
@@ -461,7 +461,7 @@ function AdminNavContent({ children }: AdminLayoutProps) {
         <header className="z-10 hidden h-16 shrink-0 items-center justify-between border-b border-white/[0.06] bg-[var(--studio-topbar-bg)] px-6 backdrop-blur-xl md:flex lg:px-10">
           <div className="flex min-w-0 items-center gap-3">
             <HeaderIcon className="h-5 w-5 shrink-0 text-accent-400" aria-hidden="true" />
-            <h1 className="truncate text-base font-semibold tracking-tight">{meta.label}</h1>
+            <h1 className="truncate font-heading text-base font-semibold tracking-tight">{meta.label}</h1>
             <Tooltip side="bottom" label={meta.label} hint={meta.description}>
               <span tabIndex={0} aria-label="Keterangan halaman" className="flex h-7 w-7 items-center justify-center rounded-lg text-neutral-500 hover:bg-white/10 hover:text-white">
                 <Info className="h-4 w-4" aria-hidden="true" />
@@ -475,7 +475,7 @@ function AdminNavContent({ children }: AdminLayoutProps) {
               <Tooltip side="bottom" label="Tulis artikel baru" hint={WRITE_ARTICLE_META.description}>
                 <Link
                   href="/admin/buat-artikel"
-                  className="inline-flex h-9 items-center gap-2 rounded-lg bg-gradient-to-r from-sky-500 to-blue-600 px-3.5 text-xs font-semibold text-white shadow-sm transition-all hover:from-sky-400 hover:to-blue-500"
+                  className="inline-flex h-9 items-center gap-2 rounded-lg bg-accent-500 px-3.5 text-xs font-semibold text-accent-950 shadow-yellow-glow transition-all hover:bg-accent-300"
                 >
                   <PenSquare className="h-4 w-4" aria-hidden="true" />
                   <span>Tulis</span>
@@ -507,7 +507,7 @@ function AdminNavContent({ children }: AdminLayoutProps) {
           </div>
           <div
             style={{ width: `${aiWidth}px` }}
-            className="relative z-20 hidden h-full shrink-0 flex-col overflow-hidden border-l border-white/[0.06] bg-[#1E1E1E] md:flex"
+            className="relative z-20 hidden h-full shrink-0 flex-col overflow-hidden border-l border-white/[0.06] bg-surface-overlay md:flex"
           >
             <StudioAiSidebar
               isOpen
@@ -531,7 +531,7 @@ function AdminNavContent({ children }: AdminLayoutProps) {
       {aiMode === 'expanded' && (
         <>
           <div className="fixed inset-0 z-40 hidden bg-black/60 backdrop-blur-sm md:block" onClick={() => setAiMode('docked')} aria-hidden="true" />
-          <div className="fixed inset-y-0 right-0 z-50 hidden w-[min(780px,calc(100vw-6rem))] flex-col border-l border-white/10 bg-[#1E1E1E] shadow-2xl shadow-black/80 md:flex">
+          <div className="fixed inset-y-0 right-0 z-50 hidden w-[min(780px,calc(100vw-6rem))] flex-col border-l border-white/10 bg-surface-overlay shadow-2xl shadow-black/80 md:flex">
             <StudioAiSidebar
               isOpen
               variant="panel"
@@ -578,7 +578,7 @@ function AdminNavContent({ children }: AdminLayoutProps) {
             <button
               type="button"
               onClick={toggleAi}
-              className="group flex items-center gap-2.5 rounded-full border border-accent-400/30 bg-[#1A1A1A]/95 px-4 py-2.5 text-xs font-semibold text-white shadow-2xl shadow-black/80 backdrop-blur transition-all hover:border-accent-400 hover:bg-[#242424] hover:shadow-accent-500/20 active:scale-95"
+              className="group flex items-center gap-2.5 rounded-full border border-accent-400/30 bg-surface-overlay/95 px-4 py-2.5 text-xs font-semibold text-white shadow-2xl shadow-black/80 backdrop-blur transition-all hover:border-accent-400 hover:bg-surface-3 hover:shadow-accent-500/20 active:scale-95"
             >
               <span className="relative flex h-2 w-2">
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
@@ -656,7 +656,7 @@ function AdminLayoutShell({ children }: AdminLayoutProps) {
 
   if (!isExcluded && !isAuthenticated) {
     return (
-      <div className="flex h-screen w-screen items-center justify-center bg-[#030611] font-sans text-xs text-neutral-400">
+      <div className="flex h-screen w-screen items-center justify-center bg-[var(--studio-bg)] font-sans text-xs text-neutral-400">
         <div className="flex flex-col items-center gap-3">
           <div className="h-6 w-6 animate-spin rounded-full border-2 border-yellow border-t-transparent" />
           <span>Memverifikasi autentikasi UNIMASI Studio...</span>
@@ -683,7 +683,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   return (
     <Suspense
       fallback={
-        <div className="flex h-screen w-screen items-center justify-center bg-[#222222] font-mono text-xs text-neutral-400">
+        <div className="flex h-screen w-screen items-center justify-center bg-surface-elevated font-mono text-xs text-neutral-400">
           Memuat Studio…
         </div>
       }

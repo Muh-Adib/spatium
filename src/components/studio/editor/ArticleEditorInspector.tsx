@@ -141,9 +141,9 @@ export function ArticleEditorInspector({
   if (!isOpen) return null
 
   return (
-    <aside className="w-full sm:w-[380px] lg:w-[410px] shrink-0 h-full border-l border-white/[0.08] bg-[#161616] flex flex-col z-20 overflow-hidden shadow-2xl">
+    <aside className="w-full sm:w-[380px] lg:w-[410px] shrink-0 h-full border-l border-white/[0.08] bg-[var(--studio-sidebar-bg)] flex flex-col z-20 overflow-hidden shadow-2xl">
       {/* Inspector Topbar Tabs */}
-      <div className="h-[52px] shrink-0 border-b border-white/[0.08] px-3 flex items-center justify-between gap-2 bg-[#191919]">
+      <div className="h-[52px] shrink-0 border-b border-white/[0.08] px-3 flex items-center justify-between gap-2 bg-[var(--studio-bg)]">
         <div className="flex items-center gap-1 p-0.5 rounded-lg bg-black/40 border border-white/10 flex-1">
           <button
             type="button"
@@ -209,7 +209,7 @@ export function ArticleEditorInspector({
             )}
 
             {/* Identitas Dokumen */}
-            <div className="rounded-xl border border-white/10 bg-[#1A1A1A] p-3.5 space-y-3">
+            <div className="rounded-xl border border-white/10 bg-surface-elevated p-3.5 space-y-3">
               <h4 className="text-[11px] font-mono font-bold text-neutral-300 uppercase tracking-wider flex items-center gap-1.5 pb-2 border-b border-white/10">
                 <FileText className="w-3.5 h-3.5 text-accent-400" />
                 <span>Identitas &amp; Taksonomi</span>
@@ -304,7 +304,7 @@ export function ArticleEditorInspector({
             </div>
 
             {/* Visual Cover Hero */}
-            <div className="rounded-xl border border-white/10 bg-[#1A1A1A] p-3.5 space-y-3">
+            <div className="rounded-xl border border-white/10 bg-surface-elevated p-3.5 space-y-3">
               <div className="flex items-center justify-between pb-2 border-b border-white/10">
                 <h4 className="text-[11px] font-mono font-bold text-neutral-300 uppercase tracking-wider flex items-center gap-1.5">
                   <ImageIcon className="w-3.5 h-3.5 text-accent-400" />
@@ -411,9 +411,9 @@ export function ArticleEditorInspector({
             </div>
 
             {/* Mini Public Card Preview */}
-            <div className="rounded-xl border border-white/10 bg-[#1A1A1A] p-3.5 space-y-2">
+            <div className="rounded-xl border border-white/10 bg-surface-elevated p-3.5 space-y-2">
               <h4 className="text-[11px] font-mono font-bold text-neutral-300 uppercase tracking-wider flex items-center gap-1.5 pb-2 border-b border-white/10">
-                <Eye className="w-3.5 h-3.5 text-sky-400" />
+                <Eye className="w-3.5 h-3.5 text-info" />
                 <span>Cuplikan Kartu Publik</span>
               </h4>
 

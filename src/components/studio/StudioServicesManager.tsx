@@ -445,7 +445,7 @@ export function StudioServicesManager() {
     return (
       <div className="fixed inset-0 z-50 flex h-screen w-screen flex-col overflow-hidden bg-[#0D0D0D] text-white antialiased selection:bg-[#FFD600] selection:text-black">
         {/* Top Dedicated Studio Master Header */}
-        <header className="h-14 shrink-0 px-4 sm:px-6 bg-[#161616] border-b border-white/[0.08] flex items-center justify-between gap-3 z-30 select-none">
+        <header className="h-14 shrink-0 px-4 sm:px-6 bg-[var(--studio-sidebar-bg)] border-b border-white/[0.08] flex items-center justify-between gap-3 z-30 select-none">
           <div className="flex items-center gap-2.5 min-w-0 flex-1 max-w-[45%] md:max-w-[50%]">
             <Tooltip label="Kembali" hint="Kembali ke Daftar Layanan" side="bottom">
               <button
@@ -498,7 +498,7 @@ export function StudioServicesManager() {
                     : 'text-neutral-400 hover:text-white'
                 }`}
               >
-                <Columns className="w-3.5 h-3.5 text-sky-400" />
+                <Columns className="w-3.5 h-3.5 text-info" />
                 <span className="hidden sm:inline">Split</span>
               </button>
             </Tooltip>
@@ -613,7 +613,7 @@ export function StudioServicesManager() {
 
           {/* 2. DOCKED RIGHT PANEL: Contextual Inspector (Block Properties / Document / SEO) */}
           {showPropertiesDrawer && viewMode !== 'full-preview' && (
-            <aside className="w-full sm:w-[380px] xl:w-[420px] shrink-0 border-l border-white/[0.08] bg-[#141414] h-full overflow-y-auto z-20 flex flex-col p-4 space-y-4">
+            <aside className="w-full sm:w-[380px] xl:w-[420px] shrink-0 border-l border-white/[0.08] bg-[var(--studio-bg)] h-full overflow-y-auto z-20 flex flex-col p-4 space-y-4">
               {selectedBlockId && currentSelectedBlock ? (
                 <div className="rounded-2xl overflow-hidden border border-white/10 flex-1 min-h-[500px]">
                   <StudioBlockProperties
@@ -630,7 +630,7 @@ export function StudioServicesManager() {
               ) : (
                 <div className="space-y-4">
                   {/* Tab Switcher: Meta vs SEO */}
-                  <div className="flex rounded-2xl bg-[#1e1e1e] p-1 border border-white/10 shadow-md">
+                  <div className="flex rounded-2xl bg-surface-overlay p-1 border border-white/10 shadow-md">
                     <button
                       type="button"
                       onClick={() => setActiveInspectorTab('meta')}
@@ -657,7 +657,7 @@ export function StudioServicesManager() {
 
                   {/* TAB A: Dokumen & Relasi */}
                   {activeInspectorTab === 'meta' && (
-                    <div className="p-5 rounded-3xl bg-[#1e1e1e] border border-white/10 space-y-4 shadow-xl">
+                    <div className="p-5 rounded-3xl bg-surface-overlay border border-white/10 space-y-4 shadow-xl">
                       <div className="p-3 rounded-xl bg-white/5 border border-white/5 text-[11px] font-mono text-neutral-400">
                         💡 <strong>Tip:</strong> Klik salah satu blok di kanvas tengah untuk mengedit properties blok secara langsung di panel ini.
                       </div>
@@ -680,7 +680,7 @@ export function StudioServicesManager() {
                                   setFocusKeyphrase(e.target.value)
                                 }
                               }}
-                              className="w-full px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-white text-sm"
+                              className="w-full px-3 py-2 rounded-xl bg-[var(--studio-bg)] border border-white/10 text-white text-sm"
                             />
                           </div>
                           <div>
@@ -692,7 +692,7 @@ export function StudioServicesManager() {
                               type="text"
                               value={depSlug}
                               onChange={(e) => setDepSlug(e.target.value)}
-                              className="w-full px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-white text-sm font-mono"
+                              className="w-full px-3 py-2 rounded-xl bg-[var(--studio-bg)] border border-white/10 text-white text-sm font-mono"
                             />
                           </div>
                           <div>
@@ -704,7 +704,7 @@ export function StudioServicesManager() {
                               type="text"
                               value={depTag}
                               onChange={(e) => setDepTag(e.target.value)}
-                              className="w-full px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-white text-sm font-mono"
+                              className="w-full px-3 py-2 rounded-xl bg-[var(--studio-bg)] border border-white/10 text-white text-sm font-mono"
                             />
                           </div>
                           <div>
@@ -719,7 +719,7 @@ export function StudioServicesManager() {
                                 setMetaDesc(e.target.value)
                               }}
                               rows={3}
-                              className="w-full px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-white text-sm"
+                              className="w-full px-3 py-2 rounded-xl bg-[var(--studio-bg)] border border-white/10 text-white text-sm"
                             />
                           </div>
                           <div className="space-y-2 p-3 rounded-2xl bg-black/30 border border-white/10">
@@ -736,7 +736,7 @@ export function StudioServicesManager() {
                                 }}
                                 className="px-2 py-1 rounded-lg bg-white/10 hover:bg-white/15 border border-white/10 text-[10px] font-mono text-white flex items-center gap-1"
                               >
-                                <Layers className="w-3 h-3 text-sky-400" />
+                                <Layers className="w-3 h-3 text-info" />
                                 <span>Galeri Media</span>
                               </button>
                             </div>
@@ -747,7 +747,7 @@ export function StudioServicesManager() {
                               type="text"
                               value={depHeroImage}
                               onChange={(e) => setDepHeroImage(e.target.value)}
-                              className="w-full px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-white text-xs font-mono"
+                              className="w-full px-3 py-2 rounded-xl bg-[var(--studio-bg)] border border-white/10 text-white text-xs font-mono"
                               placeholder="/images/nav/..."
                             />
                             <div className="space-y-1 pt-1 border-t border-white/5">
@@ -760,7 +760,7 @@ export function StudioServicesManager() {
                                 value={depHeroAlt}
                                 onChange={(e) => setDepHeroAlt(e.target.value)}
                                 placeholder="Deskripsi gambar departemen..."
-                                className="w-full px-3 py-1.5 rounded-xl bg-[#141414] border border-white/10 text-white text-xs"
+                                className="w-full px-3 py-1.5 rounded-xl bg-[var(--studio-bg)] border border-white/10 text-white text-xs"
                               />
                             </div>
                           </div>
@@ -798,7 +798,7 @@ export function StudioServicesManager() {
                                   setFocusKeyphrase(e.target.value)
                                 }
                               }}
-                              className="w-full px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-white text-sm"
+                              className="w-full px-3 py-2 rounded-xl bg-[var(--studio-bg)] border border-white/10 text-white text-sm"
                             />
                           </div>
                           <div>
@@ -814,7 +814,7 @@ export function StudioServicesManager() {
                                 const selected = categories.find((c) => c.id === catId)
                                 if (selected) setSvcCategoryBadge(selected.title)
                               }}
-                              className="w-full px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-white text-sm"
+                              className="w-full px-3 py-2 rounded-xl bg-[var(--studio-bg)] border border-white/10 text-white text-sm"
                             >
                               <option value="">Pilih Departemen...</option>
                               {categories.map((cat) => (
@@ -833,7 +833,7 @@ export function StudioServicesManager() {
                               type="text"
                               value={svcSlug}
                               onChange={(e) => setSvcSlug(e.target.value)}
-                              className="w-full px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-white text-sm font-mono"
+                              className="w-full px-3 py-2 rounded-xl bg-[var(--studio-bg)] border border-white/10 text-white text-sm font-mono"
                             />
                           </div>
                           <div>
@@ -845,7 +845,7 @@ export function StudioServicesManager() {
                               type="text"
                               value={svcWhatsappPrompt}
                               onChange={(e) => setSvcWhatsappPrompt(e.target.value)}
-                              className="w-full px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-white text-sm"
+                              className="w-full px-3 py-2 rounded-xl bg-[var(--studio-bg)] border border-white/10 text-white text-sm"
                             />
                           </div>
 
@@ -864,7 +864,7 @@ export function StudioServicesManager() {
                                 }}
                                 className="px-2 py-1 rounded-lg bg-white/10 hover:bg-white/15 border border-white/10 text-[10px] font-mono text-white flex items-center gap-1"
                               >
-                                <Layers className="w-3 h-3 text-sky-400" />
+                                <Layers className="w-3 h-3 text-info" />
                                 <span>Galeri Media</span>
                               </button>
                             </div>
@@ -875,7 +875,7 @@ export function StudioServicesManager() {
                               type="text"
                               value={svcHeroImage}
                               onChange={(e) => setSvcHeroImage(e.target.value)}
-                              className="w-full px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-white text-xs font-mono"
+                              className="w-full px-3 py-2 rounded-xl bg-[var(--studio-bg)] border border-white/10 text-white text-xs font-mono"
                               placeholder="/images/nav/..."
                             />
                             <div className="space-y-1 pt-1 border-t border-white/5">
@@ -888,7 +888,7 @@ export function StudioServicesManager() {
                                 value={svcHeroAlt}
                                 onChange={(e) => setSvcHeroAlt(e.target.value)}
                                 placeholder="Deskripsi gambar layanan..."
-                                className="w-full px-3 py-1.5 rounded-xl bg-[#141414] border border-white/10 text-white text-xs"
+                                className="w-full px-3 py-1.5 rounded-xl bg-[var(--studio-bg)] border border-white/10 text-white text-xs"
                               />
                             </div>
                           </div>
@@ -898,7 +898,7 @@ export function StudioServicesManager() {
                             <label className="block text-xs font-mono text-neutral-400 mb-1.5">
                               Hubungkan dengan Portofolio ({svcSelectedPortfolios.length} dipilih)
                             </label>
-                            <div className="max-h-48 overflow-y-auto space-y-1.5 p-2 rounded-2xl bg-[#141414] border border-white/10">
+                            <div className="max-h-48 overflow-y-auto space-y-1.5 p-2 rounded-2xl bg-[var(--studio-bg)] border border-white/10">
                               {allPortfolios.length === 0 ? (
                                 <p className="text-xs text-neutral-500 p-2">Tidak ada portofolio tersedia.</p>
                               ) : (
@@ -953,7 +953,7 @@ export function StudioServicesManager() {
                               ? setDepStatus(e.target.value)
                               : setSvcStatus(e.target.value)
                           }
-                          className="w-full px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-white text-sm"
+                          className="w-full px-3 py-2 rounded-xl bg-[var(--studio-bg)] border border-white/10 text-white text-sm"
                         >
                           <option value="draft">Draft</option>
                           <option value="in_review">In Review</option>
@@ -967,7 +967,7 @@ export function StudioServicesManager() {
 
                   {/* TAB B: Yoast-Parity SEO Inspector */}
                   {activeInspectorTab === 'seo' && (
-                    <div className="rounded-3xl bg-[#1e1e1e] border border-white/10 overflow-hidden shadow-xl">
+                    <div className="rounded-3xl bg-surface-overlay border border-white/10 overflow-hidden shadow-xl">
                       <StudioSeoInspector
                         locale={seoLocale}
                         onChangeLocale={setSeoLocale}
@@ -1071,7 +1071,7 @@ export function StudioServicesManager() {
   return (
     <div className="space-y-6">
       {/* Compact Switcher & Action Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 sm:p-4 rounded-2xl bg-[#1e1e1e] border border-white/10 shadow-sm">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 sm:p-4 rounded-2xl bg-surface-overlay border border-white/10 shadow-sm">
         {/* Tabs Switcher */}
         <div className="flex items-center gap-2">
           <button
@@ -1136,7 +1136,7 @@ export function StudioServicesManager() {
             return (
               <div
                 key={cat.id}
-                className="p-6 rounded-3xl bg-[#1e1e1e] border border-white/10 hover:border-[#FFD600]/40 transition-all flex flex-col justify-between group shadow-xl"
+                className="p-6 rounded-3xl bg-surface-overlay border border-white/10 hover:border-[#FFD600]/40 transition-all flex flex-col justify-between group shadow-xl"
               >
                 <div>
                   <div className="flex items-center justify-between gap-2 mb-3">
@@ -1220,7 +1220,7 @@ export function StudioServicesManager() {
             return (
               <div
                 key={cat.id}
-                className="p-6 rounded-3xl bg-[#1e1e1e] border border-white/10 space-y-4 shadow-xl"
+                className="p-6 rounded-3xl bg-surface-overlay border border-white/10 space-y-4 shadow-xl"
               >
                 <div className="flex items-center justify-between border-b border-white/10 pb-3">
                   <div>
@@ -1245,7 +1245,7 @@ export function StudioServicesManager() {
                     {catServices.map((svc) => (
                       <div
                         key={svc.id}
-                        className="p-4 rounded-2xl bg-[#161616] border border-white/5 hover:border-white/20 transition-all flex flex-col justify-between"
+                        className="p-4 rounded-2xl bg-[var(--studio-sidebar-bg)] border border-white/5 hover:border-white/20 transition-all flex flex-col justify-between"
                       >
                         <div>
                           <div className="flex items-center justify-between text-[11px] font-mono text-neutral-400 mb-1">

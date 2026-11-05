@@ -24,12 +24,22 @@ export function HeroCinemaBlock({ block }: { block: HeroCinemaBlockInstance | an
   const primaryCta = block?.primaryCta || data.primaryCta || (block?.buttonText ? { label: block.buttonText, href: block.buttonHref || '#reel' } : undefined)
   const secondaryCta = block?.secondaryCta || data.secondaryCta
 
-  const showreelUrl = block?.showreelUrl || data?.showreelUrl || block?.videoUrl || data?.videoUrl
-  const heroImage = block?.heroImage || data?.heroImage || block?.image || data?.image
+  const media = block?.media || data?.media
+  const mediaUrl = block?.mediaUrl || data?.mediaUrl || media?.src || media?.url
+  const mediaType = block?.mediaType || data?.mediaType || media?.type
+  const showreelUrl =
+    block?.showreelUrl || data?.showreelUrl || block?.videoUrl || data?.videoUrl ||
+    (mediaType === 'video' ? mediaUrl : undefined)
+  const heroImage =
+    block?.heroImage || data?.heroImage || block?.image || data?.image ||
+    (mediaType !== 'video' ? mediaUrl : undefined) || media?.poster
   const rawMetrics = block?.metrics || data?.metrics || block?.stats || data?.stats || []
   const metrics = Array.isArray(rawMetrics) ? rawMetrics : []
   const [imgError, setImgError] = useState(false)
   const hasValidImage = Boolean(heroImage && typeof heroImage === 'string' && heroImage.trim().length > 0 && !imgError)
+
+  const imageAlt =
+    media?.alt || block?.mediaAlt || block?.alt || data?.alt || headline || 'Visual showcase UNIMASI Studio'
 
   return (
     <section className={`hero relative flex items-center ${heightClass} overflow-hidden bg-[var(--color-background)] text-white py-20 lg:py-28`}>
@@ -85,24 +95,24 @@ export function HeroCinemaBlock({ block }: { block: HeroCinemaBlockInstance | an
               <div className="relative w-full h-full">
                 <Image
                   src={heroImage}
-                  alt={headline}
+                  alt={imageAlt}
                   fill
                   className="object-cover group-hover:scale-105 transition-transform duration-700"
                   sizes="(max-width: 1024px) 100vw, 1024px"
                   onError={() => setImgError(true)}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex items-center justify-center">
-                  <div className="w-16 h-16 rounded-full bg-[#FFDE00]/90 text-black flex items-center justify-center shadow-[0_0_30px_rgba(255,222,0,0.5)] group-hover:scale-110 transition-transform cursor-pointer">
+                  <div className="w-16 h-16 rounded-full bg-[#FFD600]/90 text-black flex items-center justify-center shadow-[0_0_30px_rgba(255,214,0,0.5)] group-hover:scale-110 transition-transform cursor-pointer">
                     <span className="text-2xl font-bold ml-1">▶</span>
                   </div>
                 </div>
               </div>
             ) : (
               <div className="w-full h-full bg-gradient-to-br from-[#060A17] via-[#0F3A79]/30 to-[#060A17] p-8 flex flex-col justify-between items-center text-center min-h-[220px]">
-                <div className="px-3 py-1 rounded-full bg-[#FFDE00]/10 border border-[#FFDE00]/30 text-[#FFDE00] font-mono text-xs font-bold uppercase tracking-wider">
+                <div className="px-3 py-1 rounded-full bg-[#FFD600]/10 border border-[#FFD600]/30 text-[#FFD600] font-mono text-xs font-bold uppercase tracking-wider">
                   4K DCI CINEMATIC MASTER
                 </div>
-                <div className="w-14 h-14 rounded-full bg-[#FFDE00]/10 border border-[#FFDE00]/30 flex items-center justify-center text-[#FFDE00] text-2xl shadow-[0_0_25px_rgba(255,222,0,0.2)] my-auto">
+                <div className="w-14 h-14 rounded-full bg-[#FFD600]/10 border border-[#FFD600]/30 flex items-center justify-center text-[#FFD600] text-2xl shadow-[0_0_25px_rgba(255,214,0,0.2)] my-auto">
                   ▶
                 </div>
                 <div className="text-xs font-mono text-neutral-400">UNIMASI HIGH-FIDELITY ANIMATION ENGINE</div>
@@ -115,7 +125,7 @@ export function HeroCinemaBlock({ block }: { block: HeroCinemaBlockInstance | an
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-4">
               {metrics.map((m: any, idx: number) => (
                 <div key={idx} className="p-3.5 rounded-xl bg-white/[0.03] border border-white/10 text-center">
-                  <div className="text-xl sm:text-2xl font-syne font-bold text-[#FFDE00] mb-0.5">
+                  <div className="text-xl sm:text-2xl font-syne font-bold text-[#FFD600] mb-0.5">
                     {m.value}
                   </div>
                   <div className="text-[11px] font-mono text-white/90 font-medium">

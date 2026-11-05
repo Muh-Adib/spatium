@@ -149,9 +149,9 @@ export async function getKeywordBank(locale: Locale = 'id'): Promise<KeywordBank
         id: r.id,
         keyword: r.keyword,
         locale: r.locale as Locale,
-        intent: r.intent as any,
-        status: r.status as any,
-        targetContentType: r.targetContentType as any,
+        intent: (r.intent || 'informational') as KeywordBankItem['intent'],
+        status: (r.status || 'discovered') as KeywordBankItem['status'],
+        targetContentType: (r.targetContentType || undefined) as KeywordBankItem['targetContentType'],
         targetContentId: r.targetContentId || undefined,
         targetSlug: r.targetSlug || undefined,
         tags: r.tags ? JSON.parse(r.tags) : [],
@@ -176,7 +176,7 @@ export async function addKeywordToBank(item: Partial<KeywordBankItem> & { keywor
 
   // Deduplication check: check if keyword already exists for this locale
   const allBank = await prisma.orm.public.KeywordBank.where({ locale }).all()
-  const existing = allBank.find((k: any) => (k.keyword || '').trim().toLowerCase() === trimmed.toLowerCase())
+  const existing = allBank.find((k: { keyword?: string }) => (k.keyword || '').trim().toLowerCase() === trimmed.toLowerCase())
 
   if (existing) {
     // If it already exists, update priority or status without creating duplicate rows
@@ -192,9 +192,9 @@ export async function addKeywordToBank(item: Partial<KeywordBankItem> & { keywor
       id: existing.id,
       keyword: existing.keyword,
       locale: existing.locale as Locale,
-      intent: ((updated as any)?.intent || existing.intent) as any,
-      status: ((updated as any)?.status || existing.status) as any,
-      priorityScore: (updated as any)?.priorityScore || existing.priorityScore || 50,
+      intent: ((updated as { intent?: KeywordBankItem['intent'] })?.intent || existing.intent) as KeywordBankItem['intent'],
+      status: ((updated as { status?: KeywordBankItem['status'] })?.status || existing.status) as KeywordBankItem['status'],
+      priorityScore: (updated as { priorityScore?: number })?.priorityScore || existing.priorityScore || 50,
       tags: existing.tags ? JSON.parse(existing.tags) : [],
       gscImpressions: existing.gscImpressions || 0,
       gscClicks: existing.gscClicks || 0,
@@ -282,7 +282,7 @@ export async function getKeywordMap(locale: Locale = 'id') {
               type: 'related',
             })
           }
-        } catch {}
+        } catch (err) { console.warn("[keywords] Caught error:", err); }
       }
     }
 

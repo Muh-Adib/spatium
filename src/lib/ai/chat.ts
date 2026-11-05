@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/db/prisma'
-import { executeSegiaTool, ToolCallExecution } from './tools'
+import { executeUnimasiTool, executeSegiaTool, ToolCallExecution } from './tools'
 import { callLlm, buildSystemPrompt, normalizeToolCall, classifyAiError, AiErrorClassification } from '@/lib/agent/llm'
 import { compressToolOutput, buildOptimizerSystemDirectives, compressChatHistory } from './token-optimizer'
 import { getArticleBySlug } from '@/lib/db/articles'
@@ -228,7 +228,7 @@ export function extractArticleTopic(query: string, articleContext?: Record<strin
     const candidate = topicMatch[1]
       .replace(/^(?:sebuah\s+)?(?:draf\s+)?(?:artikel|article|post|tulisan|konten|draft)\s*/i, '')
       .replace(/(?:di\s+halaman\s+ini|pada\s+halaman\s+ini|di\s+sini|untuk\s+halaman\s+ini|for\s+this\s+page|on\s+this\s+page).*$/i, '')
-      .replace(/\s+dan\s+segia\s+dapat\s+mengembangkannya.*$/i, '')
+      .replace(/\s+dan\s+(?:segia|unimasi)\s+dapat\s+mengembangkannya.*$/i, '')
       .replace(/\s+(?:dong|ya|deh|nih|please|tolong)[.!?]*$/i, '')
       .replace(/[.!?,]+$/g, '')
       .replace(/^["'“‘]|["'”’]$/g, '')
@@ -325,7 +325,7 @@ export async function handleAiAssistantChat(
   const onEvent: ((event: AgenticStreamEvent) => void) | undefined =
     onEventCallback ||
     (typeof messagesOrOptions === 'object' && !Array.isArray(messagesOrOptions) ? messagesOrOptions.onEvent : undefined) ||
-    (rawAiConfig as any)?.onEvent
+    (rawAiConfig as unknown as { onEvent?: (event: AgenticStreamEvent) => void })?.onEvent
 
   onEvent?.({ type: 'status', message: 'Menganalisis instruksi pengguna...' })
 
@@ -351,7 +351,7 @@ export async function handleAiAssistantChat(
 
   const runSegiaToolWithEvent = async (name: string, args: any) => {
     onEvent?.({ type: 'tool_start', name, input: args })
-    const res = await executeSegiaTool(name, args)
+    const res = await executeUnimasiTool(name, args)
     onEvent?.({ type: 'tool_result', name, output: res.output, durationMs: res.durationMs })
     return res
   }
@@ -407,7 +407,7 @@ export async function handleAiAssistantChat(
   // 0. RESOLVE ACTIVE ARTICLE CONTEXT (Client Draft or PostgreSQL DB)
   // -------------------------------------------------------------------
   let effectiveArticle: Record<string, any> | null = context?.article || null
-  const targetSlug = context?.selectedSlug || (context as any)?.slug
+  const targetSlug = context?.selectedSlug || (context as unknown as { slug?: string })?.slug
 
   if (
     !effectiveArticle?.content &&
@@ -428,7 +428,7 @@ export async function handleAiAssistantChat(
           content: dbArt.content || '',
           focusKeyphrase: dbArt.focusKeyphrase || dbArt.primaryKeyword || '',
           relatedKeyphrases: dbArt.relatedKeyphrases,
-          locale: (dbArt.locale as any) || 'id',
+          locale: (dbArt.locale as 'id' | 'en' | undefined) || 'id',
           isCornerstone: Boolean(dbArt.isCornerstone),
           images: dbArt.coverUrl ? [{ url: dbArt.coverUrl, alt: dbArt.featuredImage?.alternativeText || '' }] : [],
         })
@@ -725,7 +725,7 @@ export async function handleAiAssistantChat(
     const fullSystemPrompt = [
       baseSystemPrompt,
       optimizerDirectives,
-      '--- HASIL VERIFIKASI TOOLS NATIVE SEGIA TECH ---',
+      '--- HASIL VERIFIKASI TOOLS NATIVE UNIMASI STUDIO ---',
       toolSummaries || '(Belum ada eksekusi tool)',
       '-------------------------------------------------',
       `INSTRUKSI JAWABAN:
@@ -981,7 +981,7 @@ Gunakan data aktual dari hasil eksekusi tool di atas untuk menjawab secara akura
               failoverHistory,
               failoverHalted: true,
               quotaError: classification,
-            } as any,
+            },
           }
         }
       }
@@ -1062,7 +1062,7 @@ Gunakan data aktual dari hasil eksekusi tool di atas untuk menjawab secara akura
         latencyMs: Date.now() - startTime,
         autoApply: shouldAutoApply,
         failoverHistory: failoverHistory.length > 0 ? failoverHistory : undefined,
-      } as any,
+      },
     }
   }
 
@@ -1085,7 +1085,7 @@ Gunakan data aktual dari hasil eksekusi tool di atas untuk menjawab secara akura
         fallbackOccurred: true,
         latencyMs: Date.now() - startTime,
         failoverHistory,
-      } as any,
+      },
     }
   }
 
@@ -1140,7 +1140,7 @@ Gunakan data aktual dari hasil eksekusi tool di atas untuk menjawab secara akura
           proposedChanges: loopRes.proposedChanges,
           meta: {
             provider: provider || 'agentic-loop',
-            model: model || 'segia-agent-v1',
+            model: model || 'unimasi-agent-v1',
             latencyMs: loopRes.durationMs,
           },
         }
@@ -1155,7 +1155,7 @@ Gunakan data aktual dari hasil eksekusi tool di atas untuk menjawab secara akura
           autoApply: false,
           meta: {
             provider: provider || 'agentic-loop',
-            model: model || 'segia-agent-v1',
+            model: model || 'unimasi-agent-v1',
             latencyMs: Date.now() - startTime,
             error: loopErr?.message,
           },
@@ -1188,7 +1188,7 @@ Gunakan data aktual dari hasil eksekusi tool di atas untuk menjawab secara akura
       summary: 'Penyelarasan SEO & Keterbacaan: Penataan hierarki heading, optimalisasi panjang meta description, dan kelengkapan alt text gambar cover.',
     }
 
-    const deterministicReply = `### Analisis & Optimasi Artikel (Native Segia SEO Engine)
+    const deterministicReply = `### Analisis & Optimasi Artikel (Native UNIMASI SEO Engine)
 
 Saya telah memeriksa seluruh konten dan pengaturan artikel **"${effectiveArticle.title}"** (Slug: \`/artikel/${effectiveArticle.slug}\`).
 
@@ -1218,8 +1218,8 @@ Klik tombol **"Terapkan Perubahan ke Editor"** di bawah ini untuk menerapkan per
       toolCalls: executedToolCalls,
       proposedChanges: syntheticChanges,
       meta: {
-        provider: 'native-segia',
-        model: 'segia-seo-v4',
+        provider: 'native-unimasi',
+        model: 'unimasi-seo-v4',
         fallbackOccurred: failoverHistory.length > 0 ? true : undefined,
         failoverHistory: failoverHistory.length > 0 ? failoverHistory : undefined,
         latencyMs: Date.now() - startTime,
@@ -1253,7 +1253,7 @@ Klik tombol **"Terapkan Perubahan ke Editor"** di bawah ini untuk menerapkan per
 
 - **Judul**: ${draftCall.output.title}
 - **Slug**: \`/artikel/${draftCall.output.slug}\`
-- **Status**: \`draft\` (Sesuai panduan keamanan SEGIA Rule 8, AI tidak mempublikasikan langsung)
+- **Status**: \`draft\` (Sesuai panduan keamanan UNIMASI Rule 8, AI tidak mempublikasikan langsung)
 - **Estimasi Waktu Baca**: ~${draftCall.output.readingTime} menit
 
 Anda dapat meninjau dan menyunting draf ini di tab **Kelola Konten & Publikasi**.`
@@ -1335,7 +1335,7 @@ Basis data terhubung aktif, siap menjalankan kueri data artikel, portofolio, ana
     toolCalls: executedToolCalls,
     meta: {
       provider: 'local-native',
-      model: 'segia-engine-v3',
+      model: 'unimasi-engine-v3',
       fallbackOccurred: failoverHistory.length > 0 ? true : undefined,
       failoverHistory: failoverHistory.length > 0 ? failoverHistory : undefined,
       latencyMs: Date.now() - startTime,

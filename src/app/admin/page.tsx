@@ -5,6 +5,27 @@ import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { siteConfig } from '@/config/site'
 import reportData from '@/data/migration-report.json'
+
+interface MigrationReportItem {
+  slug: string
+  original_title: string
+  status?: string
+  http_status?: number
+  entity_type?: string
+  canonical_url?: string
+  destination?: string
+  [key: string]: unknown
+}
+
+const reportRows = (reportData as unknown as MigrationReportItem[]) || []
+type McpClientId = 'antigravity' | 'claude' | 'cursor' | 'windsurf' | 'codex'
+const MCP_CLIENT_TABS: Array<{ id: McpClientId; label: string }> = [
+  { id: 'antigravity', label: 'Google Antigravity' },
+  { id: 'claude', label: 'Claude Desktop' },
+  { id: 'cursor', label: 'Cursor IDE' },
+  { id: 'windsurf', label: 'Windsurf' },
+  { id: 'codex', label: 'Codex CLI' },
+]
 import { useAuth } from '@/lib/auth/AuthContext'
 import { Role, ArticleStatus, ROLE_PERMISSIONS } from '@/lib/auth/rbac'
 import { StudioAiSettings } from '@/components/studio/StudioAiSettings'
@@ -14,6 +35,7 @@ import { StudioPortfolioManager } from '@/components/studio/StudioPortfolioManag
 import { StudioServicesManager } from '@/components/studio/StudioServicesManager'
 import { StudioSolutionsManager } from '@/components/studio/StudioSolutionsManager'
 import { StudioBlocksCatalog } from '@/components/studio/StudioBlocksCatalog'
+import { StudioClientsManager } from '@/components/studio/StudioClientsManager'
 import { StudioMediaManager } from '@/components/studio/StudioMediaManager'
 import { StudioKeywordPlanner } from '@/components/studio/StudioKeywordPlanner'
 import { StudioSiteAudit } from '@/components/studio/StudioSiteAudit'
@@ -65,7 +87,7 @@ import {
 } from 'lucide-react'
 
 export type UserRole = Role | 'admin' | 'writer'
-export type AdminTab = 'brands' | 'matrix' | 'articles' | 'publisher' | 'overview' | 'portfolio' | 'services' | 'solutions' | 'blocks' | 'media' | 'keywords' | 'audit' | 'cta' | 'perf' | 'ai' | 'ai-settings' | 'gsc' | 'calendar' | 'migration' | 'redirects' | 'system' | 'roles' | 'settings'
+export type AdminTab = 'brands' | 'matrix' | 'articles' | 'publisher' | 'overview' | 'portfolio' | 'services' | 'solutions' | 'blocks' | 'clients' | 'media' | 'keywords' | 'audit' | 'cta' | 'perf' | 'ai' | 'ai-settings' | 'gsc' | 'calendar' | 'migration' | 'redirects' | 'system' | 'roles' | 'settings'
 
 interface ArticleItem {
   id?: number
@@ -186,7 +208,7 @@ function ArticleTableRow({
             href={`${siteConfig.url}/artikel/${art.slug}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="font-semibold text-white hover:text-sky-400 transition-colors line-clamp-1 text-xs"
+            className="font-semibold text-white hover:text-info transition-colors line-clamp-1 text-xs"
             title={art.title}
           >
             {art.title}
@@ -259,7 +281,7 @@ function ArticleTableRow({
                     <button
                       type="button"
                       onClick={() => onTransitionStatus(art.slug, 'in_review')}
-                      className="text-[10px] font-mono text-sky-400 hover:text-sky-300 underline"
+                      className="text-[10px] font-mono text-info hover:text-info-300 underline"
                     >
                       Review →
                     </button>
@@ -271,7 +293,7 @@ function ArticleTableRow({
           if (st === 'in_review') {
             return (
               <div className="flex items-center gap-1.5">
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-mono font-medium bg-sky-500/15 text-sky-300 border border-sky-500/25">
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-mono font-medium bg-info/15 text-info-300 border border-info/25">
                   <Clock className="w-2.5 h-2.5" /> In Review
                 </span>
                 {permissions.canApprove && (
@@ -464,6 +486,8 @@ function AdminDashboardContent() {
       'portfolio',
       'services',
       'solutions',
+      'blocks',
+      'clients',
       'media',
       'keywords',
       'audit',
@@ -594,7 +618,7 @@ function AdminDashboardContent() {
   const [syncMessage, setSyncMessage] = useState('')
 
   // --- Migration Registry State ----------------------------------------------
-  const migrationRegistry = (reportData as any[]) || []
+  const migrationRegistry = reportRows
   const [migrationSearch, setMigrationSearch] = useState('')
   const [migrationStatusFilter, setMigrationStatusFilter] = useState<'ALL' | 'PASS' | 'REDIRECT' | '410'>('ALL')
   const [testUrlInput, setTestUrlInput] = useState('')
@@ -877,7 +901,7 @@ node mcp/server.js`
   }
 
   // Filtered migration rows
-  const filteredMigration = (reportData as any[]).filter((r) => {
+  const filteredMigration = reportRows.filter((r) => {
     const matchesSearch =
       r.slug.toLowerCase().includes(migrationSearch.toLowerCase()) ||
       r.original_title.toLowerCase().includes(migrationSearch.toLowerCase())
@@ -892,7 +916,7 @@ node mcp/server.js`
   // Export 887 URLs as CSV
   const handleExportCSV = () => {
     const headers = 'Entity Type,Original Slug,Original Title,Status,HTTP Status,Canonical URL\n'
-    const rows = (reportData as any[])
+    const rows = reportRows
       .map((r) => `"${r.entity_type}","${r.slug}","${(r.original_title || '').replace(/"/g, '""')}","${r.status}","${r.http_status || 200}","${r.canonical_url || ''}"`)
       .join('\n')
     const blob = new Blob([headers + rows], { type: 'text/csv;charset=utf-8;' })
@@ -921,7 +945,7 @@ node mcp/server.js`
   const handleTestUrl = () => {
     if (!testUrlInput.trim()) return
     const cleaned = testUrlInput.trim().toLowerCase().replace(/^https?:\/\/[^\/]+/, '').replace(/^\/|\/$/g, '')
-    const match = (reportData as any[]).find((r) => r.slug.toLowerCase() === cleaned || r.original_title.toLowerCase().includes(cleaned))
+    const match = reportRows.find((r) => r.slug.toLowerCase() === cleaned || r.original_title.toLowerCase().includes(cleaned))
 
     if (match) {
       setTestUrlResult({
@@ -1004,7 +1028,7 @@ node mcp/server.js`
 
       {/* --- SINGLE-BRAND NOTICE (ADR-0007) ------------------------- */}
       {activeTab === 'brands' && (
-        <div className="p-8 rounded-2xl border border-white/10 bg-[#191919] text-center space-y-4">
+        <div className="p-8 rounded-2xl border border-white/10 bg-[var(--studio-bg)] text-center space-y-4">
           <Globe className="w-10 h-10 text-accent-400 mx-auto" />
           <h2 className="text-lg font-bold text-white">Arsitektur Satu Brand: UNIMASI Studio</h2>
           <p className="text-xs text-neutral-400 max-w-md mx-auto leading-relaxed">
@@ -1021,7 +1045,7 @@ node mcp/server.js`
 
       {/* --- WORKSPACE MATRIX KEYWORD & BULK GENERATOR (DEPRECATED) --- */}
       {activeTab === 'matrix' && (
-        <div className="p-8 rounded-2xl border border-white/10 bg-[#191919] text-center space-y-4">
+        <div className="p-8 rounded-2xl border border-white/10 bg-[var(--studio-bg)] text-center space-y-4">
           <Zap className="w-10 h-10 text-accent-400 mx-auto" />
           <h2 className="text-lg font-bold text-white">Keyword Matrix Dinonaktifkan</h2>
           <p className="text-xs text-neutral-400 max-w-md mx-auto leading-relaxed">
@@ -1038,7 +1062,7 @@ node mcp/server.js`
 
       {/* --- SINGLE-BRAND PUBLISHER NOTICE (ADR-0007) ------------------ */}
       {activeTab === 'publisher' && (
-        <div className="p-8 rounded-2xl border border-white/10 bg-[#191919] text-center space-y-4">
+        <div className="p-8 rounded-2xl border border-white/10 bg-[var(--studio-bg)] text-center space-y-4">
           <Download className="w-10 h-10 text-accent-400 mx-auto" />
           <h2 className="text-lg font-bold text-white">Publisher Bridge Dinonaktifkan</h2>
           <p className="text-xs text-neutral-400 max-w-md mx-auto leading-relaxed">
@@ -1058,45 +1082,45 @@ node mcp/server.js`
         <div className="space-y-6">
           {/* KPI Stat Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="rounded-2xl border border-white/10 bg-[#191919] p-5 shadow-soft-sm">
+            <div className="rounded-2xl border border-white/10 bg-[var(--studio-bg)] p-5 shadow-soft-sm">
               <span className="text-[11px] font-mono uppercase tracking-wider text-neutral-400">Total Artikel</span>
               <p className="text-3xl font-bold text-white mt-1">{totalArticles}</p>
               <div className="mt-3 flex items-center justify-between text-[11px] font-mono">
                 <span className="text-emerald-400">100% Valid Dynamic</span>
-                <Link href="/admin?tab=articles" className="text-sky-400 hover:underline">Kelola →</Link>
+                <Link href="/admin?tab=articles" className="text-info hover:underline">Kelola →</Link>
               </div>
             </div>
 
-            <div className="rounded-2xl border border-white/10 bg-[#191919] p-5 shadow-soft-sm">
+            <div className="rounded-2xl border border-white/10 bg-[var(--studio-bg)] p-5 shadow-soft-sm">
               <span className="text-[11px] font-mono uppercase tracking-wider text-neutral-400">Portofolio Institusi</span>
               <p className="text-3xl font-bold text-accent-300 mt-1">{systemStatus?.counts?.portfolios ?? 0}</p>
               <div className="mt-3 flex items-center justify-between text-[11px] font-mono">
                 <span className="text-neutral-300">100% Foto Asli Gedung</span>
-                <a href={`${siteConfig.url}/portofolio`} target="_blank" rel="noopener noreferrer" className="text-sky-400 hover:underline">Lihat Galeri ↗</a>
+                <a href={`${siteConfig.url}/portofolio`} target="_blank" rel="noopener noreferrer" className="text-info hover:underline">Lihat Galeri ↗</a>
               </div>
             </div>
 
-            <div className="rounded-2xl border border-white/10 bg-[#191919] p-5 shadow-soft-sm">
+            <div className="rounded-2xl border border-white/10 bg-[var(--studio-bg)] p-5 shadow-soft-sm">
               <span className="text-[11px] font-mono uppercase tracking-wider text-neutral-400">Validasi URL Migrasi</span>
               <p className="text-3xl font-bold text-emerald-400 mt-1">{migrationRegistry.length > 0 ? `${migrationRegistry.length} URLs` : 'Verified'}</p>
               <div className="mt-3 flex items-center justify-between text-[11px] font-mono">
                 <span className="text-emerald-400">Zero Broken Link</span>
-                <Link href="/admin?tab=migration" className="text-sky-400 hover:underline">Lihat Audit →</Link>
+                <Link href="/admin?tab=migration" className="text-info hover:underline">Lihat Audit →</Link>
               </div>
             </div>
 
-            <div className="rounded-2xl border border-white/10 bg-[#191919] p-5 shadow-soft-sm">
+            <div className="rounded-2xl border border-white/10 bg-[var(--studio-bg)] p-5 shadow-soft-sm">
               <span className="text-[11px] font-mono uppercase tracking-wider text-neutral-400">301 Redirect Rules</span>
-              <p className="text-3xl font-bold text-sky-400 mt-1">{redirectList.length}</p>
+              <p className="text-3xl font-bold text-info mt-1">{redirectList.length}</p>
               <div className="mt-3 flex items-center justify-between text-[11px] font-mono">
                 <span className="text-neutral-300">SEO Preservation</span>
-                <Link href="/admin?tab=redirects" className="text-sky-400 hover:underline">Atur Rules →</Link>
+                <Link href="/admin?tab=redirects" className="text-info hover:underline">Atur Rules →</Link>
               </div>
             </div>
           </div>
 
           {/* Quick System & Content Status Banner */}
-          <div className="rounded-2xl border border-white/10 bg-[#191919] p-6 shadow-soft-md flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="rounded-2xl border border-white/10 bg-[var(--studio-bg)] p-6 shadow-soft-md flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <Zap className="w-5 h-5 text-accent-400" />
@@ -1124,7 +1148,7 @@ node mcp/server.js`
               <button
                 type="button"
                 onClick={() => handleTabChange('system')}
-                className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white text-xs font-bold shadow-md transition-all"
+                className="px-5 py-2.5 rounded-xl bg-accent-500 hover:bg-accent-300 text-accent-950 text-xs font-bold shadow-md transition-all"
               >
                 Buka Panel Operasional →
               </button>
@@ -1182,6 +1206,13 @@ node mcp/server.js`
         </div>
       )}
 
+      {/* --- TAB: CLIENT & PARTNER LOGOS ----------------------------- */}
+      {activeTab === 'clients' && (
+        <div className="space-y-6">
+          <StudioClientsManager />
+        </div>
+      )}
+
       {/* --- TAB: BLOK CTA GLOBAL (Section 7) -------------------------- */}
       {activeTab === 'cta' && (
         <div className="space-y-6">
@@ -1221,7 +1252,7 @@ node mcp/server.js`
       {activeTab === 'articles' && (
         <div className="space-y-4">
           {/* Compact Filter & Management Bar */}
-          <div className="rounded-2xl border border-white/10 bg-[#161616] p-3 sm:p-4 shadow-soft-sm flex flex-col md:flex-row md:items-center justify-between gap-3">
+          <div className="rounded-2xl border border-white/10 bg-[var(--studio-sidebar-bg)] p-3 sm:p-4 shadow-soft-sm flex flex-col md:flex-row md:items-center justify-between gap-3">
             {/* Left: Search & Filter Controls */}
             <div className="flex flex-wrap items-center gap-2.5 flex-1">
               <div className="relative min-w-[200px] sm:min-w-[260px] flex-1 max-w-sm">
@@ -1234,7 +1265,7 @@ node mcp/server.js`
                     setPage(1)
                   }}
                   placeholder="Cari judul artikel atau slug..."
-                  className="w-full rounded-xl border border-white/10 bg-neutral-900/90 pl-9 pr-3 py-1.5 text-xs text-white placeholder:text-neutral-500 focus:border-sky-400 focus:outline-none"
+                  className="w-full rounded-xl border border-white/10 bg-neutral-900/90 pl-9 pr-3 py-1.5 text-xs text-white placeholder:text-neutral-500 focus:border-accent-400 focus:outline-none"
                 />
               </div>
 
@@ -1245,7 +1276,7 @@ node mcp/server.js`
                     setFilterCategory(e.target.value)
                     setPage(1)
                   }}
-                  className="w-full rounded-xl border border-white/10 bg-neutral-900/90 px-3 py-1.5 text-xs text-white focus:border-sky-400 focus:outline-none"
+                  className="w-full rounded-xl border border-white/10 bg-neutral-900/90 px-3 py-1.5 text-xs text-white focus:border-accent-400 focus:outline-none"
                 >
                   {categoriesOptions.length > 0 ? (
                     categoriesOptions.map((opt) => (
@@ -1266,7 +1297,7 @@ node mcp/server.js`
                     setFilterStatus(e.target.value)
                     setPage(1)
                   }}
-                  className="w-full rounded-xl border border-white/10 bg-neutral-900/90 px-3 py-1.5 text-xs text-white focus:border-sky-400 focus:outline-none"
+                  className="w-full rounded-xl border border-white/10 bg-neutral-900/90 px-3 py-1.5 text-xs text-white focus:border-accent-400 focus:outline-none"
                 >
                   <option value="">Semua Status</option>
                   <option value="published">Published</option>
@@ -1302,7 +1333,7 @@ node mcp/server.js`
           {/* Quick Edit Modal */}
           {editingArticle && (
             <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
-              <div className="max-w-md w-full rounded-2xl bg-[#191919] border border-sky-400/40 p-6 space-y-4 shadow-2xl">
+              <div className="max-w-md w-full rounded-2xl bg-[var(--studio-bg)] border border-info/40 p-6 space-y-4 shadow-2xl">
                 <div className="flex items-center justify-between pb-3 border-b border-white/10">
                   <h3 className="text-base font-bold text-white">Edit Cepat Artikel</h3>
                   <button onClick={() => setEditingArticle(null)} className="text-neutral-400 hover:text-white">✕</button>
@@ -1313,7 +1344,7 @@ node mcp/server.js`
                     type="text"
                     value={editTitle}
                     onChange={(e) => setEditTitle(e.target.value)}
-                    className="w-full rounded-xl bg-black/40 border border-white/15 p-3 text-xs text-white focus:outline-none focus:border-sky-400"
+                    className="w-full rounded-xl bg-black/40 border border-white/15 p-3 text-xs text-white focus:outline-none focus:border-accent-400"
                   />
                 </div>
                 <div>
@@ -1322,14 +1353,14 @@ node mcp/server.js`
                     type="text"
                     value={editCategory}
                     onChange={(e) => setEditCategory(e.target.value)}
-                    className="w-full rounded-xl bg-black/40 border border-white/15 p-3 text-xs text-white focus:outline-none focus:border-sky-400"
+                    className="w-full rounded-xl bg-black/40 border border-white/15 p-3 text-xs text-white focus:outline-none focus:border-accent-400"
                   />
                 </div>
                 <div className="flex gap-2 pt-2">
                   <button
                     type="button"
                     onClick={handleSaveEdit}
-                    className="flex-1 py-2.5 rounded-xl bg-sky-500 hover:bg-sky-400 text-white font-bold text-xs shadow-md"
+                    className="flex-1 py-2.5 rounded-xl bg-accent-500 hover:bg-accent-300 text-accent-950 font-bold text-xs shadow-md"
                   >
                     Simpan Perubahan
                   </button>
@@ -1346,7 +1377,7 @@ node mcp/server.js`
           )}
 
           {/* Articles Table */}
-          <div className="rounded-2xl border border-white/10 bg-[#191919] overflow-hidden shadow-soft-sm">
+          <div className="rounded-2xl border border-white/10 bg-[var(--studio-bg)] overflow-hidden shadow-soft-sm">
             {loadingArticles ? (
               <div className="py-16 text-center text-neutral-400 font-mono text-body-sm">
                 Memuat data artikel...
@@ -1364,7 +1395,7 @@ node mcp/server.js`
                         >
                           <span>Judul &amp; Slug Artikel</span>
                           {sortField === 'title' ? (
-                            sortOrder === 'asc' ? <ArrowUp className="w-3 h-3 text-sky-400" /> : <ArrowDown className="w-3 h-3 text-sky-400" />
+                            sortOrder === 'asc' ? <ArrowUp className="w-3 h-3 text-info" /> : <ArrowDown className="w-3 h-3 text-info" />
                           ) : (
                             <ArrowUpDown className="w-3 h-3 text-neutral-600 hover:text-neutral-400" />
                           )}
@@ -1378,7 +1409,7 @@ node mcp/server.js`
                         >
                           <span>Kategori</span>
                           {sortField === 'category' ? (
-                            sortOrder === 'asc' ? <ArrowUp className="w-3 h-3 text-sky-400" /> : <ArrowDown className="w-3 h-3 text-sky-400" />
+                            sortOrder === 'asc' ? <ArrowUp className="w-3 h-3 text-info" /> : <ArrowDown className="w-3 h-3 text-info" />
                           ) : (
                             <ArrowUpDown className="w-3 h-3 text-neutral-600 hover:text-neutral-400" />
                           )}
@@ -1392,7 +1423,7 @@ node mcp/server.js`
                         >
                           <span>Tanggal</span>
                           {sortField === 'date' ? (
-                            sortOrder === 'asc' ? <ArrowUp className="w-3 h-3 text-sky-400" /> : <ArrowDown className="w-3 h-3 text-sky-400" />
+                            sortOrder === 'asc' ? <ArrowUp className="w-3 h-3 text-info" /> : <ArrowDown className="w-3 h-3 text-info" />
                           ) : (
                             <ArrowUpDown className="w-3 h-3 text-neutral-600 hover:text-neutral-400" />
                           )}
@@ -1407,7 +1438,7 @@ node mcp/server.js`
                         >
                           <span>Status</span>
                           {sortField === 'status' ? (
-                            sortOrder === 'asc' ? <ArrowUp className="w-3 h-3 text-sky-400" /> : <ArrowDown className="w-3 h-3 text-sky-400" />
+                            sortOrder === 'asc' ? <ArrowUp className="w-3 h-3 text-info" /> : <ArrowDown className="w-3 h-3 text-info" />
                           ) : (
                             <ArrowUpDown className="w-3 h-3 text-neutral-600 hover:text-neutral-400" />
                           )}
@@ -1485,7 +1516,7 @@ node mcp/server.js`
       {activeTab === 'migration' && (
         <div className="space-y-6">
           {/* Header & Controls */}
-          <div className="rounded-2xl border border-white/10 bg-[#191919] p-6 shadow-soft-sm space-y-5">
+          <div className="rounded-2xl border border-white/10 bg-[var(--studio-bg)] p-6 shadow-soft-sm space-y-5">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div>
                 <h2 className="text-display-xs font-bold text-white flex items-center gap-2">
@@ -1522,7 +1553,7 @@ node mcp/server.js`
 
             {/* Interactive Live URL Ping Tester */}
             <div className="p-4 rounded-xl bg-black/40 border border-white/10 space-y-3">
-              <span className="text-[11px] font-mono uppercase tracking-wider text-sky-300 font-semibold flex items-center gap-1.5">
+              <span className="text-[11px] font-mono uppercase tracking-wider text-info-300 font-semibold flex items-center gap-1.5">
                 <Search className="w-3.5 h-3.5" />
                 <span>Penguji URL Langsung (Live URL Resolver)</span>
               </span>
@@ -1532,12 +1563,12 @@ node mcp/server.js`
                   value={testUrlInput}
                   onChange={(e) => setTestUrlInput(e.target.value)}
                   placeholder="Ketik path atau URL lama (contoh: /animasi-3d-lama/ atau /portfolio-lama/)..."
-                  className="flex-1 rounded-xl border border-white/15 bg-neutral-900 px-3.5 py-2 text-xs text-white focus:outline-none focus:border-sky-400 font-mono"
+                  className="flex-1 rounded-xl border border-white/15 bg-neutral-900 px-3.5 py-2 text-xs text-white focus:outline-none focus:border-accent-400 font-mono"
                 />
                 <button
                   type="button"
                   onClick={handleTestUrl}
-                  className="px-5 py-2 rounded-xl bg-sky-500 hover:bg-sky-400 text-white font-bold text-xs transition-all shrink-0"
+                  className="px-5 py-2 rounded-xl bg-accent-500 hover:bg-accent-300 text-accent-950 font-bold text-xs transition-all shrink-0"
                 >
                   Uji Resolusi URL
                 </button>
@@ -1576,7 +1607,7 @@ node mcp/server.js`
                     onClick={() => setMigrationStatusFilter(st)}
                     className={`px-3 py-2 rounded-xl font-mono text-[11px] font-semibold transition-all ${
                       migrationStatusFilter === st
-                        ? 'bg-sky-500 text-white shadow-sm'
+                        ? 'bg-accent-500 text-accent-950 shadow-sm'
                         : 'bg-white/5 text-neutral-400 hover:text-white border border-white/10'
                     }`}
                   >
@@ -1622,7 +1653,7 @@ node mcp/server.js`
                           href={row.entity_type === 'portfolio' ? `${siteConfig.url}/portofolio/${row.slug}` : (row.entity_type === 'service' ? `${siteConfig.url}/layanan/${row.slug}` : `${siteConfig.url}/${row.slug}`)}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-sky-400 hover:underline font-semibold"
+                          className="text-info hover:underline font-semibold"
                         >
                           Buka ↗
                         </a>
@@ -1643,7 +1674,7 @@ node mcp/server.js`
       {/* --- TAB 4: 301 REDIRECTS (Interactive Manager & Tester) --------- */}
       {activeTab === 'redirects' && (
         <div className="space-y-6">
-          <div className="rounded-2xl border border-white/10 bg-[#191919] p-6 shadow-soft-sm space-y-6">
+          <div className="rounded-2xl border border-white/10 bg-[var(--studio-bg)] p-6 shadow-soft-sm space-y-6">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div>
                 <h2 className="text-display-xs font-bold text-white">
@@ -1654,14 +1685,14 @@ node mcp/server.js`
                 </p>
               </div>
 
-              <span className="badge bg-sky-950/80 border border-sky-400/30 text-sky-300 font-mono text-xs">
+              <span className="badge bg-info-950/80 border border-info/30 text-info-300 font-mono text-xs">
                 {redirectList.length} Aturan Aktif
               </span>
             </div>
 
             {/* Interactive Redirect Tester */}
             <div className="p-4 rounded-xl bg-black/40 border border-white/10 space-y-3">
-              <span className="text-[11px] font-mono uppercase tracking-wider text-sky-300 font-semibold block">
+              <span className="text-[11px] font-mono uppercase tracking-wider text-info-300 font-semibold block">
                 🧪 Uji Kecocokan Rule (Interactive Pattern Matcher)
               </span>
               <div className="flex gap-2">
@@ -1670,11 +1701,11 @@ node mcp/server.js`
                   value={redirectTestInput}
                   onChange={(e) => handleTestRedirect(e.target.value)}
                   placeholder="Ketik path yang ingin diuji (contoh: /animasi-3d-lama atau /portfolio-lama)..."
-                  className="flex-1 rounded-xl border border-white/15 bg-neutral-900 px-3.5 py-2 text-xs text-white focus:outline-none focus:border-sky-400 font-mono"
+                  className="flex-1 rounded-xl border border-white/15 bg-neutral-900 px-3.5 py-2 text-xs text-white focus:outline-none focus:border-accent-400 font-mono"
                 />
               </div>
               {redirectTestResult && (
-                <div className="p-3 rounded-lg bg-sky-950/50 border border-sky-400/30 text-xs font-mono text-sky-300">
+                <div className="p-3 rounded-lg bg-info-950/50 border border-info/30 text-xs font-mono text-info-300">
                   {redirectTestResult}
                 </div>
               )}
@@ -1713,7 +1744,7 @@ node mcp/server.js`
               </div>
               <button
                 type="submit"
-                className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white font-bold text-xs shadow-md transition-all"
+                className="px-5 py-2.5 rounded-xl bg-accent-500 hover:bg-accent-300 text-accent-950 font-bold text-xs shadow-md transition-all"
               >
                 Simpan Aturan Redirect
               </button>
@@ -1722,8 +1753,8 @@ node mcp/server.js`
             {/* Redirect Rules List */}
             <div className="space-y-2.5">
               {redirectList.map((redir: any, i: number) => (
-                <div key={i} className="flex flex-col sm:flex-row sm:items-center justify-between p-3.5 rounded-xl border border-white/10 bg-white/5 font-mono text-body-xs hover:border-sky-400/40 transition-colors">
-                  <div className="text-sky-300 font-bold truncate max-w-xs">
+                <div key={i} className="flex flex-col sm:flex-row sm:items-center justify-between p-3.5 rounded-xl border border-white/10 bg-white/5 font-mono text-body-xs hover:border-info/40 transition-colors">
+                  <div className="text-info-300 font-bold truncate max-w-xs">
                     {redir.sourcePath}
                   </div>
                   <div className="text-neutral-500 text-xs">→ (301 Permanent) →</div>
@@ -1743,17 +1774,17 @@ node mcp/server.js`
       {/* --- TAB 5: NEXT.JS 16 WEBSHIFT ENGINE & SQLITE HUB ------------- */}
       {activeTab === 'system' && (
         <div className="space-y-6">
-          <div className="rounded-2xl border border-white/10 bg-[#191919] p-6 sm:p-8 shadow-soft-sm space-y-6">
+          <div className="rounded-2xl border border-white/10 bg-[var(--studio-bg)] p-6 sm:p-8 shadow-soft-sm space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
-                <span className="badge bg-sky-950/80 border border-sky-400/30 text-sky-300 font-mono text-xs mb-2">
+                <span className="badge bg-info-950/80 border border-info/30 text-info-300 font-mono text-xs mb-2">
                   Embedded Database &amp; Engine
                 </span>
                 <h2 className="text-display-sm font-bold text-white">
                   Next.js 16 WebShift Engine &amp; SQLite Hub
                 </h2>
                 <p className="text-body-xs text-neutral-300 mt-1">
-                  Pusat kendali database SQLite lokal (<code className="text-sky-300 font-mono">webshift.db</code>) via Drizzle ORM dengan latensi query sub-2ms tanpa dependensi database eksternal.
+                  Pusat kendali database SQLite lokal (<code className="text-info-300 font-mono">webshift.db</code>) via Drizzle ORM dengan latensi query sub-2ms tanpa dependensi database eksternal.
                 </p>
               </div>
 
@@ -1771,7 +1802,7 @@ node mcp/server.js`
                   type="button"
                   onClick={handleSyncSystem}
                   disabled={syncingSystem}
-                  className="px-5 py-2 rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white font-bold text-xs shadow-md transition-all inline-flex items-center gap-1.5"
+                  className="px-5 py-2 rounded-xl bg-accent-500 hover:bg-accent-300 text-accent-950 font-bold text-xs shadow-md transition-all inline-flex items-center gap-1.5"
                 >
                   <span>{syncingSystem ? 'Memverifikasi...' : 'Verifikasi Entitas SQLite'}</span>
                 </button>
@@ -1780,7 +1811,7 @@ node mcp/server.js`
 
             {/* Sync Feedback Message */}
             {syncMessage && (
-              <div className="p-3.5 rounded-xl bg-sky-500/20 border border-sky-400/30 text-sky-200 text-xs font-mono animate-fadeIn">
+              <div className="p-3.5 rounded-xl bg-info/20 border border-info/30 text-info-300 text-xs font-mono animate-fadeIn">
                 {syncMessage}
               </div>
             )}
@@ -1802,14 +1833,14 @@ node mcp/server.js`
               <div className="p-5 rounded-xl bg-black/40 border border-white/10">
                 <span className="text-[11px] font-mono text-neutral-400 uppercase">Arsitektur</span>
                 <p className="text-lg font-bold text-white mt-1">Full Next.js 16</p>
-                <p className="text-xs text-sky-400 font-mono mt-1">App Router + Turbopack SSR</p>
+                <p className="text-xs text-info font-mono mt-1">App Router + Turbopack SSR</p>
               </div>
             </div>
 
             {/* Content Types Sync Table */}
             <div className="border border-white/10 rounded-2xl overflow-hidden bg-black/30">
               <div className="p-4 border-b border-white/10 flex items-center justify-between">
-                <h3 className="text-xs font-mono uppercase tracking-wider text-sky-300 font-semibold">
+                <h3 className="text-xs font-mono uppercase tracking-wider text-info-300 font-semibold">
                   Skema Tabel Database SQLite (Drizzle ORM)
                 </h3>
                 <span className="text-xs font-mono text-emerald-400">✓ Zero External Setup Required</span>
@@ -1855,16 +1886,16 @@ node mcp/server.js`
             {/* CLI Instruction Helper */}
             <div className="p-4 rounded-xl bg-black/60 border border-white/10 space-y-2">
               <span className="text-[11px] font-mono text-neutral-400 flex items-center gap-1.5">
-                <Info className="w-3.5 h-3.5 text-sky-400" />
+                <Info className="w-3.5 h-3.5 text-info" />
                 <span>Untuk membuka GUI Visual Database Explorer (Drizzle Studio):</span>
               </span>
-              <code className="block p-3 rounded-lg bg-black text-sky-300 font-mono text-xs border border-white/10 select-all">
+              <code className="block p-3 rounded-lg bg-black text-info-300 font-mono text-xs border border-white/10 select-all">
                 cd web; npx drizzle-kit studio
               </code>
             </div>
 
             {/* --- Model Context Protocol (MCP) Server Integration ---- */}
-            <div className="border border-sky-400/30 rounded-2xl overflow-hidden bg-gradient-to-b from-sky-950/25 to-black/50 p-6 sm:p-7 space-y-6 shadow-soft-md">
+            <div className="border border-info/30 rounded-2xl overflow-hidden bg-gradient-to-b from-info-950/25 to-black/50 p-6 sm:p-7 space-y-6 shadow-soft-md">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
                   <div className="flex items-center gap-2 mb-2">
@@ -1894,16 +1925,16 @@ node mcp/server.js`
 
               {/* Registered Tools Grid */}
               <div>
-                <h4 className="text-xs font-mono uppercase tracking-wider text-sky-300 font-semibold mb-3">
+                <h4 className="text-xs font-mono uppercase tracking-wider text-info-300 font-semibold mb-3">
                   7 Tools Terdaftar &amp; Terbuka untuk AI
                 </h4>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-xs font-mono">
                   <div className="p-3.5 rounded-xl bg-white/[0.04] border border-white/10">
-                    <div className="font-bold text-sky-300">list_articles</div>
+                    <div className="font-bold text-info-300">list_articles</div>
                     <div className="text-neutral-400 text-[11px] mt-1 font-sans">Mencari dan memfilter 724 artikel berdasarkan status, kategori, atau kata kunci.</div>
                   </div>
                   <div className="p-3.5 rounded-xl bg-white/[0.04] border border-white/10">
-                    <div className="font-bold text-sky-300">get_article</div>
+                    <div className="font-bold text-info-300">get_article</div>
                     <div className="text-neutral-400 text-[11px] mt-1 font-sans">Mengambil isi artikel lengkap (HTML/Markdown) dan metadata SEO berdasarkan slug.</div>
                   </div>
                   <div className="p-3.5 rounded-xl bg-white/[0.04] border border-white/10">
@@ -1915,7 +1946,7 @@ node mcp/server.js`
                     <div className="text-neutral-400 text-[11px] mt-1 font-sans">Memperbarui judul, konten, kategori, dan status publikasi artikel.</div>
                   </div>
                   <div className="p-3.5 rounded-xl bg-white/[0.04] border border-white/10">
-                    <div className="font-bold text-sky-300">check_redirect</div>
+                    <div className="font-bold text-info-300">check_redirect</div>
                     <div className="text-neutral-400 text-[11px] mt-1 font-sans">Menguji dan memvalidasi URL lama terhadap aturan 301.</div>
                   </div>
                   <div className="p-3.5 rounded-xl bg-white/[0.04] border border-white/10">
@@ -1932,24 +1963,18 @@ node mcp/server.js`
               {/* Client Configurations */}
               <div className="space-y-3">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                  <h4 className="text-xs font-mono uppercase tracking-wider text-sky-300 font-semibold">
+                  <h4 className="text-xs font-mono uppercase tracking-wider text-info-300 font-semibold">
                     Konfigurasi Siap-Pakai untuk AI Client
                   </h4>
                   <div className="flex flex-wrap gap-1">
-                    {[
-                      { id: 'antigravity', label: 'Google Antigravity' },
-                      { id: 'claude', label: 'Claude Desktop' },
-                      { id: 'cursor', label: 'Cursor IDE' },
-                      { id: 'windsurf', label: 'Windsurf' },
-                      { id: 'codex', label: 'Codex CLI' },
-                    ].map((tab) => (
+                    {MCP_CLIENT_TABS.map((tab) => (
                       <button
                         key={tab.id}
                         type="button"
-                        onClick={() => setMcpClientTab(tab.id as any)}
+                        onClick={() => setMcpClientTab(tab.id)}
                         className={`px-3 py-1.5 rounded-lg text-[11px] font-mono transition-all ${
                           mcpClientTab === tab.id
-                            ? 'bg-sky-500 text-white font-bold shadow-sm'
+                            ? 'bg-accent-500 text-accent-950 font-bold shadow-sm'
                             : 'bg-white/5 text-neutral-400 hover:text-white'
                         }`}
                       >
@@ -1980,7 +2005,7 @@ node mcp/server.js`
       {/* --- TAB 6: MULTI-ROLE & ACCESS MATRIX -------------------------- */}
       {activeTab === 'roles' && (
         <div className="max-w-4xl space-y-6">
-          <div className="rounded-2xl border border-white/10 bg-[#191919] p-8 shadow-soft-sm space-y-6">
+          <div className="rounded-2xl border border-white/10 bg-[var(--studio-bg)] p-8 shadow-soft-sm space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
                 <span className="badge bg-white/10 text-accent-300 font-mono mb-2">
@@ -2013,7 +2038,7 @@ node mcp/server.js`
                   <div className="font-bold text-sm">1. DRAFT</div>
                   <div className="text-[10px] text-neutral-400 mt-1">Author / MCP AI</div>
                 </div>
-                <div className="p-3 rounded-xl bg-sky-500/10 border border-sky-500/20 text-sky-300">
+                <div className="p-3 rounded-xl bg-info/10 border border-info/20 text-info-300">
                   <div className="font-bold text-sm">2. IN_REVIEW</div>
                   <div className="text-[10px] text-neutral-400 mt-1">Diajukan Author</div>
                 </div>
@@ -2148,7 +2173,7 @@ node mcp/server.js`
       ------------------------------------------------------------- */}
       {dialogState.open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-in fade-in duration-150">
-          <div className="w-full max-w-sm bg-[#1E1E1E] border border-white/15 rounded-2xl p-5 shadow-2xl space-y-4">
+          <div className="w-full max-w-sm bg-surface-overlay border border-white/15 rounded-2xl p-5 shadow-2xl space-y-4">
             <div className="flex items-start gap-3">
               <div
                 className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 border ${

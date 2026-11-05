@@ -1,6 +1,7 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import { db as prisma } from '../prisma/db'
+import { downloadAndOptimizeImage, localizeAndOptimizeContentImages } from '../src/lib/import/media-storage'
 
 const SEED_FILE = path.resolve(process.cwd(), 'src/data/seed/seed_articles.json')
 const USER = 'Adib IT'
@@ -442,22 +443,40 @@ async function main() {
 
   for (const art of allArticles) {
     upsertedCount++
-    if (upsertedCount % 100 === 0 || upsertedCount === allArticles.length) {
+    if (upsertedCount % 50 === 0 || upsertedCount === allArticles.length) {
       process.stdout.write(`\rUpserting articles into DB [${upsertedCount}/${allArticles.length}]...`)
     }
+
+    let localCover = art.coverUrl
+    if (localCover && (localCover.startsWith('http://') || localCover.startsWith('https://'))) {
+      try {
+        const optimized = await downloadAndOptimizeImage(localCover, 'articles', {
+          altText: art.title,
+          title: art.title,
+        })
+        if (optimized) localCover = optimized
+      } catch (e) {
+        console.warn(`[Sync] Failed to localize cover for ${art.slug}:`, e)
+      }
+    }
+
+    let localContent = art.content
+    try {
+      localContent = await localizeAndOptimizeContentImages(art.content, 'articles', art.title)
+    } catch {}
 
     const existingArticle = await prisma.orm.public.Article.where({ slug: art.slug }).first()
     if (existingArticle) {
       await prisma.orm.public.Article.where({ id: existingArticle.id }).update({
         title: art.title,
         excerpt: art.excerpt,
-        content: art.content,
-        coverUrl: art.coverUrl,
-        featuredImage: art.coverUrl,
+        content: localContent,
+        coverUrl: localCover,
+        featuredImage: localCover,
         metaTitle: art.metaTitle,
         metaDescription: art.metaDescription,
         canonicalUrl: art.canonicalUrl,
-        ogImage: art.ogImage,
+        ogImage: localCover || art.ogImage,
         readingTime: art.readingTime,
         publishedAt: art.publishedAt,
         scheduledAt: art.scheduledAt,
@@ -474,13 +493,13 @@ async function main() {
         title: art.title,
         slug: art.slug,
         excerpt: art.excerpt,
-        content: art.content,
-        coverUrl: art.coverUrl,
-        featuredImage: art.coverUrl,
+        content: localContent,
+        coverUrl: localCover,
+        featuredImage: localCover,
         metaTitle: art.metaTitle,
         metaDescription: art.metaDescription,
         canonicalUrl: art.canonicalUrl,
-        ogImage: art.ogImage,
+        ogImage: localCover || art.ogImage,
         readingTime: art.readingTime,
         publishedAt: art.publishedAt,
         scheduledAt: art.scheduledAt,

@@ -19,7 +19,7 @@ interface ScheduleItem {
 
 const STATUS_STYLE: Record<string, string> = {
   draft: "bg-neutral-600/30 text-neutral-200 border-neutral-500/40",
-  in_review: "bg-sky-500/15 text-sky-200 border-sky-400/40",
+  in_review: "bg-info/15 text-info-300 border-info/40",
   approved: "bg-emerald-500/15 text-emerald-200 border-emerald-400/40",
   scheduled: "bg-amber-500/15 text-amber-200 border-amber-400/40",
   published: "bg-emerald-600/20 text-emerald-100 border-emerald-500/40",

@@ -463,7 +463,7 @@ export async function callLlm(options: LlmCallOptions): Promise<LlmCallResult> {
             if (typeof resp === 'string') {
               try {
                 resp = JSON.parse(resp)
-              } catch {}
+              } catch (err) { console.warn("[observable error]:", err) }
             }
             const fnPart = {
               functionResponse: {
@@ -851,7 +851,7 @@ export async function buildSystemPrompt(context?: {
       siteTagline = settings.siteDescription || siteTagline
       siteUrl = settings.siteUrl || siteUrl
     }
-  } catch {}
+  } catch (err) { console.warn("[observable error]:", err) }
 
   const art = context?.article
 

@@ -187,7 +187,7 @@ export function UserProfileModal({
         role="dialog"
         aria-modal="true"
         aria-label="Pengaturan Pengguna & Profil"
-        className="relative my-auto w-full max-w-lg max-h-[90vh] overflow-y-auto scrollbar-thin rounded-2xl border border-white/10 bg-[#1A1A1A] shadow-2xl animate-in zoom-in-95 duration-150"
+        className="relative my-auto w-full max-w-lg max-h-[90vh] overflow-y-auto scrollbar-thin rounded-2xl border border-accent-400/20 bg-surface-elevated shadow-2xl animate-in zoom-in-95 duration-150"
       >
         {/* Header Profil */}
         <div className="relative border-b border-white/[0.06] bg-gradient-to-r from-white/[0.04] to-transparent p-6">
@@ -195,10 +195,10 @@ export function UserProfileModal({
             <div className="flex items-center gap-4">
               <span className="relative flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-accent-500 font-mono text-lg font-bold text-accent-950 ring-2 ring-white/20">
                 {initials(name || userName)}
-                <span className="absolute -bottom-1 -right-1 h-3.5 w-3.5 rounded-full bg-emerald-400 ring-2 ring-[#1A1A1A]" />
+                <span className="absolute -bottom-1 -right-1 h-3.5 w-3.5 rounded-full bg-emerald-400 ring-2 ring-surface-elevated" />
               </span>
               <div className="min-w-0">
-                <h3 className="truncate text-base font-semibold text-white">{name || userName || 'Pengguna Admin'}</h3>
+                <h3 className="truncate font-heading text-base font-semibold text-white">{name || userName || 'Pengguna Admin'}</h3>
                 <p className="truncate text-xs text-neutral-400">{userEmail || 'admin@unimasi.com'}</p>
                 <div className="mt-2 flex items-center gap-2">
                   <span className={`inline-flex items-center gap-1.5 rounded-md border px-2 py-0.5 text-xs font-medium ${roleMeta.badge}`}>
@@ -415,7 +415,7 @@ export function UserProfileModal({
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-end border-t border-white/[0.06] bg-[#141414] px-6 py-3.5">
+        <div className="flex items-center justify-end border-t border-white/[0.06] bg-[var(--studio-bg)] px-6 py-3.5">
           <TextButton onClick={onClose}>Tutup</TextButton>
         </div>
       </div>

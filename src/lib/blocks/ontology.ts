@@ -88,7 +88,7 @@ class BlockOntologyRegistry {
   public generateLlmManifest(pageKind?: TargetPageKind): string {
     const blocks = this.list(pageKind ? { pageKind } : undefined)
     const lines: string[] = [
-      '### KATALOG BLOK DINAMIS SEGIA STUDIO (Dynamic Block Ontology)',
+      '### KATALOG BLOK DINAMIS UNIMASI STUDIO (Dynamic Block Ontology)',
       'Gunakan blok-blok terstruktur di bawah ini saat menyusun atau memodifikasi layout canvas editor:',
       '',
     ]

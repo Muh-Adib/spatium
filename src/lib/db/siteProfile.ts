@@ -136,7 +136,7 @@ export async function updateSiteProfile(data: Partial<SiteProfileEntity>): Promi
     revalidatePath('/', 'layout')
     revalidatePath('/kontak')
     revalidatePath('/tentang')
-  } catch {}
+  } catch (err) { console.warn("[observable error]:", err) }
 
   return getSiteProfile()
 }

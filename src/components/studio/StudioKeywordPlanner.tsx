@@ -124,7 +124,7 @@ export function StudioKeywordPlanner() {
             onClick={() => setActiveTab('opportunities')}
             className={`px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all ${
               activeTab === 'opportunities'
-                ? 'bg-sky-500/20 text-sky-300 border border-sky-500/30'
+                ? 'bg-info/20 text-info-300 border border-info/30'
                 : 'text-neutral-400 hover:text-white'
             }`}
           >
@@ -157,7 +157,7 @@ export function StudioKeywordPlanner() {
             <button
               onClick={() => setLocale('id')}
               className={`px-2.5 py-1 rounded-md font-mono ${
-                locale === 'id' ? 'bg-sky-500 text-white font-semibold' : 'text-neutral-400'
+                locale === 'id' ? 'bg-accent-500 text-accent-950 font-semibold' : 'text-neutral-400'
               }`}
             >
               ID
@@ -165,7 +165,7 @@ export function StudioKeywordPlanner() {
             <button
               onClick={() => setLocale('en')}
               className={`px-2.5 py-1 rounded-md font-mono ${
-                locale === 'en' ? 'bg-sky-500 text-white font-semibold' : 'text-neutral-400'
+                locale === 'en' ? 'bg-accent-500 text-accent-950 font-semibold' : 'text-neutral-400'
               }`}
             >
               EN
@@ -196,11 +196,11 @@ export function StudioKeywordPlanner() {
 
       {loading ? (
         <div className="py-20 text-center">
-          <RefreshCw className="w-8 h-8 text-sky-400 animate-spin mx-auto mb-3" />
+          <RefreshCw className="w-8 h-8 text-info animate-spin mx-auto mb-3" />
           <p className="text-sm text-neutral-400">Memuat analisis kata kunci...</p>
         </div>
       ) : error ? null : activeTab !== 'bank' && !integration?.connected ? (
-        <div className="space-y-3 rounded-xl border border-white/10 p-5"><h3 className="font-semibold text-white">Analisis GSC belum tersedia</h3><p className="text-sm text-neutral-300">{integration?.reason || 'Status sumber data belum terverifikasi.'}</p><p className="text-sm text-neutral-400">{integration?.howToConnect}</p><Link href="/admin?tab=gsc" className="inline-block text-sm text-sky-300 underline">Buka integrasi Google Search Console</Link></div>
+        <div className="space-y-3 rounded-xl border border-white/10 p-5"><h3 className="font-semibold text-white">Analisis GSC belum tersedia</h3><p className="text-sm text-neutral-300">{integration?.reason || 'Status sumber data belum terverifikasi.'}</p><p className="text-sm text-neutral-400">{integration?.howToConnect}</p><Link href="/admin?tab=gsc" className="inline-block text-sm text-info-300 underline">Buka integrasi Google Search Console</Link></div>
       ) : activeTab === 'opportunities' ? (
         /* Opportunities View (Striking Distance Pos 8-20 & Low CTR) */
         <div className="space-y-4">
@@ -231,7 +231,7 @@ export function StudioKeywordPlanner() {
                         <div className="font-semibold text-white">{opp.query}</div>
                         <div className="text-[11px] text-neutral-500 mt-0.5">{opp.recommendation}</div>
                       </td>
-                      <td className="py-3 px-4 font-mono text-sky-400">{opp.page}</td>
+                      <td className="py-3 px-4 font-mono text-info">{opp.page}</td>
                       <td className="py-3 px-4 font-mono font-bold text-amber-300">{opp.position}</td>
                       <td className="py-3 px-4 font-mono text-neutral-200">{opp.impressions.toLocaleString()}</td>
                       <td className="py-3 px-4 font-mono text-neutral-200">{opp.ctr}%</td>
@@ -239,7 +239,7 @@ export function StudioKeywordPlanner() {
                         <div className="flex items-center gap-2">
                           <div className="w-16 h-2 bg-neutral-800 rounded-full overflow-hidden">
                             <div
-                              className="h-full bg-gradient-to-r from-sky-400 to-emerald-400 rounded-full"
+                              className="h-full bg-gradient-to-r from-info-400 to-emerald-400 rounded-full"
                               style={{ width: `${opp.score}%` }}
                             />
                           </div>
@@ -292,7 +292,7 @@ export function StudioKeywordPlanner() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
                   {item.pages.map((p, pIdx) => (
                     <div key={pIdx} className="p-2.5 bg-black/40 rounded-lg border border-white/5 text-xs font-mono flex items-center justify-between">
-                      <span className="text-sky-300 truncate max-w-[200px]">{p.page}</span>
+                      <span className="text-info-300 truncate max-w-[200px]">{p.page}</span>
                       <span className="text-neutral-400 text-[11px]">
                         Pos {p.position} · {p.clicks} klik
                       </span>
@@ -313,7 +313,7 @@ export function StudioKeywordPlanner() {
               placeholder="Tambahkan kata kunci target baru..."
               value={newKeywordInput}
               onChange={(e) => setNewKeywordInput(e.target.value)}
-              className="flex-1 px-3 py-2 bg-neutral-900/80 border border-white/10 rounded-lg text-xs text-neutral-200 focus:outline-none focus:border-sky-500"
+              className="flex-1 px-3 py-2 bg-neutral-900/80 border border-white/10 rounded-lg text-xs text-neutral-200 focus:outline-none focus:border-accent-500"
             />
             <button
               onClick={() => {
@@ -321,7 +321,7 @@ export function StudioKeywordPlanner() {
                   handleAddToBank(newKeywordInput.trim())
                 }
               }}
-              className="px-4 py-2 bg-sky-500 hover:bg-sky-400 text-white rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5"
+              className="px-4 py-2 bg-accent-500 hover:bg-accent-300 text-accent-950 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5"
             >
               <Plus className="w-4 h-4" />
               <span>Tambah Kata Kunci</span>
@@ -351,7 +351,7 @@ export function StudioKeywordPlanner() {
                       <td className="py-3 px-4 font-semibold text-white">{item.keyword}</td>
                       <td className="py-3 px-4 font-mono text-neutral-400">{item.intent}</td>
                       <td className="py-3 px-4">
-                        <span className="px-2 py-0.5 rounded text-[11px] font-mono bg-sky-500/10 text-sky-400 border border-sky-500/20">
+                        <span className="px-2 py-0.5 rounded text-[11px] font-mono bg-info/10 text-info border border-info/20">
                           {item.status}
                         </span>
                       </td>

@@ -172,7 +172,7 @@ export function StudioSettings() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(DEFAULT_CONFIG),
           })
-        } catch {}
+        } catch (err) { console.warn("[observable error]:", err) }
       },
     })
   }
@@ -182,7 +182,7 @@ export function StudioSettings() {
   return (
     <div className="space-y-6">
       {/* Header Pengaturan Situs */}
-      <div className="rounded-2xl border border-white/10 bg-[#191919] p-6 shadow-soft-sm">
+      <div className="rounded-2xl border border-white/10 bg-[var(--studio-bg)] p-6 shadow-soft-sm">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
@@ -242,7 +242,7 @@ export function StudioSettings() {
       {/* Grid Konfigurasi Utama */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Card 1: Identitas & Branding Situs */}
-        <div className="rounded-2xl border border-white/10 bg-[#191919] p-5 space-y-4">
+        <div className="rounded-2xl border border-white/10 bg-[var(--studio-bg)] p-5 space-y-4">
           <div className="flex items-center gap-2 pb-2 border-b border-white/10">
             <Globe className="w-4 h-4 text-accent-400" />
             <h3 className="text-xs font-bold text-neutral-300 font-mono uppercase tracking-wider">
@@ -306,9 +306,9 @@ export function StudioSettings() {
         </div>
 
         {/* Card 2: Global SEO & SERP */}
-        <div className="rounded-2xl border border-white/10 bg-[#191919] p-5 space-y-4">
+        <div className="rounded-2xl border border-white/10 bg-[var(--studio-bg)] p-5 space-y-4">
           <div className="flex items-center gap-2 pb-2 border-b border-white/10">
-            <Search className="w-4 h-4 text-sky-400" />
+            <Search className="w-4 h-4 text-info" />
             <h3 className="text-xs font-bold text-neutral-300 font-mono uppercase tracking-wider">
               Konfigurasi Global SEO &amp; SERP
             </h3>
@@ -377,7 +377,7 @@ export function StudioSettings() {
         </div>
 
         {/* Card 3: Kebijakan Alur Editorial (AGENTS.md Rule 8) */}
-        <div className="rounded-2xl border border-white/10 bg-[#191919] p-5 space-y-4">
+        <div className="rounded-2xl border border-white/10 bg-[var(--studio-bg)] p-5 space-y-4">
           <div className="flex items-center gap-2 pb-2 border-b border-white/10">
             <FileText className="w-4 h-4 text-amber-400" />
             <h3 className="text-xs font-bold text-neutral-300 font-mono uppercase tracking-wider">
@@ -393,12 +393,12 @@ export function StudioSettings() {
               <select
                 disabled={!isEditable}
                 value={config.defaultArticleStatus}
-                onChange={(e) => setConfig({ ...config, defaultArticleStatus: e.target.value as any })}
+                onChange={(e) => setConfig({ ...config, defaultArticleStatus: e.target.value as 'draft' | 'in_review' | 'published' })}
                 className="w-full rounded-xl bg-black/40 border border-white/15 p-2.5 text-xs text-white focus:outline-none focus:border-accent-400 disabled:opacity-50"
               >
-                <option value="draft" className="bg-[#1E1E1E]">Draft (Rekomendasi AGENTS.md — Aman)</option>
-                <option value="in_review" className="bg-[#1E1E1E]">In Review (Wajib Ditinjau Editor)</option>
-                <option value="published" className="bg-[#1E1E1E]">Published (Langsung Terbit Publik)</option>
+                <option value="draft" className="bg-surface-overlay">Draft (Rekomendasi AGENTS.md — Aman)</option>
+                <option value="in_review" className="bg-surface-overlay">In Review (Wajib Ditinjau Editor)</option>
+                <option value="published" className="bg-surface-overlay">Published (Langsung Terbit Publik)</option>
               </select>
               <span className="text-[10px] text-neutral-500 font-mono mt-0.5 block">
                 AGENTS.md Bagian 8 mewajibkan konten baru/AI default ke status draf.
@@ -438,7 +438,7 @@ export function StudioSettings() {
         </div>
 
         {/* Card: Dedicated Agentic AI & Tools Configuration Banner */}
-        <div className="rounded-2xl border border-sky-400/30 bg-gradient-to-b from-sky-950/20 to-[#191919] p-5 space-y-4 shadow-soft-sm">
+        <div className="rounded-2xl border border-info/30 bg-gradient-to-b from-info-950/20 to-[var(--studio-bg)] p-5 space-y-4 shadow-soft-sm">
           <div className="flex items-center justify-between pb-2 border-b border-white/10">
             <div className="flex items-center gap-2">
               <Bot className="w-4 h-4 text-accent-400" />
@@ -467,7 +467,7 @@ export function StudioSettings() {
         </div>
 
         {/* Card 4: Status Engine SQLite & Cache */}
-        <div className="rounded-2xl border border-white/10 bg-[#191919] p-5 space-y-4">
+        <div className="rounded-2xl border border-white/10 bg-[var(--studio-bg)] p-5 space-y-4">
           <div className="flex items-center gap-2 pb-2 border-b border-white/10">
             <Database className="w-4 h-4 text-emerald-400" />
             <h3 className="text-xs font-bold text-neutral-300 font-mono uppercase tracking-wider">
@@ -487,7 +487,7 @@ export function StudioSettings() {
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-neutral-400">Next.js Framework:</span>
-                <span className="text-sky-300 font-bold">v16.3.6 (Turbopack + React 19)</span>
+                <span className="text-info-300 font-bold">v16.3.6 (Turbopack + React 19)</span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-neutral-400">Model Context Protocol:</span>
@@ -520,7 +520,7 @@ export function StudioSettings() {
       ------------------------------------------------------------- */}
       {modalState.open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-in fade-in duration-150">
-          <div className="w-full max-w-sm bg-[#1E1E1E] border border-white/15 rounded-2xl p-5 shadow-2xl space-y-4">
+          <div className="w-full max-w-sm bg-surface-overlay border border-white/15 rounded-2xl p-5 shadow-2xl space-y-4">
             <div className="flex items-start gap-3">
               <div
                 className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 border ${

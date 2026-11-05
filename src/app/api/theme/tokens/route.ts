@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
 
     try {
       revalidatePath('/', 'layout')
-    } catch {}
+    } catch (err) { console.warn("[API observable error]:", err) }
 
     const updatedActive = await getActiveThemeTokens()
     const all = await getAllThemeTokens()

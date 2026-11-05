@@ -52,7 +52,7 @@ export async function POST(req: NextRequest) {
         firstUserMsg && firstUserMsg.content ? firstUserMsg.content.slice(0, 38).trim() : 'Obrolan Baru'
       activeSession = await createAiSession(userId, {
         title: initialTitle || 'Obrolan Baru',
-        model: model || (aiConfig as any)?.model || '',
+        model: model || (aiConfig as unknown as { model?: string })?.model || '',
       })
     }
 
@@ -81,7 +81,7 @@ export async function POST(req: NextRequest) {
     const isStreamingRequested = Boolean(
       stream ||
       req.headers.get('accept')?.includes('application/x-ndjson') ||
-      (aiConfig as any)?.stream
+      (aiConfig as unknown as { stream?: boolean })?.stream
     )
 
     // 5A. Handle NDJSON Live Streaming Response
@@ -105,9 +105,9 @@ export async function POST(req: NextRequest) {
 
           try {
             const result = await handleAiAssistantChat(
-              messages as any,
-              enrichedContext as any,
-              aiConfig as any,
+              messages as unknown as Parameters<typeof handleAiAssistantChat>[0],
+              enrichedContext as unknown as Parameters<typeof handleAiAssistantChat>[1],
+              aiConfig as unknown as Parameters<typeof handleAiAssistantChat>[2],
               sendEvent
             )
 
@@ -171,9 +171,9 @@ export async function POST(req: NextRequest) {
 
     // 5B. Standard Synchronous Batch Response (Backward Compatible)
     const result = await handleAiAssistantChat(
-      messages as any,
-      enrichedContext as any,
-      aiConfig as any
+      messages as import('@/lib/ai/chat').ChatMessage[],
+      enrichedContext as import('@/lib/ai/chat').ChatContext,
+      aiConfig as import('@/lib/ai/chat').AiConfig
     )
 
     // 6. Save assistant reply to PostgreSQL
@@ -196,7 +196,7 @@ export async function POST(req: NextRequest) {
       ...result,
       sessionId: activeSession.id,
       sessionTitle: activeSession.title,
-      needsKey: Boolean((result as any)?.needsKey),
+      needsKey: Boolean((result as { needsKey?: boolean })?.needsKey),
       failoverHistory: result.meta?.failoverHistory,
     })
   } catch (error: any) {

@@ -179,7 +179,7 @@ export default function StudioImageControl({
     setTimeout(() => setCopiedUrl(false), 2000)
   }
 
-  const handleSelectPreset = (preset: typeof SEGIA_IMAGE_PRESETS[0]) => {
+  const handleSelectPreset = (preset: typeof UNIMASI_IMAGE_PRESETS[0]) => {
     onChange(preset.url)
     if (onChangeAltText && (!altText || altText === '')) {
       onChangeAltText(preset.defaultAlt)
@@ -187,16 +187,16 @@ export default function StudioImageControl({
     setShowPresetsDropdown(false)
   }
 
-  const categories = ['Semua', ...Array.from(new Set(SEGIA_IMAGE_PRESETS.map((p) => p.category)))]
+  const categories = ['Semua', ...Array.from(new Set(UNIMASI_IMAGE_PRESETS.map((p) => p.category)))]
   const filteredPresets =
     presetCategory === 'Semua'
-      ? SEGIA_IMAGE_PRESETS
-      : SEGIA_IMAGE_PRESETS.filter((p) => p.category === presetCategory)
+      ? UNIMASI_IMAGE_PRESETS
+      : UNIMASI_IMAGE_PRESETS.filter((p) => p.category === presetCategory)
 
   const hasImage = Boolean(value && value.trim())
 
   return (
-    <div className="space-y-3.5 p-4 rounded-2xl bg-[#141414] border border-white/10 hover:border-white/15 transition-all shadow-lg">
+    <div className="space-y-3.5 p-4 rounded-2xl bg-[var(--studio-bg)] border border-white/10 hover:border-white/15 transition-all shadow-lg">
       {/* Header Label, SEO Status & Aspect Ratio Switcher */}
       <div className="flex items-start justify-between gap-2">
         <div>
@@ -387,7 +387,7 @@ export default function StudioImageControl({
           onClick={() => setShowMediaPicker(true)}
           className="flex-1 py-2 px-3 rounded-xl bg-white/10 hover:bg-white/15 text-white text-xs font-mono inline-flex items-center justify-center gap-1.5 border border-white/10 transition-colors shadow-sm"
         >
-          <FolderOpen className="w-3.5 h-3.5 text-sky-400" />
+          <FolderOpen className="w-3.5 h-3.5 text-info" />
           <span>Pustaka Media</span>
         </button>
 
@@ -404,7 +404,7 @@ export default function StudioImageControl({
           </button>
 
           {showPresetsDropdown && (
-            <div className="absolute right-0 bottom-full mb-2 w-80 rounded-2xl bg-[#1C1C1C] border border-white/15 shadow-2xl p-3 z-50 space-y-2.5 max-h-80 overflow-y-auto">
+            <div className="absolute right-0 bottom-full mb-2 w-80 rounded-2xl bg-surface-elevated border border-white/15 shadow-2xl p-3 z-50 space-y-2.5 max-h-80 overflow-y-auto">
               <div className="flex items-center justify-between pb-2 border-b border-white/10">
                 <span className="text-[11px] font-mono text-[#FFD600] font-semibold flex items-center gap-1">
                   <Sparkles className="w-3 h-3" />

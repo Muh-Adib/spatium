@@ -11,6 +11,8 @@ import {
   HeroPortfolioBlock,
   PortfolioCaseStudyBlock,
   HeroSolutionBlock,
+  TableBlock,
+  InternalLinksBlock,
 } from '@/components/blocks/CatalogBlocks'
 
 /**
@@ -28,6 +30,7 @@ export const UNIMASI_BLOCK_MANIFEST: BlockManifestEntry[] = [
       subheadline: { type: 'string', description: 'Deskripsi pengantar' },
       primaryCta: { type: 'object', description: '{ label, href }' },
       secondaryCta: { type: 'object', description: '{ label, href }' },
+      media: { type: 'object', description: '{ type: "image" | "video", url, poster, alt }' },
     },
     settingsSchema: {
       height: ['screen', 'large', 'medium', 'compact'],
@@ -293,4 +296,6 @@ export const BLOCK_COMPONENT_REGISTRY: Record<string, React.ComponentType<{ bloc
   'hero-case-study': HeroPortfolioBlock,
   'portfolio-case-study': PortfolioCaseStudyBlock,
   'hero-solution': HeroSolutionBlock,
+  'table': TableBlock,
+  'internal-links': InternalLinksBlock,
 }

@@ -13,3 +13,4 @@ backend/.next/
 backend/.next
 out/
 *.tsbuildinfo
+public/uploads/

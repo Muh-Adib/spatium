@@ -27,10 +27,10 @@ export interface ToolCallExecution {
   input?: Record<string, any>
   output?: Record<string, any>
   durationMs: number
-  status: 'success' | 'warning' | 'error'
+  status: 'success' | 'warning' | 'error' | 'running' | 'completed'
 }
 
-export const SEGIA_TOOLS_CATALOG: ToolDefinition[] = [
+export const UNIMASI_TOOLS_CATALOG: ToolDefinition[] = [
   {
     id: 'db_articles_query',
     name: 'db_articles_query',
@@ -387,3 +387,5 @@ export const SEGIA_TOOLS_CATALOG: ToolDefinition[] = [
     permissionLevel: 'SUPER_ADMIN',
   },
 ]
+
+export const SEGIA_TOOLS_CATALOG = UNIMASI_TOOLS_CATALOG

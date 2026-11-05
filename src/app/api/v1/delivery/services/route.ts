@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
       try {
         const seedServices = require('@/data/seed/seed_services.json')
         services = limit ? seedServices.slice(0, limit) : seedServices
-      } catch {}
+      } catch (err) { console.warn("[API observable error]:", err) }
     }
 
     return jsonResponse({ services, categories })

@@ -23,9 +23,9 @@ import type {
 } from '@prisma/orm-postgres/contract/types';
 
 export type StorageHash =
-  StorageHashBase<'032576fa9c3c6d59b76de9b9480d94f307144417928309e1d51eb28265586d8f'>;
+  StorageHashBase<'566b9d39f9029d2fb663793e52a8e3fdd4538c832b09fefd5f6aa1eb12716c4a'>;
 export type ExecutionHash =
-  ExecutionHashBase<'1f712468a637f8e73e88998e2c6dbda7b3e95567858b4184310626ac75d97fd2'>;
+  ExecutionHashBase<'a4bae7ed4fcf0d801cf9d3f4f45277365b2bd42215bc891a0834b89dbb28f9be'>;
 export type ProfileHash =
   ProfileHashBase<'3916f444a8a17ad749191acf9e08dad97d1a327b88c2f1d45d12f240296aa8b2'>;
 
@@ -43,6 +43,10 @@ export type AggregateTypes = {
       readonly 'pg/int4@1': { readonly output: 'pg/float8@1'; readonly nullable: true };
       readonly 'pg/int8@1': { readonly output: 'pg/float8@1'; readonly nullable: true };
       readonly 'pg/int8number@1': { readonly output: 'pg/float8@1'; readonly nullable: true };
+      readonly 'pg/interval-string@1': {
+        readonly output: 'pg/interval-string@1';
+        readonly nullable: true;
+      };
       readonly 'pg/interval@1': { readonly output: 'pg/interval@1'; readonly nullable: true };
       readonly 'pg/numeric@1': { readonly output: 'pg/numeric@1'; readonly nullable: true };
       readonly 'pg/time-string@1': { readonly output: 'pg/interval@1'; readonly nullable: true };
@@ -92,6 +96,10 @@ export type AggregateTypes = {
       readonly 'pg/int4@1': { readonly output: 'pg/int4@1'; readonly nullable: true };
       readonly 'pg/int8@1': { readonly output: 'pg/int8@1'; readonly nullable: true };
       readonly 'pg/int8number@1': { readonly output: 'pg/int8number@1'; readonly nullable: true };
+      readonly 'pg/interval-string@1': {
+        readonly output: 'pg/interval-string@1';
+        readonly nullable: true;
+      };
       readonly 'pg/interval@1': { readonly output: 'pg/interval@1'; readonly nullable: true };
       readonly 'pg/numeric@1': { readonly output: 'pg/numeric@1'; readonly nullable: true };
       readonly 'pg/text-array@1': { readonly output: 'pg/text-array@1'; readonly nullable: true };
@@ -99,6 +107,14 @@ export type AggregateTypes = {
       readonly 'pg/time-string@1': { readonly output: 'pg/time-string@1'; readonly nullable: true };
       readonly 'pg/time-temporal@1': {
         readonly output: 'pg/time-temporal@1';
+        readonly nullable: true;
+      };
+      readonly 'pg/timestamp-date@1': {
+        readonly output: 'pg/timestamp-date@1';
+        readonly nullable: true;
+      };
+      readonly 'pg/timestamp-instant@1': {
+        readonly output: 'pg/timestamp-instant@1';
         readonly nullable: true;
       };
       readonly 'pg/timestamp-string@1': {
@@ -152,6 +168,10 @@ export type AggregateTypes = {
       readonly 'pg/int4@1': { readonly output: 'pg/int4@1'; readonly nullable: true };
       readonly 'pg/int8@1': { readonly output: 'pg/int8@1'; readonly nullable: true };
       readonly 'pg/int8number@1': { readonly output: 'pg/int8number@1'; readonly nullable: true };
+      readonly 'pg/interval-string@1': {
+        readonly output: 'pg/interval-string@1';
+        readonly nullable: true;
+      };
       readonly 'pg/interval@1': { readonly output: 'pg/interval@1'; readonly nullable: true };
       readonly 'pg/numeric@1': { readonly output: 'pg/numeric@1'; readonly nullable: true };
       readonly 'pg/text-array@1': { readonly output: 'pg/text-array@1'; readonly nullable: true };
@@ -159,6 +179,14 @@ export type AggregateTypes = {
       readonly 'pg/time-string@1': { readonly output: 'pg/time-string@1'; readonly nullable: true };
       readonly 'pg/time-temporal@1': {
         readonly output: 'pg/time-temporal@1';
+        readonly nullable: true;
+      };
+      readonly 'pg/timestamp-date@1': {
+        readonly output: 'pg/timestamp-date@1';
+        readonly nullable: true;
+      };
+      readonly 'pg/timestamp-instant@1': {
+        readonly output: 'pg/timestamp-instant@1';
         readonly nullable: true;
       };
       readonly 'pg/timestamp-string@1': {
@@ -204,6 +232,10 @@ export type AggregateTypes = {
       readonly 'pg/int4@1': { readonly output: 'pg/int8number@1'; readonly nullable: true };
       readonly 'pg/int8@1': { readonly output: 'pg/int8number@1'; readonly nullable: true };
       readonly 'pg/int8number@1': { readonly output: 'pg/int8number@1'; readonly nullable: true };
+      readonly 'pg/interval-string@1': {
+        readonly output: 'pg/interval-string@1';
+        readonly nullable: true;
+      };
       readonly 'pg/interval@1': { readonly output: 'pg/interval@1'; readonly nullable: true };
       readonly 'pg/numeric@1': { readonly output: 'pg/numeric@1'; readonly nullable: true };
       readonly 'pg/time-string@1': { readonly output: 'pg/interval@1'; readonly nullable: true };
@@ -396,6 +428,17 @@ export namespace Models {
     wpTermId: FieldOutputTypes['public']['Category']['wpTermId'];
     articles: public_Article[];
     readonly [RelationKeys]?: 'articles';
+  };
+  export type public_ClientLogo = {
+    altText: FieldOutputTypes['public']['ClientLogo']['altText'];
+    createdAt: FieldOutputTypes['public']['ClientLogo']['createdAt'];
+    id: FieldOutputTypes['public']['ClientLogo']['id'];
+    isActive: FieldOutputTypes['public']['ClientLogo']['isActive'];
+    logoUrl: FieldOutputTypes['public']['ClientLogo']['logoUrl'];
+    name: FieldOutputTypes['public']['ClientLogo']['name'];
+    order: FieldOutputTypes['public']['ClientLogo']['order'];
+    updatedAt: FieldOutputTypes['public']['ClientLogo']['updatedAt'];
+    readonly [RelationKeys]?: never;
   };
   export type public_Cluster = {
     createdAt: FieldOutputTypes['public']['Cluster']['createdAt'];
@@ -1010,6 +1053,7 @@ export declare const models: {
     ArticleTag: Models.public_ArticleTag;
     Author: Models.public_Author;
     Category: Models.public_Category;
+    ClientLogo: Models.public_ClientLogo;
     Cluster: Models.public_Cluster;
     ContentLink: Models.public_ContentLink;
     ContentNode: Models.public_ContentNode;
@@ -1898,6 +1942,75 @@ type ContractBase = Omit<
               };
               primaryKey: { readonly columns: readonly ['id'] };
               uniques: readonly [{ readonly columns: readonly ['slug'] }];
+              indexes: readonly [];
+              foreignKeys: readonly [];
+            };
+            readonly client_logos: {
+              columns: {
+                readonly alt_text: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: true;
+                  readonly many: false;
+                };
+                readonly created_at: {
+                  readonly dataType: 'pg/timestamptz';
+                  readonly codecId: 'pg/timestamptz-string@1';
+                  readonly nullable: false;
+                  readonly default: { readonly kind: 'function'; readonly expression: 'now()' };
+                  readonly many: false;
+                };
+                readonly id: {
+                  readonly dataType: 'pg/int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'function';
+                    readonly expression: 'autoincrement()';
+                  };
+                  readonly many: false;
+                };
+                readonly is_active: {
+                  readonly dataType: 'pg/bool';
+                  readonly codecId: 'pg/bool@1';
+                  readonly nullable: true;
+                  readonly default: {
+                    readonly kind: 'literal';
+                    readonly value: DefaultLiteralValue<'pg/bool@1', true>;
+                  };
+                  readonly many: false;
+                };
+                readonly logo_url: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly name: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly order: {
+                  readonly dataType: 'pg/int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: true;
+                  readonly default: {
+                    readonly kind: 'literal';
+                    readonly value: DefaultLiteralValue<'pg/int4@1', 0>;
+                  };
+                  readonly many: false;
+                };
+                readonly updated_at: {
+                  readonly dataType: 'pg/timestamptz';
+                  readonly codecId: 'pg/timestamptz-string@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+              };
+              primaryKey: { readonly columns: readonly ['id'] };
+              uniques: readonly [];
               indexes: readonly [];
               foreignKeys: readonly [];
             };
@@ -5711,6 +5824,10 @@ type ContractBase = Omit<
     readonly articles: { readonly namespace: 'public' & NamespaceId; readonly model: 'Article' };
     readonly authors: { readonly namespace: 'public' & NamespaceId; readonly model: 'Author' };
     readonly categories: { readonly namespace: 'public' & NamespaceId; readonly model: 'Category' };
+    readonly client_logos: {
+      readonly namespace: 'public' & NamespaceId;
+      readonly model: 'ClientLogo';
+    };
     readonly clusters: { readonly namespace: 'public' & NamespaceId; readonly model: 'Cluster' };
     readonly content_links: {
       readonly namespace: 'public' & NamespaceId;
@@ -6548,6 +6665,63 @@ type ContractBase = Omit<
                 readonly name: { readonly column: 'name' };
                 readonly slug: { readonly column: 'slug' };
                 readonly wpTermId: { readonly column: 'wp_term_id' };
+              };
+            };
+          };
+          readonly ClientLogo: {
+            readonly fields: {
+              readonly altText: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly createdAt: {
+                readonly nullable: false;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/timestamptz-string@1';
+                };
+              };
+              readonly id: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
+              readonly isActive: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/bool@1' };
+              };
+              readonly logoUrl: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly name: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly order: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
+              readonly updatedAt: {
+                readonly nullable: false;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/timestamptz-string@1';
+                };
+              };
+            };
+            readonly relations: Record<string, never>;
+            readonly storage: {
+              readonly table: 'client_logos';
+              readonly namespaceId: 'public';
+              readonly fields: {
+                readonly altText: { readonly column: 'alt_text' };
+                readonly createdAt: { readonly column: 'created_at' };
+                readonly id: { readonly column: 'id' };
+                readonly isActive: { readonly column: 'is_active' };
+                readonly logoUrl: { readonly column: 'logo_url' };
+                readonly name: { readonly column: 'name' };
+                readonly order: { readonly column: 'order' };
+                readonly updatedAt: { readonly column: 'updated_at' };
               };
             };
           };
@@ -9774,6 +9948,15 @@ type ContractBase = Omit<
           readonly onUpdate: { readonly id: 'timestamptzStringNow'; readonly kind: 'generator' };
           readonly ref: {
             readonly entry: 'articles';
+            readonly field: 'updated_at';
+            readonly namespace: 'public';
+          };
+        },
+        {
+          readonly onCreate: { readonly id: 'timestamptzStringNow'; readonly kind: 'generator' };
+          readonly onUpdate: { readonly id: 'timestamptzStringNow'; readonly kind: 'generator' };
+          readonly ref: {
+            readonly entry: 'client_logos';
             readonly field: 'updated_at';
             readonly namespace: 'public';
           };

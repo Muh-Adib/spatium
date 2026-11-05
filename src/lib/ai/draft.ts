@@ -62,7 +62,7 @@ function generateEditorialBannerSvg(title: string, category: string, brandName: 
   <line x1="80" y1="520" x2="1120" y2="520" stroke="#FFFFFF" stroke-opacity="0.1" stroke-width="1" />
   <text x="80" y="560" fill="#38BDF8" font-family="system-ui, -apple-system, sans-serif" font-size="16" font-weight="800" letter-spacing="0.5">${safeBrand}</text>
   <text x="240" y="560" fill="#64748B" font-family="system-ui, -apple-system, sans-serif" font-size="13" font-weight="500">Editorial Experience · Production Ready</text>
-  <text x="1120" y="560" fill="#94A3B8" font-family="system-ui, -apple-system, sans-serif" font-size="13" font-weight="600" text-anchor="end">SEGIA WebShift AI Engine</text>
+  <text x="1120" y="560" fill="#94A3B8" font-family="system-ui, -apple-system, sans-serif" font-size="13" font-weight="600" text-anchor="end">UNIMASI Studio AI Engine</text>
 </svg>`
 }
 
@@ -101,7 +101,7 @@ const draftSchema = z.object({
 
 /**
  * AI-assisted editorial draft generator with RTK, Caveman, and Ponytail token savers.
- * Sesuai aturan SEGIA Rule 8: Draf berstatus DRAFT, tidak auto-publish, dan zero-mock policy.
+ * Sesuai aturan UNIMASI Rule 8: Draf berstatus DRAFT, tidak auto-publish, dan zero-mock policy.
  */
 export async function generateArticleDraft(options: GenerateDraftOptions) {
   const provider = options.aiConfig?.provider || 'google'
@@ -218,7 +218,7 @@ Kembalikan respon HANYA dalam format JSON valid dengan field:
     const bannerSvg = generateEditorialBannerSvg(
       draft.title,
       options.categorySlug || 'Wawasan Arsitektur',
-      site.name || 'SEGIA Digital'
+      site.name || 'UNIMASI Studio'
     )
 
     fs.writeFileSync(svgFilePath, bannerSvg, 'utf8')

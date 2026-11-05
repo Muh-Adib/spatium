@@ -222,7 +222,7 @@ export function StudioGscDashboard() {
 
   if (loading) {
     return (
-      <div className="p-12 text-center bg-[#191919] border border-white/10 rounded-2xl space-y-4">
+      <div className="p-12 text-center bg-[var(--studio-bg)] border border-white/10 rounded-2xl space-y-4">
         <div className="w-9 h-9 border-2 border-[#FFD600] border-t-transparent rounded-full animate-spin mx-auto" />
         <div className="space-y-1">
           <p className="text-sm font-medium text-white">Menghubungkan ke Google Search Console API...</p>
@@ -234,7 +234,7 @@ export function StudioGscDashboard() {
 
   if (!connection.connected) {
     return (
-      <div className="p-8 rounded-2xl bg-[#191919] border border-amber-500/30 space-y-5">
+      <div className="p-8 rounded-2xl bg-[var(--studio-bg)] border border-amber-500/30 space-y-5">
         <div className="flex items-start gap-4">
           <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl text-amber-400 shrink-0">
             <AlertTriangle className="w-6 h-6" />
@@ -248,7 +248,7 @@ export function StudioGscDashboard() {
           </div>
         </div>
 
-        <div className="p-4 bg-[#242424] border border-white/10 rounded-xl space-y-3 text-xs">
+        <div className="p-4 bg-surface-3 border border-white/10 rounded-xl space-y-3 text-xs">
           <p className="font-semibold text-white flex items-center gap-2">
             <Globe className="w-4 h-4 text-[#FFD600]" />
             Cara Menghubungkan Google Search Console:
@@ -257,7 +257,7 @@ export function StudioGscDashboard() {
             {connection.howToConnect ||
               'Tambahkan Service Account Google Cloud (GSC_CLIENT_EMAIL dan GSC_PRIVATE_KEY) ke file web/.env.local.'}
           </p>
-          <div className="font-mono text-[11px] text-[#FFD600] bg-[#191919] p-3 rounded-lg border border-white/10 space-y-1">
+          <div className="font-mono text-[11px] text-[#FFD600] bg-[var(--studio-bg)] p-3 rounded-lg border border-white/10 space-y-1">
             <div>GSC_CLIENT_EMAIL=seo-engine@your-project.iam.gserviceaccount.com</div>
             <div>GSC_PRIVATE_KEY=&quot;-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n&quot;</div>
           </div>
@@ -285,7 +285,7 @@ export function StudioGscDashboard() {
   return (
     <div className="space-y-6">
       {/* ─── Header & Sync Action Bar ───────────────────────────────── */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-2xl bg-[#191919] border border-white/10">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-2xl bg-[var(--studio-bg)] border border-white/10">
         <div className="space-y-1">
           <div className="flex items-center gap-2.5">
             <div className="w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.5)]" />
@@ -348,7 +348,7 @@ export function StudioGscDashboard() {
       {/* ─── KPI Cards (Website Themed) ─────────────────────────────── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* KPI 1: Total Klik */}
-        <div className="p-5 rounded-2xl bg-[#191919] border border-white/10 hover:border-white/20 transition-all space-y-3">
+        <div className="p-5 rounded-2xl bg-[var(--studio-bg)] border border-white/10 hover:border-white/20 transition-all space-y-3">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-mono font-semibold uppercase tracking-wider text-[#999898]">
               Total Klik
@@ -364,7 +364,7 @@ export function StudioGscDashboard() {
         </div>
 
         {/* KPI 2: Total Impresi */}
-        <div className="p-5 rounded-2xl bg-[#191919] border border-white/10 hover:border-white/20 transition-all space-y-3">
+        <div className="p-5 rounded-2xl bg-[var(--studio-bg)] border border-white/10 hover:border-white/20 transition-all space-y-3">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-mono font-semibold uppercase tracking-wider text-[#999898]">
               Total Impresi
@@ -380,7 +380,7 @@ export function StudioGscDashboard() {
         </div>
 
         {/* KPI 3: Rata-Rata CTR */}
-        <div className="p-5 rounded-2xl bg-[#191919] border border-white/10 hover:border-white/20 transition-all space-y-3">
+        <div className="p-5 rounded-2xl bg-[var(--studio-bg)] border border-white/10 hover:border-white/20 transition-all space-y-3">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-mono font-semibold uppercase tracking-wider text-[#999898]">
               Rata-rata CTR
@@ -402,7 +402,7 @@ export function StudioGscDashboard() {
         </div>
 
         {/* KPI 4: Posisi Rata-Rata */}
-        <div className="p-5 rounded-2xl bg-[#191919] border border-white/10 hover:border-white/20 transition-all space-y-3">
+        <div className="p-5 rounded-2xl bg-[var(--studio-bg)] border border-white/10 hover:border-white/20 transition-all space-y-3">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-mono font-semibold uppercase tracking-wider text-[#999898]">
               Posisi Rata-rata
@@ -431,9 +431,9 @@ export function StudioGscDashboard() {
       </div>
 
       {/* ─── Dimension Selector Bar & Table ─────────────────────────── */}
-      <div className="bg-[#191919] border border-white/10 rounded-2xl overflow-hidden shadow-xl">
+      <div className="bg-[var(--studio-bg)] border border-white/10 rounded-2xl overflow-hidden shadow-xl">
         {/* Navigation Tabs (Kueri, Halaman, Harian, Perangkat, Negara) */}
-        <div className="p-4 border-b border-white/10 bg-[#242424]/40 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="p-4 border-b border-white/10 bg-surface-3/40 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0">
             <button
               type="button"
@@ -526,7 +526,7 @@ export function StudioGscDashboard() {
         {activeTab === 'queries' && (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
-              <thead className="bg-[#242424] text-[11px] font-mono font-semibold text-[#999898] border-b border-white/10 uppercase tracking-wider">
+              <thead className="bg-surface-3 text-[11px] font-mono font-semibold text-[#999898] border-b border-white/10 uppercase tracking-wider">
                 <tr>
                   <th className="py-3 px-5">Kueri / Kata Kunci Pencarian</th>
                   <th className="py-3 px-4 text-right">Klik</th>
@@ -603,7 +603,7 @@ export function StudioGscDashboard() {
         {activeTab === 'pages' && (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
-              <thead className="bg-[#242424] text-[11px] font-mono font-semibold text-[#999898] border-b border-white/10 uppercase tracking-wider">
+              <thead className="bg-surface-3 text-[11px] font-mono font-semibold text-[#999898] border-b border-white/10 uppercase tracking-wider">
                 <tr>
                   <th className="py-3 px-5">Halaman / URL Halaman</th>
                   <th className="py-3 px-4 text-right">Klik</th>
@@ -677,7 +677,7 @@ export function StudioGscDashboard() {
         {activeTab === 'dates' && (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
-              <thead className="bg-[#242424] text-[11px] font-mono font-semibold text-[#999898] border-b border-white/10 uppercase tracking-wider">
+              <thead className="bg-surface-3 text-[11px] font-mono font-semibold text-[#999898] border-b border-white/10 uppercase tracking-wider">
                 <tr>
                   <th className="py-3 px-5">Tanggal</th>
                   <th className="py-3 px-4 text-right">Klik</th>
@@ -745,7 +745,7 @@ export function StudioGscDashboard() {
                 return (
                   <div
                     key={idx}
-                    className="p-5 rounded-xl bg-[#242424]/60 border border-white/10 space-y-4 hover:border-white/20 transition-all"
+                    className="p-5 rounded-xl bg-surface-3/60 border border-white/10 space-y-4 hover:border-white/20 transition-all"
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2 font-bold text-white uppercase text-sm tracking-wider font-mono">
@@ -797,7 +797,7 @@ export function StudioGscDashboard() {
         {activeTab === 'countries' && (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
-              <thead className="bg-[#242424] text-[11px] font-mono font-semibold text-[#999898] border-b border-white/10 uppercase tracking-wider">
+              <thead className="bg-surface-3 text-[11px] font-mono font-semibold text-[#999898] border-b border-white/10 uppercase tracking-wider">
                 <tr>
                   <th className="py-3 px-5">Negara</th>
                   <th className="py-3 px-4 text-right">Klik</th>
@@ -846,7 +846,7 @@ export function StudioGscDashboard() {
         )}
 
         {/* ─── Table Footer ───────────────────────────────────────────── */}
-        <div className="p-4 border-t border-white/10 bg-[#242424]/20 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-[#999898]">
+        <div className="p-4 border-t border-white/10 bg-surface-3/20 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-[#999898]">
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-emerald-400" />
             <span>Sumber: Google Search Console Search Analytics API resmi</span>

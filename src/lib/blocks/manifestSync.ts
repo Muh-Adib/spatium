@@ -7,7 +7,7 @@
  * 3. Registers them dynamically into the Block Ontology for the Studio Page Builder and AI Agent Copilot
  */
 
-import { blockOntology, BlockDefinition } from './ontology'
+import { blockOntology, BlockDefinition, BlockCategory, BlockFieldInputDef } from './ontology'
 
 export interface RemoteBlockManifest {
   studio?: string
@@ -39,9 +39,10 @@ export function ingestRemoteBlockManifest(manifest: RemoteBlockManifest): {
   const registeredTypes: string[] = []
 
   for (const block of manifest.blocks) {
-    const inputs: any[] = Object.entries(block.dataSchema || {}).map(([key, field]) => ({
+    const validFieldTypes: BlockFieldInputDef['type'][] = ['string', 'number', 'boolean', 'array', 'object', 'enum']
+    const inputs: BlockFieldInputDef[] = Object.entries(block.dataSchema || {}).map(([key, field]) => ({
       name: key,
-      type: (field.type as any) || 'string',
+      type: validFieldTypes.includes(field.type as BlockFieldInputDef['type']) ? (field.type as BlockFieldInputDef['type']) : 'string',
       label: key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1'),
       description: field.description || `Parameter ${key}`,
       required: !!field.required,
@@ -65,10 +66,15 @@ export function ingestRemoteBlockManifest(manifest: RemoteBlockManifest): {
       })
     }
 
+    const validCategories: BlockCategory[] = ['hero', 'editorial', 'feature', 'architecture', 'data', 'social-proof', 'interactive', 'conversion']
+    const category: BlockCategory = validCategories.includes(block.category as BlockCategory)
+      ? (block.category as BlockCategory)
+      : 'editorial'
+
     const definition: BlockDefinition = {
       type: block.type,
       label: block.name,
-      category: (block.category as any) || 'editorial',
+      category,
       purpose: block.description || `Dynamic block ${block.name} dari frontend`,
       idealHierarchyIndex:
         block.category === 'hero'

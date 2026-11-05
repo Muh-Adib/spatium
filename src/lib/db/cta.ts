@@ -21,7 +21,7 @@ export async function getCtaPresets(locale: Locale = 'id'): Promise<CtaPreset[]>
         if (r.content) contentObj = JSON.parse(r.content)
         if (r.style) styleObj = JSON.parse(r.style)
         if (r.placement) placementObj = JSON.parse(r.placement)
-      } catch {}
+      } catch (err) { console.warn("[observable error]:", err) }
 
       return {
         id: r.id,

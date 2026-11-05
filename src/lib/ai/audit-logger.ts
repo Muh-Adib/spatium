@@ -58,7 +58,7 @@ export function recordAiPromptLog(
   if (typeof window !== 'undefined') {
     try {
       localStorage.setItem(STORAGE_LOGS_KEY, JSON.stringify(updatedLogs))
-    } catch (_) {}
+    } catch (err) { console.warn("[observable error]:", err) }
   }
 
   return newLog
@@ -68,7 +68,7 @@ export function clearAiPromptLogs(): void {
   if (typeof window !== 'undefined') {
     try {
       localStorage.removeItem(STORAGE_LOGS_KEY)
-    } catch (_) {}
+    } catch (err) { console.warn("[observable error]:", err) }
   }
 }
 

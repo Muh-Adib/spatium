@@ -6,7 +6,7 @@ import {
   handleInspectArticleSeo,
   handleUpdateArticleContent,
   handleSuggestInternalLinks,
-  executeSegiaTool,
+  executeUnimasiTool,
   type ToolCallExecution,
 } from './tools'
 import type { AiConfig } from './chat'
@@ -279,7 +279,7 @@ export function parseSseStream(streamText: string): SseEventPacket[] {
     }
 
     if (dataObj !== null) {
-      packets.push({ event: eventName as any, data: dataObj })
+      packets.push({ event: eventName as SseEventPacket['event'], data: dataObj })
     }
   }
 
@@ -335,7 +335,7 @@ export async function executeWithResilientRotation(
             actor: 'resilient_llm_layer',
             diff: JSON.stringify(rotationPayload),
           })
-        } catch {}
+        } catch (err) { console.warn("[observable error]:", err) }
         continue
       }
 
@@ -356,7 +356,7 @@ export async function executeWithResilientRotation(
             actor: 'resilient_llm_layer',
             diff: JSON.stringify(fallbackPayload),
           })
-        } catch {}
+        } catch (err) { console.warn("[observable error]:", err) }
 
         activeModel = fallback
         const res = await executeFn(allKeys[0], activeModel)
@@ -608,7 +608,7 @@ export async function executeAgenticArticleLoop(
       })
 
       // Query internal link suggestions
-      const linkCall = await executeSegiaTool('suggest_internal_links', {
+      const linkCall = await executeUnimasiTool('suggest_internal_links', {
         topic: article.focusKeyphrase || article.title,
         excludeSlug: slug,
         limit: 3,
@@ -643,7 +643,7 @@ export async function executeAgenticArticleLoop(
         focusKeyphrase: article.focusKeyphrase || undefined,
         metaTitle: article.seo?.metaTitle || article.title,
         metaDescription: article.seo?.metaDescription || article.excerpt,
-        coverAlt: article.featuredImage?.alternativeText || (article as any).coverAlt,
+        coverAlt: article.featuredImage?.alternativeText || (article as { coverAlt?: string }).coverAlt,
         internalLinkSuggestions: linkSuggestions,
         step,
       })
@@ -670,7 +670,7 @@ export async function executeAgenticArticleLoop(
           applied: true,
         })
       } else {
-        const mutationCall = await executeSegiaTool('update_article_content', {
+        const mutationCall = await executeUnimasiTool('update_article_content', {
           slug,
           title: optimizedTitle,
           metaTitle: optimizedMetaTitle,

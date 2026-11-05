@@ -818,7 +818,7 @@ toolRegistry.register({
 toolRegistry.register({
   name: 'get_block_catalog',
   label: 'Katalog Blok Dinamis Studio (Ontology & Sequence)',
-  description: 'Gunakan untuk menginspeksi jenis-jenis blok yang tersedia di Segia Studio Canvas (editorial & visual), kegunaan, urutan narasi ideal (#10 Hook -> #80 CTA), serta parameter input dan efek visualnya.',
+  description: 'Gunakan untuk menginspeksi jenis-jenis blok yang tersedia di UNIMASI Studio Canvas (editorial & visual), kegunaan, urutan narasi ideal (#10 Hook -> #80 CTA), serta parameter input dan efek visualnya.',
   category: 'content',
   scope: 'read',
   mutates: false,
@@ -830,10 +830,10 @@ toolRegistry.register({
   }),
   handler: async (input) => {
     const list = blockOntology.list({
-      category: input.category as any,
-      pageKind: input.pageKind as any,
+      category: input.category ? (input.category as import('../blocks/ontology').BlockCategory) : undefined,
+      pageKind: input.pageKind ? (input.pageKind as import('../blocks/ontology').TargetPageKind) : undefined,
     })
-    const sequence = blockOntology.getRecommendedSequence((input.pageKind || 'article') as any)
+    const sequence = blockOntology.getRecommendedSequence((input.pageKind || 'article') as import('../blocks/ontology').TargetPageKind)
     return {
       totalBlocks: list.length,
       recommendedSequence: sequence,
@@ -864,6 +864,6 @@ toolRegistry.register({
     blocks: z.array(z.record(z.string(), z.any())).min(1, 'Minimal satu blok harus disertakan').describe('Array objek blok yang akan divalidasi dan diformat'),
     targetPageKind: z.enum(['article', 'service', 'solution', 'landing', 'portfolio', 'all']).optional().describe('Tipe halaman target'),
   }),
-  handler: async (input) => composeAndValidateBlocks(input as any),
+  handler: async (input) => composeAndValidateBlocks(input as Parameters<typeof composeAndValidateBlocks>[0]),
 })
 

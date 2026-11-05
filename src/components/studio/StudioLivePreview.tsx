@@ -88,7 +88,7 @@ export default function StudioLivePreview({
   return (
     <div className="flex flex-col h-full w-full bg-[#0D0D0D] border-l border-white/10 select-none overflow-hidden">
       {/* ── Top Header & Device Switcher Bar ───────────────────────────────── */}
-      <div className="h-12 shrink-0 px-4 bg-[#141414] border-b border-white/[0.08] flex items-center justify-between gap-3 z-30">
+      <div className="h-12 shrink-0 px-4 bg-[var(--studio-bg)] border-b border-white/[0.08] flex items-center justify-between gap-3 z-30">
         <div className="flex items-center gap-2 min-w-0">
           <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[10px] font-mono text-emerald-400 font-semibold shrink-0">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
@@ -129,7 +129,7 @@ export default function StudioLivePreview({
                 : 'text-neutral-400 hover:text-white'
             }`}
           >
-            <Tablet className="w-3.5 h-3.5 text-sky-400" />
+            <Tablet className="w-3.5 h-3.5 text-info" />
             <span className="hidden md:inline">Tablet (768px)</span>
           </button>
           <button
@@ -178,7 +178,7 @@ export default function StudioLivePreview({
               title="Kembali ke Mode Edit Kanvas"
               className="hidden lg:inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white/5 border border-white/10 text-[11px] font-mono text-neutral-300 hover:text-white hover:bg-white/10 transition-colors"
             >
-              <PenSquare className="w-3 h-3 text-sky-400" />
+              <PenSquare className="w-3 h-3 text-info" />
               <span>Edit Kanvas</span>
             </button>
           )}
@@ -279,7 +279,7 @@ export default function StudioLivePreview({
 
               <div className="flex items-center gap-3">
                 <a
-                  href="https://wa.me/6283121138821?text=Halo%20UNIMASI,%20saya%20tertarik%20dengan%20layanan%20Anda"
+                  href={siteConfig.whatsapp ? `https://wa.me/${siteConfig.whatsapp}?text=Halo%20UNIMASI,%20saya%20tertarik%20dengan%20layanan%20Anda` : '/contact'}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#FFD600] text-[#060A17] font-mono text-[11px] font-bold shadow hover:bg-[#ffe855] transition-all"
@@ -306,13 +306,13 @@ export default function StudioLivePreview({
                 </nav>
 
                 <div className="flex flex-wrap items-center gap-2 mb-4">
-                  <span className="px-3 py-1 rounded-full bg-[#191919] text-[#FFD600] border border-[#2B2B2B] text-xs font-mono font-medium">
+                  <span className="px-3 py-1 rounded-full bg-[var(--studio-bg)] text-[#FFD600] border border-[#2B2B2B] text-xs font-mono font-medium">
                     Studi Kasus Animasi
                   </span>
-                  <span className="px-3 py-1 rounded-full bg-[#191919] text-[#DBD7D5] border border-[#2B2B2B] text-xs font-mono">
+                  <span className="px-3 py-1 rounded-full bg-[var(--studio-bg)] text-[#DBD7D5] border border-[#2B2B2B] text-xs font-mono">
                     Tahun {new Date().getFullYear()}
                   </span>
-                  <span className="px-3 py-1 rounded-full bg-[#191919] text-[#DBD7D5] border border-[#2B2B2B] text-xs font-mono">
+                  <span className="px-3 py-1 rounded-full bg-[var(--studio-bg)] text-[#DBD7D5] border border-[#2B2B2B] text-xs font-mono">
                     Production Ready
                   </span>
                 </div>
@@ -364,7 +364,7 @@ export default function StudioLivePreview({
           </div>
 
           {/* 5. Studio Preview Footer Indicator */}
-          <footer className="border-t border-[#2B2B2B] bg-[#111111] py-8 text-center text-xs text-neutral-500">
+          <footer className="border-t border-[#2B2B2B] bg-[var(--studio-bg)] py-8 text-center text-xs text-neutral-500">
             <p>&copy; {new Date().getFullYear()} UNIMASI Studio Preview Environment &middot; Server-Driven Block Engine</p>
           </footer>
         </div>

@@ -73,7 +73,7 @@ export async function syncLocalMediaFiles(): Promise<number> {
               const meta = await sharp(fullPath).metadata()
               width = meta.width
               height = meta.height
-            } catch {}
+            } catch (err) { console.warn("[observable error]:", err) }
           }
 
           await prisma.orm.public.MediaItem.create({
@@ -116,18 +116,38 @@ export async function getMediaItems(options: MediaFilterOptions = {}) {
   let filtered = allItems.map((item: any) => {
     let altTextObj = { id: '', en: '' }
     try {
-      if (item.altText) altTextObj = JSON.parse(item.altText)
-    } catch {}
+      if (item.altText) {
+        if (item.altText.startsWith('{')) {
+          altTextObj = JSON.parse(item.altText)
+        } else {
+          altTextObj = { id: item.altText, en: item.altText }
+        }
+      }
+    } catch {
+      altTextObj = { id: item.altText || '', en: item.altText || '' }
+    }
 
     let focalPointObj = { x: 50, y: 50 }
     try {
-      if (item.focalPoint) focalPointObj = JSON.parse(item.focalPoint)
-    } catch {}
+      if (item.focalPoint) {
+        if (item.focalPoint.startsWith('{')) {
+          focalPointObj = JSON.parse(item.focalPoint)
+        }
+      }
+    } catch (err) { console.warn("[observable error]:", err) }
 
     let usedInArr: string[] = []
     try {
-      if (item.usedIn) usedInArr = JSON.parse(item.usedIn)
-    } catch {}
+      if (item.usedIn) {
+        if (item.usedIn.startsWith('[')) {
+          usedInArr = JSON.parse(item.usedIn)
+        } else {
+          usedInArr = [item.usedIn]
+        }
+      }
+    } catch {
+      if (item.usedIn) usedInArr = [item.usedIn]
+    }
 
     return {
       ...item,
@@ -184,18 +204,38 @@ export async function getMediaItem(idOrUrl: number | string) {
 
   let altTextObj = { id: '', en: '' }
   try {
-    if (row.altText) altTextObj = JSON.parse(row.altText)
-  } catch {}
+    if (row.altText) {
+      if (row.altText.startsWith('{')) {
+        altTextObj = JSON.parse(row.altText)
+      } else {
+        altTextObj = { id: row.altText, en: row.altText }
+      }
+    }
+  } catch {
+    altTextObj = { id: row.altText || '', en: row.altText || '' }
+  }
 
   let focalPointObj = { x: 50, y: 50 }
   try {
-    if (row.focalPoint) focalPointObj = JSON.parse(row.focalPoint)
-  } catch {}
+    if (row.focalPoint) {
+      if (row.focalPoint.startsWith('{')) {
+        focalPointObj = JSON.parse(row.focalPoint)
+      }
+    }
+  } catch (err) { console.warn("[observable error]:", err) }
 
   let usedInArr: string[] = []
   try {
-    if (row.usedIn) usedInArr = JSON.parse(row.usedIn)
-  } catch {}
+    if (row.usedIn) {
+      if (row.usedIn.startsWith('[')) {
+        usedInArr = JSON.parse(row.usedIn)
+      } else {
+        usedInArr = [row.usedIn]
+      }
+    }
+  } catch {
+    if (row.usedIn) usedInArr = [row.usedIn]
+  }
 
   return {
     ...row,
@@ -354,12 +394,12 @@ export async function generateMediaAudit(): Promise<MediaAuditReport> {
     let altTextObj = { id: '', en: '' }
     try {
       if (item.altText) altTextObj = JSON.parse(item.altText)
-    } catch {}
+    } catch (err) { console.warn("[observable error]:", err) }
 
     let usedInArr: string[] = []
     try {
       if (item.usedIn) usedInArr = JSON.parse(item.usedIn)
-    } catch {}
+    } catch (err) { console.warn("[observable error]:", err) }
 
     // Check 1: Missing Alt Text (per locale)
     if (!item.decorative) {

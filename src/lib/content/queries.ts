@@ -1,6 +1,7 @@
 import { contentCanonical } from '@/lib/seo/canonical'
 import { parseRobots } from '@/lib/seo/robots'
 import { getSiteProfile } from '@/lib/db/siteProfile'
+import { siteConfig } from '@/config/site'
 /**
  * WebShift Content Queries
  * Primary data source: SQLite via Drizzle ORM (`lib/db/`)
@@ -12,7 +13,6 @@ import type {
   Article,
   Category,
   Author,
-  Page,
   Portfolio,
   Service,
   Solution,
@@ -26,7 +26,6 @@ import type {
 import seedPortfolio from '@/data/seed/seed_portfolio.json'
 import seedServices from '@/data/seed/seed_services.json'
 import seedArticles from '@/data/seed/seed_articles.json'
-import seedPages from '@/data/seed/seed_pages.json'
 import seedRedirects from '@/data/seed/seed_redirects.json'
 
 // -----------------------------------------------------------------------------
@@ -46,7 +45,7 @@ export function emitFallbackTelemetry(entity: string, error?: unknown) {
 // DB-first article query helpers (with seed fallback)
 // -----------------------------------------------------------------------------
 
-function getDynamicArticles(): any[] {
+function getDynamicArticles(): Article[] {
   try {
     if (typeof window === 'undefined') {
       const fs = require('fs')
@@ -54,11 +53,11 @@ function getDynamicArticles(): any[] {
       const p = path.join(process.cwd(), 'src', 'data', 'seed', 'seed_articles.json')
       if (fs.existsSync(p)) return JSON.parse(fs.readFileSync(p, 'utf-8'))
     }
-  } catch {}
-  return seedArticles as any[]
+  } catch (err) { console.warn("[observable error]:", err) }
+  return seedArticles as unknown as Article[]
 }
 
-function getDynamicPortfolio(): any[] {
+function getDynamicPortfolio(): Portfolio[] {
   try {
     if (typeof window === 'undefined') {
       const fs = require('fs')
@@ -66,8 +65,8 @@ function getDynamicPortfolio(): any[] {
       const p = path.join(process.cwd(), 'src', 'data', 'seed', 'seed_portfolio.json')
       if (fs.existsSync(p)) return JSON.parse(fs.readFileSync(p, 'utf-8'))
     }
-  } catch {}
-  return seedPortfolio as any[]
+  } catch (err) { console.warn("[observable error]:", err) }
+  return seedPortfolio as unknown as Portfolio[]
 }
 
 // -----------------------------------------------------------------------------
@@ -183,94 +182,17 @@ export async function getSiteSettings(): Promise<SiteSetting> {
     if (config) {
       return config
     }
-  } catch {}
+  } catch (err) { console.warn("[observable error]:", err) }
   return {
     id: 1,
-    siteName: process.env.NEXT_PUBLIC_SITE_NAME || 'UNIMASI',
-    siteDescription: 'Solusi Digital untuk Masa Depan Bisnis Anda',
-    siteUrl: process.env.NEXT_PUBLIC_SITE_URL || 'https://www.unimasi.com',
-    whatsapp: process.env.NEXT_PUBLIC_WHATSAPP || '6285227702811',
-    email: 'contact@unimasi.com',
-    phone: '+62 852-2770-2811',
-    address: 'Yogyakarta, Indonesia',
+    siteName: process.env.NEXT_PUBLIC_SITE_NAME || siteConfig.name,
+    siteDescription: siteConfig.description,
+    siteUrl: process.env.NEXT_PUBLIC_SITE_URL || siteConfig.url,
+    whatsapp: process.env.NEXT_PUBLIC_WHATSAPP || siteConfig.whatsapp,
+    email: siteConfig.email,
+    phone: siteConfig.phone,
+    address: siteConfig.address,
   }
-}
-
-function pageSeo(row: any, siteUrl: string) {
-  const stored = row.seoData ? JSON.parse(row.seoData) : {}
-  return {
-    ...stored,
-    id: row.id,
-    metaTitle: stored.seoTitle || stored.metaTitle || row.metaTitle || row.title,
-    metaDescription: stored.metaDescription || row.metaDescription || row.excerpt || '',
-    canonicalUrl: contentCanonical(stored.canonicalUrl || row.canonical, stored.sourceOriginalUrl, `/${row.slug}`, siteUrl),
-    robots: parseRobots(stored.robots || row.robots),
-    robotsIndex: !row.robots?.includes('noindex'),
-    robotsFollow: !row.robots?.includes('nofollow'),
-  }
-}
-
-// --- Pages ------------------------------------------------------------------
-
-export async function getPage(slug: string): Promise<Page | null> {
-  try {
-    const { prisma } = await import('@/lib/db/prisma')
-    const siteUrl = (await getSiteProfile()).url
-    const p = await prisma.orm.public.Page.where({ slug }).first()
-    if (p) {
-      const now = new Date().toISOString()
-      return {
-        id: p.id,
-        documentId: p.documentId || `page-${p.slug}`,
-        title: p.title,
-        slug: p.slug,
-        excerpt: p.excerpt || undefined,
-        content: p.content || undefined,
-        template: p.kind === 'landing' ? 'landing' : 'default',
-        kind: p.kind as any,
-        status: p.status as any,
-        robots: p.robots || undefined,
-        canonical: p.canonical || undefined,
-        clusterId: p.clusterId || undefined,
-        location: p.location || undefined,
-        blocks: p.blocks ? JSON.parse(p.blocks) : [],
-        seo: pageSeo(p, siteUrl),
-        publishedAt: p.publishedAt || p.createdAt || null,
-        createdAt: p.createdAt || now,
-        updatedAt: p.updatedAt || now,
-      }
-    }
-  } catch (error) { console.error('[pages] Query failed', error); throw error }
-  return null
-}
-
-export async function getPages(): Promise<Page[]> {
-  try {
-    const { prisma } = await import('@/lib/db/prisma')
-    const rows = await prisma.orm.public.Page.all()
-    const siteUrl = (await getSiteProfile()).url
-    const now = new Date().toISOString()
-    return rows.map((p: any) => ({
-      id: p.id,
-      documentId: p.documentId || `page-${p.slug}`,
-      title: p.title,
-      slug: p.slug,
-      excerpt: p.excerpt || undefined,
-      content: p.content || undefined,
-      template: p.kind === 'landing' ? 'landing' : 'default',
-      kind: p.kind as any,
-      status: p.status as any,
-      robots: p.robots || undefined,
-      canonical: p.canonical || undefined,
-      clusterId: p.clusterId || undefined,
-      location: p.location || undefined,
-      blocks: p.blocks ? JSON.parse(p.blocks) : [],
-      seo: pageSeo(p, siteUrl),
-      publishedAt: p.publishedAt || p.createdAt || null,
-      createdAt: p.createdAt || now,
-      updatedAt: p.updatedAt || now,
-    }))
-  } catch (error) { console.error('[pages] Query failed', error); throw error }
 }
 
 // --- Articles ---------------------------------------------------------------
@@ -395,7 +317,7 @@ export async function getPortfolio(slug: string): Promise<Portfolio | null> {
     const { getPortfolioBySlug } = await import('@/lib/db/portfolio')
     const port = await getPortfolioBySlug(normalizedSlug)
     if (port) return port
-  } catch {}
+  } catch (err) { console.warn("[observable error]:", err) }
 
   // 2. Fallback to seed
   const found = getDynamicPortfolio().find((p) => p.slug === normalizedSlug)
@@ -408,7 +330,7 @@ export async function getPortfolio(slug: string): Promise<Portfolio | null> {
     heroMedia: found.heroMedia, summary: found.summary,
     challenge: found.challenge, solution: found.solution,
     seo: found.seo, publishedAt: found.publishedAt,
-    createdAt: found.publishedAt, updatedAt: found.publishedAt,
+    createdAt: found.publishedAt || new Date().toISOString(), updatedAt: found.publishedAt || new Date().toISOString(),
   }
 }
 
@@ -418,7 +340,7 @@ export async function getPortfolioItems(): Promise<Portfolio[]> {
     const { getPortfolios: getPortfoliosDb } = await import('@/lib/db/portfolio')
     const list = await getPortfoliosDb()
     return list
-  } catch {}
+  } catch (err) { console.warn("[observable error]:", err) }
 
   // 2. Fallback to seed
   return getDynamicPortfolio().map((p, i) => ({
@@ -428,7 +350,7 @@ export async function getPortfolioItems(): Promise<Portfolio[]> {
     heroMedia: p.heroMedia, summary: p.summary,
     challenge: p.challenge, solution: p.solution,
     seo: p.seo, publishedAt: p.publishedAt,
-    createdAt: p.publishedAt, updatedAt: p.publishedAt,
+    createdAt: p.publishedAt || new Date().toISOString(), updatedAt: p.publishedAt || new Date().toISOString(),
   }))
 }
 

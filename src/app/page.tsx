@@ -10,9 +10,7 @@ import { WhyUnimasi } from '@/components/home/WhyUnimasi'
 import { Industries } from '@/components/home/Industries'
 import { JournalPreview } from '@/components/home/JournalPreview'
 import { InquirySection } from '@/components/home/InquirySection'
-import { SERVICES } from '@/data/services'
-import { STUDIO_EMAIL } from '@/data/site'
-import { getCorePortfolios, getCoreServices } from '@/lib/core'
+import { getCorePartners, getCorePortfolios, getCoreServices } from '@/lib/core'
 import { buildBrandGraph } from '@/lib/seo/brand-schema'
 
 const SITE_URL = 'https://unimasi.studio'
@@ -41,46 +39,12 @@ export const metadata: Metadata = {
   },
 }
 
-const jsonLd = [
-  {
-    '@context': 'https://schema.org',
-    '@type': 'Organization',
-    name: 'UNIMASI',
-    url: SITE_URL,
-    description:
-      'Animation and motion design studio specialising in 2D animation, 3D animation and visual production, and motion graphics.',
-    email: STUDIO_EMAIL,
-    knowsAbout: [
-      '2D Animation',
-      '3D Animation',
-      'Motion Graphics',
-      'Explainer Video',
-      'Architectural Visualization',
-    ],
-  },
-  {
-    '@context': 'https://schema.org',
-    '@type': 'WebSite',
-    name: 'UNIMASI',
-    url: SITE_URL,
-  },
-  {
-    '@context': 'https://schema.org',
-    '@type': 'ItemList',
-    name: 'UNIMASI services',
-    itemListElement: SERVICES.map((service, i) => ({
-      '@type': 'ListItem',
-      position: i + 1,
-      name: service.name,
-      url: `${SITE_URL}/services/${service.slug}`,
-    })),
-  },
-]
 
 export default async function HomePage() {
-  const [portfolios, services] = await Promise.all([
+  const [portfolios, services, partners] = await Promise.all([
     getCorePortfolios(),
     getCoreServices(),
+    getCorePartners(),
   ])
 
   const graph = buildBrandGraph({
@@ -88,9 +52,9 @@ export default async function HomePage() {
     title: 'UNIMASI — Animation & Motion Design Studio',
     description:
       'UNIMASI mengubah ide, informasi, produk, dan konsep kompleks menjadi visual digital yang menarik, komunikatif, dan mudah dipahami.',
-    services: SERVICES.map((s: any) => ({
-      name: s.title ?? s.name,
-      description: s.tagline ?? s.shortDescription ?? s.summary,
+    services: (services as Array<{ title?: string; name?: string; tagline?: string; shortDescription?: string; summary?: string; slug: string }>).map((s) => ({
+      name: s.title ?? s.name ?? '',
+      description: s.tagline ?? s.shortDescription ?? s.summary ?? '',
       url: `/services/${s.slug}`,
     })),
   })
@@ -103,10 +67,10 @@ export default async function HomePage() {
       />
       <RevealProvider>
         <Hero />
-        <PartnerLogos />
+        <PartnerLogos partners={partners as unknown as import('@/data/clients').PartnerLogo[]} />
         <ServicesShowcase initialServices={services} />
         <Capabilities />
-        <PortfolioPreview initialProjects={portfolios as any} />
+        <PortfolioPreview initialProjects={portfolios as unknown as import('@/data/projects').Project[]} />
         <ProcessTimeline />
         <WhyUnimasi />
         <Industries />

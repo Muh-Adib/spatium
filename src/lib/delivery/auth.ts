@@ -92,7 +92,7 @@ export async function authenticateDeliveryRequest(
     }
   }
 
-  if (!timingSafeEqualStr(String((site as any).apiKey ?? ''), siteKey)) {
+  if (!timingSafeEqualStr(String((site as { apiKey?: string }).apiKey ?? ''), siteKey)) {
     return {
       response: NextResponse.json(
         { error: 'Forbidden', message: 'Invalid x-site-key.' },

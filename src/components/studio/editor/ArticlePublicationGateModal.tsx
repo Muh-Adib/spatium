@@ -18,7 +18,7 @@ export function ArticlePublicationGateModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fadeIn">
-      <div className="max-w-md w-full rounded-2xl bg-[#191919] border border-red-500/40 p-6 space-y-4 shadow-2xl">
+      <div className="max-w-md w-full rounded-2xl bg-[var(--studio-bg)] border border-red-500/40 p-6 space-y-4 shadow-2xl">
         <div className="flex items-center justify-between pb-3 border-b border-white/10">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-lg bg-red-500/20 border border-red-500/30 text-red-400 flex items-center justify-center">

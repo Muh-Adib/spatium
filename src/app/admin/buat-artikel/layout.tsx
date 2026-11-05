@@ -8,7 +8,7 @@ export default function BuatArtikelLayout({
   children: React.ReactNode
 }) {
   return (
-    <div className="fixed inset-0 z-50 flex h-screen w-screen flex-col overflow-hidden bg-[#111111] text-neutral-100 antialiased selection:bg-accent-500 selection:text-black">
+    <div className="fixed inset-0 z-50 flex h-screen w-screen flex-col overflow-hidden bg-[var(--studio-bg)] text-neutral-100 antialiased selection:bg-accent-500 selection:text-accent-950">
       {children}
     </div>
   )

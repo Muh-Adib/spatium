@@ -10,6 +10,7 @@ import './services-showcase.css'
 export async function ServicesShowcase({ initialServices }: { initialServices?: any[] } = {}) {
   const services = initialServices || (await getCoreServices())
   const displayServices = (services && services.length > 0 ? services : CORE_SERVICES).slice(0, 3)
+  if (!displayServices || displayServices.length === 0) return null
 
   return (
     <section className="section services-showcase" id="services" aria-labelledby="services-title">

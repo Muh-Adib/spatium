@@ -11,8 +11,8 @@ import { Icon } from '@/components/Icon'
 import { PROCESS } from '@/data/site'
 import { getService, SERVICES } from '@/data/services'
 import { PROJECTS, type ProjectCategory } from '@/data/projects'
-import { getServiceCategoryWithServices } from '@/lib/db/serviceCategories'
-import { getServiceBySlug } from '@/lib/db/services'
+import { getServiceCategories, getServiceCategoryWithServices } from '@/lib/db/serviceCategories'
+import { getServiceBySlug, getServices } from '@/lib/db/services'
 import { BlockRenderer } from '@/components/blocks/BlockRenderer'
 import '@/pages/service-detail.css'
 
@@ -25,10 +25,14 @@ const CATEGORY_BY_SERVICE: Record<string, ProjectCategory> = {
   'digital-assets-ai': 'assets',
 }
 
-export function generateStaticParams() {
-  return SERVICES.map((service) => ({
-    slug: service.slug,
-  }))
+export async function generateStaticParams() {
+  const slugs = new Set<string>(SERVICES.map((service) => service.slug))
+  try {
+    const [categories, services] = await Promise.all([getServiceCategories(), getServices()])
+    for (const category of categories) slugs.add(category.slug)
+    for (const service of services) slugs.add(service.slug)
+  } catch (err) { console.warn("[observable error]:", err) }
+  return Array.from(slugs).map((slug) => ({ slug }))
 }
 
 export async function generateMetadata({
@@ -113,22 +117,10 @@ export default async function ServiceDetailPage({
     },
   ]
 
-  if (service?.faqs && service.faqs.length > 0) {
-    jsonLd.push({
-      '@context': 'https://schema.org',
-      '@type': 'FAQPage',
-      mainEntity: service.faqs.map((faq) => ({
-        '@type': 'Question',
-        name: faq.q,
-        acceptedAnswer: { '@type': 'Answer', text: faq.a },
-      })),
-    })
-  }
-
   if (dbBlocks.length > 0) {
     const contextData = dbCat
       ? { subServices: dbCat.subServices || [] }
-      : { portfolios: (dbSvc as any)?.portfolioItems || [] }
+      : { portfolios: (dbSvc as { portfolioItems?: unknown[] })?.portfolioItems || [] }
     return (
       <main className="min-h-screen bg-[var(--color-background)] text-white">
         <script
@@ -140,13 +132,58 @@ export default async function ServiceDetailPage({
     )
   }
 
-  if (!service) notFound()
+  if (!dbItem && !service) notFound()
+
+  // Static fallback shell: DB row (admin-edited) supplies the editable copy;
+  // the static entry only pads structural fields (capability grid, FAQ shape)
+  // the DB model does not carry.
+  const view = {
+    slug,
+    index: dbItem?.indexNumber || service?.index || '01',
+    name: dbItem?.title || dbItem?.name || service?.name || '',
+    shortName: service?.shortName || dbItem?.title || dbItem?.name || '',
+    tagline: dbItem?.tag || dbItem?.shortDescription || service?.tagline || '',
+    summary: dbItem?.shortDescription || dbItem?.description || service?.summary || '',
+    metaDescription: serviceDesc,
+    intro:
+      service?.intro ||
+      [dbItem?.longDescription || dbItem?.description || dbItem?.shortDescription].filter(Boolean) as string[],
+    capabilities:
+      service?.capabilities ||
+      ((dbItem?.features || []) as { title?: string; description?: string }[]).map((f) => ({
+        title: f.title || '',
+        description: f.description || '',
+      })),
+    deliverables: (dbItem?.deliverables as string[] | undefined) || service?.deliverables || [],
+    tools:
+      service?.tools ||
+      ((dbItem?.technologies || []) as { name?: string }[]).map((t) => t.name || '').filter(Boolean),
+    visual: service?.visual || '2d',
+    faqs:
+      service?.faqs ||
+      ((dbItem?.faq || []) as { question?: string; answer?: string }[]).map((f) => ({
+        q: f.question || '',
+        a: f.answer || '',
+      })),
+  }
 
   const relatedProjects = PROJECTS.filter(
-    (project) => project.category === CATEGORY_BY_SERVICE[service.slug],
+    (project) => project.category === CATEGORY_BY_SERVICE[view.slug],
   ).slice(0, 3)
 
-  const otherServices = SERVICES.filter((item) => item.slug !== service.slug)
+  if (view.faqs.length > 0) {
+    jsonLd.push({
+      '@context': 'https://schema.org',
+      '@type': 'FAQPage',
+      mainEntity: view.faqs.map((faq) => ({
+        '@type': 'Question',
+        name: faq.q,
+        acceptedAnswer: { '@type': 'Answer', text: faq.a },
+      })),
+    })
+  }
+
+  const otherServices = SERVICES.filter((item) => item.slug !== view.slug)
 
   return (
     <>
@@ -156,18 +193,18 @@ export default async function ServiceDetailPage({
       />
 
       <PageHero
-        eyebrow={`Service ${service.index}`}
-        title={service.name}
-        lede={service.summary}
+        eyebrow={`Service ${view.index}`}
+        title={view.name}
+        lede={view.summary}
         crumbs={[
           { label: 'Home', to: '/' },
           { label: 'Services', to: '/services' },
-          { label: service.shortName },
+          { label: view.shortName },
         ]}
         meta={
           <>
-            <span className="pill pill--accent">{service.tagline}</span>
-            {service.tools.slice(0, 3).map((tool) => (
+            <span className="pill pill--accent">{view.tagline}</span>
+            {view.tools.slice(0, 3).map((tool) => (
               <span className="pill" key={tool}>
                 {tool}
               </span>
@@ -182,14 +219,14 @@ export default async function ServiceDetailPage({
             <h2 className="sr-only" id="detail-intro-title">
               About this service
             </h2>
-            {service.intro.map((paragraph) => (
+            {view.intro.map((paragraph) => (
               <p key={paragraph.slice(0, 24)} className="detail-intro__paragraph">
                 {paragraph}
               </p>
             ))}
 
             <ul className="detail-intro__tools">
-              {service.tools.map((tool) => (
+              {view.tools.map((tool) => (
                 <li className="pill" key={tool}>
                   {tool}
                 </li>
@@ -201,9 +238,9 @@ export default async function ServiceDetailPage({
             <div className="detail-intro__frame">
               <div className="detail-intro__frame-head">
                 <span className="mono">Interactive preview</span>
-                <span className="mono">{service.shortName}</span>
+                <span className="mono">{view.shortName}</span>
               </div>
-              <ServiceVisual kind={service.visual} />
+              <ServiceVisual kind={view.visual} />
             </div>
           </Reveal>
         </div>
@@ -214,7 +251,7 @@ export default async function ServiceDetailPage({
           <SectionHead
             id="capabilities-heading"
             eyebrow="What this covers"
-            title={`${service.shortName} capabilities`}
+            title={`${view.shortName} capabilities`}
             aside={
               <p className="lede">
                 Each capability can be scoped on its own or combined into a single production. Mixed
@@ -224,7 +261,7 @@ export default async function ServiceDetailPage({
           />
 
           <ul className="detail-capabilities__grid">
-            {service.capabilities.map((cap, i) => (
+            {view.capabilities.map((cap, i) => (
               <Reveal as="li" key={cap.title} delay={i * 60} className="detail-capability">
                 <span className="detail-capability__num mono">{String(i + 1).padStart(2, '0')}</span>
                 <h3 className="detail-capability__title">{cap.title}</h3>
@@ -248,7 +285,7 @@ export default async function ServiceDetailPage({
             </p>
 
             <ul className="detail-deliverables__list">
-              {service.deliverables.map((item) => (
+              {view.deliverables.map((item) => (
                 <li key={item}>
                   <Icon name="check" size={15} />
                   {item}
@@ -284,7 +321,7 @@ export default async function ServiceDetailPage({
           </Reveal>
 
           <div className="detail-faq__list">
-            {service.faqs.map((faq, i) => (
+            {view.faqs.map((faq, i) => (
               <Reveal key={faq.q} delay={i * 60}>
                 <details className="faq-item">
                   <summary>
@@ -305,10 +342,10 @@ export default async function ServiceDetailPage({
             <SectionHead
               id="detail-work-heading"
               eyebrow="Related work"
-              title={`${service.shortName} capability studies`}
+              title={`${view.shortName} capability studies`}
               aside={
-                <Link href={`/portfolio?category=${CATEGORY_BY_SERVICE[service.slug]}`} className="link-arrow">
-                  See all {service.shortName} work
+                <Link href={`/portfolio?category=${CATEGORY_BY_SERVICE[view.slug]}`} className="link-arrow">
+                  See all {view.shortName} work
                   <Icon name="arrow-right" size={16} />
                 </Link>
               }
@@ -348,7 +385,7 @@ export default async function ServiceDetailPage({
         eyebrow="Start here"
         title={
           <>
-            Brief us on your <span className="accent">{service.shortName}</span> project.
+            Brief us on your <span className="accent">{view.shortName}</span> project.
           </>
         }
         body="Send the message, the audience and the deadline. We will respond with a recommended pipeline and an honest scope."

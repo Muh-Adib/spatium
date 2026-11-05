@@ -41,7 +41,7 @@ const DISCIPLINES: {
     id: '3d',
     label: '3D CGI & Industrial',
     pill: '3D VISUAL PRODUCTION',
-    client: 'PT YPTI & Industrial Clients',
+    client: 'PT Yogya Presisi Tehnikatama Industri (YPTI)',
     title: 'Presisi Manufaktur CNC & Mekanikal 5-Axis',
     description: 'Visualisasi CAD fotorealistik, sinematografi makro industri, dan simulasi proses produksi presisi tinggi.',
     image: '/images/showcase/pt-ypti-3d.webp',
@@ -51,7 +51,7 @@ const DISCIPLINES: {
     id: 'motion',
     label: 'Motion Graphics',
     pill: 'KINETIC & TECH EXPLAINER',
-    client: 'Telkom DFE & Wilmar',
+    client: 'Telkom Indonesia',
     title: 'Visualisasi Jaringan & Ekosistem Digital',
     description: 'Tipografi kinetik dinamis, animasi infografis interaktif, dan arsitektur data visual berskala besar.',
     image: '/images/showcase/telkom-dfe.webp',
@@ -61,7 +61,7 @@ const DISCIPLINES: {
     id: '2d',
     label: '2D Animation',
     pill: 'NARRATIVE & EXPLAINER',
-    client: 'Danone & Universitas Mercu Buana',
+    client: 'Danone Indonesia',
     title: 'Storytelling Emosional & Karakter Frame-by-Frame',
     description: 'Desain karakter ekspresif, alur cerita berkesan, dan animasi 2D berstandar festival serta kampanye publik.',
     image: '/images/showcase/3d-short-film.webp',
@@ -71,7 +71,7 @@ const DISCIPLINES: {
     id: 'assets',
     label: 'Digital Visual Assets',
     pill: 'SPATIAL & AI WORKFLOW',
-    client: 'UGM & Experiential Partners',
+    client: 'Universitas Gadjah Mada (UGM)',
     title: 'Aset Spasial Real-Time & Riset Visual',
     description: 'Visualisasi molekuler sains, asset library 3D real-time, dan pipeline produksi visual berbantuan AI terkurasi.',
     image: '/images/showcase/ugm.webp',
@@ -233,8 +233,8 @@ export function Hero() {
           {/* Quick Studio Metrics & Pipeline Row */}
           <div className="hero__stats-row">
             <div className="hero-stat-item">
-              <span className="hero-stat-val">100+</span>
-              <span className="hero-stat-lbl">Proyek Visual Diselesaikan</span>
+              <span className="hero-stat-val">4K DCI</span>
+              <span className="hero-stat-lbl">Standar Master Render</span>
             </div>
             <div className="hero-stat-sep" />
             <div className="hero-stat-item">

@@ -49,7 +49,7 @@ export async function GET(request: NextRequest) {
 
     // 3. Paginated Media List with Filters
     const search = searchParams.get('search') || ''
-    const filter = (searchParams.get('filter') || 'all') as any
+    const filter = (searchParams.get('filter') || 'all') as 'all' | 'missing_alt' | 'unused' | 'oversized'
     const page = parseInt(searchParams.get('page') || '1', 10)
     const pageSize = parseInt(searchParams.get('pageSize') || '36', 10)
 
@@ -293,7 +293,7 @@ export async function DELETE(request: NextRequest) {
     if (fs.existsSync(filePath)) {
       try {
         fs.unlinkSync(filePath)
-      } catch {}
+      } catch (err) { console.warn("[API observable error]:", err) }
     }
 
     await prisma.orm.public.MediaItem.where({ id }).delete()

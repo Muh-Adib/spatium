@@ -125,6 +125,25 @@ unimasi/
 - Endpoint status: `/api/mcp` (GET/POST, auth required). Admin UI menyediakan snippet konfigurasi MCP client (Antigravity, Claude, Cursor, Windsurf, Codex).
 - A2A: agent loop + tool registry diekspos via `/api/agent/tools` dan `/api/ai/*`.
 
+### 3.10 Senior Engineering & Code Quality Invariants (MANDATORY)
+- **Zero Silent Failures**: Dilarang menggunakan empty catch blocks (`catch {}`). Semua error wajib ditangani dan observable (logging terstruktur via `console.warn`/`console.error` atau return payload terukur).
+- **Defense-in-Depth Trust Boundary**: Setiap route handler mutasi (`POST`/`PUT`/`DELETE`) wajib memvalidasi otorisasi di server (session NextAuth / Bearer token / proxy guard) dan memvalidasi tipe/skema runtime (Zod), bukan sekadar mengandalkan validasi di UI.
+- **Data Atomicity & Concurrency**: Setiap mutasi multi-tabel wajib dibungkus dalam transaksi Prisma (`prisma.$transaction`) untuk mencegah state inkonsisten.
+- **Type Safety Strictness**: Hindari `as any` dan non-null assertion `!`. Gunakan TypeScript discriminated unions, type narrowing, atau inferensi skema Zod.
+- **Security & Data Exposure**: Dilarang membocorkan raw error stack trace (`err.stack`) ke dalam response JSON di lingkungan produksi.
+- **Resource & Performance Budget**: Setiap komponen `<Image>` wajib memiliki atribut `alt` eksplisit; fallback data kosong wajib bersih (`null`), dilarang memunculkan metrik atau aset fiktif.
+- **Automated Verification**: Jalankan `npm run audit:senior` untuk memverifikasi kepatuhan seluruh aturan ini sebelum merge/publish.
+
+### 3.11 Content Authenticity & Dynamic Data Invariants (Zero-Mock Policy)
+- **Single Source of Truth**: Seluruh konten bisnis yang dikelola admin (Artikel, Layanan, Portofolio, Klien, Redirects) wajib bersumber dari database PostgreSQL melalui Prisma 8 ORM. CMS-managed content dilarang keras membaca data statis.
+- **Zero Fictional Business Data**: Tidak boleh menggunakan fictional business data, angka karangan, metrik palsu, atau logo klien tanpa konfirmasi tertulis pada production runtime.
+- **No Direct Seed/Fixture Imports on Production UI**: Dilarang mengimpor file seed (`@/data/seed/*`) atau fixture langsung ke dalam komponen UI produksi, sitemap, atau delivery API. File seed hanya diperuntukkan bagi migration/seeding script.
+- **No Fictional / Camouflaged Fallbacks**: Dilarang menggunakan fake fallback (`dbData || MOCK_DATA` atau `catch { return seedData }`) untuk menutupi database error atau hasil query kosong. Bedakan database error (observable logging) dengan empty result; sajikan empty state yang jujur (`null` atau empty array `[]`).
+- **Centralized Business Configuration**: Semua konfigurasi bisnis dinamis (kontak, WhatsApp, alamat, jam kerja, dsb.) harus memiliki sumber terpusat melalui `SiteConfig` di database atau fallback terverifikasi di `siteConfig` / `companyInfo`. Dilarang menyebarkan hardcoded kontak acak di JSX.
+- **Contextual Static Content**: Static data yang sah (metodologi brand, enumerasi, navigation structure fallback, UI design tokens) harus memiliki konteks dan alasan arsitektural yang jelas.
+- **Pre-Implementation Source of Truth Definition**: Setiap data atau entitas baru wajib ditentukan dan didokumentasikan source of truth-nya di database sebelum implementasi kode.
+- **End-to-End Traceability**: Setiap perubahan yang disimpan melalui Studio Admin wajib tercermin pada halaman publik terkait tanpa "Ghost CMS" (`Admin CRUD → Database → Query/Service → Server Component/API → Public UI`).
+
 ---
 
 ## 4. Agentic Architecture & Content Workflow

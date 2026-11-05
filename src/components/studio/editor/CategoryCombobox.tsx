@@ -167,7 +167,7 @@ export function CategoryCombobox({
       {isOpen && (
         <div
           ref={listRef}
-          className="absolute z-50 mt-1 max-h-60 w-full min-w-[240px] overflow-auto rounded-xl border border-white/15 bg-[#1A1A1A] py-1 shadow-2xl backdrop-blur-xl animate-fadeIn text-xs"
+          className="absolute z-50 mt-1 max-h-60 w-full min-w-[240px] overflow-auto rounded-xl border border-white/15 bg-surface-elevated py-1 shadow-2xl backdrop-blur-xl animate-fadeIn text-xs"
         >
           {showCreateOption && (
             <button
