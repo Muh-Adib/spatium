@@ -3,7 +3,9 @@ import { SERVICES } from '@/data/services'
 import { PROJECTS } from '@/data/projects'
 import { getCoreArticles } from '@/lib/core'
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://unimasi.studio'
+import { siteConfig } from '@/config/site'
+
+const SITE_URL = siteConfig.url
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticRoutes: MetadataRoute.Sitemap = [

@@ -24,7 +24,10 @@ services:
       context: .
       dockerfile: Dockerfile
       args:
-        NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-https://unimasi.udp.co.id}
+        COOLIFY_URL: ${COOLIFY_URL:-}
+        COOLIFY_FQDN: ${COOLIFY_FQDN:-}
+        SERVICE_URL_APP: ${SERVICE_URL_APP:-}
+        NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-${COOLIFY_URL:-https://unimasi.com}}
         NEXT_PUBLIC_CORE_URL: ${NEXT_PUBLIC_CORE_URL:-}
         NEXT_PUBLIC_CORE_SITE_KEY: ${NEXT_PUBLIC_CORE_SITE_KEY:-}
         NEXT_PUBLIC_GA_ID: ${NEXT_PUBLIC_GA_ID:-}
@@ -41,7 +44,10 @@ services:
       SERVICE_FQDN_APP_3000: ${SERVICE_FQDN_APP_3000:-}
       SERVICE_FQDN_APP: ${SERVICE_FQDN_APP:-}
       DATABASE_URL: ${DATABASE_URL:-postgresql://${POSTGRES_USER:-uni}:${SERVICE_PASSWORD_POSTGRES:-${POSTGRES_PASSWORD:-uni_secure_db_pwd_2026}}@postgres:5432/${POSTGRES_DB:-uni}?schema=public}
-      NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-https://unimasi.udp.co.id}
+      COOLIFY_URL: ${COOLIFY_URL:-}
+      COOLIFY_FQDN: ${COOLIFY_FQDN:-}
+      SERVICE_URL_APP: ${SERVICE_URL_APP:-}
+      NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-${COOLIFY_URL:-https://unimasi.com}}
       NEXT_PUBLIC_SITE_NAME: ${NEXT_PUBLIC_SITE_NAME:-UNIMASI Studio}
       AUTH_SECRET: ${AUTH_SECRET:?AUTH_SECRET is required}
       AUTH_TRUST_HOST: ${AUTH_TRUST_HOST:-true}

@@ -1,6 +1,7 @@
 import type { MetadataRoute } from 'next'
+import { siteConfig } from '@/config/site'
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://unimasi.id'
+const SITE_URL = siteConfig.url
 
 /**
  * Crawler policy (GEO). Search and AI-search crawlers are allowed so UNIMASI
