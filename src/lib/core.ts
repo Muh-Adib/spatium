@@ -94,7 +94,7 @@ export interface CoreArticleDetailResponse {
 const CORE_API_URL =
   process.env.CORE_API_URL ||
   process.env.NEXT_PUBLIC_CORE_URL ||
-  'http://localhost:3001'
+  `http://127.0.0.1:${process.env.PORT || '3000'}`
 
 const CORE_SITE_KEY =
   process.env.CORE_SITE_KEY ||
