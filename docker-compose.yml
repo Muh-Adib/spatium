@@ -80,6 +80,8 @@ services:
       NEXT_PUBLIC_SITE_NAME: ${NEXT_PUBLIC_SITE_NAME:-SPATIUM}
       AUTH_SECRET: ${AUTH_SECRET:?AUTH_SECRET is required}
       AUTH_TRUST_HOST: ${AUTH_TRUST_HOST:-true}
+      # Public origin for NextAuth URLs; without it they use the container's 0.0.0.0:3000.
+      AUTH_URL: ${AUTH_URL:-${NEXT_PUBLIC_SITE_URL:-}}
       NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:-${AUTH_SECRET}}
       REQUIRE_STRONG_AUTH_SECRET: ${REQUIRE_STRONG_AUTH_SECRET:-true}
       API_BEARER_TOKEN: ${API_BEARER_TOKEN:-}
