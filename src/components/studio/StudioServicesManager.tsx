@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback, useId } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { siteConfig } from '@/config/site'
@@ -47,7 +47,31 @@ function blocksToPlainText(blocks: any[]): string {
     .join('\n\n')
 }
 
+/** Parses a JSON column that may already be decoded; logs and falls back on malformed data. */
+function parseJsonValue<T>(value: unknown, fallback: T): T {
+  if (value === null || value === undefined || value === '') return fallback
+  if (typeof value !== 'string') return value as T
+  try {
+    return JSON.parse(value) as T
+  } catch (err) {
+    console.warn('[Services] malformed JSON column:', err)
+    return fallback
+  }
+}
+
+/** Cover alt text saved in `seoData.coverAlt` (checked by the publication gate). */
+function coverAltOf(seoData: unknown): string {
+  const seo = parseJsonValue<Record<string, unknown> | null>(seoData, null)
+  return seo && typeof seo.coverAlt === 'string' ? seo.coverAlt : ''
+}
+
+/** Readable message from an API error body, including publication-gate issues. */
+function apiErrorMessage(json: { error?: string; message?: string; issues?: unknown }, fallback: string): string {
+  return json.error || json.message || fallback
+}
+
 export function StudioServicesManager() {
+  const fieldId = useId()
   const [activeTab, setActiveTab] = useState<'departments' | 'services'>('departments')
   const [categories, setCategories] = useState<any[]>([])
   const [services, setServices] = useState<any[]>([])
@@ -61,6 +85,8 @@ export function StudioServicesManager() {
   const [editingType, setEditingType] = useState<'department' | 'service'>('department')
   const [saving, setSaving] = useState(false)
   const [saveMessage, setSaveMessage] = useState('')
+  const [errorMessage, setErrorMessage] = useState('')
+  const [listStatus, setListStatus] = useState('')
   const [activeInspectorTab, setActiveInspectorTab] = useState<'meta' | 'seo'>('meta')
   const [showPropertiesDrawer, setShowPropertiesDrawer] = useState(true)
   const [selectedBlockId, setSelectedBlockId] = useState<string | null>(null)
@@ -71,11 +97,11 @@ export function StudioServicesManager() {
   const [depTitle, setDepTitle] = useState('')
   const [depTag, setDepTag] = useState('')
   const [depShortDesc, setDepShortDesc] = useState('')
-  const [depHeroImage, setDepHeroImage] = useState('/images/nav/web-dev.jpg')
+  const [depHeroImage, setDepHeroImage] = useState('')
   const [depHeroAlt, setDepHeroAlt] = useState('')
   const [depThemePreset, setDepThemePreset] = useState('charcoal')
   const [depOrder, setDepOrder] = useState('0')
-  const [depStatus, setDepStatus] = useState<'draft' | 'in_review' | 'approved' | 'published' | 'archived'>('published')
+  const [depStatus, setDepStatus] = useState<'draft' | 'in_review' | 'approved' | 'published' | 'archived'>('draft')
   const [depShowInNav, setDepShowInNav] = useState(true)
   const [depBlocks, setDepBlocks] = useState<StudioBlock[]>([])
 
@@ -89,13 +115,13 @@ export function StudioServicesManager() {
   const [svcHighlightWord, setSvcHighlightWord] = useState('')
   const [svcShortDesc, setSvcShortDesc] = useState('')
   const [svcWhatsappPrompt, setSvcWhatsappPrompt] = useState('')
-  const [svcHeroImage, setSvcHeroImage] = useState('/images/nav/web-dev.jpg')
+  const [svcHeroImage, setSvcHeroImage] = useState('')
   const [svcHeroAlt, setSvcHeroAlt] = useState('')
   const [mediaPickerOpen, setMediaPickerOpen] = useState(false)
   const [mediaPickerTarget, setMediaPickerTarget] = useState<'dep' | 'svc'>('dep')
   const [svcOrder, setSvcOrder] = useState('0')
   const [svcFeatured, setSvcFeatured] = useState(false)
-  const [svcStatus, setSvcStatus] = useState<'draft' | 'in_review' | 'approved' | 'published' | 'archived'>('published')
+  const [svcStatus, setSvcStatus] = useState<'draft' | 'in_review' | 'approved' | 'published' | 'archived'>('draft')
   const [svcBlocks, setSvcBlocks] = useState<StudioBlock[]>([])
   const [svcSelectedPortfolios, setSvcSelectedPortfolios] = useState<number[]>([])
 
@@ -144,24 +170,28 @@ export function StudioServicesManager() {
   // Open Editor for Department
   const handleEditDepartment = (cat?: any) => {
     setEditingType('department')
+    setErrorMessage('')
+    setSaveMessage('')
     if (cat) {
       setDepId(cat.id)
       setDepSlug(cat.slug)
       setDepTitle(cat.title)
       setDepTag(cat.tag || '')
       setDepShortDesc(cat.shortDescription || '')
-      setDepHeroImage(cat.heroImage || '/images/nav/web-dev.jpg')
-      setDepHeroAlt(cat.heroAlt || (cat.title ? `${cat.title} - Use Case SPATIUM` : 'Use Case SPATIUM'))
+      setDepHeroImage(cat.heroImage || '')
+      // Alt text is read back from seoData; never generated from the title.
+      setDepHeroAlt(coverAltOf(cat.seoData))
       setDepThemePreset(cat.themePreset || 'charcoal')
       setDepOrder(String(cat.order ?? 0))
-      setDepStatus(cat.status || 'published')
+      setDepStatus(cat.status || 'draft')
       setDepShowInNav(Boolean(cat.showInNav ?? true))
-      const depParsed = typeof cat.blocks === 'string' ? (cat.blocks ? JSON.parse(cat.blocks) : []) : cat.blocks
+      const depParsed = parseJsonValue<unknown>(cat.blocks, [])
       setDepBlocks(Array.isArray(depParsed) ? depParsed : [])
       setSeoTitle(cat.metaTitle || cat.title)
       setMetaDesc(cat.metaDescription || cat.shortDescription || '')
       setFocusKeyphrase(cat.focusKeyphrase || cat.title)
-      setRelatedKeyphrases(cat.relatedKeyphrases || [])
+      const depKeyphrases = parseJsonValue<unknown>(cat.relatedKeyphrases, [])
+      setRelatedKeyphrases(Array.isArray(depKeyphrases) ? depKeyphrases : [])
       setCanonicalUrl(cat.canonicalUrl || '')
     } else {
       setDepId(null)
@@ -169,11 +199,11 @@ export function StudioServicesManager() {
       setDepTitle('')
       setDepTag('DEPARTEMEN SPESIALISASI')
       setDepShortDesc('')
-      setDepHeroImage('/images/nav/web-dev.jpg')
-      setDepHeroAlt('Use Case SPATIUM')
+      setDepHeroImage('')
+      setDepHeroAlt('')
       setDepThemePreset('charcoal')
       setDepOrder(String(categories.length + 1))
-      setDepStatus('published')
+      setDepStatus('draft')
       setDepShowInNav(true)
       setDepBlocks([])
       setSeoTitle('')
@@ -188,6 +218,8 @@ export function StudioServicesManager() {
   // Open Editor for Service
   const handleEditService = (svc?: any) => {
     setEditingType('service')
+    setErrorMessage('')
+    setSaveMessage('')
     if (svc) {
       setSvcId(svc.id)
       setSvcSlug(svc.slug)
@@ -198,25 +230,24 @@ export function StudioServicesManager() {
       setSvcHighlightWord(svc.highlightWord || '')
       setSvcShortDesc(svc.shortDescription || '')
       setSvcWhatsappPrompt(svc.whatsappPrompt || '')
-      setSvcHeroImage(svc.heroImage?.url || svc.heroImage || '/images/nav/web-dev.jpg')
-      setSvcHeroAlt(svc.heroAlt || (svc.name ? `${svc.name} - Layanan SPATIUM` : 'Layanan SPATIUM'))
+      setSvcHeroImage(svc.heroImage?.url || svc.heroImage || '')
+      // Alt text is read back from seoData; never generated from the name.
+      setSvcHeroAlt(coverAltOf(svc.seoData))
       setSvcOrder(String(svc.order ?? 0))
       setSvcFeatured(Boolean(svc.featured))
-      setSvcStatus(svc.status || 'published')
-      
-      const blocksParsed = typeof svc.blocks === 'string' ? JSON.parse(svc.blocks) : svc.blocks
+      setSvcStatus(svc.status || 'draft')
+
+      const blocksParsed = parseJsonValue<unknown>(svc.blocks, [])
       setSvcBlocks(Array.isArray(blocksParsed) ? blocksParsed : [])
 
       setSeoTitle(svc.metaTitle || svc.name)
       setMetaDesc(svc.metaDescription || svc.shortDescription || '')
       setFocusKeyphrase(svc.focusKeyphrase || svc.name)
-      setRelatedKeyphrases(
-        typeof svc.relatedKeyphrases === 'string'
-          ? JSON.parse(svc.relatedKeyphrases)
-          : svc.relatedKeyphrases || []
-      )
+      const svcKeyphrases = parseJsonValue<unknown>(svc.relatedKeyphrases, [])
+      setRelatedKeyphrases(Array.isArray(svcKeyphrases) ? svcKeyphrases : [])
       setCanonicalUrl(`${siteConfig.url}/services/${svc.slug}`)
-      setSvcSelectedPortfolios([])
+      // Keep the saved links; saving sends this list back, so it must start from the DB.
+      setSvcSelectedPortfolios(Array.isArray(svc.portfolioIds) ? svc.portfolioIds : [])
     } else {
       setSvcId(null)
       setSvcSlug('')
@@ -227,11 +258,11 @@ export function StudioServicesManager() {
       setSvcHighlightWord('')
       setSvcShortDesc('')
       setSvcWhatsappPrompt('Halo SPATIUM, saya ingin konsultasi layanan.')
-      setSvcHeroImage('/images/nav/web-dev.jpg')
-      setSvcHeroAlt('Layanan SPATIUM')
+      setSvcHeroImage('')
+      setSvcHeroAlt('')
       setSvcOrder(String(services.length + 1))
       setSvcFeatured(false)
-      setSvcStatus('published')
+      setSvcStatus('draft')
       setSvcBlocks([])
       setSvcSelectedPortfolios([])
       setSeoTitle('')
@@ -246,12 +277,13 @@ export function StudioServicesManager() {
   // Save Department
   const handleSaveDepartment = async () => {
     if (!depSlug.trim() || !depTitle.trim()) {
-      alert('Slug dan Judul Departemen wajib diisi.')
+      setErrorMessage('Slug dan Judul Departemen wajib diisi.')
       return
     }
 
     setSaving(true)
     setSaveMessage('')
+    setErrorMessage('')
     try {
       const res = await fetch('/api/service-categories', {
         method: 'POST',
@@ -272,19 +304,22 @@ export function StudioServicesManager() {
           metaDescription: metaDesc,
           focusKeyphrase,
           relatedKeyphrases,
+          seoData: { coverAlt: depHeroAlt.trim() },
         }),
       })
 
       const json = await res.json()
       if (json.success) {
+        if (typeof json.data?.id === 'number') setDepId(json.data.id)
         setSaveMessage('Departemen berhasil disimpan!')
         fetchData()
         setTimeout(() => setEditorMode(false), 1200)
       } else {
-        alert(json.error || 'Gagal menyimpan departemen.')
+        setErrorMessage(apiErrorMessage(json, 'Gagal menyimpan departemen.'))
       }
-    } catch {
-      alert('Terjadi kesalahan jaringan saat menyimpan.')
+    } catch (err) {
+      console.error('[Services] department save failed:', err)
+      setErrorMessage('Terjadi kesalahan jaringan saat menyimpan.')
     } finally {
       setSaving(false)
     }
@@ -293,12 +328,13 @@ export function StudioServicesManager() {
   // Save Service
   const handleSaveService = async () => {
     if (!svcSlug.trim() || !svcName.trim()) {
-      alert('Nama dan Slug Layanan wajib diisi.')
+      setErrorMessage('Nama dan Slug Layanan wajib diisi.')
       return
     }
 
     setSaving(true)
     setSaveMessage('')
+    setErrorMessage('')
     try {
       const res = await fetch('/api/services', {
         method: 'POST',
@@ -323,19 +359,22 @@ export function StudioServicesManager() {
           metaDescription: metaDesc,
           focusKeyphrase,
           relatedKeyphrases,
+          seoData: { coverAlt: svcHeroAlt.trim() },
         }),
       })
 
       const json = await res.json()
       if (json.success) {
+        if (typeof json.id === 'number') setSvcId(json.id)
         setSaveMessage('Layanan berhasil disimpan!')
         fetchData()
         setTimeout(() => setEditorMode(false), 1200)
       } else {
-        alert(json.error || 'Gagal menyimpan layanan.')
+        setErrorMessage(apiErrorMessage(json, 'Gagal menyimpan layanan.'))
       }
-    } catch {
-      alert('Terjadi kesalahan jaringan saat menyimpan.')
+    } catch (err) {
+      console.error('[Services] service save failed:', err)
+      setErrorMessage('Terjadi kesalahan jaringan saat menyimpan.')
     } finally {
       setSaving(false)
     }
@@ -348,12 +387,14 @@ export function StudioServicesManager() {
       const res = await fetch(`/api/service-categories?id=${id}`, { method: 'DELETE' })
       const json = await res.json()
       if (json.success) {
+        setListStatus(`Departemen "${title}" berhasil dihapus.`)
         fetchData()
       } else {
-        alert(json.error || 'Gagal menghapus departemen.')
+        setListStatus(apiErrorMessage(json, 'Gagal menghapus departemen.'))
       }
-    } catch {
-      alert('Gagal menghapus departemen.')
+    } catch (err) {
+      console.error('[Services] department delete failed:', err)
+      setListStatus('Gagal menghapus departemen.')
     }
   }
 
@@ -364,12 +405,14 @@ export function StudioServicesManager() {
       const res = await fetch(`/api/services?id=${id}`, { method: 'DELETE' })
       const json = await res.json()
       if (json.success) {
+        setListStatus(`Layanan "${name}" berhasil dihapus.`)
         fetchData()
       } else {
-        alert(json.error || 'Gagal menghapus layanan.')
+        setListStatus(apiErrorMessage(json, 'Gagal menghapus layanan.'))
       }
-    } catch {
-      alert('Gagal menghapus layanan.')
+    } catch (err) {
+      console.error('[Services] service delete failed:', err)
+      setListStatus('Gagal menghapus layanan.')
     }
   }
 
@@ -387,7 +430,7 @@ export function StudioServicesManager() {
         <header className="h-14 shrink-0 px-4 sm:px-6 bg-[var(--studio-sidebar-bg)] border-b border-white/[0.08] flex items-center justify-between gap-3 z-30 select-none">
           <div className="flex items-center gap-2.5 min-w-0 flex-1 max-w-[45%] md:max-w-[50%]">
             <Tooltip label="Kembali" hint="Kembali ke Daftar Layanan" side="bottom">
-              <button
+              <button aria-label="Kembali"
                 type="button"
                 onClick={() => {
                   setEditorMode(false)
@@ -414,7 +457,7 @@ export function StudioServicesManager() {
           {/* Center: Segmented View Switcher (Kanvas, Split, Pratinjau) */}
           <div className="flex items-center p-0.5 rounded-lg bg-black/60 border border-white/10 text-xs shrink-0">
             <Tooltip label="Mode Kanvas" hint="Editor visual menyusun blok langsung" side="bottom">
-              <button
+              <button aria-label="Mode Kanvas" aria-pressed={viewMode === 'canvas'}
                 type="button"
                 onClick={() => setViewMode('canvas')}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-mono font-medium transition-all ${
@@ -428,7 +471,7 @@ export function StudioServicesManager() {
               </button>
             </Tooltip>
             <Tooltip label="Mode Split" hint="Kanvas & pratinjau bersandingan" side="bottom">
-              <button
+              <button aria-label="Mode Split" aria-pressed={viewMode === 'split-preview'}
                 type="button"
                 onClick={() => setViewMode('split-preview')}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-mono font-medium transition-all ${
@@ -442,7 +485,7 @@ export function StudioServicesManager() {
               </button>
             </Tooltip>
             <Tooltip label="Pratinjau Penuh" hint="Pratinjau 100% rasio web publik" side="bottom">
-              <button
+              <button aria-label="Pratinjau Penuh" aria-pressed={viewMode === 'full-preview'}
                 type="button"
                 onClick={() => setViewMode('full-preview')}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-mono font-medium transition-all ${
@@ -461,7 +504,7 @@ export function StudioServicesManager() {
             {/* Toggle Inspector / Properties Panel */}
             {viewMode !== 'full-preview' && (
               <Tooltip label={showPropertiesDrawer ? 'Tutup Panel' : 'Buka Panel'} hint="Panel pengaturan blok & SEO" side="bottom">
-                <button
+                <button aria-label={showPropertiesDrawer ? 'Tutup Panel' : 'Buka Panel'} aria-expanded={showPropertiesDrawer}
                   type="button"
                   onClick={() => setShowPropertiesDrawer(!showPropertiesDrawer)}
                   className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-mono border transition-all ${
@@ -477,7 +520,7 @@ export function StudioServicesManager() {
             )}
 
             {saveMessage && (
-              <span className="text-xs font-mono text-emerald-400 flex items-center gap-1.5 animate-pulse hidden lg:inline-flex">
+              <span role="status" className="text-xs font-mono text-emerald-400 flex items-center gap-1.5 motion-safe:animate-pulse hidden lg:inline-flex">
                 <CheckCircle2 className="w-3.5 h-3.5" />
                 <span>{saveMessage}</span>
               </span>
@@ -506,6 +549,16 @@ export function StudioServicesManager() {
             </Tooltip>
           </div>
         </header>
+
+        {errorMessage && (
+          <div role="alert" className="shrink-0 flex items-start gap-2 px-4 sm:px-6 py-2 bg-rose-500/10 border-b border-rose-500/30 text-xs text-rose-200">
+            <AlertCircle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-rose-400" aria-hidden="true" />
+            <span className="min-w-0 flex-1 break-words">{errorMessage}</span>
+            <button type="button" onClick={() => setErrorMessage('')} aria-label="Tutup pesan galat" className="shrink-0 rounded p-0.5 text-rose-300 hover:bg-white/10">
+              <X className="h-3.5 w-3.5" aria-hidden="true" />
+            </button>
+          </div>
+        )}
 
         {/* Dedicated Fullscreen Workspace: Left Visual Editor • Right Contextual Inspector */}
         <div className="relative flex-1 min-h-0 w-full flex overflow-hidden">
@@ -656,10 +709,10 @@ export function StudioServicesManager() {
                             />
                             <div className="space-y-1 pt-1 border-t border-white/5">
                               <div className="flex items-center justify-between">
-                                <label className="text-[11px] font-mono text-neutral-400">Alt Text [ID] (Wajib Publikasi)</label>
+                                <label htmlFor={`${fieldId}-sv1`} className="text-[11px] font-mono text-neutral-400">Alt Text [ID] (Wajib Publikasi)</label>
                                 <span className={`text-[10px] font-mono ${depHeroAlt.length > 125 ? 'text-red-400' : 'text-neutral-500'}`}>{depHeroAlt.length}/125</span>
                               </div>
-                              <input
+                              <input id={`${fieldId}-sv1`}
                                 type="text"
                                 value={depHeroAlt}
                                 onChange={(e) => setDepHeroAlt(e.target.value)}
@@ -784,10 +837,10 @@ export function StudioServicesManager() {
                             />
                             <div className="space-y-1 pt-1 border-t border-white/5">
                               <div className="flex items-center justify-between">
-                                <label className="text-[11px] font-mono text-neutral-400">Alt Text [ID] (Wajib Publikasi)</label>
+                                <label htmlFor={`${fieldId}-sv2`} className="text-[11px] font-mono text-neutral-400">Alt Text [ID] (Wajib Publikasi)</label>
                                 <span className={`text-[10px] font-mono ${svcHeroAlt.length > 125 ? 'text-red-400' : 'text-neutral-500'}`}>{svcHeroAlt.length}/125</span>
                               </div>
-                              <input
+                              <input id={`${fieldId}-sv2`}
                                 type="text"
                                 value={svcHeroAlt}
                                 onChange={(e) => setSvcHeroAlt(e.target.value)}
@@ -959,6 +1012,9 @@ export function StudioServicesManager() {
   // ─────────────────────────────────────────────────────────────────────────────
   return (
     <div className="space-y-6">
+      <p role="status" className={listStatus ? 'text-xs font-mono text-neutral-300' : 'sr-only'}>
+        {listStatus}
+      </p>
       {/* Compact Switcher & Action Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 sm:p-4 rounded-2xl bg-surface-overlay border border-white/10 shadow-sm">
         {/* Tabs Switcher */}
@@ -1052,7 +1108,8 @@ export function StudioServicesManager() {
                       {(() => {
                         if (Array.isArray(cat.blocks)) return cat.blocks.length
                         if (typeof cat.blocks === 'string') {
-                          try { return JSON.parse(cat.blocks).length } catch { return 0 }
+                          const parsed = parseJsonValue<unknown>(cat.blocks, [])
+                          return Array.isArray(parsed) ? parsed.length : 0
                         }
                         return 0
                       })()} Blok
@@ -1085,7 +1142,7 @@ export function StudioServicesManager() {
                       <Edit className="w-3.5 h-3.5" />
                       <span>Edit & Blok</span>
                     </button>
-                    <button
+                    <button aria-label="Hapus Departemen"
                       type="button"
                       onClick={() => handleDeleteDepartment(cat.id, cat.title)}
                       className="p-1.5 rounded-xl text-neutral-500 hover:text-rose-400 hover:bg-rose-500/10"
@@ -1166,7 +1223,7 @@ export function StudioServicesManager() {
                             >
                               Edit
                             </button>
-                            <button
+                            <button aria-label={`Hapus layanan ${svc.name}`}
                               type="button"
                               onClick={() => handleDeleteService(svc.id, svc.name)}
                               className="p-1 rounded text-neutral-500 hover:text-rose-400"

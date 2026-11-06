@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireRole, type Role } from '@/lib/auth/rbac'
+import { SEO_TOOL_ROLES } from '@/lib/seo/access'
 import { indexingHistoryQuerySchema } from '@/lib/validation/api-schemas'
 import { getIndexingHistory } from '@/lib/db/indexing'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
-const ALLOWED_ROLES: Role[] = ['SUPER_ADMIN', 'CONTENT_ADMIN', 'EDITOR', 'SEO_MANAGER']
+const ALLOWED_ROLES: Role[] = SEO_TOOL_ROLES
 
 function safeJsonParse(payload: string | null | undefined) {
   if (!payload) return null

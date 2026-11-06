@@ -306,6 +306,7 @@ export async function POST(request: NextRequest) {
       revalidatePath('/', 'layout')
       revalidatePath('/journal')
       revalidatePath(`/journal/${cleanSlug}`)
+      revalidatePath('/sitemap.xml')
       revalidatePath('/admin')
     } catch (e) {
       console.warn('[Cache Revalidate] Failed in POST /api/articles:', e)
@@ -369,7 +370,9 @@ export async function POST(request: NextRequest) {
         ? 'Artikel berhasil diterbitkan ke database!'
         : targetStatus === 'in_review'
           ? 'Artikel diajukan untuk review editorial!'
-          : 'Draf artikel berhasil disimpan di database!',
+          : targetStatus === 'scheduled'
+            ? 'Artikel dijadwalkan dan akan terbit otomatis pada waktunya.'
+            : 'Draf artikel berhasil disimpan di database!',
       slug: cleanSlug,
       url: `/journal/${cleanSlug}`,
     })
@@ -420,6 +423,7 @@ export async function DELETE(request: NextRequest) {
       revalidatePath('/', 'layout')
       revalidatePath('/journal')
       revalidatePath(`/journal/${slug}`)
+      revalidatePath('/sitemap.xml')
       revalidatePath('/admin')
     } catch (e) {
       console.warn('[Cache Revalidate] Failed in DELETE /api/articles:', e)
@@ -659,6 +663,7 @@ export async function PATCH(request: NextRequest) {
       revalidatePath('/journal')
       revalidatePath(`/journal/${lookupSlug}`)
       revalidatePath(`/journal/${slug}`)
+      revalidatePath('/sitemap.xml')
       revalidatePath('/admin')
     } catch (e) {
       console.warn('[Cache Revalidate] Failed in PATCH /api/articles:', e)

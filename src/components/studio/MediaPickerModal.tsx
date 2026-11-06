@@ -54,10 +54,12 @@ export default function MediaPickerModal({
   const [uploadError, setUploadError] = useState('')
   const [uploadSuccess, setUploadSuccess] = useState('')
   const [customUrlInput, setCustomUrlInput] = useState('')
+  const [libraryError, setLibraryError] = useState('')
 
   // Fetch library items
   const fetchMedia = useCallback(async () => {
     setLoading(true)
+    setLibraryError('')
     try {
       const params = new URLSearchParams({
         page: page.toString(),
@@ -67,12 +69,17 @@ export default function MediaPickerModal({
       })
       const res = await fetch(`/api/upload?${params.toString()}`)
       const data = await res.json()
-      if (data.success) {
+      if (res.ok && data.success) {
         setItems(data.items || [])
         setPagination(data.pagination || { total: 0, page: 1, limit: 32, totalPages: 1 })
+      } else {
+        setItems([])
+        setLibraryError(typeof data.error === 'string' && data.error !== 'Unauthorized' ? data.error : 'Gagal memuat pustaka media.')
       }
     } catch (err) {
       console.error('Failed to load media:', err)
+      setItems([])
+      setLibraryError('Tidak dapat terhubung ke server untuk memuat pustaka media.')
     } finally {
       setLoading(false)
     }
@@ -124,9 +131,16 @@ export default function MediaPickerModal({
         body: formData,
       })
 
-      const data = await res.json()
+      const data = await res.json().catch(() => ({}))
       if (!res.ok || !data.success) {
-        throw new Error(data.error || 'Gagal mengunggah gambar.')
+        const message =
+          res.status === 403
+            ? 'Peran Anda tidak dapat mengunggah gambar. Pilih gambar dari pustaka atau minta bantuan editor.'
+            : typeof data.error === 'string'
+              ? data.error
+              : 'Gagal mengunggah gambar.'
+        setUploadError(message)
+        return
       }
 
       setUploadSuccess(`Gambar "${file.name}" berhasil diunggah!`)
@@ -144,8 +158,9 @@ export default function MediaPickerModal({
         onSelect(data.url, uploadedItem)
         onClose()
       }, 600)
-    } catch (err: any) {
-      setUploadError(err.message || 'Terjadi kesalahan saat upload.')
+    } catch (err) {
+      console.error('Upload failed:', err)
+      setUploadError('Tidak dapat terhubung ke server. Gambar belum diunggah.')
     } finally {
       setUploading(false)
     }
@@ -212,7 +227,7 @@ export default function MediaPickerModal({
                     : 'text-neutral-400 hover:text-white'
                 }`}
               >
-                <Folder className="w-3.5 h-3.5" />
+                <Folder className="w-3.5 h-3.5" aria-hidden="true" />
                 <span>Pustaka Media</span>
               </button>
               <button
@@ -225,7 +240,7 @@ export default function MediaPickerModal({
                     : 'text-neutral-400 hover:text-white'
                 }`}
               >
-                <Upload className="w-3.5 h-3.5" />
+                <Upload className="w-3.5 h-3.5" aria-hidden="true" />
                 <span>Upload Baru</span>
               </button>
               <button
@@ -238,7 +253,7 @@ export default function MediaPickerModal({
                     : 'text-neutral-400 hover:text-white'
                 }`}
               >
-                <Link2 className="w-3.5 h-3.5" />
+                <Link2 className="w-3.5 h-3.5" aria-hidden="true" />
                 <span>Input URL</span>
               </button>
             </div>
@@ -324,12 +339,19 @@ export default function MediaPickerModal({
               <div className="flex-1 overflow-y-auto p-6 scrollbar-thin">
                 {loading ? (
                   <div className="h-64 flex flex-col items-center justify-center gap-3 text-neutral-400">
-                    <RefreshCw className="w-6 h-6 animate-spin text-accent-400" />
+                    <RefreshCw className="w-6 h-6 motion-safe:animate-spin text-accent-400" aria-hidden="true" />
                     <span className="text-xs font-mono">Memuat aset gambar...</span>
+                  </div>
+                ) : libraryError ? (
+                  <div role="alert" className="h-64 flex flex-col items-center justify-center gap-3 text-red-200">
+                    <p className="text-xs font-mono">{libraryError}</p>
+                    <button type="button" onClick={() => void fetchMedia()} className={`${focusRing} px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-xs text-white`}>
+                      Coba lagi
+                    </button>
                   </div>
                 ) : items.length === 0 ? (
                   <div className="h-64 flex flex-col items-center justify-center gap-3 text-neutral-500">
-                    <FileImage className="w-10 h-10 text-neutral-600 stroke-[1.5]" />
+                    <FileImage className="w-10 h-10 text-neutral-600 stroke-[1.5]" aria-hidden="true" />
                     <p className="text-xs font-mono">Tidak ada gambar yang cocok dengan filter.</p>
                   </div>
                 ) : (
@@ -398,7 +420,7 @@ export default function MediaPickerModal({
                       type="button"
                       disabled={page <= 1}
                       onClick={() => setPage((p) => Math.max(1, p - 1))}
-                      className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 disabled:opacity-30 disabled:cursor-not-allowed flex items-center gap-1"
+                      className={`${focusRing} px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 disabled:opacity-30 disabled:cursor-not-allowed flex items-center gap-1`}
                     >
                       <ChevronLeft className="w-3.5 h-3.5" aria-hidden="true" />
                       <span>Sebelumnya</span>
@@ -407,7 +429,7 @@ export default function MediaPickerModal({
                       type="button"
                       disabled={page >= pagination.totalPages}
                       onClick={() => setPage((p) => Math.min(pagination.totalPages, p + 1))}
-                      className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 disabled:opacity-30 disabled:cursor-not-allowed flex items-center gap-1"
+                      className={`${focusRing} px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 disabled:opacity-30 disabled:cursor-not-allowed flex items-center gap-1`}
                     >
                       <span>Berikutnya</span>
                       <ChevronRight className="w-3.5 h-3.5" aria-hidden="true" />
@@ -466,7 +488,7 @@ export default function MediaPickerModal({
             <div className="flex-1 p-8 flex flex-col items-center justify-center">
               <div className="w-full max-w-lg p-6 rounded-3xl bg-black/40 border border-white/15 space-y-4">
                 <div className="flex items-center gap-2.5 pb-2 border-b border-white/10">
-                  <Link2 className="w-4 h-4 text-accent-400" />
+                  <Link2 className="w-4 h-4 text-accent-400" aria-hidden="true" />
                   <h4 className="text-xs font-mono font-bold text-white uppercase tracking-wider">
                     Gunakan URL Gambar Kustom
                   </h4>

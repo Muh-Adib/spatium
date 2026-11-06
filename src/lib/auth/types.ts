@@ -204,6 +204,8 @@ export function validateStatusTransition(
 
     case 'draft':
       if (fromState === 'scheduled' && !permissions.canPublish) return { allowed: false, error: 'Tidak berwenang membatalkan jadwal.' }
+      // Unpublishing takes a live article offline: same authority as publishing it.
+      if (fromState === 'published' && !permissions.canPublish) return { allowed: false, error: `Peran '${role}' tidak memiliki wewenang menarik artikel yang sudah terbit.` }
       if (fromState === 'in_review' || fromState === 'approved') {
         if (!permissions.canReview && !permissions.canEditAnyDraft) {
           return { allowed: false, error: `Tidak memiliki wewenang mengembalikan artikel ke status draft.` }

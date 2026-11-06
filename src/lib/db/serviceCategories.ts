@@ -28,7 +28,8 @@ function parseJsonSafe<T>(val: any, fallback: T): T {
   if (typeof val !== 'string') return val
   try {
     return JSON.parse(val)
-  } catch {
+  } catch (err) {
+    console.warn('[db/serviceCategories] malformed JSON column:', err)
     return fallback
   }
 }
@@ -81,7 +82,8 @@ export async function getNavServiceCategories(): Promise<ServiceCategoryEntity[]
       .orderBy((c: any) => c.order.asc())
       .all()
     return rows.filter((r: any) => Boolean(r.showInNav)).map(mapCategoryRow)
-  } catch {
+  } catch (err) {
+    console.error('[db/serviceCategories] read failed:', err)
     return []
   }
 }
@@ -92,7 +94,8 @@ export async function getServiceCategoryBySlug(slug: string): Promise<ServiceCat
     const row = await prisma.orm.public.ServiceCategory.where({ slug }).first()
     if (!row) return null
     return mapCategoryRow(row)
-  } catch {
+  } catch (err) {
+    console.error('[db/serviceCategories] read failed:', err)
     return null
   }
 }
@@ -118,7 +121,8 @@ export async function getServiceCategoryWithServices(slug: string) {
         blocks: parseJsonSafe(s.blocks, []),
       })),
     }
-  } catch {
+  } catch (err) {
+    console.error('[db/serviceCategories] read failed:', err)
     return null
   }
 }
@@ -143,6 +147,7 @@ export async function getAllServiceCategoriesWithServices() {
         })),
     }))
   } catch (err) {
+    console.error('[db/serviceCategories] read failed:', err)
     return []
   }
 }

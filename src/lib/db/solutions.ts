@@ -38,7 +38,8 @@ function parseJsonSafe<T>(val: any, fallback: T): T {
   if (typeof val !== 'string') return val
   try {
     return JSON.parse(val)
-  } catch {
+  } catch (err) {
+    console.warn('[db/solutions] malformed JSON column:', err)
     return fallback
   }
 }
@@ -141,6 +142,7 @@ export async function getSolutionFinderConfig() {
       updatedAt: row.updatedAt,
     }
   } catch (err) {
+    console.error('[db/solutions] read failed:', err)
     return null
   }
 }

@@ -1,6 +1,27 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { revalidateTag, revalidatePath } from 'next/cache'
 import crypto from 'crypto'
+import { requireRole } from '@/lib/auth/rbac'
+
+/** Studio roles that may flush the cache from Settings with their session. */
+const STUDIO_FLUSH_ROLES = ['SUPER_ADMIN', 'CONTENT_ADMIN'] as const
+
+/**
+ * The proxy lists this route as public (webhook), so it skips the same-origin
+ * mutation check; the session path enforces it here instead.
+ */
+function isSameOrigin(request: NextRequest): boolean {
+  const origin = request.headers.get('origin')
+  if (!origin) return false
+  const host = request.headers.get('host') || request.nextUrl.host
+  const protocol = request.headers.get('x-forwarded-proto') || request.nextUrl.protocol.replace(':', '')
+  try {
+    return new URL(origin).origin === `${protocol}://${host}`
+  } catch (err) {
+    console.warn('[Revalidate API] Malformed Origin header', err)
+    return false
+  }
+}
 
 /**
  * Timing-safe string comparison to prevent timing side-channel attacks.
@@ -13,7 +34,8 @@ function secureCompare(a: string, b: string): boolean {
       return false
     }
     return crypto.timingSafeEqual(bufA, bufB)
-  } catch {
+  } catch (err) {
+    console.warn('[Revalidate API] Secret comparison failed', err)
     return false
   }
 }
@@ -27,16 +49,6 @@ export interface GenericRevalidatePayload {
 }
 
 export async function POST(request: NextRequest) {
-  // 1. Authenticate via pre-shared secret using timingSafeEqual
-  const expectedSecret = process.env.REVALIDATE_SECRET || process.env.WEBHOOK_SECRET
-  if (!expectedSecret) {
-    console.error('[Revalidate API] REVALIDATE_SECRET is not configured on the server.')
-    return NextResponse.json(
-      { error: 'Unauthorized', message: 'Revalidation endpoint is not configured.' },
-      { status: 401 }
-    )
-  }
-
   const { searchParams } = new URL(request.url)
   const incomingSecret =
     request.headers.get('x-revalidate-secret') ||
@@ -45,11 +57,29 @@ export async function POST(request: NextRequest) {
     searchParams.get('secret') ||
     ''
 
-  if (!incomingSecret || !secureCompare(incomingSecret, expectedSecret)) {
-    return NextResponse.json(
-      { error: 'Unauthorized', message: 'Kunci rahasia revalidasi tidak valid atau tidak disertakan.' },
-      { status: 401 }
-    )
+  if (incomingSecret) {
+    // 1a. Webhook: pre-shared secret compared with timingSafeEqual
+    const expectedSecret = process.env.REVALIDATE_SECRET || process.env.WEBHOOK_SECRET
+    if (!expectedSecret) {
+      console.error('[Revalidate API] REVALIDATE_SECRET is not configured on the server.')
+      return NextResponse.json(
+        { error: 'Unauthorized', message: 'Revalidation endpoint is not configured.' },
+        { status: 401 }
+      )
+    }
+    if (!secureCompare(incomingSecret, expectedSecret)) {
+      return NextResponse.json(
+        { error: 'Unauthorized', message: 'Kunci rahasia revalidasi tidak valid atau tidak disertakan.' },
+        { status: 401 }
+      )
+    }
+  } else {
+    // 1b. Studio "flush cache": signed-in admin, same-origin request only
+    if (!isSameOrigin(request)) {
+      return NextResponse.json({ error: 'Origin permintaan tidak diizinkan.' }, { status: 403 })
+    }
+    const auth = await requireRole(request, [...STUDIO_FLUSH_ROLES])
+    if (auth.error) return auth.error
   }
 
   // 2. Process generic revalidation payload
@@ -136,9 +166,10 @@ export async function POST(request: NextRequest) {
       revalidatedPaths,
       timestamp: new Date().toISOString(),
     })
-  } catch (err: any) {
+  } catch (err) {
+    console.error('[Revalidate API] Revalidation failed', err)
     return NextResponse.json(
-      { error: 'Gagal memproses revalidasi cache', details: err.message },
+      { error: 'Gagal memproses revalidasi cache' },
       { status: 500 }
     )
   }

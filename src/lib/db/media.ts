@@ -3,12 +3,9 @@ import { prisma } from './prisma'
 import fs from 'fs'
 import path from 'path'
 import sharp from 'sharp'
-import {
-  MediaMetadata,
-  MediaAuditReport,
-  MediaAuditIssue,
-  Locale,
-} from '../seo/schema'
+import { MediaAuditReport, MediaAuditIssue } from '../seo/schema'
+import { PublicError } from '@/lib/http/errors'
+import type { MediaMetadataPatch } from '@/lib/media/media-schema'
 
 export interface MediaFilterOptions {
   search?: string
@@ -17,6 +14,36 @@ export interface MediaFilterOptions {
   page?: number
   pageSize?: number
 }
+
+type MediaRow = {
+  id: number
+  fileName: string
+  url: string
+  altText: string | null
+  title: string | null
+  caption: string | null
+  description: string | null
+  decorative: boolean | null
+  focalPoint: string | null
+  credit: string | null
+  width: number | null
+  height: number | null
+  size: number | null
+  mimeType: string | null
+  blurHash: string | null
+  usedIn: string | null
+  uploadedBy: string | null
+  createdAt: string
+  updatedAt: string
+}
+
+export type MediaRecord = Omit<MediaRow, 'altText' | 'focalPoint' | 'usedIn'> & {
+  altText: { id: string; en: string }
+  focalPoint: { x: number; y: number }
+  usedIn: string[]
+}
+
+type Tx = Parameters<Parameters<typeof prisma.transaction>[0]>[0]
 
 /**
  * Normalizes filename to slug-friendly format (lowercase, hyphens, safe chars)
@@ -29,6 +56,67 @@ export function slugifyFileName(fileName: string): string {
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '')
   return `${cleanBase || 'media'}${ext}`
+}
+
+function parseAltText(raw: string | null): { id: string; en: string } {
+  if (!raw) return { id: '', en: '' }
+  if (!raw.startsWith('{')) return { id: raw, en: raw }
+  try {
+    const parsed: unknown = JSON.parse(raw)
+    if (parsed && typeof parsed === 'object') {
+      const o = parsed as Record<string, unknown>
+      return { id: typeof o.id === 'string' ? o.id : '', en: typeof o.en === 'string' ? o.en : '' }
+    }
+  } catch (err) {
+    console.warn('[media] invalid altText JSON:', err)
+  }
+  return { id: raw, en: raw }
+}
+
+function parseFocalPoint(raw: string | null): { x: number; y: number } {
+  if (raw?.startsWith('{')) {
+    try {
+      const parsed: unknown = JSON.parse(raw)
+      if (parsed && typeof parsed === 'object') {
+        const o = parsed as Record<string, unknown>
+        if (typeof o.x === 'number' && typeof o.y === 'number') return { x: o.x, y: o.y }
+      }
+    } catch (err) {
+      console.warn('[media] invalid focalPoint JSON:', err)
+    }
+  }
+  return { x: 50, y: 50 }
+}
+
+function parseUsedIn(raw: string | null): string[] {
+  if (!raw) return []
+  if (!raw.startsWith('[')) return [raw]
+  try {
+    const parsed: unknown = JSON.parse(raw)
+    return Array.isArray(parsed) ? parsed.filter((v): v is string => typeof v === 'string') : []
+  } catch (err) {
+    console.warn('[media] invalid usedIn JSON:', err)
+    return [raw]
+  }
+}
+
+function toMediaRecord(row: MediaRow): MediaRecord {
+  return {
+    ...row,
+    altText: parseAltText(row.altText),
+    focalPoint: parseFocalPoint(row.focalPoint),
+    usedIn: parseUsedIn(row.usedIn),
+  }
+}
+
+async function auditMedia(tx: Tx, mediaId: number, action: string, actor: string, diff?: Record<string, unknown>) {
+  await tx.orm.public.SeoAuditLog.create({
+    entityType: 'media',
+    entityId: String(mediaId),
+    action,
+    actor,
+    diff: diff ? JSON.stringify(diff) : null,
+  })
 }
 
 /**
@@ -44,8 +132,8 @@ export async function syncLocalMediaFiles(): Promise<number> {
   ]
 
   let added = 0
-  const existingRows = await prisma.orm.public.MediaItem.all()
-  const existingUrls = new Set(existingRows.map((r: any) => r.url))
+  const existingRows = (await prisma.orm.public.MediaItem.all()) as MediaRow[]
+  const existingUrls = new Set(existingRows.map((r) => r.url))
 
   for (const dir of uploadDirs) {
     if (!fs.existsSync(/*turbopackIgnore: true*/ dir)) continue
@@ -66,6 +154,7 @@ export async function syncLocalMediaFiles(): Promise<number> {
           if (file.endsWith('.png')) mimeType = 'image/png'
           else if (file.endsWith('.webp')) mimeType = 'image/webp'
           else if (file.endsWith('.avif')) mimeType = 'image/avif'
+          else if (file.endsWith('.gif')) mimeType = 'image/gif'
           else if (file.endsWith('.svg')) mimeType = 'image/svg+xml'
 
           if (!file.endsWith('.svg')) {
@@ -101,6 +190,14 @@ export async function syncLocalMediaFiles(): Promise<number> {
   return added
 }
 
+async function syncLogged(): Promise<void> {
+  try {
+    await syncLocalMediaFiles()
+  } catch (err) {
+    console.warn('[media] syncing files from public/uploads failed:', err)
+  }
+}
+
 /**
  * Get paginated media items with filters
  */
@@ -108,76 +205,31 @@ export async function getMediaItems(options: MediaFilterOptions = {}) {
   const { search = '', filter = 'all', page = 1, pageSize = 36 } = options
   const offset = (page - 1) * pageSize
 
-  // Ensure files are synced
-  await syncLocalMediaFiles().catch(() => null)
+  // Files written outside the library (legacy uploads, deploy assets) still get a row.
+  await syncLogged()
 
-  const allItems = await prisma.orm.public.MediaItem.orderBy((m: any) => m.id.desc()).all()
-
-  let filtered = allItems.map((item: any) => {
-    let altTextObj = { id: '', en: '' }
-    try {
-      if (item.altText) {
-        if (item.altText.startsWith('{')) {
-          altTextObj = JSON.parse(item.altText)
-        } else {
-          altTextObj = { id: item.altText, en: item.altText }
-        }
-      }
-    } catch {
-      altTextObj = { id: item.altText || '', en: item.altText || '' }
-    }
-
-    let focalPointObj = { x: 50, y: 50 }
-    try {
-      if (item.focalPoint) {
-        if (item.focalPoint.startsWith('{')) {
-          focalPointObj = JSON.parse(item.focalPoint)
-        }
-      }
-    } catch (err) { console.warn("[observable error]:", err) }
-
-    let usedInArr: string[] = []
-    try {
-      if (item.usedIn) {
-        if (item.usedIn.startsWith('[')) {
-          usedInArr = JSON.parse(item.usedIn)
-        } else {
-          usedInArr = [item.usedIn]
-        }
-      }
-    } catch {
-      if (item.usedIn) usedInArr = [item.usedIn]
-    }
-
-    return {
-      ...item,
-      altText: altTextObj,
-      focalPoint: focalPointObj,
-      usedIn: usedInArr,
-    }
-  })
+  const rows = (await prisma.orm.public.MediaItem.orderBy((m) => m.id.desc()).all()) as MediaRow[]
+  let filtered = rows.map(toMediaRecord)
 
   // Filter conditions
   if (search) {
     const s = search.toLowerCase()
     filtered = filtered.filter(
-      (it: any) =>
+      (it) =>
         it.fileName.toLowerCase().includes(s) ||
         it.url.toLowerCase().includes(s) ||
-        it.title?.toLowerCase().includes(s) ||
+        Boolean(it.title?.toLowerCase().includes(s)) ||
         it.altText.id.toLowerCase().includes(s) ||
         it.altText.en.toLowerCase().includes(s)
     )
   }
 
   if (filter === 'missing_alt') {
-    filtered = filtered.filter(
-      (it: any) => !it.decorative && (!it.altText.id?.trim() || !it.altText.en?.trim())
-    )
+    filtered = filtered.filter((it) => !it.decorative && (!it.altText.id.trim() || !it.altText.en.trim()))
   } else if (filter === 'unused') {
-    filtered = filtered.filter((it: any) => it.usedIn.length === 0)
+    filtered = filtered.filter((it) => it.usedIn.length === 0)
   } else if (filter === 'oversized') {
-    filtered = filtered.filter((it: any) => (it.size || 0) > 800 * 1024) // > 800 KB
+    filtered = filtered.filter((it) => (it.size || 0) > 800 * 1024) // > 800 KB
   }
 
   const total = filtered.length
@@ -195,192 +247,208 @@ export async function getMediaItems(options: MediaFilterOptions = {}) {
 /**
  * Get single media item by ID or URL
  */
-export async function getMediaItem(idOrUrl: number | string) {
-  const row = typeof idOrUrl === 'number'
+export async function getMediaItem(idOrUrl: number | string): Promise<MediaRecord | null> {
+  const row = (typeof idOrUrl === 'number'
     ? await prisma.orm.public.MediaItem.where({ id: idOrUrl }).first()
-    : await prisma.orm.public.MediaItem.where({ url: idOrUrl }).first()
+    : await prisma.orm.public.MediaItem.where({ url: idOrUrl }).first()) as MediaRow | null
 
-  if (!row) return null
+  return row ? toMediaRecord(row) : null
+}
 
-  let altTextObj = { id: '', en: '' }
-  try {
-    if (row.altText) {
-      if (row.altText.startsWith('{')) {
-        altTextObj = JSON.parse(row.altText)
-      } else {
-        altTextObj = { id: row.altText, en: row.altText }
-      }
-    }
-  } catch {
-    altTextObj = { id: row.altText || '', en: row.altText || '' }
-  }
+/** A file already written under public/uploads, to be registered in the library. */
+export type NewMediaFile = {
+  fileName: string
+  url: string
+  size: number
+  mimeType: string
+  width: number | null
+  height: number | null
+  altText?: { id: string; en: string }
+  title?: string
+  caption?: string
+}
 
-  let focalPointObj = { x: 50, y: 50 }
-  try {
-    if (row.focalPoint) {
-      if (row.focalPoint.startsWith('{')) {
-        focalPointObj = JSON.parse(row.focalPoint)
-      }
-    }
-  } catch (err) { console.warn("[observable error]:", err) }
-
-  let usedInArr: string[] = []
-  try {
-    if (row.usedIn) {
-      if (row.usedIn.startsWith('[')) {
-        usedInArr = JSON.parse(row.usedIn)
-      } else {
-        usedInArr = [row.usedIn]
-      }
-    }
-  } catch {
-    if (row.usedIn) usedInArr = [row.usedIn]
-  }
-
-  return {
-    ...row,
-    altText: altTextObj,
-    focalPoint: focalPointObj,
-    usedIn: usedInArr,
-  }
+/**
+ * Registers an uploaded file in the media library, attributed to `uploadedBy`
+ * (the Studio user id), with its audit entry in the same transaction.
+ */
+export async function registerMediaItem(file: NewMediaFile, uploadedBy: string, actor: string): Promise<MediaRecord> {
+  return prisma.transaction(async (tx) => {
+    const row = (await tx.orm.public.MediaItem.create({
+      fileName: file.fileName,
+      url: file.url,
+      size: file.size,
+      mimeType: file.mimeType,
+      width: file.width,
+      height: file.height,
+      altText: JSON.stringify(file.altText ?? { id: '', en: '' }),
+      title: file.title || file.fileName,
+      caption: file.caption ?? '',
+      focalPoint: JSON.stringify({ x: 50, y: 50 }),
+      usedIn: JSON.stringify([]),
+      uploadedBy,
+    })) as MediaRow
+    await auditMedia(tx, row.id, 'MEDIA_UPLOAD', actor, { url: file.url, mimeType: file.mimeType, size: file.size })
+    return toMediaRecord(row)
+  })
 }
 
 /**
  * Update media item metadata (Alt text per locale, title, caption, description, focal point)
  */
-export async function updateMediaItem(
-  id: number,
-  patch: Partial<MediaMetadata> & { altText?: { id?: string; en?: string } }
-) {
-  const current = await getMediaItem(id)
-  if (!current) throw new Error(`Media item with ID ${id} not found`)
+export async function updateMediaItem(id: number, patch: MediaMetadataPatch, actor: string): Promise<MediaRecord> {
+  return prisma.transaction(async (tx) => {
+    const row = (await tx.orm.public.MediaItem.where({ id }).forUpdate().first()) as MediaRow | null
+    if (!row) throw new PublicError(`Media dengan ID ${id} tidak ditemukan.`, 404)
+    const current = toMediaRecord(row)
 
-  const updatedAltText = {
-    id: patch.altText?.id !== undefined ? patch.altText.id : current.altText.id,
-    en: patch.altText?.en !== undefined ? patch.altText.en : current.altText.en,
-  }
+    const values: Record<string, unknown> = {}
+    if (patch.altText) {
+      values.altText = JSON.stringify({
+        id: patch.altText.id ?? current.altText.id,
+        en: patch.altText.en ?? current.altText.en,
+      })
+    }
+    if (patch.focalPoint) values.focalPoint = JSON.stringify(patch.focalPoint)
+    if (patch.title !== undefined) values.title = patch.title
+    if (patch.caption !== undefined) values.caption = patch.caption
+    if (patch.description !== undefined) values.description = patch.description
+    if (patch.decorative !== undefined) values.decorative = patch.decorative
+    if (patch.credit !== undefined) values.credit = patch.credit
 
-  const updatedFocal = patch.focalPoint
-    ? JSON.stringify(patch.focalPoint)
-    : JSON.stringify(current.focalPoint)
-
-  await prisma.orm.public.MediaItem.where({ id }).update({
-      altText: JSON.stringify(updatedAltText),
-      title: patch.title !== undefined ? patch.title : current.title,
-      caption: patch.caption !== undefined ? patch.caption : current.caption,
-      description: patch.description !== undefined ? patch.description : current.description,
-      decorative: patch.decorative !== undefined ? patch.decorative : current.decorative,
-      focalPoint: updatedFocal,
-      credit: patch.credit !== undefined ? patch.credit : current.credit,
-    })
-
-  return getMediaItem(id)
+    if (Object.keys(values).length > 0) {
+      await tx.orm.public.MediaItem.where({ id }).update(values)
+      await auditMedia(tx, id, 'MEDIA_UPDATE', actor, { fields: Object.keys(values) })
+    }
+    const updated = (await tx.orm.public.MediaItem.where({ id }).first()) as MediaRow
+    return toMediaRecord(updated)
+  })
 }
+
+/** Deletes the library row (with an audit entry). The caller removes the file afterwards. */
+export async function deleteMediaItem(id: number, actor: string): Promise<void> {
+  await prisma.transaction(async (tx) => {
+    const row = (await tx.orm.public.MediaItem.where({ id }).forUpdate().first()) as MediaRow | null
+    if (!row) throw new PublicError('Media tidak ditemukan.', 404)
+    await tx.orm.public.MediaItem.where({ id }).delete()
+    await auditMedia(tx, id, 'MEDIA_DELETE', actor, { url: row.url, fileName: row.fileName })
+  })
+}
+
+/** Slugs of published content whose stored image URLs a rename rewrote. */
+export type RenameTouched = { articles: string[]; portfolios: string[]; services: string[] }
 
 /**
  * Renames a media file:
- * 1. Renames physical file on disk
- * 2. Creates automated 301 redirect from old URL to new URL in redirects table
- * 3. Updates all references in database articles, portfolios, services, and pages
- * 4. Updates media_items record
+ * 1. Renames physical file on disk (the extension never changes)
+ * 2. In one transaction: 301 redirect old → new URL, rewrite references in
+ *    articles, portfolios and services, update the media row, audit entry.
+ * If the transaction fails the file is moved back.
  */
-export async function renameMediaItem(id: number, newRawFileName: string) {
+export async function renameMediaItem(
+  id: number,
+  newRawFileName: string,
+  actor: string,
+): Promise<{ item: MediaRecord; touched: RenameTouched }> {
   const item = await getMediaItem(id)
-  if (!item) throw new Error(`Media item ${id} not found`)
+  if (!item) throw new PublicError('Media tidak ditemukan.', 404)
 
-  const newFileName = slugifyFileName(newRawFileName)
+  // Keep the real extension: the bytes on disk do not change format.
+  const ext = path.extname(item.fileName).toLowerCase()
+  const base = slugifyFileName(path.basename(newRawFileName, path.extname(newRawFileName)))
+  const newFileName = `${base}${ext}`
   const oldUrl = item.url
-  const oldPath = path.join(process.cwd(), 'public', oldUrl.replace(/^\//, ''))
-  const dir = path.dirname(oldPath)
-  const newPath = path.join(/*turbopackIgnore: true*/ dir, newFileName)
-  const newUrl = oldUrl.replace(path.basename(oldUrl), newFileName)
+  const newUrl = `${path.posix.dirname(oldUrl)}/${newFileName}`
+  const touched: RenameTouched = { articles: [], portfolios: [], services: [] }
 
   if (oldUrl === newUrl) {
-    return item
+    return { item, touched }
   }
 
-  // Rename physical file
-  if (fs.existsSync(oldPath)) {
-    fs.renameSync(oldPath, newPath)
+  const publicDir = path.resolve(process.cwd(), 'public')
+  const uploadsDir = path.join(publicDir, 'uploads')
+  const oldPath = path.resolve(publicDir, oldUrl.replace(/^\//, ''))
+  const newPath = path.resolve(publicDir, newUrl.replace(/^\//, ''))
+  if (!newPath.startsWith(uploadsDir + path.sep) || !oldPath.startsWith(uploadsDir + path.sep)) {
+    throw new PublicError('Hanya file di folder uploads yang dapat diganti namanya.')
+  }
+  if (fs.existsSync(newPath) || (await prisma.orm.public.MediaItem.where({ url: newUrl }).first())) {
+    throw new PublicError(`Nama file "${newFileName}" sudah dipakai. Pilih nama lain.`, 409)
   }
 
-  // 1. Insert or update 301 redirect
-  const existingRedir = await prisma.orm.public.Redirect.where({ sourcePath: oldUrl }).first()
-  if (existingRedir) {
-    await prisma.orm.public.Redirect.where({ id: existingRedir.id }).update({ destinationPath: newUrl, statusCode: 301 })
-  } else {
-    await prisma.orm.public.Redirect.create({
-        sourcePath: oldUrl,
-        destinationPath: newUrl,
-        statusCode: 301,
-        reason: `Automated 301 redirect: Media renamed from ${item.fileName} to ${newFileName}`,
-        active: true,
+  const fileMoved = fs.existsSync(oldPath)
+  if (fileMoved) fs.renameSync(oldPath, newPath)
+
+  try {
+    await prisma.transaction(async (tx) => {
+      await tx.orm.public.Redirect.upsert({
+        conflictOn: { sourcePath: oldUrl },
+        create: {
+          sourcePath: oldUrl,
+          destinationPath: newUrl,
+          statusCode: 301,
+          reason: `Automated 301 redirect: Media renamed from ${item.fileName} to ${newFileName}`,
+          active: true,
+        },
+        update: { destinationPath: newUrl, statusCode: 301, active: true },
       })
-  }
 
-  // 2. Update references in articles
-  const allArticles = await prisma.orm.public.Article.all()
-  for (const art of allArticles) {
-    let changed = false
-    const updateData: any = {}
-    if (art.content?.includes(oldUrl)) {
-      updateData.content = art.content.replaceAll(oldUrl, newUrl)
-      changed = true
-    }
-    if (art.featuredImage?.includes(oldUrl)) {
-      updateData.featuredImage = art.featuredImage.replaceAll(oldUrl, newUrl)
-      changed = true
-    }
-    if (art.coverUrl?.includes(oldUrl)) {
-      updateData.coverUrl = art.coverUrl.replaceAll(oldUrl, newUrl)
-      changed = true
-    }
-    if (changed) {
-      await prisma.orm.public.Article.where({ id: art.id }).update(updateData)
-    }
-  }
+      const articles = await tx.orm.public.Article.all()
+      for (const art of articles) {
+        const values: Record<string, string> = {}
+        if (art.content?.includes(oldUrl)) values.content = art.content.replaceAll(oldUrl, newUrl)
+        if (art.featuredImage?.includes(oldUrl)) values.featuredImage = art.featuredImage.replaceAll(oldUrl, newUrl)
+        if (art.coverUrl?.includes(oldUrl)) values.coverUrl = art.coverUrl.replaceAll(oldUrl, newUrl)
+        if (Object.keys(values).length > 0) {
+          await tx.orm.public.Article.where({ id: art.id }).update(values)
+          touched.articles.push(art.slug)
+        }
+      }
 
-  // 3. Update references in portfolios
-  const allPortfolios = await prisma.orm.public.Portfolio.all()
-  for (const port of allPortfolios) {
-    let changed = false
-    const updateData: any = {}
-    if (port.heroImage?.includes(oldUrl)) {
-      updateData.heroImage = port.heroImage.replaceAll(oldUrl, newUrl)
-      changed = true
-    }
-    if (port.summary?.includes(oldUrl)) {
-      updateData.summary = port.summary.replaceAll(oldUrl, newUrl)
-      changed = true
-    }
-    if (changed) {
-      await prisma.orm.public.Portfolio.where({ id: port.id }).update(updateData)
-    }
-  }
+      const portfolios = await tx.orm.public.Portfolio.all()
+      for (const port of portfolios) {
+        const values: Record<string, string> = {}
+        if (port.heroImage?.includes(oldUrl)) values.heroImage = port.heroImage.replaceAll(oldUrl, newUrl)
+        if (port.summary?.includes(oldUrl)) values.summary = port.summary.replaceAll(oldUrl, newUrl)
+        if (Object.keys(values).length > 0) {
+          await tx.orm.public.Portfolio.where({ id: port.id }).update(values)
+          touched.portfolios.push(port.slug)
+        }
+      }
 
-  // 4. Update references in services
-  const allServices = await prisma.orm.public.Service.all()
-  for (const svc of allServices) {
-    if (svc.heroImage?.includes(oldUrl)) {
-      await prisma.orm.public.Service.where({ id: svc.id }).update({ heroImage: svc.heroImage.replaceAll(oldUrl, newUrl) })
-    }
-  }
+      const services = await tx.orm.public.Service.all()
+      for (const svc of services) {
+        if (svc.heroImage?.includes(oldUrl)) {
+          await tx.orm.public.Service.where({ id: svc.id }).update({ heroImage: svc.heroImage.replaceAll(oldUrl, newUrl) })
+          touched.services.push(svc.slug)
+        }
+      }
 
-  // 5. Update media_items record
-  await prisma.orm.public.MediaItem.where({ id }).update({
-      fileName: newFileName,
-      url: newUrl,
+      await tx.orm.public.MediaItem.where({ id }).update({ fileName: newFileName, url: newUrl })
+      await auditMedia(tx, id, 'MEDIA_RENAME', actor, { from: oldUrl, to: newUrl, references: touched })
     })
+  } catch (err) {
+    if (fileMoved) {
+      try {
+        fs.renameSync(newPath, oldPath)
+      } catch (rollbackErr) {
+        console.error('[media] rename rollback failed; file left at', newPath, rollbackErr)
+      }
+    }
+    throw err
+  }
 
-  return getMediaItem(id)
+  const renamed = await getMediaItem(id)
+  if (!renamed) throw new PublicError('Media tidak ditemukan setelah rename.', 404)
+  return { item: renamed, touched }
 }
 
 /**
  * Scan all media and generate comprehensive Media Audit report (Section 5.5)
  */
 export async function generateMediaAudit(): Promise<MediaAuditReport> {
-  await syncLocalMediaFiles().catch(() => null)
-  const items = await prisma.orm.public.MediaItem.all()
+  await syncLogged()
+  const items = (await prisma.orm.public.MediaItem.all()) as MediaRow[]
 
   const issues: MediaAuditIssue[] = []
   const seenAlts = new Map<string, string>()

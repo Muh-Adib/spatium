@@ -38,11 +38,15 @@ export async function runPageSpeedAudit(
       targetUrl
     )}&strategy=${device}&key=${apiKey}`
 
-    const res = await fetch(endpoint)
+    const res = await fetch(endpoint, { signal: AbortSignal.timeout(90_000) })
     if (!res.ok) {
-      const errText = await res.text().catch(() => '')
+      const errText = await res.text().catch((readErr) => {
+        console.warn('[pagespeed] Could not read error body', readErr)
+        return ''
+      })
+      console.error(`[pagespeed] Google API responded ${res.status}`, errText.slice(0, 500))
       return notConnected<PageSpeedReport>(
-        `Google PageSpeed API mengembalikan status ${res.status}: ${errText.slice(0, 150)}`,
+        `Google PageSpeed API mengembalikan status ${res.status}.`,
         'Pastikan PAGESPEED_API_KEY valid dan URL target dapat diakses publik.'
       )
     }
@@ -58,7 +62,10 @@ export async function runPageSpeedAudit(
     const lcpMs = Math.round(audits['largest-contentful-paint']?.numericValue || 0)
     const fcpMs = Math.round(audits['first-contentful-paint']?.numericValue || 0)
     const cls = Number((audits['cumulative-layout-shift']?.numericValue || 0).toFixed(3))
-    const inpMs = Math.round(audits['interactive']?.numericValue || 0)
+    // Lab runs cannot measure INP; Lighthouse's interactivity proxy is Total
+    // Blocking Time. Stored in `fidOrInpMs` / returned as `inpMs` for shape
+    // compatibility, and labelled TBT in the Studio.
+    const inpMs = Math.round(audits['total-blocking-time']?.numericValue || 0)
     const rawJson = JSON.stringify(data.loadingExperience || {})
 
     // Insert real snapshot into PostgreSQL via Prisma 8
@@ -91,9 +98,10 @@ export async function runPageSpeedAudit(
     }
 
     return connectedResult(report)
-  } catch (err: any) {
+  } catch (err) {
+    console.error('[pagespeed] Audit request failed', err)
     return notConnected<PageSpeedReport>(
-      `Gagal menjalankan audit PageSpeed: ${err.message || 'Network error'}`,
+      'Gagal menjalankan audit PageSpeed: layanan Google tidak dapat dihubungi.',
       'Periksa koneksi internet server dan status layanan Google PageSpeed API.'
     )
   }

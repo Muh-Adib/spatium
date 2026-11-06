@@ -1,6 +1,7 @@
 import crypto from 'node:crypto'
 import { prisma } from '@/lib/db/prisma'
 import { verifyPasswordScrypt, hashPasswordScrypt } from './crypto'
+import type { Role } from './types'
 export { getValidatedAuthSecret } from './secret'
 
 function constantTimeEqual(a: string, b: string): boolean {
@@ -24,6 +25,42 @@ async function verifyAnyPassword(password: string, storedSecret: string): Promis
   return constantTimeEqual(password, storedSecret)
 }
 
+const roleMap: Record<string, Role> = {
+  super_admin: 'SUPER_ADMIN',
+  administrator: 'SUPER_ADMIN',
+  admin: 'SUPER_ADMIN',
+  content_admin: 'CONTENT_ADMIN',
+  editor: 'EDITOR',
+  author: 'AUTHOR',
+  reviewer: 'REVIEWER',
+  seo_manager: 'SEO_MANAGER',
+  media_manager: 'MEDIA_MANAGER',
+}
+
+/** Canonical role for a stored DB role string, or null when unknown. */
+export function canonicalRole(stored: string): Role | null {
+  return Object.hasOwn(roleMap, stored.toLowerCase()) ? roleMap[stored.toLowerCase()] : null
+}
+
+const BOOTSTRAP_ID = 'bootstrap-super-admin'
+
+/**
+ * Current role of a signed-in account, read from the database on every API
+ * call so that demoting or deleting a user takes effect immediately instead of
+ * when their session JWT expires. Returns null when the account no longer
+ * exists or has no valid role. Throws when the database cannot be read.
+ */
+export async function resolveCurrentRole(id: string, email: string | undefined): Promise<Role | null> {
+  if (id === BOOTSTRAP_ID) {
+    const bootstrapEmail = (process.env.BOOTSTRAP_ADMIN_EMAIL || 'admin@spatium.id').toLowerCase().trim()
+    const configured = Boolean(process.env.BOOTSTRAP_ADMIN_PASSWORD_HASH?.trim() || process.env.BOOTSTRAP_ADMIN_PASSWORD?.trim())
+    return configured && bootstrapEmail && email?.toLowerCase() === bootstrapEmail ? 'SUPER_ADMIN' : null
+  }
+  const row = await prisma.orm.public.User.where({ id }).first()
+  if (!row) return null
+  return canonicalRole(row.role)
+}
+
 export async function validateCredentials(emailInput?: unknown, passwordInput?: unknown) {
   if (!emailInput || !passwordInput) {
     return null
@@ -37,17 +74,6 @@ export async function validateCredentials(emailInput?: unknown, passwordInput?: 
     return null
   }
 
-  const roleMap: Record<string, string> = {
-    super_admin: 'SUPER_ADMIN',
-    administrator: 'SUPER_ADMIN',
-    admin: 'SUPER_ADMIN',
-    content_admin: 'CONTENT_ADMIN',
-    editor: 'EDITOR',
-    author: 'AUTHOR',
-    reviewer: 'REVIEWER',
-    seo_manager: 'SEO_MANAGER',
-    media_manager: 'MEDIA_MANAGER',
-  }
 
   // 1. Check Database users table with scrypt password verification
   try {
@@ -66,7 +92,7 @@ export async function validateCredentials(emailInput?: unknown, passwordInput?: 
     if (u && u.passwordHash) {
       const isValid = await verifyAnyPassword(password, u.passwordHash)
       if (isValid) {
-        const role = roleMap[u.role.toLowerCase()]
+        const role = canonicalRole(u.role)
         if (!role) {
           // Unknown roles get no access rather than silently becoming SUPER_ADMIN.
           console.warn(`[auth] Login refused: unknown role "${u.role}" for ${u.email}`)

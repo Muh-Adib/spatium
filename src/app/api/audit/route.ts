@@ -1,7 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { z } from 'zod'
 import { runInternalDatabaseAudit, getLatestAuditReport } from '@/lib/seo/site-audit'
 import { runLiveCrawler } from '@/lib/seo/crawler'
-import { requireUser } from '@/lib/auth/rbac'
+import { requireUser, requireRole } from '@/lib/auth/rbac'
+import { SEO_TOOL_ROLES } from '@/lib/seo/access'
+import { publicMessage } from '@/lib/http/errors'
+
+/**
+ * The crawler always targets the configured site URL; a client-supplied base
+ * URL is not accepted (SSRF). Unknown keys such as `baseUrl` are stripped.
+ */
+const auditRunSchema = z.object({
+  type: z.enum(['internal_db', 'live_crawl']).default('internal_db'),
+  maxPages: z.number().int().min(1).max(50).optional(),
+})
 
 export async function GET(request: NextRequest) {
   const auth = await requireUser(request)
@@ -14,26 +26,31 @@ export async function GET(request: NextRequest) {
       errors: [],
       warnings: [],
     })
-  } catch (err: any) {
+  } catch (err) {
+    console.error('[audit] Failed to load latest audit report', err)
     return NextResponse.json(
-      { data: null, errors: [err.message || 'Gagal memuat hasil audit SEO.'] },
+      { data: null, errors: [publicMessage(err, 'Gagal memuat hasil audit SEO.')] },
       { status: 500 }
     )
   }
 }
 
 export async function POST(request: NextRequest) {
-  const auth = await requireUser(request)
+  const auth = await requireRole(request, SEO_TOOL_ROLES)
   if (auth.error) return auth.error
 
-  try {
-    const body = await request.json().catch(() => ({}))
-    const type = body.type || 'internal_db'
+  const raw = await request.json().catch(() => ({}))
+  const parsed = auditRunSchema.safeParse(raw ?? {})
+  if (!parsed.success) {
+    return NextResponse.json(
+      { data: null, errors: parsed.error.issues.map((i) => i.message), warnings: [] },
+      { status: 400 }
+    )
+  }
 
-    if (type === 'live_crawl') {
-      const baseUrl = body.baseUrl
-      const maxPages = body.maxPages || 30
-      const crawlReport = await runLiveCrawler({ baseUrl, maxPages })
+  try {
+    if (parsed.data.type === 'live_crawl') {
+      const crawlReport = await runLiveCrawler({ maxPages: parsed.data.maxPages ?? 30 })
       return NextResponse.json({
         data: crawlReport,
         message: `Live crawl berhasil dijalankan pada ${crawlReport.crawledPages} halaman.`,
@@ -50,9 +67,10 @@ export async function POST(request: NextRequest) {
       errors: [],
       warnings: [],
     })
-  } catch (err: any) {
+  } catch (err) {
+    console.error('[audit] Audit run failed', err)
     return NextResponse.json(
-      { data: null, errors: [err.message || 'Gagal menjalankan audit situs.'] },
+      { data: null, errors: [publicMessage(err, 'Gagal menjalankan audit situs.')] },
       { status: 500 }
     )
   }

@@ -7,6 +7,29 @@ import {
 } from '@/lib/db/articles'
 import { requireUser, ROLE_PERMISSIONS } from '@/lib/auth/rbac'
 import { revalidatePath } from 'next/cache'
+import { z } from 'zod'
+import { errorResponse } from '@/lib/http/errors'
+import { validateBody } from '@/lib/validation/api-schemas'
+
+const categoryCreateSchema = z.object({
+  name: z.string().trim().min(1, 'Nama kategori wajib diisi.').max(100, 'Nama kategori maksimal 100 karakter.'),
+  slug: z.string().trim().max(120, 'Slug maksimal 120 karakter.').optional(),
+  description: z.string().max(1000, 'Deskripsi maksimal 1000 karakter.').nullish(),
+})
+const categoryUpdateSchema = categoryCreateSchema.partial().extend({
+  id: z.coerce.number().int().positive('ID kategori wajib disertakan.'),
+})
+const idParam = z.coerce.number().int().positive()
+
+function revalidateCategoryPaths() {
+  try {
+    revalidatePath('/journal')
+    revalidatePath('/sitemap.xml')
+    revalidatePath('/admin')
+  } catch (err) {
+    console.warn('[revalidatePath error in /api/categories]:', err)
+  }
+}
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -16,8 +39,8 @@ export async function GET(request: NextRequest) {
   try {
     const list = await getAllCategoriesWithCounts()
     return NextResponse.json({ success: true, data: list })
-  } catch (err: any) {
-    return NextResponse.json({ success: false, error: err.message }, { status: 500 })
+  } catch (err: unknown) {
+    return errorResponse('api/categories GET', err, 'Gagal memuat kategori.')
   }
 }
 
@@ -36,32 +59,26 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const body = await request.json().catch(() => null)
-    if (!body || !body.name || typeof body.name !== 'string' || !body.name.trim()) {
-      return NextResponse.json({ error: 'Nama kategori wajib diisi.' }, { status: 400 })
-    }
+    const parsed = validateBody(categoryCreateSchema, await request.json().catch(() => null))
+    if (!parsed.success) return parsed.response
+    const body = parsed.data
 
     const category = await createCategory({
-      name: body.name.trim(),
-      slug: typeof body.slug === 'string' && body.slug.trim() ? body.slug.trim() : undefined,
-      description: typeof body.description === 'string' ? body.description : undefined,
+      name: body.name,
+      slug: body.slug || undefined,
+      description: body.description ?? undefined,
       actor: user.id,
     })
 
-    try {
-      revalidatePath('/journal')
-      revalidatePath('/admin')
-    } catch (err) {
-      console.warn('[revalidatePath error in /api/categories]:', err)
-    }
+    revalidateCategoryPaths()
 
     return NextResponse.json({
       success: true,
       data: category,
       message: `Kategori "${category.name}" berhasil dibuat.`,
     })
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message || 'Gagal membuat kategori.' }, { status: 400 })
+  } catch (err: unknown) {
+    return errorResponse('api/categories POST', err, 'Gagal membuat kategori.')
   }
 }
 
@@ -80,16 +97,14 @@ export async function PATCH(request: NextRequest) {
   }
 
   try {
-    const body = await request.json().catch(() => null)
-    const id = Number(body?.id)
-    if (!id || Number.isNaN(id)) {
-      return NextResponse.json({ error: 'ID kategori wajib disertakan.' }, { status: 400 })
-    }
+    const parsed = validateBody(categoryUpdateSchema, await request.json().catch(() => null))
+    if (!parsed.success) return parsed.response
+    const body = parsed.data
 
-    const updated = await updateCategory(id, {
-      name: typeof body.name === 'string' ? body.name : undefined,
-      slug: typeof body.slug === 'string' ? body.slug : undefined,
-      description: body.description !== undefined ? (typeof body.description === 'string' ? body.description : null) : undefined,
+    const updated = await updateCategory(body.id, {
+      name: body.name,
+      slug: body.slug,
+      description: body.description,
       actor: user.id,
     })
 
@@ -97,20 +112,15 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: 'Kategori tidak ditemukan.' }, { status: 404 })
     }
 
-    try {
-      revalidatePath('/journal')
-      revalidatePath('/admin')
-    } catch (err) {
-      console.warn('[revalidatePath error in /api/categories]:', err)
-    }
+    revalidateCategoryPaths()
 
     return NextResponse.json({
       success: true,
       data: updated,
       message: `Kategori "${updated.name}" berhasil diperbarui.`,
     })
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message || 'Gagal memperbarui kategori.' }, { status: 400 })
+  } catch (err: unknown) {
+    return errorResponse('api/categories PATCH', err, 'Gagal memperbarui kategori.')
   }
 }
 
@@ -137,30 +147,21 @@ export async function DELETE(request: NextRequest) {
     const queryId = searchParams.get('id')
     const queryReassign = searchParams.get('reassignToId')
 
-    let id = queryId ? Number(queryId) : null
-    let reassignToId = queryReassign ? Number(queryReassign) : undefined
-
-    if (!id) {
-      const body = await request.json().catch(() => ({}))
-      if (body?.id) id = Number(body.id)
-      if (body?.reassignToId) reassignToId = Number(body.reassignToId)
-    }
-
-    if (!id || Number.isNaN(id)) {
+    const idResult = idParam.safeParse(queryId)
+    if (!idResult.success) {
       return NextResponse.json({ error: 'ID kategori yang akan dihapus wajib disertakan.' }, { status: 400 })
     }
+    const reassignResult = queryReassign ? idParam.safeParse(queryReassign) : null
+    if (reassignResult && !reassignResult.success) {
+      return NextResponse.json({ error: 'ID kategori tujuan tidak valid.' }, { status: 400 })
+    }
 
-    const result = await deleteCategory(id, {
-      reassignToId: reassignToId && !Number.isNaN(reassignToId) ? reassignToId : undefined,
+    const result = await deleteCategory(idResult.data, {
+      reassignToId: reassignResult?.data,
       actor: user.id,
     })
 
-    try {
-      revalidatePath('/journal')
-      revalidatePath('/admin')
-    } catch (err) {
-      console.warn('[revalidatePath error in /api/categories]:', err)
-    }
+    revalidateCategoryPaths()
 
     const reassignMsg = result.destinationCategory
       ? `${result.reassignedCount} artikel telah dialihkan dengan aman ke kategori "${result.destinationCategory.name}".`
@@ -173,7 +174,7 @@ export async function DELETE(request: NextRequest) {
       data: result,
       message: `Kategori "${result.deletedCategory.name}" berhasil dihapus. ${reassignMsg}`,
     })
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message || 'Gagal menghapus kategori.' }, { status: 400 })
+  } catch (err: unknown) {
+    return errorResponse('api/categories DELETE', err, 'Gagal menghapus kategori.')
   }
 }

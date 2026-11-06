@@ -10,11 +10,14 @@ import {
 } from '@/lib/seo/indexing-rate-limit'
 import { createIndexingSubmission } from '@/lib/db/indexing'
 import { submitToIndexNow } from '@/lib/seo/indexnow'
+import { SEO_TOOL_ROLES } from '@/lib/seo/access'
+import { isSameSiteHost } from '@/lib/seo/site-url'
+import { errorResponse } from '@/lib/http/errors'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
-const ALLOWED_ROLES: Role[] = ['SUPER_ADMIN', 'CONTENT_ADMIN', 'EDITOR', 'SEO_MANAGER']
+const ALLOWED_ROLES: Role[] = SEO_TOOL_ROLES
 
 interface InspectUrlGoogleResult {
   connected: boolean
@@ -59,12 +62,16 @@ async function inspectUrlGoogle(inspectionUrl: string, siteUrl: string): Promise
 
     const httpStatus = res.status
     if (!res.ok) {
-      const errorText = await res.text().catch(() => '')
+      const errorText = await res.text().catch((readErr) => {
+        console.warn('[Retrigger] Could not read GSC error body', readErr)
+        return ''
+      })
+      console.error(`[Retrigger] GSC URL Inspection API responded ${httpStatus}`, errorText.slice(0, 500))
       return {
         connected: true,
         success: false,
         httpStatus,
-        message: `GSC URL Inspection API error (${httpStatus}): ${errorText}`,
+        message: `Google Search Console URL Inspection API menolak permintaan (HTTP ${httpStatus}).`,
       }
     }
 
@@ -76,17 +83,26 @@ async function inspectUrlGoogle(inspectionUrl: string, siteUrl: string): Promise
       data,
       message: 'Inspeksi URL Google berhasil.',
     }
-  } catch (err: any) {
+  } catch (err) {
+    console.error('[Retrigger] GSC URL Inspection call failed', err)
     return {
       connected: true,
       success: false,
       httpStatus: 500,
-      message: err.message || 'Gagal memanggil Google Search Console API.',
+      message: 'Gagal memanggil Google Search Console API.',
     }
   }
 }
 
 export async function POST(request: NextRequest) {
+  try {
+    return await handleRetrigger(request)
+  } catch (err) {
+    return errorResponse('indexing/retrigger', err, 'Pengiriman indexing gagal karena galat server.')
+  }
+}
+
+async function handleRetrigger(request: NextRequest): Promise<NextResponse> {
   // 1. Auth & RBAC Gate
   const auth = await requireRole(request, ALLOWED_ROLES)
   if (auth.error) {
@@ -264,6 +280,19 @@ export async function POST(request: NextRequest) {
   // Canonical normalization fallback
   targetUrl = normalizeIndexingUrl(targetUrl, siteBaseUrl)
 
+  // Only URLs on the configured site may be submitted with this site's
+  // IndexNow key / Search Console property.
+  if (!isSameSiteHost(targetUrl, siteBaseUrl)) {
+    return NextResponse.json(
+      {
+        error: 'Bad Request',
+        code: 'FOREIGN_HOST',
+        message: `Hanya URL di ${new URL(siteBaseUrl).hostname} yang dapat dikirim untuk pengindeksan.`,
+      },
+      { status: 400 }
+    )
+  }
+
   // 4. Cooldown Gate Check (24-Hour Rate Limit)
   const cooldown = await checkIndexingCooldown(targetUrl, provider)
   if (!cooldown.allowed) {
@@ -366,7 +395,8 @@ export async function POST(request: NextRequest) {
         message: inRes.message,
       }
     } catch (err: unknown) {
-      const errMsg = err instanceof Error ? err.message : 'Execution failed'
+      console.error('[Retrigger] Provider submission failed', err)
+      const errMsg = 'Pengiriman gagal karena galat server.'
       if (preflightIndexNow?.id) {
         try {
           const whereQuery = prisma.orm.public.IndexingSubmission.where({ id: preflightIndexNow.id }) as unknown as { update?: (data: Record<string, unknown>) => Promise<unknown> }
@@ -447,7 +477,8 @@ export async function POST(request: NextRequest) {
           (gscRes.connected ? 'Verifikasi Google berhasil.' : 'Google Search Console belum terhubung.'),
       }
     } catch (err: unknown) {
-      const errMsg = err instanceof Error ? err.message : 'Execution failed'
+      console.error('[Retrigger] Provider submission failed', err)
+      const errMsg = 'Pengiriman gagal karena galat server.'
       if (preflightGoogle?.id) {
         try {
           const whereQuery = prisma.orm.public.IndexingSubmission.where({ id: preflightGoogle.id }) as unknown as { update?: (data: Record<string, unknown>) => Promise<unknown> }

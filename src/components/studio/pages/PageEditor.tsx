@@ -28,6 +28,7 @@ import { BlockEditor } from '../blocks/BlockEditor'
 import { useLocalDraft, useModKeyLabel, useUnsavedGuard } from '../blocks/hooks'
 import { ensureBlockIds, formatIssue, type EditorBlock } from '../blocks/model'
 import { Badge, Button, Dialog, FOCUS_RING, FieldError, FieldHelp, describedBy, inputClass } from '../blocks/ui'
+import { PAGE_ROLES } from '@/lib/pages/http'
 import { pagesApi, type PageDto, type RevisionDto } from './client'
 import { DateTime, StatusBadge } from './shared'
 
@@ -60,8 +61,9 @@ const ROBOTS: { value: Form['robots']; label: string }[] = [
   { value: 'noindex, nofollow', label: 'Sembunyikan sepenuhnya (noindex, nofollow)' },
 ]
 
-const PUBLISHER_ROLES = new Set(['SUPER_ADMIN', 'CONTENT_ADMIN'])
-const DELETE_ROLES = PUBLISHER_ROLES
+// Same policy the API enforces (src/lib/pages/http.ts), so the UI never offers a forbidden action.
+const PUBLISHER_ROLES: ReadonlySet<string> = new Set(PAGE_ROLES.publish)
+const DELETE_ROLES: ReadonlySet<string> = new Set(PAGE_ROLES.delete)
 
 function toForm(page: PageDto): Form {
   const robots = ROBOTS.some((r) => r.value === page.robots) ? (page.robots as Form['robots']) : 'index, follow'

@@ -48,6 +48,14 @@ describe('Layer 1: Security & RBAC Contract Verification', () => {
       expect(validateStatusTransition('draft', 'published', 'SUPER_ADMIN').allowed).toBe(true)
       expect(validateStatusTransition('published', 'archived', 'SUPER_ADMIN').allowed).toBe(true)
     })
+
+    it('only roles that can publish may pull a published article back to draft', () => {
+      expect(validateStatusTransition('published', 'draft', 'REVIEWER').allowed).toBe(false)
+      expect(validateStatusTransition('published', 'draft', 'AUTHOR').allowed).toBe(false)
+      expect(validateStatusTransition('published', 'draft', 'EDITOR').allowed).toBe(true)
+      // Reviewers still send drafts back for revision.
+      expect(validateStatusTransition('in_review', 'draft', 'REVIEWER').allowed).toBe(true)
+    })
   })
 
   describe('SSRF Protection Gate', () => {

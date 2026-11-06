@@ -66,8 +66,8 @@ export async function submitToIndexNow(
       if (profile?.url) {
         baseSiteUrl = profile.url
       }
-    } catch {
-      // Fallback to siteConfig.url
+    } catch (err) {
+      console.warn('[indexnow] Site profile unavailable, using siteConfig.url', err)
     }
 
     const cleanBase = baseSiteUrl.replace(/\/+$/, '')
@@ -118,11 +118,12 @@ export async function submitToIndexNow(
         ? `Berhasil mengirim ${absoluteUrls.length} URL ke jaringan IndexNow (HTTP ${httpStatus}).`
         : `IndexNow merespons dengan HTTP ${httpStatus}.`,
     }
-  } catch (err: any) {
-    const isTimeout = err?.name === 'TimeoutError' || err?.name === 'AbortError'
+  } catch (err) {
+    console.error('[indexnow] Submission failed', err)
+    const isTimeout = err instanceof Error && (err.name === 'TimeoutError' || err.name === 'AbortError')
     const errorMsg = isTimeout
       ? `IndexNow request timed out after ${timeoutMs}ms.`
-      : err?.message || 'Gagal mengirim URL ke IndexNow.'
+      : 'Gagal mengirim URL ke IndexNow.'
 
     return {
       success: false,

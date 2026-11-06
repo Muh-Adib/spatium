@@ -38,8 +38,8 @@ export async function GET(request: NextRequest) {
 
     latency = Date.now() - startTime
     isOnline = true
-  } catch {
-    console.error('[metric:database_health_failure] Content count queries failed')
+  } catch (err) {
+    console.error('[metric:database_health_failure] Content count queries failed', err)
     return NextResponse.json({
       online: false, latency: null, counts: null, contentTypes: [],
       engine: 'Prisma v8 ORM (@prisma/orm-postgres)', database: 'PostgreSQL',
@@ -108,8 +108,8 @@ export async function POST(request: NextRequest) {
         redirects: redRes?.count || 0,
       },
     })
-  } catch {
-    console.error('[metric:database_health_failure] Database verification failed')
+  } catch (err) {
+    console.error('[metric:database_health_failure] Database verification failed', err)
     return NextResponse.json(
       { error: 'Gagal melakukan verifikasi database' },
       { status: 500 }

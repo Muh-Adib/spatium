@@ -131,7 +131,7 @@ export async function getPortfolioBySlug(slug: string, options: { publishedOnly?
 export async function getFeaturedPortfolios(limit = 6): Promise<Portfolio[]> {
   if (!process.env.DATABASE_URL) return []
   try {
-    const rows = await prisma.orm.public.Portfolio.where({ featured: true }).limit(limit).all()
+    const rows = await prisma.orm.public.Portfolio.where({ featured: true, status: 'published' }).limit(limit).all()
     return rows.map(mapToPortfolio)
   } catch (err: any) {
     console.error('Failed to get featured portfolios:', err?.message || String(err))
@@ -169,7 +169,8 @@ export async function getRelatedServicesForPortfolio(portfolioId: number): Promi
       shortDescription: r.service.shortDescription,
       iconName: r.service.icon,
     }))
-  } catch {
+  } catch (err) {
+    console.error('[db/portfolio] read failed:', err)
     return []
   }
 }
@@ -188,7 +189,8 @@ export async function getRelatedSolutionsForPortfolio(portfolioId: number): Prom
       title: r.solution.title,
       shortDescription: r.solution.shortDescription,
     }))
-  } catch {
+  } catch (err) {
+    console.error('[db/portfolio] read failed:', err)
     return []
   }
 }

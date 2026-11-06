@@ -104,7 +104,7 @@ export function StudioKeywordPlanner() {
         }),
       })
       const result = await response.json()
-      if (!response.ok) throw new Error(result.error || result.errors?.[0] || 'Keyword gagal disimpan.')
+      if (!response.ok) throw new Error(result.issues?.[0]?.message || result.errors?.[0] || result.message || result.error || 'Keyword gagal disimpan.')
       setNewKeywordInput('')
       setError('')
       setCopiedKw(kw)
@@ -121,6 +121,8 @@ export function StudioKeywordPlanner() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-4">
         <div className="flex min-w-0 max-w-full items-center gap-2 overflow-x-auto pb-1">
           <button
+            type="button"
+            aria-pressed={activeTab === 'opportunities'}
             onClick={() => setActiveTab('opportunities')}
             className={`px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all ${
               activeTab === 'opportunities'
@@ -131,6 +133,8 @@ export function StudioKeywordPlanner() {
             Peluang Ranking (Pos 8-20)
           </button>
           <button
+            type="button"
+            aria-pressed={activeTab === 'cannibalization'}
             onClick={() => setActiveTab('cannibalization')}
             className={`px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all ${
               activeTab === 'cannibalization'
@@ -141,6 +145,8 @@ export function StudioKeywordPlanner() {
             Deteksi Kanibalisasi
           </button>
           <button
+            type="button"
+            aria-pressed={activeTab === 'bank'}
             onClick={() => setActiveTab('bank')}
             className={`px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all ${
               activeTab === 'bank'
@@ -155,6 +161,8 @@ export function StudioKeywordPlanner() {
         <div className="flex items-center gap-3">
           {activeTab === 'bank' && (<div className="flex items-center gap-1 bg-black/40 border border-white/10 p-1 rounded-lg text-xs">
             <button
+              type="button"
+              aria-pressed={locale === 'id'}
               onClick={() => setLocale('id')}
               className={`px-2.5 py-1 rounded-md font-mono ${
                 locale === 'id' ? 'bg-accent-500 text-accent-950 font-semibold' : 'text-neutral-400'
@@ -163,6 +171,8 @@ export function StudioKeywordPlanner() {
               ID
             </button>
             <button
+              type="button"
+              aria-pressed={locale === 'en'}
               onClick={() => setLocale('en')}
               className={`px-2.5 py-1 rounded-md font-mono ${
                 locale === 'en' ? 'bg-accent-500 text-accent-950 font-semibold' : 'text-neutral-400'
@@ -173,9 +183,11 @@ export function StudioKeywordPlanner() {
           </div>)}
 
           <button
+            type="button"
             onClick={() => fetchData(true)}
             className="p-1.5 text-neutral-400 hover:text-white rounded-lg hover:bg-white/10 transition-colors"
             title="Refresh Data"
+            aria-label="Muat ulang data keyword"
           >
             <RefreshCw className="w-4 h-4" />
           </button>

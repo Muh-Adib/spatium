@@ -24,6 +24,21 @@ import {
   Filter,
 } from 'lucide-react'
 import { useIndexingCooldown } from '@/hooks/useIndexingCooldown'
+import { useAuth } from '@/lib/auth/AuthContext'
+import { SEO_TOOL_ROLES } from '@/lib/seo/access'
+
+/** Readable message from an API error body (`message`, `error`, or `errors[0]`). */
+function apiErrorMessage(json: unknown, fallback: string): string {
+  if (json && typeof json === 'object') {
+    const body = json as { message?: unknown; error?: unknown; errors?: unknown }
+    if (Array.isArray(body.errors) && typeof body.errors[0] === 'string') return body.errors[0]
+    if (typeof body.message === 'string') return body.message
+    if (typeof body.error === 'string') return body.error
+  }
+  return fallback
+}
+
+const PROVIDER_OK = new Set(['accepted', 'success'])
 
 interface PageSpeedReport {
   url: string
@@ -62,8 +77,10 @@ interface SubmissionResultSummary {
 }
 
 export function StudioPerformanceManager() {
+  const { role } = useAuth()
+  const canUseSeoTools = SEO_TOOL_ROLES.includes(role)
   // ─── Sub-Tab Navigation ──────────────────────────────────────────────────────
-  const [activeTab, setActiveTab] = useState<'indexing' | 'pagespeed'>('indexing')
+  const [activeTab, setActiveTab] = useState<'indexing' | 'pagespeed'>(canUseSeoTools ? 'indexing' : 'pagespeed')
 
   // ─── Unified Quick Submitter State ───────────────────────────────────────────
   const [submitUrl, setSubmitUrl] = useState<string>('')
@@ -91,33 +108,24 @@ export function StudioPerformanceManager() {
   const [filterProvider, setFilterProvider] = useState<string>('all')
   const [filterStatus, setFilterStatus] = useState<string>('all')
   const [retriggeringId, setRetriggeringId] = useState<number | null>(null)
+  const [historyError, setHistoryError] = useState<string | null>(null)
+  const [rowNotice, setRowNotice] = useState<string | null>(null)
   const [copiedUrl, setCopiedUrl] = useState<string | null>(null)
 
   // ─── PageSpeed State ─────────────────────────────────────────────────────────
   const [psHistory, setPsHistory] = useState<PageSpeedReport[]>([])
   const [psLoading, setPsLoading] = useState<boolean>(true)
   const [runningAudit, setRunningAudit] = useState<boolean>(false)
-  const [targetUrl, setTargetUrl] = useState<string>('https://spatium.id')
+  const [targetUrl, setTargetUrl] = useState<string>('')
   const [device, setDevice] = useState<'mobile' | 'desktop'>('mobile')
   const [latestReport, setLatestReport] = useState<PageSpeedReport | null>(null)
-  const [auditError, setAuditError] = useState<{ reason: string; howToConnect?: string } | null>(null)
-
-  // Set default submitUrl from origin if available
-  useEffect(() => {
-    if (typeof window !== 'undefined' && window.location.origin) {
-      const origin = window.location.origin
-      if (origin !== 'http://localhost:3000' && !submitUrl) {
-        setSubmitUrl(origin)
-      }
-      if (origin !== 'http://localhost:3000') {
-        setTargetUrl(origin)
-      }
-    }
-  }, [])
+  const [auditError, setAuditError] = useState<{ reason: string; howToConnect?: string; disconnected: boolean } | null>(null)
 
   // ─── Fetch Submission History ────────────────────────────────────────────────
   const fetchIndexingHistory = useCallback(async () => {
+    if (!canUseSeoTools) return
     setHistoryLoading(true)
+    setHistoryError(null)
     try {
       const offset = (page - 1) * pageSize
       const params = new URLSearchParams({
@@ -135,13 +143,17 @@ export function StudioPerformanceManager() {
         const total = json.pagination?.total ?? json.total ?? items.length
         setHistoryItems(items)
         setHistoryTotal(total)
+      } else {
+        const json = await res.json().catch(() => null)
+        setHistoryError(apiErrorMessage(json, 'Riwayat pengindeksan tidak dapat dimuat.'))
       }
     } catch (err) {
       console.error('Failed to load indexing history:', err)
+      setHistoryError('Riwayat pengindeksan tidak dapat dimuat.')
     } finally {
       setHistoryLoading(false)
     }
-  }, [page, pageSize, filterProvider, filterStatus, searchTerm])
+  }, [canUseSeoTools, page, pageSize, filterProvider, filterStatus, searchTerm])
 
   useEffect(() => {
     fetchIndexingHistory()
@@ -149,7 +161,7 @@ export function StudioPerformanceManager() {
 
   // ─── Check URL Cooldown on Blur / Change ──────────────────────────────────────
   const checkUrlStatus = useCallback(async (url: string) => {
-    if (!url.trim()) return
+    if (!url.trim() || !canUseSeoTools) return
     try {
       const res = await fetch(`/api/indexing/status?url=${encodeURIComponent(url.trim())}`)
       if (res.ok) {
@@ -163,7 +175,7 @@ export function StudioPerformanceManager() {
     } catch (err) {
       console.warn('Failed to check indexing status for URL:', err)
     }
-  }, [startCooldown])
+  }, [canUseSeoTools, startCooldown])
 
   // ─── Handle Quick Submit ─────────────────────────────────────────────────────
   const handleQuickSubmit = async () => {
@@ -198,7 +210,7 @@ export function StudioPerformanceManager() {
       }
 
       if (!res.ok) {
-        setSubmitError(json.message || json.error || 'Gagal mengirim indexing.')
+        setSubmitError(apiErrorMessage(json, 'Gagal mengirim indexing.'))
         return
       }
 
@@ -213,8 +225,9 @@ export function StudioPerformanceManager() {
         }
         fetchIndexingHistory()
       }
-    } catch (err: any) {
-      setSubmitError(err.message || 'Gagal menghubungi server indexing.')
+    } catch (err) {
+      console.error('Indexing submit failed:', err)
+      setSubmitError('Gagal menghubungi server indexing.')
     } finally {
       setSubmitting(false)
     }
@@ -223,6 +236,7 @@ export function StudioPerformanceManager() {
   // ─── Retrigger Individual Row ────────────────────────────────────────────────
   const handleRetriggerRow = async (item: IndexingSubmissionItem) => {
     setRetriggeringId(item.id)
+    setRowNotice(null)
     try {
       const res = await fetch('/api/indexing/retrigger', {
         method: 'POST',
@@ -234,14 +248,16 @@ export function StudioPerformanceManager() {
       })
       const json = await res.json()
       if (res.status === 429) {
-        alert(json.message || `URL ini masih dalam masa jeda 24 jam (${json.remainingFormatted} tersisa).`)
+        setRowNotice(json.message || `URL ini masih dalam masa jeda 24 jam (${json.remainingFormatted} tersisa).`)
       } else if (!res.ok) {
-        alert(json.message || json.error || 'Pengiriman ulang gagal.')
+        setRowNotice(apiErrorMessage(json, 'Pengiriman ulang gagal.'))
       } else {
+        setRowNotice(`Pengiriman ulang untuk ${item.url} telah diproses. Lihat status terbaru di tabel.`)
         fetchIndexingHistory()
       }
-    } catch (err: any) {
-      alert(`Gagal retrigger: ${err.message}`)
+    } catch (err) {
+      console.error('Indexing retrigger failed:', err)
+      setRowNotice('Gagal menghubungi server indexing.')
     } finally {
       setRetriggeringId(null)
     }
@@ -249,9 +265,13 @@ export function StudioPerformanceManager() {
 
   // ─── Copy URL Handler ────────────────────────────────────────────────────────
   const handleCopyUrl = (url: string) => {
-    navigator.clipboard.writeText(url)
-    setCopiedUrl(url)
-    setTimeout(() => setCopiedUrl(null), 2000)
+    navigator.clipboard.writeText(url).then(
+      () => {
+        setCopiedUrl(url)
+        setTimeout(() => setCopiedUrl(null), 2000)
+      },
+      (err) => console.warn('Clipboard write failed:', err),
+    )
   }
 
   // ─── PageSpeed Handlers ──────────────────────────────────────────────────────
@@ -260,7 +280,9 @@ export function StudioPerformanceManager() {
     try {
       const res = await fetch('/api/perf')
       const json = await res.json()
-      if (json.data?.history) {
+      if (!res.ok) {
+        setAuditError({ reason: apiErrorMessage(json, 'Riwayat performa tidak dapat dimuat.'), disconnected: false })
+      } else if (json.data?.history) {
         setPsHistory(json.data.history)
         if (json.data.history.length > 0 && !latestReport) {
           setLatestReport(json.data.history[0])
@@ -289,24 +311,21 @@ export function StudioPerformanceManager() {
         body: JSON.stringify({ url: targetUrl, device }),
       })
       const json = await res.json()
-      if (json.data) {
+      if (res.ok && json.data) {
         setLatestReport(json.data)
         setPsHistory((prev) => [json.data, ...prev])
       } else if (json.connected === false) {
         setAuditError({
           reason: json.reason || 'PAGESPEED_API_KEY belum dikonfigurasi.',
           howToConnect: json.howToConnect,
+          disconnected: true,
         })
-      } else if (json.errors?.length > 0) {
-        setAuditError({
-          reason: json.errors[0],
-        })
+      } else {
+        setAuditError({ reason: apiErrorMessage(json, 'Audit PageSpeed gagal.'), disconnected: false })
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error('Audit run failed:', err)
-      setAuditError({
-        reason: err.message || 'Gagal menghubungi server.',
-      })
+      setAuditError({ reason: 'Gagal menghubungi server.', disconnected: false })
     } finally {
       setRunningAudit(false)
     }
@@ -384,6 +403,7 @@ export function StudioPerformanceManager() {
         <div className="flex items-center p-1 rounded-xl bg-black/40 border border-white/10 text-xs font-medium">
           <button
             type="button"
+            aria-pressed={activeTab === 'indexing'}
             onClick={() => setActiveTab('indexing')}
             className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg transition-all ${
               activeTab === 'indexing'
@@ -397,6 +417,7 @@ export function StudioPerformanceManager() {
 
           <button
             type="button"
+            aria-pressed={activeTab === 'pagespeed'}
             onClick={() => setActiveTab('pagespeed')}
             className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg transition-all ${
               activeTab === 'pagespeed'
@@ -410,8 +431,14 @@ export function StudioPerformanceManager() {
         </div>
       </div>
 
+      {!canUseSeoTools && (
+        <p className="text-xs text-neutral-400">
+          Pengindeksan dan audit PageSpeed hanya untuk Super Admin, Content Admin, Editor, dan SEO Manager. Anda tetap dapat melihat riwayat PageSpeed.
+        </p>
+      )}
+
       {/* ─── TAB 1: REAL-TIME INDEXING (QUICK SUBMITTER & HISTORY TABLE) ─── */}
-      {activeTab === 'indexing' && (
+      {activeTab === 'indexing' && canUseSeoTools && (
         <div className="space-y-6">
           {/* 1. Unified Quick Submitter Card */}
           <div className="p-5 rounded-2xl bg-neutral-900/60 border border-white/10 space-y-4">
@@ -434,7 +461,8 @@ export function StudioPerformanceManager() {
               <div className="md:col-span-8 flex items-center gap-2.5 bg-black/60 border border-white/10 px-3 py-2 rounded-xl">
                 <Globe className="w-4 h-4 text-neutral-400 shrink-0" />
                 <input
-                  type="text"
+                  type="url"
+                  aria-label="URL yang akan dikirim ke mesin pencari"
                   value={submitUrl}
                   onChange={(e) => setSubmitUrl(e.target.value)}
                   onBlur={() => checkUrlStatus(submitUrl)}
@@ -446,6 +474,7 @@ export function StudioPerformanceManager() {
               {/* Provider Selection */}
               <div className="md:col-span-4 flex items-center gap-2">
                 <select
+                  aria-label="Penyedia pengindeksan"
                   value={providerChoice}
                   onChange={(e) => setProviderChoice(e.target.value as 'all' | 'indexnow' | 'google')}
                   className="w-full bg-black/60 border border-white/10 rounded-xl text-xs text-neutral-300 px-3 py-2 focus:outline-none"
@@ -459,7 +488,7 @@ export function StudioPerformanceManager() {
 
             {/* Error or Notice Alert */}
             {submitError && (
-              <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-300 flex items-start gap-2">
+              <div role="alert" className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-300 flex items-start gap-2">
                 <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
                 <div className="space-y-0.5">
                   <span className="font-semibold block">{submitError}</span>
@@ -468,32 +497,37 @@ export function StudioPerformanceManager() {
             )}
 
             {/* Success Result Summary */}
+            <div role="status" aria-live="polite">
             {submitResult && (
-              <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs text-emerald-300 space-y-2">
+              <div className="p-3 rounded-xl bg-black/30 border border-white/10 text-xs text-neutral-200 space-y-2">
                 <div className="flex items-center gap-2 font-semibold">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                  <span>Pengiriman berhasil diproses untuk {submitResult.url}</span>
+                  <Send className="w-4 h-4 text-info" aria-hidden="true" />
+                  <span>Hasil pengiriman untuk {submitResult.url}</span>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px] font-mono text-neutral-300">
-                  {submitResult.providers.indexnow && (
-                    <div className="p-2 rounded bg-black/40 border border-white/5">
-                      <span className="text-neutral-400">IndexNow: </span>
-                      <strong className="text-emerald-300">
-                        {submitResult.providers.indexnow.status} (HTTP {submitResult.providers.indexnow.httpStatus || 202})
-                      </strong>
-                    </div>
-                  )}
-                  {submitResult.providers.google && (
-                    <div className="p-2 rounded bg-black/40 border border-white/5">
-                      <span className="text-neutral-400">Google Search Console: </span>
-                      <strong className="text-emerald-300">
-                        {submitResult.providers.google.status} (HTTP {submitResult.providers.google.httpStatus || 200})
-                      </strong>
-                    </div>
+                  {(
+                    [
+                      ['IndexNow', submitResult.providers.indexnow],
+                      ['Google Search Console', submitResult.providers.google],
+                    ] as const
+                  ).map(([label, result]) =>
+                    result ? (
+                      <div key={label} className="p-2 rounded bg-black/40 border border-white/5 space-y-1">
+                        <div>
+                          <span className="text-neutral-400">{label}: </span>
+                          <strong className={PROVIDER_OK.has(result.status) ? 'text-emerald-300' : 'text-amber-300'}>
+                            {PROVIDER_OK.has(result.status) ? 'Berhasil' : 'Tidak berhasil'} · {result.status}
+                            {result.httpStatus ? ` (HTTP ${result.httpStatus})` : ''}
+                          </strong>
+                        </div>
+                        <p className="text-neutral-400">{result.message}</p>
+                      </div>
+                    ) : null,
                   )}
                 </div>
               </div>
             )}
+            </div>
 
             {/* Submit Action Button */}
             <div className="flex items-center justify-between pt-1">
@@ -506,7 +540,7 @@ export function StudioPerformanceManager() {
               <button
                 type="button"
                 onClick={handleQuickSubmit}
-                disabled={submitting || !submitUrl.trim() || inCooldown}
+                disabled={submitting || !submitUrl.trim() || inCooldown || !canUseSeoTools}
                 className="px-5 py-2.5 bg-accent-500 hover:bg-accent-300 text-accent-950 rounded-xl text-xs font-semibold transition-all shadow-md disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2"
               >
                 {submitting ? (
@@ -536,6 +570,7 @@ export function StudioPerformanceManager() {
               <div className="flex items-center gap-2">
                 <button
                   type="button"
+                  aria-label="Segarkan riwayat pengindeksan"
                   onClick={fetchIndexingHistory}
                   disabled={historyLoading}
                   className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-neutral-300 hover:text-white border border-white/10 text-xs transition-colors"
@@ -551,7 +586,8 @@ export function StudioPerformanceManager() {
               <div className="sm:col-span-6 flex items-center gap-2 bg-black/40 border border-white/10 px-3 py-1.5 rounded-xl">
                 <Search className="w-3.5 h-3.5 text-neutral-500 shrink-0" />
                 <input
-                  type="text"
+                  type="search"
+                  aria-label="Cari URL di riwayat"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   placeholder="Cari URL..."
@@ -561,6 +597,7 @@ export function StudioPerformanceManager() {
 
               <div className="sm:col-span-3">
                 <select
+                  aria-label="Filter penyedia"
                   value={filterProvider}
                   onChange={(e) => {
                     setFilterProvider(e.target.value)
@@ -576,6 +613,7 @@ export function StudioPerformanceManager() {
 
               <div className="sm:col-span-3">
                 <select
+                  aria-label="Filter status"
                   value={filterStatus}
                   onChange={(e) => {
                     setFilterStatus(e.target.value)
@@ -591,6 +629,15 @@ export function StudioPerformanceManager() {
                 </select>
               </div>
             </div>
+
+            <div role="status" aria-live="polite">
+              {rowNotice && (
+                <p className="p-3 rounded-xl bg-black/30 border border-white/10 text-xs text-neutral-200">{rowNotice}</p>
+              )}
+            </div>
+            {historyError && (
+              <p role="alert" className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-xs text-rose-200">{historyError}</p>
+            )}
 
             {/* Table Container */}
             <div className="rounded-2xl border border-white/10 bg-[var(--studio-sidebar-bg)] overflow-hidden shadow-soft-sm">
@@ -633,6 +680,7 @@ export function StudioPerformanceManager() {
                               <button
                                 type="button"
                                 onClick={() => handleCopyUrl(item.url)}
+                                aria-label={copiedUrl === item.url ? 'URL disalin' : `Salin URL ${item.url}`}
                                 title="Salin URL"
                                 className="p-1 rounded text-neutral-500 hover:text-white transition-colors shrink-0"
                               >
@@ -647,6 +695,7 @@ export function StudioPerformanceManager() {
                                 target="_blank"
                                 rel="noreferrer"
                                 title="Buka URL di tab baru"
+                                aria-label={`Buka ${item.url} di tab baru`}
                                 className="p-1 rounded text-neutral-500 hover:text-info transition-colors shrink-0"
                               >
                                 <ExternalLink className="w-3 h-3" />
@@ -747,6 +796,7 @@ export function StudioPerformanceManager() {
                     <button
                       type="button"
                       disabled={page <= 1}
+                      aria-label="Halaman sebelumnya"
                       onClick={() => setPage((p) => Math.max(1, p - 1))}
                       className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-neutral-300 disabled:opacity-40 transition-colors"
                     >
@@ -755,6 +805,7 @@ export function StudioPerformanceManager() {
                     <button
                       type="button"
                       disabled={page >= totalPages}
+                      aria-label="Halaman berikutnya"
                       onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                       className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-neutral-300 disabled:opacity-40 transition-colors"
                     >
@@ -777,15 +828,17 @@ export function StudioPerformanceManager() {
               <Globe className="w-4 h-4 text-neutral-400 shrink-0" />
               <input
                 type="text"
+                aria-label="URL atau path yang diaudit (kosong = beranda situs)"
                 value={targetUrl}
                 onChange={(e) => setTargetUrl(e.target.value)}
-                placeholder="https://spatium.id"
+                placeholder="/ atau /journal/judul-artikel (kosong = beranda)"
                 className="flex-1 bg-transparent text-xs text-neutral-200 focus:outline-none font-mono"
               />
             </div>
 
             <div className="flex items-center gap-2">
               <select
+                aria-label="Perangkat audit"
                 value={device}
                 onChange={(e) => setDevice(e.target.value as 'mobile' | 'desktop')}
                 className="bg-black/50 border border-white/10 rounded-lg text-xs text-neutral-300 px-3 py-1.5 focus:outline-none"
@@ -797,7 +850,7 @@ export function StudioPerformanceManager() {
               <button
                 type="button"
                 onClick={handleRunAudit}
-                disabled={runningAudit}
+                disabled={runningAudit || !canUseSeoTools}
                 className="flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-black font-semibold rounded-lg text-xs transition-all shadow-md disabled:opacity-50"
               >
                 {runningAudit ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Gauge className="w-4 h-4" />}
@@ -808,10 +861,10 @@ export function StudioPerformanceManager() {
 
           {/* Disconnected / Audit Error Alert */}
           {auditError && (
-            <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs space-y-2">
+            <div role="alert" className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs space-y-2">
               <div className="flex items-center gap-2 text-amber-400 font-semibold">
-                <AlertTriangle className="w-4 h-4" />
-                <span>Integrasi PageSpeed Belum Terhubung</span>
+                <AlertTriangle className="w-4 h-4" aria-hidden="true" />
+                <span>{auditError.disconnected ? 'Integrasi PageSpeed Belum Terhubung' : 'Audit PageSpeed Gagal'}</span>
               </div>
               <p className="text-neutral-300">{auditError.reason}</p>
               {auditError.howToConnect && (
@@ -890,7 +943,7 @@ export function StudioPerformanceManager() {
                   <span className="text-[10px] text-emerald-400 font-mono">&le; 2.5s (Baik)</span>
                 </div>
                 <div>
-                  <span className="text-[11px] font-mono text-neutral-400 uppercase">FID / INP (Interactivity)</span>
+                  <span className="text-[11px] font-mono text-neutral-400 uppercase">TBT (Total Blocking Time, lab)</span>
                   <div className="text-base font-bold text-white mt-1">{latestReport.inpMs}ms</div>
                   <span className="text-[10px] text-emerald-400 font-mono">&le; 200ms (Baik)</span>
                 </div>

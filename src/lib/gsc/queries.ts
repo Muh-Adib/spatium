@@ -143,9 +143,10 @@ export async function getGscOverview(siteUrl: string = siteConfig.url): Promise<
     } catch (err) { console.warn("[observable error]:", err) }
 
     return connectedResult<GscOverview>(overview)
-  } catch (err: any) {
+  } catch (err) {
+    console.error('[gsc] Gagal mengambil data dari Google Search Console API', err)
     return notConnected<GscOverview>(
-      `Gagal mengambil data dari Google Search Console API: ${err.message}`,
+      'Gagal mengambil data dari Google Search Console API. Detail tersedia di log server.',
       'Pastikan service account email telah ditambahkan sebagai pengguna dengan izin Read di Google Search Console property.'
     )
   }
@@ -186,9 +187,10 @@ export async function getGscTopQueries(limit = 20, siteUrl: string = siteConfig.
     }))
 
     return connectedResult<GscQueryItem[]>(queries)
-  } catch (err: any) {
+  } catch (err) {
+    console.error('[gsc] GSC API Query error', err)
     return notConnected<GscQueryItem[]>(
-      `GSC API Query error: ${err.message}`,
+      'Kueri Google Search Console (kueri pencarian) gagal. Detail tersedia di log server.',
       'Verifikasi izin akses properti Google Search Console untuk service account.'
     )
   }
@@ -228,9 +230,10 @@ export async function getGscPages(limit = 50, siteUrl: string = siteConfig.url):
     }))
 
     return connectedResult<GscPageItem[]>(pages)
-  } catch (err: any) {
+  } catch (err) {
+    console.error('[gsc] GSC API Pages Query error', err)
     return notConnected<GscPageItem[]>(
-      `GSC API Pages Query error: ${err.message}`,
+      'Kueri Google Search Console (halaman) gagal. Detail tersedia di log server.',
       'Verifikasi izin akses properti Google Search Console untuk service account.'
     )
   }
@@ -269,9 +272,10 @@ export async function getGscDevices(siteUrl: string = siteConfig.url): Promise<I
     }))
 
     return connectedResult<GscDeviceItem[]>(devices)
-  } catch (err: any) {
+  } catch (err) {
+    console.error('[gsc] GSC API Devices Query error', err)
     return notConnected<GscDeviceItem[]>(
-      `GSC API Devices Query error: ${err.message}`,
+      'Kueri Google Search Console (perangkat) gagal. Detail tersedia di log server.',
       'Verifikasi izin akses properti Google Search Console untuk service account.'
     )
   }
@@ -311,9 +315,10 @@ export async function getGscCountries(limit = 50, siteUrl: string = siteConfig.u
     }))
 
     return connectedResult<GscCountryItem[]>(countries)
-  } catch (err: any) {
+  } catch (err) {
+    console.error('[gsc] GSC API Countries Query error', err)
     return notConnected<GscCountryItem[]>(
-      `GSC API Countries Query error: ${err.message}`,
+      'Kueri Google Search Console (negara) gagal. Detail tersedia di log server.',
       'Verifikasi izin akses properti Google Search Console untuk service account.'
     )
   }

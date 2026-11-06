@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { getNavigationEntries, getFooterNavEntries } from '@/lib/navigation/getNav'
+import { errorResponse } from '@/lib/http/errors'
 
 export async function GET() {
   try {
@@ -8,8 +9,7 @@ export async function GET() {
       getFooterNavEntries(),
     ])
     return NextResponse.json({ success: true, data: header, footer })
-  } catch (err: any) {
-    return NextResponse.json({ success: false, error: err.message }, { status: 500 })
+  } catch (err) {
+    return errorResponse('navigation', err, 'Navigasi tidak dapat dimuat.')
   }
 }
-

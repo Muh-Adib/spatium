@@ -51,7 +51,7 @@ Prioritas: **P0** = wajib sebelum deploy produksi · **P1** = sebaiknya sebelum 
 | 3.1 | P0 | Lingkungan **staging** terpisah (domain, database, env sendiri) | Staging bisa di-deploy ulang dari branch |
 | 3.2 | P0 | Isi semua env wajib (lihat DEPLOYMENT.md), termasuk build args `NEXT_PUBLIC_*` | Build Coolify sukses tanpa peringatan env |
 | 3.3 | P0 | ✅ Healthcheck compose & Dockerfile memakai `/api/health`; probe DB dengan batas waktu 3 dtk, 503 saat DB mati (`tests/health-route.test.ts`) | Container ditandai unhealthy saat DB mati — tinggal verifikasi di staging |
-| 3.4 | P1 | Volume untuk `/app/public/tours` bila fitur Upload Tour dipakai (saat ini hilang saat container dibuat ulang) | Tur bertahan setelah redeploy |
+| 3.4 | P1 | ✅ Volume `tours_data` untuk `/app/public/tours` bila fitur Upload Tour dipakai (saat ini hilang saat container dibuat ulang) | Tur bertahan setelah redeploy |
 | 3.5 | P1 | Ganti default `POSTGRES_USER`/`POSTGRES_DB` (`uni`) — hanya untuk instalasi baru; instalasi lama memakai volume yang sudah ada | Diputuskan per lingkungan |
 | 3.6 | P1 | Kunci editor artikel di database (tabel `EditorLock`) agar aman saat restart/multi-instance | Dua tab editor saling terkunci walau server restart |
 | 3.7 | P2 | Logging terpusat dan pelaporan galat (`onRequestError` di `src/instrumentation.ts`) | Galat produksi terlihat di satu tempat |

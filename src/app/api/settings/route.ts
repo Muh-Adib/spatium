@@ -20,10 +20,6 @@ function parseSocialLinks(raw: string | null | undefined): Record<string, string
   }
 }
 
-function publicErrorMessage(error: unknown, fallback: string): string {
-  if (process.env.NODE_ENV === 'production') return fallback
-  return error instanceof Error && error.message ? error.message : fallback
-}
 
 export async function GET() {
   try {
@@ -67,7 +63,7 @@ export async function GET() {
   } catch (error: unknown) {
     console.error('[api/settings] GET failed:', error)
     return NextResponse.json(
-      { success: false, error: publicErrorMessage(error, 'Gagal memuat pengaturan.') },
+      { success: false, error: 'Gagal memuat pengaturan.' },
       { status: 500 }
     )
   }
@@ -78,69 +74,101 @@ export async function POST(request: NextRequest) {
   if (auth.error) return auth.error
 
   try {
-    const rawBody = await request.json().catch(() => null)
+    const rawBody: unknown = await request.json().catch(() => null)
     if (!rawBody) {
-      return NextResponse.json({ error: 'Body JSON wajib diisi.' }, { status: 400 })
+      return NextResponse.json({ success: false, error: 'Body JSON wajib diisi.' }, { status: 400 })
     }
 
     const validation = validateBody(settingsMutationSchema, rawBody)
     if (!validation.success) {
       return validation.response
     }
-
     const body = validation.data
-    const bodyRecord = body as Record<string, unknown>
 
     const existing = await prisma.orm.public.SiteConfig.where({ id: 1 }).first()
 
-    const payload = {
-      name: String(bodyRecord.siteName || body.name || 'SPATIUM'),
-      tagline: body.tagline || null,
-      description: body.metaDescription || (typeof bodyRecord.description === 'string' ? bodyRecord.description : null),
-      url: String(bodyRecord.canonicalUrl || bodyRecord.url || 'https://spatium.id'),
-      whatsapp: body.whatsapp || null,
-      email: body.contactEmail || (typeof bodyRecord.email === 'string' ? bodyRecord.email : null),
-      phone: bodyRecord.phone ? String(bodyRecord.phone) : (body.contactPhone || null),
-      address: body.address || null,
-      logoUrl: typeof bodyRecord.logoUrl === 'string' ? bodyRecord.logoUrl : null,
-      faviconUrl: typeof bodyRecord.faviconUrl === 'string' ? bodyRecord.faviconUrl : null,
-      socialLinks: body.socialLinks ? JSON.stringify(body.socialLinks) : null,
+    // Partial update: only keys present in the request are written; '' clears a field.
+    const nullable = (value: string | null | undefined) => (value === undefined ? undefined : value?.trim() || null)
+    const payload: Partial<{
+      name: string
+      tagline: string | null
+      description: string | null
+      url: string
+      whatsapp: string | null
+      email: string | null
+      phone: string | null
+      address: string | null
+      logoUrl: string | null
+      faviconUrl: string | null
+      socialLinks: string | null
+    }> = {}
+    if (body.name !== undefined) payload.name = body.name
+    if (body.tagline !== undefined) payload.tagline = nullable(body.tagline)
+    if (body.description !== undefined) payload.description = nullable(body.description)
+    if (body.whatsapp !== undefined) payload.whatsapp = nullable(body.whatsapp)
+    if (body.email !== undefined) payload.email = nullable(body.email)
+    if (body.phone !== undefined) payload.phone = nullable(body.phone)
+    if (body.address !== undefined) payload.address = nullable(body.address)
+    if (body.logoUrl !== undefined) payload.logoUrl = nullable(body.logoUrl)
+    if (body.faviconUrl !== undefined) payload.faviconUrl = nullable(body.faviconUrl)
+    if (body.socialLinks !== undefined) {
+      const links = Object.fromEntries(Object.entries(body.socialLinks).filter((entry): entry is [string, string] => typeof entry[1] === 'string' && entry[1].length > 0))
+      payload.socialLinks = Object.keys(links).length ? JSON.stringify(links) : null
     }
 
-    try {
-      const siteUrl = new URL(payload.url)
-      if (!['http:', 'https:'].includes(siteUrl.protocol) || siteUrl.username || siteUrl.password || siteUrl.search || siteUrl.hash) throw new Error('invalid')
-      payload.url = siteUrl.href.replace(/\/$/, '')
-    } catch (urlError: unknown) {
-      console.warn('[api/settings] Rejected invalid site URL:', urlError)
-      return NextResponse.json({ success: false, error: 'URL website harus berupa HTTP/HTTPS tanpa kredensial, query, atau fragmen.' }, { status: 400 })
+    if (body.url !== undefined) {
+      try {
+        const siteUrl = new URL(body.url)
+        if (!['http:', 'https:'].includes(siteUrl.protocol) || siteUrl.username || siteUrl.password || siteUrl.search || siteUrl.hash) throw new Error('invalid')
+        payload.url = siteUrl.href.replace(/\/$/, '')
+      } catch (urlError: unknown) {
+        console.warn('[api/settings] Rejected invalid site URL:', urlError)
+        return NextResponse.json({ success: false, error: 'URL website harus berupa HTTP/HTTPS tanpa kredensial, query, atau fragmen.' }, { status: 400 })
+      }
     }
 
-    if (existing) {
-      await prisma.orm.public.SiteConfig.where({ id: 1 }).update(payload)
-    } else {
-      await prisma.orm.public.SiteConfig.create({
-          id: 1,
-          ...payload,
-        })
+    if (Object.keys(payload).length === 0) {
+      return NextResponse.json({ success: false, error: 'Tidak ada perubahan untuk disimpan.' }, { status: 400 })
     }
 
-    // Trigger instant ISR revalidation for layout and landing pages
+    await prisma.transaction(async (tx) => {
+      if (existing) {
+        await tx.orm.public.SiteConfig.where({ id: 1 }).update(payload)
+      } else {
+        await tx.orm.public.SiteConfig.create({ id: 1, name: payload.name ?? 'SPATIUM', url: payload.url ?? 'https://spatium.id', ...payload })
+      }
+      await tx.orm.public.ContentRevision.create({
+        entityType: 'site_config',
+        entityId: '1',
+        actor: auth.user.id,
+        action: existing ? 'update' : 'create',
+        snapshot: JSON.stringify({ before: existing ?? null, changes: payload }),
+      })
+      await tx.orm.public.SeoAuditLog.create({
+        entityType: 'site_config',
+        entityId: '1',
+        actor: auth.user.id,
+        action: 'UPDATE_SITE_SETTINGS',
+        diff: JSON.stringify(Object.keys(payload)),
+      })
+    })
+
+    // Site name, contact and social links render in the shared layout on every page.
     try {
       revalidatePath('/', 'layout')
       revalidatePath('/contact')
       revalidatePath('/about')
-    } catch (err) { console.warn("[API observable error]:", err) }
+      revalidatePath('/sitemap.xml')
+    } catch (err) {
+      console.warn('[api/settings] revalidatePath failed:', err)
+    }
 
     return NextResponse.json({
       success: true,
-      message: 'Pengaturan situs berhasil diperbarui ke database dan cache revalidasi aktif.',
+      message: 'Pengaturan situs tersimpan.',
     })
   } catch (error: unknown) {
     console.error('[api/settings] POST failed:', error)
-    return NextResponse.json(
-      { success: false, error: publicErrorMessage(error, 'Gagal menyimpan pengaturan situs.') },
-      { status: 500 }
-    )
+    return NextResponse.json({ success: false, error: 'Gagal menyimpan pengaturan situs.' }, { status: 500 })
   }
 }

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db/prisma'
 import { getSiteProfile } from '@/lib/db/siteProfile'
 import { requireRole, type Role } from '@/lib/auth/rbac'
+import { SEO_TOOL_ROLES } from '@/lib/seo/access'
 import { indexingStatusQuerySchema } from '@/lib/validation/api-schemas'
 import { checkIndexingCooldown, normalizeIndexingUrl } from '@/lib/seo/indexing-rate-limit'
 import { getLatestSubmissionsForUrl } from '@/lib/db/indexing'
@@ -9,7 +10,7 @@ import { getLatestSubmissionsForUrl } from '@/lib/db/indexing'
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
-const ALLOWED_ROLES: Role[] = ['SUPER_ADMIN', 'CONTENT_ADMIN', 'EDITOR', 'SEO_MANAGER']
+const ALLOWED_ROLES: Role[] = SEO_TOOL_ROLES
 
 function safeJsonParse(payload: string | null | undefined) {
   if (!payload) return null

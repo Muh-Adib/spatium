@@ -9,6 +9,7 @@ import {
 import { getSiteProfile } from '@/lib/db/siteProfile'
 import { syncGscDaily } from '@/lib/gsc/sync'
 import { requireUser, requireRole } from '@/lib/auth/rbac'
+import { publicMessage } from '@/lib/http/errors'
 
 export async function GET(req: NextRequest) {
   const auth = await requireUser(req)
@@ -62,8 +63,9 @@ export async function GET(req: NextRequest) {
       devices,
       countries,
     })
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 })
+  } catch (error) {
+    console.error('[gsc] Failed to load Search Console data', error)
+    return NextResponse.json({ error: publicMessage(error, 'Data Search Console tidak dapat dimuat.') }, { status: 500 })
   }
 }
 
@@ -80,7 +82,8 @@ export async function POST(req: NextRequest) {
 
     const syncResult = await syncGscDaily(siteUrl, daysBack)
     return NextResponse.json({ success: true, result: syncResult })
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message || 'Gagal menjalankan sinkronisasi GSC' }, { status: 500 })
+  } catch (error) {
+    console.error('[gsc] Sync request failed', error)
+    return NextResponse.json({ error: publicMessage(error, 'Gagal menjalankan sinkronisasi GSC') }, { status: 500 })
   }
 }

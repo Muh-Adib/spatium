@@ -5,6 +5,7 @@ import { siteConfig } from '@/config/site'
 import { getSiteProfile } from './siteProfile'
 import { or } from '@prisma/orm-postgres/orm-client'
 import { prisma } from './prisma'
+import { PublicError } from '@/lib/http/errors'
 import type { Article, Category, Author, SEOComponent } from '../content/types'
 
 export interface ArticleQueryOptions {
@@ -301,30 +302,32 @@ export async function createCategory(data: {
   actor?: string
 }) {
   const name = data.name.trim()
-  if (!name) throw new Error('Nama kategori wajib diisi.')
+  if (!name) throw new PublicError('Nama kategori wajib diisi.')
   const slug = data.slug?.trim() ? normalizeCategorySlug(data.slug) : normalizeCategorySlug(name)
-  if (!slug) throw new Error('Nama atau slug kategori harus memuat huruf atau angka.')
+  if (!slug) throw new PublicError('Nama atau slug kategori harus memuat huruf atau angka.')
 
   const existing = await prisma.orm.public.Category.where({ slug }).first()
   if (existing) {
-    throw new Error(`Kategori dengan slug "${slug}" sudah ada (${existing.name}).`)
+    throw new PublicError(`Kategori dengan slug "${slug}" sudah ada (${existing.name}).`, 409)
   }
 
-  const category = await prisma.orm.public.Category.create({
-    name,
-    slug,
-    description: data.description?.trim() || null,
-  })
+  return prisma.transaction(async (tx) => {
+    const category = await tx.orm.public.Category.create({
+      name,
+      slug,
+      description: data.description?.trim() || null,
+    })
 
-  await prisma.orm.public.ContentRevision.create({
-    entityType: 'category',
-    entityId: String(category.id),
-    actor: data.actor || 'system',
-    action: 'create',
-    snapshot: JSON.stringify(category),
-  })
+    await tx.orm.public.ContentRevision.create({
+      entityType: 'category',
+      entityId: String(category.id),
+      actor: data.actor || 'system',
+      action: 'create',
+      snapshot: JSON.stringify(category),
+    })
 
-  return category
+    return category
+  })
 }
 
 export async function updateCategory(
@@ -338,25 +341,25 @@ export async function updateCategory(
 ) {
   return prisma.transaction(async (tx) => {
     const existing = await tx.orm.public.Category.where({ id }).first()
-    if (!existing) throw new Error('Kategori tidak ditemukan.')
+    if (!existing) throw new PublicError('Kategori tidak ditemukan.', 404)
 
     const payload: Record<string, any> = {}
     let nameChanged = false
 
     if (data.name !== undefined) {
       const name = data.name.trim()
-      if (!name) throw new Error('Nama kategori tidak boleh kosong.')
+      if (!name) throw new PublicError('Nama kategori tidak boleh kosong.')
       payload.name = name
       if (name !== existing.name) nameChanged = true
     }
 
     if (data.slug !== undefined) {
       const slug = normalizeCategorySlug(data.slug)
-      if (!slug) throw new Error('Slug kategori harus memuat huruf atau angka.')
+      if (!slug) throw new PublicError('Slug kategori harus memuat huruf atau angka.')
       if (slug !== existing.slug) {
         const conflict = await tx.orm.public.Category.where({ slug }).first()
         if (conflict && conflict.id !== id) {
-          throw new Error(`Slug "${slug}" sudah digunakan oleh kategori lain (${conflict.name}).`)
+          throw new PublicError(`Slug "${slug}" sudah digunakan oleh kategori lain (${conflict.name}).`, 409)
         }
         payload.slug = slug
       }
@@ -396,7 +399,7 @@ export async function deleteCategory(
 ) {
   return prisma.transaction(async (tx) => {
     const existing = await tx.orm.public.Category.where({ id }).first()
-    if (!existing) throw new Error('Kategori tidak ditemukan.')
+    if (!existing) throw new PublicError('Kategori tidak ditemukan.', 404)
 
     // Count how many articles currently belong to this category
     const agg = await tx.orm.public.Article.where({ categoryId: id }).aggregate((a: any) => ({ total: a.count() }))
@@ -407,11 +410,11 @@ export async function deleteCategory(
     if (linkedCount > 0) {
       if (options.reassignToId) {
         if (options.reassignToId === id) {
-          throw new Error('Kategori tujuan pengalihan tidak boleh sama dengan kategori yang akan dihapus.')
+          throw new PublicError('Kategori tujuan pengalihan tidak boleh sama dengan kategori yang akan dihapus.')
         }
         destinationCategory = await tx.orm.public.Category.where({ id: options.reassignToId }).first()
         if (!destinationCategory) {
-          throw new Error('Kategori tujuan pengalihan tidak ditemukan.')
+          throw new PublicError('Kategori tujuan pengalihan tidak ditemukan.')
         }
       } else {
         // Find safe fallback category (e.g. category 'artikel' or first available other category)
@@ -465,7 +468,7 @@ async function replaceArticleTags(models: TagModels, articleId: number, names: s
   for (const name of [...new Set(names.map((name) => name.trim()).filter(Boolean))]) {
     const existing = await models.Tag.where({ name }).first()
     const slug = name.normalize('NFKC').toLowerCase().replace(/[^\p{L}\p{N}]+/gu, '-').replace(/^-|-$/g, '')
-    if (!slug) throw new Error('Nama tag harus memuat huruf atau angka.')
+    if (!slug) throw new PublicError('Nama tag harus memuat huruf atau angka.')
     const tag = existing || await models.Tag.upsert({ conflictOn: { slug }, create: { name, slug }, update: {} })
     ids.add(tag.id)
   }
@@ -587,7 +590,7 @@ export async function updateArticle(
 
   return prisma.transaction(async (tx) => {
     const previous = await tx.orm.public.Article.where({ slug }).forUpdate().first()
-    if (!previous) throw new Error('Artikel tidak ditemukan.')
+    if (!previous) throw new PublicError('Artikel tidak ditemukan.', 404)
     const previousTags = await tx.orm.public.ArticleTag.where({ articleId: previous.id }).include('tag').all()
     await recordRevision(tx.orm.public, { ...previous, articleTags: previousTags }, actor || 'system', 'before_update')
     if (tags !== undefined) payload.tags = JSON.stringify(await replaceArticleTags(tx.orm.public, previous.id, tags))

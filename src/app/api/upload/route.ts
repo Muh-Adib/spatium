@@ -2,6 +2,16 @@ import { NextRequest, NextResponse } from 'next/server'
 import { checkRateLimit, clientKey, rateLimitResponse } from '@/lib/security/rate-limit'
 import path from 'path'
 import fs from 'fs'
+import sharp from 'sharp'
+import { requireRole, requireUser } from '@/lib/auth/rbac'
+import { registerMediaItem } from '@/lib/db/media'
+import {
+  detectMimeFromBytes,
+  sanitizeSvg,
+  generateSafeFilename,
+  isPathInsideUploads,
+} from '@/lib/media/upload-guard'
+import { MAX_UPLOAD_BYTES, MEDIA_UPLOAD_ROLES, oversizeMessage } from '@/lib/media/media-schema'
 
 const ALLOWED_MIME_TYPES = [
   'image/jpeg',
@@ -12,18 +22,13 @@ const ALLOWED_MIME_TYPES = [
   'image/svg+xml',
 ]
 
-const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5 MB
-
-import { requireUser } from '@/lib/auth/rbac'
-import {
-  detectMimeFromBytes,
-  sanitizeSvg,
-  generateSafeFilename,
-  isPathInsideUploads,
-} from '@/lib/media/upload-guard'
-
+/**
+ * Image upload used by the media picker (article, portfolio, page and block
+ * editors). The file is kept in its original format and registered in the
+ * media library so it shows up in Studio > Media with its uploader.
+ */
 export async function POST(request: NextRequest) {
-  const auth = await requireUser(request)
+  const auth = await requireRole(request, [...MEDIA_UPLOAD_ROLES])
   if (auth.error) return auth.error
 
   const rl = checkRateLimit({ key: clientKey(request, 'upload'), limit: 30, windowMs: 60_000 })
@@ -31,22 +36,17 @@ export async function POST(request: NextRequest) {
 
   try {
     const formData = await request.formData()
-    const file = formData.get('file') as File | null
+    const file = formData.get('file')
 
-    if (!file) {
+    if (!(file instanceof File)) {
       return NextResponse.json(
         { error: 'File tidak ditemukan dalam form data.' },
         { status: 400 }
       )
     }
 
-    if (file.size > MAX_FILE_SIZE) {
-      return NextResponse.json(
-        {
-          error: `Ukuran file (${(file.size / (1024 * 1024)).toFixed(2)} MB) melebihi batas maksimal 5 MB.`,
-        },
-        { status: 400 }
-      )
+    if (file.size > MAX_UPLOAD_BYTES) {
+      return NextResponse.json({ error: oversizeMessage(file.size) }, { status: 413 })
     }
 
     const bytes = await file.arrayBuffer()
@@ -64,6 +64,8 @@ export async function POST(request: NextRequest) {
     }
 
     let finalBuffer: Buffer = buffer
+    let width: number | null = null
+    let height: number | null = null
 
     // If SVG, strictly sanitize against XSS/XXE/scripts
     if (detected.mime === 'image/svg+xml') {
@@ -78,6 +80,16 @@ export async function POST(request: NextRequest) {
         )
       }
       finalBuffer = Buffer.from(sanitizeResult.sanitized, 'utf-8')
+    } else {
+      // Decode once: rejects corrupt files and records dimensions for the library.
+      try {
+        const meta = await sharp(buffer).metadata()
+        width = meta.width ?? null
+        height = meta.height ?? null
+      } catch (err) {
+        console.warn('[api/upload] image could not be decoded:', err)
+        return NextResponse.json({ error: 'Gambar tidak dapat dibaca. File mungkin rusak.' }, { status: 400 })
+      }
     }
 
     const uploadsDir = path.resolve(process.cwd(), 'public', 'uploads')
@@ -100,6 +112,26 @@ export async function POST(request: NextRequest) {
 
     const publicUrl = `/uploads/${uniqueFilename}`
 
+    try {
+      await registerMediaItem(
+        {
+          fileName: uniqueFilename,
+          url: publicUrl,
+          size: finalBuffer.length,
+          mimeType: detected.mime,
+          width,
+          height,
+          title: typeof file.name === 'string' ? file.name.slice(0, 200) : uniqueFilename,
+        },
+        auth.user.id,
+        auth.user.email ?? auth.user.name,
+      )
+    } catch (err) {
+      // Without a library row the file would be untracked: remove it and fail.
+      await fs.promises.unlink(targetFilePath).catch((unlinkErr) => console.warn('[api/upload] orphan cleanup failed:', unlinkErr))
+      throw err
+    }
+
     return NextResponse.json(
       {
         success: true,
@@ -115,18 +147,16 @@ export async function POST(request: NextRequest) {
         },
       }
     )
-  } catch (error: any) {
-    console.error('Error handling file upload:', error)
-    return NextResponse.json(
-      {
-        error: error.message || 'Gagal mengunggah file ke media storage server.',
-      },
-      { status: 500 }
-    )
+  } catch (error) {
+    console.error('[api/upload] upload failed:', error)
+    return NextResponse.json({ error: 'Gagal mengunggah file ke server. Coba lagi.' }, { status: 500 })
   }
 }
 
 export async function GET(request: NextRequest) {
+  const auth = await requireUser(request)
+  if (auth.error) return auth.error
+
   try {
     const { searchParams } = new URL(request.url)
     const search = (searchParams.get('search') || '').toLowerCase().trim()
@@ -175,7 +205,8 @@ export async function GET(request: NextRequest) {
                 let stat
                 try {
                   stat = fs.statSync(fullPath)
-                } catch {
+                } catch (statErr) {
+                  console.warn('[api/upload] stat failed:', fullPath, statErr)
                   stat = { size: 0, mtime: new Date() }
                 }
                 items.push({
@@ -217,9 +248,9 @@ export async function GET(request: NextRequest) {
         totalPages,
       },
     })
-  } catch (error: any) {
-    console.error('Error fetching media library:', error)
-    return NextResponse.json({ error: error.message || 'Gagal memuat pustaka media.' }, { status: 500 })
+  } catch (error) {
+    console.error('[api/upload] listing media failed:', error)
+    return NextResponse.json({ error: 'Gagal memuat pustaka media.' }, { status: 500 })
   }
 }
 

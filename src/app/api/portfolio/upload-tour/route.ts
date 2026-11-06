@@ -4,8 +4,9 @@ import fs from 'fs'
 import AdmZip from 'adm-zip'
 import { z } from 'zod'
 import { prisma } from '@/lib/db/prisma'
-import { revalidatePath } from 'next/cache'
-import { requireRole } from '@/lib/auth/rbac'
+import { requireCan } from '@/lib/auth/capabilities'
+import { revalidateCatalog } from '@/lib/cache/revalidate'
+import { actorOf, recordCatalogHistory } from '@/lib/db/catalogMutations'
 
 export const maxDuration = 60
 
@@ -60,20 +61,17 @@ function field(formData: FormData, key: string): string | undefined {
   return typeof value === 'string' ? value : undefined
 }
 
-function errorMessage(err: unknown): string {
-  return err instanceof Error ? err.message : String(err)
-}
-
 export async function POST(request: NextRequest) {
   // Trust boundary: only studio editors may write files under public/tours and create portfolio rows.
-  const auth = await requireRole(request, ['SUPER_ADMIN', 'CONTENT_ADMIN', 'EDITOR'])
+  // Same roles as portfolio:create / portfolio:update in the capability map.
+  const auth = await requireCan(request, 'portfolio:create')
   if (auth.error) return auth.error
 
   let formData: FormData
   try {
     formData = await request.formData()
   } catch (err) {
-    console.warn('[TourUpload] Invalid multipart body:', errorMessage(err))
+    console.warn('[TourUpload] Invalid multipart body:', err)
     return NextResponse.json({ success: false, error: 'Body multipart tidak valid.' }, { status: 400 })
   }
 
@@ -183,29 +181,44 @@ export async function POST(request: NextRequest) {
   ].filter((m): m is { label: string; value: string } => m !== null)
 
   // Uploads land as DRAFT: publishing goes through the Studio publication gate (AGENTS.md §3.5).
-  const values = {
+  // Re-uploading to an existing slug only refreshes the tour link and the fields the
+  // editor filled in, so an existing case study is never blanked or re-statused.
+  const provided = {
     title: input.title,
-    client: input.client ?? null,
-    category: input.category ?? null,
-    summary: input.summary ?? null,
     liveUrl,
     featured,
-    technologies: JSON.stringify(['3D Gaussian Splatting']),
-    metrics: metrics.length > 0 ? JSON.stringify(metrics) : null,
+    ...(input.client ? { client: input.client } : {}),
+    ...(input.category ? { category: input.category } : {}),
+    ...(input.summary ? { summary: input.summary } : {}),
+    ...(metrics.length > 0 ? { metrics: JSON.stringify(metrics) } : {}),
   }
 
+  let savedStatus = 'draft'
   try {
-    const existing = await prisma.orm.public.Portfolio.where({ slug: safeSlug }).first()
-    if (existing) {
-      await prisma.orm.public.Portfolio.where({ id: existing.id }).update(values)
-    } else {
-      await prisma.orm.public.Portfolio.create({
-        ...values,
+    const actor = actorOf(auth.user)
+    savedStatus = await prisma.transaction(async (tx) => {
+      const existing = await tx.orm.public.Portfolio.where({ slug: safeSlug }).forUpdate().first()
+      if (existing) {
+        await tx.orm.public.Portfolio.where({ id: existing.id }).update(provided)
+        await recordCatalogHistory(tx, 'portfolio', existing.id, actor, 'update:tour-upload', existing, {
+          fields: Object.keys(provided),
+        })
+        return existing.status ?? 'draft'
+      }
+      const row = await tx.orm.public.Portfolio.create({
+        client: null,
+        category: null,
+        summary: null,
+        metrics: null,
+        ...provided,
+        technologies: JSON.stringify(['3D Gaussian Splatting']),
         documentId: `port-${safeSlug}`,
         slug: safeSlug,
         status: 'draft',
       })
-    }
+      await recordCatalogHistory(tx, 'portfolio', row.id, actor, 'create:tour-upload', row)
+      return 'draft'
+    })
   } catch (err) {
     console.error('[TourUpload] Portfolio upsert failed:', err)
     return NextResponse.json(
@@ -214,15 +227,16 @@ export async function POST(request: NextRequest) {
     )
   }
 
-  revalidatePath('/portfolio')
-  revalidatePath(`/portfolio/${safeSlug}`)
-  revalidatePath('/')
+  await revalidateCatalog('portfolio', safeSlug)
 
   return NextResponse.json({
     success: true,
-    message: 'Tur spasial tersimpan sebagai draft. Tinjau lalu publikasikan dari Portfolio Manager.',
+    message:
+      savedStatus === 'draft'
+        ? 'Tur spasial tersimpan sebagai draft. Tinjau lalu publikasikan dari Portfolio Manager.'
+        : `Tur spasial diperbarui pada portofolio "${safeSlug}" (status: ${savedStatus}).`,
     slug: safeSlug,
     liveUrl,
-    portfolio: { slug: safeSlug, title: input.title, status: 'draft', liveUrl },
+    portfolio: { slug: safeSlug, title: input.title, status: savedStatus, liveUrl },
   })
 }

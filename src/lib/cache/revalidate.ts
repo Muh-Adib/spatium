@@ -34,7 +34,9 @@ export async function revalidateCatalog(
             revalidatePath(`/services/${cSlug}`)
           }
         }
-        revalidatePath('/')
+        // Use cases feed the header mega menu and footer (root layout), so every
+        // page that renders the site chrome must be regenerated.
+        revalidatePath('/', 'layout')
         revalidatePath('/sitemap.xml')
         break
 
@@ -43,7 +45,8 @@ export async function revalidateCatalog(
         if (slug) {
           revalidatePath(`/services/${slug}`)
         }
-        revalidatePath('/')
+        // Services and portfolios also feed the navigation in the root layout.
+        revalidatePath('/', 'layout')
         revalidatePath('/sitemap.xml')
         break
 
@@ -59,7 +62,7 @@ export async function revalidateCatalog(
         if (slug) {
           revalidatePath(`/portfolio/${slug}`)
         }
-        revalidatePath('/')
+        revalidatePath('/', 'layout')
         revalidatePath('/sitemap.xml')
         break
 

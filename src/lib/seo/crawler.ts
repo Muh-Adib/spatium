@@ -23,18 +23,51 @@ export interface CrawledPageResult {
 /**
  * Executes Layer 2: Live Crawler (Section 15.3)
  */
+/** Resolves `location` against `from` and keeps it only when it stays on `base`'s origin. */
+export function sameOriginUrl(location: string, from: string, base: string): string | null {
+  try {
+    const next = new URL(location, from)
+    if (next.origin !== new URL(base).origin) return null
+    next.hash = ''
+    return next.toString()
+  } catch (err) {
+    console.warn('[crawler] Ignoring malformed URL', location, err)
+    return null
+  }
+}
+
+const CRAWL_TIMEOUT_MS = 15_000
+
+/**
+ * `src` of every `<img>` without an `alt` attribute. `alt=""` is the correct
+ * markup for decorative images (WCAG H67) and is not reported.
+ */
+export function findImagesMissingAlt(html: string): string[] {
+  const missing: string[] = []
+  for (const img of html.matchAll(/<img\b[^>]*>/gi)) {
+    const tag = img[0]
+    const src = tag.match(/\ssrc=["']([^"']+)["']/i)
+    if (!src) continue
+    if (!/\salt\s*=/i.test(tag)) missing.push(src[1])
+  }
+  return missing
+}
+
+/**
+ * The crawler only ever visits the configured site (`siteConfig.url`); callers
+ * cannot point it at another host, and discovered links/redirects leaving that
+ * origin are not followed.
+ */
 export async function runLiveCrawler(options: {
-  baseUrl?: string
   maxPages?: number
-  concurrency?: number
 } = {}): Promise<{
   summary: SiteAuditSummary
   issues: SiteAuditIssue[]
   crawledPages: number
 }> {
   const auditId = `audit_crawl_${Date.now()}`
-  const targetBaseUrl = (options.baseUrl || siteConfig.url || 'http://localhost:3000').replace(/\/$/, '')
-  const maxPages = options.maxPages || 40
+  const targetBaseUrl = siteConfig.url.replace(/\/$/, '')
+  const maxPages = Math.min(Math.max(options.maxPages ?? 40, 1), 50)
 
   const visitedUrls = new Set<string>()
   const queue: string[] = [targetBaseUrl]
@@ -52,8 +85,8 @@ export async function runLiveCrawler(options: {
   const userAgent = 'SPATIUM-SEO-Crawler/2.0 (+https://spatium.id/bot)'
 
   while (queue.length > 0 && visitedUrls.size < maxPages) {
-    const currentUrl = queue.shift()!
-    if (visitedUrls.has(currentUrl)) continue
+    const currentUrl = queue.shift()
+    if (currentUrl === undefined || visitedUrls.has(currentUrl)) continue
     visitedUrls.add(currentUrl)
 
     const t0 = Date.now()
@@ -65,6 +98,7 @@ export async function runLiveCrawler(options: {
           Accept: 'text/html,application/xhtml+xml',
         },
         redirect: 'manual', // Do not automatically follow redirects so we can detect 301/302
+        signal: AbortSignal.timeout(CRAWL_TIMEOUT_MS),
       })
       const responseTimeMs = Date.now() - t0
       const statusCode = res.status
@@ -92,9 +126,9 @@ export async function runLiveCrawler(options: {
               description: `Halaman ${currentUrl} mengalihkan ke dirinya sendiri (Loop).`,
               recommendation: 'Hapus aturan redirect loop.',
             })
-          } else if (locHeader.startsWith(targetBaseUrl) || locHeader.startsWith('/')) {
-            const nextUrl = locHeader.startsWith('http') ? locHeader : `${targetBaseUrl}${locHeader}`
-            if (!visitedUrls.has(nextUrl) && queue.length < maxPages) {
+          } else {
+            const nextUrl = sameOriginUrl(locHeader, currentUrl, targetBaseUrl)
+            if (nextUrl && !visitedUrls.has(nextUrl) && queue.length < maxPages) {
               queue.push(nextUrl)
             }
           }
@@ -181,15 +215,7 @@ export async function runLiveCrawler(options: {
       }
 
       // 3. Images Missing Alt
-      const imgTags = Array.from(html.matchAll(/<img[^>]+src=["']([^"']+)["'][^>]*>/gi))
-      const imagesMissingAlt: string[] = []
-      for (const img of imgTags) {
-        const full = img[0]
-        const alt = full.match(/alt=["']([^"']*)["']/i)
-        if (!alt || !alt[1].trim()) {
-          imagesMissingAlt.push(img[1])
-        }
-      }
+      const imagesMissingAlt = findImagesMissingAlt(html)
 
       if (imagesMissingAlt.length > 0) {
         issues.push({
@@ -219,8 +245,8 @@ export async function runLiveCrawler(options: {
       for (const m of hrefMatches) {
         const href = m[1]
         if (href.startsWith('/') && !href.startsWith('//') && !href.startsWith('/api') && !href.startsWith('/admin')) {
-          const nextUrl = `${targetBaseUrl}${href}`
-          if (!visitedUrls.has(nextUrl) && !queue.includes(nextUrl) && queue.length < maxPages) {
+          const nextUrl = sameOriginUrl(href, currentUrl, targetBaseUrl)
+          if (nextUrl && !visitedUrls.has(nextUrl) && !queue.includes(nextUrl) && queue.length < maxPages) {
             queue.push(nextUrl)
           }
         }
@@ -241,13 +267,17 @@ export async function runLiveCrawler(options: {
         externalLinks: [],
         jsonLdValid: html.includes('application/ld+json'),
       })
-    } catch (err: any) {
+    } catch (err) {
+      console.warn('[crawler] Fetch failed', currentUrl, err)
+      const timedOut = err instanceof Error && (err.name === 'TimeoutError' || err.name === 'AbortError')
       issues.push({
         severity: 'critical',
         category: 'performance',
         urlOrPath: currentUrl,
         title: 'Koneksi Crawler Gagal',
-        description: `Crawler gagal menghubungi ${currentUrl}: ${err.message}`,
+        description: timedOut
+          ? `Crawler tidak mendapat respons dari ${currentUrl} dalam ${CRAWL_TIMEOUT_MS / 1000} detik.`
+          : `Crawler gagal menghubungi ${currentUrl}.`,
         recommendation: 'Pastikan web server aktif dan URL dapat diakses.',
       })
     }
@@ -273,28 +303,30 @@ export async function runLiveCrawler(options: {
     finishedAt: new Date().toISOString(),
   }
 
-  // Save audit
-  await prisma.orm.public.SiteAudit.create({
-    id: auditId,
-    type: 'live_crawl',
-    status: 'completed',
-    summary: JSON.stringify(summary),
-    finishedAt: summary.finishedAt,
-  })
-
-  for (const iss of issues) {
-    await prisma.orm.public.SiteAuditIssue.create({
-      auditId,
-      severity: iss.severity,
-      category: iss.category,
-      urlOrPath: iss.urlOrPath,
-      title: iss.title,
-      description: iss.description,
-      recommendation: iss.recommendation,
+  // Save audit and its issues atomically
+  const insertedIssues = await prisma.transaction(async (tx) => {
+    await tx.orm.public.SiteAudit.create({
+      id: auditId,
+      type: 'live_crawl',
+      status: 'completed',
+      summary: JSON.stringify(summary),
+      finishedAt: summary.finishedAt,
     })
-  }
 
-  const insertedIssues = await prisma.orm.public.SiteAuditIssue.where({ auditId }).all()
+    for (const iss of issues) {
+      await tx.orm.public.SiteAuditIssue.create({
+        auditId,
+        severity: iss.severity,
+        category: iss.category,
+        urlOrPath: iss.urlOrPath,
+        title: iss.title,
+        description: iss.description,
+        recommendation: iss.recommendation,
+      })
+    }
+
+    return tx.orm.public.SiteAuditIssue.where({ auditId }).all()
+  })
 
   return {
     summary,

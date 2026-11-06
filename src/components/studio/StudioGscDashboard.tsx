@@ -101,6 +101,18 @@ export function StudioGscDashboard() {
     try {
       const res = await fetch('/api/gsc?type=all', { cache: 'no-store' })
       const json = await res.json()
+      if (!res.ok) {
+        setConnection({
+          connected: false,
+          reason:
+            typeof json.message === 'string'
+              ? json.message
+              : typeof json.error === 'string'
+                ? json.error
+                : 'Data Search Console tidak dapat dimuat.',
+        })
+        return
+      }
 
       if (json.siteUrl) setSiteUrl(json.siteUrl)
 
@@ -143,6 +155,7 @@ export function StudioGscDashboard() {
       }
     } catch (err) {
       console.error('Failed to load GSC data:', err)
+      setConnection({ connected: false, reason: 'Server Studio tidak dapat dihubungi untuk memuat data Search Console.' })
     } finally {
       setLoading(false)
     }
@@ -170,22 +183,29 @@ export function StudioGscDashboard() {
         throw new Error(data.error || 'Gagal menjalankan sinkronisasi data GSC.')
       }
 
+      if (data.result?.connected === false) {
+        throw new Error(data.result.reason || 'Sinkronisasi GSC tidak berjalan.')
+      }
       const syncedRows = data.result?.data?.syncedRows ?? 0
       setSyncSuccessMessage(
         `Sinkronisasi berhasil! ${syncedRows} baris data performa harian berhasil ditarik langsung dari Google Search Console.`
       )
       await loadGscData()
-    } catch (err: any) {
-      setSyncErrorMessage(err.message || 'Terjadi kesalahan saat sinkronisasi.')
+    } catch (err) {
+      setSyncErrorMessage(err instanceof Error ? err.message : 'Terjadi kesalahan saat sinkronisasi.')
     } finally {
       setSyncing(false)
     }
   }
 
   const handleCopy = (text: string) => {
-    navigator.clipboard.writeText(text)
-    setCopiedText(text)
-    setTimeout(() => setCopiedText(null), 2000)
+    navigator.clipboard.writeText(text).then(
+      () => {
+        setCopiedText(text)
+        setTimeout(() => setCopiedText(null), 2000)
+      },
+      (err) => console.warn('Clipboard write failed:', err),
+    )
   }
 
   // Format Date Helper
@@ -313,6 +333,7 @@ export function StudioGscDashboard() {
       </div>
 
       {/* ─── Feedback Alerts ────────────────────────────────────────── */}
+      <div role="status" aria-live="polite">
       {syncSuccessMessage && (
         <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-between gap-3 text-xs text-emerald-300 animate-in fade-in">
           <div className="flex items-center gap-2.5">
@@ -322,6 +343,7 @@ export function StudioGscDashboard() {
           <button
             type="button"
             onClick={() => setSyncSuccessMessage(null)}
+            aria-label="Tutup pesan sinkronisasi"
             className="text-emerald-400/80 hover:text-emerald-300 font-bold"
           >
             ×
@@ -329,8 +351,10 @@ export function StudioGscDashboard() {
         </div>
       )}
 
+      </div>
+
       {syncErrorMessage && (
-        <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/30 flex items-center justify-between gap-3 text-xs text-red-300 animate-in fade-in">
+        <div role="alert" className="p-4 rounded-xl bg-red-500/10 border border-red-500/30 flex items-center justify-between gap-3 text-xs text-red-300 animate-in fade-in">
           <div className="flex items-center gap-2.5">
             <AlertTriangle className="w-4 h-4 text-red-400 shrink-0" />
             <span>{syncErrorMessage}</span>
@@ -338,6 +362,7 @@ export function StudioGscDashboard() {
           <button
             type="button"
             onClick={() => setSyncErrorMessage(null)}
+            aria-label="Tutup pesan galat"
             className="text-red-400/80 hover:text-red-300 font-bold"
           >
             ×
@@ -437,6 +462,7 @@ export function StudioGscDashboard() {
           <div className="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0">
             <button
               type="button"
+              aria-pressed={activeTab === 'queries'}
               onClick={() => { setActiveTab('queries'); setSearchTerm(''); }}
               className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all ${
                 activeTab === 'queries'
@@ -450,6 +476,7 @@ export function StudioGscDashboard() {
 
             <button
               type="button"
+              aria-pressed={activeTab === 'pages'}
               onClick={() => { setActiveTab('pages'); setSearchTerm(''); }}
               className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all ${
                 activeTab === 'pages'
@@ -463,6 +490,7 @@ export function StudioGscDashboard() {
 
             <button
               type="button"
+              aria-pressed={activeTab === 'dates'}
               onClick={() => { setActiveTab('dates'); setSearchTerm(''); }}
               className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all ${
                 activeTab === 'dates'
@@ -476,6 +504,7 @@ export function StudioGscDashboard() {
 
             <button
               type="button"
+              aria-pressed={activeTab === 'devices'}
               onClick={() => { setActiveTab('devices'); setSearchTerm(''); }}
               className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all ${
                 activeTab === 'devices'
@@ -489,6 +518,7 @@ export function StudioGscDashboard() {
 
             <button
               type="button"
+              aria-pressed={activeTab === 'countries'}
               onClick={() => { setActiveTab('countries'); setSearchTerm(''); }}
               className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all ${
                 activeTab === 'countries'
@@ -506,7 +536,10 @@ export function StudioGscDashboard() {
             <div className="relative">
               <Search className="w-3.5 h-3.5 text-[#999898] absolute left-3 top-1/2 -translate-y-1/2" />
               <input
-                type="text"
+                type="search"
+                aria-label={
+                  activeTab === 'queries' ? 'Cari kueri' : activeTab === 'pages' ? 'Cari URL halaman' : 'Cari tanggal'
+                }
                 placeholder={
                   activeTab === 'queries'
                     ? 'Cari kueri...'
@@ -557,7 +590,8 @@ export function StudioGscDashboard() {
                             type="button"
                             onClick={() => handleCopy(q.query)}
                             title="Salin kata kunci"
-                            className="opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded hover:bg-white/10 text-[#999898] hover:text-white"
+                            aria-label={copiedText === q.query ? 'Kata kunci disalin' : `Salin kata kunci ${q.query}`}
+                            className="opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity p-1 rounded hover:bg-white/10 text-[#999898] hover:text-white"
                           >
                             {copiedText === q.query ? (
                               <Check className="w-3 h-3 text-emerald-400" />

@@ -142,9 +142,10 @@ export async function syncGscDaily(
       endDate,
       siteUrl,
     })
-  } catch (err: any) {
+  } catch (err) {
+    console.error('[gsc] Sync failed', err)
     return notConnected<GscSyncResult>(
-      `Gagal menjalankan sinkronisasi GSC: ${err.message}`,
+      'Gagal menjalankan sinkronisasi GSC. Detail tersedia di log server.',
       'Periksa koneksi API Google Search Console dan izin properti pada service account.'
     )
   }

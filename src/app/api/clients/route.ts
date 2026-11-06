@@ -1,22 +1,50 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { revalidatePath } from 'next/cache'
 import { requireUser, requireRole } from '@/lib/auth/rbac'
-import { prisma } from '@/lib/db/prisma'
 import {
   getAllClientLogos,
   createClientLogo,
   updateClientLogo,
   deleteClientLogo,
 } from '@/lib/db/clientLogos'
+import { errorResponse } from '@/lib/http/errors'
 import { z } from 'zod'
 
+/** Local path (`/brand/…`, `/uploads/…`) or an absolute https URL. */
+const logoUrlSchema = z
+  .string()
+  .trim()
+  .min(1, 'URL logo wajib diisi.')
+  .max(1000, 'URL logo terlalu panjang.')
+  .refine((v) => (v.startsWith('/') && !v.startsWith('//')) || /^https:\/\/[^\s]+$/i.test(v), {
+    message: 'URL logo harus path lokal (diawali "/") atau URL https.',
+  })
+
 const clientLogoInputSchema = z.object({
-  id: z.number().int().optional(),
-  name: z.string().min(1, 'Nama klien wajib diisi'),
-  logoUrl: z.string().min(1, 'URL logo wajib diisi'),
-  altText: z.string().optional(),
-  order: z.number().int().optional().default(0),
-  isActive: z.boolean().optional().default(true),
+  id: z.number().int().positive().optional(),
+  name: z.string().trim().min(1, 'Nama klien wajib diisi.').max(120, 'Nama klien maksimal 120 karakter.'),
+  logoUrl: logoUrlSchema,
+  altText: z.string().trim().max(200, 'Alt text maksimal 200 karakter.').nullish(),
+  order: z.number().int().min(0, 'Urutan tidak boleh negatif.').max(10000).nullish(),
+  isActive: z.boolean().nullish(),
 })
+
+const idParamSchema = z.coerce.number().int().positive()
+
+/** Edit the logo strip: same roles as the other content catalogs. */
+const EDIT_ROLES = ['SUPER_ADMIN', 'CONTENT_ADMIN', 'EDITOR'] as const
+const DELETE_ROLES = ['SUPER_ADMIN', 'CONTENT_ADMIN'] as const
+
+/** Logos render on the home page partner strip (src/app/page.tsx via getCorePartners). */
+function revalidatePublic(): void {
+  try {
+    revalidatePath('/')
+  } catch (err) {
+    console.warn('[api/clients] revalidatePath failed:', err)
+  }
+}
+
+const actorOf = (user: { email?: string; name: string }) => user.email ?? user.name
 
 export async function GET(request: NextRequest) {
   const auth = await requireUser(request)
@@ -25,94 +53,72 @@ export async function GET(request: NextRequest) {
   try {
     const data = await getAllClientLogos()
     return NextResponse.json({ data })
-  } catch (err: any) {
-    return NextResponse.json(
-      { error: 'Gagal memuat logo klien', details: err.message },
-      { status: 500 }
-    )
+  } catch (err) {
+    return errorResponse('api/clients:list', err, 'Gagal memuat logo klien.')
   }
 }
 
 export async function POST(request: NextRequest) {
-  const auth = await requireRole(request, ['SUPER_ADMIN', 'CONTENT_ADMIN', 'EDITOR'])
+  const auth = await requireRole(request, [...EDIT_ROLES])
   if (auth.error) return auth.error
-  const user = auth.user
+  const actor = actorOf(auth.user)
+
+  let body: unknown
+  try {
+    body = await request.json()
+  } catch (err) {
+    console.warn('[api/clients] invalid JSON body:', err)
+    return NextResponse.json({ error: 'Body permintaan harus JSON yang valid.' }, { status: 400 })
+  }
+
+  const parsed = clientLogoInputSchema.safeParse(body)
+  if (!parsed.success) {
+    const issues = parsed.error.issues.map((i) => ({ field: i.path.map(String).join('.'), message: i.message }))
+    return NextResponse.json(
+      { error: issues.map((i) => i.message).join(' '), issues },
+      { status: 422 }
+    )
+  }
+
+  const { id, name, logoUrl, altText, order, isActive } = parsed.data
+  const input = {
+    name,
+    logoUrl,
+    altText: altText ?? undefined,
+    order: order ?? undefined,
+    isActive: isActive ?? undefined,
+  }
 
   try {
-    const body = await request.json()
-    const parsed = clientLogoInputSchema.safeParse(body)
-    if (!parsed.success) {
-      return NextResponse.json(
-        { error: 'Validasi gagal', issues: parsed.error.format() },
-        { status: 422 }
-      )
-    }
-
-    const { id, name, logoUrl, altText, order, isActive } = parsed.data
-
-    let result
-    if (id) {
-      result = await updateClientLogo(id, { name, logoUrl, altText, order, isActive })
-    } else {
-      result = await createClientLogo({ name, logoUrl, altText, order, isActive })
-    }
-
-    // Audit log
-    try {
-      await prisma.orm.public.SeoAuditLog.create({
-        entityType: 'client_logo',
-        entityId: String(id || name),
-        action: id ? 'UPDATE_CLIENT_LOGO' : 'CREATE_CLIENT_LOGO',
-        actor: user.name,
-        diff: JSON.stringify({ name, logoUrl, altText, order, isActive }),
-      })
-    } catch (err) { console.warn("[API observable error]:", err) }
-
+    const result = id ? await updateClientLogo(id, input, actor) : await createClientLogo(input, actor)
+    revalidatePublic()
     return NextResponse.json({
       success: true,
       data: result,
       message: `Logo klien "${name}" berhasil ${id ? 'diperbarui' : 'ditambahkan'}.`,
     })
-  } catch (err: any) {
-    return NextResponse.json(
-      { error: 'Gagal menyimpan logo klien', details: err.message },
-      { status: 500 }
-    )
+  } catch (err) {
+    return errorResponse('api/clients:save', err, 'Gagal menyimpan logo klien.')
   }
 }
 
 export async function DELETE(request: NextRequest) {
-  const auth = await requireRole(request, ['SUPER_ADMIN', 'CONTENT_ADMIN'])
+  const auth = await requireRole(request, [...DELETE_ROLES])
   if (auth.error) return auth.error
-  const user = auth.user
+
+  const id = idParamSchema.safeParse(request.nextUrl.searchParams.get('id'))
+  if (!id.success) {
+    return NextResponse.json({ error: 'Parameter id tidak valid.' }, { status: 400 })
+  }
 
   try {
-    const { searchParams } = new URL(request.url)
-    const id = searchParams.get('id')
-    if (!id) {
-      return NextResponse.json({ error: 'Parameter id diperlukan.' }, { status: 400 })
-    }
-
-    await deleteClientLogo(Number(id))
-
-    // Audit log
-    try {
-      await prisma.orm.public.SeoAuditLog.create({
-        entityType: 'client_logo',
-        entityId: id,
-        action: 'DELETE_CLIENT_LOGO',
-        actor: user.name,
-      })
-    } catch (err) { console.warn("[API observable error]:", err) }
-
+    const deleted = await deleteClientLogo(id.data, actorOf(auth.user))
+    revalidatePublic()
     return NextResponse.json({
       success: true,
-      message: `Logo klien dengan ID ${id} berhasil dihapus oleh ${user.name}.`,
+      message: `Logo klien "${deleted.name}" berhasil dihapus.`,
     })
-  } catch (err: any) {
-    return NextResponse.json(
-      { error: 'Gagal menghapus logo klien', details: err.message },
-      { status: 500 }
-    )
+  } catch (err) {
+    return errorResponse('api/clients:delete', err, 'Gagal menghapus logo klien.')
   }
 }

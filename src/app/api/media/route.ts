@@ -8,16 +8,42 @@ import {
   updateMediaItem,
   renameMediaItem,
   generateMediaAudit,
-  slugifyFileName,
+  registerMediaItem,
+  deleteMediaItem,
 } from '@/lib/db/media'
-import { prisma } from '@/lib/db/prisma'
 import { requireUser, requireRole } from '@/lib/auth/rbac'
+import { PublicError } from '@/lib/http/errors'
+import { revalidateCatalog } from '@/lib/cache/revalidate'
+import { checkRateLimit, clientKey, rateLimitResponse } from '@/lib/security/rate-limit'
 import {
   detectMimeFromBytes,
   sanitizeSvg,
   generateSafeFilename,
   isPathInsideUploads,
 } from '@/lib/media/upload-guard'
+import {
+  MAX_UPLOAD_BYTES,
+  MEDIA_MANAGE_ROLES,
+  mediaActionBodySchema,
+  mediaPatchBodySchema,
+  oversizeMessage,
+  zodIssueMessages,
+} from '@/lib/media/media-schema'
+
+/** Error body in the shape the media manager reads (`errors: string[]`). */
+function fail(context: string, err: unknown, fallback: string): NextResponse {
+  if (err instanceof PublicError) {
+    return NextResponse.json({ data: null, errors: [err.message] }, { status: err.status })
+  }
+  console.error(`[api/media] ${context} failed:`, err)
+  return NextResponse.json({ data: null, errors: [fallback] }, { status: 500 })
+}
+
+function invalid(messages: string[], status = 422): NextResponse {
+  return NextResponse.json({ data: null, errors: messages }, { status })
+}
+
+const actorOf = (user: { email?: string; name: string }) => user.email ?? user.name
 
 export async function GET(request: NextRequest) {
   const auth = await requireUser(request)
@@ -40,7 +66,9 @@ export async function GET(request: NextRequest) {
     // 2. Single Media Item
     const id = searchParams.get('id')
     if (id) {
-      const item = await getMediaItem(parseInt(id, 10))
+      const numericId = Number(id)
+      if (!Number.isInteger(numericId) || numericId <= 0) return invalid(['ID media tidak valid.'], 400)
+      const item = await getMediaItem(numericId)
       if (!item) {
         return NextResponse.json({ data: null, errors: ['Media tidak ditemukan.'] }, { status: 404 })
       }
@@ -48,10 +76,11 @@ export async function GET(request: NextRequest) {
     }
 
     // 3. Paginated Media List with Filters
-    const search = searchParams.get('search') || ''
-    const filter = (searchParams.get('filter') || 'all') as 'all' | 'missing_alt' | 'unused' | 'oversized'
-    const page = parseInt(searchParams.get('page') || '1', 10)
-    const pageSize = parseInt(searchParams.get('pageSize') || '36', 10)
+    const search = (searchParams.get('search') || '').slice(0, 200)
+    const rawFilter = searchParams.get('filter') || 'all'
+    const filter = (['all', 'missing_alt', 'unused', 'oversized'] as const).find((f) => f === rawFilter) ?? 'all'
+    const page = Math.max(1, parseInt(searchParams.get('page') || '1', 10) || 1)
+    const pageSize = Math.min(200, Math.max(1, parseInt(searchParams.get('pageSize') || '36', 10) || 36))
 
     const result = await getMediaItems({ search, filter, page, pageSize })
     return NextResponse.json({
@@ -65,80 +94,77 @@ export async function GET(request: NextRequest) {
       errors: [],
       warnings: [],
     })
-  } catch (err: any) {
-    return NextResponse.json(
-      { data: null, errors: [err.message || 'Gagal memuat media.'] },
-      { status: 500 }
-    )
+  } catch (err) {
+    return fail('list', err, 'Gagal memuat media.')
   }
 }
 
 export async function POST(request: NextRequest) {
-  const auth = await requireUser(request)
+  const auth = await requireRole(request, [...MEDIA_MANAGE_ROLES])
   if (auth.error) return auth.error
+  const actor = actorOf(auth.user)
 
   try {
     const contentType = request.headers.get('content-type') || ''
 
     // 1. JSON Actions (Rename, Bulk Edit)
     if (contentType.includes('application/json')) {
-      const body = await request.json()
-      const { action, id, newFileName, items } = body
+      let body: unknown
+      try {
+        body = await request.json()
+      } catch (err) {
+        console.warn('[api/media] invalid JSON body:', err)
+        return invalid(['Body permintaan harus JSON yang valid.'], 400)
+      }
+      const parsed = mediaActionBodySchema.safeParse(body)
+      if (!parsed.success) return invalid(zodIssueMessages(parsed.error))
 
-      if (action === 'rename') {
-        if (!id || !newFileName) {
-          return NextResponse.json(
-            { data: null, errors: ['ID dan newFileName wajib disertakan.'] },
-            { status: 400 }
-          )
-        }
-        const cleanNewName = path.basename(newFileName)
-        if (!cleanNewName || cleanNewName.includes('..') || cleanNewName !== newFileName.trim()) {
-          return NextResponse.json(
-            { data: null, errors: ['Nama file tidak valid atau mengandung path traversal.'] },
-            { status: 400 }
-          )
-        }
-        const updated = await renameMediaItem(id, cleanNewName)
+      if (parsed.data.action === 'rename') {
+        const { item, touched } = await renameMediaItem(parsed.data.id, parsed.data.newFileName, actor)
+        // References were rewritten: refresh the public pages that show them.
+        for (const slug of touched.articles) await revalidateCatalog('article', slug)
+        for (const slug of touched.portfolios) await revalidateCatalog('portfolio', slug)
+        for (const slug of touched.services) await revalidateCatalog('service', slug)
         return NextResponse.json({
-          data: updated,
-          message: `Berhasil mengubah nama file menjadi "${updated?.fileName}" dan mendaftarkan 301 redirect.`,
+          data: item,
+          message: `Berhasil mengubah nama file menjadi "${item.fileName}" dan mendaftarkan 301 redirect.`,
           errors: [],
           warnings: [],
         })
       }
 
-      if (action === 'bulk_update') {
-        if (!Array.isArray(items)) {
-          return NextResponse.json(
-            { data: null, errors: ['Items array wajib disertakan untuk bulk_update.'] },
-            { status: 400 }
-          )
-        }
-        for (const it of items) {
-          if (it.id) {
-            await updateMediaItem(it.id, it)
-          }
-        }
-        return NextResponse.json({
-          data: { updatedCount: items.length },
-          message: `Berhasil memperbarui metadata ${items.length} media.`,
-          errors: [],
-          warnings: [],
-        })
+      const { items } = parsed.data
+      for (const { id, ...patch } of items) {
+        await updateMediaItem(id, patch, actor)
       }
+      return NextResponse.json({
+        data: { updatedCount: items.length },
+        message: `Berhasil memperbarui metadata ${items.length} media.`,
+        errors: [],
+        warnings: [],
+      })
     }
 
     // 2. Multipart Form Upload
-    const formData = await request.formData()
-    const file = formData.get('file') as File | null
-    const altId = (formData.get('alt_id') as string) || ''
-    const altEn = (formData.get('alt_en') as string) || ''
-    const title = (formData.get('title') as string) || ''
-    const caption = (formData.get('caption') as string) || ''
+    const rl = checkRateLimit({ key: clientKey(request, 'media-upload'), limit: 30, windowMs: 60_000 })
+    if (!rl.allowed) return rateLimitResponse(rl.retryAfterSeconds)
 
-    if (!file) {
-      return NextResponse.json({ data: null, errors: ['File tidak ditemukan dalam form data.'] }, { status: 400 })
+    const formData = await request.formData()
+    const file = formData.get('file')
+    const field = (name: string, max: number) => {
+      const v = formData.get(name)
+      return typeof v === 'string' ? v.trim().slice(0, max) : ''
+    }
+    const altId = field('alt_id', 300)
+    const altEn = field('alt_en', 300)
+    const title = field('title', 200)
+    const caption = field('caption', 500)
+
+    if (!(file instanceof File)) {
+      return invalid(['File tidak ditemukan dalam form data.'], 400)
+    }
+    if (file.size > MAX_UPLOAD_BYTES) {
+      return invalid([oversizeMessage(file.size)], 413)
     }
 
     const uploadsDir = path.resolve(process.cwd(), 'public', 'uploads')
@@ -146,40 +172,34 @@ export async function POST(request: NextRequest) {
       fs.mkdirSync(uploadsDir, { recursive: true })
     }
 
-    const bytes = await file.arrayBuffer()
-    const buffer = Buffer.from(bytes)
+    const buffer = Buffer.from(await file.arrayBuffer())
 
     // Inspect magic bytes
     const detected = detectMimeFromBytes(buffer)
     if (!detected) {
-      return NextResponse.json(
-        { data: null, errors: ['Format file tidak valid atau tidak dikenali dari magic bytes.'] },
-        { status: 400 }
-      )
+      return invalid(['Format file tidak valid atau tidak dikenali. Unggah gambar WebP, PNG, JPG, GIF, AVIF, atau SVG.'], 400)
     }
 
     const isSvg = detected.mime === 'image/svg+xml'
     let finalBuffer: Buffer = buffer
-    let width = 800
-    let height = 600
+    let width: number | null = null
+    let height: number | null = null
 
     if (isSvg) {
-      const svgText = buffer.toString('utf-8')
-      const sanitizeResult = sanitizeSvg(svgText)
+      const sanitizeResult = sanitizeSvg(buffer.toString('utf-8'))
       if (!sanitizeResult.valid || !sanitizeResult.sanitized) {
-        return NextResponse.json(
-          { data: null, errors: [`SVG ditolak: ${sanitizeResult.error || 'Konten tidak aman'}`] },
-          { status: 400 }
-        )
+        return invalid([`SVG ditolak: ${sanitizeResult.error || 'Konten tidak aman'}`], 400)
       }
       finalBuffer = Buffer.from(sanitizeResult.sanitized, 'utf-8')
     } else {
       // Optimize using sharp: auto-rotate, strip sensitive EXIF, convert to WebP
-      const processed = await sharp(buffer)
-        .rotate()
-        .webp({ quality: 85 })
-        .toBuffer({ resolveWithObject: true })
-
+      let processed: { data: Buffer; info: { width: number; height: number } }
+      try {
+        processed = await sharp(buffer).rotate().webp({ quality: 85 }).toBuffer({ resolveWithObject: true })
+      } catch (err) {
+        console.warn('[api/media] image could not be decoded:', err)
+        return invalid(['Gambar tidak dapat dibaca. File mungkin rusak.'], 400)
+      }
       finalBuffer = processed.data
       width = processed.info.width
       height = processed.info.height
@@ -189,65 +209,62 @@ export async function POST(request: NextRequest) {
     const targetFilePath = path.join(uploadsDir, cleanFileName)
 
     if (!isPathInsideUploads(targetFilePath)) {
-      return NextResponse.json({ data: null, errors: ['Path traversal terdeteksi.'] }, { status: 400 })
+      return invalid(['Path traversal terdeteksi.'], 400)
     }
 
     await fs.promises.writeFile(targetFilePath, finalBuffer)
-    const publicUrl = `/uploads/${cleanFileName}`
 
-    // Insert into database via Prisma 8
-    const inserted = await prisma.orm.public.MediaItem.create({
-        fileName: cleanFileName,
-        url: publicUrl,
-        size: finalBuffer.length,
-        mimeType: isSvg ? 'image/svg+xml' : 'image/webp',
-        width,
-        height,
-        altText: JSON.stringify({ id: altId, en: altEn }),
-        title: title || cleanFileName,
-        caption,
-        focalPoint: JSON.stringify({ x: 50, y: 50 }),
-        usedIn: JSON.stringify([]),
-        uploadedBy: 'admin_studio',
-      })
-
-    const item = await getMediaItem(inserted.id)
+    let item
+    try {
+      item = await registerMediaItem(
+        {
+          fileName: cleanFileName,
+          url: `/uploads/${cleanFileName}`,
+          size: finalBuffer.length,
+          mimeType: isSvg ? 'image/svg+xml' : 'image/webp',
+          width,
+          height,
+          altText: { id: altId, en: altEn },
+          title,
+          caption,
+        },
+        auth.user.id,
+        actor,
+      )
+    } catch (err) {
+      // No row means no library entry: do not leave an orphan file behind.
+      await fs.promises.unlink(targetFilePath).catch((unlinkErr) => console.warn('[api/media] orphan cleanup failed:', unlinkErr))
+      throw err
+    }
 
     return NextResponse.json({
       data: item,
-      message: 'File berhasil diunggah, dikonversi ke WebP, dan dioptimasi.',
+      message: isSvg ? 'SVG berhasil diunggah dan dibersihkan.' : 'File berhasil diunggah, dikonversi ke WebP, dan dioptimasi.',
       errors: [],
       warnings: [],
     })
-  } catch (err: any) {
-    return NextResponse.json(
-      { data: null, errors: [err.message || 'Gagal memproses upload media.'] },
-      { status: 500 }
-    )
+  } catch (err) {
+    return fail('post', err, 'Gagal memproses media.')
   }
 }
 
 export async function PATCH(request: NextRequest) {
-  const auth = await requireUser(request)
+  const auth = await requireRole(request, [...MEDIA_MANAGE_ROLES])
   if (auth.error) return auth.error
 
   try {
-    const body = await request.json()
-    const { id, altText, title, caption, description, decorative, focalPoint, credit } = body
-
-    if (!id) {
-      return NextResponse.json({ data: null, errors: ['ID media wajib diisi.'] }, { status: 400 })
+    let body: unknown
+    try {
+      body = await request.json()
+    } catch (err) {
+      console.warn('[api/media] invalid JSON body:', err)
+      return invalid(['Body permintaan harus JSON yang valid.'], 400)
     }
+    const parsed = mediaPatchBodySchema.safeParse(body)
+    if (!parsed.success) return invalid(zodIssueMessages(parsed.error))
 
-    const updated = await updateMediaItem(id, {
-      altText,
-      title,
-      caption,
-      description,
-      decorative,
-      focalPoint,
-      credit,
-    })
+    const { id, ...patch } = parsed.data
+    const updated = await updateMediaItem(id, patch, actorOf(auth.user))
 
     return NextResponse.json({
       data: updated,
@@ -255,24 +272,21 @@ export async function PATCH(request: NextRequest) {
       errors: [],
       warnings: [],
     })
-  } catch (err: any) {
-    return NextResponse.json(
-      { data: null, errors: [err.message || 'Gagal memperbarui media.'] },
-      { status: 500 }
-    )
+  } catch (err) {
+    return fail('patch', err, 'Gagal memperbarui media.')
   }
 }
 
 export async function DELETE(request: NextRequest) {
-  const auth = await requireRole(request, ['SUPER_ADMIN', 'CONTENT_ADMIN', 'EDITOR'])
+  const auth = await requireRole(request, [...MEDIA_MANAGE_ROLES])
   if (auth.error) return auth.error
 
   try {
     const { searchParams } = new URL(request.url)
-    const id = parseInt(searchParams.get('id') || '0', 10)
+    const id = Number(searchParams.get('id') || '0')
 
-    if (!id) {
-      return NextResponse.json({ data: null, errors: ['ID media wajib diisi.'] }, { status: 400 })
+    if (!Number.isInteger(id) || id <= 0) {
+      return invalid(['ID media wajib diisi.'], 400)
     }
 
     const item = await getMediaItem(id)
@@ -280,34 +294,33 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ data: null, errors: ['Media tidak ditemukan.'] }, { status: 404 })
     }
 
-    // Delete physical file if exists with strict path containment check
+    // Strict path containment check before touching the disk
     const safeUploadsDir = path.resolve(process.cwd(), 'public', 'uploads')
     const filePath = path.resolve(process.cwd(), 'public', item.url.replace(/^\//, ''))
     if (!filePath.startsWith(safeUploadsDir + path.sep)) {
-      return NextResponse.json(
-        { data: null, errors: ['Operasi dilarang: file berada di luar direktori uploads.'] },
-        { status: 400 }
-      )
+      return invalid(['Operasi dilarang: file berada di luar direktori uploads.'], 400)
     }
 
+    await deleteMediaItem(id, actorOf(auth.user))
+
+    // Row is gone; a leftover file would be re-imported by the library sync, so report it.
+    let warnings: string[] = []
     if (fs.existsSync(filePath)) {
       try {
-        fs.unlinkSync(filePath)
-      } catch (err) { console.warn("[API observable error]:", err) }
+        await fs.promises.unlink(filePath)
+      } catch (err) {
+        console.warn('[api/media] file delete failed:', filePath, err)
+        warnings = ['Data media dihapus, tetapi file fisik gagal dihapus dari server.']
+      }
     }
-
-    await prisma.orm.public.MediaItem.where({ id }).delete()
 
     return NextResponse.json({
       data: { success: true, id },
       message: 'Media berhasil dihapus.',
       errors: [],
-      warnings: [],
+      warnings,
     })
-  } catch (err: any) {
-    return NextResponse.json(
-      { data: null, errors: [err.message || 'Gagal menghapus media.'] },
-      { status: 500 }
-    )
+  } catch (err) {
+    return fail('delete', err, 'Gagal menghapus media.')
   }
 }

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { getLocations } from '@/lib/db/locations'
+import { errorResponse } from '@/lib/http/errors'
 
 export async function GET() {
   try {
@@ -8,7 +9,7 @@ export async function GET() {
       success: true,
       data,
     })
-  } catch (err: any) {
-    return NextResponse.json({ success: false, error: err.message }, { status: 500 })
+  } catch (err) {
+    return errorResponse('locations', err, 'Lokasi tidak dapat dimuat.')
   }
 }

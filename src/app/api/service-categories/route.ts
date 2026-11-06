@@ -4,110 +4,146 @@ import { getServiceCategories, mapCategoryRow } from '@/lib/db/serviceCategories
 import { requireCan } from '@/lib/auth/capabilities'
 import { parseBlocks } from '@/lib/blocks/schema'
 import { revalidateCatalog } from '@/lib/cache/revalidate'
+import { serviceCategoryMutationSchema, validateCatalogBody } from '@/lib/validation/api-schemas'
+import { errorResponse, PublicError } from '@/lib/http/errors'
+import {
+  actorOf,
+  catalogGateResponse,
+  coverAltFrom,
+  jsonColumn,
+  mergeSeoData,
+  normalizeCatalogSlug,
+  parseJsonArray,
+  recordCatalogHistory,
+  redirectRenamedSlug,
+  stripUndefined,
+  toIntOrDefault,
+} from '@/lib/db/catalogMutations'
 
 const MAX_PAYLOAD_BYTES = 1024 * 1024 // 1MB
 
+/** Studio list of every department (all statuses). */
 export async function GET() {
   try {
     const list = await getServiceCategories()
     return NextResponse.json({ success: true, data: list })
-  } catch (err: any) {
-    return NextResponse.json({ success: false, error: err.message }, { status: 500 })
+  } catch (error) {
+    return errorResponse('API service-categories GET', error, 'Gagal mengambil data departemen.')
   }
 }
 
 export async function POST(request: NextRequest) {
-  // Check payload size
-  const contentLength = request.headers.get('content-length')
-  if (contentLength && parseInt(contentLength, 10) > MAX_PAYLOAD_BYTES) {
-    return NextResponse.json(
-      { success: false, error: 'Ukuran payload melebihi batas 1MB.' },
-      { status: 413 }
-    )
+  const contentLength = Number(request.headers.get('content-length') || 0)
+  if (contentLength > MAX_PAYLOAD_BYTES) {
+    return NextResponse.json({ success: false, error: 'Ukuran payload melebihi batas 1MB.' }, { status: 413 })
   }
 
-  const auth = await requireCan(request, 'category:update')
+  let rawBody: unknown
+  try {
+    rawBody = await request.json()
+  } catch (err) {
+    console.warn('[API service-categories] invalid JSON body:', err)
+    rawBody = null
+  }
+  if (!rawBody || typeof rawBody !== 'object') {
+    return NextResponse.json({ success: false, error: 'Body JSON wajib diisi.' }, { status: 400 })
+  }
+
+  const isUpdate = 'id' in rawBody && Boolean((rawBody as { id?: unknown }).id)
+  const auth = await requireCan(request, isUpdate ? 'category:update' : 'category:create')
   if (auth.error) return auth.error
 
+  const validation = validateCatalogBody(serviceCategoryMutationSchema, rawBody)
+  if (!validation.success) return validation.response
+  const data = validation.data
+
+  const slug = normalizeCatalogSlug(data.slug)
+  if (!slug) {
+    return NextResponse.json({ success: false, error: 'Slug departemen tidak valid.' }, { status: 400 })
+  }
+
+  let blocksJson: string | undefined
+  if (data.blocks !== undefined) {
+    const parsed = parseBlocks(data.blocks)
+    if (!parsed.ok) {
+      return NextResponse.json(
+        { success: false, error: 'Validasi blok katalog gagal.', issues: parsed.issues },
+        { status: 422 },
+      )
+    }
+    blocksJson = JSON.stringify(parsed.blocks)
+  }
+
   try {
-    const body = await request.json().catch(() => null)
-    if (!body) {
-      return NextResponse.json({ success: false, error: 'Body JSON wajib diisi.' }, { status: 400 })
+    const existing = data.id ? await prisma.orm.public.ServiceCategory.where({ id: data.id }).first() : null
+    if (data.id && !existing) throw new PublicError('Departemen tidak ditemukan.', 404)
+
+    const clash = await prisma.orm.public.ServiceCategory.where({ slug }).first()
+    if (clash && clash.id !== existing?.id) {
+      throw new PublicError(`Slug "${slug}" sudah dipakai departemen lain.`, 409)
     }
 
-    const {
-      id,
+    const text = (v: string | null | undefined) => (v === undefined ? undefined : v || null)
+    const values = stripUndefined({
       slug,
-      title,
-      tag,
-      shortDescription,
-      heroImage,
-      themePreset,
-      keyOutcomes,
-      blocks,
-      order,
-      status,
-      showInNav,
-      metaTitle,
-      metaDescription,
-      focusKeyphrase,
-      relatedKeyphrases,
-    } = body
+      title: data.title,
+      tag: text(data.tag),
+      shortDescription: text(data.shortDescription),
+      heroImage: text(data.heroImage),
+      themePreset: data.themePreset === undefined ? undefined : data.themePreset || 'charcoal',
+      keyOutcomes: data.keyOutcomes === undefined ? undefined : jsonColumn(data.keyOutcomes),
+      blocks: blocksJson,
+      order: data.order === undefined ? undefined : toIntOrDefault(data.order, 0),
+      showInNav: data.showInNav,
+      metaTitle: text(data.metaTitle),
+      metaDescription: text(data.metaDescription),
+      focusKeyphrase: text(data.focusKeyphrase),
+      relatedKeyphrases: data.relatedKeyphrases === undefined ? undefined : jsonColumn(data.relatedKeyphrases),
+      seoData: data.seoData === undefined ? undefined : mergeSeoData(existing?.seoData, data.seoData),
+      // New departments start as DRAFT; publishing goes through the gate (AGENTS.md §3.5).
+      status: data.status ?? existing?.status ?? 'draft',
+    })
 
-    if (!slug || !title) {
-      return NextResponse.json({ success: false, error: 'Slug dan Judul Departemen wajib diisi.' }, { status: 400 })
+    if (values.status === 'published') {
+      const merged = { ...existing, ...values }
+      const gate = catalogGateResponse({
+        title: merged.title,
+        slug: merged.slug,
+        metaTitle: merged.metaTitle ?? undefined,
+        metaDescription: merged.metaDescription ?? undefined,
+        heroImage: merged.heroImage ?? undefined,
+        heroImageAlt: coverAltFrom(merged.seoData),
+        blocks: parseJsonArray(merged.blocks),
+      })
+      if (gate) return gate
     }
 
-    // Validate blocks with K-2 Block Schema
-    if (blocks !== undefined && blocks !== null) {
-      const parsedBlocks = parseBlocks(blocks)
-      if (!parsedBlocks.ok) {
-        return NextResponse.json(
-          {
-            success: false,
-            error: 'Validasi blok katalog gagal.',
-            issues: parsedBlocks.issues,
-          },
-          { status: 422 }
-        )
+    const actor = actorOf(auth.user)
+    const saved = await prisma.transaction(async (tx) => {
+      if (existing) {
+        await tx.orm.public.ServiceCategory.where({ id: existing.id }).update(values)
+        const row = await tx.orm.public.ServiceCategory.where({ id: existing.id }).first()
+        if (!row) throw new PublicError('Departemen tidak ditemukan.', 404)
+        await redirectRenamedSlug(tx, '/services', existing, row.slug)
+        await recordCatalogHistory(tx, 'service_category', row.id, actor, 'update', existing, {
+          fields: Object.keys(values),
+          from: existing.status,
+          to: row.status,
+        })
+        return row
       }
-    }
+      const row = await tx.orm.public.ServiceCategory.create(values)
+      await recordCatalogHistory(tx, 'service_category', row.id, actor, 'create', row)
+      return row
+    })
 
-    const payload: any = {
-      slug,
-      title,
-      tag: tag || null,
-      shortDescription: shortDescription || null,
-      heroImage: heroImage || null,
-      themePreset: themePreset || 'charcoal',
-      keyOutcomes: typeof keyOutcomes === 'string' ? keyOutcomes : JSON.stringify(keyOutcomes || []),
-      blocks: typeof blocks === 'string' ? blocks : JSON.stringify(blocks || []),
-      order: Number(order) || 0,
-      status: status || 'published',
-      showInNav: showInNav !== undefined ? Boolean(showInNav) : true,
-      metaTitle: metaTitle || null,
-      metaDescription: metaDescription || null,
-      focusKeyphrase: focusKeyphrase || null,
-      relatedKeyphrases: typeof relatedKeyphrases === 'string' ? relatedKeyphrases : JSON.stringify(relatedKeyphrases || []),
-      updatedAt: new Date().toISOString(),
-    }
+    const childSlugs = (await prisma.orm.public.Service.where({ categoryId: saved.id }).all()).map((s) => s.slug)
+    await revalidateCatalog('category', saved.slug, childSlugs)
+    if (existing && existing.slug !== saved.slug) await revalidateCatalog('category', existing.slug)
 
-    let resultCategory: any = null
-
-    if (id) {
-      await prisma.orm.public.ServiceCategory.where({ id: Number(id) }).update(payload)
-      const updated = await prisma.orm.public.ServiceCategory.where({ id: Number(id) }).first()
-      resultCategory = updated ? mapCategoryRow(updated) : null
-    } else {
-      const inserted = await prisma.orm.public.ServiceCategory.create(payload)
-      resultCategory = inserted ? mapCategoryRow(inserted) : null
-    }
-
-    await revalidateCatalog('category', slug)
-
-    return NextResponse.json({ success: true, data: resultCategory })
-  } catch (err: any) {
-    return NextResponse.json({ success: false, error: err.message }, { status: 500 })
+    return NextResponse.json({ success: true, data: mapCategoryRow(saved) })
+  } catch (error) {
+    return errorResponse('API service-categories POST', error, 'Gagal menyimpan departemen.')
   }
 }
 
@@ -115,22 +151,33 @@ export async function DELETE(request: NextRequest) {
   const auth = await requireCan(request, 'category:delete')
   if (auth.error) return auth.error
 
+  const idParam = new URL(request.url).searchParams.get('id')
+  if (!idParam || !/^\d+$/.test(idParam)) {
+    return NextResponse.json({ success: false, error: 'ID departemen wajib disertakan.' }, { status: 400 })
+  }
+  const id = Number(idParam)
+
   try {
-    const { searchParams } = new URL(request.url)
-    const id = searchParams.get('id')
-    if (!id) {
-      return NextResponse.json({ success: false, error: 'ID wajib disertakan.' }, { status: 400 })
-    }
+    const actor = actorOf(auth.user)
+    const { removed, childSlugs } = await prisma.transaction(async (tx) => {
+      const current = await tx.orm.public.ServiceCategory.where({ id }).forUpdate().first()
+      if (!current) throw new PublicError('Departemen tidak ditemukan.', 404)
+      // Services keep existing but lose their department (the UI warns about this).
+      const children = await tx.orm.public.Service.where({ categoryId: id }).all()
+      if (children.length > 0) {
+        await tx.orm.public.Service.where({ categoryId: id }).updateAll({ categoryId: null })
+      }
+      await recordCatalogHistory(tx, 'service_category', id, actor, 'delete', current, {
+        detachedServiceIds: children.map((c) => c.id),
+      })
+      await tx.orm.public.ServiceCategory.where({ id }).delete()
+      return { removed: current, childSlugs: children.map((c) => c.slug) }
+    })
 
-    const existing = await prisma.orm.public.ServiceCategory.where({ id: Number(id) }).first()
-    await prisma.orm.public.ServiceCategory.where({ id: Number(id) }).delete()
-
-    if (existing?.slug) {
-      await revalidateCatalog('category', existing.slug)
-    }
+    await revalidateCatalog('category', removed.slug, childSlugs)
 
     return NextResponse.json({ success: true, message: 'Departemen berhasil dihapus.' })
-  } catch (err: any) {
-    return NextResponse.json({ success: false, error: err.message }, { status: 500 })
+  } catch (error) {
+    return errorResponse('API service-categories DELETE', error, 'Gagal menghapus departemen.')
   }
 }

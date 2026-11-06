@@ -3,6 +3,8 @@
 import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { siteConfig } from '@/config/site'
+import { useAuth } from '@/lib/auth/AuthContext'
+import { SEO_TOOL_ROLES } from '@/lib/seo/access'
 import {
   ShieldCheck,
   AlertTriangle,
@@ -49,7 +51,22 @@ interface SiteAuditSummary {
   }
 }
 
+/** Readable message from an audit API response (`errors[]`, or `message` on 401/403). */
+function responseError(json: unknown, fallback: string): string {
+  if (json && typeof json === 'object') {
+    const body = json as { errors?: unknown; message?: unknown; error?: unknown }
+    if (Array.isArray(body.errors) && typeof body.errors[0] === 'string') return body.errors[0]
+    if (typeof body.message === 'string') return body.message
+    if (typeof body.error === 'string') return body.error
+  }
+  return fallback
+}
+
 export function StudioSiteAudit() {
+  const { role } = useAuth()
+  const canRun = SEO_TOOL_ROLES.includes(role)
+  const [error, setError] = useState<string | null>(null)
+  const [notice, setNotice] = useState<string | null>(null)
   const [summary, setSummary] = useState<SiteAuditSummary | null>(null)
   const [issues, setIssues] = useState<SiteAuditIssue[]>([])
   const [loading, setLoading] = useState<boolean>(true)
@@ -59,15 +76,19 @@ export function StudioSiteAudit() {
 
   const fetchAudit = async () => {
     setLoading(true)
+    setError(null)
     try {
       const res = await fetch('/api/audit')
       const json = await res.json()
-      if (json.data) {
+      if (!res.ok) {
+        setError(responseError(json, 'Gagal memuat hasil audit SEO.'))
+      } else if (json.data) {
         setSummary(json.data.summary)
         setIssues(json.data.issues || [])
       }
     } catch (err) {
       console.error('Failed to load audit report:', err)
+      setError('Gagal memuat hasil audit SEO.')
     } finally {
       setLoading(false)
     }
@@ -79,6 +100,8 @@ export function StudioSiteAudit() {
 
   const runAudit = async (type: 'internal_db' | 'live_crawl') => {
     setRunningType(type)
+    setError(null)
+    setNotice(null)
     try {
       const res = await fetch('/api/audit', {
         method: 'POST',
@@ -86,12 +109,16 @@ export function StudioSiteAudit() {
         body: JSON.stringify({ type }),
       })
       const json = await res.json()
-      if (json.data) {
+      if (!res.ok || !json.data) {
+        setError(responseError(json, 'Gagal menjalankan audit situs.'))
+      } else {
         setSummary(json.data.summary)
         setIssues(json.data.issues || [])
+        if (typeof json.message === 'string') setNotice(json.message)
       }
     } catch (err) {
       console.error('Audit run failed:', err)
+      setError('Gagal menjalankan audit situs.')
     } finally {
       setRunningType(null)
     }
@@ -119,8 +146,10 @@ export function StudioSiteAudit() {
 
         <div className="flex items-center gap-2.5">
           <button
+            type="button"
             onClick={() => runAudit('internal_db')}
-            disabled={runningType !== null}
+            disabled={!canRun || runningType !== null}
+            aria-busy={runningType === 'internal_db'}
             className="flex items-center gap-1.5 px-3.5 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg text-xs font-medium transition-all disabled:opacity-50"
           >
             {runningType === 'internal_db' ? (
@@ -132,8 +161,10 @@ export function StudioSiteAudit() {
           </button>
 
           <button
+            type="button"
             onClick={() => runAudit('live_crawl')}
-            disabled={runningType !== null}
+            disabled={!canRun || runningType !== null}
+            aria-busy={runningType === 'live_crawl'}
             className="flex items-center gap-1.5 px-3.5 py-2 bg-accent-500 hover:bg-accent-300 text-accent-950 rounded-lg text-xs font-semibold transition-all shadow-md disabled:opacity-50"
           >
             {runningType === 'live_crawl' ? (
@@ -146,8 +177,23 @@ export function StudioSiteAudit() {
         </div>
       </div>
 
+      {!canRun && (
+        <p className="text-xs text-neutral-400">
+          Menjalankan audit hanya untuk Super Admin, Content Admin, Editor, dan SEO Manager. Anda tetap dapat melihat hasil audit terakhir.
+        </p>
+      )}
+
+      <div role="status" aria-live="polite">
+        {notice && (
+          <p className="rounded-lg border border-emerald-500/20 bg-emerald-500/5 p-3 text-xs text-emerald-300">{notice}</p>
+        )}
+      </div>
+      {error && (
+        <p role="alert" className="rounded-lg border border-rose-500/30 bg-rose-500/5 p-3 text-xs text-rose-200">{error}</p>
+      )}
+
       {loading ? (
-        <div className="py-24 text-center">
+        <div className="py-24 text-center" role="status">
           <RefreshCw className="w-8 h-8 text-info animate-spin mx-auto mb-3" />
           <p className="text-sm text-neutral-400">Memuat laporan audit situs...</p>
         </div>
@@ -203,6 +249,8 @@ export function StudioSiteAudit() {
               {['all', 'meta', 'images', 'links', 'headings', 'redirects', 'performance'].map((cat) => (
                 <button
                   key={cat}
+                  type="button"
+                  aria-pressed={selectedCategory === cat}
                   onClick={() => setSelectedCategory(cat)}
                   className={`px-3 py-1 rounded-md text-xs font-mono uppercase transition-all ${
                     selectedCategory === cat
@@ -217,6 +265,7 @@ export function StudioSiteAudit() {
 
             <div className="flex items-center gap-2">
               <select
+                aria-label="Filter tingkat keparahan"
                 value={selectedSeverity}
                 onChange={(e) => setSelectedSeverity(e.target.value)}
                 className="bg-black/40 border border-white/10 rounded-lg text-xs text-neutral-300 px-3 py-1 focus:outline-none focus:border-accent-500"
@@ -241,11 +290,13 @@ export function StudioSiteAudit() {
                     <div className="flex items-start gap-3">
                       {iss.severity === 'critical' ? (
                         <div className="p-1.5 bg-rose-500/20 text-rose-400 rounded-lg mt-0.5">
-                          <AlertTriangle className="w-4 h-4" />
+                          <AlertTriangle className="w-4 h-4" aria-hidden="true" />
+                          <span className="sr-only">Kritis:</span>
                         </div>
                       ) : (
                         <div className="p-1.5 bg-amber-500/20 text-amber-400 rounded-lg mt-0.5">
-                          <Info className="w-4 h-4" />
+                          <Info className="w-4 h-4" aria-hidden="true" />
+                          <span className="sr-only">{iss.severity === 'warning' ? 'Peringatan:' : 'Info:'}</span>
                         </div>
                       )}
                       <div>
@@ -267,7 +318,8 @@ export function StudioSiteAudit() {
                         className="px-2.5 py-1 bg-white/10 hover:bg-white/20 text-info-300 rounded text-xs font-mono flex items-center gap-1 shrink-0"
                       >
                         <span>{iss.urlOrPath}</span>
-                        <ExternalLink className="w-3 h-3" />
+                        <ExternalLink className="w-3 h-3" aria-hidden="true" />
+                        <span className="sr-only">(buka di tab baru)</span>
                       </a>
                     )}
                   </div>
@@ -280,6 +332,10 @@ export function StudioSiteAudit() {
             )}
           </div>
         </>
+      ) : !error ? (
+        <div className="p-10 text-center border border-dashed border-white/10 rounded-xl text-xs text-neutral-400">
+          Belum ada audit yang dijalankan. {canRun ? 'Pilih “Audit Data DB” atau “Live Crawler” untuk memulai.' : ''}
+        </div>
       ) : null}
     </div>
   )

@@ -1,540 +1,417 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useEffect, useId, useRef, useState } from 'react'
 import { useAuth } from '@/lib/auth/AuthContext'
-import {
-  Settings,
-  Globe,
-  Search,
-  Shield,
-  Sliders,
-  Save,
-  RefreshCw,
-  CheckCircle2,
-  Database,
-  Cpu,
-  Layers,
-  FileText,
-  AlertTriangle,
-  Lock,
-} from 'lucide-react'
+import type { Role } from '@/lib/auth/types'
+import { Settings, Globe, Phone, Share2, Database, Save, RefreshCw, Lock } from 'lucide-react'
 
-interface SiteConfig {
-  siteName: string
+/**
+ * Site settings editor. Every field here maps to a column of `site_configs`
+ * (see `/api/settings`); there are no client-only toggles. Saving sends only
+ * the fields shown, so values managed elsewhere are never wiped.
+ */
+
+const SETTINGS_ADMINS: readonly Role[] = ['SUPER_ADMIN', 'CONTENT_ADMIN']
+
+const SOCIAL_FIELDS = [
+  { key: 'instagram', label: 'Instagram' },
+  { key: 'linkedin', label: 'LinkedIn' },
+  { key: 'youtube', label: 'YouTube' },
+  { key: 'tiktok', label: 'TikTok' },
+  { key: 'facebook', label: 'Facebook' },
+  { key: 'x', label: 'X' },
+  { key: 'vimeo', label: 'Vimeo' },
+  { key: 'behance', label: 'Behance' },
+] as const
+
+type SocialKey = (typeof SOCIAL_FIELDS)[number]['key']
+
+interface SettingsForm {
+  name: string
   tagline: string
-  canonicalUrl: string
-  contactEmail: string
-  titleTemplate: string
-  defaultMetaDescription: string
-  googleVerification: string
-  robotsIndex: boolean
-  defaultArticleStatus: 'draft' | 'in_review' | 'published'
-  maxUploadMb: number
-  enforceAltText: boolean
+  description: string
+  url: string
+  email: string
+  phone: string
+  whatsapp: string
+  address: string
+  logoUrl: string
+  faviconUrl: string
+  socialLinks: Record<SocialKey, string>
 }
 
-const DEFAULT_CONFIG: SiteConfig = {
-  siteName: 'SPATIUM',
-  tagline: 'Real places. New perspectives.',
-  canonicalUrl: 'https://spatium.id',
-  contactEmail: 'hello@spatium.id',
-  titleTemplate: '%s — SPATIUM',
-  defaultMetaDescription: 'SPATIUM adalah studio teknologi spasial: laser scan, point cloud, geometri 3D, dan 3D Gaussian Splat untuk digital twin industri kreatif.',
-  googleVerification: '',
-  robotsIndex: true,
-  defaultArticleStatus: 'draft',
-  maxUploadMb: 10,
-  enforceAltText: true,
+type FieldKey = Exclude<keyof SettingsForm, 'socialLinks'> | `socialLinks.${SocialKey}`
+
+const EMPTY_SOCIAL = Object.fromEntries(SOCIAL_FIELDS.map((f) => [f.key, ''])) as Record<SocialKey, string>
+
+const EMPTY_FORM: SettingsForm = {
+  name: '',
+  tagline: '',
+  description: '',
+  url: '',
+  email: '',
+  phone: '',
+  whatsapp: '',
+  address: '',
+  logoUrl: '',
+  faviconUrl: '',
+  socialLinks: EMPTY_SOCIAL,
+}
+
+/** Order used to move focus to the first invalid field. */
+const FIELD_ORDER: FieldKey[] = [
+  'name', 'tagline', 'url', 'description', 'logoUrl', 'faviconUrl',
+  'email', 'phone', 'whatsapp', 'address',
+  ...SOCIAL_FIELDS.map((f) => `socialLinks.${f.key}` as const),
+]
+
+const str = (v: unknown): string => (typeof v === 'string' ? v : '')
+
+function toForm(data: Record<string, unknown>): SettingsForm {
+  const rawLinks = data.socialLinks && typeof data.socialLinks === 'object' ? (data.socialLinks as Record<string, unknown>) : {}
+  const socialLinks = { ...EMPTY_SOCIAL }
+  for (const f of SOCIAL_FIELDS) socialLinks[f.key] = str(rawLinks[f.key])
+  return {
+    name: str(data.name),
+    tagline: str(data.tagline),
+    description: str(data.description),
+    url: str(data.url),
+    email: str(data.email),
+    phone: str(data.phone),
+    whatsapp: str(data.whatsapp),
+    address: str(data.address),
+    logoUrl: str(data.logoUrl),
+    faviconUrl: str(data.faviconUrl),
+    socialLinks,
+  }
+}
+
+const inputClass =
+  'w-full rounded-xl bg-black/40 border border-white/15 p-2.5 text-xs text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-400 focus:border-accent-400 disabled:opacity-60 aria-[invalid=true]:border-red-400'
+
+interface FieldProps {
+  id: string
+  label: string
+  hint?: string
+  error?: string
+  children: (props: { id: string; 'aria-invalid': boolean; 'aria-describedby'?: string }) => React.ReactNode
+}
+
+function Field({ id, label, hint, error, children }: FieldProps) {
+  const hintId = hint ? `${id}-hint` : undefined
+  const errorId = error ? `${id}-error` : undefined
+  const describedBy = [hintId, errorId].filter(Boolean).join(' ') || undefined
+  return (
+    <div>
+      <label htmlFor={id} className="text-[11px] font-mono text-neutral-300 block mb-1 font-semibold">
+        {label}
+      </label>
+      {children({ id, 'aria-invalid': Boolean(error), 'aria-describedby': describedBy })}
+      {hint && (
+        <p id={hintId} className="text-[11px] text-neutral-400 mt-1">
+          {hint}
+        </p>
+      )}
+      {error && (
+        <p id={errorId} className="text-[11px] text-red-300 mt-1">
+          {error}
+        </p>
+      )}
+    </div>
+  )
 }
 
 export function StudioSettings() {
-  const { role, actorName, permissions } = useAuth()
-  const [config, setConfig] = useState<SiteConfig>(DEFAULT_CONFIG)
+  const { role, actorName } = useAuth()
+  const canEdit = SETTINGS_ADMINS.includes(role)
+  const baseId = useId()
+  const fieldId = (key: FieldKey) => `${baseId}-${key.replace('.', '-')}`
+
+  const [form, setForm] = useState<SettingsForm>(EMPTY_FORM)
+  const [loadState, setLoadState] = useState<'loading' | 'ready' | 'error'>('loading')
   const [isSaving, setIsSaving] = useState(false)
-  const [savedSuccess, setSavedSuccess] = useState(false)
-  const [flushCacheLoading, setFlushCacheLoading] = useState(false)
-  const [flushCacheMessage, setFlushCacheMessage] = useState('')
+  const [errors, setErrors] = useState<Partial<Record<FieldKey, string>>>({})
+  const [status, setStatus] = useState<{ tone: 'ok' | 'error'; text: string } | null>(null)
+  const [flushing, setFlushing] = useState(false)
+  const [flushStatus, setFlushStatus] = useState<{ tone: 'ok' | 'error'; text: string } | null>(null)
+  const pendingFocus = useRef<FieldKey | null>(null)
 
-  // Modal State pengganti window.confirm & alert
-  const [modalState, setModalState] = useState<{
-    open: boolean
-    title: string
-    message: string
-    type?: 'confirm' | 'error' | 'success'
-    confirmText?: string
-    onConfirm?: () => void
-  }>({
-    open: false,
-    title: '',
-    message: '',
-  })
-
-  // Muat setting dari database PostgreSQL
   useEffect(() => {
-    fetch('/api/settings')
-      .then((res) => res.json())
-      .then((res) => {
-        if (res.success && res.data) {
-          setConfig((prev) => ({
-            ...prev,
-            siteName: res.data.siteName || res.data.name || prev.siteName,
-            tagline: res.data.tagline || prev.tagline,
-            canonicalUrl: res.data.canonicalUrl || res.data.url || prev.canonicalUrl,
-            contactEmail: res.data.contactEmail || res.data.email || prev.contactEmail,
-            defaultMetaDescription: res.data.defaultMetaDescription || res.data.description || prev.defaultMetaDescription,
-            googleVerification: res.data.googleVerification || prev.googleVerification,
-            robotsIndex: typeof res.data.robotsIndex === 'boolean' ? res.data.robotsIndex : prev.robotsIndex,
-            defaultArticleStatus: res.data.defaultArticleStatus || prev.defaultArticleStatus,
-            maxUploadMb: typeof res.data.maxUploadMb === 'number' ? res.data.maxUploadMb : prev.maxUploadMb,
-            enforceAltText: typeof res.data.enforceAltText === 'boolean' ? res.data.enforceAltText : prev.enforceAltText,
-          }))
+    const controller = new AbortController()
+    fetch('/api/settings', { signal: controller.signal })
+      .then(async (res) => {
+        const json: unknown = await res.json()
+        if (!res.ok || !json || typeof json !== 'object' || !('data' in json) || !json.data || typeof json.data !== 'object') {
+          throw new Error(`HTTP ${res.status}`)
         }
+        setForm(toForm(json.data as Record<string, unknown>))
+        setLoadState('ready')
       })
       .catch((err: unknown) => {
+        if (err instanceof DOMException && err.name === 'AbortError') return
         console.warn('[settings] Could not load site settings:', err)
+        setLoadState('error')
       })
+    return () => controller.abort()
   }, [])
 
-  const handleSave = async () => {
-    setIsSaving(true)
-    setSavedSuccess(false)
+  useEffect(() => {
+    const key = pendingFocus.current
+    if (!key) return
+    pendingFocus.current = null
+    document.getElementById(fieldId(key))?.focus()
+  })
 
+  const setField = (key: Exclude<keyof SettingsForm, 'socialLinks'>, value: string) => {
+    setForm((prev) => ({ ...prev, [key]: value }))
+    if (errors[key]) setErrors((prev) => ({ ...prev, [key]: undefined }))
+  }
+  const setSocial = (key: SocialKey, value: string) => {
+    setForm((prev) => ({ ...prev, socialLinks: { ...prev.socialLinks, [key]: value } }))
+    const errKey = `socialLinks.${key}` as const
+    if (errors[errKey]) setErrors((prev) => ({ ...prev, [errKey]: undefined }))
+  }
+
+  const handleSave = async (event: React.FormEvent) => {
+    event.preventDefault()
+    if (!canEdit) return
+    const nextErrors: Partial<Record<FieldKey, string>> = {}
+    if (!form.name.trim()) nextErrors.name = 'Nama situs wajib diisi.'
+    if (!form.url.trim()) nextErrors.url = 'URL situs wajib diisi.'
+    if (Object.keys(nextErrors).length) {
+      setErrors(nextErrors)
+      pendingFocus.current = FIELD_ORDER.find((k) => nextErrors[k]) ?? null
+      setStatus({ tone: 'error', text: 'Periksa kolom yang ditandai.' })
+      return
+    }
+
+    setIsSaving(true)
+    setStatus(null)
     try {
       const res = await fetch('/api/settings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(config),
+        body: JSON.stringify(form),
       })
-      const result = await res.json()
-      if (result.success) {
-        setSavedSuccess(true)
-        setTimeout(() => setSavedSuccess(false), 4000)
-      } else {
-        setModalState({
-          open: true,
-          title: 'Gagal Menyimpan',
-          message: result.error || 'Gagal menyimpan pengaturan.',
-          type: 'error',
-        })
+      const result: { success?: boolean; error?: string; message?: string; issues?: { field: string; message: string }[] } = await res.json()
+      if (res.ok && result.success) {
+        setErrors({})
+        setStatus({ tone: 'ok', text: `Pengaturan tersimpan oleh ${actorName}.` })
+        return
       }
-    } catch (err: any) {
-      setModalState({
-        open: true,
-        title: 'Kesalahan Sistem',
-        message: err.message || 'Terjadi kesalahan sistem saat menyimpan.',
-        type: 'error',
-      })
+      const fieldErrors: Partial<Record<FieldKey, string>> = {}
+      for (const issue of result.issues ?? []) {
+        const key = FIELD_ORDER.find((k) => k === issue.field)
+        if (key) fieldErrors[key] = issue.message
+      }
+      setErrors(fieldErrors)
+      pendingFocus.current = FIELD_ORDER.find((k) => fieldErrors[k]) ?? null
+      setStatus({ tone: 'error', text: result.issues?.length ? 'Periksa kolom yang ditandai.' : result.error || 'Gagal menyimpan pengaturan.' })
+    } catch (err: unknown) {
+      console.error('[settings] Save failed:', err)
+      setStatus({ tone: 'error', text: 'Tidak dapat menghubungi server. Coba lagi.' })
     } finally {
       setIsSaving(false)
     }
   }
 
   const handleFlushCache = async () => {
-    setFlushCacheLoading(true)
-    setFlushCacheMessage('')
+    setFlushing(true)
+    setFlushStatus(null)
     try {
       const res = await fetch('/api/revalidate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ path: '/' }),
+        body: JSON.stringify({ path: ['/', '/sitemap.xml'] }),
       })
-      const data = await res.json()
-      setFlushCacheMessage(
-        data.revalidated
-          ? 'Cache Next.js ISR & Query Buffer berhasil direvalidasi secara instan!'
-          : 'Penyegaran cache selesai.'
-      )
-    } catch {
-      setFlushCacheMessage('Penyegaran cache selesai.')
+      const data: { revalidated?: boolean; error?: string; message?: string } = await res.json()
+      if (res.ok && data.revalidated) {
+        setFlushStatus({ tone: 'ok', text: 'Cache halaman publik sudah diperbarui.' })
+      } else {
+        setFlushStatus({ tone: 'error', text: data.message || data.error || `Gagal memperbarui cache (HTTP ${res.status}).` })
+      }
+    } catch (err: unknown) {
+      console.error('[settings] Cache flush failed:', err)
+      setFlushStatus({ tone: 'error', text: 'Tidak dapat menghubungi server. Coba lagi.' })
     } finally {
-      setFlushCacheLoading(false)
-      setTimeout(() => setFlushCacheMessage(''), 5000)
+      setFlushing(false)
     }
   }
 
-  const handleReset = () => {
-    setModalState({
-      open: true,
-      title: 'Kembalikan Pengaturan Bawaan',
-      message: 'Apakah Anda yakin ingin mengembalikan seluruh konfigurasi situs ke pengaturan bawaan SPATIUM?',
-      type: 'confirm',
-      confirmText: 'Kembalikan Bawaan',
-      onConfirm: async () => {
-        setModalState((prev) => ({ ...prev, open: false }))
-        setConfig(DEFAULT_CONFIG)
-        try {
-          await fetch('/api/settings', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(DEFAULT_CONFIG),
-          })
-        } catch (err) { console.warn("[observable error]:", err) }
-      },
-    })
-  }
+  const disabled = !canEdit || loadState !== 'ready' || isSaving
 
-  const isEditable = permissions.canManageSeo || permissions.canPublish
+  const text = (key: Exclude<keyof SettingsForm, 'socialLinks'>, label: string, opts: { type?: string; hint?: string; placeholder?: string } = {}) => (
+    <Field id={fieldId(key)} label={label} hint={opts.hint} error={errors[key]}>
+      {(props) => (
+        <input
+          {...props}
+          type={opts.type ?? 'text'}
+          disabled={disabled}
+          value={form[key]}
+          placeholder={opts.placeholder}
+          onChange={(e) => setField(key, e.target.value)}
+          className={inputClass}
+        />
+      )}
+    </Field>
+  )
+
+  const cardTitle = (icon: React.ReactNode, title: string) => (
+    <div className="flex items-center gap-2 pb-2 border-b border-white/10">
+      {icon}
+      <h3 className="text-xs font-bold text-neutral-300 font-mono uppercase tracking-wider">{title}</h3>
+    </div>
+  )
 
   return (
-    <div className="space-y-6">
-      {/* Header Pengaturan Situs */}
+    <form className="space-y-6" onSubmit={handleSave} noValidate>
       <div className="rounded-2xl border border-white/10 bg-[var(--studio-bg)] p-6 shadow-soft-sm">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <span className="p-2 rounded-xl bg-accent-500/15 border border-accent-400/30 text-accent-400">
-                <Settings className="w-5 h-5" />
-              </span>
-              <div>
-                <h2 className="text-display-xs font-bold text-white flex items-center gap-2.5">
-                  <span>Pengaturan Situs &amp; Tata Kelola Web</span>
-                  <span className="badge bg-white/10 text-accent-300 font-mono text-[10px]">
-                    v3.0 Studio
-                  </span>
-                </h2>
-                <p className="text-body-xs text-neutral-300">
-                  Konfigurasi identitas global, metadata SEO, kebijakan alur editorial, serta kontrol platform &amp; database.
-                </p>
-              </div>
+          <div className="flex items-center gap-2">
+            <span className="p-2 rounded-xl bg-accent-500/15 border border-accent-400/30 text-accent-400" aria-hidden="true">
+              <Settings className="w-5 h-5" />
+            </span>
+            <div>
+              <h2 className="text-display-xs font-bold text-white">Pengaturan situs</h2>
+              <p className="text-body-xs text-neutral-300">
+                Identitas, kontak publik, dan akun sosial yang tampil di situs. Kolom kosong disembunyikan di situs.
+              </p>
             </div>
           </div>
-
-          <div className="flex items-center gap-2.5">
+          {canEdit && (
             <button
-              type="button"
-              onClick={handleReset}
-              className="px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-neutral-300 hover:text-white border border-white/10 text-xs font-medium transition-all"
+              type="submit"
+              disabled={disabled}
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-accent-500 hover:bg-accent-400 text-accent-950 font-bold text-xs shadow-md transition-all disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
             >
-              Reset Bawaan
+              <Save className="w-3.5 h-3.5" aria-hidden="true" />
+              <span>{isSaving ? 'Menyimpan…' : 'Simpan pengaturan'}</span>
             </button>
-            <button
-              type="button"
-              disabled={isSaving || !isEditable}
-              onClick={handleSave}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-accent-500 hover:bg-accent-400 text-accent-950 font-bold text-xs shadow-md transition-all disabled:opacity-50"
-            >
-              <Save className="w-3.5 h-3.5" />
-              <span>{isSaving ? 'Menyimpan...' : 'Simpan Pengaturan'}</span>
-            </button>
-          </div>
+          )}
         </div>
       </div>
 
-      {/* Feedback Alert */}
-      {savedSuccess && (
-        <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center gap-3 text-xs text-emerald-300">
-          <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-          <span>Pengaturan situs berhasil diperbarui dan disinkronkan ke sesi aktif oleh <strong>{actorName}</strong> ({role}).</span>
-        </div>
+      <div role="status" aria-live="polite" className="empty:hidden">
+        {loadState === 'loading' && <p className="text-xs text-neutral-300">Memuat pengaturan…</p>}
+        {status && (
+          <p className={`p-3 rounded-xl border text-xs ${status.tone === 'ok' ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-200' : 'bg-red-500/10 border-red-500/30 text-red-200'}`}>
+            {status.tone === 'ok' ? 'Berhasil: ' : 'Gagal: '}
+            {status.text}
+          </p>
+        )}
+      </div>
+      {loadState === 'error' && (
+        <p role="alert" className="p-3 rounded-xl border bg-red-500/10 border-red-500/30 text-xs text-red-200">
+          Pengaturan gagal dimuat dari database. Muat ulang halaman untuk mencoba lagi; formulir dikunci agar data tidak tertimpa.
+        </p>
       )}
 
-      {!isEditable && (
-        <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center gap-3 text-xs text-amber-300">
-          <Lock className="w-4 h-4 text-amber-400 shrink-0" />
-          <span>Mode Hanya Baca: Peran Anda ({role}) tidak memiliki wewenang mengubah konfigurasi situs. Hanya Super Admin, Content Admin, dan SEO Manager yang memiliki akses tulis.</span>
-        </div>
+      {!canEdit && (
+        <p className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center gap-3 text-xs text-amber-200">
+          <Lock className="w-4 h-4 text-amber-400 shrink-0" aria-hidden="true" />
+          <span>Hanya baca: peran Anda ({role}) tidak dapat mengubah pengaturan situs. Hubungi Super Admin atau Content Admin.</span>
+        </p>
       )}
 
-      {/* Grid Konfigurasi Utama */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Card 1: Identitas & Branding Situs */}
-        <div className="rounded-2xl border border-white/10 bg-[var(--studio-bg)] p-5 space-y-4">
-          <div className="flex items-center gap-2 pb-2 border-b border-white/10">
-            <Globe className="w-4 h-4 text-accent-400" />
-            <h3 className="text-xs font-bold text-neutral-300 font-mono uppercase tracking-wider">
-              Identitas &amp; Domain Situs
-            </h3>
-          </div>
-
+        <fieldset className="rounded-2xl border border-white/10 bg-[var(--studio-bg)] p-5 space-y-4 min-w-0">
+          <legend className="sr-only">Identitas situs</legend>
+          {cardTitle(<Globe className="w-4 h-4 text-accent-400" aria-hidden="true" />, 'Identitas situs')}
           <div className="space-y-3">
-            <div>
-              <label className="text-[11px] font-mono text-neutral-400 block mb-1 font-semibold">
-                Nama Platform / Brand Web
-              </label>
-              <input
-                type="text"
-                disabled={!isEditable}
-                value={config.siteName}
-                onChange={(e) => setConfig({ ...config, siteName: e.target.value })}
-                className="w-full rounded-xl bg-black/40 border border-white/15 p-2.5 text-xs text-white focus:outline-none focus:border-accent-400 disabled:opacity-50"
-              />
-            </div>
-
-            <div>
-              <label className="text-[11px] font-mono text-neutral-400 block mb-1 font-semibold">
-                Tagline Utama
-              </label>
-              <input
-                type="text"
-                disabled={!isEditable}
-                value={config.tagline}
-                onChange={(e) => setConfig({ ...config, tagline: e.target.value })}
-                className="w-full rounded-xl bg-black/40 border border-white/15 p-2.5 text-xs text-white focus:outline-none focus:border-accent-400 disabled:opacity-50"
-              />
-            </div>
-
-            <div>
-              <label className="text-[11px] font-mono text-neutral-400 block mb-1 font-semibold">
-                URL Kanonikal Utama (Production Base URL)
-              </label>
-              <input
-                type="url"
-                disabled={!isEditable}
-                value={config.canonicalUrl}
-                onChange={(e) => setConfig({ ...config, canonicalUrl: e.target.value })}
-                className="w-full rounded-xl bg-black/40 border border-white/15 p-2.5 text-xs font-mono text-neutral-300 focus:outline-none focus:border-accent-400 disabled:opacity-50"
-              />
-            </div>
-
-            <div>
-              <label className="text-[11px] font-mono text-neutral-400 block mb-1 font-semibold">
-                Email Kontak Editorial &amp; Governance
-              </label>
-              <input
-                type="email"
-                disabled={!isEditable}
-                value={config.contactEmail}
-                onChange={(e) => setConfig({ ...config, contactEmail: e.target.value })}
-                className="w-full rounded-xl bg-black/40 border border-white/15 p-2.5 text-xs text-white focus:outline-none focus:border-accent-400 disabled:opacity-50"
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Card 2: Global SEO & SERP */}
-        <div className="rounded-2xl border border-white/10 bg-[var(--studio-bg)] p-5 space-y-4">
-          <div className="flex items-center gap-2 pb-2 border-b border-white/10">
-            <Search className="w-4 h-4 text-info" />
-            <h3 className="text-xs font-bold text-neutral-300 font-mono uppercase tracking-wider">
-              Konfigurasi Global SEO &amp; SERP
-            </h3>
-          </div>
-
-          <div className="space-y-3">
-            <div>
-              <label className="text-[11px] font-mono text-neutral-400 block mb-1 font-semibold">
-                Pola Judul Halaman (Meta Title Template)
-              </label>
-              <input
-                type="text"
-                disabled={!isEditable}
-                value={config.titleTemplate}
-                onChange={(e) => setConfig({ ...config, titleTemplate: e.target.value })}
-                className="w-full rounded-xl bg-black/40 border border-white/15 p-2.5 text-xs font-mono text-neutral-300 focus:outline-none focus:border-accent-400 disabled:opacity-50"
-              />
-              <span className="text-[10px] text-neutral-500 font-mono mt-0.5 block">
-                Gunakan %s untuk merepresentasikan judul halaman aktif.
-              </span>
-            </div>
-
-            <div>
-              <label className="text-[11px] font-mono text-neutral-400 block mb-1 font-semibold">
-                Deskripsi Meta Bawaan (Default Description)
-              </label>
-              <textarea
-                rows={2}
-                disabled={!isEditable}
-                value={config.defaultMetaDescription}
-                onChange={(e) => setConfig({ ...config, defaultMetaDescription: e.target.value })}
-                className="w-full rounded-xl bg-black/40 border border-white/15 p-2.5 text-xs text-white focus:outline-none focus:border-accent-400 disabled:opacity-50"
-              />
-            </div>
-
-            <div>
-              <label className="text-[11px] font-mono text-neutral-400 block mb-1 font-semibold">
-                Google Search Console Verification Token
-              </label>
-              <input
-                type="text"
-                disabled={!isEditable}
-                value={config.googleVerification}
-                onChange={(e) => setConfig({ ...config, googleVerification: e.target.value })}
-                className="w-full rounded-xl bg-black/40 border border-white/15 p-2.5 text-xs font-mono text-neutral-300 focus:outline-none focus:border-accent-400 disabled:opacity-50"
-              />
-            </div>
-
-            <div className="pt-1 flex items-center justify-between p-3 rounded-xl bg-white/[0.03] border border-white/10">
-              <div>
-                <span className="text-xs font-semibold text-white block">Indexing Mesin Pencari</span>
-                <span className="text-[10px] text-neutral-400 font-mono">Izinkan Googlebot &amp; Bingbot mengindeks situs</span>
-              </div>
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  disabled={!isEditable}
-                  checked={config.robotsIndex}
-                  onChange={(e) => setConfig({ ...config, robotsIndex: e.target.checked })}
-                  className="sr-only peer"
+            {text('name', 'Nama situs')}
+            {text('tagline', 'Tagline')}
+            {text('url', 'URL produksi', { type: 'url', hint: 'Dipakai untuk URL kanonikal, sitemap, dan pengindeksan. Contoh: https://spatium.id' })}
+            <Field id={fieldId('description')} label="Deskripsi situs" hint="Deskripsi bawaan untuk metadata dan data terstruktur." error={errors.description}>
+              {(props) => (
+                <textarea
+                  {...props}
+                  rows={3}
+                  disabled={disabled}
+                  value={form.description}
+                  onChange={(e) => setField('description', e.target.value)}
+                  className={inputClass}
                 />
-                <div className="w-9 h-5 bg-white/20 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-500"></div>
-              </label>
-            </div>
-          </div>
-        </div>
-
-        {/* Card 3: Kebijakan Alur Editorial (AGENTS.md Rule 8) */}
-        <div className="rounded-2xl border border-white/10 bg-[var(--studio-bg)] p-5 space-y-4">
-          <div className="flex items-center gap-2 pb-2 border-b border-white/10">
-            <FileText className="w-4 h-4 text-amber-400" />
-            <h3 className="text-xs font-bold text-neutral-300 font-mono uppercase tracking-wider">
-              Kebijakan Alur Editorial &amp; Konten
-            </h3>
-          </div>
-
-          <div className="space-y-3">
-            <div>
-              <label className="text-[11px] font-mono text-neutral-400 block mb-1 font-semibold">
-                Status Bawaan Artikel Baru (Editorial Safety)
-              </label>
-              <select
-                disabled={!isEditable}
-                value={config.defaultArticleStatus}
-                onChange={(e) => setConfig({ ...config, defaultArticleStatus: e.target.value as 'draft' | 'in_review' | 'published' })}
-                className="w-full rounded-xl bg-black/40 border border-white/15 p-2.5 text-xs text-white focus:outline-none focus:border-accent-400 disabled:opacity-50"
-              >
-                <option value="draft" className="bg-surface-overlay">Draft (Rekomendasi AGENTS.md — Aman)</option>
-                <option value="in_review" className="bg-surface-overlay">In Review (Wajib Ditinjau Editor)</option>
-                <option value="published" className="bg-surface-overlay">Published (Langsung Terbit Publik)</option>
-              </select>
-              <span className="text-[10px] text-neutral-500 font-mono mt-0.5 block">
-                AGENTS.md Bagian 8 mewajibkan konten baru default ke status draf.
-              </span>
-            </div>
-
-            <div>
-              <label className="text-[11px] font-mono text-neutral-400 block mb-1 font-semibold">
-                Batas Ukuran Media Gambar (MB)
-              </label>
-              <input
-                type="number"
-                disabled={!isEditable}
-                value={config.maxUploadMb}
-                onChange={(e) => setConfig({ ...config, maxUploadMb: Number(e.target.value) })}
-                className="w-full rounded-xl bg-black/40 border border-white/15 p-2.5 text-xs text-white focus:outline-none focus:border-accent-400 disabled:opacity-50"
-              />
-            </div>
-
-            <div className="pt-1 flex items-center justify-between p-3 rounded-xl bg-white/[0.03] border border-white/10">
-              <div>
-                <span className="text-xs font-semibold text-white block">Wajibkan Alt Text pada Gambar</span>
-                <span className="text-[10px] text-neutral-400 font-mono">Standar aksesibilitas WCAG 2.1 &amp; openSEO</span>
-              </div>
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  disabled={!isEditable}
-                  checked={config.enforceAltText}
-                  onChange={(e) => setConfig({ ...config, enforceAltText: e.target.checked })}
-                  className="sr-only peer"
-                />
-                <div className="w-9 h-5 bg-white/20 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-500"></div>
-              </label>
-            </div>
-          </div>
-        </div>
-
-        {/* Card 4: Database & cache */}
-        <div className="rounded-2xl border border-white/10 bg-[var(--studio-bg)] p-5 space-y-4">
-          <div className="flex items-center gap-2 pb-2 border-b border-white/10">
-            <Database className="w-4 h-4 text-emerald-400" />
-            <h3 className="text-xs font-bold text-neutral-300 font-mono uppercase tracking-wider">
-              Database &amp; pemeliharaan cache
-            </h3>
-          </div>
-
-          <div className="space-y-3">
-            <div className="p-3 rounded-xl bg-black/40 border border-white/10 space-y-2 text-xs font-mono">
-              <div className="flex items-center justify-between">
-                <span className="text-neutral-400">Database Driver:</span>
-                <span className="text-emerald-300 font-bold">@prisma/orm-postgres (Prisma 8 ORM)</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-neutral-400">Database Engine:</span>
-                <span className="text-white">PostgreSQL 16</span>
-              </div>
-            </div>
-
-            <div className="pt-2">
-              <button
-                type="button"
-                disabled={flushCacheLoading}
-                onClick={handleFlushCache}
-                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/15 text-xs font-medium text-white transition-all disabled:opacity-50"
-              >
-                <RefreshCw className={`w-3.5 h-3.5 text-accent-400 ${flushCacheLoading ? 'animate-spin' : ''}`} />
-                <span>{flushCacheLoading ? 'Membersihkan Cache...' : 'Bersihkan Cache Next.js & Revalidate'}</span>
-              </button>
-              {flushCacheMessage && (
-                <p className="text-[11px] font-mono text-emerald-400 text-center mt-2">
-                  {flushCacheMessage}
-                </p>
               )}
-            </div>
+            </Field>
+            {text('logoUrl', 'Logo', { hint: 'Path lokal (mis. /brand/logo.svg) atau URL https://.' })}
+            {text('faviconUrl', 'Favicon', { hint: 'Path lokal atau URL https://.' })}
           </div>
-        </div>
+        </fieldset>
+
+        <fieldset className="rounded-2xl border border-white/10 bg-[var(--studio-bg)] p-5 space-y-4 min-w-0">
+          <legend className="sr-only">Kontak publik</legend>
+          {cardTitle(<Phone className="w-4 h-4 text-info" aria-hidden="true" />, 'Kontak publik')}
+          <div className="space-y-3">
+            {text('email', 'Email', { type: 'email' })}
+            {text('phone', 'Telepon', { type: 'tel' })}
+            {text('whatsapp', 'WhatsApp', { type: 'tel', hint: 'Angka saja, boleh diawali +. Contoh: +62 812 0000 0000' })}
+            <Field id={fieldId('address')} label="Alamat" error={errors.address}>
+              {(props) => (
+                <textarea
+                  {...props}
+                  rows={2}
+                  disabled={disabled}
+                  value={form.address}
+                  onChange={(e) => setField('address', e.target.value)}
+                  className={inputClass}
+                />
+              )}
+            </Field>
+          </div>
+        </fieldset>
+
+        <fieldset className="rounded-2xl border border-white/10 bg-[var(--studio-bg)] p-5 space-y-4 min-w-0">
+          <legend className="sr-only">Akun sosial</legend>
+          {cardTitle(<Share2 className="w-4 h-4 text-amber-400" aria-hidden="true" />, 'Akun sosial')}
+          <p className="text-[11px] text-neutral-400">Isi URL profil lengkap (https://). Kolom kosong tidak ditampilkan di situs.</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {SOCIAL_FIELDS.map((f) => {
+              const key = `socialLinks.${f.key}` as const
+              return (
+                <Field key={f.key} id={fieldId(key)} label={f.label} error={errors[key]}>
+                  {(props) => (
+                    <input
+                      {...props}
+                      type="url"
+                      inputMode="url"
+                      disabled={disabled}
+                      value={form.socialLinks[f.key]}
+                      onChange={(e) => setSocial(f.key, e.target.value)}
+                      className={inputClass}
+                    />
+                  )}
+                </Field>
+              )
+            })}
+          </div>
+        </fieldset>
+
+        {canEdit && (
+          <section className="rounded-2xl border border-white/10 bg-[var(--studio-bg)] p-5 space-y-4 min-w-0" aria-labelledby={`${baseId}-cache`}>
+            <div className="flex items-center gap-2 pb-2 border-b border-white/10">
+              <Database className="w-4 h-4 text-emerald-400" aria-hidden="true" />
+              <h3 id={`${baseId}-cache`} className="text-xs font-bold text-neutral-300 font-mono uppercase tracking-wider">
+                Cache situs
+              </h3>
+            </div>
+            <p className="text-[11px] text-neutral-400">
+              Konten yang terbit sudah memperbarui cache otomatis. Gunakan tombol ini bila halaman publik masih menampilkan versi lama.
+            </p>
+            <button
+              type="button"
+              disabled={flushing}
+              onClick={handleFlushCache}
+              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/15 text-xs font-medium text-white transition-all disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-400"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 text-accent-400 ${flushing ? 'motion-safe:animate-spin' : ''}`} aria-hidden="true" />
+              <span>{flushing ? 'Memperbarui cache…' : 'Perbarui cache halaman publik'}</span>
+            </button>
+            <p role="status" className={`text-[11px] text-center empty:hidden ${flushStatus?.tone === 'error' ? 'text-red-300' : 'text-emerald-300'}`}>
+              {flushStatus ? `${flushStatus.tone === 'ok' ? 'Berhasil' : 'Gagal'}: ${flushStatus.text}` : ''}
+            </p>
+          </section>
+        )}
       </div>
-
-      {/* -------------------------------------------------------------
-          MODAL DIALOG SISTEM PENGATURAN (PENGGANTI ALERT & CONFIRM)
-      ------------------------------------------------------------- */}
-      {modalState.open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-in fade-in duration-150">
-          <div className="w-full max-w-sm bg-surface-overlay border border-white/15 rounded-2xl p-5 shadow-2xl space-y-4">
-            <div className="flex items-start gap-3">
-              <div
-                className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 border ${
-                  modalState.type === 'error'
-                    ? 'bg-red-500/15 border-red-500/30 text-red-400'
-                    : modalState.type === 'confirm'
-                    ? 'bg-amber-500/15 border-amber-500/30 text-amber-400'
-                    : 'bg-accent-500/15 border-accent-500/30 text-accent-400'
-                }`}
-              >
-                {modalState.type === 'error' ? (
-                  <AlertTriangle className="w-4 h-4" />
-                ) : modalState.type === 'confirm' ? (
-                  <RefreshCw className="w-4 h-4" />
-                ) : (
-                  <CheckCircle2 className="w-4 h-4" />
-                )}
-              </div>
-              <div className="min-w-0 flex-1">
-                <h3 className="text-sm font-bold text-white">{modalState.title}</h3>
-                <p className="text-xs text-neutral-400 mt-1 leading-relaxed">{modalState.message}</p>
-              </div>
-            </div>
-
-            <div className="flex items-center justify-end gap-2 pt-2 border-t border-white/10">
-              {modalState.type === 'confirm' && (
-                <button
-                  type="button"
-                  onClick={() => setModalState((prev) => ({ ...prev, open: false }))}
-                  className="px-3.5 py-1.5 rounded-xl text-xs font-medium text-neutral-300 hover:text-white hover:bg-white/10 transition-colors"
-                >
-                  Batal
-                </button>
-              )}
-              <button
-                type="button"
-                onClick={() => {
-                  if (modalState.onConfirm) {
-                    modalState.onConfirm()
-                  } else {
-                    setModalState((prev) => ({ ...prev, open: false }))
-                  }
-                }}
-                className={`px-4 py-1.5 rounded-xl text-xs font-semibold transition-all ${
-                  modalState.type === 'confirm'
-                    ? 'bg-amber-500 hover:bg-amber-600 text-neutral-950 font-bold shadow-lg shadow-amber-500/20'
-                    : 'bg-white/10 hover:bg-white/15 text-white'
-                }`}
-              >
-                {modalState.confirmText || 'Tutup'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
+    </form>
   )
 }

@@ -13,7 +13,8 @@ function mapToService(row: any): Service {
   if (row.features) {
     try {
       features = typeof row.features === 'string' ? JSON.parse(row.features) : row.features
-    } catch {
+    } catch (err) {
+      console.warn('[db/services] malformed JSON column:', err)
       features = []
     }
   }
@@ -22,7 +23,8 @@ function mapToService(row: any): Service {
   if (row.deliverables) {
     try {
       deliverables = typeof row.deliverables === 'string' ? JSON.parse(row.deliverables) : row.deliverables
-    } catch {
+    } catch (err) {
+      console.warn('[db/services] malformed JSON column:', err)
       deliverables = []
     }
   }
@@ -31,7 +33,8 @@ function mapToService(row: any): Service {
   if (row.technologies) {
     try {
       technologies = typeof row.technologies === 'string' ? JSON.parse(row.technologies) : row.technologies
-    } catch {
+    } catch (err) {
+      console.warn('[db/services] malformed JSON column:', err)
       technologies = []
     }
   }
@@ -40,7 +43,8 @@ function mapToService(row: any): Service {
   if (row.faq) {
     try {
       faq = typeof row.faq === 'string' ? JSON.parse(row.faq) : row.faq
-    } catch {
+    } catch (err) {
+      console.warn('[db/services] malformed JSON column:', err)
       faq = []
     }
   }
@@ -49,7 +53,8 @@ function mapToService(row: any): Service {
   if (row.blocks) {
     try {
       blocks = typeof row.blocks === 'string' ? JSON.parse(row.blocks) : row.blocks
-    } catch {
+    } catch (err) {
+      console.warn('[db/services] malformed JSON column:', err)
       blocks = []
     }
   }
@@ -58,7 +63,8 @@ function mapToService(row: any): Service {
   if (row.primaryMedia) {
     try {
       primaryMedia = typeof row.primaryMedia === 'string' ? JSON.parse(row.primaryMedia) : row.primaryMedia
-    } catch {
+    } catch (err) {
+      console.warn('[db/services] malformed JSON column:', err)
       primaryMedia = null
     }
   }
@@ -67,7 +73,8 @@ function mapToService(row: any): Service {
   if (row.metrics) {
     try {
       metrics = typeof row.metrics === 'string' ? JSON.parse(row.metrics) : row.metrics
-    } catch {
+    } catch (err) {
+      console.warn('[db/services] malformed JSON column:', err)
       metrics = []
     }
   }
@@ -157,7 +164,8 @@ export async function getServicesByCategoryId(categoryId: number): Promise<Servi
       .orderBy((s: any) => s.order.asc())
       .all()
     return rows.map(mapToService)
-  } catch {
+  } catch (err) {
+    console.error('[db/services] read failed:', err)
     return []
   }
 }
@@ -215,12 +223,13 @@ export async function getServiceWithDetails(slug: string) {
 export async function getFeaturedServices(limit = 6): Promise<Service[]> {
   try {
     const rows = await prisma.orm.public.Service
-      .where({ featured: true })
+      .where({ featured: true, status: 'published' })
       .orderBy((s: any) => s.order.asc())
       .limit(limit)
       .all()
     return rows.map(mapToService)
-  } catch {
+  } catch (err) {
+    console.error('[db/services] read failed:', err)
     return []
   }
 }

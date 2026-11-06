@@ -58,8 +58,8 @@ export async function GET(request: NextRequest) {
       errors: [],
       warnings: [],
     })
-  } catch {
-    console.error('[keywords] Keyword operation failed')
+  } catch (err) {
+    console.error('[keywords] Keyword operation failed', err)
     return NextResponse.json(
       { data: null, errors: ['Gagal memuat data kata kunci.'] },
       { status: 500 }
@@ -72,8 +72,11 @@ export async function POST(request: NextRequest) {
   if (auth.error) return auth.error
 
   try {
-    const body = await request.json()
-    const { action = 'add', ...data } = body
+    const body: unknown = await request.json().catch(() => null)
+    if (!body || typeof body !== 'object') {
+      return NextResponse.json({ data: null, errors: ['Body JSON wajib diisi.'] }, { status: 400 })
+    }
+    const { action = 'add', ...data } = body as Record<string, unknown>
 
     if (action === 'sync') return NextResponse.json({ error: 'Metrik dari browser tidak dapat dianggap data GSC. Gunakan sinkronisasi resmi pada /api/gsc.' }, { status: 400 })
 
@@ -86,8 +89,8 @@ export async function POST(request: NextRequest) {
       errors: [],
       warnings: [],
     })
-  } catch {
-    console.error('[keywords] Keyword operation failed')
+  } catch (err) {
+    console.error('[keywords] Keyword operation failed', err)
     return NextResponse.json(
       { data: null, errors: ['Gagal memproses kata kunci.'] },
       { status: 500 }

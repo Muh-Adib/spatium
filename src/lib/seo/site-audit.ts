@@ -313,32 +313,33 @@ export async function runInternalDatabaseAudit(): Promise<{
     diff: diffObj,
   }
 
-  // Save audit record to PostgreSQL via Prisma 8
-  await prisma.orm.public.SiteAudit.create({
-    id: auditId,
-    type: 'internal_db',
-    status: 'completed',
-    summary: JSON.stringify(summary),
-    diffFromPrevious: JSON.stringify(diffObj),
-    finishedAt: summary.finishedAt,
-  })
-
-  // Save individual issues
-  for (const iss of issues) {
-    await prisma.orm.public.SiteAuditIssue.create({
-      auditId,
-      severity: iss.severity,
-      category: iss.category,
-      urlOrPath: iss.urlOrPath,
-      contentType: iss.contentType,
-      contentId: iss.contentId,
-      title: iss.title,
-      description: iss.description,
-      recommendation: iss.recommendation,
+  // Save audit record and its issues atomically
+  const insertedIssues = await prisma.transaction(async (tx) => {
+    await tx.orm.public.SiteAudit.create({
+      id: auditId,
+      type: 'internal_db',
+      status: 'completed',
+      summary: JSON.stringify(summary),
+      diffFromPrevious: JSON.stringify(diffObj),
+      finishedAt: summary.finishedAt,
     })
-  }
 
-  const insertedIssues = await prisma.orm.public.SiteAuditIssue.where({ auditId }).all()
+    for (const iss of issues) {
+      await tx.orm.public.SiteAuditIssue.create({
+        auditId,
+        severity: iss.severity,
+        category: iss.category,
+        urlOrPath: iss.urlOrPath,
+        contentType: iss.contentType,
+        contentId: iss.contentId,
+        title: iss.title,
+        description: iss.description,
+        recommendation: iss.recommendation,
+      })
+    }
+
+    return tx.orm.public.SiteAuditIssue.where({ auditId }).all()
+  })
 
   return {
     summary,
@@ -360,8 +361,9 @@ export async function getLatestAuditReport(): Promise<{
     .orderBy((s: any) => s.startedAt.desc()).limit(1).all()
 
   if (!latestAudit[0]) {
-    // If no audit has ever run, execute an internal DB audit immediately
-    return runInternalDatabaseAudit()
+    // No audit has run yet: report that honestly. Reading never writes; an
+    // audit only runs when an SEO role asks for it (POST /api/audit).
+    return { summary: null, issues: [] }
   }
 
   const sumObj = JSON.parse(latestAudit[0].summary) as SiteAuditSummary

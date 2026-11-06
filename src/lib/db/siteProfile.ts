@@ -26,12 +26,13 @@ export interface SiteProfileEntity {
   updatedAt: string | null
 }
 
-function parseJsonSafe<T>(val: any, fallback: T): T {
+function parseJsonSafe<T>(val: unknown, fallback: T): T {
   if (!val) return fallback
-  if (typeof val !== 'string') return val
+  if (typeof val !== 'string') return val as T
   try {
-    return JSON.parse(val)
-  } catch {
+    return JSON.parse(val) as T
+  } catch (err) {
+    console.warn('[siteProfile] JSON column is not valid JSON:', err)
     return fallback
   }
 }
@@ -56,8 +57,9 @@ export async function getSiteProfile(): Promise<SiteProfileEntity> {
       email: siteConfig.email,
       phone: siteConfig.phone,
       address: siteConfig.address,
-      logoUrl: '/images/logo.png',
-      faviconUrl: '/favicon.ico',
+      // No invented assets: logo/favicon stay empty until set in Studio settings.
+      logoUrl: null,
+      faviconUrl: null,
       socialLinks: '{}',
       brandVoice: null,
       hqLocation: null,
@@ -130,6 +132,7 @@ export async function updateSiteProfile(data: Partial<SiteProfileEntity>): Promi
     )
   } catch (err) {
     console.error('Failed to update site config:', err)
+    throw err
   }
 
   try {

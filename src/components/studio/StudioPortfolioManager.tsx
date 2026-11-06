@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect, useCallback, useMemo } from 'react'
+import React, { useState, useEffect, useCallback, useMemo, useId } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { siteConfig } from '@/config/site'
@@ -36,6 +36,7 @@ import {
 import StudioVisualEditor, { StudioBlock, StudioViewMode } from './StudioVisualEditor'
 import StudioSeoInspector from './StudioSeoInspector'
 import MediaPickerModal from './MediaPickerModal'
+import { EditorDialog, dialogButton } from './editor/EditorDialog'
 import { Tooltip } from '@/components/ui/Tooltip'
 import { Locale } from '@/lib/seo/schema'
 
@@ -167,6 +168,7 @@ function generateDefaultPortfolioBlocks(title: string, client: string, summary: 
 }
 
 export function StudioPortfolioManager() {
+  const fieldId = useId()
   const [items, setItems] = useState<PortfolioItem[]>([])
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
@@ -183,6 +185,7 @@ export function StudioPortfolioManager() {
   const [saving, setSaving] = useState(false)
   const [saveMessage, setSaveMessage] = useState('')
   const [errorMessage, setErrorMessage] = useState('')
+  const [listStatus, setListStatus] = useState('')
   const [showPropertiesDrawer, setShowPropertiesDrawer] = useState(true)
   const [selectedBlockId, setSelectedBlockId] = useState<string | null>(null)
   const [activeInspectorTab, setActiveInspectorTab] = useState<'story' | 'meta' | 'seo'>('story')
@@ -192,16 +195,16 @@ export function StudioPortfolioManager() {
   const [formTitle, setFormTitle] = useState('')
   const [formSlug, setFormSlug] = useState('')
   const [formClient, setFormClient] = useState('')
-  const [formYear, setFormYear] = useState(new Date().getFullYear().toString())
+  const [formYear, setFormYear] = useState('')
   const [formCategory, setFormCategory] = useState('')
   const [formSummary, setFormSummary] = useState('')
-  const [formHeroImage, setFormHeroImage] = useState('/images/spatium/web/pipe-04-splat.webp')
+  const [formHeroImage, setFormHeroImage] = useState('')
   const [formHeroAlt, setFormHeroAlt] = useState('')
   const [mediaPickerOpen, setMediaPickerOpen] = useState(false)
   const [showCoverAltModal, setShowCoverAltModal] = useState(false)
   const [formLiveUrl, setFormLiveUrl] = useState('')
   const [formFeatured, setFormFeatured] = useState(false)
-  const [formStatus, setFormStatus] = useState<'draft' | 'in_review' | 'approved' | 'published' | 'archived'>('published')
+  const [formStatus, setFormStatus] = useState<'draft' | 'in_review' | 'approved' | 'published' | 'archived'>('draft')
 
   // Narrative Story Form State
   const [formChallenge, setFormChallenge] = useState('')
@@ -209,17 +212,9 @@ export function StudioPortfolioManager() {
   const [formSolution, setFormSolution] = useState('')
   const [formProcess, setFormProcess] = useState('')
   const [formResult, setFormResult] = useState('')
-  const [formMetrics, setFormMetrics] = useState<Array<{ label: string; value: string; detail?: string }>>([
-    { label: 'Peningkatan Engagement', value: '4.2x', detail: 'Retensi audiens dan pemahaman pesan' },
-    { label: 'Kualitas Render', value: '4K Ultra HD', detail: 'Sinematik 60fps photorealistic' },
-  ])
-  const [formTechnologies, setFormTechnologies] = useState<string[]>([
-    'Blender 3D',
-    'After Effects',
-    'Cinema 4D',
-    'Substance Painter',
-    'DaVinci Resolve',
-  ])
+  // Metrics and stack start empty: only measured project data is shown (AGENTS.md §3.3).
+  const [formMetrics, setFormMetrics] = useState<Array<{ label: string; value: string; detail?: string }>>([])
+  const [formTechnologies, setFormTechnologies] = useState<string[]>([])
   const [newTechInput, setNewTechInput] = useState('')
 
   // Visual Blocks Array
@@ -357,9 +352,9 @@ export function StudioPortfolioManager() {
 
       setTourUploadResult(json)
       await fetchPortfolios()
-    } catch (err: any) {
+    } catch (err) {
       console.error('[TourUpload] Upload failed:', err)
-      setTourUploadError(err.message || 'Terjadi kesalahan saat mengunggah tur spasial.')
+      setTourUploadError(err instanceof Error ? err.message : 'Terjadi kesalahan saat mengunggah tur spasial.')
     } finally {
       setTourUploading(false)
     }
@@ -371,24 +366,24 @@ export function StudioPortfolioManager() {
     setFormTitle(item.title || '')
     setFormSlug(item.slug || '')
     setFormClient(item.client || '')
-    setFormYear((item.year || new Date().getFullYear()).toString())
-    setFormCategory(item.category || availableCategories[0] || 'Immersive Software & Edutainment')
+    setFormYear(item.year ? String(item.year) : '')
+    setFormCategory(item.category || '')
     setFormSummary(item.summary || '')
-    setFormHeroImage(item.heroImage || '/images/spatium/web/pipe-04-splat.webp')
+    setFormHeroImage(item.heroImage || '')
     let extractedAlt = ''
     if (item.seoData) {
       try {
         const parsed = typeof item.seoData === 'string' ? JSON.parse(item.seoData) : item.seoData
         extractedAlt = parsed.coverAlt || parsed.ogImageAlt || ''
-      } catch (err) { console.warn("[observable error]:", err) }
+      } catch (err) {
+        console.warn('[Portfolio] seoData is not valid JSON:', err)
+      }
     }
-    if (!extractedAlt && item.title) {
-      extractedAlt = `${item.title} - Portofolio SPATIUM`
-    }
+    // No generated alt text: the editor writes a real description (publication gate).
     setFormHeroAlt(extractedAlt)
     setFormLiveUrl(item.liveUrl || '')
     setFormFeatured(Boolean(item.featured))
-    setFormStatus(item.status || 'published')
+    setFormStatus(item.status || 'draft')
 
     setFormChallenge(item.challenge || '')
     setFormApproach(item.approach || '')
@@ -401,28 +396,27 @@ export function StudioPortfolioManager() {
     if (item.metrics) {
       try {
         parsedMetrics = typeof item.metrics === 'string' ? JSON.parse(item.metrics) : item.metrics
-      } catch {
+      } catch (err) {
+        console.warn('[Portfolio] metrics is not valid JSON:', err)
         parsedMetrics = []
       }
     }
-    setFormMetrics(Array.isArray(parsedMetrics) && parsedMetrics.length > 0 ? parsedMetrics : [
-      { label: 'Peningkatan Efisiensi', value: '3.4x', detail: 'Otomatisasi alur kerja' },
-      { label: 'Ketersediaan Sistem', value: '99.98%', detail: 'Zero-downtime architecture' },
-    ])
+    setFormMetrics(Array.isArray(parsedMetrics) ? parsedMetrics : [])
 
     // Parse Technologies
     let parsedTech: any[] = []
     if (item.technologies) {
       try {
         parsedTech = typeof item.technologies === 'string' ? JSON.parse(item.technologies) : item.technologies
-      } catch {
+      } catch (err) {
+        console.warn('[Portfolio] technologies is not valid JSON:', err)
         parsedTech = []
       }
     }
     setFormTechnologies(
-      Array.isArray(parsedTech) && parsedTech.length > 0
-        ? parsedTech.map((t) => (typeof t === 'string' ? t : t.name || 'Tech'))
-        : ['Next.js 16', 'TypeScript', 'Tailwind CSS']
+      Array.isArray(parsedTech)
+        ? parsedTech.map((t) => (typeof t === 'string' ? t : t?.name)).filter((t): t is string => Boolean(t))
+        : []
     )
 
     // Parse Blocks
@@ -430,18 +424,14 @@ export function StudioPortfolioManager() {
     if (item.blocks) {
       try {
         parsedBlocks = typeof item.blocks === 'string' ? JSON.parse(item.blocks) : item.blocks
-      } catch {
+      } catch (err) {
+        console.warn('[Portfolio] blocks is not valid JSON:', err)
         parsedBlocks = []
       }
     }
 
     if (!Array.isArray(parsedBlocks) || parsedBlocks.length === 0) {
-      parsedBlocks = generateDefaultPortfolioBlocks(
-        item.title,
-        item.client || '',
-        item.summary || '',
-        item.heroImage || '/images/spatium/web/pipe-04-splat.webp'
-      )
+      parsedBlocks = generateDefaultPortfolioBlocks(item.title, item.client || '', item.summary || '', item.heroImage || '')
     }
     setFormBlocks(parsedBlocks)
 
@@ -453,7 +443,8 @@ export function StudioPortfolioManager() {
     if (item.relatedKeyphrases) {
       try {
         parsedRelated = typeof item.relatedKeyphrases === 'string' ? JSON.parse(item.relatedKeyphrases) : item.relatedKeyphrases
-      } catch {
+      } catch (err) {
+        console.warn('[Portfolio] relatedKeyphrases is not valid JSON:', err)
         parsedRelated = []
       }
     }
@@ -468,28 +459,28 @@ export function StudioPortfolioManager() {
   }
 
   // Delete Portfolio
-  const handleDeleteItem = async (slug: string, title: string) => {
-    if (!confirm(`Apakah Anda yakin ingin menghapus portofolio "${title}"?`)) return
+  const handleDeleteItem = async (item: PortfolioItem) => {
+    if (!confirm(`Apakah Anda yakin ingin menghapus portofolio "${item.title}"?`)) return
+    const query = item.id ? `id=${item.id}` : `slug=${encodeURIComponent(item.slug)}`
     try {
-      const res = await fetch(`/api/portfolio?slug=${encodeURIComponent(slug)}`, {
-        method: 'DELETE',
-      })
+      const res = await fetch(`/api/portfolio?${query}`, { method: 'DELETE' })
       const json = await res.json()
       if (json.success) {
-        alert('Portofolio berhasil dihapus.')
+        setListStatus(`Portofolio "${item.title}" berhasil dihapus.`)
         fetchPortfolios()
       } else {
-        alert(json.error || 'Gagal menghapus portofolio.')
+        setListStatus(json.error || json.message || 'Gagal menghapus portofolio.')
       }
-    } catch {
-      alert('Terjadi kesalahan jaringan saat menghapus.')
+    } catch (err) {
+      console.error('[Portfolio] delete failed:', err)
+      setListStatus('Terjadi kesalahan jaringan saat menghapus.')
     }
   }
 
   // Save Portfolio Handler
   const handleSavePortfolio = async () => {
     if (!formTitle.trim() || !formSlug.trim()) {
-      alert('Judul dan slug portofolio wajib diisi.')
+      setErrorMessage('Judul dan slug portofolio wajib diisi.')
       return
     }
 
@@ -498,11 +489,13 @@ export function StudioPortfolioManager() {
     setErrorMessage('')
 
     const payload = {
+      id: formId,
       title: formTitle.trim(),
       slug: formSlug.trim(),
       client: formClient.trim() || null,
-      year: parseInt(formYear, 10) || new Date().getFullYear(),
-      category: formCategory,
+      // Unknown year stays empty — never defaulted to the current year (AGENTS.md §3.3).
+      year: formYear.trim() || null,
+      category: formCategory || null,
       summary: formSummary.trim() || null,
       challenge: formChallenge.trim() || null,
       approach: formApproach.trim() || null,
@@ -541,14 +534,18 @@ export function StudioPortfolioManager() {
       })
       const data = await res.json()
       if (data.success) {
+        // Later saves update this row instead of trying to create a duplicate.
+        if (typeof data.id === 'number') setFormId(data.id)
+        if (typeof data.slug === 'string') setFormSlug(data.slug)
         setSaveMessage('Portofolio & blok visual berhasil disimpan!')
         fetchPortfolios()
         setTimeout(() => setSaveMessage(''), 3500)
       } else {
-        setErrorMessage(data.error || 'Gagal menyimpan portofolio.')
+        setErrorMessage(data.error || data.message || 'Gagal menyimpan portofolio.')
       }
-    } catch (err: any) {
-      setErrorMessage(err.message || 'Terjadi kesalahan sistem saat menyimpan.')
+    } catch (err) {
+      console.error('[Portfolio] save failed:', err)
+      setErrorMessage('Terjadi kesalahan jaringan saat menyimpan.')
     } finally {
       setSaving(false)
     }
@@ -556,7 +553,7 @@ export function StudioPortfolioManager() {
 
   // Metric helpers
   const handleAddMetric = () => {
-    setFormMetrics([...formMetrics, { label: 'Metrik Baru', value: '100%', detail: 'Deskripsi singkat' }])
+    setFormMetrics([...formMetrics, { label: '', value: '', detail: '' }])
   }
   const handleUpdateMetric = (index: number, field: string, val: string) => {
     const next = [...formMetrics]
@@ -590,11 +587,13 @@ export function StudioPortfolioManager() {
       const data = await res.json()
       if (data.success && data.url) {
         setFormHeroImage(data.url)
+        setErrorMessage('')
       } else {
-        alert(data.error || 'Gagal mengunggah gambar.')
+        setErrorMessage(data.error || data.message || 'Gagal mengunggah gambar.')
       }
-    } catch {
-      alert('Terjadi kesalahan saat mengunggah gambar.')
+    } catch (err) {
+      console.error('[Portfolio] image upload failed:', err)
+      setErrorMessage('Terjadi kesalahan saat mengunggah gambar.')
     }
   }
 
@@ -618,7 +617,7 @@ export function StudioPortfolioManager() {
         <header className="h-14 shrink-0 px-4 sm:px-6 bg-[var(--studio-sidebar-bg)] border-b border-white/[0.08] flex items-center justify-between gap-3 z-30 select-none overflow-hidden flex-nowrap">
           <div className="flex items-center gap-2 sm:gap-2.5 min-w-0 flex-1 max-w-[55%] lg:max-w-[60%] overflow-hidden flex-nowrap whitespace-nowrap">
             <Tooltip label="Kembali" hint="Kembali ke daftar portofolio" side="bottom">
-              <button
+              <button aria-label="Kembali"
                 type="button"
                 onClick={() => {
                   setEditorMode(false)
@@ -658,7 +657,7 @@ export function StudioPortfolioManager() {
           {/* Center: Segmented View Switcher (Kanvas, Split, Pratinjau) */}
           <div className="flex items-center p-0.5 rounded-lg bg-black/60 border border-white/10 text-xs shrink-0">
             <Tooltip label="Mode Kanvas" hint="Editor visual menyusun blok langsung" side="bottom">
-              <button
+              <button aria-label="Mode Kanvas" aria-pressed={viewMode === 'canvas'}
                 type="button"
                 onClick={() => setViewMode('canvas')}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-mono font-medium transition-all ${
@@ -672,7 +671,7 @@ export function StudioPortfolioManager() {
               </button>
             </Tooltip>
             <Tooltip label="Mode Split" hint="Kanvas & pratinjau bersandingan" side="bottom">
-              <button
+              <button aria-label="Mode Split" aria-pressed={viewMode === 'split-preview'}
                 type="button"
                 onClick={() => setViewMode('split-preview')}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-mono font-medium transition-all ${
@@ -686,7 +685,7 @@ export function StudioPortfolioManager() {
               </button>
             </Tooltip>
             <Tooltip label="Pratinjau Penuh" hint="Pratinjau 100% rasio web publik" side="bottom">
-              <button
+              <button aria-label="Pratinjau Penuh" aria-pressed={viewMode === 'full-preview'}
                 type="button"
                 onClick={() => setViewMode('full-preview')}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-mono font-medium transition-all ${
@@ -721,7 +720,7 @@ export function StudioPortfolioManager() {
             {/* Toggle Inspector / Properties Panel */}
             {viewMode !== 'full-preview' && (
               <Tooltip label={showPropertiesDrawer ? 'Tutup Panel' : 'Buka Panel'} hint="Panel pengaturan blok & SEO" side="bottom">
-                <button
+                <button aria-label={showPropertiesDrawer ? 'Tutup Panel' : 'Buka Panel'} aria-expanded={showPropertiesDrawer}
                   type="button"
                   onClick={() => setShowPropertiesDrawer(!showPropertiesDrawer)}
                   className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-mono border transition-all ${
@@ -737,17 +736,12 @@ export function StudioPortfolioManager() {
             )}
 
             {saveMessage && (
-              <span className="text-xs font-mono text-emerald-400 flex items-center gap-1.5 animate-pulse hidden lg:inline-flex">
+              <span role="status" className="text-xs font-mono text-emerald-400 flex items-center gap-1.5 motion-safe:animate-pulse hidden lg:inline-flex">
                 <CheckCircle2 className="w-3.5 h-3.5" />
                 <span>{saveMessage}</span>
               </span>
             )}
 
-            {errorMessage && (
-              <span className="text-xs font-mono text-rose-400 flex items-center gap-1.5 hidden md:inline-flex">
-                {errorMessage}
-              </span>
-            )}
 
             {!isBlocksValid && (
               <span
@@ -772,6 +766,16 @@ export function StudioPortfolioManager() {
             </Tooltip>
           </div>
         </header>
+
+        {errorMessage && (
+          <div role="alert" className="shrink-0 flex items-start gap-2 px-4 sm:px-6 py-2 bg-rose-500/10 border-b border-rose-500/30 text-xs text-rose-200">
+            <AlertCircle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-rose-400" aria-hidden="true" />
+            <span className="min-w-0 flex-1 break-words">{errorMessage}</span>
+            <button type="button" onClick={() => setErrorMessage('')} aria-label="Tutup pesan galat" className="shrink-0 rounded p-0.5 text-rose-300 hover:bg-white/10">
+              <X className="h-3.5 w-3.5" aria-hidden="true" />
+            </button>
+          </div>
+        )}
 
         {/* Dedicated Fullscreen Workspace: Left Visual Editor • Right Contextual Inspector */}
         <div className="relative flex-1 min-h-0 w-full flex overflow-hidden">
@@ -848,10 +852,10 @@ export function StudioPortfolioManager() {
 
                       {/* Executive Summary */}
                       <div>
-                        <label className="block text-[11px] font-mono text-neutral-400 uppercase tracking-wider mb-1">
+                        <label htmlFor={`${fieldId}-pf1`} className="block text-[11px] font-mono text-neutral-400 uppercase tracking-wider mb-1">
                           Ringkasan Eksekutif (Summary)
                         </label>
-                        <textarea
+                        <textarea id={`${fieldId}-pf1`}
                           rows={3}
                           value={formSummary}
                           onChange={(e) => setFormSummary(e.target.value)}
@@ -863,10 +867,10 @@ export function StudioPortfolioManager() {
                       {/* 4 Story Pillars */}
                       <div className="space-y-3 pt-2 border-t border-white/5">
                         <div>
-                          <label className="block text-[11px] font-mono text-neutral-300 font-semibold mb-1">
+                          <label htmlFor={`${fieldId}-pf2`} className="block text-[11px] font-mono text-neutral-300 font-semibold mb-1">
                             1. Tantangan Bisnis &amp; Teknis (Challenge)
                           </label>
-                          <textarea
+                          <textarea id={`${fieldId}-pf2`}
                             rows={3}
                             value={formChallenge}
                             onChange={(e) => setFormChallenge(e.target.value)}
@@ -876,10 +880,10 @@ export function StudioPortfolioManager() {
                         </div>
 
                         <div>
-                          <label className="block text-[11px] font-mono text-neutral-300 font-semibold mb-1">
+                          <label htmlFor={`${fieldId}-pf3`} className="block text-[11px] font-mono text-neutral-300 font-semibold mb-1">
                             2. Pendekatan Rekayasa (Approach)
                           </label>
-                          <textarea
+                          <textarea id={`${fieldId}-pf3`}
                             rows={3}
                             value={formApproach}
                             onChange={(e) => setFormApproach(e.target.value)}
@@ -889,10 +893,10 @@ export function StudioPortfolioManager() {
                         </div>
 
                         <div>
-                          <label className="block text-[11px] font-mono text-neutral-300 font-semibold mb-1">
+                          <label htmlFor={`${fieldId}-pf4`} className="block text-[11px] font-mono text-neutral-300 font-semibold mb-1">
                             3. Solusi &amp; Implementasi (Solution)
                           </label>
-                          <textarea
+                          <textarea id={`${fieldId}-pf4`}
                             rows={3}
                             value={formSolution}
                             onChange={(e) => setFormSolution(e.target.value)}
@@ -902,10 +906,10 @@ export function StudioPortfolioManager() {
                         </div>
 
                         <div>
-                          <label className="block text-[11px] font-mono text-neutral-300 font-semibold mb-1">
+                          <label htmlFor={`${fieldId}-pf5`} className="block text-[11px] font-mono text-neutral-300 font-semibold mb-1">
                             4. Hasil &amp; Dampak Bisnis (Results)
                           </label>
-                          <textarea
+                          <textarea id={`${fieldId}-pf5`}
                             rows={3}
                             value={formResult}
                             onChange={(e) => setFormResult(e.target.value)}
@@ -918,10 +922,10 @@ export function StudioPortfolioManager() {
                       {/* Key Metrics Editor */}
                       <div className="pt-3 border-t border-white/5 space-y-2">
                         <div className="flex items-center justify-between">
-                          <label className="text-[11px] font-mono text-neutral-300 font-semibold flex items-center gap-1.5">
-                            <BarChart3 className="w-3.5 h-3.5 text-emerald-400" />
+                          <h4 className="text-[11px] font-mono text-neutral-300 font-semibold flex items-center gap-1.5">
+                            <BarChart3 className="w-3.5 h-3.5 text-emerald-400" aria-hidden="true" />
                             <span>Metrik Kunci (Key Results)</span>
-                          </label>
+                          </h4>
                           <button
                             type="button"
                             onClick={handleAddMetric}
@@ -937,20 +941,22 @@ export function StudioPortfolioManager() {
                             <div key={i} className="p-2.5 rounded-xl bg-black/40 border border-white/10 space-y-1.5">
                               <div className="flex items-center gap-2">
                                 <input
+                                  aria-label={`Nilai metrik ${i + 1}`}
                                   type="text"
                                   value={met.value}
                                   onChange={(e) => handleUpdateMetric(i, 'value', e.target.value)}
-                                  placeholder="Nilai (e.g. 3.4x)"
+                                  placeholder="Nilai terukur"
                                   className="w-24 px-2 py-1 text-xs font-mono font-bold text-emerald-400 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:border-[#4d8bff]"
                                 />
                                 <input
+                                  aria-label={`Label metrik ${i + 1}`}
                                   type="text"
                                   value={met.label}
                                   onChange={(e) => handleUpdateMetric(i, 'label', e.target.value)}
                                   placeholder="Label metrik"
                                   className="flex-1 px-2 py-1 text-xs bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:border-[#4d8bff]"
                                 />
-                                <button
+                                <button aria-label={`Hapus metrik ${i + 1}`}
                                   type="button"
                                   onClick={() => handleRemoveMetric(i)}
                                   className="p-1 text-neutral-500 hover:text-rose-400"
@@ -959,6 +965,7 @@ export function StudioPortfolioManager() {
                                 </button>
                               </div>
                               <input
+                                aria-label={`Detail metrik ${i + 1}`}
                                 type="text"
                                 value={met.detail || ''}
                                 onChange={(e) => handleUpdateMetric(i, 'detail', e.target.value)}
@@ -983,7 +990,7 @@ export function StudioPortfolioManager() {
                               className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white/5 border border-white/10 text-xs font-mono text-white"
                             >
                               <span>{tech}</span>
-                              <button
+                              <button aria-label={`Hapus teknologi ${tech}`}
                                 type="button"
                                 onClick={() => handleRemoveTech(tech)}
                                 className="text-neutral-500 hover:text-rose-400"
@@ -995,6 +1002,7 @@ export function StudioPortfolioManager() {
                         </div>
                         <div className="flex items-center gap-2 pt-1">
                           <input
+                            aria-label="Tambah teknologi"
                             type="text"
                             value={newTechInput}
                             onChange={(e) => setNewTechInput(e.target.value)}
@@ -1034,10 +1042,10 @@ export function StudioPortfolioManager() {
 
                       {/* Judul & Slug */}
                       <div>
-                        <label className="block text-[11px] font-mono text-neutral-400 uppercase tracking-wider mb-1">
+                        <label htmlFor={`${fieldId}-pf7`} className="block text-[11px] font-mono text-neutral-400 uppercase tracking-wider mb-1">
                           Judul Portofolio
                         </label>
-                        <input
+                        <input id={`${fieldId}-pf7`}
                           type="text"
                           value={formTitle}
                           onChange={(e) => setFormTitle(e.target.value)}
@@ -1047,12 +1055,12 @@ export function StudioPortfolioManager() {
                       </div>
 
                       <div>
-                        <label className="block text-[11px] font-mono text-neutral-400 uppercase tracking-wider mb-1">
+                        <label htmlFor={`${fieldId}-pf8`} className="block text-[11px] font-mono text-neutral-400 uppercase tracking-wider mb-1">
                           Slug URL Publik
                         </label>
                         <div className="flex items-center gap-1.5">
                           <span className="text-xs font-mono text-neutral-500">/portfolio/</span>
-                          <input
+                          <input id={`${fieldId}-pf8`}
                             type="text"
                             value={formSlug}
                             onChange={(e) => setFormSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]+/g, '-'))}
@@ -1065,10 +1073,10 @@ export function StudioPortfolioManager() {
                       {/* Client & Year */}
                       <div className="grid grid-cols-2 gap-3">
                         <div>
-                          <label className="block text-[11px] font-mono text-neutral-400 uppercase tracking-wider mb-1">
+                          <label htmlFor={`${fieldId}-pf9`} className="block text-[11px] font-mono text-neutral-400 uppercase tracking-wider mb-1">
                             Klien / Mitra
                           </label>
-                          <input
+                          <input id={`${fieldId}-pf9`}
                             type="text"
                             value={formClient}
                             onChange={(e) => setFormClient(e.target.value)}
@@ -1077,10 +1085,10 @@ export function StudioPortfolioManager() {
                           />
                         </div>
                         <div>
-                          <label className="block text-[11px] font-mono text-neutral-400 uppercase tracking-wider mb-1">
+                          <label htmlFor={`${fieldId}-pf10`} className="block text-[11px] font-mono text-neutral-400 uppercase tracking-wider mb-1">
                             Tahun
                           </label>
-                          <input
+                          <input id={`${fieldId}-pf10`}
                             type="number"
                             value={formYear}
                             onChange={(e) => setFormYear(e.target.value)}
@@ -1091,10 +1099,10 @@ export function StudioPortfolioManager() {
 
                       {/* Kategori */}
                       <div>
-                        <label className="block text-[11px] font-mono text-neutral-400 uppercase tracking-wider mb-1">
+                        <label htmlFor={`${fieldId}-pf11`} className="block text-[11px] font-mono text-neutral-400 uppercase tracking-wider mb-1">
                           Kategori Industri
                         </label>
-                        <select
+                        <select id={`${fieldId}-pf11`}
                           value={formCategory}
                           onChange={(e) => setFormCategory(e.target.value)}
                           className="w-full px-3 py-2 text-xs bg-[var(--studio-bg)] border border-white/10 rounded-xl text-white focus:outline-none focus:border-[#4d8bff]"
@@ -1123,14 +1131,14 @@ export function StudioPortfolioManager() {
                               <Layers className="w-3 h-3 text-info" />
                               <span>Galeri Media</span>
                             </button>
-                            <label className="cursor-pointer px-2 py-1 rounded-lg bg-white/10 hover:bg-white/15 border border-white/10 text-[10px] font-mono text-white flex items-center gap-1 transition-colors">
+                            <label className="cursor-pointer px-2 py-1 rounded-lg bg-white/10 hover:bg-white/15 border border-white/10 text-[10px] font-mono text-white flex items-center gap-1 transition-colors focus-within:outline focus-within:outline-2 focus-within:outline-[#4d8bff]">
                               <Upload className="w-3 h-3 text-emerald-400" />
                               <span>Upload</span>
                               <input
                                 type="file"
                                 accept="image/*"
                                 onChange={handleImageUpload}
-                                className="hidden"
+                                className="sr-only"
                               />
                             </label>
                           </div>
@@ -1167,6 +1175,7 @@ export function StudioPortfolioManager() {
 
                         <div className="flex items-center gap-2">
                           <input
+                            aria-label="URL gambar cover"
                             type="text"
                             value={formHeroImage}
                             onChange={(e) => setFormHeroImage(e.target.value)}
@@ -1179,9 +1188,9 @@ export function StudioPortfolioManager() {
                         <div className="pt-2 border-t border-white/5 space-y-1.5">
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-1.5">
-                              <span className="text-[11px] font-mono text-neutral-300 font-semibold">
+                              <label htmlFor={`${fieldId}-cover-alt`} className="text-[11px] font-mono text-neutral-300 font-semibold">
                                 Alt Text [ID]
-                              </span>
+                              </label>
                               {formHeroAlt.trim() && formHeroAlt.trim().length <= 125 && !/^(gambar|foto|image of|photo of|picture of)\b/i.test(formHeroAlt.trim()) ? (
                                 <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-mono bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
                                   <CheckCircle2 className="w-2.5 h-2.5" />
@@ -1195,19 +1204,7 @@ export function StudioPortfolioManager() {
                               )}
                             </div>
                             <div className="flex items-center gap-1.5">
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  const auto = `${formTitle || 'Portofolio'} - Digital Twin SPATIUM`.slice(0, 120)
-                                  setFormHeroAlt(auto)
-                                }}
-                                className="text-[10px] text-accent-400 hover:text-accent-300 flex items-center gap-0.5"
-                                title="Generate Alt Text dengan AI"
-                              >
-                                <Sparkles className="w-2.5 h-2.5" />
-                                <span>AI</span>
-                              </button>
-                              <button
+                              <button aria-label="Buka Pop-up Editor Alt Text"
                                 type="button"
                                 onClick={() => setShowCoverAltModal(true)}
                                 className="p-1 rounded text-neutral-400 hover:text-white hover:bg-white/10"
@@ -1220,6 +1217,7 @@ export function StudioPortfolioManager() {
 
                           <div className="relative">
                             <input
+                              id={`${fieldId}-cover-alt`}
                               type="text"
                               value={formHeroAlt}
                               onChange={(e) => setFormHeroAlt(e.target.value)}
@@ -1245,28 +1243,20 @@ export function StudioPortfolioManager() {
                       </div>
 
                       {/* Pop-up Modal Perbaikan Alt Text & Media Cover */}
-                      {showCoverAltModal && (
-                        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fadeIn">
-                          <div className="w-full max-w-lg rounded-2xl bg-[var(--studio-bg)] border border-white/15 shadow-2xl p-5 space-y-4 text-left">
-                            <div className="flex items-center justify-between pb-3 border-b border-white/10">
-                              <div className="flex items-center gap-2">
-                                <div className="p-1.5 rounded-lg bg-[#4d8bff]/10 border border-[#4d8bff]/20 text-[#4d8bff]">
-                                  <Sparkles className="w-4 h-4" />
-                                </div>
-                                <div>
-                                  <h3 className="text-sm font-semibold text-white">Kelola Cover & Alt Text Portofolio</h3>
-                                  <p className="text-[11px] text-neutral-400">Hubungkan gambar cover dan pastikan Alt Text valid untuk gerbang publikasi.</p>
-                                </div>
-                              </div>
-                              <button
-                                type="button"
-                                onClick={() => setShowCoverAltModal(false)}
-                                className="p-1.5 rounded-lg text-neutral-400 hover:text-white hover:bg-white/10 transition-colors"
-                              >
-                                <X className="w-4 h-4" />
-                              </button>
-                            </div>
-
+                      <EditorDialog
+                        open={showCoverAltModal}
+                        onClose={() => setShowCoverAltModal(false)}
+                        size="lg"
+                        icon={<ImageIcon className="h-4 w-4 text-[#4d8bff]" />}
+                        title="Kelola Cover & Alt Text Portofolio"
+                        description="Hubungkan gambar cover dan pastikan Alt Text valid untuk gerbang publikasi."
+                        footer={
+                          <button type="button" onClick={() => setShowCoverAltModal(false)} className={dialogButton.primary}>
+                            Selesai
+                          </button>
+                        }
+                      >
+                        <div className="space-y-4 text-left">
                             {/* Cover Preview & Galeri Button */}
                             <div className="space-y-2">
                               <div className="relative h-36 w-full rounded-xl overflow-hidden border border-white/10 bg-black/50">
@@ -1287,6 +1277,8 @@ export function StudioPortfolioManager() {
                                 <button
                                   type="button"
                                   onClick={() => {
+                                    // The media picker is not a top-layer dialog: close this one first.
+                                    setShowCoverAltModal(false)
                                     setMediaPickerOpen(true)
                                   }}
                                   className="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/15 border border-white/15 text-xs text-white flex items-center gap-1.5"
@@ -1303,7 +1295,7 @@ export function StudioPortfolioManager() {
                             {/* Alt Text Input */}
                             <div className="space-y-1.5">
                               <div className="flex items-center justify-between">
-                                <label className="text-xs font-mono font-semibold text-neutral-300">
+                                <label htmlFor={`${fieldId}-pf12`} className="text-xs font-mono font-semibold text-neutral-300">
                                   Alt Text [ID] (Maks. 125 Karakter)
                                 </label>
                                 <span
@@ -1318,7 +1310,7 @@ export function StudioPortfolioManager() {
                                   {formHeroAlt.trim().length} / 125 kar
                                 </span>
                               </div>
-                              <textarea
+                              <textarea id={`${fieldId}-pf12`}
                                 value={formHeroAlt}
                                 onChange={(e) => setFormHeroAlt(e.target.value)}
                                 rows={3}
@@ -1345,19 +1337,8 @@ export function StudioPortfolioManager() {
                               ))}
                             </div>
 
-                            {/* Modal Footer */}
-                            <div className="flex items-center justify-end gap-2 pt-3 border-t border-white/10">
-                              <button
-                                type="button"
-                                onClick={() => setShowCoverAltModal(false)}
-                                className="px-4 py-1.5 rounded-xl bg-white/10 hover:bg-white/15 text-xs text-white transition-colors"
-                              >
-                                Selesai
-                              </button>
-                            </div>
-                          </div>
                         </div>
-                      )}
+                      </EditorDialog>
 
                       {/* Live Demo URL */}
                       <div>
@@ -1376,10 +1357,10 @@ export function StudioPortfolioManager() {
                       {/* Status & Featured */}
                       <div className="pt-2 border-t border-white/5 space-y-3">
                         <div>
-                          <label className="block text-[11px] font-mono text-neutral-400 uppercase tracking-wider mb-1">
+                          <label htmlFor={`${fieldId}-pf13`} className="block text-[11px] font-mono text-neutral-400 uppercase tracking-wider mb-1">
                             Status Publikasi
                           </label>
-                          <select
+                          <select id={`${fieldId}-pf13`}
                             value={formStatus}
                             onChange={(e) => setFormStatus(e.target.value as 'draft' | 'in_review' | 'approved' | 'published' | 'archived')}
                             className="w-full px-3 py-2 text-xs font-mono bg-[var(--studio-bg)] border border-white/10 rounded-xl text-white focus:outline-none focus:border-[#4d8bff]"
@@ -1487,6 +1468,9 @@ export function StudioPortfolioManager() {
   // ─────────────────────────────────────────────────────────────────────────────
   return (
     <div className="space-y-6">
+      <p role="status" className={listStatus ? 'text-xs font-mono text-neutral-300' : 'sr-only'}>
+        {listStatus}
+      </p>
       {/* Compact Controls & Search Bar */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-3 p-3 sm:p-4 rounded-2xl bg-surface-overlay border border-white/10 shadow-sm">
         <div className="relative flex-1 w-full max-w-md">
@@ -1494,6 +1478,7 @@ export function StudioPortfolioManager() {
           <input
             type="text"
             value={searchQuery}
+            aria-label="Cari portofolio"
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Cari studi kasus berdasarkan judul, nama klien, atau kategori..."
             className="w-full pl-9 pr-3 py-1.5 rounded-xl bg-neutral-900 border border-white/10 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-[#4d8bff]"
@@ -1506,7 +1491,7 @@ export function StudioPortfolioManager() {
           </span>
 
           <Tooltip label="Muat Ulang" hint="Segarkan data portofolio dari basis data">
-            <button
+            <button aria-label="Muat Ulang"
               type="button"
               onClick={fetchPortfolios}
               className="p-1.5 rounded-xl bg-white/5 border border-white/10 text-neutral-300 hover:text-white hover:bg-white/10 transition-colors"
@@ -1550,6 +1535,7 @@ export function StudioPortfolioManager() {
           <input
             type="text"
             value={searchQuery}
+            aria-label="Cari portofolio"
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Cari studi kasus berdasarkan judul, nama klien, atau kategori..."
             className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-surface-overlay border border-white/10 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-[#4d8bff]"
@@ -1593,7 +1579,7 @@ export function StudioPortfolioManager() {
       {loading ? (
         <div className="p-16 text-center text-xs text-neutral-400 font-mono flex items-center justify-center gap-2">
           <RefreshCw className="w-4 h-4 animate-spin text-[#4d8bff]" />
-          <span>Memuat data portofolio dari basis data SQLite...</span>
+          <span>Memuat data portofolio dari basis data...</span>
         </div>
       ) : filteredItems.length === 0 ? (
         <div className="p-16 text-center rounded-3xl bg-surface-overlay border border-dashed border-white/10 space-y-3">
@@ -1714,9 +1700,9 @@ export function StudioPortfolioManager() {
                       <Edit className="w-3.5 h-3.5" />
                       <span>Edit Studi Kasus &amp; Blok</span>
                     </button>
-                    <button
+                    <button aria-label="Hapus Portofolio"
                       type="button"
-                      onClick={() => handleDeleteItem(item.slug, item.title)}
+                      onClick={() => handleDeleteItem(item)}
                       className="p-1.5 rounded-lg text-neutral-500 hover:text-rose-400 hover:bg-rose-500/10 transition-colors"
                       title="Hapus Portofolio"
                     >
@@ -1731,57 +1717,31 @@ export function StudioPortfolioManager() {
       )}
 
       {/* Tour Upload Modal */}
-      {tourUploadModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="relative w-full max-w-2xl bg-[#0A1628] border border-white/15 rounded-3xl p-6 sm:p-8 shadow-2xl overflow-hidden max-h-[90vh] overflow-y-auto">
-            {/* Header */}
-            <div className="flex items-center justify-between pb-4 border-b border-white/10 mb-6">
-              <div>
-                <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                  <Upload className="w-5 h-5 text-cyan-400" />
-                  <span>Unggah Paket Tur Spasial / 3DGS</span>
-                </h3>
-                <p className="text-xs font-mono text-neutral-400 mt-1">
-                  Ekspor .zip (HTML + folder aset), berkas .html, atau embed SuperSplat
-                </p>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => setTourUploadModalOpen(false)}
-                className="p-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-neutral-400 hover:text-white transition-colors"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
+      <EditorDialog
+        open={tourUploadModalOpen}
+        onClose={() => setTourUploadModalOpen(false)}
+        dismissible={!tourUploading}
+        size="lg"
+        icon={<Upload className="h-4 w-4 text-cyan-400" />}
+        title="Unggah Paket Tur Spasial / 3DGS"
+        description="Ekspor .zip (HTML + folder aset), berkas .html, atau embed SuperSplat. Hasil unggahan tersimpan sebagai draft."
+      >
             {/* Error & Success Alerts */}
             {tourUploadError && (
-              <div className="mb-6 p-4 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs flex items-center gap-3">
+              <div role="alert" className="mb-6 p-4 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs flex items-center gap-3">
                 <AlertCircle className="w-4 h-4 shrink-0 text-rose-400" />
                 <span>{tourUploadError}</span>
               </div>
             )}
 
             {tourUploadResult && (
-              <div className="mb-6 p-5 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs">
+              <div role="status" className="mb-6 p-5 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs">
                 <div className="flex items-center gap-2 font-bold mb-2">
                   <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                  <span>Tur Spasial Berhasil Dipublikasikan!</span>
+                  <span>Tur spasial tersimpan</span>
                 </div>
-                <p className="text-neutral-300 mb-3">
-                  Aset telah diekstrak dan didaftarkan ke portofolio SPATIUM secara otomatis.
-                </p>
+                <p className="text-neutral-300 mb-3">{tourUploadResult.message}</p>
                 <div className="flex flex-wrap items-center gap-3">
-                  <a
-                    href={`/portfolio/${tourUploadResult.slug}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-500 text-black font-mono font-bold hover:bg-emerald-400 transition-colors"
-                  >
-                    <span>Buka Halaman Portofolio</span>
-                    <ExternalLink className="w-3.5 h-3.5" />
-                  </a>
                   {tourUploadResult.liveUrl && (
                     <a
                       href={tourUploadResult.liveUrl}
@@ -1801,10 +1761,10 @@ export function StudioPortfolioManager() {
             <form onSubmit={handleTourUploadSubmit} className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-mono uppercase tracking-wider text-neutral-400 mb-1.5">
+                  <label htmlFor={`${fieldId}-pf14`} className="block text-xs font-mono uppercase tracking-wider text-neutral-400 mb-1.5">
                     Judul Proyek Spasial *
                   </label>
-                  <input
+                  <input id={`${fieldId}-pf14`}
                     type="text"
                     required
                     value={tourUploadTitle}
@@ -1815,10 +1775,10 @@ export function StudioPortfolioManager() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-mono uppercase tracking-wider text-neutral-400 mb-1.5">
+                  <label htmlFor={`${fieldId}-pf15`} className="block text-xs font-mono uppercase tracking-wider text-neutral-400 mb-1.5">
                     Nama Klien / Brand
                   </label>
-                  <input
+                  <input id={`${fieldId}-pf15`}
                     type="text"
                     value={tourUploadClient}
                     onChange={(e) => setTourUploadClient(e.target.value)}
@@ -1830,10 +1790,10 @@ export function StudioPortfolioManager() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-mono uppercase tracking-wider text-neutral-400 mb-1.5">
+                  <label htmlFor={`${fieldId}-pf16`} className="block text-xs font-mono uppercase tracking-wider text-neutral-400 mb-1.5">
                     Sektor / Kategori
                   </label>
-                  <select
+                  <select id={`${fieldId}-pf16`}
                     value={tourUploadCategory}
                     onChange={(e) => setTourUploadCategory(e.target.value)}
                     className="w-full px-3.5 py-2.5 rounded-xl bg-[#070F1E] border border-white/10 text-xs text-white focus:outline-none focus:border-cyan-400"
@@ -1850,10 +1810,10 @@ export function StudioPortfolioManager() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-mono uppercase tracking-wider text-neutral-400 mb-1.5">
+                  <label htmlFor={`${fieldId}-pf17`} className="block text-xs font-mono uppercase tracking-wider text-neutral-400 mb-1.5">
                     Custom Slug (Opsional)
                   </label>
-                  <input
+                  <input id={`${fieldId}-pf17`}
                     type="text"
                     value={tourUploadSlug}
                     onChange={(e) => setTourUploadSlug(e.target.value)}
@@ -1865,7 +1825,7 @@ export function StudioPortfolioManager() {
 
               {/* File Input Box */}
               <div className="p-4 rounded-2xl bg-white/[0.02] border-2 border-dashed border-white/15 hover:border-cyan-400/50 transition-colors">
-                <label className="block text-center cursor-pointer">
+                <label className="block text-center cursor-pointer rounded-xl focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-cyan-400">
                   <Upload className="w-8 h-8 text-cyan-400 mx-auto mb-2" />
                   <span className="text-xs font-mono text-white block font-semibold mb-1">
                     {tourUploadFile ? tourUploadFile.name : 'Pilih Berkas .zip Paket Tur atau .html Mandiri'}
@@ -1877,7 +1837,7 @@ export function StudioPortfolioManager() {
                     type="file"
                     accept=".zip,.html,.htm"
                     onChange={(e) => setTourUploadFile(e.target.files?.[0] || null)}
-                    className="hidden"
+                    className="sr-only"
                   />
                 </label>
               </div>
@@ -1889,10 +1849,10 @@ export function StudioPortfolioManager() {
                 </span>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-[11px] font-mono text-neutral-400 mb-1">
+                    <label htmlFor={`${fieldId}-pf18`} className="block text-[11px] font-mono text-neutral-400 mb-1">
                       SuperSplat ID (8 karakter)
                     </label>
-                    <input
+                    <input id={`${fieldId}-pf18`}
                       type="text"
                       value={tourUploadSplatId}
                       onChange={(e) => setTourUploadSplatId(e.target.value)}
@@ -1902,10 +1862,11 @@ export function StudioPortfolioManager() {
                   </div>
 
                   <div>
-                    <label className="block text-[11px] font-mono text-neutral-400 mb-1">
+                    <label htmlFor={`${fieldId}-tour-url`} className="block text-[11px] font-mono text-neutral-400 mb-1">
                       URL Lengkap (3DVista / Custom WebGL)
                     </label>
                     <input
+                      id={`${fieldId}-tour-url`}
                       type="url"
                       value={tourUploadExternalUrl}
                       onChange={(e) => setTourUploadExternalUrl(e.target.value)}
@@ -1919,10 +1880,10 @@ export function StudioPortfolioManager() {
               {/* Specs */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-[11px] font-mono uppercase tracking-wider text-neutral-400 mb-1.5">
+                  <label htmlFor={`${fieldId}-pf19`} className="block text-[11px] font-mono uppercase tracking-wider text-neutral-400 mb-1.5">
                     Kerapatan Partikel (Point Count)
                   </label>
-                  <input
+                  <input id={`${fieldId}-pf19`}
                     type="text"
                     value={tourUploadPointCount}
                     onChange={(e) => setTourUploadPointCount(e.target.value)}
@@ -1932,10 +1893,10 @@ export function StudioPortfolioManager() {
                 </div>
 
                 <div>
-                  <label className="block text-[11px] font-mono uppercase tracking-wider text-neutral-400 mb-1.5">
+                  <label htmlFor={`${fieldId}-pf20`} className="block text-[11px] font-mono uppercase tracking-wider text-neutral-400 mb-1.5">
                     Akurasi Geometri
                   </label>
-                  <input
+                  <input id={`${fieldId}-pf20`}
                     type="text"
                     value={tourUploadAccuracy}
                     onChange={(e) => setTourUploadAccuracy(e.target.value)}
@@ -1967,15 +1928,13 @@ export function StudioPortfolioManager() {
                   ) : (
                     <>
                       <Upload className="w-3.5 h-3.5" />
-                      <span>Ekstrak &amp; Publikasikan</span>
+                      <span>Ekstrak &amp; Simpan Draft</span>
                     </>
                   )}
                 </button>
               </div>
             </form>
-          </div>
-        </div>
-      )}
+      </EditorDialog>
     </div>
   )
 }

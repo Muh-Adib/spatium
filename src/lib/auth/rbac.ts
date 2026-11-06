@@ -2,6 +2,7 @@ import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { getToken } from 'next-auth/jwt'
 import { getValidatedAuthSecret, validateBearerToken } from './secret'
+import { resolveCurrentRole } from './credentials'
 
 export * from './types'
 import type { Role } from './types'
@@ -52,7 +53,18 @@ export async function requireUser(request: NextRequest): Promise<AuthResult> {
     })
 
     if (token && token.id) {
-      const role = (token.role as Role) || 'EDITOR'
+      // The JWT role is only a hint: the account's current DB role decides, so a
+      // demoted or deleted user loses access on their next request.
+      const role = await resolveCurrentRole(String(token.id), token.email ? String(token.email) : undefined)
+      if (!role) {
+        return {
+          user: null,
+          error: NextResponse.json(
+            { error: 'Unauthorized', message: 'Akun tidak lagi aktif. Silakan masuk kembali.' },
+            { status: 401 }
+          ),
+        }
+      }
       return {
         user: {
           id: String(token.id),

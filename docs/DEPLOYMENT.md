@@ -30,21 +30,31 @@ Kontak publik (`NEXT_PUBLIC_PHONE`, `NEXT_PUBLIC_WHATSAPP`, `NEXT_PUBLIC_STUDIO_
 
 Klien MCP **tidak** memakai variabel env; mereka memakai API key per klien yang dibuat di Studio (lihat [MCP.md](MCP.md)).
 
-## Setelah deploy pertama
+## Skema & seed otomatis
 
-```bash
-pnpm run db:push     # di container atau dari mesin dengan akses DB
-pnpm run db:seed     # hanya untuk database kosong
-```
+Compose punya tiga service: `postgres`, `migrate` (sekali jalan) dan `app`.
 
-Isi `SITE_API_KEY` (≥32 karakter acak) **sebelum** `db:seed`: nilainya disimpan sebagai API key Site dan dipakai klien Delivery API di header `x-site-key`. Bila kosong, seed membuat key acak yang tidak dicetak — tidak bisa dipakai sampai Anda mengisi `SITE_API_KEY` (diterima lewat fallback env) atau membaca `sites.api_key` langsung dari database. Tidak ada lagi key bawaan yang bisa ditebak; `site_sec_spatium`/`site_sec_default` ditolak di produksi.
+- `migrate` dibangun dari stage `migrate` di `Dockerfile` dan menjalankan `prisma db update --yes` pada **setiap** deploy, lalu `scripts/seed-if-empty.ts`.
+- Seed hanya berjalan bila database belum punya portofolio, artikel, halaman, dan layanan — `db:seed` melakukan upsert, jadi menjalankannya di database berisi akan menimpa editan Studio. Matikan dengan `SEED_ON_EMPTY=false`.
+- `app` baru start setelah `migrate` selesai sukses. Perubahan skema yang destruktif ditolak `db update` → deploy berhenti dan versi lama tetap jalan. Untuk itu: backup, lalu jalankan migrasi terencana secara manual.
 
-Lalu login di `/pawon` dengan akun bootstrap dan buat akun editor sungguhan dari tab **Pengguna**.
+Akun pertama: login di `/pawon` dengan `BOOTSTRAP_ADMIN_EMAIL` + password yang hash-nya ada di `BOOTSTRAP_ADMIN_PASSWORD_HASH` (`pnpm exec tsx scripts/hash-password.ts`), lalu buat akun editor sungguhan dari tab **Pengguna**.
+
+Isi `SITE_API_KEY` (≥32 karakter acak) **sebelum** deploy pertama: seed menyimpannya sebagai API key Site untuk header `x-site-key`. Bila kosong, seed membuat key acak yang tidak dicetak. Tidak ada key bawaan yang bisa ditebak; `site_sec_spatium`/`site_sec_default` ditolak di produksi.
+
+## Coolify
+
+Aplikasi `spatium` (project **WEB UDP**, environment `production`), build pack *Docker Compose*, sumber GitHub App ke `Muh-Adib/spatium`, branch `feat/spatium-rebuild`, compose `/docker-compose.yml`, domain service `app`: `https://spatium.id,https://www.spatium.id`.
+
+- **Auto-deploy aktif**: setiap push ke branch tersebut memicu build + deploy. Ganti branch di Coolify setelah merge ke `main`.
+- `SERVICE_PASSWORD_POSTGRES` dibuat otomatis oleh Coolify; tidak ada password DB di repo.
+- Env rahasia (`AUTH_SECRET`, `API_BEARER_TOKEN`, `SITE_API_KEY`, `REVALIDATE_SECRET`, `WEBHOOK_SECRET`, `BOOTSTRAP_ADMIN_*`) diisi di Coolify, ditandai *literal*. Salinan lokal pemilik ada di `.env.coolify.local` (gitignored).
+- `NEXT_PUBLIC_*` adalah build-time: mengubahnya butuh redeploy.
 
 ## Penyimpanan berkas
 
 - Unggahan media disimpan di `public/uploads` (volume `uploads_data`).
-- Tur yang diunggah lewat **Portfolio → Upload Tour** ditulis ke `public/tours`. Folder ini **tidak** punya volume di compose saat ini, jadi isinya hilang saat container dibuat ulang. Tambahkan volume `/app/public/tours` bila fitur ini dipakai di produksi, atau pakai scene SuperSplat (ID scene) yang tidak butuh penyimpanan lokal.
+- Tur yang diunggah lewat **Portfolio → Upload Tour** ditulis ke `public/tours` (volume `tours_data`), sehingga bertahan setelah redeploy.
 
 ## Cache dan revalidasi
 

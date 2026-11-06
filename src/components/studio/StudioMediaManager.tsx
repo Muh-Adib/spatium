@@ -1,24 +1,19 @@
 'use client'
 
 import React, { useState, useEffect, useRef } from 'react'
+import { EditorDialog, dialogButton } from '@/components/studio/editor/EditorDialog'
 import Image from 'next/image'
 import {
   Image as ImageIcon,
   Upload,
   Search,
   Filter,
-  CheckCircle2,
   AlertTriangle,
   Info,
   RefreshCw,
-  Edit2,
   Trash2,
-  ExternalLink,
   Layers,
-  ArrowRight,
-  X,
   FileText,
-  Sliders,
   Check,
 } from 'lucide-react'
 
@@ -60,6 +55,17 @@ interface MediaAuditReport {
   scannedAt: string
 }
 
+/** First readable error from an API body (`errors: string[]`, `error`, or `message`). */
+function errorText(json: unknown, fallback: string): string {
+  if (json && typeof json === 'object') {
+    const b = json as { errors?: unknown; error?: unknown; message?: unknown }
+    if (Array.isArray(b.errors) && typeof b.errors[0] === 'string') return b.errors.join(' ')
+    if (typeof b.message === 'string') return b.message
+    if (typeof b.error === 'string') return b.error
+  }
+  return fallback
+}
+
 export function StudioMediaManager() {
   const [activeTab, setActiveTab] = useState<'library' | 'audit'>('library')
   const [items, setItems] = useState<MediaItem[]>([])
@@ -82,6 +88,11 @@ export function StudioMediaManager() {
   const [saving, setSaving] = useState<boolean>(false)
   const [renameWarning, setRenameWarning] = useState<string | null>(null)
   const [saveSuccess, setSaveSuccess] = useState<boolean>(false)
+  const [deleting, setDeleting] = useState<boolean>(false)
+  /** Library-level feedback (load / upload), announced via role=status or alert. */
+  const [notice, setNotice] = useState<{ tone: 'success' | 'error'; text: string } | null>(null)
+  /** Drawer-level error (save / rename / delete). */
+  const [drawerError, setDrawerError] = useState<string | null>(null)
 
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -90,11 +101,14 @@ export function StudioMediaManager() {
     try {
       const res = await fetch(`/api/media?filter=${filter}&search=${encodeURIComponent(search)}&pageSize=48`)
       const json = await res.json()
-      if (json.data) {
+      if (res.ok && Array.isArray(json.data)) {
         setItems(json.data)
+      } else {
+        setNotice({ tone: 'error', text: errorText(json, 'Gagal memuat media.') })
       }
     } catch (err) {
       console.error('Failed to load media:', err)
+      setNotice({ tone: 'error', text: 'Tidak dapat terhubung ke server untuk memuat media.' })
     } finally {
       setLoading(false)
     }
@@ -105,11 +119,14 @@ export function StudioMediaManager() {
     try {
       const res = await fetch('/api/media?action=audit')
       const json = await res.json()
-      if (json.data) {
+      if (res.ok && json.data) {
         setAuditReport(json.data)
+      } else {
+        setNotice({ tone: 'error', text: errorText(json, 'Gagal menjalankan audit media.') })
       }
     } catch (err) {
       console.error('Failed to load media audit:', err)
+      setNotice({ tone: 'error', text: 'Tidak dapat terhubung ke server untuk audit media.' })
     } finally {
       setAuditLoading(false)
     }
@@ -135,6 +152,7 @@ export function StudioMediaManager() {
     setNewFileName(item.fileName)
     setRenameWarning(null)
     setSaveSuccess(false)
+    setDrawerError(null)
   }
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -142,19 +160,30 @@ export function StudioMediaManager() {
     if (!files || files.length === 0) return
 
     setIsUploading(true)
+    setNotice(null)
+    const failed: string[] = []
+    let uploaded = 0
     try {
       for (let i = 0; i < files.length; i++) {
         const file = files[i]
         const fd = new FormData()
         fd.append('file', file)
-        await fetch('/api/media', {
-          method: 'POST',
-          body: fd,
-        })
+        try {
+          const res = await fetch('/api/media', { method: 'POST', body: fd })
+          const json = await res.json().catch(() => ({}))
+          if (res.ok) uploaded++
+          else failed.push(`${file.name}: ${errorText(json, 'gagal diunggah.')}`)
+        } catch (err) {
+          console.error('Upload failed:', err)
+          failed.push(`${file.name}: tidak dapat terhubung ke server.`)
+        }
       }
       await fetchMedia()
-    } catch (err) {
-      console.error('Upload failed:', err)
+      setNotice(
+        failed.length > 0
+          ? { tone: 'error', text: `${uploaded} file terunggah, ${failed.length} gagal. ${failed.join(' ')}` }
+          : { tone: 'success', text: `${uploaded} file berhasil diunggah. Lengkapi alt text sebelum dipakai.` }
+      )
     } finally {
       setIsUploading(false)
       if (fileInputRef.current) fileInputRef.current.value = ''
@@ -165,6 +194,7 @@ export function StudioMediaManager() {
     if (!selectedMedia) return
     setSaving(true)
     setSaveSuccess(false)
+    setDrawerError(null)
     try {
       const res = await fetch('/api/media', {
         method: 'PATCH',
@@ -178,14 +208,17 @@ export function StudioMediaManager() {
         }),
       })
       const json = await res.json()
-      if (json.data) {
+      if (res.ok && json.data) {
         setSelectedMedia(json.data)
         setItems((prev) => prev.map((m) => (m.id === json.data.id ? json.data : m)))
         setSaveSuccess(true)
         setTimeout(() => setSaveSuccess(false), 3000)
+      } else {
+        setDrawerError(errorText(json, 'Gagal menyimpan metadata.'))
       }
     } catch (err) {
       console.error('Failed to update media:', err)
+      setDrawerError('Tidak dapat terhubung ke server. Metadata belum disimpan.')
     } finally {
       setSaving(false)
     }
@@ -201,6 +234,7 @@ export function StudioMediaManager() {
     }
 
     setSaving(true)
+    setDrawerError(null)
     try {
       const res = await fetch('/api/media', {
         method: 'POST',
@@ -212,17 +246,46 @@ export function StudioMediaManager() {
         }),
       })
       const json = await res.json()
-      if (json.data) {
+      if (res.ok && json.data) {
         setSelectedMedia(json.data)
         setNewFileName(json.data.fileName)
         setRenameWarning(null)
         setItems((prev) => prev.map((m) => (m.id === json.data.id ? json.data : m)))
         setSaveSuccess(true)
+      } else {
+        setDrawerError(errorText(json, 'Gagal mengganti nama file.'))
       }
     } catch (err) {
       console.error('Rename failed:', err)
+      setDrawerError('Tidak dapat terhubung ke server. Nama file belum diganti.')
     } finally {
       setSaving(false)
+    }
+  }
+
+  const handleDelete = async () => {
+    if (!selectedMedia) return
+    const used = selectedMedia.usedIn?.length || 0
+    const warning = used > 0 ? ` Gambar ini tercatat dipakai di ${used} konten.` : ''
+    if (!window.confirm(`Hapus "${selectedMedia.fileName}" secara permanen?${warning}`)) return
+    setDeleting(true)
+    setDrawerError(null)
+    try {
+      const res = await fetch(`/api/media?id=${selectedMedia.id}`, { method: 'DELETE' })
+      const json = await res.json().catch(() => ({}))
+      if (res.ok) {
+        const name = selectedMedia.fileName
+        setItems((prev) => prev.filter((m) => m.id !== selectedMedia.id))
+        setSelectedMedia(null)
+        setNotice({ tone: 'success', text: `"${name}" dihapus.` })
+      } else {
+        setDrawerError(errorText(json, 'Gagal menghapus media.'))
+      }
+    } catch (err) {
+      console.error('Delete failed:', err)
+      setDrawerError('Tidak dapat terhubung ke server. Media belum dihapus.')
+    } finally {
+      setDeleting(false)
     }
   }
 
@@ -232,6 +295,8 @@ export function StudioMediaManager() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-4">
         <div className="flex items-center gap-3">
           <button
+            type="button"
+            aria-pressed={activeTab === 'library'}
             onClick={() => setActiveTab('library')}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
               activeTab === 'library'
@@ -242,6 +307,8 @@ export function StudioMediaManager() {
             Media Library ({items.length})
           </button>
           <button
+            type="button"
+            aria-pressed={activeTab === 'audit'}
             onClick={() => setActiveTab('audit')}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${
               activeTab === 'audit'
@@ -249,7 +316,7 @@ export function StudioMediaManager() {
                 : 'text-neutral-400 hover:text-white'
             }`}
           >
-            <AlertTriangle className="w-4 h-4" />
+            <AlertTriangle className="w-4 h-4" aria-hidden="true" />
             Audit Media {auditReport && `(${auditReport.issues.length})`}
           </button>
         </div>
@@ -262,17 +329,34 @@ export function StudioMediaManager() {
             multiple
             accept="image/*"
             className="hidden"
+            tabIndex={-1}
+            aria-hidden="true"
           />
           <button
+            type="button"
             onClick={() => fileInputRef.current?.click()}
             disabled={isUploading}
             className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-info to-blue-600 text-white rounded-lg text-sm font-medium hover:from-info-400 hover:to-blue-500 transition-all shadow-md disabled:opacity-50"
           >
-            {isUploading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
-            <span>Upload Media</span>
+            {isUploading ? <RefreshCw className="w-4 h-4 motion-safe:animate-spin" aria-hidden="true" /> : <Upload className="w-4 h-4" aria-hidden="true" />}
+            <span>{isUploading ? 'Mengunggah…' : 'Upload Media'}</span>
           </button>
         </div>
       </div>
+
+      <div role="status" aria-live="polite">
+        {notice?.tone === 'success' && (
+          <p className="rounded-lg border border-emerald-400/40 bg-emerald-500/10 p-3 text-xs text-emerald-100">{notice.text}</p>
+        )}
+      </div>
+      {notice?.tone === 'error' && (
+        <div role="alert" className="flex items-start justify-between gap-3 rounded-lg border border-rose-400/40 bg-rose-500/10 p-3 text-xs text-rose-100">
+          <p>{notice.text}</p>
+          <button type="button" onClick={() => setNotice(null)} className="shrink-0 underline">
+            Tutup
+          </button>
+        </div>
+      )}
 
       {activeTab === 'library' ? (
         <>
@@ -280,9 +364,10 @@ export function StudioMediaManager() {
           <div className="flex flex-wrap items-center justify-between gap-4 bg-neutral-900/60 border border-white/5 p-3 rounded-xl backdrop-blur-md">
             <div className="flex items-center gap-3 flex-1 min-w-[280px]">
               <div className="relative flex-1">
-                <Search className="w-4 h-4 text-neutral-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                <Search className="w-4 h-4 text-neutral-400 absolute left-3 top-1/2 -translate-y-1/2" aria-hidden="true" />
                 <input
-                  type="text"
+                  type="search"
+                  aria-label="Cari media"
                   placeholder="Cari media berdasarkan nama file, URL, atau alt text..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
@@ -291,6 +376,7 @@ export function StudioMediaManager() {
               </div>
 
               <select
+                aria-label="Filter media"
                 value={filter}
                 onChange={(e) => setFilter(e.target.value as 'all' | 'missing_alt' | 'unused' | 'oversized')}
                 className="bg-black/40 border border-white/10 rounded-lg text-sm text-neutral-300 px-3 py-1.5 focus:outline-none focus:border-accent-500/50"
@@ -304,6 +390,9 @@ export function StudioMediaManager() {
 
             <div className="flex items-center gap-2">
               <button
+                type="button"
+                aria-label="Tampilan grid"
+                aria-pressed={viewMode === 'grid'}
                 onClick={() => setViewMode('grid')}
                 className={`p-1.5 rounded-lg border transition-all ${
                   viewMode === 'grid'
@@ -312,9 +401,12 @@ export function StudioMediaManager() {
                 }`}
                 title="Tampilan Grid"
               >
-                <Layers className="w-4 h-4" />
+                <Layers className="w-4 h-4" aria-hidden="true" />
               </button>
               <button
+                type="button"
+                aria-label="Tampilan list"
+                aria-pressed={viewMode === 'list'}
                 onClick={() => setViewMode('list')}
                 className={`p-1.5 rounded-lg border transition-all ${
                   viewMode === 'list'
@@ -323,7 +415,7 @@ export function StudioMediaManager() {
                 }`}
                 title="Tampilan List"
               >
-                <FileText className="w-4 h-4" />
+                <FileText className="w-4 h-4" aria-hidden="true" />
               </button>
             </div>
           </div>
@@ -345,23 +437,25 @@ export function StudioMediaManager() {
               {items.map((item) => {
                 const missingAlt = !item.decorative && (!item.altText?.id || !item.altText?.en)
                 return (
-                  <div
+                  <button
+                    type="button"
                     key={item.id}
                     onClick={() => openDrawer(item)}
-                    className="group relative bg-neutral-900/80 border border-white/10 rounded-xl overflow-hidden cursor-pointer hover:border-info/50 hover:shadow-lg transition-all"
+                    aria-label={`${item.fileName}${missingAlt ? ' — alt text belum lengkap' : ''}. Buka detail`}
+                    className="group relative block w-full text-left bg-neutral-900/80 border border-white/10 rounded-xl overflow-hidden cursor-pointer hover:border-info/50 hover:shadow-lg transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-400"
                   >
                     <div className="aspect-square relative bg-neutral-950 flex items-center justify-center overflow-hidden">
                       <Image
                         src={item.url}
-                        alt={item.altText?.id || item.fileName}
+                        alt=""
                         fill
                         sizes="(max-width: 768px) 50vw, 20vw"
-                        className="object-cover group-hover:scale-105 transition-transform duration-300"
+                        className="object-cover motion-safe:group-hover:scale-105 motion-safe:transition-transform motion-safe:duration-300"
                         unoptimized={item.url.endsWith('.svg')}
                       />
 
                       {missingAlt && (
-                        <div className="absolute top-2 right-2 bg-rose-500/90 text-white p-1 rounded-md shadow-md" title="Alt text belum lengkap">
+                        <div className="absolute top-2 right-2 bg-rose-500/90 text-white p-1 rounded-md shadow-md" title="Alt text belum lengkap" aria-hidden="true">
                           <AlertTriangle className="w-3.5 h-3.5" />
                         </div>
                       )}
@@ -376,7 +470,7 @@ export function StudioMediaManager() {
                         <span>{item.width && item.height ? `${item.width}×${item.height}` : ''}</span>
                       </div>
                     </div>
-                  </div>
+                  </button>
                 )
               })}
             </div>
@@ -402,7 +496,7 @@ export function StudioMediaManager() {
                     >
                       <td className="py-2.5 px-4">
                         <div className="w-10 h-10 relative rounded-lg overflow-hidden bg-black/60">
-                          <Image src={item.url} alt={item.fileName} fill className="object-cover" />
+                          <Image src={item.url} alt="" fill sizes="40px" className="object-cover" unoptimized={item.url.endsWith('.svg')} />
                         </div>
                       </td>
                       <td className="py-2.5 px-4 font-mono text-info-300">{item.fileName}</td>
@@ -411,7 +505,7 @@ export function StudioMediaManager() {
                           <span className="text-neutral-200 truncate max-w-[200px] block">{item.altText.id}</span>
                         ) : (
                           <span className="text-rose-400 flex items-center gap-1 font-mono text-[11px]">
-                            <AlertTriangle className="w-3 h-3" /> Wajib diisi
+                            <AlertTriangle className="w-3 h-3" aria-hidden="true" /> Wajib diisi
                           </span>
                         )}
                       </td>
@@ -431,6 +525,8 @@ export function StudioMediaManager() {
                             e.stopPropagation()
                             openDrawer(item)
                           }}
+                          type="button"
+                          aria-label={`Detail ${item.fileName}`}
                           className="px-2.5 py-1 bg-white/10 hover:bg-white/20 text-neutral-200 rounded-md transition-all text-xs"
                         >
                           Detail
@@ -478,6 +574,7 @@ export function StudioMediaManager() {
                 <div className="p-4 border-b border-white/5 flex items-center justify-between">
                   <h3 className="text-sm font-semibold text-white">Daftar Masalah Audit Media</h3>
                   <button
+                    type="button"
                     onClick={fetchAudit}
                     className="flex items-center gap-1.5 text-xs text-info hover:text-info-300 transition-colors"
                   >
@@ -514,8 +611,13 @@ export function StudioMediaManager() {
                               setActiveTab('library')
                               openDrawer(json.data)
                             }
-                          } catch (err) { console.warn("[observable error]:", err) }
+                          } catch (err) {
+                            console.warn('[media] opening audit item failed:', err)
+                            setNotice({ tone: 'error', text: 'Tidak dapat membuka media ini.' })
+                          }
                         }}
+                        type="button"
+                        aria-label={`Perbaiki ${iss.fileName}`}
                         className="px-3 py-1 bg-white/10 hover:bg-white/20 text-neutral-200 rounded-md text-xs font-medium transition-all"
                       >
                         Perbaiki
@@ -529,57 +631,91 @@ export function StudioMediaManager() {
         </div>
       )}
 
-      {/* Media Detail Drawer / Side Panel (Section 5.2 & 5.3) */}
-      {selectedMedia && (
-        <div className="fixed inset-y-0 right-0 z-50 w-full sm:w-[460px] bg-neutral-950 border-l border-white/10 shadow-2xl flex flex-col backdrop-blur-xl animate-in slide-in-from-right duration-200">
-          <div className="p-4 border-b border-white/10 flex items-center justify-between">
-            <h3 className="text-sm font-semibold text-white">Detail &amp; Metadata SEO Gambar</h3>
-            <button
-              onClick={() => setSelectedMedia(null)}
-              className="p-1 text-neutral-400 hover:text-white rounded-lg hover:bg-white/10"
-            >
-              <X className="w-5 h-5" />
-            </button>
-          </div>
+      {/* Media Detail Drawer (Section 5.2 & 5.3): modal sheet — focus trapped, Escape closes, focus returns. */}
+      <EditorDialog
+        open={selectedMedia !== null}
+        onClose={() => setSelectedMedia(null)}
+        variant="sheet"
+        title="Detail & Metadata SEO Gambar"
+        description={selectedMedia?.fileName}
+        dismissible={!saving && !deleting}
+        footer={
+          selectedMedia ? (
+            <>
+              <span role="status" className="me-auto text-xs text-neutral-300">
+                {saveSuccess ? (
+                  <span className="inline-flex items-center gap-1.5 text-emerald-300">
+                    <Check className="w-4 h-4" aria-hidden="true" /> Metadata disimpan.
+                  </span>
+                ) : (
+                  `ID: ${selectedMedia.id}`
+                )}
+              </span>
+              <button type="button" onClick={handleDelete} disabled={saving || deleting} className={dialogButton.danger}>
+                <Trash2 className="w-3.5 h-3.5" aria-hidden="true" />
+                {deleting ? 'Menghapus…' : 'Hapus'}
+              </button>
+              <button type="button" onClick={handleSaveMetadata} disabled={saving || deleting} className={dialogButton.primary}>
+                {saving ? 'Menyimpan…' : 'Simpan Metadata'}
+              </button>
+            </>
+          ) : null
+        }
+      >
+        {selectedMedia && (
+          <div className="space-y-6">
+            {drawerError && (
+              <p role="alert" className="rounded-lg border border-rose-400/40 bg-rose-500/10 p-3 text-xs text-rose-100">
+                {drawerError}
+              </p>
+            )}
 
-          <div className="flex-1 overflow-y-auto p-5 space-y-6">
             {/* Image Preview */}
             <div className="aspect-video relative rounded-xl overflow-hidden bg-black/60 border border-white/10">
               <Image
                 src={selectedMedia.url}
                 alt={altId || selectedMedia.fileName}
                 fill
+                sizes="420px"
                 className="object-contain"
+                unoptimized={selectedMedia.url.endsWith('.svg')}
               />
             </div>
 
             {/* Quick Stats */}
-            <div className="grid grid-cols-3 gap-2 text-center text-xs font-mono bg-neutral-900/60 p-2.5 rounded-lg border border-white/5">
+            <dl className="grid grid-cols-3 gap-2 text-center text-xs font-mono bg-neutral-900/60 p-2.5 rounded-lg border border-white/5">
               <div>
-                <span className="text-neutral-500 block">Ukuran</span>
-                <span className="text-neutral-300 font-semibold">{Math.round((selectedMedia.size || 0) / 1024)} KB</span>
+                <dt className="text-neutral-400 block">Ukuran</dt>
+                <dd className="text-neutral-200 font-semibold">{Math.round((selectedMedia.size || 0) / 1024)} KB</dd>
               </div>
               <div>
-                <span className="text-neutral-500 block">Resolusi</span>
-                <span className="text-neutral-300 font-semibold">{selectedMedia.width}×{selectedMedia.height}</span>
+                <dt className="text-neutral-400 block">Resolusi</dt>
+                <dd className="text-neutral-200 font-semibold">
+                  {selectedMedia.width && selectedMedia.height ? `${selectedMedia.width}×${selectedMedia.height}` : '—'}
+                </dd>
               </div>
               <div>
-                <span className="text-neutral-500 block">Format</span>
-                <span className="text-neutral-300 font-semibold">{selectedMedia.mimeType?.split('/')[1]?.toUpperCase() || 'WEBP'}</span>
+                <dt className="text-neutral-400 block">Format</dt>
+                <dd className="text-neutral-200 font-semibold">{selectedMedia.mimeType?.split('/')[1]?.toUpperCase() || '—'}</dd>
               </div>
-            </div>
+            </dl>
 
             {/* Rename File with Auto 301 Redirect (Section 5.3) */}
             <div className="space-y-2">
-              <label className="text-xs font-mono text-neutral-400 uppercase">Nama File (Slug-Friendly URL)</label>
+              <label htmlFor="media-rename" className="text-xs font-mono text-neutral-300 uppercase">
+                Nama File (Slug-Friendly URL)
+              </label>
               <div className="flex items-center gap-2">
                 <input
+                  id="media-rename"
                   type="text"
                   value={newFileName}
                   onChange={(e) => setNewFileName(e.target.value)}
-                  className="flex-1 px-3 py-1.5 bg-black/50 border border-white/10 rounded-lg text-xs font-mono text-neutral-200 focus:outline-none focus:border-accent-500"
+                  aria-describedby="media-rename-help"
+                  className="min-w-0 flex-1 px-3 py-1.5 bg-black/50 border border-white/10 rounded-lg text-xs font-mono text-neutral-200 focus:outline-none focus:border-accent-500"
                 />
                 <button
+                  type="button"
                   onClick={handleRename}
                   disabled={saving || newFileName === selectedMedia.fileName}
                   className="px-3 py-1.5 bg-white/10 hover:bg-white/20 text-white rounded-lg text-xs font-medium transition-all disabled:opacity-40"
@@ -587,14 +723,15 @@ export function StudioMediaManager() {
                   Rename &amp; 301
                 </button>
               </div>
+              <p id="media-rename-help" className="text-[11px] text-neutral-400">
+                Ekstensi file tetap. URL lama dialihkan 301 ke URL baru.
+              </p>
               {renameWarning && (
-                <div className="p-2.5 bg-amber-500/10 border border-amber-500/20 rounded-lg text-xs text-amber-300">
+                <div role="alert" className="p-2.5 bg-amber-500/10 border border-amber-500/20 rounded-lg text-xs text-amber-200">
                   <p>{renameWarning}</p>
                   <button
-                    onClick={() => {
-                      setRenameWarning(null)
-                      handleRename()
-                    }}
+                    type="button"
+                    onClick={() => handleRename()}
                     className="mt-2 px-2.5 py-1 bg-amber-500 text-black font-semibold rounded text-[11px]"
                   >
                     Lanjutkan Rename &amp; Update Referensi
@@ -605,31 +742,32 @@ export function StudioMediaManager() {
 
             {/* Alt Text ID (Mandatory per Section 3.4 & 16.4) */}
             <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <label className="text-xs font-mono text-neutral-400 uppercase flex items-center gap-1.5">
-                  <span>Alt Text [ID]</span>
-                  <span className="text-rose-400 font-bold">*Wajib</span>
-                </label>
-              </div>
+              <label htmlFor="media-alt-id" className="text-xs font-mono text-neutral-300 uppercase flex items-center gap-1.5">
+                <span>Alt Text [ID]</span>
+                <span className="text-rose-300 font-bold">*Wajib</span>
+              </label>
               <textarea
+                id="media-alt-id"
                 rows={2}
                 value={altId}
                 onChange={(e) => setAltId(e.target.value)}
+                aria-describedby="media-alt-id-count"
                 placeholder="Deskripsi gambar untuk pembaca tuna netra & SEO Google Gambar..."
                 className="w-full px-3 py-2 bg-black/50 border border-white/10 rounded-lg text-xs text-neutral-200 focus:outline-none focus:border-accent-500 resize-none"
               />
-              <div className="flex justify-between text-[11px] text-neutral-500">
-                <span>Maksimal 125 karakter</span>
+              <div id="media-alt-id-count" className="flex justify-between text-[11px] text-neutral-400">
+                <span>Ideal maksimal 125 karakter</span>
                 <span>{altId.length}/125</span>
               </div>
             </div>
 
             {/* Alt Text EN (Multi-language per Section 16.4) */}
             <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <label className="text-xs font-mono text-neutral-400 uppercase">Alt Text [EN]</label>
-              </div>
+              <label htmlFor="media-alt-en" className="text-xs font-mono text-neutral-300 uppercase">
+                Alt Text [EN]
+              </label>
               <textarea
+                id="media-alt-en"
                 rows={2}
                 value={altEn}
                 onChange={(e) => setAltEn(e.target.value)}
@@ -638,10 +776,27 @@ export function StudioMediaManager() {
               />
             </div>
 
-            {/* Title & Caption */}
+            {/* Title */}
             <div className="space-y-2">
-              <label className="text-xs font-mono text-neutral-400 uppercase">Caption / Keterangan Gambar</label>
+              <label htmlFor="media-title" className="text-xs font-mono text-neutral-300 uppercase">
+                Judul Gambar
+              </label>
               <input
+                id="media-title"
+                type="text"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                className="w-full px-3 py-1.5 bg-black/50 border border-white/10 rounded-lg text-xs text-neutral-200 focus:outline-none focus:border-accent-500"
+              />
+            </div>
+
+            {/* Caption */}
+            <div className="space-y-2">
+              <label htmlFor="media-caption" className="text-xs font-mono text-neutral-300 uppercase">
+                Caption / Keterangan Gambar
+              </label>
+              <input
+                id="media-caption"
                 type="text"
                 value={caption}
                 onChange={(e) => setCaption(e.target.value)}
@@ -657,34 +812,15 @@ export function StudioMediaManager() {
                 id="dec_check"
                 checked={decorative}
                 onChange={(e) => setDecorative(e.target.checked)}
-                className="rounded border-white/20 bg-black/40 text-info focus:ring-0"
+                className="rounded border-white/20 bg-black/40 text-info"
               />
               <label htmlFor="dec_check" className="text-xs text-neutral-300 select-none cursor-pointer">
                 Tandai sebagai elemen dekoratif semata (alt=&quot;&quot; valid)
               </label>
             </div>
           </div>
-
-          {/* Drawer Footer Actions */}
-          <div className="p-4 border-t border-white/10 bg-neutral-900/40 flex items-center justify-between">
-            {saveSuccess ? (
-              <span className="text-xs text-emerald-400 flex items-center gap-1.5">
-                <Check className="w-4 h-4" /> Metadata disimpan!
-              </span>
-            ) : (
-              <span className="text-xs text-neutral-500">ID: {selectedMedia.id}</span>
-            )}
-
-            <button
-              onClick={handleSaveMetadata}
-              disabled={saving}
-              className="px-4 py-2 bg-accent-500 hover:bg-accent-300 text-accent-950 rounded-lg text-xs font-semibold transition-all shadow-md disabled:opacity-50"
-            >
-              {saving ? 'Menyimpan...' : 'Simpan Metadata'}
-            </button>
-          </div>
-        </div>
-      )}
+        )}
+      </EditorDialog>
     </div>
   )
 }

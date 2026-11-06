@@ -290,7 +290,8 @@ export async function getKeywordMap(locale: Locale = 'id') {
       mapItems,
       conflictWarnings,
     }
-  } catch {
+  } catch (err) {
+    console.error('[keywords] Keyword map query failed', err)
     return {
       mapItems: [],
       conflictWarnings: [],
