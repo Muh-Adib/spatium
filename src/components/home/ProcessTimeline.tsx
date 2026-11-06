@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { PROCESS } from '@/data/site'
+import { SPATIAL_PIPELINE as PROCESS } from '@/config/spatium-story'
 import { Icon } from '@/components/Icon'
 import { SectionHead } from '@/components/ui/SectionHead'
 import './process-timeline.css'
@@ -49,7 +49,7 @@ export function ProcessTimeline() {
               <span className="process-step__index mono">{item.index}</span>
               <span className="process-step__dot" aria-hidden="true" />
               <span className="process-step__title">{item.title}</span>
-              <span className="process-step__duration mono">{item.duration}</span>
+              <span className="process-step__duration mono">{item.caption}</span>
             </button>
           ))}
           <span className="process__line" aria-hidden="true">
@@ -63,11 +63,11 @@ export function ProcessTimeline() {
             <span className="process__panel-index">{step.index}</span>
             <div>
               <h3 className="process__panel-title">{step.title}</h3>
-              <p className="mono process__panel-duration">{step.duration}</p>
+              <p className="mono process__panel-duration">{step.caption}</p>
             </div>
           </div>
 
-          <p className="process__panel-summary">{step.summary}</p>
+          <p className="process__panel-summary">{step.summaryId}</p>
 
           <div className="process__outputs">
             <p className="mono process__outputs-label">What you receive</p>

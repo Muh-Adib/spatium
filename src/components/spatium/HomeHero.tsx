@@ -76,10 +76,12 @@ export function HomeHero({ sceneCount }: { sceneCount: number }) {
             — ruang yang bisa dijelajahi, diukur, dan dikunjungi kembali dari mana saja.
           </p>
           <div className="sp-hero__actions">
-            <a href="#scenes" className="sp-btn sp-btn--primary">
-              Jelajahi {sceneCount} scene
-              <span aria-hidden="true">→</span>
-            </a>
+            {sceneCount > 0 ? (
+              <a href="#scenes" className="sp-btn sp-btn--primary">
+                Jelajahi {sceneCount} scene
+                <span aria-hidden="true">→</span>
+              </a>
+            ) : null}
             <Link href="/contact" className="sp-btn sp-btn--ghost">
               Mulai proyek
             </Link>

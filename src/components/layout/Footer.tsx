@@ -1,17 +1,13 @@
 import Link from 'next/link'
-import { CONTACT, NAV, SOCIALS } from '@/data/site'
+import { CONTACT } from '@/data/site'
 import { telHref, whatsappHref } from '@/config/site'
 import { Icon } from '@/components/Icon'
 import { BrandLogo } from '@/components/ui/BrandLogo'
+import type { SocialLink, UseCaseMenuItem } from '@/lib/content/spatium-types'
 import './footer.css'
 
-// Client-rendered (inside SiteShell), so the service list uses the static
-// navigation-structure fallback in NAV rather than a DB query.
-const SERVICES = (NAV.find((item) => item.to === '/services')?.children ?? [])
-  .filter((child) => child.to !== '/services')
-  .map((child) => ({ slug: child.to.replace('/services/', ''), name: child.label }))
-
-export function Footer() {
+/** `useCases` and `socials` are read from the DB by the root layout. */
+export function Footer({ useCases, socials }: { useCases: UseCaseMenuItem[]; socials: SocialLink[] }) {
   const year = new Date().getFullYear()
 
   return (
@@ -39,16 +35,18 @@ export function Footer() {
             </Link>
           </div>
 
-          <nav className="site-footer__col" aria-label="Services">
-            <h2 className="site-footer__heading">Services</h2>
-            <ul>
-              {SERVICES.map((service) => (
-                <li key={service.slug}>
-                  <Link href={`/services/${service.slug}`}>{service.name}</Link>
-                </li>
-              ))}
-            </ul>
-          </nav>
+          {useCases.length > 0 ? (
+            <nav className="site-footer__col" aria-label="Services">
+              <h2 className="site-footer__heading">Services</h2>
+              <ul>
+                {useCases.map((useCase) => (
+                  <li key={useCase.slug}>
+                    <Link href={`/services/${useCase.slug}`}>{useCase.name}</Link>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+          ) : null}
 
           <nav className="site-footer__col" aria-label="Studio">
             <h2 className="site-footer__heading">Studio</h2>
@@ -105,16 +103,19 @@ export function Footer() {
                 </li>
               )}
             </ul>
-            <ul className="site-footer__socials">
-              {SOCIALS.map((social) => (
-                <li key={social.label}>
-                  <a href={social.href} target="_blank" rel="noreferrer noopener">
-                    {social.label}
-                    <Icon name="external" size={14} />
-                  </a>
-                </li>
-              ))}
-            </ul>
+            {socials.length > 0 ? (
+              <ul className="site-footer__socials">
+                {socials.map((social) => (
+                  <li key={social.href}>
+                    <a href={social.href} target="_blank" rel="noreferrer noopener">
+                      {social.label}
+                      <Icon name="external" size={14} aria-hidden="true" />
+                      <span className="sr-only"> (tab baru)</span>
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            ) : null}
           </div>
         </div>
 

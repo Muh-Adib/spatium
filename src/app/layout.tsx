@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next'
 import { Plus_Jakarta_Sans, DM_Mono, Montserrat, Inter } from 'next/font/google'
 import { SiteShell } from '@/components/layout/SiteShell'
 import { siteConfig } from '@/config/site'
+import { getSocialLinks, getUseCaseMenu } from '@/lib/content/spatium'
 import '@/styles/tokens.css'
 import '@/styles/globals.css'
 import '@/components/layout/layout.css'
@@ -38,8 +39,8 @@ const inter = Inter({
 })
 
 // Content lives in PostgreSQL, which is not reachable while the Docker image builds.
-// Prerendering would freeze empty pages into every deploy, so all routes render per
-// request; Studio's revalidatePath calls stay harmless.
+// Prerendering would freeze empty pages (and an empty nav) into every deploy, so all
+// routes render per request; Studio's revalidatePath calls stay harmless.
 export const dynamic = 'force-dynamic'
 
 export const viewport: Viewport = {
@@ -82,18 +83,24 @@ export const metadata: Metadata = {
   },
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  // Header/footer content is Studio-managed: use cases (service_categories with
+  // show_in_nav) and social profiles (site_configs.social_links). Both resolve
+  // to [] on failure, which hides the corresponding menu or list.
+  const [useCases, socials] = await Promise.all([getUseCaseMenu(), getSocialLinks()])
   return (
     <html
       lang="id"
       className={`${plusJakartaSans.variable} ${dmMono.variable} ${montserrat.variable} ${inter.variable}`}
     >
       <body>
-        <SiteShell>{children}</SiteShell>
+        <SiteShell useCases={useCases} socials={socials}>
+          {children}
+        </SiteShell>
       </body>
     </html>
   )

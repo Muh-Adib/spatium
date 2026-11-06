@@ -96,7 +96,7 @@ export default async function HomePage() {
                   Real places, <span className="sp-accent">real productions.</span>
                 </h2>
               </header>
-              <UseCaseStories />
+              <UseCaseStories publishedUseCases={services.map((s) => s.slug)} />
             </div>
           </section>
 

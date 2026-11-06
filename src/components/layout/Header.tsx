@@ -6,18 +6,11 @@ import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { NAV, type NavItem } from '@/data/site'
 import { siteConfig } from '@/config/site'
+import type { UseCaseMenuItem } from '@/lib/content/spatium-types'
 import { Icon } from '@/components/Icon'
 import { BrandLogo } from '@/components/ui/BrandLogo'
 import { useBodyScrollLock } from '@/hooks'
 import './header.css'
-
-/** Presentation-only stills for the services mega menu (cropped from the product deck). */
-const MENU_STILLS: Record<string, { src: string; alt: string }> = {
-  '/services/filmmaking-vfx': { src: '/images/spatium/web/uc-filmmaking.webp', alt: 'Kru film di depan rekonstruksi digital set' },
-  '/services/marketing-branding': { src: '/images/spatium/web/uc-marketing.webp', alt: 'Spatial tour villa dengan denah 3D' },
-  '/services/entertainment-installation': { src: '/images/spatium/web/uc-entertainment.webp', alt: 'Instalasi imersif dengan proyeksi paus' },
-  '/services/memory-documentary': { src: '/images/spatium/web/uc-memory.webp', alt: 'Dekorasi pernikahan dalam pengalaman spasial' },
-}
 
 const PRIMARY: NavItem[] = NAV.filter((item) => item.to !== '/' && item.to !== '/contact')
 
@@ -38,7 +31,8 @@ function Logo() {
   )
 }
 
-export function Header() {
+/** `useCases` comes from the DB (published `service_categories` with `show_in_nav`). */
+export function Header({ useCases }: { useCases: UseCaseMenuItem[] }) {
   const pathname = usePathname()
   const menuId = useId()
   const [scrolled, setScrolled] = useState(false)
@@ -125,7 +119,7 @@ export function Header() {
     closeTimer.current = window.setTimeout(() => setMegaOpen(false), 160)
   }
 
-  const services = PRIMARY.find((item) => item.children)
+  const hasMega = useCases.length > 0
 
   return (
     <>
@@ -149,7 +143,7 @@ export function Header() {
             <ul className="sh-nav__list">
               {PRIMARY.map((item) => {
                 const active = isActive(item.to)
-                if (!item.children) {
+                if (item.to !== '/services' || !hasMega) {
                   return (
                     <li key={item.to}>
                       <Link
@@ -208,12 +202,12 @@ export function Header() {
           </div>
         </div>
 
-        {services?.children ? (
+        {hasMega ? (
           <div
             id={`${menuId}-mega`}
             className={`sh-mega${megaOpen ? ' is-open' : ''}`}
             role="group"
-            aria-label={services.label}
+            aria-label="Layanan"
             onMouseEnter={openMega}
             onMouseLeave={scheduleClose}
           >
@@ -225,22 +219,20 @@ export function Header() {
               </Link>
             </div>
             <ul className="sh-mega__grid">
-              {services.children
-                .filter((child) => child.to !== '/services')
-                .map((child) => {
-                  const still = MENU_STILLS[child.to]
-                  return (
-                    <li key={child.to}>
-                      <Link href={child.to} className="sh-mega__card" tabIndex={megaOpen ? 0 : -1}>
-                        <span className="sh-mega__media">
-                          {still ? <Image src={still.src} alt={still.alt} fill sizes="220px" /> : null}
-                        </span>
-                        <span className="sh-mega__label">{child.label}</span>
-                        {child.blurb ? <span className="sh-mega__blurb">{child.blurb}</span> : null}
-                      </Link>
-                    </li>
-                  )
-                })}
+              {useCases.map((useCase) => {
+                const to = `/services/${useCase.slug}`
+                return (
+                  <li key={useCase.slug}>
+                    <Link href={to} className="sh-mega__card" tabIndex={megaOpen ? 0 : -1}>
+                      <span className="sh-mega__media">
+                        {useCase.image ? <Image src={useCase.image} alt={useCase.imageAlt} fill sizes="220px" /> : null}
+                      </span>
+                      <span className="sh-mega__label">{useCase.name}</span>
+                      {useCase.tagline ? <span className="sh-mega__blurb">{useCase.tagline}</span> : null}
+                    </Link>
+                  </li>
+                )
+              })}
             </ul>
           </div>
         ) : null}
@@ -260,15 +252,13 @@ export function Header() {
                   <span className="sh-mobile__n">{String(i + 1).padStart(2, '0')}</span>
                   {item.label}
                 </Link>
-                {item.children ? (
+                {item.to === '/services' && useCases.length > 0 ? (
                   <ul className="sh-mobile__sub">
-                    {item.children
-                      .filter((child) => child.to !== item.to)
-                      .map((child) => (
-                        <li key={child.to}>
-                          <Link href={child.to}>{child.label}</Link>
-                        </li>
-                      ))}
+                    {useCases.map((useCase) => (
+                      <li key={useCase.slug}>
+                        <Link href={`/services/${useCase.slug}`}>{useCase.name}</Link>
+                      </li>
+                    ))}
                   </ul>
                 ) : null}
               </li>

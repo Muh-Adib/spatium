@@ -20,3 +20,4 @@ public/uploads/
 
 # Local editor/agent config (contains access tokens)
 .termul/
+.claude/

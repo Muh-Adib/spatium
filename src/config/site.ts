@@ -1,6 +1,7 @@
 // -----------------------------------------------------------------------------
 // Site Configuration — Spatium
 // -----------------------------------------------------------------------------
+import { STUDIO_EMAIL } from '@/data/site'
 
 export function resolveSiteUrl(defaultFallback: string = 'https://spatium.id'): string {
   const envUrl =
@@ -41,14 +42,9 @@ export const siteConfig = {
   url: resolveSiteUrl('https://spatium.id'),
   cmsUrl: process.env.CMS_URL ?? '/admin',
   whatsapp,
-  email: 'hello@spatium.id',
+  email: STUDIO_EMAIL,
   phone,
   address,
-  // Social handles are pending owner confirmation — see CONTACT/SOCIALS in src/data/site.ts.
-  social: {
-    instagram: 'https://instagram.com/spatium.studio',
-    linkedin: 'https://linkedin.com/company/spatium-studio',
-  },
   analytics: {
     gaId: process.env.NEXT_PUBLIC_GA_ID,
     gtmId: process.env.NEXT_PUBLIC_GTM_ID,

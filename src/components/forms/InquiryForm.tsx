@@ -2,7 +2,7 @@
 
 import { useId, useMemo, useRef, useState } from 'react'
 import type { ServiceNavItem } from '@/lib/content/spatium-types'
-import { BUDGET_RANGES, CONTACT, TIMELINES } from '@/data/site'
+import { CONTACT } from '@/data/site'
 import { Icon } from '@/components/Icon'
 import './inquiry-form.css'
 
@@ -37,8 +37,6 @@ function validate(values: Fields): Errors {
   if (!values.email.trim()) errors.email = 'Alamat email wajib diisi untuk balasan proposal.'
   else if (!EMAIL_RE.test(values.email.trim())) errors.email = 'Format alamat email tidak valid.'
   if (!values.service) errors.service = 'Pilih vertikal layanan yang Anda minati.'
-  if (!values.budget) errors.budget = 'Pilih perkiraan anggaran.'
-  if (!values.timeline) errors.timeline = 'Pilih target waktu pelaksanaan.'
   if (!values.brief.trim()) errors.brief = 'Mohon jelaskan lokasi atau kebutuhan proyek Anda.'
   else if (values.brief.trim().length < 20)
     errors.brief = 'Mohon tambahkan rincian sedikit lebih detail (minimal 20 karakter).'
@@ -51,8 +49,8 @@ function buildEmailBody(values: Fields): string {
     `Company: ${values.company || '—'}`,
     `Email: ${values.email}`,
     `Service interest: ${values.service}`,
-    `Budget range: ${values.budget}`,
-    `Timeline: ${values.timeline}`,
+    `Budget: ${values.budget || '—'}`,
+    `Timeline: ${values.timeline || '—'}`,
     '',
     'Project brief:',
     values.brief,
@@ -69,7 +67,7 @@ export function InquiryForm({ services = [] }: { services?: ServiceNavItem[] }) 
   const summaryRef = useRef<HTMLDivElement | null>(null)
 
   const mailtoHref = useMemo(() => {
-    const subject = `Project inquiry — ${values.service || 'Animation'}`
+    const subject = `Project inquiry — ${values.service || 'SPATIUM'}`
     return `mailto:${CONTACT.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(
       buildEmailBody(values),
     )}`
@@ -136,7 +134,8 @@ export function InquiryForm({ services = [] }: { services?: ServiceNavItem[] }) 
       await navigator.clipboard.writeText(buildEmailBody(values))
       setCopied(true)
       window.setTimeout(() => setCopied(false), 2200)
-    } catch {
+    } catch (error) {
+      console.warn('[InquiryForm] clipboard copy failed:', error)
       setCopied(false)
     }
   }
@@ -206,41 +205,13 @@ export function InquiryForm({ services = [] }: { services?: ServiceNavItem[] }) 
 
         <div className="inquiry__row">
           <div className="field">
-            <label htmlFor={`${uid}-budget`}>
-              Estimasi Anggaran <span aria-hidden="true">*</span>
-            </label>
-            <select {...fieldProps('budget')}>
-              <option value="">Pilih rentang anggaran…</option>
-              {BUDGET_RANGES.map((range) => (
-                <option key={range} value={range}>
-                  {range}
-                </option>
-              ))}
-            </select>
-            {errors.budget ? (
-              <p className="field__error" id={`${uid}-budget-error`}>
-                {errors.budget}
-              </p>
-            ) : null}
+            <label htmlFor={`${uid}-budget`}>Perkiraan Anggaran (opsional)</label>
+            <input type="text" placeholder="Bila sudah ada" {...fieldProps('budget')} />
           </div>
 
           <div className="field">
-            <label htmlFor={`${uid}-timeline`}>
-              Target Waktu Pelaksanaan <span aria-hidden="true">*</span>
-            </label>
-            <select {...fieldProps('timeline')}>
-              <option value="">Pilih target waktu…</option>
-              {TIMELINES.map((option) => (
-                <option key={option} value={option}>
-                  {option}
-                </option>
-              ))}
-            </select>
-            {errors.timeline ? (
-              <p className="field__error" id={`${uid}-timeline-error`}>
-                {errors.timeline}
-              </p>
-            ) : null}
+            <label htmlFor={`${uid}-timeline`}>Target Waktu (opsional)</label>
+            <input type="text" placeholder="Misalnya tanggal acara atau jadwal syuting" {...fieldProps('timeline')} />
           </div>
         </div>
 

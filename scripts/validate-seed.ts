@@ -6,7 +6,8 @@
  *  1. duplicate slugs per entity
  *  2. service → category link integrity (no orphans)
  *  3. required fields (slug, name/title, shortDescription)
- *  4. portfolio status validity; published entries must have a client
+ *  4. portfolio status validity; `client` is null (not recorded — never
+ *     invented, AGENTS.md §3.3) or a non-empty name
  *  5. referenced image paths exist on disk
  *  6. seed-manifest.json count parity
  *
@@ -71,8 +72,8 @@ for (const p of ports ?? []) {
   if (!['draft', 'published'].includes(p.status)) {
     errors.push(`portfolio "${p.slug}": invalid status "${p.status}" (expected draft|published)`)
   }
-  if (p.status === 'published' && !p.client) {
-    errors.push(`portfolio "${p.slug}": published but missing client`)
+  if (p.client !== null && (typeof p.client !== 'string' || !p.client.trim())) {
+    errors.push(`portfolio "${p.slug}": client must be null (unknown) or a non-empty name`)
   }
 }
 

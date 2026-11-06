@@ -13,6 +13,8 @@ import {
   type Project,
   type Service,
   type ServiceNavItem,
+  type SocialLink,
+  type UseCaseMenuItem,
 } from './spatium-types'
 
 // -----------------------------------------------------------------------------
@@ -275,6 +277,82 @@ export async function getUseCaseBySlug(slug: string): Promise<Service | null> {
 export async function getUseCaseNav(): Promise<ServiceNavItem[]> {
   const all = await getUseCases()
   return all.map((s) => ({ slug: s.slug, name: s.name }))
+}
+
+/**
+ * Published use cases flagged `show_in_nav`, for the header mega menu and the
+ * footer. [] when none exist or the DB is unavailable (the menu then hides).
+ */
+export async function getUseCaseMenu(): Promise<UseCaseMenuItem[]> {
+  if (!hasDb()) return []
+  try {
+    const rows = await prisma.orm.public.ServiceCategory.where({ status: 'published' })
+      .orderBy((c) => c.order.asc())
+      .all()
+    return rows
+      .filter((row) => row.showInNav === true)
+      .map((row) => {
+        const outcomes = parseJsonColumn(row.keyOutcomes, labelledList, `service_categories.key_outcomes#${row.slug}`)
+        return {
+          slug: row.slug,
+          name: row.title,
+          tagline: row.tag ?? '',
+          image: row.heroImage ?? undefined,
+          imageAlt: pick(outcomes, 'imageAlt')?.value ?? row.title,
+        }
+      })
+  } catch (err) {
+    console.error('[content] getUseCaseMenu failed:', err)
+    return []
+  }
+}
+
+/* --------------------------------- Socials -------------------------------- */
+
+const SOCIAL_LABELS: Record<string, string> = {
+  instagram: 'Instagram',
+  linkedin: 'LinkedIn',
+  youtube: 'YouTube',
+  tiktok: 'TikTok',
+  facebook: 'Facebook',
+  x: 'X',
+  twitter: 'X',
+  vimeo: 'Vimeo',
+  behance: 'Behance',
+}
+const socialLinksColumn = z.record(z.string(), z.string())
+
+/**
+ * Social profiles set in Studio settings (`site_configs.social_links`, a JSON
+ * object `{ "<network>": "<https url>" }`). Only absolute https URLs are kept;
+ * [] when unset so the UI hides the list instead of inventing handles.
+ */
+export async function getSocialLinks(): Promise<SocialLink[]> {
+  if (!hasDb()) return []
+  try {
+    const row = await prisma.orm.public.SiteConfig.where({ id: 1 }).first()
+    const links = parseJsonColumn(row?.socialLinks, socialLinksColumn, 'site_configs.social_links') ?? {}
+    return Object.entries(links).flatMap(([network, raw]) => {
+      const href = raw.trim()
+      if (!href) return []
+      let url: URL
+      try {
+        url = new URL(href)
+      } catch (err) {
+        console.warn(`[content] social link "${network}" is not a URL — skipped.`, err)
+        return []
+      }
+      if (url.protocol !== 'https:') {
+        console.warn(`[content] social link "${network}" is not https — skipped.`)
+        return []
+      }
+      const key = network.trim().toLowerCase()
+      return [{ label: SOCIAL_LABELS[key] ?? network.trim(), href: url.href }]
+    })
+  } catch (err) {
+    console.error('[content] getSocialLinks failed:', err)
+    return []
+  }
 }
 
 /**

@@ -8,8 +8,9 @@ import { CTASection } from '@/components/ui/CTASection'
 import { Reveal } from '@/components/ui/Reveal'
 import { SectionHead } from '@/components/ui/SectionHead'
 import { Icon } from '@/components/Icon'
-import { INDUSTRIES } from '@/data/site'
-import { getCoreServices } from '@/lib/core'
+import { SECTOR_ICON } from '@/components/home/Industries'
+import { getCorePortfolios, getCoreServices } from '@/lib/core'
+import { projectSectors } from '@/lib/content/spatium-types'
 import { siteConfig } from '@/config/site'
 import '@/pages/services.css'
 
@@ -27,7 +28,8 @@ export const metadata: Metadata = {
 export const revalidate = 300
 
 export default async function ServicesPage() {
-  const services = await getCoreServices()
+  const [services, projects] = await Promise.all([getCoreServices(), getCorePortfolios()])
+  const sectors = projectSectors(projects)
   const jsonLd = services.map((service) => ({
     '@context': 'https://schema.org',
     '@type': 'Service',
@@ -157,14 +159,16 @@ export default async function ServicesPage() {
             </table>
           </Reveal>
 
-          <ul className="services-industries">
-            {INDUSTRIES.map((industry) => (
-              <li key={industry.name}>
-                <Icon name={industry.icon} size={16} />
-                {industry.name}
-              </li>
-            ))}
-          </ul>
+          {sectors.length > 0 ? (
+            <ul className="services-industries" aria-label="Sektor dengan scene di portofolio">
+              {sectors.map((sector) => (
+                <li key={sector.name}>
+                  <Icon name={SECTOR_ICON[sector.category]} size={16} aria-hidden="true" />
+                  {sector.name}
+                </li>
+              ))}
+            </ul>
+          ) : null}
         </div>
       </section>
       ) : null}

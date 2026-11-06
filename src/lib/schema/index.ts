@@ -7,7 +7,8 @@ import { siteConfig } from '@/config/site'
 
 type JsonLdSchema = Record<string, unknown>
 
-export function createSchemaGenerators(site: SeoSite = siteConfig) {
+// Social profiles are Studio settings (DB); the static default has none.
+export function createSchemaGenerators(site: SeoSite = { ...siteConfig, social: {} }) {
 function generateOrganizationSchema(): JsonLdSchema {
   return {
     '@context': 'https://schema.org',

@@ -1,10 +1,11 @@
 import type { Metadata } from 'next'
 import { PageHero } from '@/components/ui/PageHero'
 import { InquiryForm } from '@/components/forms/InquiryForm'
-import { getUseCaseNav } from '@/lib/content/spatium'
+import { getSocialLinks, getUseCaseNav } from '@/lib/content/spatium'
 import { Reveal } from '@/components/ui/Reveal'
 import { Icon } from '@/components/Icon'
-import { CONTACT, SOCIALS } from '@/data/site'
+import { CONTACT } from '@/data/site'
+import { CONTACT_FAQS, CONTACT_STEPS } from '@/config/spatium-story'
 import { siteConfig, telHref, whatsappHref } from '@/config/site'
 import '@/pages/contact.css'
 
@@ -13,49 +14,11 @@ const SITE_URL = siteConfig.url
 export const metadata: Metadata = {
   title: 'Hubungi SPATIUM — Jadwalkan Konsultasi & Reality Capture',
   description:
-    'Jadwalkan pemindaian LiDAR darat, drone photogrammetry, dan rekonstruksi 3D Gaussian Splatting untuk bisnis Anda bersama tim spesialis spasial SPATIUM.',
+    'Ceritakan ruang dan tujuan Anda: SPATIUM merekam lokasi dengan laser scan dan merekonstruksinya menjadi 3D Gaussian Splat yang bisa dijelajahi.',
   alternates: {
     canonical: `${SITE_URL}/contact`,
   },
 }
-
-// Copy limited to what the product deck states — no unverified accuracy, turnaround or device claims.
-const EXPECTATIONS = [
-  {
-    title: 'Memahami ruang & tujuan Anda',
-    body: 'Kami mempelajari jenis lokasi dan untuk apa digital twin akan dipakai — film, marketing, hiburan, atau memori.',
-    icon: 'eye',
-  },
-  {
-    title: 'Menentukan output yang tepat',
-    body: 'Satu capture bisa menghasilkan point cloud, mesh, tekstur, panorama, atau 3D Gaussian Splat. Kami pilih yang sesuai kebutuhan.',
-    icon: 'route',
-  },
-  {
-    title: 'Lingkup & alur kerja transparan',
-    body: 'Tahapan capture, pemrosesan, dan serah terima dijelaskan sejak awal — tanpa kotak hitam.',
-    icon: 'shield',
-  },
-]
-
-const FAQS = [
-  {
-    q: 'Apa bedanya digital twin dengan foto atau video?',
-    a: 'Foto hanya menangkap gambar dan video hanya menangkap momen. Digital twin menangkap seluruh ruang, objek di sekitarnya, dan konteksnya — sehingga bisa dijelajahi dari sudut mana pun dan dikunjungi kembali kapan saja.',
-  },
-  {
-    q: 'Apakah pengunjung harus mengunduh aplikasi untuk melihat scene 3D?',
-    a: 'Tidak. Scene 3D Gaussian Splat kami dibuka langsung di peramban melalui viewer web. Waktu muat bergantung pada koneksi, perangkat, dan ukuran scene.',
-  },
-  {
-    q: 'Bagaimana cara memasang scene ke website kami?',
-    a: 'Scene dapat disematkan sebagai iframe di halaman Anda atau dibagikan sebagai tautan.',
-  },
-  {
-    q: 'Apakah satu kali capture bisa dipakai untuk banyak kebutuhan?',
-    a: 'Ya — capture once, use everywhere. Data yang sama dapat diolah menjadi output 3D, 2D, interaktif, maupun imersif.',
-  },
-]
 
 const jsonLd = [
   {
@@ -73,7 +36,7 @@ const jsonLd = [
 ]
 
 export default async function ContactPage() {
-  const services = await getUseCaseNav()
+  const [services, socials] = await Promise.all([getUseCaseNav(), getSocialLinks()])
   return (
     <>
       <script
@@ -105,11 +68,11 @@ export default async function ContactPage() {
         <div className="container container--wide contact__inner">
           <Reveal className="contact__aside">
             <h2 className="contact__aside-title text-white" id="contact-form-title">
-              Standar Layanan SPATIUM
+              Yang kami bahas di awal
             </h2>
 
             <ul className="contact__expectations">
-              {EXPECTATIONS.map((item) => (
+              {CONTACT_STEPS.map((item) => (
                 <li key={item.title}>
                   <span className="contact__expectation-icon text-cyan-400">
                     <Icon name={item.icon} size={18} />
@@ -163,18 +126,21 @@ export default async function ContactPage() {
               </ul>
             </div>
 
-            <div className="contact__socials">
-              <h3 className="mono contact__details-title text-cyan-400">Kanal Resmi</h3>
-              <ul>
-                {SOCIALS.map((social) => (
-                  <li key={social.label}>
-                    <a href={social.href} target="_blank" rel="noopener noreferrer" className="text-white hover:text-cyan-400">
-                      {social.label}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
+            {socials.length > 0 ? (
+              <div className="contact__socials">
+                <h3 className="mono contact__details-title text-cyan-400">Kanal Resmi</h3>
+                <ul>
+                  {socials.map((social) => (
+                    <li key={social.href}>
+                      <a href={social.href} target="_blank" rel="noopener noreferrer" className="text-white hover:text-cyan-400">
+                        {social.label}
+                        <span className="sr-only"> (tab baru)</span>
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
           </Reveal>
 
           <Reveal className="contact__main" delay={100} variant="scale">
@@ -189,7 +155,7 @@ export default async function ContactPage() {
             Pertanyaan Umum Seputar Pemindaian Spasial
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {FAQS.map((faq) => (
+            {CONTACT_FAQS.map((faq) => (
               <div key={faq.q} className="p-6 rounded-2xl bg-white/[0.02] border border-white/10">
                 <h3 className="text-base font-bold text-white mb-2">{faq.q}</h3>
                 <p className="text-xs text-neutral-300 leading-relaxed">{faq.a}</p>

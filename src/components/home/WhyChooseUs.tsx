@@ -1,4 +1,4 @@
-import { VALUES } from '@/data/site'
+import { BRAND_VALUES as VALUES } from '@/config/spatium-story'
 import { Icon } from '@/components/Icon'
 import { Reveal } from '@/components/ui/Reveal'
 import './why.css'

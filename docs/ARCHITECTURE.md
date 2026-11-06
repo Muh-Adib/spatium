@@ -38,7 +38,9 @@ src/lib/** (domain & data access) ── prisma/db.ts ── PostgreSQL 16
 
 Rute lama (`/layanan`, `/portofolio`, `/artikel`, `/solusi`, `/solutions`, `/kontak`, `/tentang`) di-308 di `next.config.mjs`. Redirect yang dikelola di Studio (tabel `redirects`) diterapkan oleh halaman detail sebelum mengembalikan 404 (`src/lib/redirects/resolve.ts`).
 
-Narasi brand yang bukan konten CMS (pipeline, manfaat, perbandingan media) ada di `src/config/spatium-story.ts`, bersumber dari deck produk.
+Header dan footer (root layout) membaca use case terbit dengan `show_in_nav` (`getUseCaseMenu`) dan profil sosial dari `site_configs.social_links` (`getSocialLinks`, hanya URL https); keduanya disembunyikan bila kosong. Sektor di `/about` dan `/services` diturunkan dari kategori portofolio terbit (`projectSectors`) — tidak ada sektor tanpa scene. Kontak publik berasal dari env `NEXT_PUBLIC_*` (`src/data/site.ts`) dan disembunyikan bila kosong.
+
+Narasi brand yang bukan konten CMS (pipeline, manfaat, perbandingan media, cerita use case, nilai, FAQ kontak) ada di `src/config/spatium-story.ts`, bersumber dari deck produk.
 
 ## Studio Admin
 

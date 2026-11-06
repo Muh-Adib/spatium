@@ -2,7 +2,13 @@ import type { ReactNode } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { OrbitBackdrop } from './OrbitBackdrop'
-import { MEDIA_COMPARISON, SPATIAL_BENEFITS, SPATIAL_PIPELINE } from '@/config/spatium-story'
+import {
+  DISTANCE_PLACES,
+  MEDIA_COMPARISON,
+  SPATIAL_BENEFITS,
+  SPATIAL_PIPELINE,
+  WAYS_OF_SEEING,
+} from '@/config/spatium-story'
 import type { Service } from '@/lib/content/spatium-types'
 
 /* All headline copy below is quoted from Spatium-SpatialStudio-ProductKnowledge.pdf. */
@@ -35,27 +41,6 @@ function SectionHead({
 /* 01 — The way we see space (slide 7)                                        */
 /* -------------------------------------------------------------------------- */
 export function WayWeSeeSpace() {
-  const items = [
-    {
-      title: 'Photograph',
-      body: 'only captures image',
-      src: '/images/spatium/web/way-photograph.webp',
-      alt: 'Kamera foto dan cetakan foto sebuah rumah modern',
-    },
-    {
-      title: 'Videograph',
-      body: 'only captures moment',
-      src: '/images/spatium/web/way-videograph.webp',
-      alt: 'Kamera video dan rangkaian frame video rumah yang sama',
-    },
-    {
-      title: 'Digital Twin',
-      body: 'captures the whole space, objects around, and their context',
-      src: '/images/spatium/web/way-digitaltwin.webp',
-      alt: 'Laser scanner merekam rumah yang sama menjadi digital twin',
-      featured: true,
-    },
-  ]
   return (
     <section id="way-we-see" className="sp-section" aria-labelledby="sp-way-title">
       <div className="sp-container">
@@ -66,7 +51,7 @@ export function WayWeSeeSpace() {
           lede="Foto dan video merekam apa yang terlihat dari satu titik. Digital twin merekam ruangnya."
         />
         <ul className="sp-way">
-          {items.map((it) => (
+          {WAYS_OF_SEEING.map((it) => (
             <li key={it.title} className={`sp-way__item${it.featured ? ' is-featured' : ''}`} data-reveal>
               <div className="sp-way__media sp-frame">
                 <Image src={it.src} alt={it.alt} fill sizes="(max-width: 900px) 100vw, 40vw" className="sp-cover" />
@@ -85,7 +70,6 @@ export function WayWeSeeSpace() {
 /* 02 — Distance (slide 8)                                                    */
 /* -------------------------------------------------------------------------- */
 export function DistanceStatement() {
-  const places = ['holiday place', 'memorable place', 'remarkable place', 'working place', 'film set']
   return (
     <section className="sp-distance" aria-labelledby="sp-distance-title">
       <div className="sp-distance__cliff sp-distance__cliff--l" aria-hidden="true">
@@ -108,7 +92,7 @@ export function DistanceStatement() {
           We are cursed by <strong>distance</strong>.
         </p>
         <p className="sp-distance__list">
-          {places.map((p, i) => (
+          {DISTANCE_PLACES.map((p, i) => (
             <span key={p} className="sp-distance__place" style={{ ['--i' as string]: i }}>
               {i === 0 ? `Distance to our ${p}` : p}
             </span>

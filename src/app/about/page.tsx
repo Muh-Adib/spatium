@@ -9,7 +9,9 @@ import { Reveal } from '@/components/ui/Reveal'
 import { SectionHead } from '@/components/ui/SectionHead'
 import { ServiceVisual } from '@/components/services/ServiceVisual'
 import { Icon } from '@/components/Icon'
-import { getCoreServices } from '@/lib/core'
+import { getCorePortfolios, getCoreServices } from '@/lib/core'
+import { projectSectors } from '@/lib/content/spatium-types'
+import { SPATIAL_BENEFITS } from '@/config/spatium-story'
 import { siteConfig } from '@/config/site'
 import '@/pages/about.css'
 
@@ -23,29 +25,6 @@ export const metadata: Metadata = {
     canonical: `${SITE_URL}/about`,
   },
 }
-
-const PRINCIPLES = [
-  {
-    title: 'Walkable Reality Beats Static Frames',
-    body: 'Ruang fisik nyata tidak bisa diwakili secara jujur hanya oleh foto 2D bersudut lebar atau video pasif. Ruang harus dapat dijelajahi sendiri secara bebas skala 1:1.',
-    icon: 'target',
-  },
-  {
-    title: 'Real-World Accuracy',
-    body: 'Skala dan detail ruang yang sebenarnya menjadi fondasi — geometri dan hubungan spasial yang nyata, bukan perkiraan.',
-    icon: 'eye',
-  },
-  {
-    title: 'Zero Moment of Truth (ZMOT)',
-    body: 'Kami merancang tur spasial untuk memicu keyakinan beli seketika. Konsumen dan investor memverifikasi lokasi secara nyata sebelum memutuskan bertransaksi.',
-    icon: 'layers',
-  },
-  {
-    title: 'One Point, Unlimited Possibilities',
-    body: 'Capture once, use everywhere: satu data spasial untuk output 3D, 2D, interaktif, dan imersif — dari spatial tour hingga previz film.',
-    icon: 'shield',
-  },
-]
 
 const jsonLd = [
   {
@@ -65,7 +44,8 @@ const jsonLd = [
 ]
 
 export default async function AboutPage() {
-  const services = await getCoreServices()
+  const [services, projects] = await Promise.all([getCoreServices(), getCorePortfolios()])
+  const sectors = projectSectors(projects)
   return (
     <>
       <script
@@ -83,11 +63,11 @@ export default async function AboutPage() {
         lede="SPATIUM adalah studio teknologi spasial yang menjawab 'kutukan jarak' dengan merekonstruksi ruang nyata menjadi walkable image — 3D Gaussian Splat yang bisa dijelajahi dari mana saja."
         crumbs={[{ label: 'Home', to: '/' }, { label: 'Tentang' }]}
         meta={
-          <>
+          services.length > 0 ? (
             <span className="pill">
-              <Icon name="layers" size={13} /> 4 Vertikal Utama
+              <Icon name="layers" size={13} /> {services.length} use case
             </span>
-          </>
+          ) : undefined
         }
       />
 
@@ -117,15 +97,16 @@ export default async function AboutPage() {
         </div>
       </section>
 
+      {services.length > 0 ? (
       <section className="section about-disciplines" aria-labelledby="about-disciplines-title">
         <div className="container container--wide">
           <SectionHead
             id="about-disciplines-title"
             eyebrow="Vertikal Layanan"
-            title="4 Vertikal Teknologi Spasial"
+            title="Use case teknologi spasial"
             aside={
               <p className="lede">
-                Solusi presisi terintegrasi untuk industri perfilman, pemasaran bisnis, kalibrasi pameran seni, dan preservasi memori abadi.
+                Satu kali capture ruang nyata menjadi fondasi untuk produksi film, pemasaran, instalasi imersif, dan preservasi memori.
               </p>
             }
           />
@@ -146,21 +127,22 @@ export default async function AboutPage() {
           </ul>
         </div>
       </section>
+      ) : null}
 
       <section className="section about-principles" aria-labelledby="principles-title">
         <div className="container container--wide">
           <SectionHead
             id="principles-title"
             eyebrow="Prinsip & Nilai"
-            title="Standar Rekayasa Spasial SPATIUM"
+            title="One Point, Unlimited Possibilities"
           />
 
           <ul className="about-principles__grid">
-            {PRINCIPLES.map((principle, i) => (
-              <Reveal as="li" key={principle.title} delay={i * 80} className="principle-card">
+            {SPATIAL_BENEFITS.map((benefit, i) => (
+              <Reveal as="li" key={benefit.title} delay={i * 80} className="principle-card">
                 <span className="principle-card__num mono">{String(i + 1).padStart(2, '0')}</span>
-                <h3 className="principle-card__title">{principle.title}</h3>
-                <p className="principle-card__body">{principle.body}</p>
+                <h3 className="principle-card__title">{benefit.title}</h3>
+                <p className="principle-card__body">{benefit.body}</p>
               </Reveal>
             ))}
           </ul>
@@ -169,7 +151,7 @@ export default async function AboutPage() {
 
       <ProcessTimeline />
       <WhyChooseUs />
-      <Industries />
+      <Industries sectors={sectors} />
 
       <CTASection
         id="about-cta"
@@ -179,7 +161,7 @@ export default async function AboutPage() {
             Siap merekonstruksi ruang Anda ke dalam <span className="accent">3D Gaussian Splatting</span>?
           </>
         }
-        body="Konsultasikan kebutuhan ruang dan lokasi Anda bersama tim insinyur spasial kami. Kami siapkan survei lapangan dan estimasi teknis transparan."
+        body="Ceritakan ruang dan tujuan Anda. Kami jelaskan alur capture, keluaran, dan cakupan pekerjaan secara terbuka."
         primary={{ label: 'Jadwalkan Konsultasi Spasial', to: '/contact' }}
         secondary={{ label: 'Lihat Portofolio 3DGS', to: '/portfolio' }}
       />

@@ -113,6 +113,25 @@ export function mapProjectCategory(raw: unknown): ProjectCategoryValue {
   return 'unknown'
 }
 
+/** A sector with at least one published scene, derived from `portfolios.category`. */
+export type ProjectSector = { name: string; category: ProjectCategoryValue; sceneCount: number }
+
+/**
+ * Sectors actually covered by published scenes — the label before " · " in
+ * `discipline` — in first-seen order. Never lists a sector without a scene.
+ */
+export function projectSectors(projects: readonly Project[]): ProjectSector[] {
+  const sectors = new Map<string, ProjectSector>()
+  for (const p of projects) {
+    const name = p.discipline.split(' · ')[0]?.trim()
+    if (!name) continue
+    const existing = sectors.get(name)
+    if (existing) existing.sceneCount += 1
+    else sectors.set(name, { name, category: mapProjectCategory(name), sceneCount: 1 })
+  }
+  return [...sectors.values()]
+}
+
 export function superSplatSceneUrl(id: string): string {
   return `https://superspl.at/scene/${id}`
 }
@@ -172,6 +191,12 @@ export type Service = {
 
 /** Lightweight shape for nav lists and selects. */
 export type ServiceNavItem = { slug: string; name: string }
+
+/** Header mega-menu / footer entry: a published use case with `show_in_nav`. */
+export type UseCaseMenuItem = ServiceNavItem & { tagline: string; image?: string; imageAlt: string }
+
+/** Public social profile from Studio settings (`site_configs.social_links`). */
+export type SocialLink = { label: string; href: string }
 
 /* -------------------------------- Articles ------------------------------- */
 
