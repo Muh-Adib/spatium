@@ -13,21 +13,20 @@ export function Footer() {
       <div className="container container--wide site-footer__inner">
         <div className="site-footer__top">
           <div className="site-footer__brand">
-            <Link href="/" className="footer-logo" aria-label="UNIMASI — home">
+            <Link href="/" className="footer-logo" aria-label="SPATIUM — Spatial Technology Studio">
               <img
-                src="/logo/unimasi-white.webp"
-                alt="UNIMASI — Animation & Motion Design"
+                src="/images/spatium-logo.png"
+                alt="SPATIUM — Spatial Technology Studio"
                 width={140}
                 height={54}
                 style={{ height: '36px', width: 'auto', objectFit: 'contain' }}
               />
             </Link>
             <p className="footer-tagline">
-              We make ideas move. An animation and motion design studio for teams that need complex
-              subjects understood.
+              Real places. New perspectives. One Point, Unlimited Possibilities. Studio teknologi spasial 3D Gaussian Splatting, LiDAR laser scanning, dan walkable digital twin.
             </p>
             <Link href="/contact" className="btn btn--primary">
-              Start a project
+              Mulai Konsultasi Spasial
               <span className="btn__icon">
                 <Icon name="arrow-right" size={16} />
               </span>
@@ -49,7 +48,7 @@ export function Footer() {
             <h2 className="site-footer__heading">Studio</h2>
             <ul>
               <li>
-                <Link href="/about">About Unimasi</Link>
+                <Link href="/about">About Spatium</Link>
               </li>
               <li>
                 <Link href="/portfolio">Portfolio</Link>

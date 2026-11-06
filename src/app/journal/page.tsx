@@ -10,12 +10,14 @@ import {
 import { JournalClient, type JournalCategory } from './JournalClient'
 import type { ArticleCardItem } from '@/components/journal/ArticleCard'
 
-const SITE_URL = 'https://unimasi.studio'
+import { siteConfig } from '@/config/site'
+
+const SITE_URL = siteConfig.url
 
 export const metadata: Metadata = {
-  title: 'Animation & Motion Design Articles',
+  title: 'Wawasan Spasial & Riset 3DGS — SPATIUM',
   description:
-    'Insight and process notes on 3D animation, videotron, motion graphics, and CGI pipelines from the UNIMASI studio team of specialists.',
+    'Wawasan dan riset mendalam seputar 3D Gaussian Splatting, LiDAR laser scanning, virtual scouting sinematik, dan strategi Zero Moment of Truth dari SPATIUM Studio.',
   alternates: {
     canonical: `${SITE_URL}/journal`,
   },

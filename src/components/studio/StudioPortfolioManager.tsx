@@ -68,68 +68,68 @@ export interface PortfolioItem {
 }
 
 function generateDefaultPortfolioBlocks(title: string, client: string, summary: string, heroImage: string): StudioBlock[] {
-  const heroTitle = title || 'Cinematic Motion & 3D Animation Showcase'
-  const heroDesc = summary || 'Eksplorasi visual imersif, animasi 3D fidelitas tinggi, dan narasi sinematik yang memukau audiens global bersama UNIMASI.'
+  const heroTitle = title || 'SPATIUM 3D Gaussian Splatting Showcase'
+  const heroDesc = summary || 'Rekonstruksi spasial fotorealistis, pemindaian LiDAR presisi tinggi, dan tur interaktif 3DGS 60 FPS bersama SPATIUM.'
   return [
     {
       id: `hero-${Date.now()}-1`,
       type: 'hero-cinema',
       title: heroTitle,
       headline: heroTitle,
-      highlightWord: 'Cinematic Motion',
-      badge: 'UNIMASI ANIMATION STUDIO',
-      client: client || 'Mitra Industri Kreatif',
+      highlightWord: 'Spatial Computing',
+      badge: 'SPATIUM SPATIAL TECHNOLOGY STUDIO',
+      client: client || 'Mitra SPATIUM',
       description: heroDesc,
       subheadline: heroDesc,
-      showreelUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
+      showreelUrl: 'https://superspl.at/s?id=dc1cd13b',
       data: {
-        badge: 'UNIMASI ANIMATION STUDIO',
+        badge: 'SPATIUM SPATIAL TECHNOLOGY STUDIO',
         headline: heroTitle,
         subheadline: heroDesc,
-        primaryCta: { label: 'Lihat Showreel', href: '#showreel' },
-        secondaryCta: { label: 'Konsultasi Proyek', href: '/kontak' },
+        primaryCta: { label: 'Jelajahi 3DGS', href: '#splat-viewer' },
+        secondaryCta: { label: 'Konsultasi Spasial', href: '/contact' },
       },
       metrics: [
-        { label: 'Resolusi Master', value: '4K DCI' },
-        { label: 'Total Views / Reach', value: '2.4M+' },
-        { label: 'Audience Retention', value: '89.4%' },
+        { label: 'Kerapatan Partikel', value: '15.1M Splats' },
+        { label: 'Akurasi Geometri', value: 'Sub-5mm' },
+        { label: 'Rendering Engine', value: '60 FPS WebGL' },
       ],
     },
     {
       id: `timeline-${Date.now()}-2`,
       type: 'process-timeline',
-      title: 'Alur Produksi Animasi & Craft Visual',
-      subtitle: 'Metodologi 4-fase terpadu UNIMASI dari sketsa ide hingga mastering warna standar bioskop.',
+      title: 'Alur Reality Capture & Rekonstruksi 3DGS',
+      subtitle: 'Metodologi 4-fase terpadu SPATIUM dari pemindaian sensor hingga representasi neural radiance fields WebGL.',
       steps: [
         {
           step: '01',
-          title: 'Konseptual & Storyboard Visual',
-          description: 'Eksplorasi naskah naratif, character design, dan penataan storyboard sinematik frame-by-frame.',
+          title: 'Laser Scan & Drone Capture',
+          description: 'Akuisisi data multi-sensor LiDAR darat dan drone resolusi tinggi untuk jutaan koordinat XYZ.',
         },
         {
           step: '02',
-          title: 'Modeling 3D & Rigging Kompleks',
-          description: 'Pembangunan aset geometri presisi tinggi, simulasi kain, rambut, dan sistem rigging anatomis.',
+          title: 'Point Cloud Densification',
+          description: 'Komputasi awan titik berkerapatan tinggi dengan akurasi sub-sentimeter toleransi < 5mm.',
         },
         {
           step: '03',
-          title: 'Lighting Sinematik & Multi-Pass Render',
-          description: 'Pencahayaan dramatik dengan global illumination dan kalkulasi fotorealistis berkecepatan tinggi.',
+          title: '3D Geometry & CAD Reconstruction',
+          description: 'Pemodelan mesh dan kalibrasi batas ruang arsitektur untuk integrasi software 3D profesional.',
         },
         {
           step: '04',
-          title: 'Sound Design Spasial & Color Grading',
-          description: 'Mastering grading warna standar DCI-P3 dan orkestrasi audio atmosferik yang menggugah emosi.',
+          title: '3D Gaussian Splatting (3DGS)',
+          description: 'Pelatihan radiance fields menjadi representasi elipsoid fotorealistis 60 FPS di WebGL browser.',
         },
       ],
       data: {
-        title: 'Alur Produksi Animasi & Craft Visual',
-        description: 'Metodologi 4-fase terpadu UNIMASI dari sketsa ide hingga mastering warna standar bioskop.',
+        title: 'Alur Reality Capture & Rekonstruksi 3DGS',
+        description: 'Metodologi 4-fase terpadu SPATIUM dari pemindaian sensor hingga representasi neural radiance fields WebGL.',
         steps: [
-          { stepNumber: '01', title: 'Konseptual & Storyboard Visual', summary: 'Eksplorasi naskah naratif, character design, dan penataan storyboard sinematik frame-by-frame.' },
-          { stepNumber: '02', title: 'Modeling 3D & Rigging Kompleks', summary: 'Pembangunan aset geometri presisi tinggi, simulasi kain, rambut, dan sistem rigging anatomis.' },
-          { stepNumber: '03', title: 'Lighting Sinematik & Multi-Pass Render', summary: 'Pencahayaan dramatik dengan global illumination dan kalkulasi fotorealistis berkecepatan tinggi.' },
-          { stepNumber: '04', title: 'Sound Design Spasial & Color Grading', summary: 'Mastering grading warna standar DCI-P3 dan orkestrasi audio atmosferik yang menggugah emosi.' },
+          { stepNumber: '01', title: 'Laser Scan & Drone Capture', summary: 'Akuisisi data multi-sensor LiDAR darat dan drone resolusi tinggi untuk jutaan koordinat XYZ.' },
+          { stepNumber: '02', title: 'Point Cloud Densification', summary: 'Komputasi awan titik berkerapatan tinggi dengan akurasi sub-sentimeter toleransi < 5mm.' },
+          { stepNumber: '03', title: '3D Geometry & CAD Reconstruction', summary: 'Pemodelan mesh dan kalibrasi batas ruang arsitektur untuk integrasi software 3D profesional.' },
+          { stepNumber: '04', title: '3D Gaussian Splatting (3DGS)', summary: 'Pelatihan radiance fields menjadi representasi elipsoid fotorealistis 60 FPS di WebGL browser.' },
         ],
       },
     },
@@ -237,6 +237,21 @@ export function StudioPortfolioManager() {
   // Visual Blocks Array
   const [formBlocks, setFormBlocks] = useState<StudioBlock[]>([])
 
+  // Tour Upload State
+  const [tourUploadModalOpen, setTourUploadModalOpen] = useState(false)
+  const [tourUploadTitle, setTourUploadTitle] = useState('')
+  const [tourUploadSlug, setTourUploadSlug] = useState('')
+  const [tourUploadClient, setTourUploadClient] = useState('')
+  const [tourUploadCategory, setTourUploadCategory] = useState('Marketing & Branding')
+  const [tourUploadPointCount, setTourUploadPointCount] = useState('14.2M Splats')
+  const [tourUploadAccuracy, setTourUploadAccuracy] = useState('Sub-centimeter (5mm)')
+  const [tourUploadSplatId, setTourUploadSplatId] = useState('')
+  const [tourUploadExternalUrl, setTourUploadExternalUrl] = useState('')
+  const [tourUploadFile, setTourUploadFile] = useState<File | null>(null)
+  const [tourUploading, setTourUploading] = useState(false)
+  const [tourUploadError, setTourUploadError] = useState('')
+  const [tourUploadResult, setTourUploadResult] = useState<any>(null)
+
   // Shared SEO V4 Inspector State
   const [seoLocale, setSeoLocale] = useState<Locale>('id')
   const [seoTitle, setSeoTitle] = useState('')
@@ -279,51 +294,94 @@ export function StudioPortfolioManager() {
   // Create New Portfolio
   const handleAddNew = () => {
     setFormId(null)
-    setFormTitle('Cinematic 3D Animation Showcase')
-    const initialSlug = `karya-${Date.now().toString().slice(-4)}`
+    setFormTitle('SPATIUM 3D Gaussian Splatting Showcase')
+    const initialSlug = `spatium-capture-${Date.now().toString().slice(-4)}`
     setFormSlug(initialSlug)
-    setFormClient('Mitra Industri Kreatif')
+    setFormClient('Mitra SPATIUM')
     setFormYear(new Date().getFullYear().toString())
-    setFormCategory(availableCategories[0] || '3D Animation')
-    setFormSummary('Produksi animasi 3D sinematik beresolusi tinggi dengan simulasi pencahayaan fotorealistik dan narasi visual imersif.')
-    setFormHeroImage('/images/portfolio/pt-ypti-3d.webp')
-    setFormHeroAlt('Cinematic 3D Animation Showcase — UNIMASI Studio')
-    setFormLiveUrl('https://unimasi.studio')
+    setFormCategory(availableCategories[0] || 'Marketing & Branding')
+    setFormSummary('Rekonstruksi spasial fotorealistis 3D Gaussian Splatting dengan akurasi sub-sentimeter pada 60 FPS real-time WebGL.')
+    setFormHeroImage('/images/spatium/page_01_0.jpg')
+    setFormHeroAlt('SPATIUM Spatial Technology Studio')
+    setFormLiveUrl('https://superspl.at/s?id=dc1cd13b')
     setFormFeatured(false)
     setFormStatus('published')
-    setFormChallenge('Komunikasi naratif produk membutuhkan pendekatan visual imersif yang mampu memikat atensi audiens dalam hitungan detik.')
-    setFormApproach('Mengembangkan pipeline produksi 3D terpadu dari konsep storyboard, perancangan aset beresolusi tinggi, hingga rendering 4K DCI.')
-    setFormSolution('Memproduksi rangkaian animasi sinematik dengan visual effects presisi dan compositing audio-visual dramatis.')
-    setFormProcess('Concept Storyboard, 3D Asset Modeling, Rigging & Animation, Lighting & VFX, 4K Master Render.')
-    setFormResult('Meningkatkan retensi pemirsa hingga 89.4% dan menjangkau lebih dari 2.4 juta impresi kampanye.')
+    setFormChallenge('Membutuhkan dokumentasi spasial interaktif fidelitas tinggi yang dapat diakses secara instan dari web tanpa distorsi sudut lensa.')
+    setFormApproach('Mengembangkan alur pemindaian LiDAR darat dan fotogrametri drone berkerapatan tinggi yang dikonversi menjadi medan radiansi 3DGS.')
+    setFormSolution('Memproduksi tur spasial WebGL 60 FPS mandiri dengan navigasi kamera bebas dan akurasi sub-sentimeter.')
+    setFormProcess('LiDAR Sensor Scan, Drone Aerial Capture, Point Cloud Densification, 3D Geometry Reconstruction, 3DGS WebGL Delivery.')
+    setFormResult('Memberikan pengalaman verifikasi visual 1:1 tanpa batasan jarak fisik, meningkatkan konversi dan keyakinan pembeli (ZMOT).')
     setFormMetrics([
-      { label: 'Resolusi Render Master', value: '4K DCI', detail: 'Fidelitas visual tinggi 60 FPS' },
-      { label: 'Jangkauan Penonton', value: '2.4M+', detail: 'Total impresi kampanye global' },
-      { label: 'Retensi Pemirsa', value: '89.4%', detail: 'Rata-rata durasi tonton' },
+      { label: 'Kerapatan Partikel', value: '15.1M Splats', detail: 'Fidelitas visual neural radiance field' },
+      { label: 'Akurasi Geometri', value: 'Sub-5mm', detail: 'Survei koordinat laser LiDAR darat' },
+      { label: 'Kecepatan Frame', value: '60 FPS', detail: 'Real-time WebGL di semua peramban' },
     ])
-    setFormTechnologies(['Unreal Engine 5', 'Blender 4K Pipeline', 'Three.js / WebGL', 'Houdini FX', 'DaVinci Resolve Studio'])
+    setFormTechnologies(['3D Gaussian Splatting', 'Terrestrial LiDAR Scanner', 'SuperSplat WebGL', 'Drone Photogrammetry', 'Three.js'])
 
     // Initialize Default Visual Blocks
     const defaultBlocks = generateDefaultPortfolioBlocks(
-      'Cinematic 3D Animation Showcase',
-      'Mitra Industri Kreatif',
-      'Produksi animasi 3D sinematik beresolusi tinggi dengan simulasi pencahayaan fotorealistik dan narasi visual imersif.',
-      '/images/portfolio/pt-ypti-3d.webp'
+      'SPATIUM 3D Gaussian Splatting Showcase',
+      'Mitra SPATIUM',
+      'Rekonstruksi spasial fotorealistis 3D Gaussian Splatting dengan akurasi sub-sentimeter pada 60 FPS real-time WebGL.',
+      '/images/spatium/page_01_0.jpg'
     )
     setFormBlocks(defaultBlocks)
 
     // Reset SEO
-    setSeoTitle('Cinematic 3D Animation Showcase — Portofolio UNIMASI')
-    setMetaDesc('Eksplorasi karya animasi 3D dan visual effect sinematik berstandar global dari studio animasi UNIMASI.')
-    setFocusKeyphrase('animasi 3d sinematik studio')
-    setRelatedKeyphrases(['animasi 3d profesional', 'studio motion design indonesia'])
-    setCanonicalUrl(`https://unimasi.studio/portfolio/${initialSlug}`)
+    setSeoTitle('SPATIUM 3D Gaussian Splatting Showcase — Reality Capture')
+    setMetaDesc('Eksplorasi tur spasial interaktif 3D Gaussian Splatting dan digital twin fotorealistis dari SPATIUM.')
+    setFocusKeyphrase('3d gaussian splatting indonesia')
+    setRelatedKeyphrases(['digital twin spasial', 'lidar reality capture'])
+    setCanonicalUrl(`${siteConfig.url}/portfolio/${initialSlug}`)
 
     setSelectedBlockId(defaultBlocks[0]?.id || null)
     setShowPropertiesDrawer(true)
     setSaveMessage('')
     setErrorMessage('')
     setEditorMode(true)
+  }
+
+  const handleTourUploadSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!tourUploadTitle.trim()) {
+      setTourUploadError('Judul tur spasial wajib diisi.')
+      return
+    }
+
+    setTourUploading(true)
+    setTourUploadError('')
+    setTourUploadResult(null)
+
+    try {
+      const data = new FormData()
+      data.append('title', tourUploadTitle.trim())
+      if (tourUploadSlug.trim()) data.append('slug', tourUploadSlug.trim())
+      if (tourUploadClient.trim()) data.append('client', tourUploadClient.trim())
+      if (tourUploadCategory.trim()) data.append('category', tourUploadCategory.trim())
+      if (tourUploadPointCount.trim()) data.append('pointCount', tourUploadPointCount.trim())
+      if (tourUploadAccuracy.trim()) data.append('accuracy', tourUploadAccuracy.trim())
+      if (tourUploadSplatId.trim()) data.append('splatId', tourUploadSplatId.trim())
+      if (tourUploadExternalUrl.trim()) data.append('externalUrl', tourUploadExternalUrl.trim())
+      if (tourUploadFile) data.append('file', tourUploadFile)
+
+      const res = await fetch('/api/portfolio/upload-tour', {
+        method: 'POST',
+        body: data,
+      })
+
+      const json = await res.json()
+      if (!res.ok || !json.success) {
+        throw new Error(json.error || 'Gagal mengunggah dan mengekstrak berkas tur spasial.')
+      }
+
+      setTourUploadResult(json)
+      await fetchPortfolios()
+    } catch (err: any) {
+      console.error('[TourUpload] Upload failed:', err)
+      setTourUploadError(err.message || 'Terjadi kesalahan saat mengunggah tur spasial.')
+    } finally {
+      setTourUploading(false)
+    }
   }
 
   // Open Edit Mode for Existing Item
@@ -1417,13 +1475,13 @@ export function StudioPortfolioManager() {
                       {/* Live Demo URL */}
                       <div>
                         <label className="block text-[11px] font-mono text-neutral-400 uppercase tracking-wider mb-1">
-                          Tautan Proyek Live / Demo
+                          Tautan 3D Gaussian Splatting / Tur Spasial (Live URL)
                         </label>
                         <input
-                          type="url"
+                          type="text"
                           value={formLiveUrl}
                           onChange={(e) => setFormLiveUrl(e.target.value)}
-                          placeholder="https://client-demo.com"
+                          placeholder="https://superspl.at/s?id=... atau /tours/nama-proyek/index.html"
                           className="w-full px-3 py-2 text-xs font-mono bg-[var(--studio-bg)] border border-white/10 rounded-xl text-white placeholder-neutral-500 focus:outline-none focus:border-[#FFD600]"
                         />
                       </div>
@@ -1582,6 +1640,21 @@ export function StudioPortfolioManager() {
               className="p-1.5 rounded-xl bg-white/5 border border-white/10 text-neutral-300 hover:text-white hover:bg-white/10 transition-colors"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
+            </button>
+          </Tooltip>
+
+          <Tooltip label="Upload Spatial Tour (.zip / HTML)" hint="Unggah paket tur .zip / file HTML jadi atau embed SuperSplat">
+            <button
+              type="button"
+              onClick={() => {
+                setTourUploadResult(null)
+                setTourUploadError('')
+                setTourUploadModalOpen(true)
+              }}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 font-medium text-xs font-mono uppercase tracking-wider hover:bg-cyan-500/20 transition-all shadow-sm"
+            >
+              <Upload className="w-3.5 h-3.5" />
+              <span>Upload Tour (.zip)</span>
             </button>
           </Tooltip>
 
@@ -1782,6 +1855,253 @@ export function StudioPortfolioManager() {
               </div>
             )
           })}
+        </div>
+      )}
+
+      {/* Tour Upload Modal */}
+      {tourUploadModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="relative w-full max-w-2xl bg-[#0A1628] border border-white/15 rounded-3xl p-6 sm:p-8 shadow-2xl overflow-hidden max-h-[90vh] overflow-y-auto">
+            {/* Header */}
+            <div className="flex items-center justify-between pb-4 border-b border-white/10 mb-6">
+              <div>
+                <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                  <Upload className="w-5 h-5 text-cyan-400" />
+                  <span>Unggah Paket Tur Spasial / 3DGS</span>
+                </h3>
+                <p className="text-xs font-mono text-neutral-400 mt-1">
+                  Ekspor .zip (HTML + folder aset), berkas .html, atau embed SuperSplat
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setTourUploadModalOpen(false)}
+                className="p-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-neutral-400 hover:text-white transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Error & Success Alerts */}
+            {tourUploadError && (
+              <div className="mb-6 p-4 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs flex items-center gap-3">
+                <AlertCircle className="w-4 h-4 shrink-0 text-rose-400" />
+                <span>{tourUploadError}</span>
+              </div>
+            )}
+
+            {tourUploadResult && (
+              <div className="mb-6 p-5 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs">
+                <div className="flex items-center gap-2 font-bold mb-2">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                  <span>Tur Spasial Berhasil Dipublikasikan!</span>
+                </div>
+                <p className="text-neutral-300 mb-3">
+                  Aset telah diekstrak dan didaftarkan ke portofolio SPATIUM secara otomatis.
+                </p>
+                <div className="flex flex-wrap items-center gap-3">
+                  <a
+                    href={`/portfolio/${tourUploadResult.slug}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-500 text-black font-mono font-bold hover:bg-emerald-400 transition-colors"
+                  >
+                    <span>Buka Halaman Portofolio</span>
+                    <ExternalLink className="w-3.5 h-3.5" />
+                  </a>
+                  {tourUploadResult.liveUrl && (
+                    <a
+                      href={tourUploadResult.liveUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/10 text-white font-mono hover:bg-white/15 transition-colors"
+                    >
+                      <span>Lihat Tur Langsung</span>
+                      <ExternalLink className="w-3.5 h-3.5" />
+                    </a>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Upload Form */}
+            <form onSubmit={handleTourUploadSubmit} className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-mono uppercase tracking-wider text-neutral-400 mb-1.5">
+                    Judul Proyek Spasial *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={tourUploadTitle}
+                    onChange={(e) => setTourUploadTitle(e.target.value)}
+                    placeholder="Contoh: Villa Oceanview Canggu"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-white/5 border border-white/10 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-cyan-400"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-mono uppercase tracking-wider text-neutral-400 mb-1.5">
+                    Nama Klien / Brand
+                  </label>
+                  <input
+                    type="text"
+                    value={tourUploadClient}
+                    onChange={(e) => setTourUploadClient(e.target.value)}
+                    placeholder="Contoh: Canggu Luxury Estate"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-white/5 border border-white/10 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-cyan-400"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-mono uppercase tracking-wider text-neutral-400 mb-1.5">
+                    Sektor / Kategori
+                  </label>
+                  <select
+                    value={tourUploadCategory}
+                    onChange={(e) => setTourUploadCategory(e.target.value)}
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-[#070F1E] border border-white/10 text-xs text-white focus:outline-none focus:border-cyan-400"
+                  >
+                    <option value="Marketing & Branding">Marketing & Branding</option>
+                    <option value="Hospitality & Wisata">Hospitality & Wisata</option>
+                    <option value="Healthcare & Medis">Healthcare & Medis</option>
+                    <option value="Industrial & Manufaktur">Industrial & Manufaktur</option>
+                    <option value="Agrikultur & Riset">Agrikultur & Riset</option>
+                    <option value="Properti & Arsitektur">Properti & Arsitektur</option>
+                    <option value="Memori & Dokumenter">Memori & Dokumenter</option>
+                    <option value="Filmmaking & VFX">Filmmaking & VFX</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-mono uppercase tracking-wider text-neutral-400 mb-1.5">
+                    Custom Slug (Opsional)
+                  </label>
+                  <input
+                    type="text"
+                    value={tourUploadSlug}
+                    onChange={(e) => setTourUploadSlug(e.target.value)}
+                    placeholder="villa-oceanview-canggu"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-white/5 border border-white/10 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-cyan-400"
+                  />
+                </div>
+              </div>
+
+              {/* File Input Box */}
+              <div className="p-4 rounded-2xl bg-white/[0.02] border-2 border-dashed border-white/15 hover:border-cyan-400/50 transition-colors">
+                <label className="block text-center cursor-pointer">
+                  <Upload className="w-8 h-8 text-cyan-400 mx-auto mb-2" />
+                  <span className="text-xs font-mono text-white block font-semibold mb-1">
+                    {tourUploadFile ? tourUploadFile.name : 'Pilih Berkas .zip Paket Tur atau .html Mandiri'}
+                  </span>
+                  <span className="text-[11px] text-neutral-400 block font-mono">
+                    Maksimal 250MB · Otomatis diekstrak ke folder /public/tours/
+                  </span>
+                  <input
+                    type="file"
+                    accept=".zip,.html,.htm"
+                    onChange={(e) => setTourUploadFile(e.target.files?.[0] || null)}
+                    className="hidden"
+                  />
+                </label>
+              </div>
+
+              {/* Or Direct Embed SuperSplat / External URL */}
+              <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/10">
+                <span className="text-xs font-mono uppercase tracking-wider text-[#FFD600] font-semibold block mb-2">
+                  Atau Gunakan SuperSplat ID / URL Eksternal
+                </span>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-[11px] font-mono text-neutral-400 mb-1">
+                      SuperSplat ID (8 karakter)
+                    </label>
+                    <input
+                      type="text"
+                      value={tourUploadSplatId}
+                      onChange={(e) => setTourUploadSplatId(e.target.value)}
+                      placeholder="e318925e"
+                      className="w-full px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-xs text-white placeholder-neutral-600 focus:outline-none focus:border-[#FFD600]"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-mono text-neutral-400 mb-1">
+                      URL Lengkap (3DVista / Custom WebGL)
+                    </label>
+                    <input
+                      type="url"
+                      value={tourUploadExternalUrl}
+                      onChange={(e) => setTourUploadExternalUrl(e.target.value)}
+                      placeholder="https://superspl.at/s?id=..."
+                      className="w-full px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-xs text-white placeholder-neutral-600 focus:outline-none focus:border-[#FFD600]"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Specs */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-[11px] font-mono uppercase tracking-wider text-neutral-400 mb-1.5">
+                    Kerapatan Partikel (Point Count)
+                  </label>
+                  <input
+                    type="text"
+                    value={tourUploadPointCount}
+                    onChange={(e) => setTourUploadPointCount(e.target.value)}
+                    placeholder="15.1M Splats"
+                    className="w-full px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-xs text-white focus:outline-none focus:border-cyan-400"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-mono uppercase tracking-wider text-neutral-400 mb-1.5">
+                    Akurasi Geometri
+                  </label>
+                  <input
+                    type="text"
+                    value={tourUploadAccuracy}
+                    onChange={(e) => setTourUploadAccuracy(e.target.value)}
+                    placeholder="Sub-centimeter (5mm)"
+                    className="w-full px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-xs text-white focus:outline-none focus:border-cyan-400"
+                  />
+                </div>
+              </div>
+
+              <div className="pt-4 border-t border-white/10 flex items-center justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() => setTourUploadModalOpen(false)}
+                  className="px-4 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-neutral-300 text-xs font-mono transition-colors"
+                >
+                  Tutup
+                </button>
+
+                <button
+                  type="submit"
+                  disabled={tourUploading}
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 disabled:opacity-50 text-black font-bold text-xs font-mono uppercase tracking-wider transition-all shadow-lg"
+                >
+                  {tourUploading ? (
+                    <>
+                      <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                      <span>Mengekstrak Berkas...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Upload className="w-3.5 h-3.5" />
+                      <span>Ekstrak &amp; Publikasikan</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
     </div>

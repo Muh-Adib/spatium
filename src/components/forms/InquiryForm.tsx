@@ -33,15 +33,15 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i
 
 function validate(values: Fields): Errors {
   const errors: Errors = {}
-  if (!values.name.trim()) errors.name = 'Please tell us your name.'
-  if (!values.email.trim()) errors.email = 'An email address is required so we can reply.'
-  else if (!EMAIL_RE.test(values.email.trim())) errors.email = 'That email address does not look right.'
-  if (!values.service) errors.service = 'Choose the service you are interested in.'
-  if (!values.budget) errors.budget = 'Choose a budget range — a rough indication is fine.'
-  if (!values.timeline) errors.timeline = 'Let us know roughly when this needs to happen.'
-  if (!values.brief.trim()) errors.brief = 'A short project brief helps us respond usefully.'
+  if (!values.name.trim()) errors.name = 'Mohon masukkan nama Anda.'
+  if (!values.email.trim()) errors.email = 'Alamat email wajib diisi untuk balasan proposal.'
+  else if (!EMAIL_RE.test(values.email.trim())) errors.email = 'Format alamat email tidak valid.'
+  if (!values.service) errors.service = 'Pilih vertikal layanan yang Anda minati.'
+  if (!values.budget) errors.budget = 'Pilih perkiraan anggaran.'
+  if (!values.timeline) errors.timeline = 'Pilih target waktu pelaksanaan.'
+  if (!values.brief.trim()) errors.brief = 'Mohon jelaskan lokasi atau kebutuhan proyek Anda.'
   else if (values.brief.trim().length < 20)
-    errors.brief = 'Please add a little more detail (at least 20 characters).'
+    errors.brief = 'Mohon tambahkan rincian sedikit lebih detail (minimal 20 karakter).'
   return errors
 }
 
@@ -154,9 +154,9 @@ export function InquiryForm() {
         <div className="inquiry__row">
           <div className="field">
             <label htmlFor={`${uid}-name`}>
-              Your name <span aria-hidden="true">*</span>
+              Nama Lengkap <span aria-hidden="true">*</span>
             </label>
-            <input type="text" autoComplete="name" placeholder="Jordan Ellis" {...fieldProps('name')} />
+            <input type="text" autoComplete="name" placeholder="Nama Anda" {...fieldProps('name')} />
             {errors.name ? (
               <p className="field__error" id={`${uid}-name-error`}>
                 {errors.name}
@@ -165,17 +165,17 @@ export function InquiryForm() {
           </div>
 
           <div className="field">
-            <label htmlFor={`${uid}-company`}>Company / organisation</label>
-            <input type="text" autoComplete="organization" placeholder="Optional" {...fieldProps('company')} />
+            <label htmlFor={`${uid}-company`}>Perusahaan / Instansi</label>
+            <input type="text" autoComplete="organization" placeholder="Nama instansi (opsional)" {...fieldProps('company')} />
           </div>
         </div>
 
         <div className="inquiry__row">
           <div className="field">
             <label htmlFor={`${uid}-email`}>
-              Email <span aria-hidden="true">*</span>
+              Email Resmi <span aria-hidden="true">*</span>
             </label>
-            <input type="email" autoComplete="email" placeholder="you@company.com" {...fieldProps('email')} />
+            <input type="email" autoComplete="email" placeholder="email@perusahaan.com" {...fieldProps('email')} />
             {errors.email ? (
               <p className="field__error" id={`${uid}-email-error`}>
                 {errors.email}
@@ -185,16 +185,16 @@ export function InquiryForm() {
 
           <div className="field">
             <label htmlFor={`${uid}-service`}>
-              Service interest <span aria-hidden="true">*</span>
+              Layanan Spasial <span aria-hidden="true">*</span>
             </label>
             <select {...fieldProps('service')}>
-              <option value="">Select a service…</option>
+              <option value="">Pilih vertikal layanan…</option>
               {SERVICES.map((service) => (
                 <option key={service.slug} value={service.name}>
                   {service.name}
                 </option>
               ))}
-              <option value="Multiple / not sure yet">Multiple / not sure yet</option>
+              <option value="Multiple / Belum yakin">Konsultasi Terbuka / Belum yakin</option>
             </select>
             {errors.service ? (
               <p className="field__error" id={`${uid}-service-error`}>
@@ -207,10 +207,10 @@ export function InquiryForm() {
         <div className="inquiry__row">
           <div className="field">
             <label htmlFor={`${uid}-budget`}>
-              Budget range <span aria-hidden="true">*</span>
+              Estimasi Anggaran <span aria-hidden="true">*</span>
             </label>
             <select {...fieldProps('budget')}>
-              <option value="">Select a range…</option>
+              <option value="">Pilih rentang anggaran…</option>
               {BUDGET_RANGES.map((range) => (
                 <option key={range} value={range}>
                   {range}
@@ -226,10 +226,10 @@ export function InquiryForm() {
 
           <div className="field">
             <label htmlFor={`${uid}-timeline`}>
-              Timeline <span aria-hidden="true">*</span>
+              Target Waktu Pelaksanaan <span aria-hidden="true">*</span>
             </label>
             <select {...fieldProps('timeline')}>
-              <option value="">Select a timeline…</option>
+              <option value="">Pilih target waktu…</option>
               {TIMELINES.map((option) => (
                 <option key={option} value={option}>
                   {option}
@@ -246,11 +246,11 @@ export function InquiryForm() {
 
         <div className="field">
           <label htmlFor={`${uid}-brief`}>
-            Project brief <span aria-hidden="true">*</span>
+            Deskripsi Kebutuhan Ruang / Lokasi <span aria-hidden="true">*</span>
           </label>
           <textarea
             rows={5}
-            placeholder="What are you trying to communicate, who is it for, and where will it be shown?"
+            placeholder="Jelaskan jenis lokasi (restoran, hotel, pabrik, set film, wedding), luasan perkiraan, dan target pemanfaatan (web, VR, previz)..."
             {...fieldProps('brief')}
           />
           <div className="field__foot">
@@ -259,9 +259,9 @@ export function InquiryForm() {
                 {errors.brief}
               </p>
             ) : (
-              <p className="field__hint">The more context you give, the more useful our reply.</p>
+              <p className="field__hint">Semakin lengkap rincian lokasi, semakin akurat proposal teknis kami.</p>
             )}
-            <span className="field__count mono">{values.brief.trim().length} chars</span>
+            <span className="field__count mono">{values.brief.trim().length} karakter</span>
           </div>
         </div>
 

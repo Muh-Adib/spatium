@@ -1,46 +1,46 @@
 [
   {
-    "slug": "2d-animation",
-    "title": "2D Animation",
+    "slug": "filmmaking-vfx",
+    "title": "Filmmaking & VFX",
     "tag": "01",
-    "shortDescription": "Animasi dua dimensi untuk edukasi, penjelasan konsep, komunikasi, dan storytelling.",
+    "shortDescription": "Virtual scouting, set reconstruction presisi 3DGS, Pre-visualization (Previz), dan integrasi kamera Unreal Engine untuk produksi film dan sinema modern.",
     "order": 1,
     "status": "published",
     "showInNav": true,
-    "metaTitle": "2D Animation — UNIMASI",
-    "metaDescription": "Animasi dua dimensi untuk edukasi, penjelasan konsep, komunikasi, dan storytelling."
+    "metaTitle": "Filmmaking & VFX — SPATIUM Spatial Technology Studio",
+    "metaDescription": "Virtual scouting, set reconstruction presisi 3DGS, Previz, dan simulasi kamera Unreal Engine untuk produksi film modern."
   },
   {
-    "slug": "3d-animation-visual-production",
-    "title": "3D Animation & Visual Production",
+    "slug": "marketing-branding",
+    "title": "Marketing & Branding",
     "tag": "02",
-    "shortDescription": "Produksi animasi tiga dimensi untuk memvisualkan produk, objek, mesin, lingkungan, atau proses yang sulit direkam secara langsung.",
+    "shortDescription": "Tur spasial fotorealistik 3D Gaussian Splatting, display interaktif WebGL, dan integrasi Google Maps digital twin yang memicu Zero Moment of Truth (ZMOT).",
     "order": 2,
     "status": "published",
     "showInNav": true,
-    "metaTitle": "3D Animation & Visual Production — UNIMASI",
-    "metaDescription": "Produksi animasi tiga dimensi untuk memvisualkan produk, objek, mesin, lingkungan, atau proses yang sulit direkam secara langsung."
+    "metaTitle": "Marketing & Branding — SPATIUM Spatial Technology Studio",
+    "metaDescription": "Tur spasial fotorealistik 3D Gaussian Splatting dan display interaktif WebGL untuk meningkatkan konversi dan direct booking."
   },
   {
-    "slug": "motion-graphics",
-    "title": "Motion Graphics",
+    "slug": "entertainment-installation",
+    "title": "Entertainment & Installation",
     "tag": "03",
-    "shortDescription": "Animasi grafis, tipografi bergerak, infografis, visualisasi data, dan grafis untuk video.",
+    "shortDescription": "Kalibrasi spasial presisi untuk instalasi seni imersif, projection mapping fasad arsitektural, dan pengalaman interaktif berbasis lokasi.",
     "order": 3,
     "status": "published",
     "showInNav": true,
-    "metaTitle": "Motion Graphics — UNIMASI",
-    "metaDescription": "Animasi grafis, tipografi bergerak, infografis, visualisasi data, dan grafis untuk video."
+    "metaTitle": "Entertainment & Installation — SPATIUM Spatial Technology Studio",
+    "metaDescription": "Kalibrasi projection mapping fasad arsitektural, environment AR/VR, dan instalasi interaktif museum serta pameran seni digital."
   },
   {
-    "slug": "digital-visual-assets-ai-assisted-production",
-    "title": "Digital Visual Assets & AI-Assisted Production",
+    "slug": "memory-documentary",
+    "title": "Memory & Documentary",
     "tag": "04",
-    "shortDescription": "Pembuatan aset visual digital untuk berbagai kebutuhan, termasuk aset 3D dan produksi visual dengan bantuan AI.",
+    "shortDescription": "Preservasi spasial 3D fotorealistik momen pernikahan mewah, kembaran digital cagar budaya bersejarah, dan arsip properti keluarga abadi.",
     "order": 4,
     "status": "published",
     "showInNav": true,
-    "metaTitle": "Digital Visual Assets & AI-Assisted Production — UNIMASI",
-    "metaDescription": "Pembuatan aset visual digital untuk berbagai kebutuhan, termasuk aset 3D dan produksi visual dengan bantuan AI."
+    "metaTitle": "Memory & Documentary — SPATIUM Spatial Technology Studio",
+    "metaDescription": "Preservasi spasial 3D momen pernikahan mewah, digital twin cagar budaya bersejarah, dan arsip properti keluarga abadi."
   }
 ]

@@ -49,8 +49,8 @@ export async function getClientLogos(): Promise<ClientLogoRecord[]> {
       }
     }
     return []
-  } catch (err) {
-    console.error('Failed to get client logos from database:', err)
+  } catch (err: any) {
+    console.error('Failed to get client logos from database:', err?.message || String(err))
     return []
   }
 }

@@ -10,11 +10,11 @@ import './header.css'
 
 function Logo() {
   return (
-    <Link href="/" className="brand" aria-label="UNIMASI — home">
+    <Link href="/" className="brand" aria-label="SPATIUM — Spatial Technology Studio">
       <img
-        src="/logo/unimasi-coloured.webp"
-        alt="UNIMASI — Animation & Motion Design"
-        width={130}
+        src="/images/spatium-logo.png"
+        alt="SPATIUM — Spatial Technology Studio"
+        width={140}
         height={45}
         className="brand__img"
         style={{ height: '36px', width: 'auto', objectFit: 'contain' }}
@@ -200,7 +200,7 @@ export function Header() {
             </span>
           </Link>
           <p className="mobile-nav__note">
-            Or email <a href="mailto:hello@unimasi.studio">hello@unimasi.studio</a>
+            Or email <a href="mailto:hello@spatium.id">hello@spatium.id</a>
           </p>
         </div>
       </div>

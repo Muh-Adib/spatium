@@ -34,6 +34,7 @@
   height: 100%;
   width: 100%;
   transform-origin: left;
-  background: linear-gradient(90deg, var(--yellow), var(--yellow-soft));
+  background: linear-gradient(90deg, #00e5ff, #38bdf8);
+  box-shadow: 0 0 10px rgba(0, 229, 255, 0.6);
   transition: transform 90ms linear;
 }

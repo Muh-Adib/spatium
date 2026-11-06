@@ -7,22 +7,21 @@ import './inquiry-section.css'
 export function InquirySection() {
   return (
     <section className="section inquiry-section" id="inquiry" aria-labelledby="inquiry-title">
-      <div className="bg-glow bg-glow--yellow inquiry-section__glow" aria-hidden="true" />
+      <div className="bg-glow bg-glow--blue inquiry-section__glow" aria-hidden="true" />
       <div className="container container--wide inquiry-section__inner">
         <Reveal className="inquiry-section__intro">
-          <p className="eyebrow">Project inquiry</p>
-          <h2 className="display-md inquiry-section__title" id="inquiry-title">
-            Tell us what needs to <span className="accent">move</span>.
+          <p className="eyebrow text-cyan-400">Konsultasi &amp; Penjadwalan Capture</p>
+          <h2 className="display-md inquiry-section__title text-white" id="inquiry-title">
+            Jadwalkan Rekonstruksi <span className="accent">Spasial 3D</span> Anda.
           </h2>
-          <p className="lede">
-            Share the message, the audience and the timeline. We will come back with a recommended
-            pipeline, a realistic scope and a fixed proposal — no obligation.
+          <p className="lede text-neutral-300">
+            Sampaikan lokasi Anda, sasaran pemanfaatan (marketing ZMOT, previz film, simulasi klinis, atau arsip memori), dan jangka waktu. Kami siapkan survei laser LiDAR dan proposal terperinci.
           </p>
 
           <ul className="inquiry-section__steps">
             {PROCESS.slice(0, 3).map((step) => (
               <li key={step.index}>
-                <span className="mono">{step.index}</span>
+                <span className="mono text-cyan-400">{step.index}</span>
                 <strong>{step.title}</strong>
               </li>
             ))}

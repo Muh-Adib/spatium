@@ -18,7 +18,7 @@ function SketchArt() {
         <rect x="28" y="164" width="150" height="106" rx="6" />
         <rect x="222" y="164" width="150" height="106" rx="6" />
       </g>
-      <g fill="none" stroke="#FFD600" strokeWidth="2.2" strokeLinecap="round">
+      <g fill="none" stroke="#00E5FF" strokeWidth="2.2" strokeLinecap="round">
         <circle cx="103" cy="76" r="22" />
         <path d="M74 118c4-16 15-24 29-24s25 8 29 24" />
         <path d="M60 70h-14M60 82h-10" />
@@ -28,7 +28,7 @@ function SketchArt() {
         <path d="M246 110h104" />
         <path d="M246 124h72" />
       </g>
-      <g fill="none" stroke="#FFD600" strokeWidth="2" strokeLinecap="round">
+      <g fill="none" stroke="#00E5FF" strokeWidth="2" strokeLinecap="round">
         <path d="M78 232l26-30 26 30z" />
         <circle cx="104" cy="208" r="6" />
         <path d="M140 210h24M140 224h16" />
@@ -53,7 +53,7 @@ function FinalArt() {
           <stop offset="100%" stopColor="#0A1730" />
         </linearGradient>
         <linearGradient id="sv2d-b" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#FFD600" />
+          <stop offset="0%" stopColor="#00E5FF" />
           <stop offset="100%" stopColor="#E0AD00" />
         </linearGradient>
       </defs>
@@ -65,24 +65,24 @@ function FinalArt() {
       <circle cx="103" cy="76" r="22" fill="url(#sv2d-b)" />
       <path d="M74 118c4-16 15-24 29-24s25 8 29 24z" fill="url(#sv2d-b)" />
       <rect x="60" y="126" width="86" height="6" rx="3" fill="#ffffff" opacity="0.35" />
-      <path d="M46 70h14M50 82h10" stroke="#FFD600" strokeWidth="3" strokeLinecap="round" />
+      <path d="M46 70h14M50 82h10" stroke="#00E5FF" strokeWidth="3" strokeLinecap="round" />
 
       <g>
         <rect x="246" y="76" width="18" height="32" rx="3" fill="#7FB2FF" />
-        <rect x="272" y="60" width="18" height="48" rx="3" fill="#FFD600" />
+        <rect x="272" y="60" width="18" height="48" rx="3" fill="#00E5FF" />
         <rect x="298" y="88" width="18" height="20" rx="3" fill="#ffffff" opacity="0.5" />
         <rect x="324" y="52" width="18" height="56" rx="3" fill="#8FF0C4" />
         <path d="M246 118h104" stroke="#ffffff" strokeWidth="2" opacity="0.4" />
       </g>
 
-      <path d="M78 232l26-30 26 30z" fill="#FFD600" />
+      <path d="M78 232l26-30 26 30z" fill="#00E5FF" />
       <circle cx="104" cy="208" r="6" fill="#0A1730" />
       <rect x="140" y="204" width="26" height="8" rx="4" fill="#ffffff" opacity="0.8" />
       <rect x="140" y="220" width="18" height="8" rx="4" fill="#ffffff" opacity="0.4" />
 
       <rect x="246" y="190" width="104" height="56" rx="6" fill="#0F2044" />
       <rect x="262" y="210" width="72" height="8" rx="4" fill="#ffffff" opacity="0.7" />
-      <rect x="262" y="226" width="48" height="8" rx="4" fill="#FFD600" />
+      <rect x="262" y="226" width="48" height="8" rx="4" fill="#00E5FF" />
     </svg>
   )
 }
@@ -106,7 +106,7 @@ function WireframeArt() {
       <g fill="none" stroke="#ffffff" strokeWidth="1" opacity="0.14">
         <path d="M0 252h400M0 60h400" />
       </g>
-      <circle cx="200" cy="124" r="4" fill="#FFD600" />
+      <circle cx="200" cy="124" r="4" fill="#00E5FF" />
       <circle cx="100" cy="88" r="3.5" fill="#7FB2FF" />
       <circle cx="300" cy="88" r="3.5" fill="#7FB2FF" />
       <circle cx="200" cy="252" r="3.5" fill="#7FB2FF" />
@@ -127,7 +127,7 @@ function RenderArt() {
           <stop offset="100%" stopColor="#122C57" />
         </linearGradient>
         <linearGradient id="sv3d-right" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#FFD600" />
+          <stop offset="0%" stopColor="#00E5FF" />
           <stop offset="100%" stopColor="#C9A200" />
         </linearGradient>
       </defs>
@@ -163,14 +163,14 @@ function MotionChart({ kind, animateKey }: { kind: ChartKind; animateKey: number
           key={animateKey}
           points={points}
           fill="none"
-          stroke="#FFD600"
+          stroke="#00E5FF"
           strokeWidth="3.5"
           strokeLinecap="round"
           strokeLinejoin="round"
           className="sv-line-draw"
         />
         {CHART_DATA.map((v, i) => (
-          <circle key={i} cx={40 + i * 58} cy={200 - v * 140} r="5.5" fill="#FFD600" className="sv-dot-in" style={{ animationDelay: `${0.5 + i * 0.09}s` }} />
+          <circle key={i} cx={40 + i * 58} cy={200 - v * 140} r="5.5" fill="#00E5FF" className="sv-dot-in" style={{ animationDelay: `${0.5 + i * 0.09}s` }} />
         ))}
       </svg>
     )
@@ -180,7 +180,7 @@ function MotionChart({ kind, animateKey }: { kind: ChartKind; animateKey: number
     const total = CHART_DATA.reduce((a, b) => a + b, 0)
     const C = 2 * Math.PI * 74
     let offset = 0
-    const colors = ['#FFD600', '#7FB2FF', '#8FF0C4', '#FFE566', '#FF8A5C', '#ffffff']
+    const colors = ['#00E5FF', '#7FB2FF', '#8FF0C4', '#FFE566', '#FF8A5C', '#ffffff']
     return (
       <svg viewBox="0 0 380 240" className="sv-chart" role="img" aria-label="Animated donut chart">
         <g transform="translate(120 120) rotate(-90)">
@@ -230,7 +230,7 @@ function MotionChart({ kind, animateKey }: { kind: ChartKind; animateKey: number
             width="36"
             height={v * 140}
             rx="7"
-            fill={i === 3 ? '#FFD600' : 'rgba(127,178,255,0.75)'}
+            fill={i === 3 ? '#00E5FF' : 'rgba(127,178,255,0.75)'}
             className="sv-bar-grow"
             style={{ animationDelay: `${i * 0.08}s` }}
           />
@@ -444,23 +444,23 @@ export function ServiceVisual({ kind }: { kind: VisualKind }) {
     [],
   )
 
-  if (kind === '2d') {
+  if (kind === 'marketing' || kind === '2d') {
     return (
       <BeforeAfter
-        tag="Sketch → Final"
-        labels={['Sketch', 'Final animation']}
+        tag="LiDAR Grid → 3DGS WebGL"
+        labels={['Sensor Scan', '3DGS Real-time']}
         before={<SketchArt />}
         after={<FinalArt />}
       />
     )
   }
 
-  if (kind === '3d') {
+  if (kind === 'filmmaking' || kind === '3d') {
     return (
       <div className="sv-stack">
         <BeforeAfter
-          tag="Wireframe → Render"
-          labels={['Wireframe', 'Render']}
+          tag="Point Cloud → Neural Radiance"
+          labels={['Point Cloud', '3DGS Master']}
           before={<WireframeArt />}
           after={<RenderArt />}
         />
@@ -469,7 +469,7 @@ export function ServiceVisual({ kind }: { kind: VisualKind }) {
     )
   }
 
-  if (kind === 'motion') {
+  if (kind === 'entertainment' || kind === 'motion') {
     return (
       <div className="sv-motion">
         <div className="sv-marquee" aria-hidden="true">

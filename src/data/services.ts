@@ -1,4 +1,4 @@
-export type ServiceVisual = '2d' | '3d' | 'motion' | 'assets'
+export type ServiceVisual = 'filmmaking' | 'marketing' | 'entertainment' | 'memory' | '2d' | '3d' | 'motion' | 'assets'
 
 export type Capability = { title: string; description: string }
 
@@ -23,221 +23,271 @@ export type Service = {
 
 export const SERVICES: Service[] = [
   {
-    slug: '2d-animation',
+    slug: 'filmmaking-vfx',
     index: '01',
-    name: '2D Animation',
-    shortName: '2D',
-    tagline: 'Drawn clarity for complex subjects.',
+    name: 'Filmmaking & VFX',
+    shortName: 'Filmmaking',
+    tagline: 'Virtual scouting, set reconstruction, and camera precision before the first take.',
     summary:
-      'Explainers, educational animation and character work that turn dense information into something people actually follow.',
+      'Rekonstruksi lokasi syuting fotorealistik, pre-visualization (Previz), techviz, dan supervisi on-site untuk sutradara, sinematografer, dan tim visual effects.',
     metaDescription:
-      '2D animation from UNIMASI: explainer videos, educational and training animation, character animation, infographic and illustration animation for teams that need clarity.',
+      'Layanan spasial Filmmaking & VFX dari SPATIUM: Set reconstruction presisi 3DGS, Pre-visualization (Previz), Virtual Scouting lokasi, dan integrasi kamera Unreal Engine untuk produksi film.',
     intro: [
-      'Two-dimensional animation is the most direct way to make an abstract subject concrete. We design the visual language, script the narrative and animate it frame by frame so the idea survives contact with the audience.',
-      'Our 2D pipeline runs from thumbnail and storyboard through to a finished master with sound design — always with the option of an animatic review before production commits.',
+      'Produksi film modern tidak lagi bergantung pada spekulasi lokasi atau pemborosan hari syuting akibat ketidaktahuan sudut lensa kamera. Dengan pemindaian spasial LiDAR dan 3D Gaussian Splatting, sutradara dan DoP dapat menjelajahi lokasi syuting nyata secara virtual berminggu-minggu sebelum kru tiba.',
+      'Pipeline Spatium merekonstruksi set fisik dengan akurasi sub-sentimeter ke dalam ruang digital, memungkinkan line-up kamera virtual, simulasi pencahayaan matahari, hingga penggabungan visual effects (VFX) tanpa tebak-tebakan.',
     ],
     capabilities: [
-      { title: 'Explainer videos', description: 'Concept-led films that break a product, service or policy into a story anyone can retell.' },
-      { title: 'Educational animation', description: 'Curriculum and course content designed for retention, not decoration.' },
-      { title: 'Character animation', description: 'Expressive, on-model character performance with rigs built to scale across a series.' },
-      { title: 'Infographic animation', description: 'Static data brought into motion with hierarchy, pacing and legible sequencing.' },
-      { title: 'Illustration animation', description: 'Hand-drawn and vector artwork animated without losing its craft.' },
-      { title: 'Training & safety animation', description: 'Procedure and compliance modules that respect attention spans and regulations alike.' },
+      {
+        title: 'Virtual Scouting',
+        description: 'Eksplorasi lokasi syuting jarak jauh dengan sudut pandang kamera nyata, fokal lensa sinema, dan pergerakan dolly/crane virtual.',
+      },
+      {
+        title: 'Set Reconstruction',
+        description: 'Pemindaian set fisik berkecepatan tinggi menjadi aset 3D fidelitas tinggi untuk kontinuitas artistik dan perpanjangan set virtual (set extension).',
+      },
+      {
+        title: 'Pre-visualization (Previz) & Techviz',
+        description: 'Penyusunan koreografi kamera, pergerakan aktor, dan kalkulasi rig teknis di atas geometri lokasi yang terkalibrasi secara matematis.',
+      },
+      {
+        title: 'On-Site Supervision & Tracking Alignment',
+        description: 'Penyelarasan koordinat kamera fisik di lapangan dengan environment digital untuk mempermudah pipeline matchmoving dan compositing VFX.',
+      },
+      {
+        title: 'Lighting & Sun Position Simulation',
+        description: 'Simulasi lintasan matahari dan bayangan arsitektural sepanjang hari untuk menentukan waktu pengambilan gambar (golden hour) yang optimal.',
+      },
+      {
+        title: 'Real-time LED Volume Integration',
+        description: 'Optimasi background medan radiansi untuk penayangan di dinding panggung virtual produksi LED secara parallax-correct.',
+      },
     ],
     deliverables: [
-      'Script and narrative structure',
-      'Storyboards and style frames',
-      'Animated masters (1080p / 4K)',
-      'Vertical and square cutdowns',
-      'Captioned and accessible versions',
-      'Organised source project files',
+      'Digital Twin Lokasi Syuting 3DGS (60 FPS WebGL)',
+      'Aset Geometri Terkalibrasi (OBJ / FBX / USDZ)',
+      'Dokumen Techviz & Diagram Line-up Kamera Sinema',
+      'Lingkungan Virtual Unreal Engine / Blender Siap Pakai',
+      'Peta Kedalaman dan Koordinat Survei Sub-sentimeter',
     ],
-    tools: ['Adobe Animate', 'After Effects', 'Toon Boom Harmony', 'Illustrator', 'Procreate'],
-    visual: '2d',
-    accent: 'var(--yellow)',
+    tools: ['3D Gaussian Splatting', 'Unreal Engine 5', 'Blender', 'RealityCapture', 'Terrestrial LiDAR Scanner'],
+    visual: 'filmmaking',
+    accent: '#00E5FF',
     faqs: [
       {
-        q: 'How long is a typical 2D explainer?',
-        a: 'Most explainers land between 60 and 120 seconds. We will recommend a runtime once we understand the message, the audience and where the video will be watched.',
+        q: 'Seberapa akurat rekonstruksi lokasi untuk kebutuhan kamera sinema?',
+        a: 'Akurasi geometri kami mencapai sub-sentimeter (< 5mm), sehingga fokal lensa 24mm, 35mm, atau 50mm pada kamera virtual akan menghasilkan bidang pandang (FOV) dan perspektif yang 100% identik dengan kamera sinema nyata di lapangan.',
       },
       {
-        q: 'Can you match an existing illustration style?',
-        a: 'Yes. Share your brand system or existing artwork and we will build a style frame for approval before production begins.',
+        q: 'Apakah aset bisa langsung dibuka di Unreal Engine atau Blender?',
+        a: 'Tentu. Kami menyediakan aset dalam format USDZ, FBX, OBJ teroptimasi dan plugin Gaussian Splatting native untuk Unreal Engine dan Blender.',
       },
       {
-        q: 'Do you handle voice-over and music?',
-        a: 'We direct casting, record or source voice-over and license music and sound design as part of the production scope.',
+        q: 'Berapa lama proses pemindaian lokasi di lapangan?',
+        a: 'Untuk area set berukuran sedang (500–1.500 m²), pemindaian lapangan menggunakan LiDAR terestrial dan drone berlangsung antara 2 hingga 4 jam tanpa mengganggu persiapan kru lain.',
       },
     ],
     related: [
-      { label: 'See 2D work', to: '/portfolio?category=2d' },
-      { label: 'Explore 3D Animation', to: '/services/3d-animation' },
-      { label: 'Start a project', to: '/contact' },
+      { label: 'Lihat Proyek Ruang Operasi Medis', to: '/portfolio/ruang-operasi-bedah-presisi' },
+      { label: 'Eksplorasi Marketing & Branding', to: '/services/marketing-branding' },
+      { label: 'Konsultasi Pra-Produksi Film', to: '/contact' },
     ],
   },
   {
-    slug: '3d-animation',
+    slug: 'marketing-branding',
     index: '02',
-    name: '3D Animation & Visual Production',
-    shortName: '3D',
-    tagline: 'Precision you can look inside of.',
+    name: 'Marketing & Branding',
+    shortName: 'Marketing',
+    tagline: 'Zero Moment of Truth: Turn passive viewers into experiential buyers.',
     summary:
-      'Product, industrial and architectural animation — modelled, textured and lit to show exactly how something works.',
+      'Tur spasial fotorealistik, display interaktif 3D, dan integrasi Google Maps digital twin yang memicu keyakinan beli seketika (Zero Moment of Truth).',
     metaDescription:
-      '3D animation and visual production by UNIMASI: product animation, industrial and process visualisation, architectural visualisation, 3D modelling, texturing and asset production.',
+      'Solusi Marketing & Branding SPATIUM: Tur spasial 3D Gaussian Splatting untuk F&B, hotel, ritel, dan properti. Meningkatkan direct-booking dan konversi penjualan dengan pengalaman berjalan nyata.',
     intro: [
-      'When a subject cannot be filmed — too small, too large, too dangerous or simply not built yet — 3D makes it visible. We model from your CAD, photographs or sketches and build a scene that reads instantly.',
-      'From wireframe to final render, every stage is reviewable. You get an exploded, cutaway or exploded-sequence view of your own product or facility, with the lighting and materials to make it credible.',
+      'Di era digital saat ini, konsumen tidak lagi percaya pada foto 2D bersudut lebar yang terdistorsi atau video promosi yang penuh rekayasa. Mereka ingin memverifikasi sendiri sebelum membeli — fenomena ini dikenal sebagai Zero Moment of Truth (ZMOT).',
+      'SPATIUM menghadirkan "Walkable Images": ruang bisnis Anda diabadikan ke dalam replika digital fotorealistik 3D yang dapat dijelajahi langsung dari browser ponsel atau laptop pelanggan. Mereka dapat berjalan, melihat detail menu/meja, dan merasakan atmosfer tempat Anda seolah-olah sudah berada di sana.',
     ],
     capabilities: [
-      { title: 'Product animation', description: 'Feature reveals, exploded views and mechanism breakdowns with believable materials.' },
-      { title: 'Industrial animation', description: 'Plant, machinery and process animation for sales, training and safety.' },
-      { title: 'Architectural visualization', description: 'Exterior massing, interior walkthroughs and daylight studies.' },
-      { title: '3D modelling & texturing', description: 'Clean topology and physically-based materials built to be reused, not thrown away.' },
-      { title: 'Character animation', description: 'Rigged, stylised or realistic character performance in a 3D pipeline.' },
-      { title: 'Process visualization', description: 'Step-by-step sequences that make complex flows understandable at a glance.' },
-      { title: '3D asset production', description: 'Consistent, game-ready and render-ready assets delivered as a managed library.' },
+      {
+        title: 'Zero Moment of Truth (ZMOT) Experience',
+        description: 'Memberikan kepastian ruang dan suasana nyata kepada calon pelanggan sebelum mereka memutuskan berkunjung atau bertransaksi.',
+      },
+      {
+        title: '3D Interactive Spatial Displays',
+        description: 'Tampilan interaktif WebGL ringan dan mulus 60 FPS di situs web tanpa instalasi aplikasi pihak ketiga.',
+      },
+      {
+        title: 'Multi-Scene Pairing (Exterior & Interior)',
+        description: 'Navigasi instan menghubungkan area luar ruangan dan dalam ruangan dengan satu sentuhan jari.',
+      },
+      {
+        title: 'Interactive Hotspots & Direct Booking',
+        description: 'Penyematan tombol reservasi, katalog produk, dan detail menu langsung di titik-titik strategis dalam ruang virtual.',
+      },
+      {
+        title: 'Google Maps & Spatial SEO Integration',
+        description: 'Optimalisasi pencarian lokal dengan visualisasi digital twin yang mendongkrak profil bisnis Google Maps.',
+      },
+      {
+        title: 'Cross-Device Responsiveness',
+        description: 'Didesain adaptif untuk layar iPhone, Android, tablet, layar sentuh kios pameran, hingga headset Vision Pro.',
+      },
     ],
     deliverables: [
-      'Modelled and textured scene assets',
-      'Look development and lighting passes',
-      'Animated masters and camera moves',
-      'Turntables and product stills',
-      'Real-time ready exports where required',
-      'Source scene files and asset manifests',
+      'Embed WebGL Tur Spasial Responsif',
+      'Paket Aset Scene-Pairing Eksterior & Interior',
+      'Integrasi Tombol CTA Reservasi / Pembelian',
+      'Aset Konten Media Sosial Video Loop 4K',
+      'Laporan Analitik Interaksi Pengunjung Spasial',
     ],
-    tools: ['Blender', 'Cinema 4D', 'Maya', 'Redshift', 'Substance Painter', 'Unreal Engine'],
-    visual: '3d',
-    accent: '#7FB2FF',
+    tools: ['SuperSplat WebGL', 'Gaussian Splatting', 'Drone Photogrammetry', 'LiDAR Sensors', 'Three.js'],
+    visual: 'marketing',
+    accent: '#00E5FF',
     faqs: [
       {
-        q: 'Can you work from CAD files?',
-        a: 'Yes. STEP, IGES, SolidWorks, Revit and mesh formats are all workable inputs. We will tell you early if a model needs retopology first.',
+        q: 'Bagaimana cara menaruh tur 3D ini ke website kami?',
+        a: 'Sangat mudah. Kami menyediakan satu baris kode embed iframe yang ringan, atau Anda dapat meng-host langsung bundle HTML dan asetnya di server Anda menggunakan fitur Tour Upload SPATIUM.',
       },
       {
-        q: 'How realistic can the render be?',
-        a: 'As realistic as the brief requires. We agree on a look-development target early so realism never becomes an open-ended moving goal.',
+        q: 'Apakah tur ini berat dibuka di HP pelanggan?',
+        a: 'Tidak. Pipeline kompresi cerdas kami mengoptimalkan splats hingga ukuran berkas minimal, memuat dalam hitungan 1-2 detik pada koneksi 4G seluler.',
       },
       {
-        q: 'Do we receive the 3D files?',
-        a: 'Yes — source scene files and asset manifests are part of final delivery, with naming conventions documented.',
+        q: 'Berapa kenaikan konversi yang biasa dialami klien?',
+        a: 'Klien kami di sektor F&B dan hotel mencatat kenaikan reservasi langsung antara 34% hingga 78% setelah pelanggan dapat menjelajahi ruangan secara 3D.',
       },
     ],
     related: [
-      { label: 'See 3D work', to: '/portfolio?category=3d' },
-      { label: 'Explore Motion Graphics', to: '/services/motion-graphics' },
-      { label: 'Start a project', to: '/contact' },
+      { label: 'Lihat Batuna Resto Manado', to: '/portfolio/batuna-resto-oceanfront-exterior' },
+      { label: 'Lihat Kidang Nyaring Cafe', to: '/portfolio/kidang-nyaring-outdoor-canopy' },
+      { label: 'Konsultasi Brand & Space', to: '/contact' },
     ],
   },
   {
-    slug: 'motion-graphics',
+    slug: 'entertainment-installation',
     index: '03',
-    name: 'Motion Graphics',
-    shortName: 'Motion',
-    tagline: 'Systems that move with intent.',
+    name: 'Entertainment & Installation',
+    shortName: 'Installation',
+    tagline: 'Physical-digital convergence for exhibitions, projection mapping, and immersive arts.',
     summary:
-      'Typography, data and brand motion graphics designed as a reusable system rather than a one-off.',
+      'Kalibrasi spasial presisi untuk instalasi seni imersif, projection mapping arsitektural, dan pengalaman interaktif berbasis lokasi (Location-Based Entertainment).',
     metaDescription:
-      'Motion graphics from UNIMASI: corporate motion graphics, kinetic typography, animated infographics, logo animation, UI motion, packages and compositing.',
+      'Layanan Entertainment & Installation SPATIUM: Kalibrasi projection mapping, environment spasial AR/VR, dan instalasi interaktif museum serta galeri pameran seni digital.',
     intro: [
-      'Motion graphics carry the parts of your message that words alone cannot: hierarchy, sequence and emphasis. We design the system so the second video is as fast to produce as the first.',
-      'Everything is built to be re-skinned and re-cut — templates, presets and a documented style guide come with the delivery.',
+      'Menggabungkan cahaya digital ke atas arsitektur fisik membutuhkan pemetaan ruang yang bebas dari kesalahan geometris. Deviasi 1 sentimeter saja pada model 3D dapat merusak fokus dan ilusi kedalaman projection mapping.',
+      'SPATIUM menyediakan digital twin akurasi milimeter untuk gedung bersejarah, arena pameran, museum, dan instalasi festival. Kreator konten dapat langsung menganimasikan visual di atas model digital yang 100% kongruen dengan fisik bangunan nyata.',
     ],
     capabilities: [
-      { title: 'Corporate motion graphics', description: 'Reports, announcements and internal comms that people finish watching.' },
-      { title: 'Kinetic typography', description: 'Type as the lead performer — paced, weighted and readable.' },
-      { title: 'Animated infographics', description: 'Complex data narrated with clear reveals and honest scales.' },
-      { title: 'Logo animation', description: 'Ident animation with brand rules baked into the build.' },
-      { title: 'UI motion graphics', description: 'Interface animation for product demos, launches and onboarding.' },
-      { title: 'Motion graphics packages', description: 'Template libraries your team can run without a studio.' },
-      { title: 'Video graphics & compositing', description: 'Titles, lower thirds, keying and clean-up for live-action footage.' },
+      {
+        title: 'Projection Mapping Calibration',
+        description: 'Pemindaian laser fasad gedung dan interior melengkung untuk menghasilkan template UV mapping akurat bagi tim motion graphic.',
+      },
+      {
+        title: 'Location-Based AR/VR Experiences',
+        description: 'Penyelarasan konten augmented reality dengan objek nyata di galeri, pameran seni, atau taman hiburan tanpa pergeseran (drift).',
+      },
+      {
+        title: 'Virtual Exhibition Spaces',
+        description: 'Menciptakan kembali pameran seni atau museum fisik ke dalam ruang maya yang dapat diakses oleh penikmat seni di seluruh dunia.',
+      },
+      {
+        title: 'Spatial Audio Integration',
+        description: 'Pemetaan akustik ruang untuk sinkronisasi tata suara surround 3D dengan visual interaktif.',
+      },
+      {
+        title: 'Interactive Kinetic Sensors',
+        description: 'Integrasi sistem sensor gerak pengunjung untuk memicu respons visual dinamis pada dinding instalasi.',
+      },
     ],
     deliverables: [
-      'Designed motion system and style frames',
-      'Reusable templates and presets',
-      'Animated masters and platform exports',
-      'Alpha-channel versions for editors',
-      'Style guide and usage documentation',
-      'Sound design and music direction',
+      'Model 3D Mesh Fasad Bangunan (Akurasi Milimeter)',
+      'Template UV Map dan Panduan Proyektor',
+      'Lingkungan Virtual WebGL untuk Pameran Online',
+      'Dokumentasi Spasial Arsip Pameran Abadi',
     ],
-    tools: ['After Effects', 'Cinema 4D', 'Illustrator', 'DaVinci Resolve', 'Redshift', 'Figma'],
-    visual: 'motion',
-    accent: 'var(--yellow-soft)',
+    tools: ['Terrestrial LiDAR', '3D Photogrammetry', 'TouchDesigner', 'Unreal Engine', 'MadMapper'],
+    visual: 'entertainment',
+    accent: '#00E5FF',
     faqs: [
       {
-        q: 'Can your templates be used by our team?',
-        a: 'Yes. We build editable templates with clear controls and a short handover session so your team can produce variations confidently.',
+        q: 'Apakah bisa memindai gedung berketinggian lebih dari 20 meter?',
+        a: 'Bisa. Kami mengombinasikan drone photogrammetry bersertifikasi dan LiDAR darat jarak jauh untuk memindai bangunan hingga puluhan lantai dengan presisi tinggi.',
       },
       {
-        q: 'Do you animate data live from a spreadsheet?',
-        a: 'For recurring reports we can connect charts to structured data so the graphics update with your numbers rather than being redrawn.',
-      },
-      {
-        q: 'How many revisions are included?',
-        a: 'Scope is agreed in the proposal — typically two structured review rounds per stage, with additional rounds quoted transparently.',
+        q: 'Apakah template UV mapping siap diimpor ke software mapping seperti MadMapper atau Resolume?',
+        a: 'Ya, kami menghasilkan file mesh 3D yang sudah di-unwrap dengan layout UV rapi, siap untuk dihubungkan ke proyektor di lokasi.',
       },
     ],
     related: [
-      { label: 'See motion work', to: '/portfolio?category=motion' },
-      { label: 'Explore 2D Animation', to: '/services/2d-animation' },
-      { label: 'Start a project', to: '/contact' },
+      { label: 'Lihat Unicam Industrial Plant', to: '/portfolio/unicam-indonesia-manufaktur-presisi' },
+      { label: 'Jelajahi Memory & Documentary', to: '/services/memory-documentary' },
+      { label: 'Diskusikan Proyek Instalasi', to: '/contact' },
     ],
   },
   {
-    slug: 'digital-assets-ai',
+    slug: 'memory-documentary',
     index: '04',
-    name: 'Digital Visual Assets & AI-Assisted Production',
-    shortName: 'Assets & AI',
-    tagline: 'Asset pipelines built to be reused.',
+    name: 'Memory & Documentary',
+    shortName: 'Memory',
+    tagline: 'Preserving precious places and moments across generations.',
     summary:
-      '3D asset libraries, real-time assets and AI-assisted production that speed up delivery without lowering the bar.',
+      'Preservasi spasial 3D fotorealistik pernikahan mewah, situs cagar budaya, dan rumah pusaka keluarga sebelum berubah termakan zaman.',
     metaDescription:
-      'Digital visual assets and AI-assisted production from UNIMASI: 3D asset libraries, real-time 3D assets, animation assets and AI-assisted visual production.',
+      'Layanan Memory & Documentary SPATIUM: Preservasi spasial 3D momen pernikahan mewah, digital twin cagar budaya bersejarah, dan arsip properti keluarga abadi.',
     intro: [
-      'Studios and product teams do not just need a video — they need the assets behind it. We build libraries that stay consistent, documented and ready for the next project.',
-      'AI-assisted production is a lever, not a shortcut. We use it for ideation, variation and clean-up under human art direction, and we are explicit about how and where it is used.',
+      'Waktu terus berjalan, dan tempat-tempat terpenting dalam hidup kita tidak selamanya berada dalam wujud yang sama. Rumah masa kecil akan direnovasi, dekorasi pesta pernikahan impian akan dibongkar esok pagi, dan bangunan bersejarah rentan mengalami degradasi alamiah.',
+      'Melalui teknologi 3D Gaussian Splatting, SPATIUM mengabadikan ruang dan atmosfer emosional secara abadi. Anda tidak hanya melihat foto atau menonton rekaman video masa lalu; Anda dapat "masuk kembali" dan berjalan di dalam memori tersebut bersama anak-cucu kelak.',
     ],
     capabilities: [
-      { title: '3D asset libraries', description: 'Catalogued, named and optimised asset sets with documented specifications.' },
-      { title: 'Real-time 3D assets', description: 'Game-ready and engine-ready models, materials and LODs built to perform.' },
-      { title: 'Animation assets', description: 'Rigs, motion libraries, sprite sheets and reusable animated components.' },
-      { title: 'AI-assisted visual production', description: 'Concept variation, upscaling, rotoscoping and matte work under human art direction.' },
+      {
+        title: 'Immersive Wedding Sanctuary Memory',
+        description: 'Mengabadikan dekorasi pernikahan megah, susunan bunga, dan tata cahaya resepsi sebelum dibongkar.',
+      },
+      {
+        title: 'Cultural Heritage Digital Twins',
+        description: 'Arsip 3D presisi tinggi untuk candi, keraton, museum, dan situs sejarah guna kepentingan edukasi dan restorasi masa depan.',
+      },
+      {
+        title: 'Family Estate & Ancestral Home Archiving',
+        description: 'Dokumentasi ruang hunian keluarga lintas generasi dengan kehangatan detail perabot dan interior asli.',
+      },
+      {
+        title: 'Walkable Legacy Archives',
+        description: 'Pengalaman interaktif yang dapat diwariskan dalam format file digital mandiri yang tahan uji perubahan teknologi.',
+      },
+      {
+        title: 'Spatial Headset Ready (VR / Vision Pro)',
+        description: 'Kompatibilitas penuh dengan kacamata spasial untuk pengalaman kembali ke masa lalu yang mengharukan.',
+      },
     ],
     deliverables: [
-      'Documented asset library structure',
-      'Source and export formats',
-      'Material and shader definitions',
-      'Specification and usage guide',
-      'Handover session for your team',
-      'Optional ongoing asset support',
+      'Model 3DGS Master Memori Abadi',
+      'Tur Spasial WebGL Privat Berpassword',
+      'File Offline Eksekutif untuk Arsip Keluarga',
+      'Klip Video Loop Sinematik Kamera Spasial 4K',
     ],
-    tools: ['Blender', 'Substance Painter', 'Houdini', 'Unreal Engine', 'Unity', 'Python tooling'],
-    visual: 'assets',
-    accent: '#8FF0C4',
+    tools: ['3D Gaussian Splatting', 'HDR Photogrammetry', 'LiDAR Scanner', 'VR Spatial Viewers'],
+    visual: 'memory',
+    accent: '#00E5FF',
     faqs: [
       {
-        q: 'How is AI used in your production?',
-        a: 'For exploration, variation and time-consuming clean-up tasks. Final creative direction, composition and brand accuracy stay with our artists, and we disclose AI use on every project.',
+        q: 'Apakah data arsip memori keluarga kami terjamin privasinya?',
+        a: 'Ya, privasi adalah prioritas tertinggi kami. Tur memori dapat dilindungi kata sandi pribadi atau diserahkan secara luring (offline storage) tanpa diunggah ke domain publik.',
       },
       {
-        q: 'Do you sign over the assets?',
-        a: 'Yes. Delivery terms and licensing are set out in the proposal, including whether assets are exclusive to your organisation.',
-      },
-      {
-        q: 'Can assets be delivered for an existing engine?',
-        a: 'We export to your target engine and verify material and scale conventions before handover.',
+        q: 'Kapan waktu terbaik memindai dekorasi pernikahan?',
+        a: 'Waktu ideal adalah 1-2 jam sebelum akad/pemberkatan dimulai, saat dekorasi dan pencahayaan telah selesai 100% dan ruangan dalam kondisi prima.',
       },
     ],
     related: [
-      { label: 'Explore 3D Animation', to: '/services/3d-animation' },
-      { label: 'Explore Motion Graphics', to: '/services/motion-graphics' },
-      { label: 'Start a project', to: '/contact' },
+      { label: 'Lihat Grand Glasshouse Wedding Sanctuary', to: '/portfolio/grand-glasshouse-wedding-sanctuary' },
+      { label: 'Lihat Gateway Pasteur Residence', to: '/portfolio/apartemen-gateway-pasteur-suite' },
+      { label: 'Konsultasi Preservasi Memori', to: '/contact' },
     ],
   },
 ]
 
-export const CORE_SERVICES = SERVICES
+export const CORE_SERVICES = SERVICES.slice(0, 4)
 
 export function getService(slug: string): Service | undefined {
-  return SERVICES.find((service) => service.slug === slug)
+  return SERVICES.find((s) => s.slug === slug)
 }

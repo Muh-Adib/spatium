@@ -9,7 +9,7 @@ import './services-showcase.css'
 
 export async function ServicesShowcase({ initialServices }: { initialServices?: any[] } = {}) {
   const services = initialServices || (await getCoreServices())
-  const displayServices = (services && services.length > 0 ? services : CORE_SERVICES).slice(0, 3)
+  const displayServices = (services && services.length > 0 ? services : CORE_SERVICES).slice(0, 4)
   if (!displayServices || displayServices.length === 0) return null
 
   return (
@@ -17,20 +17,19 @@ export async function ServicesShowcase({ initialServices }: { initialServices?: 
       <div className="container container--wide">
         <SectionHead
           id="services-title"
-          eyebrow="Core disciplines"
+          eyebrow="4 Vertikal Layanan Spasial"
           title={
             <>
-              Three ways we make <span className="accent">ideas move</span>.
+              Solusi Teknologi Spasial &amp; <span className="accent">Reality Capture</span>.
             </>
           }
           aside={
             <>
               <p className="lede">
-                Each discipline has its own pipeline, its own visual language and its own reasons for
-                existing. Most projects combine two or three.
+                Dari rekonstruksi set film virtual, display interaktif ZMOT ritel &amp; F&B, hingga digital twin presisi sub-sentimeter dan preservasi memori abadi.
               </p>
               <Link href="/services" className="link-arrow">
-                Compare all services
+                Lihat Seluruh Layanan
                 <Icon name="arrow-right" size={17} />
               </Link>
             </>

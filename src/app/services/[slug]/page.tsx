@@ -14,11 +14,16 @@ import { PROJECTS, type ProjectCategory } from '@/data/projects'
 import { getServiceCategories, getServiceCategoryWithServices } from '@/lib/db/serviceCategories'
 import { getServiceBySlug, getServices } from '@/lib/db/services'
 import { BlockRenderer } from '@/components/blocks/BlockRenderer'
+import { siteConfig } from '@/config/site'
 import '@/pages/service-detail.css'
 
-const SITE_URL = 'https://unimasi.studio'
+const SITE_URL = siteConfig.url
 
 const CATEGORY_BY_SERVICE: Record<string, ProjectCategory> = {
+  'filmmaking-vfx': 'filmmaking',
+  'marketing-branding': 'marketing',
+  'entertainment-installation': 'entertainment',
+  'memory-documentary': 'memory',
   '2d-animation': '2d',
   '3d-animation': '3d',
   'motion-graphics': 'motion',
@@ -41,8 +46,8 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>
 }): Promise<Metadata> {
   const { slug } = await params
-  const dbCat = await getServiceCategoryWithServices(slug)
-  const dbSvc = !dbCat ? await getServiceBySlug(slug) : null
+  const dbCat = process.env.DATABASE_URL ? await getServiceCategoryWithServices(slug).catch(() => null) : null
+  const dbSvc = process.env.DATABASE_URL && !dbCat ? await getServiceBySlug(slug).catch(() => null) : null
   const dbItem: any = dbCat || dbSvc
 
   const service = getService(slug)
@@ -64,13 +69,13 @@ export async function generateMetadata({
     },
     openGraph: {
       type: 'website',
-      title: `${serpTitle} · UNIMASI`,
+      title: `${serpTitle} · SPATIUM`,
       description: desc,
       url: `${SITE_URL}/services/${slug}`,
-      siteName: 'UNIMASI',
-      images: [{ url: ogImg, width: 512, height: 512, alt: 'UNIMASI' }],
+      siteName: 'SPATIUM',
+      images: [{ url: ogImg, width: 512, height: 512, alt: 'SPATIUM' }],
     },
-    twitter: { card: 'summary_large_image', title: `${serpTitle} · UNIMASI`, description: desc, images: [ogImg] },
+    twitter: { card: 'summary_large_image', title: `${serpTitle} · SPATIUM`, description: desc, images: [ogImg] },
   }
 }
 
@@ -80,8 +85,8 @@ export default async function ServiceDetailPage({
   params: Promise<{ slug: string }>
 }) {
   const { slug } = await params
-  const dbCat = await getServiceCategoryWithServices(slug)
-  const dbSvc = !dbCat ? await getServiceBySlug(slug) : null
+  const dbCat = process.env.DATABASE_URL ? await getServiceCategoryWithServices(slug).catch(() => null) : null
+  const dbSvc = process.env.DATABASE_URL && !dbCat ? await getServiceBySlug(slug).catch(() => null) : null
   const dbItem: any = dbCat || dbSvc
   const dbBlocks = dbItem?.blocks && Array.isArray(dbItem.blocks) ? dbItem.blocks : []
 
@@ -99,7 +104,7 @@ export default async function ServiceDetailPage({
       serviceType: serviceName,
       description: serviceDesc,
       url: `${SITE_URL}/services/${slug}`,
-      provider: { '@type': 'Organization', name: 'UNIMASI', url: SITE_URL },
+      provider: { '@type': 'Organization', name: 'SPATIUM', url: SITE_URL },
     },
     {
       '@context': 'https://schema.org',

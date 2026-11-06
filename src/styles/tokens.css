@@ -1,42 +1,61 @@
 @import '../tokens/tokens.css';
 
 /* ==========================================================================
-   UNIMASI — Design tokens
-   Navy · Vibrant yellow · White
+   SPATIUM — Design tokens
+   Obsidian Void · Electric Cyan · Photonic White · Slate
+   Clean, clear, generous spatial architecture
    ========================================================================== */
 
 :root {
   /* --- Core palette ----------------------------------------------------- */
-  --navy-950: #030611;
-  --navy-900: #060a17;
-  --navy-850: #0a1124;
-  --navy-800: #0f1932;
-  --navy-700: #162444;
-  --navy-600: #1e315b;
-  --navy-500: #2a437a;
-  --navy-400: #3b5fa3;
+  --space-950: #020408;
+  --space-900: #040711;
+  --space-850: #070c1b;
+  --space-800: #0a1124;
+  --space-700: #0f1932;
+  --space-600: #162444;
+  --space-500: #1e315b;
+  --space-400: #2d467e;
 
-  --yellow: #ffd600;
-  --yellow-500: #ffd600;
-  --yellow-600: #e0bc00;
-  --yellow-soft: #ffe855;
+  /* Legacy aliases for backwards compatibility */
+  --navy-950: var(--space-950);
+  --navy-900: var(--space-900);
+  --navy-850: var(--space-850);
+  --navy-800: var(--space-800);
+  --navy-700: var(--space-700);
+  --navy-600: var(--space-600);
+  --navy-500: var(--space-500);
+  --navy-400: var(--space-400);
+
+  /* Primary Accent: Luminescent Cyan & Azure (Spatial / LiDAR / Radiance Fields) */
+  --cyan: #00e5ff;
+  --cyan-500: #00e5ff;
+  --cyan-400: #38bdf8;
+  --cyan-soft: #7dd3fc;
+  --cyan-glow: rgba(0, 229, 255, 0.35);
+
+  /* Remap yellow aliases to clean cyan/white so no lingering yellow appears */
+  --yellow: #00e5ff;
+  --yellow-500: #00e5ff;
+  --yellow-600: #0284c7;
+  --yellow-soft: #38bdf8;
 
   --white: #ffffff;
   --paper: #f8fafc;
   --paper-2: #edf2f7;
-  --ink: #070e1e;
+  --ink: #040711;
   --ink-soft: #334155;
 
-  --danger: #ff5252;
-  --success: #22c55e;
+  --danger: #f43f5e;
+  --success: #10b981;
 
   /* --- Surfaces --------------------------------------------------------- */
-  --bg: var(--navy-900);
-  --bg-deep: var(--navy-950);
-  --surface-1: #0a1224;
-  --surface-2: #0e1a33;
-  --surface-3: #142345;
-  --surface-translucent: rgba(14, 26, 51, 0.75);
+  --bg: var(--space-900);
+  --bg-deep: var(--space-950);
+  --surface-1: #070c1b;
+  --surface-2: #0b1428;
+  --surface-3: #111e3b;
+  --surface-translucent: rgba(7, 12, 27, 0.78);
   --line: rgba(255, 255, 255, 0.08);
   --line-strong: rgba(255, 255, 255, 0.16);
 
@@ -45,33 +64,32 @@
   --text-muted: #94a3b8;
   --text-dim: #64748b;
   --text-ink: var(--ink);
-  --text-ink-muted: rgba(7, 14, 30, 0.65);
+  --text-ink-muted: rgba(4, 7, 17, 0.65);
 
   /* --- Typography ------------------------------------------------------- */
-  /* Official brand heading font (AGENTS.md): Montserrat. */
   --font-display: var(--font-montserrat), 'Montserrat', system-ui, -apple-system, sans-serif;
   --font-body: var(--font-plus-jakarta), 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
   --font-mono: var(--font-dm-mono), 'DM Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
 
-  --fs-display-xl: clamp(3.2rem, 8.5vw, 7.8rem);
-  --fs-display-lg: clamp(2.35rem, 5.2vw, 4.4rem);
-  --fs-display-md: clamp(1.85rem, 3.5vw, 2.9rem);
-  --fs-h3: clamp(1.3rem, 2vw, 1.75rem);
-  --fs-h4: clamp(1.08rem, 1.4vw, 1.25rem);
-  --fs-body-lg: clamp(1.02rem, 1.2vw, 1.14rem);
-  --fs-body: 0.98rem;
+  --fs-display-xl: clamp(3.4rem, 8.8vw, 8.2rem);
+  --fs-display-lg: clamp(2.4rem, 5.5vw, 4.6rem);
+  --fs-display-md: clamp(1.9rem, 3.6vw, 3.1rem);
+  --fs-h3: clamp(1.35rem, 2.1vw, 1.85rem);
+  --fs-h4: clamp(1.1rem, 1.4vw, 1.3rem);
+  --fs-body-lg: clamp(1.05rem, 1.25vw, 1.2rem);
+  --fs-body: 1rem;
   --fs-small: 0.875rem;
   --fs-micro: 0.75rem;
 
-  --lh-tight: 0.94;
-  --lh-heading: 1.05;
-  --lh-body: 1.65;
+  --lh-tight: 0.95;
+  --lh-heading: 1.08;
+  --lh-body: 1.7;
 
   --tracking-tight: -0.035em;
   --tracking-wide: 0.12em;
-  --tracking-eyebrow: 0.18em;
+  --tracking-eyebrow: 0.2em;
 
-  /* --- Space ------------------------------------------------------------ */
+  /* --- Space (Generous Breathing Room for SPATIUM) ---------------------- */
   --space-1: 0.25rem;
   --space-2: 0.5rem;
   --space-3: 0.75rem;
@@ -79,15 +97,15 @@
   --space-5: 1.5rem;
   --space-6: 2rem;
   --space-7: 3rem;
-  --space-8: 4rem;
-  --space-9: 6rem;
-  --space-10: 8rem;
+  --space-8: 4.5rem;
+  --space-9: 6.5rem;
+  --space-10: 9rem;
 
-  --section-y: clamp(4.5rem, 9vw, 9rem);
-  --gutter: clamp(1.15rem, 4.2vw, 3.25rem);
-  --container: 1280px;
-  --container-wide: 1560px;
-  --header-h: 76px;
+  --section-y: clamp(5.5rem, 10vw, 10rem);
+  --gutter: clamp(1.25rem, 4.5vw, 3.75rem);
+  --container: 1320px;
+  --container-wide: 1600px;
+  --header-h: 80px;
 
   /* --- Radii ------------------------------------------------------------ */
   --r-xs: 6px;
@@ -98,10 +116,11 @@
   --r-pill: 999px;
 
   /* --- Shadows ---------------------------------------------------------- */
-  --shadow-sm: 0 2px 10px rgba(4, 9, 26, 0.18);
-  --shadow-md: 0 18px 44px -22px rgba(4, 9, 26, 0.65);
-  --shadow-lg: 0 44px 90px -40px rgba(4, 9, 26, 0.85);
-  --shadow-yellow: 0 24px 60px -28px rgba(255, 214, 0, 0.5);
+  --shadow-sm: 0 2px 10px rgba(0, 0, 0, 0.35);
+  --shadow-md: 0 18px 44px -22px rgba(0, 0, 0, 0.75);
+  --shadow-lg: 0 44px 90px -40px rgba(0, 0, 0, 0.9);
+  --shadow-cyan: 0 0 35px rgba(0, 229, 255, 0.35);
+  --shadow-yellow: var(--shadow-cyan);
 
   /* --- Motion ----------------------------------------------------------- */
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
@@ -116,17 +135,16 @@
   --z-modal: 300;
 }
 
-
 /* ==========================================================================
    LAYER 2 & 3: SEMANTIC & COMPONENT DESIGN TOKENS
-   UNIMASI Studio & CMS Studio Admin Tokens
+   SPATIUM Studio & Clean Architecture
    ========================================================================== */
 :root {
   /* Brand Semantic */
-  --color-brand-primary: var(--yellow);
-  --color-brand-primary-hover: var(--yellow-soft);
-  --color-brand-primary-active: var(--yellow-600);
-  --color-brand-primary-subtle: rgba(255, 214, 0, 0.12);
+  --color-brand-primary: #00e5ff;
+  --color-brand-primary-hover: #38bdf8;
+  --color-brand-primary-active: #0284c7;
+  --color-brand-primary-subtle: rgba(0, 229, 255, 0.12);
 
   /* Surface Semantic */
   --color-surface-base: var(--bg);
@@ -139,30 +157,30 @@
   --color-text-secondary: var(--text-muted);
   --color-text-muted: var(--text-dim);
   --color-text-inverse: var(--ink);
-  --color-text-accent: var(--yellow);
+  --color-text-accent: #00e5ff;
 
   /* Border Semantic */
   --color-border: var(--line);
-  --color-border-subtle: rgba(255, 255, 255, 0.04);
-  --color-border-strong: rgba(255, 214, 0, 0.25);
+  --color-border-subtle: rgba(255, 255, 255, 0.06);
+  --color-border-strong: rgba(0, 229, 255, 0.35);
 
   /* Status */
   --color-success: var(--success);
   --color-danger: var(--danger);
-  --color-warning: var(--yellow-500);
-  --color-info: #3B82F6;
+  --color-warning: #f59e0b;
+  --color-info: #00e5ff;
 
   /* Component Layer: Studio Admin */
-  --studio-bg: var(--navy-950);
-  --studio-sidebar-bg: #030814;
-  --studio-topbar-bg: rgba(6, 10, 23, 0.85);
-  --studio-accent: var(--yellow);
-  --studio-accent-hover: var(--yellow-soft);
-  --studio-border: rgba(255, 214, 0, 0.10);
+  --studio-bg: var(--space-950);
+  --studio-sidebar-bg: #040813;
+  --studio-topbar-bg: rgba(4, 7, 17, 0.88);
+  --studio-accent: #00e5ff;
+  --studio-accent-hover: #38bdf8;
+  --studio-border: rgba(0, 229, 255, 0.15);
   --studio-text: var(--text);
   --studio-text-muted: var(--text-muted);
-  --studio-nav-active: rgba(255, 214, 0, 0.10);
-  --studio-nav-active-indicator: var(--yellow);
+  --studio-nav-active: rgba(0, 229, 255, 0.12);
+  --studio-nav-active-indicator: #00e5ff;
 
   /* Radius Scale */
   --radius-sm: 0.375rem;

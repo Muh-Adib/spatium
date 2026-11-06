@@ -59,11 +59,11 @@ export function buildBrandGraph(input: BrandGraphInput): Schema {
     description: siteConfig.description,
     areaServed: { '@type': 'Country', name: 'Indonesia' },
     knowsAbout: [
-      '2D Animation',
-      '3D Animation',
-      'Motion Graphics',
-      'Digital Visual Assets',
-      'AI-Assisted Production',
+      '3D Gaussian Splatting',
+      'LiDAR Laser Scanning',
+      'Photogrammetry Digital Twin',
+      'Spatial Computing & WebGL',
+      'Virtual Scouting & Previz',
     ],
   })
 
@@ -103,7 +103,7 @@ export function buildBrandGraph(input: BrandGraphInput): Schema {
     graph.push({
       '@type': 'OfferCatalog',
       '@id': `${pageUrl}#services`,
-      name: 'Layanan UNIMASI',
+      name: 'Layanan SPATIUM',
       itemListElement: input.services.map((s) => ({
         '@type': 'Offer',
         itemOffered: {

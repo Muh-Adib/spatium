@@ -122,29 +122,32 @@ function mapToService(row: any): Service {
 }
 
 export async function getServices(limit?: number): Promise<Service[]> {
+  if (!process.env.DATABASE_URL) return []
   try {
     let query = prisma.orm.public.Service.orderBy((s: any) => s.order.asc())
     if (limit) query = query.limit(limit)
     const rows = await query.all()
     return rows.map(mapToService)
-  } catch (err) {
-    console.error('Failed to get services:', err)
+  } catch (err: any) {
+    console.error('Failed to get services:', err?.message || String(err))
     return []
   }
 }
 
 export async function getServiceBySlug(slug: string): Promise<Service | null> {
+  if (!process.env.DATABASE_URL) return null
   try {
     const row = await prisma.orm.public.Service.where({ slug }).first()
     if (!row) return null
     return mapToService(row)
-  } catch (err) {
-    console.error('Failed to get service by slug:', err)
+  } catch (err: any) {
+    console.error('Failed to get service by slug:', err?.message || String(err))
     return null
   }
 }
 
 export async function getServicesByCategoryId(categoryId: number): Promise<Service[]> {
+  if (!process.env.DATABASE_URL) return []
   try {
     const rows = await prisma.orm.public.Service
       .where({ categoryId })
@@ -157,6 +160,7 @@ export async function getServicesByCategoryId(categoryId: number): Promise<Servi
 }
 
 export async function getServiceWithDetails(slug: string) {
+  if (!process.env.DATABASE_URL) return null
   try {
     const row = await prisma.orm.public.Service.where({ slug }).first()
     if (!row) return null
@@ -185,7 +189,7 @@ export async function getServiceWithDetails(slug: string) {
       { label: 'Architecture', value: 'Modular Cloud' },
     ]
 
-    const safeWhatsappPrompt = svc.whatsappPrompt || `Halo UNIMASI, saya ingin konsultasi mengenai layanan ${svc.name}.`
+    const safeWhatsappPrompt = svc.whatsappPrompt || `Halo SPATIUM, saya ingin konsultasi mengenai layanan ${svc.name}.`
 
     // Portofolio terkait via relation
     const linkedRels = await prisma.orm.public.ServicePortfolio

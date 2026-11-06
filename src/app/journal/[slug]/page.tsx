@@ -19,9 +19,10 @@ import {
 } from '@/data/articles'
 import { getCoreArticleBySlug, getCoreArticles } from '@/lib/core'
 import { sanitizeHtmlContent } from '@/lib/security/sanitize-html'
+import { siteConfig } from '@/config/site'
 import '@/pages/article.css'
 
-const SITE_URL = 'https://unimasi.studio'
+const SITE_URL = siteConfig.url
 
 async function resolveArticle(slug: string): Promise<{
   article: Article

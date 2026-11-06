@@ -50,20 +50,19 @@ export async function JournalPreview() {
       <div className="container container--wide">
         <SectionHead
           id="journal-title"
-          eyebrow="Articles"
+          eyebrow="Wawasan & Riset Spasial"
           title={
             <>
-              Notes from the <span className="accent">production floor</span>.
+              Catatan &amp; Riset <span className="accent">Teknologi 3DGS</span>.
             </>
           }
           aside={
             <>
               <p className="lede">
-                Practical writing on briefs, storyboards, pipelines and the decisions that make
-                animation land — written by the people who do the work.
+                Wawasan teknis mendalam mengenai neural radiance fields, integrasi LiDAR sinematik, dan strategi Zero Moment of Truth untuk konversi bisnis.
               </p>
               <Link href="/journal" className="link-arrow">
-                Browse all articles
+                Lihat Semua Artikel
                 <Icon name="arrow-right" size={17} />
               </Link>
             </>

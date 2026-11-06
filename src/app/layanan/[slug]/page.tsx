@@ -26,13 +26,13 @@ export async function generateMetadata({
   const svc = !cat ? await getServiceBySlug(slug) : null
   const item: any = cat || svc
 
-  if (!item) return { title: 'Layanan Tidak Ditemukan · UNIMASI' }
+  if (!item) return { title: 'Layanan Tidak Ditemukan · SPATIUM' }
 
-  const title = item.metaTitle || `${item.title || item.name} · Layanan Animasi UNIMASI`
+  const title = item.metaTitle || `${item.title || item.name} · Layanan Spasial SPATIUM`
   const description =
     item.metaDescription ||
     item.shortDescription ||
-    'Layanan produksi animasi 2D, 3D, dan motion design terdepan dari UNIMASI Studio.'
+    'Layanan produksi teknologi spasial, 3D Gaussian Splatting, dan LiDAR terdepan dari SPATIUM.'
   const canonical = item.canonicalUrl || `${siteConfig.url}/layanan/${slug}`
 
   return {
@@ -44,7 +44,7 @@ export async function generateMetadata({
       title,
       description,
       url: canonical,
-      siteName: 'UNIMASI Studio',
+      siteName: 'SPATIUM',
       images: [{ url: item.heroImage || '/icon-512.png', width: 1200, height: 630, alt: title }],
     },
     twitter: {
@@ -80,7 +80,7 @@ export default async function LayananDetailPage({
       name: item.title || item.name,
       description: item.shortDescription || item.description || '',
       url: `${siteConfig.url}/layanan/${slug}`,
-      provider: { '@type': 'Organization', name: 'UNIMASI Studio', url: siteConfig.url },
+      provider: { '@type': 'Organization', name: 'SPATIUM', url: siteConfig.url },
     },
     {
       '@context': 'https://schema.org',

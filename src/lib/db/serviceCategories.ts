@@ -58,40 +58,44 @@ export function mapCategoryRow(row: any): ServiceCategoryEntity {
 }
 
 export async function getServiceCategories(): Promise<ServiceCategoryEntity[]> {
+  if (!process.env.DATABASE_URL) return []
   try {
     const rows = await prisma.orm.public.ServiceCategory
       .orderBy((c: any) => c.order.asc())
       .all()
     return rows.map(mapCategoryRow)
-  } catch (err) {
-    console.error('Failed to get service categories:', err)
+  } catch (err: any) {
+    console.error('Failed to get service categories:', err?.message || String(err))
     return []
   }
 }
 
 export async function getNavServiceCategories(): Promise<ServiceCategoryEntity[]> {
+  if (!process.env.DATABASE_URL) return []
   try {
     const rows = await prisma.orm.public.ServiceCategory
       .where({ status: 'published' })
       .orderBy((c: any) => c.order.asc())
       .all()
     return rows.filter((r: any) => Boolean(r.showInNav)).map(mapCategoryRow)
-  } catch (err) {
+  } catch {
     return []
   }
 }
 
 export async function getServiceCategoryBySlug(slug: string): Promise<ServiceCategoryEntity | null> {
+  if (!process.env.DATABASE_URL) return null
   try {
     const row = await prisma.orm.public.ServiceCategory.where({ slug }).first()
     if (!row) return null
     return mapCategoryRow(row)
-  } catch (err) {
+  } catch {
     return null
   }
 }
 
 export async function getServiceCategoryWithServices(slug: string) {
+  if (!process.env.DATABASE_URL) return null
   try {
     const category = await getServiceCategoryBySlug(slug)
     if (!category) return null
@@ -111,7 +115,7 @@ export async function getServiceCategoryWithServices(slug: string) {
         blocks: parseJsonSafe(s.blocks, []),
       })),
     }
-  } catch (err) {
+  } catch {
     return null
   }
 }

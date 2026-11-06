@@ -21,25 +21,25 @@ export function resolveSiteUrl(defaultFallback: string = 'https://spatium.id'): 
 
 export const siteConfig = {
   name: 'Spatium',
-  tagline: 'Modern Digital Space & Interactive Solutions',
+  tagline: 'Real places. New perspectives. | One Point, Unlimited Possibilities',
   description:
-    'Spatium — Flagship interactive digital platform and technology solutions.',
+    'SPATIUM — Spatial Technology Studio specializing in 3D Gaussian Splatting, LiDAR laser scanning, photogrammetry digital twins, and walkable spatial computing for Filmmaking, Marketing, Entertainment, and Memory Preservation.',
   url: resolveSiteUrl('https://spatium.id'),
   cmsUrl: process.env.CMS_URL ?? '/admin',
-  whatsapp: process.env.NEXT_PUBLIC_WHATSAPP || '',
+  whatsapp: process.env.NEXT_PUBLIC_WHATSAPP || '+6281234567890',
   email: 'hello@spatium.id',
-  phone: process.env.NEXT_PUBLIC_PHONE || '',
-  address: 'Indonesia',
+  phone: process.env.NEXT_PUBLIC_PHONE || '+6281234567890',
+  address: 'Jakarta & Bandung, Indonesia',
   social: {
-    instagram: 'https://instagram.com/spatium',
-    linkedin: 'https://linkedin.com/company/spatium',
+    instagram: 'https://instagram.com/spatium.studio',
+    linkedin: 'https://linkedin.com/company/spatium-studio',
     github: 'https://github.com/spatium',
   },
   analytics: {
     gaId: process.env.NEXT_PUBLIC_GA_ID,
     gtmId: process.env.NEXT_PUBLIC_GTM_ID,
   },
-  defaultOgImage: '/favicon.svg',
+  defaultOgImage: '/images/spatium-logo.png',
   locale: 'id_ID',
   alternateLocale: 'en_US',
   /** Canonical public route for the articles index (brand-specific). */

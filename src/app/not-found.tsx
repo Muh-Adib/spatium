@@ -7,7 +7,7 @@ import '@/pages/not-found.css'
 export const metadata: Metadata = {
   title: 'Page not found',
   description:
-    'The page you were looking for does not exist. Explore UNIMASI services, portfolio and journal instead.',
+    'The page you were looking for does not exist. Explore SPATIUM services, portfolio and journal instead.',
   robots: {
     index: false,
     follow: false,

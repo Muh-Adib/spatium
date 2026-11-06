@@ -15,7 +15,7 @@ import {
 import { sanitizeHtmlContent } from '@/lib/security/sanitize-html'
 import '@/pages/article.css'
 
-const SITE_URL = 'https://unimasi.studio'
+const SITE_URL = 'https://spatium.id'
 
 export const revalidate = 3600 // Cache for 1 hour, revalidates on-demand via ISR
 

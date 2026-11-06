@@ -1,13 +1,12 @@
 import Link from 'next/link'
-import { getService } from '@/data/services'
+import { getService, SERVICES } from '@/data/services'
 import { ServiceVisual } from '@/components/services/ServiceVisual'
 import { Icon } from '@/components/Icon'
 import { Reveal } from '@/components/ui/Reveal'
 import './capabilities.css'
 
-const service = getService('digital-assets-ai')
-
 export function Capabilities() {
+  const service = getService('entertainment-installation') || SERVICES[2] || SERVICES[0]
   if (!service) return null
   return (
     <section className="section capabilities" id="capabilities" aria-labelledby="capabilities-title">
@@ -16,13 +15,13 @@ export function Capabilities() {
 
       <div className="container container--wide capabilities__inner">
         <Reveal className="capabilities__head">
-          <p className="eyebrow">Additional capabilities</p>
+          <p className="eyebrow">Kapabilitas Spasial Khusus</p>
           <h2 className="display-md capabilities__title" id="capabilities-title">
             {service.name}
           </h2>
           <p className="lede capabilities__lede">{service.summary}</p>
           <Link href={`/services/${service.slug}`} className="btn btn--primary">
-            Explore assets &amp; AI
+            Eksplorasi Instalasi Spasial
             <span className="btn__icon">
               <Icon name="arrow-right" size={16} />
             </span>

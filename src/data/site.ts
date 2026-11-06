@@ -1,10 +1,10 @@
-export const STUDIO_EMAIL = process.env.NEXT_PUBLIC_STUDIO_EMAIL || 'hello@unimasi.studio'
+export const STUDIO_EMAIL = process.env.NEXT_PUBLIC_STUDIO_EMAIL || 'hello@spatium.id'
 
 export const CONTACT = {
   email: STUDIO_EMAIL,
-  phone: process.env.NEXT_PUBLIC_PHONE || '',
-  location: 'Remote-first studio · working with teams worldwide',
-  hours: 'Mon–Fri · 09:00–18:00',
+  phone: process.env.NEXT_PUBLIC_PHONE || '+6281234567890',
+  location: 'Jakarta & Bandung, Indonesia · Global Captures',
+  hours: 'Mon–Fri · 09:00–18:00 WIB',
 } as const
 
 export type NavChild = { label: string; to: string; blurb?: string }
@@ -13,128 +13,117 @@ export type NavItem = { label: string; to: string; children?: NavChild[] }
 export const NAV: NavItem[] = [
   { label: 'Home', to: '/' },
   {
-    label: 'Services',
+    label: 'Layanan',
     to: '/services',
     children: [
-      { label: 'All Services', to: '/services', blurb: 'Three core disciplines, one studio' },
-      { label: '2D Animation', to: '/services/2d-animation', blurb: 'Explainers, character & education' },
-      { label: '3D Animation', to: '/services/3d-animation', blurb: 'Product, industrial & architectural' },
-      { label: 'Motion Graphics', to: '/services/motion-graphics', blurb: 'Typography, data & brand motion' },
-      { label: 'Digital Visual Assets & AI', to: '/services/digital-assets-ai', blurb: 'Libraries, real-time & AI-assisted' },
+      { label: 'Semua Layanan', to: '/services', blurb: '4 Vertikal Spasial Utama SPATIUM' },
+      { label: 'Filmmaking & VFX', to: '/services/filmmaking-vfx', blurb: 'Set reconstruction, previz & virtual scouting' },
+      { label: 'Marketing & Branding', to: '/services/marketing-branding', blurb: 'ZMOT, tur spasial 3DGS & WebGL display' },
+      { label: 'Entertainment & Installation', to: '/services/entertainment-installation', blurb: 'Projection mapping & immersive exhibits' },
+      { label: 'Memory & Documentary', to: '/services/memory-documentary', blurb: 'Wedding sanctuary & heritage digital twin' },
     ],
   },
-  { label: 'Portfolio', to: '/portfolio' },
-  { label: 'About', to: '/about' },
-  { label: 'Articles', to: '/journal' },
-  { label: 'Contact', to: '/contact' },
+  { label: 'Portofolio', to: '/portfolio' },
+  { label: 'Tentang', to: '/about' },
+  { label: 'Artikel', to: '/journal' },
+  { label: 'Kontak', to: '/contact' },
 ]
 
 export const PROCESS = [
   {
     index: '01',
-    title: 'Discovery & Brief',
-    duration: 'Week 1',
+    title: 'Laser Scan & Drone Capture',
+    duration: 'Tahap 1',
     summary:
-      'We start with the problem, not the pixels. Workshops, reference gathering and audience mapping define what the animation has to achieve.',
-    outputs: ['Creative brief', 'Audience & message map', 'Reference direction', 'Scope and timeline'],
+      'Perekaman lapangan berkecepatan tinggi menggunakan terrestrial laser scanner LiDAR, drone photogrammetry, dan rig kamera spasial calibrated.',
+    outputs: ['Jutaan koordinat XYZ', 'Data intensitas laser LiDAR', 'Foto resolusi ultra-tinggi', 'Peta survei geospasial'],
   },
   {
     index: '02',
-    title: 'Concept & Storyboard',
-    duration: 'Week 1–2',
+    title: 'Dense Point Cloud Reconstruction',
+    duration: 'Tahap 2',
     summary:
-      'Ideas become sequences. We script the narrative, sketch the frames and lock a visual direction before a single frame is animated.',
-    outputs: ['Script & voice direction', 'Storyboard panels', 'Style frames', 'Animatic'],
+      'Pemrosesan densifikasi awan titik spasial dengan akurasi sub-sentimeter (3–5mm) sebagai cetak biru digital ruang fisik.',
+    outputs: ['Dense point cloud terkalibrasi', 'Pembersihan noise spasial', 'Koordinat batas ruang', 'Registrasi multi-scan'],
   },
   {
     index: '03',
-    title: 'Production',
-    duration: 'Week 2–5',
+    title: '3D Geometry & CAD Modeling',
+    duration: 'Tahap 3',
     summary:
-      'Design, modelling, rigging and animation run in parallel tracks. Weekly reviews keep the work visible and the decisions close.',
-    outputs: ['Asset build', 'Animation passes', 'Sound & music direction', 'Internal review cuts'],
+      'Konversi awan titik ke dalam model mesh permukaan 3D dan CAD yang presisi untuk kebutuhan analisis arsitektur atau integrasi engine.',
+    outputs: ['Mesh 3D bersih & teroptimasi', 'Model CAD / BIM', 'Format OBJ / FBX / USDZ', 'Peta UV unwrap'],
   },
   {
     index: '04',
-    title: 'Review & Refinement',
-    duration: 'Week 5–6',
+    title: '3D Gaussian Splatting (3DGS)',
+    duration: 'Tahap 4',
     summary:
-      'Structured feedback rounds sharpen timing, clarity and polish. Every note is tracked until it is resolved or deliberately declined.',
-    outputs: ['Review rounds', 'Revision log', 'Accessibility & legibility pass', 'Final approval'],
-  },
-  {
-    index: '05',
-    title: 'Final Delivery',
-    duration: 'Week 6',
-    summary:
-      'We deliver masters, cutdowns and platform-ready exports, then hand over source files and a usage guide so the work keeps performing.',
-    outputs: ['Master & cutdown exports', 'Platform versions', 'Source project files', 'Usage documentation'],
+      'Pelatihan neural radiance fields menghasilkan jutaan elipsoid spasial fotorealistis yang dapat diakses langsung pada 60 FPS WebGL.',
+    outputs: ['Aset 3DGS Master (.ply / .splat)', 'Player WebGL interaktif', 'Scene-pairing eksterior/interior', 'Kompatibilitas VR / WebXR'],
   },
 ] as const
 
 export const VALUES = [
   {
-    title: 'Professional expertise',
-    body: 'A senior, specialist team across 2D, 3D and motion. No outsourcing the thinking, no junior roulette on your project.',
+    title: 'Walkable Images 3D',
+    body: 'Bukan sekadar foto statis atau video pasif. Pengunjung bebas berjalan, berputar, dan terbang ke sudut mana pun dengan skala nyata 1:1.',
     icon: 'expertise',
   },
   {
-    title: 'Creative storytelling',
-    body: 'We build narrative structure first — because a clear story is what makes a technical subject land with real people.',
-    icon: 'story',
-  },
-  {
-    title: 'Technical capability',
-    body: 'Rigging, simulation, real-time 3D and compositing pipelines that scale from one explainer to a full asset library.',
+    title: 'Sub-Centimeter Precision',
+    body: 'Akurasi pemindaian laser LiDAR terestrial hingga toleransi di bawah 5mm, menghadirkan replika fisik yang dapat dipercaya dan diverifikasi.',
     icon: 'technical',
   },
   {
-    title: 'Flexible collaboration',
-    body: 'Plug into your team or run end-to-end. Adaptable contracts, transparent scope and reviews that respect your calendar.',
-    icon: 'collaboration',
+    title: 'Zero Moment of Truth (ZMOT)',
+    body: 'Memberikan kepastian ruang dan atmosfer nyata sebelum konsumen memutuskan memesan kamar, menyewa tempat, atau membeli properti.',
+    icon: 'story',
   },
   {
-    title: 'Production quality',
-    body: 'Design systems, naming conventions and QC passes — so the hundredth video looks as considered as the first.',
+    title: 'One Point, Unlimited Possibilities',
+    body: 'Pindai sekali di lokasi, aset dapat digunakan selamanya untuk embed WebGL, VR/Vision Pro, VFX film, survei teknis, hingga arsip digital.',
     icon: 'quality',
+  },
+  {
+    title: 'Native WebGL Real-Time 60 FPS',
+    body: 'Dapat diakses instan di browser smartphone, laptop, tablet, dan headset VR tanpa perlu mengunduh atau menginstal aplikasi apa pun.',
+    icon: 'collaboration',
   },
 ] as const
 
 export type Industry = { name: string; blurb: string; icon: string }
 
 export const INDUSTRIES: Industry[] = [
-  { name: 'Education', blurb: 'Curriculum explainers and course content that holds attention.', icon: 'education' },
-  { name: 'Government', blurb: 'Public information, safety and policy communication.', icon: 'government' },
-  { name: 'Manufacturing', blurb: 'Process, maintenance and training animation.', icon: 'manufacturing' },
-  { name: 'Architecture', blurb: 'Visualisation, walkthroughs and spatial storytelling.', icon: 'architecture' },
-  { name: 'Creative agencies', blurb: 'White-label production for campaigns and launches.', icon: 'agency' },
-  { name: 'Gaming', blurb: 'Trailers, asset production and in-engine motion.', icon: 'gaming' },
-  { name: 'Digital products', blurb: 'UI motion, onboarding and product explainers.', icon: 'product' },
-  { name: 'Brands', blurb: 'Brand films, ident systems and social motion.', icon: 'brand' },
+  { name: 'Filmmaking & VFX', blurb: 'Virtual scouting, set reconstruction, dan kamera previz sebelum hari syuting.', icon: 'gaming' },
+  { name: 'Food & Beverage', blurb: 'Eksplorasi spasial restoran & kafe untuk mendongkrak reservasi meja ZMOT.', icon: 'brand' },
+  { name: 'Hospitality & Hotel', blurb: 'Tur fotorealistis kamar suite dan resort untuk memaksimalkan direct booking.', icon: 'product' },
+  { name: 'Industrial & Manufaktur', blurb: 'Audit virtual pabrik, mesin presisi CNC, dan orientasi teknis jarak jauh.', icon: 'manufacturing' },
+  { name: 'Healthcare & Medis', blurb: 'Digital twin ruang bedah steril presisi sub-3mm untuk simulasi klinis.', icon: 'education' },
+  { name: 'Properti & Arsitektur', blurb: 'Walkthrough apartemen dan residensial skala 1:1 tanpa distorsi lensa wide-angle.', icon: 'architecture' },
+  { name: 'Agrikultur & Riset', blurb: 'Kembaran digital greenhouse pembibitan dan pemantauan mikroklimat botani.', icon: 'government' },
+  { name: 'Memori & Cagar Budaya', blurb: 'Preservasi spasial dekorasi pernikahan mewah dan arsip warisan pusaka abadi.', icon: 'agency' },
 ]
 
 export const BUDGET_RANGES = [
-  'Under $5k',
-  '$5k – $10k',
-  '$10k – $25k',
-  '$25k – $50k',
-  '$50k+',
-  'Not sure yet — advise me',
+  'Di bawah Rp 15 Juta',
+  'Rp 15 Juta – Rp 35 Juta',
+  'Rp 35 Juta – Rp 75 Juta',
+  'Rp 75 Juta – Rp 150 Juta',
+  'Rp 150 Juta+',
+  'Belum yakin — butuh konsultasi',
 ] as const
 
 export const TIMELINES = [
-  'ASAP (under 2 weeks)',
-  '2–4 weeks',
-  '1–2 months',
-  '3+ months',
-  'Ongoing retainer',
+  'Segera (< 1 minggu)',
+  '1–2 minggu',
+  '2–4 minggu',
+  '1–2 bulan',
+  'Kemitraan berkelanjutan',
 ] as const
 
 export const SOCIALS = [
-  // Handles await owner confirmation — generic platform roots were removed
-  // because they send visitors nowhere useful (see docs/CONTENT_GAPS.md).
-  { label: 'Behance', href: 'https://www.behance.net/unimasi' },
-  { label: 'Vimeo', href: 'https://vimeo.com/unimasi' },
-  { label: 'LinkedIn', href: 'https://www.linkedin.com/company/unimasi' },
-  { label: 'Instagram', href: 'https://www.instagram.com/unimasi' },
+  { label: 'Instagram', href: 'https://instagram.com/spatium.studio' },
+  { label: 'LinkedIn', href: 'https://linkedin.com/company/spatium-studio' },
+  { label: 'GitHub', href: 'https://github.com/spatium' },
 ] as const

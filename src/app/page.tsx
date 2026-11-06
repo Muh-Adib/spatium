@@ -4,41 +4,42 @@ import { Hero } from '@/components/home/Hero'
 import { PartnerLogos } from '@/components/home/PartnerLogos'
 import { ServicesShowcase } from '@/components/home/ServicesShowcase'
 import { Capabilities } from '@/components/home/Capabilities'
-import { PortfolioPreview } from '@/components/home/PortfolioPreview'
-import { ProcessTimeline } from '@/components/home/ProcessTimeline'
+import { SpatialShowcase } from '@/components/home/SpatialShowcase'
+import { SpatialVsTraditional } from '@/components/home/SpatialVsTraditional'
+import { SpatialPipeline } from '@/components/home/SpatialPipeline'
 import { WhyUnimasi } from '@/components/home/WhyUnimasi'
 import { Industries } from '@/components/home/Industries'
 import { JournalPreview } from '@/components/home/JournalPreview'
 import { InquirySection } from '@/components/home/InquirySection'
 import { getCorePartners, getCorePortfolios, getCoreServices } from '@/lib/core'
 import { buildBrandGraph } from '@/lib/seo/brand-schema'
+import { siteConfig } from '@/config/site'
 
-const SITE_URL = 'https://unimasi.studio'
+const SITE_URL = siteConfig.url
 
 export const metadata: Metadata = {
-  title: 'UNIMASI — Animation & Motion Design Studio',
+  title: 'SPATIUM — Spatial Technology Studio | 3D Gaussian Splatting & Digital Twin',
   description:
-    'UNIMASI is an animation studio specialising in 2D animation, 3D animation and visual production, and motion graphics. We make ideas move.',
+    'SPATIUM adalah studio teknologi spasial terdepan di Indonesia spesialis 3D Gaussian Splatting (3DGS), laser scanning LiDAR terestrial, dan reality capture fotorealistis skala 1:1 untuk Filmmaking, Marketing, Entertainment, dan Memory Preservation.',
   alternates: {
     canonical: SITE_URL,
   },
   openGraph: {
     type: 'website',
-    title: 'UNIMASI — Animation & Motion Design Studio',
+    title: 'SPATIUM — Real Places. New Perspectives. | Spatial Technology Studio',
     description:
-      'UNIMASI is an animation studio specialising in 2D animation, 3D animation and visual production, and motion graphics. We make ideas move.',
+      'Mengatasi The Curse of Distance dengan Walkable Images. Tur spasial 3D Gaussian Splatting 60 FPS real-time native WebGL untuk industri perfilman, properti, hospitality, dan preservasi memori.',
     url: SITE_URL,
-    siteName: 'UNIMASI',
-    images: [{ url: `${SITE_URL}/icon-512.png`, width: 512, height: 512, alt: 'UNIMASI' }],
+    siteName: 'SPATIUM',
+    images: [{ url: `${SITE_URL}/images/spatium-logo.png`, width: 1200, height: 630, alt: 'SPATIUM Spatial Technology Studio' }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'UNIMASI — Animation & Motion Design Studio',
-    description: 'We make ideas move — 2D, 3D animation and motion graphics.',
-    images: [`${SITE_URL}/icon-512.png`],
+    title: 'SPATIUM — Spatial Technology Studio',
+    description: 'Real places. New perspectives. One Point, Unlimited Possibilities with 3D Gaussian Splatting.',
+    images: [`${SITE_URL}/images/spatium-logo.png`],
   },
 }
-
 
 export default async function HomePage() {
   const [portfolios, services, partners] = await Promise.all([
@@ -49,9 +50,9 @@ export default async function HomePage() {
 
   const graph = buildBrandGraph({
     path: '/',
-    title: 'UNIMASI — Animation & Motion Design Studio',
+    title: 'SPATIUM — Spatial Technology Studio',
     description:
-      'UNIMASI mengubah ide, informasi, produk, dan konsep kompleks menjadi visual digital yang menarik, komunikatif, dan mudah dipahami.',
+      'SPATIUM merekonstruksi ruang fisik menjadi pengalaman digital spasial fotorealistis interaktif 3D Gaussian Splatting berkecepatan 60 FPS.',
     services: (services as Array<{ title?: string; name?: string; tagline?: string; shortDescription?: string; summary?: string; slug: string }>).map((s) => ({
       name: s.title ?? s.name ?? '',
       description: s.tagline ?? s.shortDescription ?? s.summary ?? '',
@@ -68,10 +69,11 @@ export default async function HomePage() {
       <RevealProvider>
         <Hero />
         <PartnerLogos partners={partners as unknown as import('@/data/clients').PartnerLogo[]} />
+        <SpatialShowcase initialProjects={portfolios as unknown as import('@/data/projects').Project[]} />
+        <SpatialVsTraditional />
+        <SpatialPipeline />
         <ServicesShowcase initialServices={services} />
         <Capabilities />
-        <PortfolioPreview initialProjects={portfolios as unknown as import('@/data/projects').Project[]} />
-        <ProcessTimeline />
         <WhyUnimasi />
         <Industries />
         <JournalPreview />

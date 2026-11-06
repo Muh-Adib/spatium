@@ -103,21 +103,21 @@ export function JournalClient({
   return (
     <>
       <PageHero
-        eyebrow="Articles & Archive"
+        eyebrow="SPATIUM INSIGHTS"
         title={
           <>
-            Insights from the <span className="accent">production floor</span>.
+            Riset &amp; Inovasi <span className="accent">3D Gaussian Splatting</span>.
           </>
         }
-        lede="Explore practical writing, case analyses, and production insights covering 3D CGI animation, videotron production, motion design, and visual technology."
-        crumbs={[{ label: 'Home', to: '/' }, { label: 'Articles' }]}
+        lede="Eksplorasi tulisan teknis, studi kasus pemindaian laser LiDAR, strategi Zero Moment of Truth (ZMOT), dan komputasi spasial dari tim spesialis SPATIUM."
+        crumbs={[{ label: 'Home', to: '/' }, { label: 'Artikel' }]}
         meta={
           <>
             <span className="pill">
-              <Icon name="pen" size={13} /> {totalAllCount.toLocaleString()} articles
+              <Icon name="pen" size={13} /> {totalAllCount.toLocaleString()} Artikel
             </span>
             <span className="pill">
-              <Icon name="grid" size={13} /> {categories.length} topics
+              <Icon name="grid" size={13} /> {categories.length} Kategori
             </span>
             <span className="pill">
               <Icon name="calendar" size={13} /> Page {currentPage} of {Math.max(1, totalPages)}

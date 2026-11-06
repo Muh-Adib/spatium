@@ -82,6 +82,7 @@ function mapToPortfolio(row: any): Portfolio {
 }
 
 export async function getPortfolios(limit?: number): Promise<Portfolio[]> {
+  if (!process.env.DATABASE_URL) return []
   try {
     let query = prisma.orm.public.Portfolio.orderBy((p: any) => p.id.desc())
     if (limit) {
@@ -89,28 +90,31 @@ export async function getPortfolios(limit?: number): Promise<Portfolio[]> {
     }
     const rows = await query.all()
     return rows.map(mapToPortfolio)
-  } catch (err) {
-    console.error('Failed to get portfolios:', err)
+  } catch (err: any) {
+    console.error('Failed to get portfolios:', err?.message || String(err))
     return []
   }
 }
 
 export async function getPortfolioBySlug(slug: string): Promise<Portfolio | null> {
+  if (!process.env.DATABASE_URL) return null
   try {
     const row = await prisma.orm.public.Portfolio.where({ slug }).first()
     if (!row) return null
     return mapToPortfolio(row)
-  } catch (err) {
-    console.error('Failed to get portfolio by slug:', err)
+  } catch (err: any) {
+    console.error('Failed to get portfolio by slug:', err?.message || String(err))
     return null
   }
 }
 
 export async function getFeaturedPortfolios(limit = 6): Promise<Portfolio[]> {
+  if (!process.env.DATABASE_URL) return []
   try {
     const rows = await prisma.orm.public.Portfolio.where({ featured: true }).limit(limit).all()
     return rows.map(mapToPortfolio)
-  } catch (err) {
+  } catch (err: any) {
+    console.error('Failed to get featured portfolios:', err?.message || String(err))
     return []
   }
 }

@@ -4,14 +4,15 @@ import { InquiryForm } from '@/components/forms/InquiryForm'
 import { Reveal } from '@/components/ui/Reveal'
 import { Icon } from '@/components/Icon'
 import { CONTACT, SOCIALS } from '@/data/site'
+import { siteConfig } from '@/config/site'
 import '@/pages/contact.css'
 
-const SITE_URL = 'https://unimasi.studio'
+const SITE_URL = siteConfig.url
 
 export const metadata: Metadata = {
-  title: 'Start a Project with UNIMASI',
+  title: 'Hubungi SPATIUM — Jadwalkan Konsultasi & Reality Capture',
   description:
-    'Start a project with UNIMASI. Send your brief, service interest, budget range and timeline and the studio will respond within two working days.',
+    'Jadwalkan pemindaian LiDAR darat, drone photogrammetry, dan rekonstruksi 3D Gaussian Splatting untuk bisnis Anda bersama tim spesialis spasial SPATIUM.',
   alternates: {
     canonical: `${SITE_URL}/contact`,
   },
@@ -19,43 +20,43 @@ export const metadata: Metadata = {
 
 const EXPECTATIONS = [
   {
-    title: 'We read the brief properly',
-    body: 'No templated reply. We look at the audience, the deadline and the budget before answering.',
+    title: 'Analisis Sensor & Karakteristik Ruang',
+    body: 'Kami menelaah jenis lokasi (F&B, hotel, rumah sakit, pabrik, atau set film) untuk menentukan kombinasi LiDAR dan rig radiansi terbaik.',
     icon: 'eye',
   },
   {
-    title: 'You get a recommended pipeline',
-    body: 'Including why we would choose 2D, 3D or motion for your specific message — and what we would avoid.',
+    title: 'Estimasi Akurasi & Kerapatan Splats',
+    body: 'Penetapan target akurasi sub-sentimeter (< 5mm) dan kerapatan partikel fotorealistis (8M–20M splats) sesuai kebutuhan platform.',
     icon: 'route',
   },
   {
-    title: 'Scope before surprises',
-    body: 'A written scope with deliverables, review rounds and timing, so nothing is discovered late.',
+    title: 'Proposal Lingkup & Alur Transparan',
+    body: 'Rincian jadwal pemindaian on-site, paket serah terima WebGL / VR, dan biaya tetap tanpa biaya tersembunyi.',
     icon: 'shield',
   },
   {
-    title: 'Reply within two working days',
-    body: 'Usually faster. If we are at capacity we will say so rather than hold your project in a queue.',
+    title: 'Respons Cepat 1x24 Jam Kerja',
+    body: 'Konsultasi teknis awal langsung bersama tim insinyur spasial kami untuk memberikan solusi ruang konkret.',
     icon: 'clock',
   },
 ]
 
 const FAQS = [
   {
-    q: 'What does a project typically cost?',
-    a: 'Cost depends on runtime, complexity and how much of the design work you already have. Pick a budget range in the form and we will tell you honestly what is achievable within it.',
+    q: 'Berapa lama proses pemindaian LiDAR dan kamera di lokasi fisik?',
+    a: 'Untuk area restoran, kafe, atau ruang bedah berukuran 200–1.500 m², proses pemindaian lapangan biasanya memakan waktu antara 2 hingga 4 jam tanpa mengganggu operasional.',
   },
   {
-    q: 'How quickly can you start?',
-    a: 'Discovery usually begins within a week to ten days of an approved proposal, depending on current studio capacity.',
+    q: 'Apakah pengunjung harus mengunduh aplikasi untuk melihat tur 3D ini?',
+    a: 'Tidak. Teknologi 3D Gaussian Splatting SPATIUM berjalan secara native di peramban (Chrome, Safari, Firefox, Edge) pada HP, laptop, dan tablet secara mulus 60 FPS.',
   },
   {
-    q: 'Do you work with teams in other time zones?',
-    a: 'Yes. We are remote-first and run reviews asynchronously by default, with live calls when they add something.',
+    q: 'Bagaimana cara memasang tur 3D ini ke website perusahaan kami?',
+    a: 'Kami menyediakan kode embed iframe satu baris yang ringan, atau Anda dapat mengunggah berkas bundle HTML mandiri ke server Anda menggunakan fitur Tour Upload SPATIUM.',
   },
   {
-    q: 'Can you work under our brand guidelines?',
-    a: 'Yes. Share the brand system and we will build the animation style within it, proposing extensions only where motion genuinely needs new rules.',
+    q: 'Apakah hasil rekonstruksi spasial bisa dipakai di headset VR atau Apple Vision Pro?',
+    a: 'Ya, semua hasil tangkapan SPATIUM siap untuk standar WebXR spasial sehingga pengguna kacamata VR atau Vision Pro dapat langsung masuk ke ruangan secara nyata.',
   },
 ]
 
@@ -63,11 +64,11 @@ const jsonLd = [
   {
     '@context': 'https://schema.org',
     '@type': 'ContactPage',
-    name: 'Contact UNIMASI',
+    name: 'Kontak SPATIUM',
     url: `${SITE_URL}/contact`,
     mainEntity: {
       '@type': 'Organization',
-      name: 'UNIMASI',
+      name: 'SPATIUM Spatial Technology Studio',
       url: SITE_URL,
       email: CONTACT.email,
     },
@@ -83,21 +84,21 @@ export default function ContactPage() {
       />
 
       <PageHero
-        eyebrow="Project inquiry"
+        eyebrow="KONTAK &amp; KONSULTASI SPATIUM"
         title={
           <>
-            Tell us what needs to <span className="accent">move</span>.
+            Jadwalkan <span className="accent">Reality Capture</span> Anda.
           </>
         }
-        lede="Fill in as much as you can. The more context you give, the more useful our reply will be — and there is no obligation on either side."
-        crumbs={[{ label: 'Home', to: '/' }, { label: 'Contact' }]}
+        lede="Sampaikan kebutuhan ruang Anda — dari display interaktif ZMOT marketing, virtual scouting film, hingga arsip cagar budaya dan pernikahan abadi."
+        crumbs={[{ label: 'Home', to: '/' }, { label: 'Kontak' }]}
         meta={
           <>
             <span className="pill">
-              <Icon name="clock" size={13} /> Reply within 2 working days
+              <Icon name="clock" size={13} /> Respons 1x24 Jam
             </span>
             <span className="pill">
-              <Icon name="globe" size={13} /> Remote-first, worldwide
+              <Icon name="globe" size={13} /> Jakarta · Bandung · Global
             </span>
           </>
         }
@@ -106,47 +107,49 @@ export default function ContactPage() {
       <section className="section contact" aria-labelledby="contact-form-title">
         <div className="container container--wide contact__inner">
           <Reveal className="contact__aside">
-            <h2 className="contact__aside-title" id="contact-form-title">
-              What to expect
+            <h2 className="contact__aside-title text-white" id="contact-form-title">
+              Standar Layanan SPATIUM
             </h2>
 
             <ul className="contact__expectations">
               {EXPECTATIONS.map((item) => (
                 <li key={item.title}>
-                  <span className="contact__expectation-icon">
+                  <span className="contact__expectation-icon text-cyan-400">
                     <Icon name={item.icon} size={18} />
                   </span>
                   <div>
-                    <strong>{item.title}</strong>
-                    <p>{item.body}</p>
+                    <strong className="text-white">{item.title}</strong>
+                    <p className="text-neutral-300">{item.body}</p>
                   </div>
                 </li>
               ))}
             </ul>
 
             <div className="contact__details">
-              <h3 className="mono contact__details-title">Studio details</h3>
+              <h3 className="mono contact__details-title text-cyan-400">Rincian Studio</h3>
               <ul>
                 <li>
                   <Icon name="mail" size={16} />
-                  <a href={`mailto:${CONTACT.email}`}>{CONTACT.email}</a>
+                  <a href={`mailto:${CONTACT.email}`} className="text-white hover:text-cyan-400">{CONTACT.email}</a>
                 </li>
                 <li>
                   <Icon name="pin" size={16} />
-                  <span>{CONTACT.location}</span>
+                  <span className="text-neutral-300">{CONTACT.location}</span>
                 </li>
                 <li>
                   <Icon name="clock" size={16} />
-                  <span>{CONTACT.hours}</span>
+                  <span className="text-neutral-300">{CONTACT.hours}</span>
                 </li>
               </ul>
+            </div>
 
-              <ul className="contact__socials">
+            <div className="contact__socials">
+              <h3 className="mono contact__details-title text-cyan-400">Kanal Resmi</h3>
+              <ul>
                 {SOCIALS.map((social) => (
                   <li key={social.label}>
-                    <a href={social.href} target="_blank" rel="noreferrer noopener">
+                    <a href={social.href} target="_blank" rel="noopener noreferrer" className="text-white hover:text-cyan-400">
                       {social.label}
-                      <Icon name="external" size={13} />
                     </a>
                   </li>
                 ))}
@@ -154,32 +157,23 @@ export default function ContactPage() {
             </div>
           </Reveal>
 
-          <Reveal className="contact__form" delay={110} variant="scale">
+          <Reveal className="contact__main" delay={100} variant="scale">
             <InquiryForm />
           </Reveal>
         </div>
       </section>
 
-      <section className="section section--deep contact-faq" aria-labelledby="contact-faq-title">
+      <section className="section contact-faqs" aria-labelledby="faqs-title">
         <div className="container container--wide">
-          <Reveal className="contact-faq__head">
-            <p className="eyebrow">Before you write</p>
-            <h2 className="display-md" id="contact-faq-title">
-              Common questions
-            </h2>
-          </Reveal>
-
-          <div className="contact-faq__list">
-            {FAQS.map((faq, i) => (
-              <Reveal key={faq.q} delay={i * 60}>
-                <details className="faq-item">
-                  <summary>
-                    <span>{faq.q}</span>
-                    <Icon name="plus" size={18} />
-                  </summary>
-                  <p>{faq.a}</p>
-                </details>
-              </Reveal>
+          <h2 className="display-sm text-white mb-8" id="faqs-title">
+            Pertanyaan Umum Seputar Pemindaian Spasial
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {FAQS.map((faq) => (
+              <div key={faq.q} className="p-6 rounded-2xl bg-white/[0.02] border border-white/10">
+                <h3 className="text-base font-bold text-white mb-2">{faq.q}</h3>
+                <p className="text-xs text-neutral-300 leading-relaxed">{faq.a}</p>
+              </div>
             ))}
           </div>
         </div>

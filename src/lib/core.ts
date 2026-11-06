@@ -94,12 +94,12 @@ export interface CoreArticleDetailResponse {
 const CORE_API_URL =
   process.env.CORE_API_URL ||
   process.env.NEXT_PUBLIC_CORE_URL ||
-  `http://127.0.0.1:${process.env.PORT || '3000'}`
+  `http://127.0.0.1:${process.env.PORT || '3002'}`
 
 const CORE_SITE_KEY =
   process.env.CORE_SITE_KEY ||
   process.env.NEXT_PUBLIC_CORE_SITE_KEY ||
-  'site_sec_unimasi'
+  'site_sec_spatium'
 
 /**
  * Standard fetch wrapper for UNIMASI Core Delivery API with Next.js caching.
@@ -140,9 +140,9 @@ async function coreFetch<T>(endpoint: string, options: RequestInit = {}): Promis
  * Helper to normalize author name from Core object or string.
  */
 export function getAuthorName(author?: CoreAuthor | string | null): string {
-  if (!author) return 'UNIMASI'
+  if (!author) return 'SPATIUM'
   if (typeof author === 'string') return author
-  return author.name || 'UNIMASI'
+  return author.name || 'SPATIUM'
 }
 
 /**
@@ -192,37 +192,6 @@ export async function getCoreArticles(params: {
   const page = Math.max(1, params.page || 1)
   const pageSize = params.pageSize || 12
 
-  const queryParams = new URLSearchParams({
-    page: String(page),
-    pageSize: String(pageSize),
-    limit: String(pageSize),
-  })
-
-  if (params.category && params.category !== 'all') {
-    queryParams.set('category', params.category)
-  }
-  if (params.search && params.search.trim()) {
-    queryParams.set('search', params.search.trim())
-  }
-
-  const result = await coreFetch<CoreArticlesResponse>(
-    `/api/v1/delivery/articles?${queryParams.toString()}`
-  )
-
-  if (result && Array.isArray(result.data)) {
-    const total = result.meta?.pagination?.total ?? result.data.length
-    const pageCount = result.meta?.pagination?.pageCount ?? Math.ceil(total / pageSize)
-    return {
-      articles: result.data,
-      total,
-      page,
-      pageSize,
-      pageCount,
-    }
-  }
-
-  // Graceful fallback to local static articles if Core is offline
-  console.warn('[Core API] Falling back to local static articles')
   let filtered = [...SORTED_ARTICLES]
   if (params.category && params.category !== 'all') {
     filtered = filtered.filter((a) => a.category.toLowerCase() === params.category!.toLowerCase())
@@ -258,18 +227,9 @@ export async function getCoreArticles(params: {
 }
 
 /**
- * Fetch a single article by slug from UNIMASI Core.
+ * Fetch a single article by slug from SPATIUM Core.
  */
 export async function getCoreArticleBySlug(slug: string): Promise<CoreArticle | null> {
-  const result = await coreFetch<CoreArticleDetailResponse>(
-    `/api/v1/delivery/articles/${encodeURIComponent(slug)}`
-  )
-
-  if (result && result.article) {
-    return result.article
-  }
-
-  // Graceful fallback to local static article
   const localMatch = SORTED_ARTICLES.find((a) => a.slug === slug)
   if (localMatch) {
     return {
@@ -294,9 +254,9 @@ export async function getCoreArticleBySlug(slug: string): Promise<CoreArticle | 
       readingTime: localMatch.readMinutes,
       tags: localMatch.tags.map((t) => ({ name: t, slug: t.toLowerCase() })),
       seo: {
-        metaTitle: localMatch.title,
+        metaTitle: `${localMatch.title} — SPATIUM`,
         metaDescription: localMatch.metaDescription,
-        canonicalUrl: `https://unimasi.studio/journal/${localMatch.slug}`,
+        canonicalUrl: `https://spatium.id/journal/${localMatch.slug}`,
       },
     }
   }
@@ -308,21 +268,11 @@ export async function getCoreArticleBySlug(slug: string): Promise<CoreArticle | 
  * Fetch all categories and counts for filter UI.
  */
 export async function getCoreCategories(): Promise<{ name: string; count: number }[]> {
-  // Query first page with maximum sample to extract dynamic categories
-  const res = await coreFetch<CoreArticlesResponse>('/api/v1/delivery/articles?limit=100')
   const counts: Record<string, number> = {}
-
-  if (res && Array.isArray(res.data)) {
-    res.data.forEach((art) => {
-      const cat = getCategoryName(art.category)
-      counts[cat] = (counts[cat] || 0) + 1
-    })
-  } else {
-    SORTED_ARTICLES.forEach((art) => {
-      const cat = art.category
-      counts[cat] = (counts[cat] || 0) + 1
-    })
-  }
+  SORTED_ARTICLES.forEach((art) => {
+    const cat = art.category
+    counts[cat] = (counts[cat] || 0) + 1
+  })
 
   return Object.entries(counts)
     .sort((a, b) => b[1] - a[1])
@@ -361,61 +311,32 @@ export interface CorePartnerItem {
 }
 
 import { SERVICES } from '@/data/services'
+import { PROJECTS } from '@/data/projects'
 
 export async function getCoreServices(): Promise<any[]> {
-  const res = await coreFetch<{ services: CoreServiceItem[] }>('/api/v1/delivery/services')
-  const localServices = SERVICES || []
-  if (res && Array.isArray(res.services) && res.services.length > 0) {
-    return res.services.map((svc) => {
-      const match = localServices.find((s) => s.slug === svc.slug)
-      const extendedSvc = svc as typeof svc & { shortName?: string; description?: string }
-      return {
-        ...match,
-        ...svc,
-        name: svc.name || match?.name || '',
-        shortName: extendedSvc.shortName || match?.shortName || svc.name || '',
-        tagline: svc.shortDescription || match?.tagline || '',
-        summary: svc.summary || extendedSvc.description || match?.summary || '',
-        visual: match?.visual || '2d',
-        capabilities: match?.capabilities || (svc.deliverables || []).map((d) => ({ title: d, description: d })),
-        tools: match?.tools || ['Cinema 4D', 'Blender', 'After Effects'],
-      }
-    })
-  }
-  return localServices
+  return SERVICES || []
 }
 
 export async function getCorePortfolios(): Promise<CorePortfolioItem[]> {
-  const res = await coreFetch<{ portfolios: CorePortfolioItem[] }>('/api/v1/delivery/portfolios')
-  if (res && Array.isArray(res.portfolios) && res.portfolios.length > 0) {
-    return res.portfolios
-  }
-  try {
-    const seed = require('@/data/projects')
-    return seed.PROJECTS || []
-  } catch {
-    return []
-  }
+  return (PROJECTS as unknown as CorePortfolioItem[]) || []
 }
 
 export async function getCorePartners(): Promise<CorePartnerItem[]> {
-  try {
-    const res = await coreFetch<{ data: CorePartnerItem[] }>('/api/v1/delivery/partners')
-    if (res && Array.isArray(res.data) && res.data.length > 0) {
-      return res.data
-    }
-  } catch (err) { console.warn("[observable error]:", err) }
+  if (!process.env.DATABASE_URL) {
+    return []
+  }
   try {
     const { getClientLogos } = await import('@/lib/content/clients')
-    const dbItems = await getClientLogos()
+    const timeout = new Promise<null>((resolve) => setTimeout(() => resolve(null), 600))
+    const dbItems = await Promise.race([getClientLogos(), timeout])
+    if (!dbItems || !Array.isArray(dbItems)) return []
     return dbItems.map((c) => ({
       id: c.id,
       name: c.name,
       logo: c.src,
       alt: c.alt,
     }))
-  } catch (err) {
-    console.error('Failed to get partners from DB:', err)
+  } catch {
     return []
   }
 }

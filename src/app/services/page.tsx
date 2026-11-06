@@ -11,14 +11,15 @@ import { Icon } from '@/components/Icon'
 import { CORE_SERVICES, SERVICES } from '@/data/services'
 import { INDUSTRIES } from '@/data/site'
 import { getCoreServices } from '@/lib/core'
+import { siteConfig } from '@/config/site'
 import '@/pages/services.css'
 
-const SITE_URL = 'https://unimasi.studio'
+const SITE_URL = siteConfig.url
 
 export const metadata: Metadata = {
-  title: 'Animation & Motion Design Services',
+  title: 'Layanan Teknologi Spasial & 3D Gaussian Splatting',
   description:
-    '2D animation, 3D animation, motion graphics, and digital visual assets with AI-assisted production — the four UNIMASI capabilities.',
+    'Layanan komprehensif SPATIUM: Filmmaking & VFX, Marketing & Branding (ZMOT), Entertainment & Installation, dan Memory & Documentary berbasis 3DGS dan laser LiDAR.',
   alternates: {
     canonical: `${SITE_URL}/services`,
   },
@@ -31,7 +32,7 @@ const jsonLd = SERVICES.map((service) => ({
   serviceType: service.name,
   description: service.metaDescription,
   url: `${SITE_URL}/services/${service.slug}`,
-  provider: { '@type': 'Organization', name: 'UNIMASI', url: SITE_URL },
+  provider: { '@type': 'Organization', name: 'SPATIUM', url: SITE_URL },
 }))
 
 export default async function ServicesPage() {
@@ -44,24 +45,21 @@ export default async function ServicesPage() {
       />
 
       <PageHero
-        eyebrow="Services"
+        eyebrow="SPATIUM SERVICES"
         title={
           <>
-            Everything we do, <span className="accent">and why</span>.
+            4 Vertikal Solusi <span className="accent">Spasial &amp; 3DGS</span>.
           </>
         }
-        lede="Three core disciplines supported by a digital asset pipeline. Each one has its own visual language, its own production route and its own ideal use case."
-        crumbs={[{ label: 'Home', to: '/' }, { label: 'Services' }]}
+        lede="Dari pra-produksi film, display interaktif ZMOT untuk ritel &amp; kuliner, hingga kalibrasi instalasi seni dan preservasi memori digital beresolusi tinggi."
+        crumbs={[{ label: 'Home', to: '/' }, { label: 'Layanan' }]}
         meta={
           <>
             <span className="pill">
-              <Icon name="layers" size={13} /> 4 core disciplines
+              <Icon name="layers" size={13} /> 4 Vertikal Utama
             </span>
             <span className="pill">
-              <Icon name="sparkle" size={13} /> AI-assisted production
-            </span>
-            <span className="pill">
-              <Icon name="users" size={13} /> 8 industries served
+              <Icon name="clock" size={13} /> Akurasi Sub-5mm
             </span>
           </>
         }
@@ -73,22 +71,21 @@ export default async function ServicesPage() {
         <div className="container container--wide">
           <SectionHead
             id="compare-title"
-            eyebrow="Side by side"
-            title="Which discipline fits your message?"
+            eyebrow="Komparasi Vertikal"
+            title="Pilih Vertikal yang Sesuai Kebutuhan Anda"
             aside={
               <p className="lede">
-                A quick comparison of what each discipline is best at, what it produces and how it is
-                typically used.
+                Tinjauan komprehensif atas kapabilitas, hasil serah terima, dan toolchain pemindaian sensor pada setiap vertikal SPATIUM.
               </p>
             }
           />
 
           <Reveal className="compare-table-wrap">
             <table className="compare-table">
-              <caption className="sr-only">Comparison of the three core animation disciplines</caption>
+              <caption className="sr-only">Komparasi 4 Vertikal Layanan SPATIUM</caption>
               <thead>
                 <tr>
-                  <th scope="col">At a glance</th>
+                  <th scope="col">Vertikal</th>
                   {CORE_SERVICES.map((service) => (
                     <th scope="col" key={service.slug}>
                       <span className="compare-table__index mono">{service.index}</span>
@@ -99,13 +96,13 @@ export default async function ServicesPage() {
               </thead>
               <tbody>
                 <tr>
-                  <th scope="row">Best for</th>
+                  <th scope="row">Fokus Utama</th>
                   {CORE_SERVICES.map((service) => (
                     <td key={service.slug}>{service.tagline}</td>
                   ))}
                 </tr>
                 <tr>
-                  <th scope="row">Core capabilities</th>
+                  <th scope="row">Kapabilitas Inti</th>
                   {CORE_SERVICES.map((service) => (
                     <td key={service.slug}>
                       <ul className="compare-table__list">
@@ -117,7 +114,7 @@ export default async function ServicesPage() {
                   ))}
                 </tr>
                 <tr>
-                  <th scope="row">Typical deliverables</th>
+                  <th scope="row">Hasil Serah Terima</th>
                   {CORE_SERVICES.map((service) => (
                     <td key={service.slug}>
                       <ul className="compare-table__list">
@@ -129,7 +126,7 @@ export default async function ServicesPage() {
                   ))}
                 </tr>
                 <tr>
-                  <th scope="row">Toolchain</th>
+                  <th scope="row">Toolchain & Sensor</th>
                   {CORE_SERVICES.map((service) => (
                     <td key={service.slug}>
                       <div className="compare-table__tools">
@@ -147,7 +144,7 @@ export default async function ServicesPage() {
                   {CORE_SERVICES.map((service) => (
                     <td key={service.slug}>
                       <Link href={`/services/${service.slug}`} className="link-arrow">
-                        Detail page
+                        Detail Layanan
                         <Icon name="arrow-right" size={15} />
                       </Link>
                     </td>
@@ -173,15 +170,15 @@ export default async function ServicesPage() {
 
       <CTASection
         id="services-cta"
-        eyebrow="Not sure which applies?"
+        eyebrow="One Point, Unlimited Possibilities"
         title={
           <>
-            Send the brief — we will recommend the <span className="accent">right pipeline</span>.
+            Konsultasikan ruang fisik Anda dengan <span className="accent">3D Gaussian Splatting</span>.
           </>
         }
-        body="We regularly explain why a project does not need the expensive option. The recommendation comes with the trade-offs stated."
-        primary={{ label: 'Start a Project', to: '/contact' }}
-        secondary={{ label: 'See portfolio', to: '/portfolio' }}
+        body="Kami bantu merekomendasikan kombinasi sensor LiDAR darat, drone photogrammetry, dan optimasi WebGL sesuai dengan sasaran bisnis Anda."
+        primary={{ label: 'Jadwalkan Konsultasi', to: '/contact' }}
+        secondary={{ label: 'Lihat Portofolio 3DGS', to: '/portfolio' }}
       />
     </>
   )

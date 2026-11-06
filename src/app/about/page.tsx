@@ -10,14 +10,15 @@ import { SectionHead } from '@/components/ui/SectionHead'
 import { ServiceVisual } from '@/components/services/ServiceVisual'
 import { Icon } from '@/components/Icon'
 import { CORE_SERVICES } from '@/data/services'
+import { siteConfig } from '@/config/site'
 import '@/pages/about.css'
 
-const SITE_URL = 'https://unimasi.studio'
+const SITE_URL = siteConfig.url
 
 export const metadata: Metadata = {
-  title: 'About the UNIMASI Animation Studio',
+  title: 'Tentang SPATIUM — Spatial Technology Studio',
   description:
-    'UNIMASI is an animation and motion design studio built to make complex subjects understandable through 2D animation, 3D animation and motion graphics.',
+    'SPATIUM adalah studio teknologi spasial terdepan di Indonesia yang mengkhususkan diri pada 3D Gaussian Splatting, pemindaian laser LiDAR terestrial, dan digital twin fotorealistis skala 1:1.',
   alternates: {
     canonical: `${SITE_URL}/about`,
   },
@@ -25,23 +26,23 @@ export const metadata: Metadata = {
 
 const PRINCIPLES = [
   {
-    title: 'Clarity beats cleverness',
-    body: 'If a viewer has to work out what they are looking at, the craft has failed. We simplify until the message is unmissable, then add the polish.',
+    title: 'Walkable Reality Beats Static Frames',
+    body: 'Ruang fisik nyata tidak bisa diwakili secara jujur hanya oleh foto 2D bersudut lebar atau video pasif. Ruang harus dapat dijelajahi sendiri secara bebas skala 1:1.',
     icon: 'target',
   },
   {
-    title: 'Show the work early',
-    body: 'Animatics and look-development frames arrive before the expensive stages. Nobody should be surprised by a reveal on delivery day.',
+    title: 'Sub-Centimeter Mathematical Precision',
+    body: 'Setiap pemindaian kami dikalibrasi dengan sensor LiDAR terestrial dan fotogrametri padat hingga toleransi di bawah 5mm, menjamin integritas geometri asli.',
     icon: 'eye',
   },
   {
-    title: 'Build things that get reused',
-    body: 'Rigs, materials, templates and asset libraries are structured so the next film starts ahead rather than from zero.',
+    title: 'Zero Moment of Truth (ZMOT)',
+    body: 'Kami merancang tur spasial untuk memicu keyakinan beli seketika. Konsumen dan investor memverifikasi lokasi secara nyata sebelum memutuskan bertransaksi.',
     icon: 'layers',
   },
   {
-    title: 'Say no when it helps',
-    body: 'If a project does not need 3D, we say so. Recommending the cheaper, faster route is how long-term studio relationships are built.',
+    title: 'One Point, Unlimited Possibilities',
+    body: 'Pindai sekali di lapangan, gunakan selamanya untuk embed WebGL 60 FPS, headset VR / Apple Vision Pro, line-up kamera sinema, hingga arsip digital abadi.',
     icon: 'shield',
   },
 ]
@@ -50,15 +51,15 @@ const jsonLd = [
   {
     '@context': 'https://schema.org',
     '@type': 'AboutPage',
-    name: 'About UNIMASI',
+    name: 'Tentang SPATIUM',
     url: `${SITE_URL}/about`,
     mainEntity: {
       '@type': 'Organization',
-      name: 'UNIMASI',
+      name: 'SPATIUM Spatial Technology Studio',
       url: SITE_URL,
       description:
-        'An animation and motion design studio specialising in 2D animation, 3D animation and visual production, and motion graphics.',
-      knowsAbout: ['2D Animation', '3D Animation', 'Motion Graphics', 'Visual Effects', 'Real-time 3D'],
+        'Studio teknologi spasial yang mengubah ruang fisik menjadi pengalaman digital fotorealistis interaktif 3D Gaussian Splatting dan digital twin.',
+      knowsAbout: ['3D Gaussian Splatting', 'LiDAR Laser Scanning', 'Digital Twins', 'Photogrammetry', 'Spatial Computing', 'WebXR'],
     },
   },
 ]
@@ -72,21 +73,21 @@ export default function AboutPage() {
       />
 
       <PageHero
-        eyebrow="About the studio"
+        eyebrow="TENTANG SPATIUM"
         title={
           <>
-            We make ideas <span className="accent">move</span>.
+            Real places. <span className="accent">New perspectives</span>.
           </>
         }
-        lede="UNIMASI is an animation and motion design studio working with educators, industry, government and brands to turn complex subjects into work people actually watch."
-        crumbs={[{ label: 'Home', to: '/' }, { label: 'About' }]}
+        lede="SPATIUM adalah studio teknologi spasial yang mengatasi The Curse of Distance dengan merekonstruksi ruang nyata ke dalam pengalaman walkable 3D Gaussian Splatting berkecepatan 60 FPS di WebGL."
+        crumbs={[{ label: 'Home', to: '/' }, { label: 'Tentang' }]}
         meta={
           <>
             <span className="pill">
-              <Icon name="layers" size={13} /> 4 core disciplines
+              <Icon name="layers" size={13} /> 4 Vertikal Utama
             </span>
             <span className="pill">
-              <Icon name="globe" size={13} /> Remote-first, worldwide
+              <Icon name="globe" size={13} /> Jakarta · Bandung · Global
             </span>
           </>
         }
@@ -95,30 +96,24 @@ export default function AboutPage() {
       <section className="section about-statement" aria-labelledby="about-statement-title">
         <div className="container container--wide about-statement__inner">
           <Reveal className="about-statement__copy">
-            <p className="eyebrow">Our position</p>
-            <h2 className="display-md about-statement__title" id="about-statement-title">
-              Animation is an argument, not a decoration.
+            <p className="eyebrow text-cyan-400">Filosofi Kami</p>
+            <h2 className="display-md about-statement__title text-white" id="about-statement-title">
+              Dari sekadar melihat, menjadi mengalami. Dari sekadar menduga, menjadi memverifikasi.
             </h2>
-            <p className="about-statement__text">
-              Most of the work we take on exists because something is hard to explain — an engineering
-              process, a policy change, a product mechanism, a curriculum topic. The animation is not
-              there to make the explanation pretty. It is there to make it land.
+            <p className="about-statement__text text-neutral-300">
+              Jarak geografis sering kali menjadi penghalang terbesar: calon tamu restoran ragu memesan meja sunset, sutradara film kesulitan membayangkan sudut kamera di lokasi syuting luar pulau, dan keluarga tidak bisa kembali ke suasana dekorasi pernikahan yang telah dibongkar.
             </p>
-            <p className="about-statement__text">
-              That means we care as much about structure and pacing as we do about rendering. We write
-              before we model, we storyboard before we animate, and we review in the animatic where
-              changes are still cheap.
+            <p className="about-statement__text text-neutral-300">
+              Melalui teknologi <strong>3D Gaussian Splatting (3DGS)</strong> dan <strong>LiDAR laser scanning</strong>, SPATIUM mereplikasi dunia nyata dengan akurasi sub-sentimeter dan menangkap refleksi cahaya fotorealistis. Pengguna dapat berjalan bebas di ruang virtual 60 FPS langsung dari peramban ponsel pintar mereka tanpa perlu mengunduh aplikasi apa pun.
             </p>
-            <p className="about-statement__text">
-              We are deliberately a specialist studio. Rather than offering every format, we go deep on
-              three disciplines and support them with a documented asset pipeline — so the quality
-              holds from the first explainer to the hundredth template.
+            <p className="about-statement__text text-neutral-300">
+              Prinsip kami: <em>One Point, Unlimited Possibilities</em>. Satu kali pemindaian di lokasi fisik membuka potensi tanpa batas untuk marketing ZMOT, simulasi medis klinis, virtual scouting film, hingga preservasi warisan budaya abadi.
             </p>
           </Reveal>
 
           <Reveal className="about-statement__visual" variant="scale" delay={100}>
             <div className="about-statement__frame">
-              <ServiceVisual kind="motion" />
+              <ServiceVisual kind="3d" />
             </div>
           </Reveal>
         </div>
@@ -128,12 +123,11 @@ export default function AboutPage() {
         <div className="container container--wide">
           <SectionHead
             id="about-disciplines-title"
-            eyebrow="What we do"
-            title="Three disciplines, one studio"
+            eyebrow="Vertikal Layanan"
+            title="4 Vertikal Teknologi Spasial"
             aside={
               <p className="lede">
-                Most projects blend two or three. The pipeline is chosen to suit the message, not the
-                other way around.
+                Solusi presisi terintegrasi untuk industri perfilman, pemasaran bisnis, kalibrasi pameran seni, dan preservasi memori abadi.
               </p>
             }
           />
@@ -146,7 +140,7 @@ export default function AboutPage() {
                 <p className="about-discipline__tagline">{service.tagline}</p>
                 <p className="about-discipline__body">{service.summary}</p>
                 <Link href={`/services/${service.slug}`} className="link-arrow">
-                  Explore {service.shortName}
+                  Eksplorasi {service.shortName}
                   <Icon name="arrow-right" size={15} />
                 </Link>
               </Reveal>
@@ -155,28 +149,20 @@ export default function AboutPage() {
         </div>
       </section>
 
-      <section className="section section--deep about-principles" aria-labelledby="about-principles-title">
+      <section className="section about-principles" aria-labelledby="principles-title">
         <div className="container container--wide">
           <SectionHead
-            id="about-principles-title"
-            eyebrow="How we work"
-            title="Four principles we do not negotiate"
-            aside={
-              <p className="lede">
-                These are the rules that keep projects predictable — for us and for the teams we work
-                with.
-              </p>
-            }
+            id="principles-title"
+            eyebrow="Prinsip & Nilai"
+            title="Standar Rekayasa Spasial SPATIUM"
           />
 
           <ul className="about-principles__grid">
-            {PRINCIPLES.map((item, i) => (
-              <Reveal as="li" key={item.title} delay={i * 65} className="about-principle">
-                <span className="about-principle__icon">
-                  <Icon name={item.icon} size={20} />
-                </span>
-                <h3>{item.title}</h3>
-                <p>{item.body}</p>
+            {PRINCIPLES.map((principle, i) => (
+              <Reveal as="li" key={principle.title} delay={i * 80} className="principle-card">
+                <span className="principle-card__num mono">{String(i + 1).padStart(2, '0')}</span>
+                <h3 className="principle-card__title">{principle.title}</h3>
+                <p className="principle-card__body">{principle.body}</p>
               </Reveal>
             ))}
           </ul>
@@ -189,14 +175,15 @@ export default function AboutPage() {
 
       <CTASection
         id="about-cta"
-        eyebrow="Work with us"
+        eyebrow="Mulai Eksplorasi Spasial"
         title={
           <>
-            Bring us the thing that is <span className="accent">hard to explain</span>.
+            Siap merekonstruksi ruang Anda ke dalam <span className="accent">3D Gaussian Splatting</span>?
           </>
         }
-        body="That is the work we are built for. Send the brief and we will tell you honestly whether animation is even the right answer."
-        secondary={{ label: 'Read the journal', to: '/journal' }}
+        body="Konsultasikan kebutuhan ruang dan lokasi Anda bersama tim insinyur spasial kami. Kami siapkan survei lapangan dan estimasi teknis transparan."
+        primary={{ label: 'Jadwalkan Konsultasi Spasial', to: '/contact' }}
+        secondary={{ label: 'Lihat Portofolio 3DGS', to: '/portfolio' }}
       />
     </>
   )
