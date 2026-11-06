@@ -20,6 +20,7 @@ Artikel ditulis sebagai rangkaian blok penulisan (paragraf, subjudul, gambar, vi
 - **Kunci editor**: hanya artikel yang sudah tersimpan yang dikunci (heartbeat tiap 25 detik), agar dua orang tidak menimpa satu sama lain. Kunci disimpan di memori proses — hilang saat restart dan tidak dibagi antar-instance.
 - **Konflik**: setiap simpan mengirim `expectedUpdatedAt`; bila artikel diubah orang lain, editor menampilkan dialog konflik.
 - **Gerbang publikasi**: sebelum terbit atau dijadwalkan, `checkPublicationGate` (`src/lib/seo/validation.ts`) memeriksa judul, slug, meta, dan alt text. Setiap masalah adalah tautan yang memfokuskan kolom terkait.
+- **Menarik artikel terbit** kembali ke draft hanya bisa dilakukan role yang boleh menerbitkan (SUPER_ADMIN, CONTENT_ADMIN, EDITOR). REVIEWER tetap bisa mengembalikan artikel `in_review`/`approved` ke draft untuk revisi.
 - **Penjadwalan**: artikel berstatus `scheduled` diterbitkan oleh penjadwal (`src/lib/publishing/scheduler.ts`, dijalankan dari `src/instrumentation.ts` tiap 30 detik). Artikel yang gagal gerbang dikembalikan ke draft dengan alasan di `scheduleError`.
 - Di bawah 1024 px, panel Dokumen & SEO terbuka sebagai sheet samping.
 
@@ -72,6 +73,43 @@ Tab **Halaman** (`src/components/studio/pages/`) mengelola baris `Page` yang tay
 - Klien MCP bisa membuat dan menyunting draft (lihat [MCP.md](MCP.md)); publikasi tetap di tangan editor.
 
 API: `GET/POST /api/pages`, `GET/PATCH/DELETE /api/pages/:id`, `POST /api/pages/:id/status`, `GET /api/pages/:id/revisions`. Galat berbentuk `{ error, code?, issues?, blockIssues? }`: `not_found` 404, `conflict` / `slug_taken` 409, `invalid` / `gate` 422, `forbidden` 403.
+
+## Katalog: portofolio, layanan, kategori layanan, solusi
+
+Manajer di tab **Portofolio**, **Layanan**, dan **Solusi** memakai aturan yang sama (`src/lib/db/catalogMutations.ts`, skema di `src/lib/validation/api-schemas.ts`):
+
+- **Item baru selalu draft.** Tidak ada lagi default `published`.
+- **Gerbang publikasi** berjalan saat item disimpan sebagai `published`, terhadap data gabungan (yang tersimpan + yang dikirim): judul, slug, meta title & description, dan **alt text gambar sampul**. Galat 422 berisi `error` dan `issues` per kolom. Alt sampul disimpan di `seoData.coverAlt`.
+  - Empat kategori layanan yang sudah terbit (filmmaking-vfx, marketing-branding, entertainment-installation, memory-documentary) belum punya alt sampul karena UI lama tidak menyimpannya; editor perlu mengisinya sekali sebelum bisa menyimpan ulang sebagai `published`.
+- **Simpan berdasarkan ID**, bukan slug. Slug yang dipakai item lain → 409. Mengganti slug item terbit membuat redirect 301 dari URL lama.
+- Pembaruan parsial: kolom yang tidak dikirim tetap. Tautan layanan ↔ portofolio dibaca dari database dan diganti di dalam transaksi (dulu menyunting layanan bisa menghapus semua tautannya).
+- Setiap simpan/hapus menulis `ContentRevision` + `SeoAuditLog` dalam satu transaksi dan me-revalidate rute publik terkait serta `/sitemap.xml` (`revalidateCatalog`).
+- Tidak ada angka, tech stack, tahun, atau alt text yang diisi otomatis (AGENTS.md §3.3).
+- Hapus: SUPER_ADMIN dan CONTENT_ADMIN saja; item yang tidak ada → 404.
+- Konfigurasi pencari solusi bisa dibuat dari keadaan kosong; daftar JSON divalidasi per daftar dengan galat inline.
+
+## Media, logo klien, CTA
+
+- **Media**: unggah, ubah metadata, ganti nama, dan hapus untuk SUPER_ADMIN, CONTENT_ADMIN, EDITOR, MEDIA_MANAGER. AUTHOR hanya bisa mengunggah gambar lewat editor artikel (`/api/upload`). Gambar dari pemilih media dan editor artikel langsung tercatat di pustaka dengan nama pengunggah. Ganti nama tidak boleh mengubah ekstensi, membuat redirect, dan memperbarui referensi dalam satu transaksi.
+- **Logo klien**: tampil di strip mitra beranda; perubahan me-revalidate `/`.
+- **Preset CTA**: buat/ubah untuk SUPER_ADMIN, CONTENT_ADMIN, EDITOR; hapus (`DELETE /api/cta?id=<id>`) untuk SUPER_ADMIN dan CONTENT_ADMIN. Slug bentrok → 409. Preset belum dirender di halaman publik mana pun.
+
+## Pengaturan situs
+
+Tab **Pengaturan** hanya menampilkan kolom yang benar-benar tersimpan di `site_configs`: nama, tagline, URL produksi, deskripsi, logo, favicon, email, telepon, WhatsApp, alamat, dan akun sosial (Instagram, LinkedIn, YouTube, TikTok, Facebook, X, Vimeo, Behance — URL `https://` lengkap). Kolom kosong disembunyikan di situs.
+
+- Hanya SUPER_ADMIN dan CONTENT_ADMIN yang bisa menyimpan; role lain melihat mode baca.
+- Simpan bersifat parsial: kolom yang dikelola di tempat lain tidak ikut terhapus.
+- Galat tampil inline per kolom, fokus pindah ke kolom pertama yang salah.
+- Tombol **Perbarui cache halaman publik** me-revalidate `/` dan `/sitemap.xml` dan melaporkan hasil sebenarnya.
+
+## Redirect
+
+Tab **Redirect** menerima path di situs ini saja (`/lama` → `/baru`). URL luar, `//host`, dan loop (termasuk A→B saat B→A) ditolak dengan pesan yang jelas. Membuat/mengubah: SUPER_ADMIN, CONTENT_ADMIN, SEO_MANAGER, EDITOR; menghapus: SUPER_ADMIN, CONTENT_ADMIN.
+
+## Alat SEO
+
+Audit situs, PageSpeed, pengindeksan ulang, IndexNow, dan keyword untuk SUPER_ADMIN, CONTENT_ADMIN, EDITOR, SEO_MANAGER; sinkronisasi Search Console untuk SUPER_ADMIN, CONTENT_ADMIN, SEO_MANAGER. Crawler dan PageSpeed hanya ke situs sendiri. Tanpa kredensial (GSC, PageSpeed), tab menampilkan status "belum terhubung" tanpa angka.
 
 ## Celah yang diketahui
 
