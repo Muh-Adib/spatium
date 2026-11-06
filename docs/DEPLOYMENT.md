@@ -9,6 +9,7 @@ SPATIUM dideploy sebagai satu image Docker (Next.js 16 `output: 'standalone'`) b
 - `builder` menjalankan `prisma contract emit` lalu `pnpm run build`. Kegagalan emit menghentikan build.
 - Variabel `NEXT_PUBLIC_*` di-inline saat build. Kirim lewat build args: `NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_GA_ID`, `NEXT_PUBLIC_GTM_ID`, `NEXT_PUBLIC_WHATSAPP`, `NEXT_PUBLIC_PHONE`, `NEXT_PUBLIC_STUDIO_ADDRESS`, `NEXT_PUBLIC_STUDIO_HOURS`. Mengubahnya butuh rebuild.
 - Runtime berjalan sebagai user `nextjs` di port 3000.
+- Healthcheck (`Dockerfile` dan `docker-compose.yml`) memanggil `GET /api/health`: 200 bila proses hidup dan database menjawab dalam 3 detik, 503 bila tidak — container ditandai *unhealthy* saat database mati.
 
 ## Variabel lingkungan
 
@@ -36,6 +37,8 @@ pnpm run db:push     # di container atau dari mesin dengan akses DB
 pnpm run db:seed     # hanya untuk database kosong
 ```
 
+Isi `SITE_API_KEY` (≥32 karakter acak) **sebelum** `db:seed`: nilainya disimpan sebagai API key Site dan dipakai klien Delivery API di header `x-site-key`. Bila kosong, seed membuat key acak yang tidak dicetak — tidak bisa dipakai sampai Anda mengisi `SITE_API_KEY` (diterima lewat fallback env) atau membaca `sites.api_key` langsung dari database. Tidak ada lagi key bawaan yang bisa ditebak; `site_sec_spatium`/`site_sec_default` ditolak di produksi.
+
 Lalu login di `/pawon` dengan akun bootstrap dan buat akun editor sungguhan dari tab **Pengguna**.
 
 ## Penyimpanan berkas
@@ -46,3 +49,7 @@ Lalu login di `/pawon` dengan akun bootstrap dan buat akun editor sungguhan dari
 ## Cache dan revalidasi
 
 Halaman publik memakai ISR. Perubahan dari Studio memanggil `revalidatePath` pada rute terkait. Webhook `POST /api/revalidate` (header `x-revalidate-secret`) tersedia untuk pemicu eksternal.
+
+## CI
+
+`.github/workflows/ci.yml` berjalan pada setiap PR dan push ke `main`: `prisma contract emit` (gagal bila `schema.json`/`schema.d.ts` belum di-commit), `db:push` ke Postgres kosong, typecheck, vitest, `audit:senior` (gagal bila ada temuan), build. Aktifkan branch protection `main` dengan check `CI / verify` agar wajib hijau sebelum merge.

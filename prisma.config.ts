@@ -11,7 +11,7 @@ export default definePrismaConfig({
   orm: ormConfig({
     contract: "./prisma/schema.prisma",
     db: {
-      connection: process.env['DATABASE_URL'] || 'postgresql://segiatech:segiatech_secret@localhost:5433/segiatech?schema=public',
+      connection: process.env['DATABASE_URL'] || 'postgresql://spatium:spatium@localhost:5432/spatium?schema=public',
     },
   }),
 });

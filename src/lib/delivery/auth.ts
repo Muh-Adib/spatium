@@ -4,7 +4,7 @@ import { getSiteByApiKey, type SiteEntity } from '@/lib/db/site'
 import { validateBearerToken } from '@/lib/auth/secret'
 import { corsHeaders } from './cors'
 
-const PLACEHOLDER_KEYS = new Set(['segia-default-key', 'site_sec_default', 'default', 'changeme', 'test'])
+const PLACEHOLDER_KEYS = new Set(['segia-default-key', 'site_sec_default', 'site_sec_spatium', 'default', 'changeme', 'test'])
 function isPlaceholderKey(key: string): boolean {
   const k = key.trim().toLowerCase()
   return PLACEHOLDER_KEYS.has(k) || k.length < 16

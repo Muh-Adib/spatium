@@ -17,3 +17,6 @@ public/uploads/
 
 # Local scratch (QA credentials, temp scripts)
 .tmp/
+
+# Local editor/agent config (contains access tokens)
+.termul/

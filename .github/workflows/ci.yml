@@ -1,0 +1,79 @@
+# ROADMAP 4.1 — every PR must pass typecheck, vitest (against a real Postgres),
+# audit:senior and build before merge. Mirrors AGENTS.md §4.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          # Throwaway CI-only database; not a real credential.
+          POSTGRES_USER: spatium
+          POSTGRES_PASSWORD: spatium
+          POSTGRES_DB: spatium
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U spatium -d spatium"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      DATABASE_URL: postgresql://spatium:spatium@localhost:5432/spatium?schema=public
+      NEXT_TELEMETRY_DISABLED: '1'
+      NEXT_PUBLIC_SITE_URL: https://spatium.id
+      PNPM_CONFIG_UPDATE_NOTIFIER: 'false'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Generate per-run AUTH_SECRET
+        run: echo "AUTH_SECRET=$(openssl rand -hex 32)" >> "$GITHUB_ENV"
+
+      - uses: pnpm/action-setup@v4 # version comes from package.json "packageManager"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Emit Prisma contract
+        run: pnpm exec prisma contract emit
+
+      - name: Contract is committed and up to date
+        run: git diff --exit-code -- prisma/schema.json prisma/schema.d.ts
+
+      - name: Apply schema to CI database
+        run: pnpm run db:push --yes
+
+      - name: Typecheck
+        run: pnpm run typecheck
+
+      - name: Tests
+        run: pnpm exec vitest run
+
+      - name: Senior code audit
+        run: pnpm run audit:senior
+
+      - name: Build
+        run: pnpm run build

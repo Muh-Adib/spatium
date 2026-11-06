@@ -21,7 +21,7 @@ function getDefaultSite(apiKey?: string): SiteEntity {
     slug: 'default',
     name: process.env.NEXT_PUBLIC_SITE_NAME || 'SPATIUM',
     domain: process.env.NEXT_PUBLIC_SITE_URL ? new URL(process.env.NEXT_PUBLIC_SITE_URL).host : 'spatium.id',
-    apiKey: apiKey || process.env.SITE_API_KEY || 'site_sec_spatium',
+    apiKey: apiKey || process.env.SITE_API_KEY?.trim() || '',
     webhookUrl: process.env.DEFAULT_WEBHOOK_URL || null,
     webhookSecret: process.env.REVALIDATE_SECRET || null,
     isActive: true,
@@ -57,21 +57,10 @@ export async function getSiteByApiKey(apiKey: string): Promise<SiteEntity | null
     console.error('[site] getSiteByApiKey query failed, evaluating fallback:', err)
   }
 
-  // In production mode, strictly reject hardcoded fallback dummy keys
-  if (process.env.NODE_ENV === 'production') {
-    if (process.env.SITE_API_KEY && cleanKey === process.env.SITE_API_KEY.trim()) {
-      return getDefaultSite(cleanKey)
-    }
-    return null
-  }
-
-  // Development and test convenience fallback
-  const envKey = process.env.SITE_API_KEY || 'site_sec_spatium'
-  if (
-    cleanKey === envKey ||
-    cleanKey === 'site_sec_default' ||
-    cleanKey === 'site_sec_spatium'
-  ) {
+  // Env fallback: the operator-configured SITE_API_KEY is valid even without a `sites` row.
+  // There are deliberately no hardcoded keys here, in any environment (ROADMAP 1.9).
+  const envKey = process.env.SITE_API_KEY?.trim()
+  if (envKey && cleanKey === envKey) {
     return getDefaultSite(cleanKey)
   }
 

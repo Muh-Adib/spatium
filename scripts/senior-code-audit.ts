@@ -324,4 +324,7 @@ if (process.argv[1]?.includes('senior-code-audit')) {
   fs.mkdirSync(path.dirname(reportPath), { recursive: true });
   fs.writeFileSync(reportPath, JSON.stringify({ summary, elapsedMs: elapsed, findings }, null, 2));
   console.log(`📄 Detailed JSON report written to: ${reportPath}`);
+
+  // AGENTS.md §4 requires 0 findings; fail so CI blocks the merge.
+  if (summary.total > 0) process.exitCode = 1;
 }

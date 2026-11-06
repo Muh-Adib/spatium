@@ -27,6 +27,7 @@ Prioritas: **P0** = wajib sebelum deploy produksi · **P1** = sebaiknya sebelum 
 | 1.4 | P0 | Buat rahasia produksi baru: `AUTH_SECRET`, `API_BEARER_TOKEN`, `SITE_API_KEY`, `REVALIDATE_SECRET` (≥32 karakter acak) | Tersimpan di Coolify, tidak di repo |
 | 1.5 | P0 | Akun pemulihan: `BOOTSTRAP_ADMIN_EMAIL` + `BOOTSTRAP_ADMIN_PASSWORD_HASH` | Login berhasil di staging |
 | 1.6 | P0 | Hapus akun QA lokal `qa-admin@spatium.local` dari database mana pun selain lokal | Tidak ada di staging/produksi |
+| 1.9 | P0 | Rotasi `sites.api_key` yang bernilai `site_sec_spatium`/`site_sec_default` (dulu default `db:seed` bila `SITE_API_KEY` kosong; diterima Delivery API di produksi). Seed kini membuat key acak | `SELECT slug FROM sites WHERE api_key IN ('site_sec_spatium','site_sec_default')` kosong di staging/produksi |
 | 1.7 | P1 | Verifikasi header keamanan di domain produksi (CSP termasuk `superspl.at`, HSTS, frame-ancestors) | Diperiksa dengan securityheaders.com / curl |
 | 1.8 | P1 | Rate limit login & MCP saat ini per proses. Tetapkan **satu replika** app, atau pindahkan ke Postgres/Redis | Keputusan dicatat di DEPLOYMENT.md |
 
@@ -49,7 +50,7 @@ Prioritas: **P0** = wajib sebelum deploy produksi · **P1** = sebaiknya sebelum 
 |---|---|---|---|
 | 3.1 | P0 | Lingkungan **staging** terpisah (domain, database, env sendiri) | Staging bisa di-deploy ulang dari branch |
 | 3.2 | P0 | Isi semua env wajib (lihat DEPLOYMENT.md), termasuk build args `NEXT_PUBLIC_*` | Build Coolify sukses tanpa peringatan env |
-| 3.3 | P0 | Healthcheck compose memakai `/api/health`; pastikan memeriksa koneksi database | Container ditandai unhealthy saat DB mati |
+| 3.3 | P0 | ✅ Healthcheck compose & Dockerfile memakai `/api/health`; probe DB dengan batas waktu 3 dtk, 503 saat DB mati (`tests/health-route.test.ts`) | Container ditandai unhealthy saat DB mati — tinggal verifikasi di staging |
 | 3.4 | P1 | Volume untuk `/app/public/tours` bila fitur Upload Tour dipakai (saat ini hilang saat container dibuat ulang) | Tur bertahan setelah redeploy |
 | 3.5 | P1 | Ganti default `POSTGRES_USER`/`POSTGRES_DB` (`uni`) — hanya untuk instalasi baru; instalasi lama memakai volume yang sudah ada | Diputuskan per lingkungan |
 | 3.6 | P1 | Kunci editor artikel di database (tabel `EditorLock`) agar aman saat restart/multi-instance | Dua tab editor saling terkunci walau server restart |
@@ -59,7 +60,7 @@ Prioritas: **P0** = wajib sebelum deploy produksi · **P1** = sebaiknya sebelum 
 
 | # | Prioritas | Item | Selesai bila |
 |---|---|---|---|
-| 4.1 | P0 | CI: typecheck, vitest (dengan service Postgres), `audit:senior`, build pada setiap PR | Pipeline hijau wajib untuk merge |
+| 4.1 | P0 | ✅ CI `.github/workflows/ci.yml`: typecheck, vitest (service Postgres, DB kosong), `audit:senior` (kini gagal bila ada temuan), build, cek kontrak Prisma ter-commit | Pipeline hijau wajib untuk merge — **sisa**: aktifkan branch protection `main` dengan check `CI / verify` |
 | 4.2 | P0 | Uji alur kritis di staging: login, tulis & terbitkan artikel, jadwalkan artikel (penjadwal), buat & terbitkan halaman `/<slug>`, ganti slug (redirect 301), upload media, kelola redirect, kelola pengguna | Checklist ditandatangani |
 | 4.3 | P0 | Uji MCP di staging: buat API key, `tools/list`, `create_page_draft`, edit blok, pastikan publish ditolak, cabut key | Sesuai MCP.md |
 | 4.4 | P0 | Viewer SuperSplat tampil di domain staging (CSP `frame-src`) di beranda, portofolio, blok `splat-viewer` | Ke-10 scene termuat |

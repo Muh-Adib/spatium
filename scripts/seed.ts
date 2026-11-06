@@ -7,6 +7,7 @@
  * untouched. Column conventions are documented in src/lib/content/spatium.ts.
  */
 import fs from 'fs'
+import { randomBytes } from 'node:crypto'
 import path from 'path'
 import { z } from 'zod'
 import { prisma } from '../src/lib/db/prisma'
@@ -340,11 +341,16 @@ async function seedSiteDefaults() {
       slug: 'spatium',
       name: 'SPATIUM',
       domain: 'spatium.id',
-      apiKey: process.env.SITE_API_KEY || 'site_sec_spatium',
+      // Never fall back to a well-known key: it would be accepted by the Delivery API in production.
+      apiKey: process.env.SITE_API_KEY?.trim() || `site_${randomBytes(24).toString('base64url')}`,
       isActive: true,
       settings: JSON.stringify({}),
     })
-    console.log('✓ Delivery API site tenant created.')
+    console.log(
+      process.env.SITE_API_KEY?.trim()
+        ? '✓ Delivery API site tenant created with SITE_API_KEY.'
+        : '✓ Delivery API site tenant created with a random API key (set SITE_API_KEY to choose one).'
+    )
   }
 }
 
