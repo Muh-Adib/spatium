@@ -1,8 +1,6 @@
-# UNIMASI — Animation & Motion Design Studio
+# Spatium — Flagship Interactive Digital Platform
 
-Studio website for **UNIMASI** (2D animation, 3D animation & visual production, motion
-graphics), built as a unified Next.js application with an integrated Studio admin and a
-Prisma-backed content layer.
+Interactive platform website for **Spatium**, built as a unified Next.js 16 application with an integrated Studio admin and a Prisma 8 content layer.
 
 ## Stack
 
@@ -15,13 +13,12 @@ Prisma-backed content layer.
 ## Getting started
 
 ```bash
-npm install
-npm run dev          # dev server on http://localhost:3001
-npm run build        # production build
-npm run start        # serve production build on port 3001
-npm run type-check   # tsc --noEmit
-npm run db:push      # apply the Prisma schema
-npm run db:seed      # seed starter content
+pnpm install
+pnpm run dev          # dev server on http://localhost:3002
+pnpm run build        # production build
+pnpm run start        # serve production build on port 3002
+pnpm run typecheck    # tsc --noEmit
+pnpm test             # run vitest suite
 ```
 
 ## Routes
@@ -32,11 +29,9 @@ npm run db:seed      # seed starter content
 | `/services`, `/services/[slug]` | Services catalog and service detail |
 | `/portfolio`, `/portfolio/[slug]` | Case studies |
 | `/journal`, `/journal/[slug]` | Articles |
-| `/about`, `/contact` | Studio profile and contact |
+| `/about`, `/contact` | Company profile and contact |
 | `/admin` | Studio admin (content, media, SEO) |
 
 ## Brand
 
-Official brand rules (palette, typography, tone of voice) live in **`AGENTS.md`** — the single
-source of truth. Key tokens: Bright Yellow `#FFD600`, Cinematic Navy `#0F3A79`, Montserrat for
-headings, Inter / Plus Jakarta Sans for body text.
+Official brand rules will be placed in `docs/` and referenced in **`AGENTS.md`** as the single source of truth.

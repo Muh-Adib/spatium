@@ -1,8 +1,8 @@
 // -----------------------------------------------------------------------------
-// Site Configuration — UNIMASI Studio
+// Site Configuration — Spatium
 // -----------------------------------------------------------------------------
 
-export function resolveSiteUrl(defaultFallback: string = 'https://unimasi.com'): string {
+export function resolveSiteUrl(defaultFallback: string = 'https://spatium.com'): string {
   const envUrl =
     process.env.NEXT_PUBLIC_SITE_URL ||
     process.env.COOLIFY_URL ||
@@ -20,20 +20,20 @@ export function resolveSiteUrl(defaultFallback: string = 'https://unimasi.com'):
 }
 
 export const siteConfig = {
-  name: 'UNIMASI Studio',
-  tagline: 'We Make Ideas Move — 2D & 3D Animation, Motion Graphics & Videotron',
+  name: 'Spatium',
+  tagline: 'Modern Digital Space & Interactive Solutions',
   description:
-    'UNIMASI adalah studio animasi 2D, 3D, motion graphics, dan visual production untuk edukasi, industri, dan brands.',
-  url: resolveSiteUrl('https://unimasi.com'),
+    'Spatium — Flagship interactive digital platform and technology solutions.',
+  url: resolveSiteUrl('https://spatium.com'),
   cmsUrl: process.env.CMS_URL ?? '/admin',
   whatsapp: process.env.NEXT_PUBLIC_WHATSAPP || '',
-  email: 'hello@unimasi.studio',
+  email: 'hello@spatium.com',
   phone: process.env.NEXT_PUBLIC_PHONE || '',
-  address: 'Yogyakarta, Indonesia',
+  address: 'Indonesia',
   social: {
-    instagram: 'https://instagram.com/unimasi.studio',
-    linkedin: 'https://linkedin.com/company/unimasi',
-    github: 'https://github.com/unimasi',
+    instagram: 'https://instagram.com/spatium',
+    linkedin: 'https://linkedin.com/company/spatium',
+    github: 'https://github.com/spatium',
   },
   analytics: {
     gaId: process.env.NEXT_PUBLIC_GA_ID,

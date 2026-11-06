@@ -1,4 +1,4 @@
-# AGENTS.md — UNIMASI Studio (Official Source of Truth)
+# AGENTS.md — SPATIUM (Official Source of Truth)
 
 Version: 1.0
 Audience: Human engineers, AI coding agents, architecture reviewers, MCP automations
@@ -7,40 +7,30 @@ Audience: Human engineers, AI coding agents, architecture reviewers, MCP automat
 
 ## 0. Mission & Repo Purpose
 
-Repo ini adalah **website immersive UNIMASI Studio** — Animation & Motion Design Studio. Tujuan: mendorong penjualan jasa animasi (2D, 3D, motion graphics, digital visual assets & AI-assisted production) ke audien lokal dan global melalui pengalaman web premium berbasis interaksi, animasi GSAP + Three.js/WebGL, dan konten editorial berkualitas tinggi (non-hard-sell, keyword deskripsi transaksional).
+Repo ini adalah **flagship interactive digital platform & web application SPATIUM**.
+Tujuan: platform digital interaktif dengan pengalaman web premium berbasis interaksi, animasi GSAP + Three.js/WebGL, dan konten editorial terstruktur yang terintegrasi langsung dengan Studio Admin (`/admin`), backend engine (Delivery API, AI Copilot, Prisma 8 ORM PostgreSQL).
 
-UNIMASI menyediakan 4 layanan inti (sumber kanonis: `unimasi-brand.png`; katalog turunan lengkap di `docs/services/service-catalog.md`):
-1. **01 2D Animation** — 2D Explainer, 2D Educational, 2D Character, 2D Infographic, 2D Illustration, 2D Training & Safety Animation.
-2. **02 3D Animation & Visual Production** — 3D Product, 3D Industrial, 3D Architectural Visualization, 3D Modeling & Texturing, 3D Character, 3D Process Visualization, 3D Asset Production.
-3. **03 Motion Graphics** — Corporate Motion Graphics, Kinetic Typography, Animated Infographics, Logo Animation, UI Motion Graphics, Motion Graphics Package, Video Graphics & Compositing.
-4. **04 Digital Visual Assets & AI-Assisted Production** — 3D Asset Library, Real-Time 3D Assets, Animation Assets, AI-Assisted Visual Production, High-Volume Visual Production.
+Dokumen identitas resmi merek (brand guideline, company profile, katalog layanan) akan ditempatkan di direktori `docs/` oleh pemilik proyek.
 
-Stack: Next.js 16 (App Router, Turbopack) + React 19 + PostgreSQL 16 via Prisma 8 ORM (`@prisma/orm-postgres`), NextAuth, Tailwind v3, GSAP, Three.js/WebGL. Port dev: 3001. Port start: 3001.
+Stack: Next.js 16 (App Router, Turbopack) + React 19 + PostgreSQL 16 via Prisma 8 ORM (`@prisma/orm-postgres`), NextAuth, Tailwind v3, GSAP, Three.js/WebGL. Port dev: 3002. Port start: 3002.
 
-Repo ini **unified**: public site + Studio Admin (`/admin`) + backend engine (Delivery API, AI Copilot, agentic loop) dalam satu aplikasi. Bukan headless decoupled seperti SegiaTech.
-
-Kontak terverifikasi (dari `unimasi-brand.png`): `www.unimasi.id`, `@unimasi`. Domain alternatif di kode: `unimasi.studio` (site.ts/email/Instagram) — **selisih, `needs-confirmation`** (lihat `docs/CONTENT_GAPS.md` item 1–5). Jangan tampilkan email/telepon/alamat lain di footer/JSON-LD sebelum dikonfirmasi.
+Repo ini **unified**: public site + Studio Admin (`/admin`) + backend engine (Delivery API, AI Copilot, agentic loop) dalam satu aplikasi mandiri.
 
 ---
 
-## 1. Brand Identity (Ringkas — detail di §6)
+## 1. Brand Identity (Initial Blueprint — detail pending `docs/`)
 
-- **Brand**: UNIMASI — Animation & Motion Design Studio
-- **Tagline**: "We Make Ideas Move" | "Make Ideas Move, Explain the Complex"
-- **Posisi**: Studio animasi terdepan — mengubah ide teknis dan kompleks menjadi pengalaman visual yang memukau melalui animasi dan motion design. Mengutamakan storytelling dan keahlian spesialis senior pada setiap frame untuk membantu audiens memahami subjek rumit secara visual dan intuitif.
-- **Karakter Studio**: Specialist, Transparent, Story-driven.
-- **Palet**: Bright Yellow `#FFD600`, Dark Blue `#0F3A79`, Pure White `#FFFFFF`.
-- **Font**: Heading `Montserrat` (Regular, Medium, Bold), Body `Sans Serif Regular` (Regular, Medium, Bold, Black).
-- ALL CAPS hanya untuk judul utama/headline penekanan informasi penting.
-
-Tone of voice: Clear & Transparent — komunikasi terbuka tanpa "black boxes", terjemah subjek teknis ke alur visual terstruktur, praktis tanpa jargon kosong.
+- **Brand**: SPATIUM
+- **Descriptor**: Interactive Digital Platform & Technology
+- **Tagline**: "Modern Digital Space & Interactive Solutions"
+- **Status Panduan Merek**: Menunggu dokumen resmi di `docs/brand-guideline/` atau `docs/brand-identity/`.
 
 ---
 
 ## 2. Architecture & Key Directories
 
 ```
-unimasi/
+spatium/
 ├── src/
 │   ├── app/                # Next.js 16 App Router (pages + API routes)
 │   │   ├── admin/          # Studio Admin (content, media, SEO, blocks)
@@ -48,6 +38,33 @@ unimasi/
 │   │   │   ├── v1/delivery/*  # Headless Delivery API
 │   │   │   ├── ai/*            # Studio AI Copilot (chat, draft, models, sessions, memory, tools)
 │   │   │   ├── agent/tools     # Tool registry HTTP surface
+│   │   │   ├── mcp             # MCP server status endpoint
+│   │   │   ├── seo/*           # SEO analyzer, suggest
+│   │   │   ├── blocks/manifest  # Block manifest
+│   │   │   ├── revalidate      # On-demand ISR webhook
+│   │   ├── [slug]/page.tsx     # Dynamic pages
+│   │   ├── services/*, portfolio/*, journal/*, about, contact
+│   ├── blocks/             # Spatium SDUI blocks + contracts + registry + BlockRenderer
+│   ├── components/         # UI, sections, studio editors, motion
+│   ├── lib/
+│   │   ├── agent/          # ToolRegistry + LLM (Gemini/OpenRouter)
+│   │   ├── ai/             # Agentic loop, copilot runner, draft, sessions, tools, token optimizer
+│   │   ├── blocks/         # Ontology, schema, publication-gate, manifestSync, animation, perf-budget, seo-text
+│   │   ├── db/             # Prisma 8 data access (articles, portfolio, services, media, redirects, etc.)
+│   │   ├── seo/            # Analyzer, readability, metadata, jsonld, indexing, indexnow
+│   │   ├── voice/          # Brand voice checker & stylometry
+│   │   ├── graph/          # Content graph
+│   │   ├── publishing/     # Scheduler, validation
+│   │   ├── webhooks/       # Dispatcher
+│   ├── config/             # site.ts, navigation.ts
+│   ├── data/               # Static data + seed JSON
+│   ├── proxy.ts            # Next.js 16 proxy (auth, CORS, security headers)
+│   ├── auth.ts             # NextAuth
+├── prisma/                 # schema.prisma + migrations
+├── scripts/                # seed.ts
+├── public/                 # static assets
+├── docs/                   # dokumentasi brand (company-profile, brand-identity, brand-guideline, services)
+```
 │   │   │   ├── mcp             # MCP server status endpoint
 │   │   │   ├── seo/*           # SEO analyzer, suggest
 │   │   │   ├── blocks/manifest  # Block manifest
