@@ -350,6 +350,22 @@ describe('MCP end-to-end page building (live DB)', () => {
     expect(urls.structuredContent?.publicUrl).toBeNull()
   })
 
+  it('rejects publication fields and unknown keys instead of ignoring them', async () => {
+    const page = (await call('get_page', { id })).structuredContent
+    const publish = await call('update_page_draft', { id, expectedUpdatedAt: page?.updatedAt, status: 'published' })
+    expect(publish.isError).toBe(true)
+    expect(publish.content[0].text).toMatch(/status cannot be set through MCP/)
+    expect(publish.content[0].text).toMatch(/human editor/)
+    const scheduled = await call('create_page_draft', { title: `Jadwal ${RUN}`, publishedAt: new Date().toISOString() })
+    expect(scheduled.isError).toBe(true)
+    const unknown = await call('update_page_draft', { id, expectedUpdatedAt: page?.updatedAt, titel: 'Typo' })
+    expect(unknown.isError).toBe(true)
+    expect(unknown.content[0].text).toMatch(/titel/)
+    const after = (await call('get_page', { id })).structuredContent
+    expect(after?.status).toBe('draft')
+    expect(after?.updatedAt).toBe(page?.updatedAt)
+  })
+
   it('refuses to edit a published page', async () => {
     await prisma.orm.public.Page.where({ id }).update({ status: 'published' })
     const page = (await call('get_page', { id })).structuredContent

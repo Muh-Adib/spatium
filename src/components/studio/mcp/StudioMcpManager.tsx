@@ -622,7 +622,7 @@ export default function StudioMcpManager() {
           </h2>
           <p className="text-sm leading-relaxed text-neutral-300">
             MCP (Model Context Protocol) memungkinkan asisten AI seperti Claude, Cursor, atau Windsurf menyusun halaman dari blok katalog
-            SPATIUM. Klien hanya dapat <strong className="font-semibold text-white">membuat dan mengubah draf</strong>: menerbitkan,
+            SPATIUM serta menulis artikel jurnal, portofolio, dan layanan sesuai izin kuncinya. Klien hanya dapat <strong className="font-semibold text-white">membuat dan mengubah draf</strong>: menerbitkan,
             mengarsipkan, dan menghapus tetap dilakukan editor di Studio. Setiap perubahan tercatat di log audit atas nama kunci yang dipakai.
           </p>
         </div>

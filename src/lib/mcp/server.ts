@@ -185,6 +185,29 @@ function landingPromptText(topic: string, audience?: string): string {
   ].join('\n')
 }
 
+const ARTICLE_PROMPT = {
+  name: 'write_article',
+  title: 'Write a journal article draft',
+  description: 'Guides the model through writing a journal article draft that is ready for human review.',
+  arguments: [
+    { name: 'topic', description: 'What the article is about.', required: true },
+    { name: 'audience', description: 'Who the article is for.', required: false },
+  ],
+}
+
+function articlePromptText(topic: string, audience?: string): string {
+  return [
+    `Write a SPATIUM journal article draft about: ${topic}.${audience ? ` Audience: ${audience}.` : ''}`,
+    '1. Call list_article_taxonomy and pick an existing category (and author, only if the user named one). Do not invent new ones.',
+    '2. Write semantic HTML: an intro <p>, then <h2> sections (with <h3> sub-sections when needed), lists where they help. No <h1>: the title is the H1.',
+    '3. Use only facts the user gave you or that are common knowledge. Never invent metrics, client names, quotes, testimonials or image URLs; leave images out rather than guessing, and give every <img> alt text.',
+    '4. Call create_article_draft with title, content, excerpt (1–2 sentences), metaTitle (≤ 60 chars) and metaDescription (120–160 chars).',
+    '5. Call get_article, fix what you can from publication.issues with update_article_draft (pass expectedUpdatedAt), and give the user the editUrl so a human can review and publish.',
+  ].join('\n')
+}
+
+const PROMPTS = [LANDING_PROMPT, ARTICLE_PROMPT] as const
+
 // ─── Dispatch ─────────────────────────────────────────────────────────────────
 
 async function dispatch(method: string, params: Record<string, unknown>, principal: McpPrincipal): Promise<unknown> {
@@ -201,7 +224,7 @@ async function dispatch(method: string, params: Record<string, unknown>, princip
           resources: { listChanged: false, subscribe: false },
           prompts: { listChanged: false },
         },
-        serverInfo: { name: SERVER_NAME, title: 'SPATIUM page builder', version: SERVER_VERSION },
+        serverInfo: { name: SERVER_NAME, title: 'SPATIUM content studio', version: SERVER_VERSION },
         instructions: MCP_INSTRUCTIONS,
       }
     }
@@ -233,17 +256,17 @@ async function dispatch(method: string, params: Record<string, unknown>, princip
       return { contents: [{ uri: CATALOG_URI, mimeType: 'application/json', text: catalogText() }] }
     }
     case 'prompts/list':
-      return { prompts: [LANDING_PROMPT] }
+      return { prompts: [...PROMPTS] }
     case 'prompts/get': {
       const p = promptGetParams.safeParse(params)
       if (!p.success) throw new RpcError(JSONRPC.INVALID_PARAMS, 'prompts/get requires params.name')
-      if (p.data.name !== LANDING_PROMPT.name) throw new RpcError(JSONRPC.INVALID_PARAMS, `Unknown prompt: ${p.data.name}`)
+      const prompt = PROMPTS.find((candidate) => candidate.name === p.data.name)
+      if (!prompt) throw new RpcError(JSONRPC.INVALID_PARAMS, `Unknown prompt: ${p.data.name}`)
       const topic = p.data.arguments?.topic?.trim()
       if (!topic) throw new RpcError(JSONRPC.INVALID_PARAMS, 'Missing required argument: topic')
-      return {
-        description: LANDING_PROMPT.description,
-        messages: [{ role: 'user', content: { type: 'text', text: landingPromptText(topic, p.data.arguments?.audience) } }],
-      }
+      const audience = p.data.arguments?.audience
+      const text = prompt.name === ARTICLE_PROMPT.name ? articlePromptText(topic, audience) : landingPromptText(topic, audience)
+      return { description: prompt.description, messages: [{ role: 'user', content: { type: 'text', text } }] }
     }
     default:
       throw new RpcError(JSONRPC.METHOD_NOT_FOUND, `Method not found: ${method}`)

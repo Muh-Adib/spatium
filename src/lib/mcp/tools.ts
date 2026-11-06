@@ -1,12 +1,10 @@
 import 'server-only'
 import { z } from 'zod'
-import { siteConfig } from '@/config/site'
 import {
   BLOCK_CATEGORY_LABEL,
   blockJsonSchema,
   getBlockEntry,
   listBlocksFor,
-  newBlockId,
   validateBlockList,
   type BlockCategory,
   type BlockIssue,
@@ -24,55 +22,36 @@ import {
   type PageRecord,
 } from '@/lib/pages/repository'
 import type { McpScope } from './scopes'
+import {
+  EDITABLE_STATUSES as EDITABLE_STATUS_LIST,
+  blockIssuesResult,
+  blockList,
+  defineTool,
+  fail,
+  ok,
+  readOnly,
+  rejectPublicationFields,
+  siteUrl,
+  validateBlocksFor,
+  withIds,
+  write,
+  type McpTool,
+  type ToolAnnotations,
+  type ToolContext,
+  type ToolResult,
+} from './tool-kit'
+import { ARTICLE_TOOLS } from './content/articles'
+import { PORTFOLIO_TOOLS } from './content/portfolio'
+import { SERVICE_TOOLS } from './content/services'
+
+export type { ToolContext, ToolResult } from './tool-kit'
 
 /**
- * MCP tools: deterministic wrappers around the block catalogue and the pages
- * repository. Nothing here can publish, archive or delete: every write goes
- * through `createPage` / `updatePage`, which only ever produce drafts and write
- * ContentRevision + SeoAuditLog rows with the `mcp:<key name>` actor.
+ * MCP tools: deterministic wrappers around the block catalogue and the content
+ * repositories. Nothing here can publish, archive or delete: every write only
+ * produces or edits drafts and writes ContentRevision + SeoAuditLog rows with
+ * the `mcp:<key name>` actor. Article/portfolio/service tools live in ./content.
  */
-
-export type ToolContext = { actor: string; scopes: readonly McpScope[] }
-
-export type ToolResult = {
-  content: { type: 'text'; text: string }[]
-  structuredContent?: Record<string, unknown>
-  isError?: boolean
-}
-
-type ToolAnnotations = {
-  title: string
-  readOnlyHint: boolean
-  destructiveHint: boolean
-  idempotentHint: boolean
-  openWorldHint: false
-}
-
-type McpTool<S extends z.ZodType = z.ZodType> = {
-  name: string
-  title: string
-  description: string
-  scope: McpScope
-  input: S
-  output?: z.ZodType
-  annotations: Omit<ToolAnnotations, 'title' | 'openWorldHint'>
-  run: (args: z.output<S>, ctx: ToolContext) => Promise<ToolResult>
-}
-
-function defineTool<S extends z.ZodType>(tool: McpTool<S>): McpTool {
-  return tool as unknown as McpTool
-}
-
-// ─── Result helpers ───────────────────────────────────────────────────────────
-
-function ok(data: Record<string, unknown>): ToolResult {
-  return { content: [{ type: 'text', text: JSON.stringify(data, null, 2) }], structuredContent: data }
-}
-
-function fail(message: string, details?: Record<string, unknown>): ToolResult {
-  const text = details ? `${message}\n${JSON.stringify(details, null, 2)}` : message
-  return { content: [{ type: 'text', text }], isError: true }
-}
 
 function fromPageError(err: PageError): ToolResult {
   const hints: Record<PageError['code'], string> = {
@@ -90,16 +69,7 @@ function fromPageError(err: PageError): ToolResult {
 
 const TARGETS = ['page', 'portfolio', 'service', 'solution'] as const satisfies readonly BlockTarget[]
 const CATEGORIES = Object.keys(BLOCK_CATEGORY_LABEL) as [BlockCategory, ...BlockCategory[]]
-const EDITABLE_STATUSES = new Set(['draft', 'in_review'])
-
-const blockInput = z
-  .looseObject({
-    type: z.string().min(1).describe('Block type, e.g. "hero-cinema". See list_block_types.'),
-    id: z.string().optional().describe('Stable block id. Omit for new blocks: the server assigns one.'),
-  })
-  .describe('One block. Besides type/id, use the fields documented by get_block_type.')
-
-const blockList = z.array(blockInput).max(60, 'A page holds at most 60 blocks.')
+const EDITABLE_STATUSES = new Set(EDITABLE_STATUS_LIST)
 
 const pageId = z.number().int().positive().describe('Page id (from list_pages, get_page or create_page_draft).')
 const expectedUpdatedAt = z
@@ -125,10 +95,6 @@ const metaFields = {
 }
 
 // ─── Page helpers ─────────────────────────────────────────────────────────────
-
-function siteUrl(): string {
-  return siteConfig.url.replace(/\/+$/, '')
-}
 
 export function pageUrls(page: Pick<PageRecord, 'id' | 'slug' | 'status'>) {
   return {
@@ -171,24 +137,6 @@ function pageView(page: PageRecord, options: { includeBlocks: boolean }) {
       note: 'Only a human editor can publish, from the Studio (editUrl).',
     },
   }
-}
-
-/** Assigns ids to blocks that lack one (or reuse an id already present). */
-function withIds(blocks: readonly Record<string, unknown>[], taken: Set<string> = new Set()): Record<string, unknown>[] {
-  return blocks.map((b) => {
-    const type = typeof b.type === 'string' ? b.type : 'block'
-    let id = typeof b.id === 'string' && b.id.trim() ? b.id.trim() : ''
-    if (!id || taken.has(id)) id = newBlockId(type)
-    taken.add(id)
-    return { ...b, id }
-  })
-}
-
-function blockIssuesResult(issues: BlockIssue[]): ToolResult {
-  return fail('Some blocks are invalid. Nothing was saved.', {
-    issues,
-    hint: 'Call get_block_type for the failing type to see its fields and a valid example.',
-  })
 }
 
 type Located = { ok: true; index: number } | { ok: false; result: ToolResult }
@@ -253,9 +201,6 @@ async function saveBlocks(page: PageRecord, blocks: unknown[], ctx: ToolContext,
 
 // ─── Tools ────────────────────────────────────────────────────────────────────
 
-const readOnly = { readOnlyHint: true, destructiveHint: false, idempotentHint: true } as const
-const write = { readOnlyHint: false, destructiveHint: false, idempotentHint: false } as const
-
 const blockSummary = z.object({
   type: z.string(),
   label: z.string(),
@@ -264,7 +209,7 @@ const blockSummary = z.object({
   targets: z.array(z.string()),
 })
 
-export const MCP_TOOLS: readonly McpTool[] = [
+const PAGE_TOOLS: readonly McpTool[] = [
   defineTool({
     name: 'list_block_types',
     title: 'List block types',
@@ -272,7 +217,7 @@ export const MCP_TOOLS: readonly McpTool[] = [
     description:
       'Step 1 of building a page. Lists the block types available for a target (default "page"): type, label, description, category and targets. ' +
       'Pick blocks from here, then call get_block_type for the exact fields of each type you use.',
-    input: z.object({
+    input: z.strictObject({
       target: z.enum(TARGETS).default('page').describe('Where the blocks will be placed. Dynamic pages use "page".'),
       category: z.enum(CATEGORIES).optional().describe('Only return blocks of this category.'),
     }),
@@ -293,7 +238,7 @@ export const MCP_TOOLS: readonly McpTool[] = [
     description:
       'Returns the editable fields, a valid example payload and the full JSON Schema of one block type. ' +
       'Start from the example and change only the content: never invent metrics, client names, quotes or image URLs.',
-    input: z.object({ type: z.string().min(1).describe('Block type from list_block_types, e.g. "hero-cinema".') }),
+    input: z.strictObject({ type: z.string().min(1).describe('Block type from list_block_types, e.g. "hero-cinema".') }),
     annotations: readOnly,
     run: async ({ type }) => {
       const entry = getBlockEntry(type)
@@ -319,16 +264,20 @@ export const MCP_TOOLS: readonly McpTool[] = [
     scope: 'blocks:read',
     description:
       'Validates an array of blocks against the catalogue without saving anything. Returns ok plus per-block issues (index, blockId, type, message). ' +
-      'Use it before create_page_draft / update_page_draft when composing many blocks at once.',
-    input: z.object({ blocks: blockList }),
+      'Pass target "portfolio" or "service" to also check the types are offered there. ' +
+      'Use it before create_*_draft / update_*_draft when composing many blocks at once.',
+    input: z.strictObject({
+      blocks: blockList,
+      target: z.enum(TARGETS).default('page').describe('Where the blocks will be placed.'),
+    }),
     output: z.object({
       ok: z.boolean(),
       blockCount: z.number(),
       issues: z.array(z.object({ index: z.number(), blockId: z.string().optional(), type: z.string().optional(), message: z.string() })),
     }),
     annotations: readOnly,
-    run: async ({ blocks }) => {
-      const result = validateBlockList(withIds(blocks))
+    run: async ({ blocks, target }) => {
+      const result = validateBlocksFor(target, withIds(blocks))
       return ok({ ok: result.ok, blockCount: blocks.length, issues: result.issues })
     },
   }),
@@ -338,7 +287,7 @@ export const MCP_TOOLS: readonly McpTool[] = [
     title: 'List pages',
     scope: 'pages:read',
     description: 'Lists dynamic pages (newest first): id, slug, title, status, updatedAt, blockCount and editUrl. Filter by status.',
-    input: z.object({ status: z.enum(PAGE_STATUSES).optional().describe('Only pages with this status.') }),
+    input: z.strictObject({ status: z.enum(PAGE_STATUSES).optional().describe('Only pages with this status.') }),
     output: z.object({
       count: z.number(),
       pages: z.array(
@@ -376,7 +325,7 @@ export const MCP_TOOLS: readonly McpTool[] = [
     description:
       'Returns one page by id or slug with all blocks, updatedAt (pass it back as expectedUpdatedAt when editing), editable, ' +
       'and publication: what a human must still fix before publishing.',
-    input: z.object({
+    input: z.strictObject({
       id: pageId.optional(),
       slug: z.string().optional().describe('Page slug, used when id is omitted.'),
     }),
@@ -395,7 +344,7 @@ export const MCP_TOOLS: readonly McpTool[] = [
     scope: 'pages:read',
     description:
       'Returns where a page can be seen: publicUrl (only for published pages) and editUrl, the Studio editor where a human previews, reviews and publishes drafts.',
-    input: z.object({ id: pageId.optional(), slug: z.string().optional() }),
+    input: z.strictObject({ id: pageId.optional(), slug: z.string().optional() }),
     output: z.object({
       id: z.number(),
       status: z.string(),
@@ -428,7 +377,7 @@ export const MCP_TOOLS: readonly McpTool[] = [
     description:
       'Creates a new DRAFT page at /<slug>. slug is optional (derived from title). Blocks without an id get one. ' +
       'Returns the page (with updatedAt for further edits), editUrl and the publication checklist. The page is never published by this tool.',
-    input: z.object({
+    input: z.strictObject({
       title: z.string().trim().min(1).max(200).describe('Page title (also the H1 when no hero block is used).'),
       slug: z.string().optional().describe('URL slug: lowercase letters, digits and hyphens. Omit to derive from the title.'),
       ...metaFields,
@@ -470,7 +419,7 @@ export const MCP_TOOLS: readonly McpTool[] = [
     description:
       'Patches a draft (or in_review) page: title, slug, meta fields and/or the WHOLE block list. Requires expectedUpdatedAt from get_page. ' +
       'Refused for published or archived pages: ask a human, or create a new draft instead. For single-block edits prefer insert_blocks / update_block / remove_block / move_block.',
-    input: z.object({
+    input: z.strictObject({
       id: pageId,
       expectedUpdatedAt,
       title: z.string().trim().min(1).max(200).optional(),
@@ -511,7 +460,7 @@ export const MCP_TOOLS: readonly McpTool[] = [
     description:
       'Inserts one or more blocks into a draft page without resending the page. Position: afterBlockId, or index (0 = top), default = append at the end. ' +
       'New blocks get ids. Returns the updated outline (index, id, type) and the new updatedAt.',
-    input: z.object({
+    input: z.strictObject({
       pageId,
       blocks: blockList.min(1),
       afterBlockId: z.string().optional().describe('Insert right after this block.'),
@@ -545,7 +494,7 @@ export const MCP_TOOLS: readonly McpTool[] = [
     description:
       'Edits one block on a draft page (by blockId or index). "set" shallow-merges fields into the block (a nested object or list replaces the old value); ' +
       '"unset" removes optional fields. type and id cannot change: remove_block + insert_blocks to swap a type.',
-    input: z.object({
+    input: z.strictObject({
       pageId,
       ...blockLocator,
       set: z.record(z.string(), z.unknown()).default({}).describe('Fields to set, e.g. {"headline": "…"}.'),
@@ -575,7 +524,7 @@ export const MCP_TOOLS: readonly McpTool[] = [
     title: 'Remove block',
     scope: 'pages:draft',
     description: 'Removes one block (by blockId or index) from a draft page. The previous version stays in the page revision history.',
-    input: z.object({ pageId, ...blockLocator, expectedUpdatedAt: expectedUpdatedAt.optional() }),
+    input: z.strictObject({ pageId, ...blockLocator, expectedUpdatedAt: expectedUpdatedAt.optional() }),
     annotations: { ...write, destructiveHint: true },
     run: async (args, ctx) => {
       const loaded = await loadEditablePage(args.pageId, args.expectedUpdatedAt)
@@ -593,7 +542,7 @@ export const MCP_TOOLS: readonly McpTool[] = [
     title: 'Move block',
     scope: 'pages:draft',
     description: 'Moves one block (by blockId or index) to toIndex, its final 0-based position, on a draft page.',
-    input: z.object({
+    input: z.strictObject({
       pageId,
       ...blockLocator,
       toIndex: z.number().int().min(0).describe('Final position of the block (0 = top).'),
@@ -615,6 +564,8 @@ export const MCP_TOOLS: readonly McpTool[] = [
     },
   }),
 ]
+
+export const MCP_TOOLS: readonly McpTool[] = [...PAGE_TOOLS, ...ARTICLE_TOOLS, ...PORTFOLIO_TOOLS, ...SERVICE_TOOLS]
 
 const BY_NAME = new Map(MCP_TOOLS.map((t) => [t.name, t]))
 
@@ -665,6 +616,11 @@ export async function callTool(name: string, rawArgs: unknown, ctx: ToolContext)
       }),
     }
   }
+  if (tool.scope.endsWith(':draft')) {
+    // Drafts only (AGENTS.md §3.5): never silently drop a publish attempt.
+    const refused = rejectPublicationFields(rawArgs)
+    if (refused) return { kind: 'result', result: refused }
+  }
   const parsed = tool.input.safeParse(rawArgs ?? {})
   if (!parsed.success) {
     // Argument errors are tool results (not protocol errors) so the model can self-correct.
@@ -672,6 +628,7 @@ export async function callTool(name: string, rawArgs: unknown, ctx: ToolContext)
       kind: 'result',
       result: fail(`Invalid arguments for ${name}.`, {
         issues: parsed.error.issues.map((i) => ({ path: i.path.map(String).join('.'), message: i.message })),
+        hint: 'Unknown fields are rejected, not ignored: use only the properties in this tool\'s inputSchema.',
       }),
     }
   }
@@ -680,8 +637,9 @@ export async function callTool(name: string, rawArgs: unknown, ctx: ToolContext)
 
 /** Server instructions sent in `initialize`: teaches the client the workflow. */
 export const MCP_INSTRUCTIONS = [
-  'SPATIUM page builder. You compose pages out of catalogue blocks and save them as DRAFTS; a human editor reviews and publishes them in the Studio. You cannot publish, archive or delete.',
-  'Workflow: 1) list_block_types → 2) get_block_type for each type you use (start from its example) → 3) optional validate_blocks → 4) create_page_draft (title, metaTitle, metaDescription, blocks) → 5) refine with insert_blocks / update_block / move_block / remove_block, or update_page_draft for bulk changes → 6) get_page to read publication issues and report the editUrl to the user.',
-  'Edits need fresh state: every write returns the new updatedAt; pass it as expectedUpdatedAt. On a conflict, call get_page and retry.',
-  'Content rules: write in the site language (Indonesian unless asked otherwise), keep headings in order (H2 then H3), give every image alt text, and never invent metrics, client names, testimonials or image URLs.',
+  'SPATIUM content studio. You write pages, journal articles, portfolio entries and services as DRAFTS; a human editor reviews and publishes them in the Studio. You cannot publish, schedule, archive or delete, and any status/publishedAt/scheduledAt argument is refused.',
+  'Pages: 1) list_block_types → 2) get_block_type for each type you use (start from its example) → 3) optional validate_blocks → 4) create_page_draft (title, metaTitle, metaDescription, blocks) → 5) refine with insert_blocks / update_block / move_block / remove_block, or update_page_draft for bulk changes → 6) get_page to read publication issues and report the editUrl to the user.',
+  'Articles: list_article_taxonomy (existing categories/authors) → create_article_draft (title, HTML or markdown content, excerpt, metaTitle, metaDescription) → get_article → update_article_draft. Portfolio: create_portfolio_draft / update_portfolio_draft. Services: list_services (categories) → create_service_draft / update_service_draft. Blocks for portfolio/service use list_block_types with target "portfolio"/"service".',
+  'Edits need fresh state: every write returns the new updatedAt; pass it as expectedUpdatedAt. On a conflict, read again and retry. Unknown arguments are rejected, not ignored.',
+  'Content rules: write in the site language (Indonesian unless asked otherwise), keep headings in order (H2 then H3), give every image alt text, and never invent metrics, client names, testimonials, quotes or image URLs. Always end by giving the user the editUrl and the remaining publication issues.',
 ].join('\n')

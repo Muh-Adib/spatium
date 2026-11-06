@@ -547,6 +547,28 @@ export async function createArticle(data: {
   })
 }
 
+/** Raised by guarded article writes (e.g. MCP drafts); `message` is safe to show. */
+const ARTICLE_WRITE_STATUS = { not_found: 404, conflict: 409, forbidden: 403 } as const
+
+/** A PublicError (safe message + HTTP status for Studio routes) with a code for MCP. */
+export class ArticleWriteError extends PublicError {
+  constructor(
+    readonly code: keyof typeof ARTICLE_WRITE_STATUS,
+    message: string,
+  ) {
+    super(message, ARTICLE_WRITE_STATUS[code])
+    this.name = 'ArticleWriteError'
+  }
+}
+
+/** Optional checks evaluated inside the update transaction, on the locked row. */
+export interface ArticleUpdateGuard {
+  /** Refuse the write unless the row's updatedAt still equals this value. */
+  expectedUpdatedAt?: string
+  /** Refuse the write unless the row's current status is one of these. */
+  editableStatuses?: readonly string[]
+}
+
 export async function updateArticle(
   slug: string,
   data: Partial<{
@@ -576,7 +598,8 @@ export async function updateArticle(
     publicationTimezone: string
     scheduledBy: string
     scheduleError: string | null
-  }>
+  }>,
+  guard: ArticleUpdateGuard = {},
 ) {
   const { actor, tags, ...fields } = data
   const payload: Record<string, any> = { ...fields }
@@ -590,7 +613,13 @@ export async function updateArticle(
 
   return prisma.transaction(async (tx) => {
     const previous = await tx.orm.public.Article.where({ slug }).forUpdate().first()
-    if (!previous) throw new PublicError('Artikel tidak ditemukan.', 404)
+    if (!previous) throw new ArticleWriteError('not_found', 'Artikel tidak ditemukan.')
+    if (guard.expectedUpdatedAt !== undefined && guard.expectedUpdatedAt !== previous.updatedAt) {
+      throw new ArticleWriteError('conflict', 'Artikel sudah diubah sejak terakhir dibaca.')
+    }
+    if (guard.editableStatuses && !guard.editableStatuses.includes(previous.status)) {
+      throw new ArticleWriteError('forbidden', `Artikel berstatus "${previous.status}" tidak dapat diubah lewat jalur ini.`)
+    }
     const previousTags = await tx.orm.public.ArticleTag.where({ articleId: previous.id }).include('tag').all()
     await recordRevision(tx.orm.public, { ...previous, articleTags: previousTags }, actor || 'system', 'before_update')
     if (tags !== undefined) payload.tags = JSON.stringify(await replaceArticleTags(tx.orm.public, previous.id, tags))
