@@ -88,7 +88,7 @@ export async function getService(slug: string): Promise<Service | null> {
 export async function getServices(): Promise<Service[]> {
   try {
     const { getServices: getServicesDb } = await import('@/lib/db/services')
-    return await getServicesDb()
+    return await getServicesDb(undefined, { publishedOnly: true })
   } catch (err) {
     console.error('[content] getServices failed:', err)
     return []
@@ -100,7 +100,7 @@ export async function getServices(): Promise<Service[]> {
 export async function getPortfolio(slug: string): Promise<Portfolio | null> {
   try {
     const { getPortfolioBySlug } = await import('@/lib/db/portfolio')
-    return await getPortfolioBySlug(slug)
+    return await getPortfolioBySlug(slug, { publishedOnly: true })
   } catch (err) {
     console.error('[content] getPortfolio failed:', err)
     return null
@@ -110,7 +110,7 @@ export async function getPortfolio(slug: string): Promise<Portfolio | null> {
 export async function getPortfolioItems(): Promise<Portfolio[]> {
   try {
     const { getPortfolios } = await import('@/lib/db/portfolio')
-    return await getPortfolios()
+    return await getPortfolios(undefined, { publishedOnly: true })
   } catch (err) {
     console.error('[content] getPortfolioItems failed:', err)
     return []

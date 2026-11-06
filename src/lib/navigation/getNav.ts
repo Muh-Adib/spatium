@@ -53,8 +53,8 @@ export async function getNavigationEntries(): Promise<NavEntry[]> {
     const [navCategories, allServices, allPortfolios, allCategories, recentArticlesResult] =
       await Promise.all([
         getNavServiceCategories().catch((err) => logNavFallback('service categories', err, [])),
-        getServices().catch((err) => logNavFallback('services', err, [])),
-        getPortfolios().catch((err) => logNavFallback('portfolios', err, [])),
+        getServices(undefined, { publishedOnly: true }).catch((err) => logNavFallback('services', err, [])),
+        getPortfolios(undefined, { publishedOnly: true }).catch((err) => logNavFallback('portfolios', err, [])),
         getCategories().catch((err) => logNavFallback('article categories', err, [])),
         getArticlesDb({ pageSize: 4 }).catch((err) =>
           logNavFallback('recent articles', err, { data: [], total: 0, page: 1, pageSize: 4, totalPages: 0 })
@@ -252,7 +252,7 @@ export async function getNavigationEntries(): Promise<NavEntry[]> {
 export async function getFooterNavEntries(): Promise<FooterNavSection[]> {
   try {
     const [allServices, allCategories] = await Promise.all([
-      getServices().catch((err) => logNavFallback('services', err, [])),
+      getServices(undefined, { publishedOnly: true }).catch((err) => logNavFallback('services', err, [])),
       getCategories().catch((err) => logNavFallback('article categories', err, [])),
     ])
 
