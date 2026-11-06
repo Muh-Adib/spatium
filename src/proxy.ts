@@ -155,26 +155,45 @@ async function routeProxy(request: NextRequest) {
     return NextResponse.next()
   }
 
-  // 2. Guard /admin/** routes
-  if (pathname.startsWith('/admin')) {
-    // Login page is public
-    if (pathname === '/admin/login' || pathname === '/admin/login/') {
-      return NextResponse.next()
-    }
-
+  // Pawon Studio Authentication page
+  if (pathname === '/pawon' || pathname === '/pawon/') {
     let token = null
     try {
       token = await getToken({
         req: request,
         secret: getValidatedAuthSecret(),
-      secureCookie: request.nextUrl.protocol === 'https:' || request.headers.get('x-forwarded-proto') === 'https',
+        secureCookie: request.nextUrl.protocol === 'https:' || request.headers.get('x-forwarded-proto') === 'https',
+      })
+    } catch {
+      token = null
+    }
+    // If already logged in, redirect directly to Studio admin
+    if (token) {
+      return NextResponse.redirect(new URL('/admin', request.url))
+    }
+    return NextResponse.next()
+  }
+
+  // Legacy admin login redirect
+  if (pathname === '/admin/login' || pathname === '/admin/login/') {
+    return NextResponse.redirect(new URL('/pawon', request.url), 301)
+  }
+
+  // 2. Guard /admin/** routes
+  if (pathname.startsWith('/admin')) {
+    let token = null
+    try {
+      token = await getToken({
+        req: request,
+        secret: getValidatedAuthSecret(),
+        secureCookie: request.nextUrl.protocol === 'https:' || request.headers.get('x-forwarded-proto') === 'https',
       })
     } catch {
       token = null
     }
 
     if (!token) {
-      const loginUrl = new URL('/admin/login', request.url)
+      const loginUrl = new URL('/pawon', request.url)
       loginUrl.searchParams.set('callbackUrl', request.nextUrl.pathname + request.nextUrl.search)
       return NextResponse.redirect(loginUrl)
     }

@@ -38,9 +38,9 @@ function AuthConsumer({ children }: { children: React.ReactNode }) {
     try {
       localStorage.removeItem('unimasi_user_role')
       localStorage.removeItem('unimasi_actor_name')
-      await nextAuthSignOut({ callbackUrl: '/admin/login' })
+      await nextAuthSignOut({ callbackUrl: '/pawon' })
     } catch {
-      window.location.href = '/admin/login'
+      window.location.href = '/pawon'
     }
   }
 
