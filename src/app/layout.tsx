@@ -37,6 +37,11 @@ const inter = Inter({
   display: 'swap',
 })
 
+// Content lives in PostgreSQL, which is not reachable while the Docker image builds.
+// Prerendering would freeze empty pages into every deploy, so all routes render per
+// request; Studio's revalidatePath calls stay harmless.
+export const dynamic = 'force-dynamic'
+
 export const viewport: Viewport = {
   themeColor: '#03060D',
   width: 'device-width',

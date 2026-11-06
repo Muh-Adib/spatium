@@ -7,9 +7,9 @@ import { siteConfig } from '@/config/site'
 
 const SITE_URL = siteConfig.url
 
-// Safety net: Studio mutations revalidate /sitemap.xml directly, but scheduled
-// publications run outside a request, so the sitemap also refreshes hourly.
-export const revalidate = 3600
+// Rendered per request: the DB is unreachable at image build time, so a prerendered
+// sitemap would only list static routes until the next revalidation.
+export const dynamic = 'force-dynamic'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // All dynamic routes come from PostgreSQL; each getter logs and returns []
