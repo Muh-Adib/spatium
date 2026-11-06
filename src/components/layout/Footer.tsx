@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { CONTACT, NAV, SOCIALS } from '@/data/site'
 import { telHref, whatsappHref } from '@/config/site'
 import { Icon } from '@/components/Icon'
+import { BrandLogo } from '@/components/ui/BrandLogo'
 import './footer.css'
 
 // Client-rendered (inside SiteShell), so the service list uses the static
@@ -20,12 +21,11 @@ export function Footer() {
         <div className="site-footer__top">
           <div className="site-footer__brand">
             <Link href="/" className="footer-logo" aria-label="SPATIUM — Spatial Technology Studio">
-              <img
-                src="/brand/logo-spatium-white.svg"
-                alt="SPATIUM — Spatial Technology Studio"
-                width={140}
-                height={54}
-                style={{ height: '36px', width: 'auto', objectFit: 'contain' }}
+              <BrandLogo
+                siteName="SPATIUM"
+                color="dark"
+                width={200}
+                className="footer-logo__img"
               />
             </Link>
             <p className="footer-tagline">

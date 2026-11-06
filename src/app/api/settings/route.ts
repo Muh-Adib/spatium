@@ -55,11 +55,12 @@ export async function GET() {
           'SPATIUM adalah studio teknologi spasial: laser scan, point cloud, geometri 3D, dan 3D Gaussian Splat untuk digital twin industri kreatif.',
         url: 'https://spatium.id',
         whatsapp: process.env.NEXT_PUBLIC_WHATSAPP || '',
-        email: 'hello@spatium.id',
+        // AGENTS.md §3.3: public contact comes from env and stays empty when unset.
+        email: process.env.NEXT_PUBLIC_STUDIO_EMAIL || '',
         phone: process.env.NEXT_PUBLIC_PHONE || '',
         address: '',
-        logoUrl: '/brand/logo-spatium-white.svg',
-        faviconUrl: '/favicon.svg',
+        logoUrl: '/brand/mark-spatium.svg',
+        faviconUrl: '/brand/mark-spatium.svg',
         socialLinks: {},
       },
     })

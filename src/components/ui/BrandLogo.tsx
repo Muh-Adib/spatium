@@ -3,50 +3,34 @@ import Image from 'next/image'
 
 export interface BrandLogoProps {
   siteName?: string
+  /** Custom logo from site settings; overrides the bundled SPATIUM wordmark. */
   logoUrl?: string | null
   className?: string
-  iconSize?: number
-  showText?: boolean
-  subtext?: string
+  /** `dark` = for dark backgrounds (white wordmark); `light`/`auto` = gradient wordmark. */
+  color?: 'light' | 'dark' | 'auto'
+  /** Rendered width in CSS px. Height follows the logo's own aspect ratio. */
+  width?: number
+  /** Preload the image (Next 16 replacement for `priority`). Only for above-the-fold use, e.g. the header. */
+  preload?: boolean
 }
 
-export function BrandLogo({
-  siteName = 'SPATIUM',
-  logoUrl,
-  className = '',
-  iconSize = 28,
-  showText = true,
-  subtext,
-}: BrandLogoProps) {
-  // If a custom logo URL is provided from site settings
-  if (logoUrl) {
-    return (
-      <div className={`flex items-center select-none py-1 px-1 sm:px-1.5 ${className}`}>
-        <Image
-          src={logoUrl}
-          alt={siteName}
-          width={130}
-          height={38}
-          className="h-7 sm:h-[30px] w-auto object-contain transition-transform duration-200 group-hover:scale-105"
-          priority
-        />
-      </div>
-    )
-  }
+/** viewBox of /brand/logo-spatium*.svg (2434.86 × 230.85). */
+const WORDMARK_RATIO = 2434.86 / 230.85
 
-  // Official SPATIUM Logo
+export function BrandLogo({ siteName = 'SPATIUM', logoUrl, className = '', color = 'auto', width = 130, preload = false }: BrandLogoProps) {
+  const src = logoUrl || (color === 'dark' ? '/brand/logo-spatium-white.svg' : '/brand/logo-spatium.svg')
+  const height = Math.round(width / WORDMARK_RATIO)
+
   return (
-    <div className={`flex items-center gap-2 select-none py-1 px-1 sm:px-1.5 ${className}`}>
-      <Image
-        src="/brand/logo-spatium-white.svg"
-        alt={siteName}
-        width={130}
-        height={34}
-        className="h-7 sm:h-[32px] w-auto object-contain transition-transform duration-200 group-hover:scale-105"
-        priority
-      />
-    </div>
+    <Image
+      src={src}
+      alt={siteName}
+      width={width}
+      height={height}
+      preload={preload}
+      className={className}
+      // Size by width only: a fixed height on a ~10:1 wordmark makes it huge.
+      style={{ width, height: 'auto', maxWidth: '100%', objectFit: 'contain', display: 'block' }}
+    />
   )
 }
-
-

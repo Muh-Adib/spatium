@@ -54,8 +54,8 @@ export const metadata: Metadata = {
     'SPATIUM — Spatial Technology Studio. Digital twin for creative industry: real places captured and reconstructed as photorealistic, explorable 3D Gaussian Splats.',
   icons: {
     icon: [
+      { url: '/brand/mark-spatium.svg', type: 'image/svg+xml', sizes: 'any' },
       { url: '/favicon.ico', sizes: 'any' },
-      { url: '/favicon.svg', type: 'image/svg+xml' },
     ],
     apple: '/apple-touch-icon.png',
   },

@@ -97,10 +97,16 @@
   flex: none;
 }
 
-.sh-brand__img {
+.sh-brand__logo {
   display: block;
   width: 132px;
   height: auto;
+}
+
+@media (max-width: 380px) {
+  .sh-brand__logo {
+    width: 112px !important;
+  }
 }
 
 .sh-brand__tag {

@@ -7,6 +7,7 @@ import { usePathname } from 'next/navigation'
 import { NAV, type NavItem } from '@/data/site'
 import { siteConfig } from '@/config/site'
 import { Icon } from '@/components/Icon'
+import { BrandLogo } from '@/components/ui/BrandLogo'
 import { useBodyScrollLock } from '@/hooks'
 import './header.css'
 
@@ -23,13 +24,12 @@ const PRIMARY: NavItem[] = NAV.filter((item) => item.to !== '/' && item.to !== '
 function Logo() {
   return (
     <Link href="/" className="sh-brand" aria-label="SPATIUM — beranda">
-      <Image
-        src="/brand/logo-spatium-white.svg"
-        alt="SPATIUM"
-        width={150}
-        height={14}
-        priority
-        className="sh-brand__img"
+      <BrandLogo
+        siteName="SPATIUM"
+        color="dark"
+        width={132}
+        className="sh-brand__logo"
+        preload
       />
       <span className="sh-brand__tag" aria-hidden="true">
         Spatial Technology Studio
