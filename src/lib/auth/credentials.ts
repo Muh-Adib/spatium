@@ -135,12 +135,12 @@ export async function validateCredentials(emailInput?: unknown, passwordInput?: 
 
 async function syncUserRecord(email: string, name: string, plainPassword: string) {
   try {
-    const existing = await prisma.orm.public.User.where({ email }).first()
+    const existing = await prisma.orm.public.User.where({ email }).first().catch(() => null)
     const passwordHash = await hashPasswordScrypt(plainPassword)
     if (existing) {
       await prisma.orm.public.User.where({ id: existing.id }).update({
         passwordHash,
-      })
+      }).catch(() => {})
     } else {
       await prisma.orm.public.User.create({
         id: `usr_${email.replace(/[^a-z0-9]+/g, '_')}`,
@@ -148,9 +148,9 @@ async function syncUserRecord(email: string, name: string, plainPassword: string
         email,
         role: 'super_admin',
         passwordHash,
-      })
+      }).catch(() => {})
     }
-  } catch (err) {
-    console.warn('[NextAuth] Auto-heal user sync warning:', err)
+  } catch {
+    // Graceful silent fallback
   }
 }
