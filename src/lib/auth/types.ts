@@ -1,5 +1,5 @@
 /**
- * UNIMASI Platform — Role & Editorial Lifecycle Definitions
+ * SPATIUM Platform — Role & Editorial Lifecycle Definitions
  * Shared between Server and Client Components.
  */
 

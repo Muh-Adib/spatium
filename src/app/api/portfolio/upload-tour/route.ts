@@ -2,11 +2,15 @@ import { NextRequest, NextResponse } from 'next/server'
 import path from 'path'
 import fs from 'fs'
 import AdmZip from 'adm-zip'
+import { z } from 'zod'
 import { prisma } from '@/lib/db/prisma'
 import { revalidatePath } from 'next/cache'
+import { requireRole } from '@/lib/auth/rbac'
 
-// Maximum upload size: 250MB for spatial tour bundles
 export const maxDuration = 60
+
+/** Upper bound for a spatial tour bundle (.zip / .html). */
+const MAX_UPLOAD_BYTES = 250 * 1024 * 1024
 
 function slugify(text: string): string {
   return text
@@ -17,246 +21,208 @@ function slugify(text: string): string {
     .replace(/^-+|-+$/g, '')
 }
 
+const optionalText = (max: number) =>
+  z
+    .string()
+    .trim()
+    .max(max)
+    .optional()
+    .transform((v) => (v ? v : undefined))
+
+const uploadFieldsSchema = z.object({
+  title: z.string().trim().min(1, 'Judul proyek tur spasial wajib diisi.').max(200),
+  slug: optionalText(200),
+  client: optionalText(200),
+  category: optionalText(100),
+  summary: optionalText(2000),
+  // Specs are stored only when the editor supplies measured values — never defaulted.
+  pointCount: optionalText(60),
+  accuracy: optionalText(60),
+  splatId: z
+    .string()
+    .trim()
+    .regex(/^[a-zA-Z0-9_-]{1,64}$/, 'ID SuperSplat tidak valid.')
+    .optional()
+    .or(z.literal('').transform(() => undefined)),
+  externalUrl: z
+    .string()
+    .trim()
+    .max(1000)
+    .refine((v) => v === '' || v.startsWith('https://') || v.startsWith('/tours/'), {
+      message: 'URL eksternal harus https:// atau /tours/...',
+    })
+    .optional()
+    .transform((v) => (v ? v : undefined)),
+})
+
+function field(formData: FormData, key: string): string | undefined {
+  const value = formData.get(key)
+  return typeof value === 'string' ? value : undefined
+}
+
+function errorMessage(err: unknown): string {
+  return err instanceof Error ? err.message : String(err)
+}
+
 export async function POST(request: NextRequest) {
+  // Trust boundary: only studio editors may write files under public/tours and create portfolio rows.
+  const auth = await requireRole(request, ['SUPER_ADMIN', 'CONTENT_ADMIN', 'EDITOR'])
+  if (auth.error) return auth.error
+
+  let formData: FormData
   try {
-    const formData = await request.formData()
+    formData = await request.formData()
+  } catch (err) {
+    console.warn('[TourUpload] Invalid multipart body:', errorMessage(err))
+    return NextResponse.json({ success: false, error: 'Body multipart tidak valid.' }, { status: 400 })
+  }
 
-    const title = (formData.get('title') as string | null)?.trim()
-    if (!title) {
-      return NextResponse.json(
-        { success: false, error: 'Judul proyek tur spasial wajib diisi.' },
-        { status: 400 }
-      )
-    }
+  const parsed = uploadFieldsSchema.safeParse({
+    title: field(formData, 'title') ?? '',
+    slug: field(formData, 'slug'),
+    client: field(formData, 'client'),
+    category: field(formData, 'category'),
+    summary: field(formData, 'summary'),
+    pointCount: field(formData, 'pointCount'),
+    accuracy: field(formData, 'accuracy'),
+    splatId: field(formData, 'splatId'),
+    externalUrl: field(formData, 'externalUrl'),
+  })
+  if (!parsed.success) {
+    return NextResponse.json(
+      { success: false, error: parsed.error.issues[0]?.message ?? 'Input tidak valid.' },
+      { status: 400 },
+    )
+  }
+  const input = parsed.data
+  const safeSlug = slugify(input.slug ?? input.title)
+  if (!safeSlug) {
+    return NextResponse.json({ success: false, error: 'Slug tidak valid.' }, { status: 400 })
+  }
+  const featured = formData.get('featured') === 'true' || formData.get('featured') === 'on'
 
-    const rawSlug = (formData.get('slug') as string | null)?.trim()
-    const safeSlug = rawSlug ? slugify(rawSlug) : slugify(title)
-    if (!safeSlug) {
-      return NextResponse.json(
-        { success: false, error: 'Slug tidak valid.' },
-        { status: 400 }
-      )
-    }
+  const fileEntry = formData.get('file')
+  const file = fileEntry instanceof File && fileEntry.size > 0 ? fileEntry : null
+  if (file && file.size > MAX_UPLOAD_BYTES) {
+    return NextResponse.json({ success: false, error: 'Ukuran berkas melebihi batas 250 MB.' }, { status: 413 })
+  }
 
-    const client = (formData.get('client') as string | null)?.trim() || 'Klien Spatium'
-    const category = (formData.get('category') as string | null)?.trim() || 'Marketing & Branding'
-    const summary = (formData.get('summary') as string | null)?.trim() || `${title} — Tur spasial interaktif 3D Gaussian Splatting.`
-    const pointCount = (formData.get('pointCount') as string | null)?.trim() || '12.0M Splats'
-    const accuracy = (formData.get('accuracy') as string | null)?.trim() || 'Sub-centimeter (5mm)'
-    const splatId = (formData.get('splatId') as string | null)?.trim() || ''
-    const externalUrl = (formData.get('externalUrl') as string | null)?.trim() || ''
-    const featured = formData.get('featured') === 'true' || formData.get('featured') === 'on'
+  let liveUrl = input.externalUrl ?? ''
+  const toursBaseDir = path.join(process.cwd(), 'public', 'tours')
+  const targetDir = path.join(toursBaseDir, safeSlug)
 
-    const file = formData.get('file') as File | null
-    let liveUrl = externalUrl
-
-    const toursBaseDir = path.join(process.cwd(), 'public', 'tours')
-    const targetDir = path.join(toursBaseDir, safeSlug)
-
-    // Ensure base directory exists
-    if (!fs.existsSync(toursBaseDir)) {
-      fs.mkdirSync(toursBaseDir, { recursive: true })
-    }
-
-    if (file && file.size > 0) {
+  try {
+    if (file) {
       const fileName = file.name.toLowerCase()
       const fileBuffer = Buffer.from(await file.arrayBuffer())
+      fs.mkdirSync(toursBaseDir, { recursive: true })
 
       if (fileName.endsWith('.zip')) {
-        // Safe ZIP extraction with Zip Slip defense
-        if (fs.existsSync(targetDir)) {
-          fs.rmSync(targetDir, { recursive: true, force: true })
-        }
+        if (fs.existsSync(targetDir)) fs.rmSync(targetDir, { recursive: true, force: true })
         fs.mkdirSync(targetDir, { recursive: true })
 
-        const zip = new AdmZip(fileBuffer)
-        const zipEntries = zip.getEntries()
-
+        const root = path.resolve(targetDir)
         let entryPointHtmlRel = ''
-
-        for (const entry of zipEntries) {
-          const entryPath = entry.entryName
-          // Defend against Zip Slip
-          const resolvedPath = path.resolve(targetDir, entryPath)
-          if (!resolvedPath.startsWith(path.resolve(targetDir) + path.sep) && resolvedPath !== path.resolve(targetDir)) {
-            console.warn(`[TourUpload] Suspicious zip entry rejected: ${entryPath}`)
+        for (const entry of new AdmZip(fileBuffer).getEntries()) {
+          const resolvedPath = path.resolve(targetDir, entry.entryName)
+          // Zip Slip defence.
+          if (!resolvedPath.startsWith(root + path.sep) && resolvedPath !== root) {
+            console.warn(`[TourUpload] Suspicious zip entry rejected: ${entry.entryName}`)
             continue
           }
-
           if (entry.isDirectory) {
             fs.mkdirSync(resolvedPath, { recursive: true })
-          } else {
-            const entryDir = path.dirname(resolvedPath)
-            if (!fs.existsSync(entryDir)) {
-              fs.mkdirSync(entryDir, { recursive: true })
-            }
-            fs.writeFileSync(resolvedPath, entry.getData())
-
-            // Detect main index.html or root html file
-            const lowerBase = path.basename(resolvedPath).toLowerCase()
-            if (lowerBase === 'index.html' && !entryPointHtmlRel) {
-              entryPointHtmlRel = path.relative(targetDir, resolvedPath)
-            } else if (lowerBase.endsWith('.html') && !entryPointHtmlRel) {
-              entryPointHtmlRel = path.relative(targetDir, resolvedPath)
-            }
+            continue
+          }
+          fs.mkdirSync(path.dirname(resolvedPath), { recursive: true })
+          fs.writeFileSync(resolvedPath, entry.getData())
+          const base = path.basename(resolvedPath).toLowerCase()
+          if (!entryPointHtmlRel && base.endsWith('.html')) {
+            entryPointHtmlRel = path.relative(targetDir, resolvedPath)
+          }
+          if (base === 'index.html' && path.dirname(resolvedPath) === root) {
+            entryPointHtmlRel = 'index.html'
           }
         }
 
         if (!entryPointHtmlRel) {
-          entryPointHtmlRel = 'index.html'
-          // If no html found, create a starter player wrapper
-          const fallbackHtmlPath = path.join(targetDir, 'index.html')
-          if (!fs.existsSync(fallbackHtmlPath)) {
-            fs.writeFileSync(
-              fallbackHtmlPath,
-              `<!DOCTYPE html>
-<html lang="id">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${title} — SPATIUM Tour</title>
-  <style>
-    body { margin: 0; background: #0F3A79; color: #FFFFFF; font-family: sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; text-align: center; }
-    h1 { color: #FFD600; font-size: 1.8rem; margin-bottom: 0.5rem; }
-    p { color: #E2E8F0; max-width: 500px; line-height: 1.5; }
-  </style>
-</head>
-<body>
-  <div>
-    <h1>${title}</h1>
-    <p>Tur spasial berhasil diekstrak dan siap dikonfigurasi.</p>
-  </div>
-</body>
-</html>`
-            )
-          }
+          fs.rmSync(targetDir, { recursive: true, force: true })
+          return NextResponse.json(
+            { success: false, error: 'Arsip .zip tidak berisi berkas .html sebagai titik masuk tur.' },
+            { status: 400 },
+          )
         }
-
-        // Normalize forward slashes for URL
-        const normalizedRel = entryPointHtmlRel.split(path.sep).join('/')
-        liveUrl = `/tours/${safeSlug}/${normalizedRel}`
+        liveUrl = `/tours/${safeSlug}/${entryPointHtmlRel.split(path.sep).join('/')}`
       } else if (fileName.endsWith('.html') || fileName.endsWith('.htm')) {
-        // Single HTML file upload
-        if (!fs.existsSync(targetDir)) {
-          fs.mkdirSync(targetDir, { recursive: true })
-        }
-        const destPath = path.join(targetDir, 'index.html')
-        fs.writeFileSync(destPath, fileBuffer)
+        fs.mkdirSync(targetDir, { recursive: true })
+        fs.writeFileSync(path.join(targetDir, 'index.html'), fileBuffer)
         liveUrl = `/tours/${safeSlug}/index.html`
       } else {
         return NextResponse.json(
-          { success: false, error: 'Format berkas tidak didukung. Harap unggah berkas arsip .zip atau .html.' },
-          { status: 400 }
+          { success: false, error: 'Format berkas tidak didukung. Unggah arsip .zip atau .html.' },
+          { status: 400 },
         )
       }
     }
+  } catch (err) {
+    console.error('[TourUpload] Failed to store tour bundle:', err)
+    return NextResponse.json({ success: false, error: 'Gagal menyimpan berkas tur spasial.' }, { status: 500 })
+  }
 
-    if (!liveUrl) {
-      if (splatId) {
-        liveUrl = `https://superspl.at/s?id=${splatId}`
-      } else {
-        liveUrl = `/tours/${safeSlug}/index.html`
-      }
-    }
-
-    const technologies = ['3D Gaussian Splatting', 'WebGL Tour Engine', 'LiDAR Scanning']
-    const metrics = [
-      { label: 'Point Count', value: pointCount },
-      { label: 'Spatial Accuracy', value: accuracy },
-      { label: 'WebGL Engine', value: '60 FPS Real-time' },
-    ]
-
-    const newPortfolioItem = {
-      id: Date.now(),
-      documentId: `port-${safeSlug}`,
-      title,
-      slug: safeSlug,
-      client,
-      year: new Date().getFullYear(),
-      category,
-      discipline: `${category} · 3D Gaussian Splatting`,
-      summary,
-      challenge: 'Membutuhkan dokumentasi spasial interaktif fidelitas tinggi yang dapat diakses secara instan dari web.',
-      approach: 'Pemindaian spasial LiDAR dan fotogrametri berkerapatan tinggi yang dikonversi menjadi medan radiansi neural 3DGS.',
-      solution: 'Penyajian tur spasial WebGL 60 FPS mandiri dengan navigasi kamera bebas dan akurasi sub-sentimeter.',
-      result: 'Memberikan pengalaman verifikasi visual 1:1 tanpa batasan jarak fisik.',
-      heroImage: `/images/spatium/page_01_0.jpg`,
-      liveUrl,
-      featured,
-      status: 'published',
-      technologies,
-      metrics,
-    }
-
-    // 1. Persist to seed_portfolio.json
-    try {
-      const seedFile = path.join(process.cwd(), 'src', 'data', 'seed', 'seed_portfolio.json')
-      if (fs.existsSync(seedFile)) {
-        const raw = fs.readFileSync(seedFile, 'utf-8')
-        const items = JSON.parse(raw)
-        const existingIdx = items.findIndex((item: any) => item.slug === safeSlug)
-        if (existingIdx >= 0) {
-          items[existingIdx] = { ...items[existingIdx], ...newPortfolioItem, id: items[existingIdx].id }
-        } else {
-          items.unshift(newPortfolioItem)
-        }
-        fs.writeFileSync(seedFile, JSON.stringify(items, null, 2), 'utf-8')
-      }
-    } catch (persistErr) {
-      console.warn('[TourUpload] Failed to update seed_portfolio.json:', persistErr)
-    }
-
-    // 2. Try DB Upsert via Prisma if DB is available
-    try {
-      await prisma.orm.public.Portfolio.upsert({
-        conflictOn: { slug: safeSlug },
-        update: {
-          title,
-          client,
-          category,
-          summary,
-          liveUrl,
-          featured,
-          status: 'published',
-          technologies: JSON.stringify(technologies),
-          metrics: JSON.stringify(metrics),
-        },
-        create: {
-          documentId: `port-${safeSlug}`,
-          slug: safeSlug,
-          title,
-          client,
-          year: new Date().getFullYear(),
-          category,
-          summary,
-          liveUrl,
-          heroImage: `/images/spatium/page_01_0.jpg`,
-          featured,
-          status: 'published',
-          technologies: JSON.stringify(technologies),
-          metrics: JSON.stringify(metrics),
-        },
-      })
-    } catch (dbErr) {
-      console.warn('[TourUpload] DB upsert bypassed (offline mode active):', (dbErr as any)?.message)
-    }
-
-    revalidatePath('/portfolio')
-    revalidatePath(`/portfolio/${safeSlug}`)
-    revalidatePath('/')
-
-    return NextResponse.json({
-      success: true,
-      message: 'Tur spasial berhasil diunggah dan didaftarkan ke portofolio SPATIUM.',
-      slug: safeSlug,
-      liveUrl,
-      portfolio: newPortfolioItem,
-    })
-  } catch (err: any) {
-    console.error('[TourUpload] Error processing tour upload:', err)
+  if (!liveUrl && input.splatId) liveUrl = `https://superspl.at/s?id=${input.splatId}`
+  if (!liveUrl) {
     return NextResponse.json(
-      { success: false, error: err?.message || 'Terjadi kesalahan saat memproses berkas tur spasial.' },
-      { status: 500 }
+      { success: false, error: 'Sertakan berkas tur, ID SuperSplat, atau URL eksternal.' },
+      { status: 400 },
     )
   }
+
+  const metrics = [
+    input.pointCount ? { label: 'Point Count', value: input.pointCount } : null,
+    input.accuracy ? { label: 'Spatial Accuracy', value: input.accuracy } : null,
+  ].filter((m): m is { label: string; value: string } => m !== null)
+
+  // Uploads land as DRAFT: publishing goes through the Studio publication gate (AGENTS.md §3.5).
+  const values = {
+    title: input.title,
+    client: input.client ?? null,
+    category: input.category ?? null,
+    summary: input.summary ?? null,
+    liveUrl,
+    featured,
+    technologies: JSON.stringify(['3D Gaussian Splatting']),
+    metrics: metrics.length > 0 ? JSON.stringify(metrics) : null,
+  }
+
+  try {
+    const existing = await prisma.orm.public.Portfolio.where({ slug: safeSlug }).first()
+    if (existing) {
+      await prisma.orm.public.Portfolio.where({ id: existing.id }).update(values)
+    } else {
+      await prisma.orm.public.Portfolio.create({
+        ...values,
+        documentId: `port-${safeSlug}`,
+        slug: safeSlug,
+        status: 'draft',
+      })
+    }
+  } catch (err) {
+    console.error('[TourUpload] Portfolio upsert failed:', err)
+    return NextResponse.json(
+      { success: false, error: 'Berkas tersimpan, tetapi gagal mendaftarkan portofolio ke database.' },
+      { status: 500 },
+    )
+  }
+
+  revalidatePath('/portfolio')
+  revalidatePath(`/portfolio/${safeSlug}`)
+  revalidatePath('/')
+
+  return NextResponse.json({
+    success: true,
+    message: 'Tur spasial tersimpan sebagai draft. Tinjau lalu publikasikan dari Portfolio Manager.',
+    slug: safeSlug,
+    liveUrl,
+    portfolio: { slug: safeSlug, title: input.title, status: 'draft', liveUrl },
+  })
 }

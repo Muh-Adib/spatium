@@ -1,25 +1,15 @@
 /**
- * Embed Validator & Security Policy for UNIMASI Media Architecture
+ * Embed Validator & Security Policy for SPATIUM Media Architecture
  *
  * Enforces strict domain allowlists and protocol sanity checks
  * to prevent SSRF, XSS, and clickjacking attacks via CMS-driven iframe previews.
  */
 
 export const ALLOWED_EMBED_DOMAINS = [
-  'unimasi.id',
-  'www.unimasi.id',
-  'unimasi.studio',
-  'www.unimasi.studio',
-  'unimasi.com',
-  'www.unimasi.com',
-  'unicamstudio.com',
-  'www.unicamstudio.com',
-  'smkpbsoedirman2.sch.id',
-  'www.smkpbsoedirman2.sch.id',
-  'smkmahanaim.sch.id',
-  'www.smkmahanaim.sch.id',
-  'pmb.umby.ac.id',
-  'umby.ac.id',
+  'spatium.id',
+  'www.spatium.id',
+  // SuperSplat — viewer for the 3D Gaussian Splat scene portfolio.
+  'superspl.at',
   'figma.com',
   'www.figma.com',
   'youtube-nocookie.com',
@@ -28,8 +18,6 @@ export const ALLOWED_EMBED_DOMAINS = [
   'www.youtube.com',
   'vimeo.com',
   'player.vimeo.com',
-  'github.com',
-  'www.github.com',
 ] as const
 
 export interface EmbedValidationResult {
@@ -86,7 +74,7 @@ export function validateEmbedUrl(rawUrl: string): EmbedValidationResult {
     return {
       isValid: false,
       domain: hostname,
-      reason: `Domain "${hostname}" tidak terdaftar dalam allowlist mitra resmi UNIMASI.`,
+      reason: `Domain "${hostname}" tidak terdaftar dalam allowlist mitra resmi SPATIUM.`,
     }
   }
 

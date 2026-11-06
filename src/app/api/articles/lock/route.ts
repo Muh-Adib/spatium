@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { z } from 'zod'
 import { requireUser } from '@/lib/auth/rbac'
 import {
   getArticleLock,
@@ -7,6 +8,8 @@ import {
 } from '@/lib/articles/locks'
 
 export const dynamic = 'force-dynamic'
+
+const LockBodySchema = z.object({ slug: z.string().trim().min(1).max(200) })
 
 /**
  * GET /api/articles/lock?slug=...
@@ -36,12 +39,15 @@ export async function POST(request: NextRequest) {
   if (auth.error) return auth.error
 
   try {
-    const body = await request.json().catch(() => ({}))
-    const { slug } = body
-
-    if (!slug || typeof slug !== 'string') {
+    const body: unknown = await request.json().catch((err: unknown) => {
+      console.warn('[articles/lock] Invalid JSON body:', err)
+      return null
+    })
+    const parsed = LockBodySchema.safeParse(body)
+    if (!parsed.success) {
       return NextResponse.json({ error: 'Slug artikel tidak valid.' }, { status: 400 })
     }
+    const { slug } = parsed.data
 
     const result = acquireOrRefreshLock(slug, {
       id: auth.user.id,
@@ -69,8 +75,9 @@ export async function POST(request: NextRequest) {
       acquired: true,
       expiresAt: result.lock.expiresAt,
     })
-  } catch (err: any) {
-    return NextResponse.json({ error: 'Gagal memperbarui lock editor.', details: err.message }, { status: 500 })
+  } catch (err) {
+    console.error('[articles/lock] Heartbeat failed:', err)
+    return NextResponse.json({ error: 'Gagal memperbarui lock editor.' }, { status: 500 })
   }
 }
 

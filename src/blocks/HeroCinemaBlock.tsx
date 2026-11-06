@@ -5,7 +5,6 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { HeroCinemaBlockInstance } from './contracts'
 import { Icon } from '@/components/Icon'
-import '@/components/home/hero.css'
 
 export function HeroCinemaBlock({ block }: { block: HeroCinemaBlockInstance | any }) {
   const data = block?.data || block || {}
@@ -18,8 +17,8 @@ export function HeroCinemaBlock({ block }: { block: HeroCinemaBlockInstance | an
       : 'min-h-[85vh]'
 
   const isCenter = settings?.alignment === 'center'
-  const badge = block?.badge || data.badge || block?.categoryBadge || 'UNIMASI ANIMATION STUDIO'
-  const headline = block?.headline || data.headline || block?.title || data.title || block?.name || 'Cinematic 3D Animation Showcase'
+  const badge = block?.badge || data.badge || block?.categoryBadge || 'SPATIUM SPATIAL STUDIO'
+  const headline = block?.headline || data.headline || block?.title || data.title || block?.name || ''
   const subheadline = block?.subheadline || data.subheadline || block?.description || data.description || block?.summary || ''
   const primaryCta = block?.primaryCta || data.primaryCta || (block?.buttonText ? { label: block.buttonText, href: block.buttonHref || '#reel' } : undefined)
   const secondaryCta = block?.secondaryCta || data.secondaryCta
@@ -39,7 +38,7 @@ export function HeroCinemaBlock({ block }: { block: HeroCinemaBlockInstance | an
   const hasValidImage = Boolean(heroImage && typeof heroImage === 'string' && heroImage.trim().length > 0 && !imgError)
 
   const imageAlt =
-    media?.alt || block?.mediaAlt || block?.alt || data?.alt || headline || 'Visual showcase UNIMASI Studio'
+    media?.alt || block?.mediaAlt || block?.alt || data?.alt || headline || 'Visual digital twin SPATIUM'
 
   return (
     <section className={`hero relative flex items-center ${heightClass} overflow-hidden bg-[var(--color-background)] text-white py-20 lg:py-28`}>
@@ -52,7 +51,10 @@ export function HeroCinemaBlock({ block }: { block: HeroCinemaBlockInstance | an
             </div>
           ) : null}
 
-          <h1 className="hero__title display-xl font-syne font-bold tracking-tight mb-8">
+          <h1
+            className="hero__title font-medium mb-8 text-balance"
+            style={{ fontFamily: 'var(--font-plus-jakarta), system-ui, sans-serif', fontSize: 'clamp(2.4rem, 6.2vw, 5.6rem)', lineHeight: 1.02, letterSpacing: '-0.04em', overflowWrap: 'normal' }}
+          >
             {headline}
           </h1>
 
@@ -80,62 +82,42 @@ export function HeroCinemaBlock({ block }: { block: HeroCinemaBlockInstance | an
           </div>
         </div>
 
-        {/* Cinematic Media Showcase Frame / 4K Preview */}
-        <div className="mt-12 rounded-3xl overflow-hidden border border-white/10 bg-[#060A17] p-3 sm:p-5 shadow-2xl relative w-full">
-          <div className="relative aspect-video rounded-2xl overflow-hidden bg-black/60 border border-white/10 flex items-center justify-center group">
-            {showreelUrl ? (
-              <iframe
-                src={showreelUrl}
-                title={headline}
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-                className="w-full h-full border-0"
-              />
-            ) : hasValidImage ? (
-              <div className="relative w-full h-full">
+        {/* Media frame: only when there is real media to show. */}
+        {showreelUrl || hasValidImage ? (
+          <div className="mt-12 rounded-3xl overflow-hidden border border-white/10 bg-[#060A17] p-3 sm:p-5 shadow-2xl relative w-full">
+            <div className="relative aspect-video rounded-2xl overflow-hidden bg-black/60 border border-white/10">
+              {showreelUrl ? (
+                <iframe
+                  src={showreelUrl}
+                  title={headline || 'Media'}
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  className="w-full h-full border-0"
+                />
+              ) : (
                 <Image
                   src={heroImage}
                   alt={imageAlt}
                   fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-700"
+                  className="object-cover"
                   sizes="(max-width: 1024px) 100vw, 1024px"
                   onError={() => setImgError(true)}
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex items-center justify-center">
-                  <div className="w-16 h-16 rounded-full bg-[#FFD600]/90 text-black flex items-center justify-center shadow-[0_0_30px_rgba(255,214,0,0.5)] group-hover:scale-110 transition-transform cursor-pointer">
-                    <span className="text-2xl font-bold ml-1">▶</span>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div className="w-full h-full bg-gradient-to-br from-[#060A17] via-[#0F3A79]/30 to-[#060A17] p-8 flex flex-col justify-between items-center text-center min-h-[220px]">
-                <div className="px-3 py-1 rounded-full bg-[#FFD600]/10 border border-[#FFD600]/30 text-[#FFD600] font-mono text-xs font-bold uppercase tracking-wider">
-                  4K DCI CINEMATIC MASTER
-                </div>
-                <div className="w-14 h-14 rounded-full bg-[#FFD600]/10 border border-[#FFD600]/30 flex items-center justify-center text-[#FFD600] text-2xl shadow-[0_0_25px_rgba(255,214,0,0.2)] my-auto">
-                  ▶
-                </div>
-                <div className="text-xs font-mono text-neutral-400">UNIMASI HIGH-FIDELITY ANIMATION ENGINE</div>
-              </div>
-            )}
-          </div>
-
-          {/* 3 Metric Pills below media */}
-          {metrics.length > 0 && (
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-4">
-              {metrics.map((m: any, idx: number) => (
-                <div key={idx} className="p-3.5 rounded-xl bg-white/[0.03] border border-white/10 text-center">
-                  <div className="text-xl sm:text-2xl font-syne font-bold text-[#FFD600] mb-0.5">
-                    {m.value}
-                  </div>
-                  <div className="text-[11px] font-mono text-white/90 font-medium">
-                    {m.label}
-                  </div>
-                </div>
-              ))}
+              )}
             </div>
-          )}
-        </div>
+          </div>
+        ) : null}
+
+        {metrics.length > 0 && (
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-8">
+            {metrics.map((m: any, idx: number) => (
+              <div key={idx} className="p-3.5 rounded-xl bg-white/[0.03] border border-white/10 text-center">
+                <div className="text-xl sm:text-2xl font-semibold text-[#6fb0ff] mb-0.5">{m.value}</div>
+                <div className="text-[11px] font-mono text-white/90 font-medium">{m.label}</div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </section>
   )

@@ -52,7 +52,7 @@ model Article {
   scheduledBy        String?      @map("scheduled_by")
   scheduleError      String?      @map("schedule_error")
   createdAt          TimestamptzString @default(now()) @map("created_at")
-  updatedAt          temporal.UpdatedAtString @map("updated_at")
+  updatedAt          TimestamptzString @onCreate(now()) @onUpdate(now()) @map("updated_at")
 
   wpPostId           Int?         @map("wp_post_id")
   wpSourceUrl        String?      @map("wp_source_url")
@@ -129,7 +129,7 @@ model Portfolio {
   robots             String?             @default("index, follow")
   ogImage            String?             @map("og_image")
   createdAt          TimestamptzString   @default(now()) @map("created_at")
-  updatedAt          temporal.UpdatedAtString @map("updated_at")
+  updatedAt          TimestamptzString @onCreate(now()) @onUpdate(now()) @map("updated_at")
 
   locale             String              @default("id")
   translationGroupId String?             @map("translation_group_id")
@@ -157,7 +157,7 @@ model ServiceCategory {
   status             String    @default("published")
   showInNav          Boolean?  @default(true) @map("show_in_nav")
   createdAt          TimestamptzString @default(now()) @map("created_at")
-  updatedAt          temporal.UpdatedAtString @map("updated_at")
+  updatedAt          TimestamptzString @onCreate(now()) @onUpdate(now()) @map("updated_at")
 
   locale             String    @default("id")
   translationGroupId String?   @map("translation_group_id")
@@ -207,7 +207,7 @@ model Service {
   robots             String?            @default("index, follow")
   ogImage            String?            @map("og_image")
   createdAt          TimestamptzString  @default(now()) @map("created_at")
-  updatedAt          temporal.UpdatedAtString @map("updated_at")
+  updatedAt          TimestamptzString @onCreate(now()) @onUpdate(now()) @map("updated_at")
 
   locale             String             @default("id")
   translationGroupId String?            @map("translation_group_id")
@@ -247,7 +247,7 @@ model Solution {
   featured           Boolean?            @default(false)
   status             String              @default("published")
   createdAt          TimestamptzString   @default(now()) @map("created_at")
-  updatedAt          temporal.UpdatedAtString @map("updated_at")
+  updatedAt          TimestamptzString @onCreate(now()) @onUpdate(now()) @map("updated_at")
 
   locale             String              @default("id")
   translationGroupId String?             @map("translation_group_id")
@@ -294,7 +294,7 @@ model SolutionFinderConfig {
   industries           String?
   questions            String?
   recommendationMatrix String?   @map("recommendation_matrix")
-  updatedAt            temporal.UpdatedAtString @map("updated_at")
+  updatedAt            TimestamptzString @onCreate(now()) @onUpdate(now()) @map("updated_at")
 
   @@map("solution_finder_configs")
 }
@@ -308,7 +308,7 @@ model PageTemplate {
   blocks         String
   variationPools String?   @map("variation_pools")
   createdAt      TimestamptzString @default(now()) @map("created_at")
-  updatedAt      temporal.UpdatedAtString @map("updated_at")
+  updatedAt      TimestamptzString @onCreate(now()) @onUpdate(now()) @map("updated_at")
 
   @@map("page_templates")
 }
@@ -324,7 +324,7 @@ model Page {
   metaTitle          String?   @map("meta_title")
   metaDescription    String?   @map("meta_description")
   createdAt          TimestamptzString @default(now()) @map("created_at")
-  updatedAt          temporal.UpdatedAtString @map("updated_at")
+  updatedAt          TimestamptzString @onCreate(now()) @onUpdate(now()) @map("updated_at")
 
   locale             String    @default("id")
   translationGroupId String?   @map("translation_group_id")
@@ -333,7 +333,8 @@ model Page {
   seoData            String?   @map("seo_data")
 
   kind               String    @default("standard")
-  status             String    @default("published")
+  // New pages start as drafts; publishing goes through the page publication gate.
+  status             String    @default("draft")
   robots             String?   @default("index, follow")
   canonical          String?
   publishedAt        String?   @map("published_at")
@@ -370,7 +371,7 @@ model SiteConfig {
   logoUrl                 String?   @map("logo_url")
   faviconUrl              String?   @map("favicon_url")
   socialLinks             String?   @map("social_links")
-  updatedAt               temporal.UpdatedAtString @map("updated_at")
+  updatedAt               TimestamptzString @onCreate(now()) @onUpdate(now()) @map("updated_at")
 
   brandVoice              String?   @map("brand_voice")
   hqLocation              String?   @map("hq_location")
@@ -400,7 +401,7 @@ model Site {
   isActive      Boolean   @default(true) @map("is_active")
   settings      String?
   createdAt     TimestamptzString @default(now()) @map("created_at")
-  updatedAt     temporal.UpdatedAtString @map("updated_at")
+  updatedAt     TimestamptzString @onCreate(now()) @onUpdate(now()) @map("updated_at")
 
   @@map("sites")
 }
@@ -412,7 +413,7 @@ model ThemeToken {
   active    Boolean?  @default(true)
   version   Int       @default(1)
   createdAt TimestamptzString @default(now()) @map("created_at")
-  updatedAt temporal.UpdatedAtString @map("updated_at")
+  updatedAt TimestamptzString @onCreate(now()) @onUpdate(now()) @map("updated_at")
 
   @@map("theme_tokens")
 }
@@ -455,7 +456,7 @@ model ContentNode {
   image          String?
   status         String        @default("published")
   indexable      Boolean?      @default(true)
-  updatedAt      temporal.UpdatedAtString @map("updated_at")
+  updatedAt      TimestamptzString @onCreate(now()) @onUpdate(now()) @map("updated_at")
 
   sourceLinks    ContentLink[] @relation("SourceNode")
   targetLinks    ContentLink[] @relation("TargetNode")
@@ -489,7 +490,7 @@ model VoiceProfile {
   exemplarIds String?   @map("exemplar_ids")
   active      Boolean?  @default(true)
   createdAt   TimestamptzString @default(now()) @map("created_at")
-  updatedAt   temporal.UpdatedAtString @map("updated_at")
+  updatedAt   TimestamptzString @onCreate(now()) @onUpdate(now()) @map("updated_at")
 
   @@map("voice_profiles")
 }
@@ -632,7 +633,7 @@ model MediaItem {
   usedIn      String?   @map("used_in")
   uploadedBy  String?   @map("uploaded_by")
   createdAt   TimestamptzString @default(now()) @map("created_at")
-  updatedAt   temporal.UpdatedAtString @map("updated_at")
+  updatedAt   TimestamptzString @onCreate(now()) @onUpdate(now()) @map("updated_at")
 
   @@map("media_items")
 }
@@ -647,7 +648,7 @@ model CtaPreset {
   placement String?
   active    Boolean?  @default(true)
   createdAt TimestamptzString @default(now()) @map("created_at")
-  updatedAt temporal.UpdatedAtString @map("updated_at")
+  updatedAt TimestamptzString @onCreate(now()) @onUpdate(now()) @map("updated_at")
 
   @@map("cta_presets")
 }
@@ -685,7 +686,7 @@ model KeywordBank {
   gscPosition       Float?    @default(0) @map("gsc_position")
   priorityScore     Float?    @default(0) @map("priority_score")
   createdAt         TimestamptzString @default(now()) @map("created_at")
-  updatedAt         temporal.UpdatedAtString @map("updated_at")
+  updatedAt         TimestamptzString @onCreate(now()) @onUpdate(now()) @map("updated_at")
 
   @@map("keyword_bank")
 }
@@ -789,7 +790,7 @@ model SiteStat {
   active       Boolean?  @default(true)
   displayOrder Int?      @default(0) @map("display_order")
   createdAt    TimestamptzString @default(now()) @map("created_at")
-  updatedAt    temporal.UpdatedAtString @map("updated_at")
+  updatedAt    TimestamptzString @onCreate(now()) @onUpdate(now()) @map("updated_at")
 
   @@map("site_stats")
 }
@@ -802,7 +803,7 @@ model FaqItem {
   position  Int?      @default(0)
   active    Boolean?  @default(true)
   createdAt TimestamptzString @default(now()) @map("created_at")
-  updatedAt temporal.UpdatedAtString @map("updated_at")
+  updatedAt TimestamptzString @onCreate(now()) @onUpdate(now()) @map("updated_at")
 
   @@map("faq_items")
 }
@@ -861,9 +862,25 @@ model ClientLogo {
   order     Int?      @default(0)
   isActive  Boolean?  @default(true) @map("is_active")
   createdAt TimestamptzString @default(now()) @map("created_at")
-  updatedAt temporal.UpdatedAtString @map("updated_at")
+  updatedAt TimestamptzString @onCreate(now()) @onUpdate(now()) @map("updated_at")
 
   @@map("client_logos")
 }
 
+/// Per-client API keys for the MCP endpoint (/api/mcp). Only a SHA-256 hash of the
+/// key is stored; the plaintext is shown once at creation. Scopes are a JSON array,
+/// e.g. ["blocks:read","pages:read","pages:draft"]. MCP clients can never publish.
+model McpApiKey {
+  id          Int       @id @default(autoincrement())
+  name        String
+  keyPrefix   String    @map("key_prefix")
+  keyHash     String    @unique @map("key_hash")
+  scopes      String    @default("[\"blocks:read\",\"pages:read\",\"pages:draft\"]")
+  createdBy   String?   @map("created_by")
+  createdAt   TimestamptzString @default(now()) @map("created_at")
+  lastUsedAt  String?   @map("last_used_at")
+  revokedAt   String?   @map("revoked_at")
+  expiresAt   String?   @map("expires_at")
 
+  @@map("mcp_api_keys")
+}

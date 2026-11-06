@@ -26,7 +26,7 @@ export function InteractiveCtaBlock({ block }: { block: InteractiveCtaBlockInsta
     (block?.secondaryCtaText || data.secondaryCtaText
       ? {
           label: block?.secondaryCtaText || data.secondaryCtaText || 'Pelajari Lebih Lanjut',
-          href: block?.secondaryCtaLink || data.secondaryCtaLink || '/portofolio',
+          href: block?.secondaryCtaLink || data.secondaryCtaLink || '/portfolio',
         }
       : undefined)
 

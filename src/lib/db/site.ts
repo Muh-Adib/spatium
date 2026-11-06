@@ -19,9 +19,9 @@ function getDefaultSite(apiKey?: string): SiteEntity {
   return {
     id: 1,
     slug: 'default',
-    name: process.env.NEXT_PUBLIC_SITE_NAME || 'UNIMASI Studio',
-    domain: process.env.NEXT_PUBLIC_SITE_URL ? new URL(process.env.NEXT_PUBLIC_SITE_URL).host : 'unimasi.studio',
-    apiKey: apiKey || process.env.SITE_API_KEY || 'site_sec_unimasi',
+    name: process.env.NEXT_PUBLIC_SITE_NAME || 'SPATIUM',
+    domain: process.env.NEXT_PUBLIC_SITE_URL ? new URL(process.env.NEXT_PUBLIC_SITE_URL).host : 'spatium.id',
+    apiKey: apiKey || process.env.SITE_API_KEY || 'site_sec_spatium',
     webhookUrl: process.env.DEFAULT_WEBHOOK_URL || null,
     webhookSecret: process.env.REVALIDATE_SECRET || null,
     isActive: true,
@@ -66,13 +66,11 @@ export async function getSiteByApiKey(apiKey: string): Promise<SiteEntity | null
   }
 
   // Development and test convenience fallback
-  const envKey = process.env.SITE_API_KEY || 'site_sec_unimasi'
+  const envKey = process.env.SITE_API_KEY || 'site_sec_spatium'
   if (
     cleanKey === envKey ||
     cleanKey === 'site_sec_default' ||
-    cleanKey === 'site_sec_unimasi' ||
-    cleanKey === 'unimasi-default-key' ||
-    cleanKey === 'segia-default-key'
+    cleanKey === 'site_sec_spatium'
   ) {
     return getDefaultSite(cleanKey)
   }

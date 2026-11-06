@@ -1,7 +1,9 @@
 import { CollapsibleLinkItem, generateCollapsibleLinksHtml } from './linkBlock'
 
 /**
- * Block Editor data types, converter, and real-time openSEO / Yoast-style scoring engine.
+ * Article block editor model: client-side block types and the HTML <-> block converters
+ * (`contentToBlocks` / `blocksToContent`). Articles are stored as HTML; blocks are an editing
+ * view only. SEO scoring lives in `@/lib/seo/analyzer` (single scorer).
  */
 
 export type BlockType =
@@ -176,9 +178,15 @@ export function generateHeadingSlug(text: string): string {
  */
 export function cleanHeadingText(text: string): string {
   if (!text) return ''
-  return text
-    .replace(/<[^>]*>/g, '')
-    .replace(/[*_`#]/g, '')
+  return decodeWordPressArtifacts(text.replace(/<[^>]*>/g, '').replace(/[*_`#]/g, ''))
+    .replace(/&amp;/g, '&')
+    .replace(/&nbsp;/g, ' ')
+    .trim()
+}
+
+/** Strip Grammarly (`<gwmw>`) residue and decode the WordPress typographic entities. */
+function decodeWordPressArtifacts(html: string): string {
+  return html
     .replace(/<gwmw\b[^>]*>[\s\S]*?<\/gwmw>/gi, '')
     .replace(/<gwmw\b[^>]*\/?>/gi, '')
     .replace(/&#8211;/g, '–')
@@ -188,9 +196,6 @@ export function cleanHeadingText(text: string): string {
     .replace(/&#8220;/g, '“')
     .replace(/&#8221;/g, '”')
     .replace(/&#038;/g, '&')
-    .replace(/&amp;/g, '&')
-    .replace(/&nbsp;/g, ' ')
-    .trim()
 }
 
 /**
@@ -198,8 +203,7 @@ export function cleanHeadingText(text: string): string {
  */
 export function blocksToContent(blocks: ContentBlock[]): string {
   return blocks
-    .map((rawBlock) => {
-      const b = rawBlock
+    .map((b) => {
       switch (b.type) {
         case 'html': return b.html
         case 'paragraph':
@@ -213,12 +217,15 @@ export function blocksToContent(blocks: ContentBlock[]): string {
           return anchor ? `<h3 id="${anchor}">${b.text}</h3>` : `<h3>${b.text}</h3>`
         }
         case 'image': {
+          // An image block without a picture yet is an editing placeholder; never emit <img src="">.
+          if (!b.url) return ''
           const captionHtml = b.caption ? `<figcaption>${b.caption}</figcaption>` : ''
           const fullClass = b.alignment === 'full' ? ' w-full' : ' max-w-2xl mx-auto'
           return `<figure class="article-figure${fullClass}"><img src="${b.url}" alt="${b.alt || b.caption || 'Gambar Artikel'}" loading="lazy" />${captionHtml}</figure>`
         }
         case 'video': {
           const embed = b.embedUrl || extractEmbedUrl(b.url)
+          if (!embed) return ''
           return `<div class="article-video-wrapper aspect-video w-full my-8 rounded-2xl overflow-hidden shadow-lg border border-border"><iframe src="${embed}" title="${b.title || 'Video Embed'}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen class="w-full h-full border-0"></iframe></div>`
         }
         case 'quote':
@@ -252,128 +259,9 @@ export function blocksToContent(blocks: ContentBlock[]): string {
           return `<div class="article-table-wrapper my-6 overflow-x-auto rounded-xl border border-white/10"><table class="w-full text-left text-sm border-collapse">${colgroup}${captionHtml}${thead}${tbody}</table></div>`
         }
         default: {
-          const block = rawBlock as unknown as Record<string, unknown>
-          const type = String(block.type || '')
-          if (type === 'feature-bento-grid') {
-            const rawFeatures = Array.isArray(block.features) ? block.features : []
-            const features = rawFeatures.map((f) => {
-              const item = f as Record<string, unknown>
-              return `<div class="bento-card p-5 rounded-2xl bg-white/[0.03] border border-white/10 my-3">
-                ${item.tag ? `<span class="badge text-xs font-mono text-[#FFD600] mb-2 inline-block">${item.tag}</span>` : ''}
-                <h4 class="font-bold text-white text-lg">${item.title || ''}</h4>
-                <p class="text-sm text-neutral-300 mt-1">${item.description || ''}</p>
-              </div>`
-            }).join('')
-            return `<section class="article-bento-grid my-8">
-              ${block.title ? `<h3 class="text-2xl font-bold text-white mb-2">${block.title}</h3>` : ''}
-              ${block.description ? `<p class="text-neutral-400 mb-4">${block.description}</p>` : ''}
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">${features}</div>
-            </section>`
-          }
-          if (type === 'comparison-matrix') {
-            const rawRows = Array.isArray(block.rows) ? block.rows : []
-            const rows = rawRows.map((r) => {
-              const item = r as Record<string, unknown>
-              return `<tr class="border-b border-white/10">
-                <td class="p-3 font-semibold text-white">${item.feature || ''}</td>
-                <td class="p-3 text-[#FFD600]">${item.us || ''}</td>
-                <td class="p-3 text-neutral-400">${item.standard || ''}</td>
-              </tr>`
-            }).join('')
-            return `<section class="article-comparison-matrix my-8 overflow-x-auto">
-              ${block.title ? `<h3 class="text-2xl font-bold text-white mb-3">${block.title}</h3>` : ''}
-              <table class="w-full text-left text-sm border-collapse border border-white/10 rounded-xl">
-                <thead><tr class="bg-white/5 border-b border-white/10"><th class="p-3">Fitur / Dimensi</th><th class="p-3">UNIMASI Enterprise</th><th class="p-3">Solusi Konvensional</th></tr></thead>
-                <tbody>${rows}</tbody>
-              </table>
-            </section>`
-          }
-          if (type === 'client-stats-impact') {
-            const rawStats = Array.isArray(block.stats) ? block.stats : []
-            const stats = rawStats.map((s) => {
-              const item = s as Record<string, unknown>
-              return `<div class="stat-card p-4 rounded-2xl bg-white/[0.04] border border-white/10 text-center">
-                <span class="block text-3xl font-extrabold text-[#FFD600]">${item.value || ''}</span>
-                <strong class="block text-xs uppercase tracking-wider text-white mt-1">${item.label || ''}</strong>
-                ${item.detail ? `<span class="block text-xs text-neutral-400 mt-1">${item.detail}</span>` : ''}
-              </div>`
-            }).join('')
-            return `<section class="article-stats-impact my-8">
-              ${block.title ? `<h3 class="text-xl font-bold text-white mb-4 text-center">${block.title}</h3>` : ''}
-              <div class="grid grid-cols-2 md:grid-cols-4 gap-4">${stats}</div>
-            </section>`
-          }
-          if (type === 'architecture-blueprint') {
-            const rawLayers = Array.isArray(block.layers) ? block.layers : []
-            const layers = rawLayers.map((l) => {
-              const item = l as Record<string, unknown>
-              return `<div class="p-4 rounded-xl bg-white/[0.03] border border-white/10 mb-3">
-                <div class="flex justify-between items-center mb-1">
-                  <span class="font-bold text-white text-base">${item.name || ''}</span>
-                  <span class="text-xs font-mono text-[#FFD600]">${item.tech || ''}</span>
-                </div>
-                <p class="text-xs text-neutral-300">${item.desc || ''}</p>
-              </div>`
-            }).join('')
-            return `<section class="article-blueprint my-8">
-              ${block.title ? `<h3 class="text-2xl font-bold text-white mb-2">${block.title}</h3>` : ''}
-              ${block.description ? `<p class="text-neutral-400 text-sm mb-4">${block.description}</p>` : ''}
-              <div>${layers}</div>
-            </section>`
-          }
-          if (type === 'deliverables-checklist') {
-            const rawItems = Array.isArray(block.items) ? block.items : []
-            const items = rawItems.map((it) => {
-              const item = it as Record<string, unknown>
-              return `<li class="flex items-start gap-2 mb-3">
-                <span class="text-[#FFD600] font-bold">✓</span>
-                <div>
-                  <strong class="text-white block">${item.title || ''}</strong>
-                  <span class="text-neutral-300 text-sm">${item.desc || ''}</span>
-                </div>
-              </li>`
-            }).join('')
-            return `<section class="article-deliverables my-8 p-6 rounded-2xl bg-white/[0.02] border border-white/10">
-              ${block.title ? `<h3 class="text-xl font-bold text-white mb-4">${block.title}</h3>` : ''}
-              <ul class="list-none pl-0 space-y-2">${items}</ul>
-            </section>`
-          }
-          if (type === 'faq-accordion') {
-            const rawFaqs = Array.isArray(block.faqs) ? block.faqs : Array.isArray(block.items) ? block.items : []
-            const faqs = rawFaqs.map((f) => {
-              const item = f as Record<string, unknown>
-              return `<details class="group p-4 rounded-xl bg-white/[0.03] border border-white/10 mb-3">
-                <summary class="cursor-pointer font-semibold text-white">${item.question || ''}</summary>
-                <p class="mt-2 text-sm text-neutral-300 leading-relaxed border-t border-white/5 pt-2">${item.answer || ''}</p>
-              </details>`
-            }).join('')
-            return `<section class="article-faqs my-8">
-              ${block.title ? `<h3 class="text-2xl font-bold text-white mb-4">${block.title}</h3>` : ''}
-              <div>${faqs}</div>
-            </section>`
-          }
-          if (type === 'studio-cta') {
-            return `<div class="article-cta my-10 p-8 rounded-3xl bg-gradient-to-r from-neutral-900 to-neutral-950 border border-white/15 text-center">
-              <h3 class="text-2xl font-bold text-white mb-2">${(block.title as string) || 'Mulai Konsultasi Proyek Digital Anda'}</h3>
-              <p class="text-sm text-neutral-300 max-w-xl mx-auto mb-6">${(block.description as string) || 'Diskusikan arsitektur dan kebutuhan spesifik sistem Anda bersama tim spesialis UNIMASI.'}</p>
-              <a href="${(block.buttonUrl as string) || (process.env.NEXT_PUBLIC_WHATSAPP ? `https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP}` : '/contact')}" target="_blank" rel="noopener noreferrer" class="inline-block px-6 py-3 rounded-xl bg-[#FFD600] text-neutral-900 font-bold text-sm hover:opacity-90 transition-opacity">
-                ${(block.buttonText as string) || 'Konsultasi Sekarang'}
-              </a>
-            </div>`
-          }
-          if (type === 'media-showcase' || type === 'editorial-image') {
-            const img = (block.image || block.imageUrl || block.url) as string | undefined
-            if (!img) return ''
-            return `<figure class="article-media-showcase my-8 rounded-2xl overflow-hidden border border-white/10">
-              <img src="${img}" alt="${(block.alt || block.title || 'Showcase Visual') as string}" class="w-full object-cover" loading="lazy" />
-              ${block.caption || block.title ? `<figcaption class="p-3 text-center text-xs text-neutral-400 bg-neutral-900/80">${(block.caption || block.title) as string}</figcaption>` : ''}
-            </figure>`
-          }
-          const anyBlock = block as Record<string, string | undefined>
-          if (anyBlock?.text) return `<p>${anyBlock.text}</p>`
-          if (anyBlock?.content) return `<p>${anyBlock.content}</p>`
-          if (anyBlock?.title) return `<h3>${anyBlock.title}</h3>`
-          return ''
+          // Exhaustiveness guard: every ContentBlock variant is handled above.
+          const unreachable: never = b
+          return unreachable
         }
       }
     })
@@ -1278,17 +1166,7 @@ export function contentToBlocks(raw: string): ContentBlock[] {
  */
 export function preserveInlineElements(html: string): string {
   if (!html) return ''
-  const withMarkdownConverted = convertInlineMarkdown(html)
-  return withMarkdownConverted
-    .replace(/<gwmw\b[^>]*>[\s\S]*?<\/gwmw>/gi, '')
-    .replace(/<gwmw\b[^>]*\/?>/gi, '')
-    .replace(/&#8211;/g, '–')
-    .replace(/&#8212;/g, '—')
-    .replace(/&#8216;/g, '‘')
-    .replace(/&#8217;/g, '’')
-    .replace(/&#8220;/g, '“')
-    .replace(/&#8221;/g, '”')
-    .replace(/&#038;/g, '&')
+  return decodeWordPressArtifacts(convertInlineMarkdown(html))
     .replace(/&nbsp;/g, ' ')
     .replace(/^<p[^>]*>/i, '')
     .replace(/<\/p>$/i, '')
@@ -1296,321 +1174,4 @@ export function preserveInlineElements(html: string): string {
     .replace(/<style[\s\S]*?<\/style>/gi, '')
     .replace(/<(?!(\/?(a|strong|b|em|i|u|s|del|code|span|br|mark|sub|sup)\b))[^>]+>/gi, '')
     .trim()
-}
-
-// -----------------------------------------------------------------------------
-// Real-time SEO Scoring Engine (openSEO / Yoast style)
-// -----------------------------------------------------------------------------
-
-export interface SeoIndicator {
-  id: string
-  label: string
-  status: 'good' | 'warning' | 'bad' // Green / Yellow / Red
-  message: string
-  value?: string | number
-}
-
-export interface SeoAuditReport {
-  score: number // 0 - 100
-  grade: 'Sangat Baik' | 'Cukup' | 'Perlu Perbaikan'
-  targetKeyword: string
-  indicators: SeoIndicator[]
-}
-
-export function calculateSeoScore(params: {
-  title: string
-  excerpt: string
-  content: string
-  targetKeyword: string
-  blocks?: ContentBlock[]
-}): SeoAuditReport {
-  const { title, excerpt, content, targetKeyword, blocks = [] } = params
-  const kw = targetKeyword.trim().toLowerCase()
-  const indicators: SeoIndicator[] = []
-
-  // Extract clean text
-  const cleanContentText = content.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim()
-  const words = cleanContentText.split(/\s+/).filter(Boolean)
-  const totalWords = words.length
-
-  // 1. Keyword in Title (H1)
-  if (!kw) {
-    indicators.push({
-      id: 'kw-title',
-      label: 'Target Kata Kunci di Judul (H1)',
-      status: 'warning',
-      message: 'Tentukan kata kunci target di panel untuk evaluasi SEO.',
-    })
-  } else if (title.toLowerCase().includes(kw)) {
-    indicators.push({
-      id: 'kw-title',
-      label: 'Target Kata Kunci di Judul (H1)',
-      status: 'good',
-      message: `Kata kunci "${targetKeyword}" ditemukan di judul.`,
-    })
-  } else {
-    indicators.push({
-      id: 'kw-title',
-      label: 'Target Kata Kunci di Judul (H1)',
-      status: 'bad',
-      message: `Kata kunci "${targetKeyword}" belum ada di judul artikel.`,
-    })
-  }
-
-  // 2. Keyword in First Paragraph
-  const firstParagraph = blocks.find((b) => b.type === 'paragraph') as ParagraphBlock | undefined
-  const firstParaText = (firstParagraph?.text || cleanContentText.slice(0, 300)).toLowerCase()
-  if (!kw) {
-    indicators.push({
-      id: 'kw-first-para',
-      label: 'Kata Kunci di Paragraf Pertama',
-      status: 'warning',
-      message: 'Masukkan kata kunci untuk memeriksa paragraf pembuka.',
-    })
-  } else if (firstParaText.includes(kw)) {
-    indicators.push({
-      id: 'kw-first-para',
-      label: 'Kata Kunci di Paragraf Pertama',
-      status: 'good',
-      message: 'Kata kunci muncul pada paragraf pembuka artikel.',
-    })
-  } else {
-    indicators.push({
-      id: 'kw-first-para',
-      label: 'Kata Kunci di Paragraf Pertama',
-      status: 'bad',
-      message: 'Sertakan kata kunci pada 100 kata pertama tulisan.',
-    })
-  }
-
-  // 3. Image Alt-Text Presence
-  const imageBlocks = blocks.filter((b) => b.type === 'image') as ImageBlock[]
-  const htmlImgAlts = content.match(/<img[^>]*alt="[^"]*"/gi) || []
-  const totalImages = imageBlocks.length || htmlImgAlts.length
-  const missingAltCount = imageBlocks.filter((img) => !img.alt.trim()).length
-
-  if (totalImages === 0) {
-    indicators.push({
-      id: 'img-alt',
-      label: 'Atribut Alt-Text Gambar',
-      status: 'warning',
-      message: 'Belum ada gambar disisipkan. Sisipkan gambar pendukung dengan alt-text.',
-    })
-  } else if (missingAltCount === 0) {
-    indicators.push({
-      id: 'img-alt',
-      label: 'Atribut Alt-Text Gambar',
-      status: 'good',
-      message: `Semua ${totalImages} gambar telah memiliki deskripsi Alt-Text.`,
-    })
-  } else {
-    indicators.push({
-      id: 'img-alt',
-      label: 'Atribut Alt-Text Gambar',
-      status: 'bad',
-      message: `${missingAltCount} gambar belum memiliki Alt-Text (penting untuk aksesibilitas & SEO).`,
-    })
-  }
-
-  // 4. Keyword Density & Stuffing Prevention
-  if (!kw) {
-    indicators.push({
-      id: 'kw-density',
-      label: 'Kepadatan Kata Kunci (Density)',
-      status: 'warning',
-      message: 'Menunggu input target kata kunci.',
-    })
-  } else {
-    const kwRegex = new RegExp(`\\b${kw.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')}\\b`, 'gi')
-    const matches = cleanContentText.match(kwRegex) || []
-    const occurrences = matches.length
-    const densityPercent = totalWords > 0 ? (occurrences / totalWords) * 100 : 0
-    const rounded = Math.round(densityPercent * 10) / 10
-
-    if (densityPercent > 3.0) {
-      indicators.push({
-        id: 'kw-density',
-        label: 'Kepadatan Kata Kunci (Density)',
-        status: 'bad',
-        message: `Terlalu tinggi (${rounded}% - ${occurrences} kali)! Berpotensi terdeteksi spam/keyword stuffing oleh AI Google.`,
-        value: `${rounded}%`,
-      })
-    } else if (densityPercent >= 0.8 && densityPercent <= 2.5) {
-      indicators.push({
-        id: 'kw-density',
-        label: 'Kepadatan Kata Kunci (Density)',
-        status: 'good',
-        message: `Kepadatan optimal (${rounded}% - ${occurrences} kali dari ${totalWords} kata).`,
-        value: `${rounded}%`,
-      })
-    } else if (occurrences > 0) {
-      indicators.push({
-        id: 'kw-density',
-        label: 'Kepadatan Kata Kunci (Density)',
-        status: 'warning',
-        message: `Kepadatan agak rendah (${rounded}% - ${occurrences} kali). Tambahkan penyebutan alami.`,
-        value: `${rounded}%`,
-      })
-    } else {
-      indicators.push({
-        id: 'kw-density',
-        label: 'Kepadatan Kata Kunci (Density)',
-        status: 'bad',
-        message: 'Kata kunci belum ditemukan di dalam isi artikel.',
-        value: '0%',
-      })
-    }
-  }
-
-  // 5. Internal Links
-  const internalLinksRegex = /href=["'](?:\/|\/layanan|\/portofolio|\/solusi|\/artikel|\/kontak|https?:\/\/(?:www\.)?unimasi\.com)[^"']*["']/gi
-  const internalLinks = content.match(internalLinksRegex) || []
-  if (internalLinks.length >= 2) {
-    indicators.push({
-      id: 'internal-links',
-      label: 'Tautan Internal (Internal Links)',
-      status: 'good',
-      message: `Terdeteksi ${internalLinks.length} tautan internal ke ekosistem UNIMASI.`,
-      value: internalLinks.length,
-    })
-  } else if (internalLinks.length === 1) {
-    indicators.push({
-      id: 'internal-links',
-      label: 'Tautan Internal (Internal Links)',
-      status: 'warning',
-      message: 'Disarankan menambah minimal 1 tautan internal ke layanan atau studi kasus.',
-      value: internalLinks.length,
-    })
-  } else {
-    indicators.push({
-      id: 'internal-links',
-      label: 'Tautan Internal (Internal Links)',
-      status: 'bad',
-      message: 'Belum ada tautan internal. Tautkan ke layanan / portofolio relevan.',
-      value: 0,
-    })
-  }
-
-  // 6. External Links
-  const externalLinksRegex = /href=["']https?:\/\/(?!www\.unimasi\.com|unimasi\.com|localhost)[^"']+["']/gi
-  const externalLinks = content.match(externalLinksRegex) || []
-  if (externalLinks.length >= 1) {
-    indicators.push({
-      id: 'external-links',
-      label: 'Tautan Eksternal / Referensi',
-      status: 'good',
-      message: `Terdeteksi ${externalLinks.length} tautan rujukan eksternal.`,
-      value: externalLinks.length,
-    })
-  } else {
-    indicators.push({
-      id: 'external-links',
-      label: 'Tautan Eksternal / Referensi',
-      status: 'warning',
-      message: 'Menyertakan 1-2 sumber otoritatif dapat meningkatkan kredibilitas artikel.',
-      value: 0,
-    })
-  }
-
-  // 7. Title Length
-  const titleLen = title.length
-  if (titleLen >= 40 && titleLen <= 70) {
-    indicators.push({
-      id: 'title-len',
-      label: 'Panjang Karakter Judul',
-      status: 'good',
-      message: `Ideal (${titleLen} karakter, standar Google 40–70 karakter).`,
-      value: `${titleLen} char`,
-    })
-  } else if (titleLen >= 20 && titleLen < 40) {
-    indicators.push({
-      id: 'title-len',
-      label: 'Panjang Karakter Judul',
-      status: 'warning',
-      message: `Agak pendek (${titleLen} karakter). Disarankan 40–70 karakter.`,
-      value: `${titleLen} char`,
-    })
-  } else {
-    indicators.push({
-      id: 'title-len',
-      label: 'Panjang Karakter Judul',
-      status: 'bad',
-      message: `Kurang optimal (${titleLen} karakter). Buat judul yang lebih spesifik.`,
-      value: `${titleLen} char`,
-    })
-  }
-
-  // 8. Meta Description / Excerpt Length
-  const excerptLen = excerpt.length
-  if (excerptLen >= 120 && excerptLen <= 160) {
-    indicators.push({
-      id: 'excerpt-len',
-      label: 'Panjang Meta Description',
-      status: 'good',
-      message: `Sempurna (${excerptLen} karakter, ideal Google 120–160).`,
-      value: `${excerptLen} char`,
-    })
-  } else if (excerptLen >= 60 && excerptLen < 120) {
-    indicators.push({
-      id: 'excerpt-len',
-      label: 'Panjang Meta Description',
-      status: 'warning',
-      message: `Agak pendek (${excerptLen}/160 karakter). Perkaya ringkasan Anda.`,
-      value: `${excerptLen} char`,
-    })
-  } else {
-    indicators.push({
-      id: 'excerpt-len',
-      label: 'Panjang Meta Description',
-      status: 'bad',
-      message: excerptLen === 0 ? 'Meta description masih kosong.' : `Panjang (${excerptLen} karakter) melebihi batas 160 char Google.`,
-      value: `${excerptLen} char`,
-    })
-  }
-
-  // 9. Content Word Count
-  if (totalWords >= 600) {
-    indicators.push({
-      id: 'content-words',
-      label: 'Panjang Kata Artikel',
-      status: 'good',
-      message: `Lengkap & komprehensif (${totalWords} kata, melebihi target 600 kata).`,
-      value: `${totalWords} kata`,
-    })
-  } else if (totalWords >= 300) {
-    indicators.push({
-      id: 'content-words',
-      label: 'Panjang Kata Artikel',
-      status: 'warning',
-      message: `Cukup (${totalWords} kata), idealnya 600+ kata untuk topik teknis.`,
-      value: `${totalWords} kata`,
-    })
-  } else {
-    indicators.push({
-      id: 'content-words',
-      label: 'Panjang Kata Artikel',
-      status: 'bad',
-      message: `Terlalu singkat (${totalWords} kata). Minimal 300 kata agar tidak dianggap thin content.`,
-      value: `${totalWords} kata`,
-    })
-  }
-
-  // Calculate Numerical Score (0 - 100)
-  let score = 0
-  indicators.forEach((ind) => {
-    if (ind.status === 'good') score += 11.1
-    else if (ind.status === 'warning') score += 5.5
-  })
-  score = Math.min(100, Math.round(score))
-
-  let grade: 'Sangat Baik' | 'Cukup' | 'Perlu Perbaikan' = 'Perlu Perbaikan'
-  if (score >= 80) grade = 'Sangat Baik'
-  else if (score >= 55) grade = 'Cukup'
-
-  return {
-    score,
-    grade,
-    targetKeyword,
-    indicators,
-  }
 }

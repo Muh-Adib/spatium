@@ -1,10 +1,11 @@
 import type { Metadata } from 'next'
 import { PageHero } from '@/components/ui/PageHero'
 import { InquiryForm } from '@/components/forms/InquiryForm'
+import { getUseCaseNav } from '@/lib/content/spatium'
 import { Reveal } from '@/components/ui/Reveal'
 import { Icon } from '@/components/Icon'
 import { CONTACT, SOCIALS } from '@/data/site'
-import { siteConfig } from '@/config/site'
+import { siteConfig, telHref, whatsappHref } from '@/config/site'
 import '@/pages/contact.css'
 
 const SITE_URL = siteConfig.url
@@ -18,45 +19,41 @@ export const metadata: Metadata = {
   },
 }
 
+// Copy limited to what the product deck states — no unverified accuracy, turnaround or device claims.
 const EXPECTATIONS = [
   {
-    title: 'Analisis Sensor & Karakteristik Ruang',
-    body: 'Kami menelaah jenis lokasi (F&B, hotel, rumah sakit, pabrik, atau set film) untuk menentukan kombinasi LiDAR dan rig radiansi terbaik.',
+    title: 'Memahami ruang & tujuan Anda',
+    body: 'Kami mempelajari jenis lokasi dan untuk apa digital twin akan dipakai — film, marketing, hiburan, atau memori.',
     icon: 'eye',
   },
   {
-    title: 'Estimasi Akurasi & Kerapatan Splats',
-    body: 'Penetapan target akurasi sub-sentimeter (< 5mm) dan kerapatan partikel fotorealistis (8M–20M splats) sesuai kebutuhan platform.',
+    title: 'Menentukan output yang tepat',
+    body: 'Satu capture bisa menghasilkan point cloud, mesh, tekstur, panorama, atau 3D Gaussian Splat. Kami pilih yang sesuai kebutuhan.',
     icon: 'route',
   },
   {
-    title: 'Proposal Lingkup & Alur Transparan',
-    body: 'Rincian jadwal pemindaian on-site, paket serah terima WebGL / VR, dan biaya tetap tanpa biaya tersembunyi.',
+    title: 'Lingkup & alur kerja transparan',
+    body: 'Tahapan capture, pemrosesan, dan serah terima dijelaskan sejak awal — tanpa kotak hitam.',
     icon: 'shield',
-  },
-  {
-    title: 'Respons Cepat 1x24 Jam Kerja',
-    body: 'Konsultasi teknis awal langsung bersama tim insinyur spasial kami untuk memberikan solusi ruang konkret.',
-    icon: 'clock',
   },
 ]
 
 const FAQS = [
   {
-    q: 'Berapa lama proses pemindaian LiDAR dan kamera di lokasi fisik?',
-    a: 'Untuk area restoran, kafe, atau ruang bedah berukuran 200–1.500 m², proses pemindaian lapangan biasanya memakan waktu antara 2 hingga 4 jam tanpa mengganggu operasional.',
+    q: 'Apa bedanya digital twin dengan foto atau video?',
+    a: 'Foto hanya menangkap gambar dan video hanya menangkap momen. Digital twin menangkap seluruh ruang, objek di sekitarnya, dan konteksnya — sehingga bisa dijelajahi dari sudut mana pun dan dikunjungi kembali kapan saja.',
   },
   {
-    q: 'Apakah pengunjung harus mengunduh aplikasi untuk melihat tur 3D ini?',
-    a: 'Tidak. Teknologi 3D Gaussian Splatting SPATIUM berjalan secara native di peramban (Chrome, Safari, Firefox, Edge) pada HP, laptop, dan tablet secara mulus 60 FPS.',
+    q: 'Apakah pengunjung harus mengunduh aplikasi untuk melihat scene 3D?',
+    a: 'Tidak. Scene 3D Gaussian Splat kami dibuka langsung di peramban melalui viewer web. Waktu muat bergantung pada koneksi, perangkat, dan ukuran scene.',
   },
   {
-    q: 'Bagaimana cara memasang tur 3D ini ke website perusahaan kami?',
-    a: 'Kami menyediakan kode embed iframe satu baris yang ringan, atau Anda dapat mengunggah berkas bundle HTML mandiri ke server Anda menggunakan fitur Tour Upload SPATIUM.',
+    q: 'Bagaimana cara memasang scene ke website kami?',
+    a: 'Scene dapat disematkan sebagai iframe di halaman Anda atau dibagikan sebagai tautan.',
   },
   {
-    q: 'Apakah hasil rekonstruksi spasial bisa dipakai di headset VR atau Apple Vision Pro?',
-    a: 'Ya, semua hasil tangkapan SPATIUM siap untuk standar WebXR spasial sehingga pengguna kacamata VR atau Vision Pro dapat langsung masuk ke ruangan secara nyata.',
+    q: 'Apakah satu kali capture bisa dipakai untuk banyak kebutuhan?',
+    a: 'Ya — capture once, use everywhere. Data yang sama dapat diolah menjadi output 3D, 2D, interaktif, maupun imersif.',
   },
 ]
 
@@ -75,7 +72,8 @@ const jsonLd = [
   },
 ]
 
-export default function ContactPage() {
+export default async function ContactPage() {
+  const services = await getUseCaseNav()
   return (
     <>
       <script
@@ -94,12 +92,11 @@ export default function ContactPage() {
         crumbs={[{ label: 'Home', to: '/' }, { label: 'Kontak' }]}
         meta={
           <>
-            <span className="pill">
-              <Icon name="clock" size={13} /> Respons 1x24 Jam
-            </span>
-            <span className="pill">
-              <Icon name="globe" size={13} /> Jakarta · Bandung · Global
-            </span>
+            {CONTACT.location && (
+              <span className="pill">
+                <Icon name="globe" size={13} /> {CONTACT.location}
+              </span>
+            )}
           </>
         }
       />
@@ -132,14 +129,37 @@ export default function ContactPage() {
                   <Icon name="mail" size={16} />
                   <a href={`mailto:${CONTACT.email}`} className="text-white hover:text-cyan-400">{CONTACT.email}</a>
                 </li>
-                <li>
-                  <Icon name="pin" size={16} />
-                  <span className="text-neutral-300">{CONTACT.location}</span>
-                </li>
-                <li>
-                  <Icon name="clock" size={16} />
-                  <span className="text-neutral-300">{CONTACT.hours}</span>
-                </li>
+                {CONTACT.phone && telHref(CONTACT.phone) && (
+                  <li>
+                    <Icon name="phone" size={16} />
+                    <a href={telHref(CONTACT.phone) ?? undefined} className="text-white hover:text-cyan-400">{CONTACT.phone}</a>
+                  </li>
+                )}
+                {whatsappHref(CONTACT.whatsapp, 'Halo SPATIUM, saya ingin berkonsultasi.') && (
+                  <li>
+                    <Icon name="phone" size={16} />
+                    <a
+                      href={whatsappHref(CONTACT.whatsapp, 'Halo SPATIUM, saya ingin berkonsultasi.') ?? undefined}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-white hover:text-cyan-400"
+                    >
+                      WhatsApp
+                    </a>
+                  </li>
+                )}
+                {CONTACT.location && (
+                  <li>
+                    <Icon name="pin" size={16} />
+                    <span className="text-neutral-300">{CONTACT.location}</span>
+                  </li>
+                )}
+                {CONTACT.hours && (
+                  <li>
+                    <Icon name="clock" size={16} />
+                    <span className="text-neutral-300">{CONTACT.hours}</span>
+                  </li>
+                )}
               </ul>
             </div>
 
@@ -158,7 +178,7 @@ export default function ContactPage() {
           </Reveal>
 
           <Reveal className="contact__main" delay={100} variant="scale">
-            <InquiryForm />
+            <InquiryForm services={services} />
           </Reveal>
         </div>
       </section>

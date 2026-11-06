@@ -3,6 +3,7 @@ import { prisma } from '@/lib/db/prisma'
 import { revalidatePath } from 'next/cache'
 import { requireRole } from '@/lib/auth/rbac'
 import { portfolioMutationSchema, validateBody } from '@/lib/validation/api-schemas'
+import { validateCatalogPublication } from '@/lib/blocks/publication-gate'
 
 export async function GET(request: NextRequest) {
   try {
@@ -76,8 +77,9 @@ export async function POST(request: NextRequest) {
       title,
       slug: slug.toLowerCase().trim().replace(/[^a-z0-9-]+/g, '-'),
       client: client || null,
-      year: year ? parseInt(String(year), 10) : new Date().getFullYear(),
-      category: category || 'Digital Product',
+      // Unknown capture year / category stay empty — never invented (AGENTS.md §3.3).
+      year: year ? parseInt(String(year), 10) : null,
+      category: category || null,
       summary: summary || null,
       challenge: challenge || null,
       approach: approach || null,
@@ -95,7 +97,27 @@ export async function POST(request: NextRequest) {
       focusKeyphrase: focusKeyphrase || null,
       relatedKeyphrases: relatedKeyphrases ? (typeof relatedKeyphrases === 'string' ? relatedKeyphrases : JSON.stringify(relatedKeyphrases)) : null,
       seoData: rawBody.seoData ? (typeof rawBody.seoData === 'string' ? rawBody.seoData : JSON.stringify(rawBody.seoData)) : null,
-      status: rawBody.status || 'published',
+      // Default to DRAFT; publishing must pass the publication gate below (AGENTS.md §3.5).
+      status: rawBody.status || 'draft',
+    }
+
+    if (payload.status === 'published') {
+      const seo = typeof rawBody.seoData === 'string' ? safeJson(rawBody.seoData) : rawBody.seoData
+      const gate = validateCatalogPublication({
+        title: payload.title,
+        slug: payload.slug,
+        metaTitle: payload.metaTitle ?? undefined,
+        metaDescription: payload.metaDescription ?? undefined,
+        heroImage: payload.heroImage ?? undefined,
+        heroImageAlt: typeof seo?.coverAlt === 'string' ? seo.coverAlt : undefined,
+        blocks: Array.isArray(blocks) ? blocks : undefined,
+      })
+      if (!gate.canPublish) {
+        return NextResponse.json(
+          { success: false, error: 'Publikasi ditolak: syarat gerbang publikasi belum terpenuhi.', issues: gate.issues, warnings: gate.warnings },
+          { status: 422 },
+        )
+      }
     }
 
     const existing = await prisma.orm.public.Portfolio.where({ slug: payload.slug }).first()
@@ -108,8 +130,8 @@ export async function POST(request: NextRequest) {
 
     try {
       revalidatePath('/', 'layout')
-      revalidatePath('/portofolio')
-      revalidatePath(`/portofolio/${payload.slug}`)
+      revalidatePath('/portfolio')
+      revalidatePath(`/portfolio/${payload.slug}`)
     } catch (err) { console.warn("[API observable error]:", err) }
 
     return NextResponse.json({
@@ -117,11 +139,19 @@ export async function POST(request: NextRequest) {
       message: 'Portofolio berhasil disimpan dan disinkronkan.',
       slug: payload.slug,
     })
-  } catch (error: any) {
-    return NextResponse.json(
-      { success: false, error: error.message || 'Gagal menyimpan portofolio.' },
-      { status: 500 }
-    )
+  } catch (error) {
+    console.error('[API portfolio] save failed:', error)
+    return NextResponse.json({ success: false, error: 'Gagal menyimpan portofolio.' }, { status: 500 })
+  }
+}
+
+function safeJson(value: string): Record<string, unknown> | null {
+  try {
+    const parsed: unknown = JSON.parse(value)
+    return parsed && typeof parsed === 'object' ? (parsed as Record<string, unknown>) : null
+  } catch (err) {
+    console.warn('[API portfolio] seoData is not valid JSON:', err)
+    return null
   }
 }
 
@@ -147,8 +177,8 @@ export async function DELETE(request: NextRequest) {
 
     try {
       revalidatePath('/', 'layout')
-      revalidatePath('/portofolio')
-      if (slugParam) revalidatePath(`/portofolio/${slugParam}`)
+      revalidatePath('/portfolio')
+      if (slugParam) revalidatePath(`/portfolio/${slugParam}`)
     } catch (err) { console.warn("[API observable error]:", err) }
 
     return NextResponse.json({ success: true, message: 'Portofolio berhasil dihapus.' })

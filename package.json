@@ -16,7 +16,6 @@
     "audit:senior": "tsx scripts/senior-code-audit.ts",
     "db:push": "prisma db update",
     "db:seed": "tsx --conditions=react-server scripts/seed.ts",
-    "dev:wp-sync": "tsx --conditions=react-server scripts/dev/wp-sync.ts",
     "validate-seed": "tsx --conditions=react-server scripts/validate-seed.ts",
     "seo-audit": "tsx scripts/seo-audit.ts"
   },

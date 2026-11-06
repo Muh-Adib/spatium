@@ -198,7 +198,7 @@ export function resolveArticleCover(article: {
       src: article.coverUrl.startsWith('/') || article.coverUrl.startsWith('http')
         ? article.coverUrl
         : resolveMediaUrl(article.coverUrl),
-      alt: article.title ? `${article.title} - UNIMASI` : 'Sampul Artikel',
+      alt: article.title ? `${article.title} — SPATIUM` : 'Sampul artikel SPATIUM',
     }
   }
 
@@ -275,6 +275,6 @@ export function resolveArticleCover(article: {
   // Default
   return {
     src: getHashedImage(TOPIC_POOLS['corporate-web'], key),
-    alt: article.title ? `${article.title} - UNIMASI Platform` : 'Digital Experience Platform',
+    alt: article.title ? `${article.title} — SPATIUM` : 'Sampul artikel SPATIUM',
   }
 }

@@ -3,10 +3,11 @@ export interface SeoSite {
   url: string
   description: string
   tagline: string
-  phone: string
+  /** Null/empty when unconfigured — JSON-LD omits the field instead of emitting a placeholder. */
+  phone: string | null
   email: string
   social: Record<string, string>
-  address?: string
+  address?: string | null
   defaultOgImage: string
   locale: string
 }

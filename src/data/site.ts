@@ -1,11 +1,30 @@
 export const STUDIO_EMAIL = process.env.NEXT_PUBLIC_STUDIO_EMAIL || 'hello@spatium.id'
 
-export const CONTACT = {
+function optionalEnv(value: string | undefined): string | null {
+  const trimmed = value?.trim()
+  return trimmed ? trimmed : null
+}
+
+/**
+ * Public contact details. Only the email is confirmed; every other channel is
+ * env-driven and `null` when unset so the UI hides it instead of rendering a
+ * placeholder (§3.11 Zero-Mock).
+ */
+export type ContactInfo = {
+  email: string
+  phone: string | null
+  whatsapp: string | null
+  location: string | null
+  hours: string | null
+}
+
+export const CONTACT: ContactInfo = {
   email: STUDIO_EMAIL,
-  phone: process.env.NEXT_PUBLIC_PHONE || '+6281234567890',
-  location: 'Jakarta & Bandung, Indonesia · Global Captures',
-  hours: 'Mon–Fri · 09:00–18:00 WIB',
-} as const
+  phone: optionalEnv(process.env.NEXT_PUBLIC_PHONE),
+  whatsapp: optionalEnv(process.env.NEXT_PUBLIC_WHATSAPP),
+  location: optionalEnv(process.env.NEXT_PUBLIC_STUDIO_ADDRESS),
+  hours: optionalEnv(process.env.NEXT_PUBLIC_STUDIO_HOURS),
+}
 
 export type NavChild = { label: string; to: string; blurb?: string }
 export type NavItem = { label: string; to: string; children?: NavChild[] }
@@ -18,9 +37,9 @@ export const NAV: NavItem[] = [
     children: [
       { label: 'Semua Layanan', to: '/services', blurb: '4 Vertikal Spasial Utama SPATIUM' },
       { label: 'Filmmaking & VFX', to: '/services/filmmaking-vfx', blurb: 'Set reconstruction, previz & virtual scouting' },
-      { label: 'Marketing & Branding', to: '/services/marketing-branding', blurb: 'ZMOT, tur spasial 3DGS & WebGL display' },
+      { label: 'Marketing & Branding', to: '/services/marketing-branding', blurb: 'ZMOT, spatial tour & interactive showcase' },
       { label: 'Entertainment & Installation', to: '/services/entertainment-installation', blurb: 'Projection mapping & immersive exhibits' },
-      { label: 'Memory & Documentary', to: '/services/memory-documentary', blurb: 'Wedding sanctuary & heritage digital twin' },
+      { label: 'Memory & Documentary', to: '/services/memory-documentary', blurb: 'Wedding memory, event & cultural heritage' },
     ],
   },
   { label: 'Portofolio', to: '/portfolio' },
@@ -29,80 +48,83 @@ export const NAV: NavItem[] = [
   { label: 'Kontak', to: '/contact' },
 ]
 
+// Brand methodology (not CMS content). Copy follows the product deck's workflow slide;
+// no accuracy, frame-rate or device-compatibility claims that the deck does not make.
 export const PROCESS = [
   {
     index: '01',
-    title: 'Laser Scan & Drone Capture',
-    duration: 'Tahap 1',
+    title: 'Laser Scan',
+    duration: 'Capture the real world',
     summary:
-      'Perekaman lapangan berkecepatan tinggi menggunakan terrestrial laser scanner LiDAR, drone photogrammetry, dan rig kamera spasial calibrated.',
-    outputs: ['Jutaan koordinat XYZ', 'Data intensitas laser LiDAR', 'Foto resolusi ultra-tinggi', 'Peta survei geospasial'],
+      'Laser scanner merekam jutaan pengukuran spasial (XYZ + intensitas) dari dunia nyata dengan akurasi tinggi.',
+    outputs: ['Pengukuran XYZ + intensitas', 'Data lokasi nyata'],
   },
   {
     index: '02',
-    title: 'Dense Point Cloud Reconstruction',
-    duration: 'Tahap 2',
+    title: 'Point Cloud',
+    duration: 'Accurate spatial data',
     summary:
-      'Pemrosesan densifikasi awan titik spasial dengan akurasi sub-sentimeter (3–5mm) sebagai cetak biru digital ruang fisik.',
-    outputs: ['Dense point cloud terkalibrasi', 'Pembersihan noise spasial', 'Koordinat batas ruang', 'Registrasi multi-scan'],
+      'Hasilnya point cloud — representasi 3D presisi dari jutaan titik spasial dengan informasi warna dan intensitas.',
+    outputs: ['Point cloud berwarna', 'Data spasial akurat'],
   },
   {
     index: '03',
-    title: '3D Geometry & CAD Modeling',
-    duration: 'Tahap 3',
+    title: '3D Geometry',
+    duration: 'Structured and editable',
     summary:
-      'Konversi awan titik ke dalam model mesh permukaan 3D dan CAD yang presisi untuk kebutuhan analisis arsitektur atau integrasi engine.',
-    outputs: ['Mesh 3D bersih & teroptimasi', 'Model CAD / BIM', 'Format OBJ / FBX / USDZ', 'Peta UV unwrap'],
+      'Dari point cloud dibuat 3D geometry (mesh) — model terstruktur yang bisa diedit, dengan topologi dan tekstur rapi, siap untuk produksi 3D, visualisasi, dan simulasi.',
+    outputs: ['Mesh bertekstur', 'Aset untuk produksi 3D'],
   },
   {
     index: '04',
-    title: '3D Gaussian Splatting (3DGS)',
-    duration: 'Tahap 4',
+    title: '3D Gaussian Splat',
+    duration: 'Photorealistic and immersive',
     summary:
-      'Pelatihan neural radiance fields menghasilkan jutaan elipsoid spasial fotorealistis yang dapat diakses langsung pada 60 FPS WebGL.',
-    outputs: ['Aset 3DGS Master (.ply / .splat)', 'Player WebGL interaktif', 'Scene-pairing eksterior/interior', 'Kompatibilitas VR / WebXR'],
+      'Data yang sama dikonversi menjadi 3D Gaussian Splat — representasi ringan, fotorealistis, dan imersif untuk pengalaman real-time, tur virtual, dan aplikasi interaktif.',
+    outputs: ['Scene 3D Gaussian Splat', 'Viewer interaktif di browser'],
   },
 ] as const
 
 export const VALUES = [
   {
-    title: 'Walkable Images 3D',
-    body: 'Bukan sekadar foto statis atau video pasif. Pengunjung bebas berjalan, berputar, dan terbang ke sudut mana pun dengan skala nyata 1:1.',
+    title: 'Walkable Image',
+    body: 'Bukan sekadar foto atau video. Jelajahi dan rasakan ruang seolah benar-benar berada di sana.',
     icon: 'expertise',
   },
   {
-    title: 'Sub-Centimeter Precision',
-    body: 'Akurasi pemindaian laser LiDAR terestrial hingga toleransi di bawah 5mm, menghadirkan replika fisik yang dapat dipercaya dan diverifikasi.',
+    title: 'Real-World Accuracy',
+    body: 'Skala dan detail ruang yang sebenarnya menjadi fondasi setiap output.',
     icon: 'technical',
   },
   {
     title: 'Zero Moment of Truth (ZMOT)',
-    body: 'Memberikan kepastian ruang dan atmosfer nyata sebelum konsumen memutuskan memesan kamar, menyewa tempat, atau membeli properti.',
+    body: 'First impression yang bisa dijelajahi: calon pelanggan merasakan ruang Anda sebelum datang.',
     icon: 'story',
   },
   {
     title: 'One Point, Unlimited Possibilities',
-    body: 'Pindai sekali di lokasi, aset dapat digunakan selamanya untuk embed WebGL, VR/Vision Pro, VFX film, survei teknis, hingga arsip digital.',
+    body: 'Capture once, use everywhere — satu data spasial untuk output 3D, 2D, interaktif, dan imersif.',
     icon: 'quality',
   },
   {
-    title: 'Native WebGL Real-Time 60 FPS',
-    body: 'Dapat diakses instan di browser smartphone, laptop, tablet, dan headset VR tanpa perlu mengunduh atau menginstal aplikasi apa pun.',
+    title: 'Creative Freedom',
+    body: 'Memberi seniman 3D dan visual tempat nyata untuk berkarya.',
     icon: 'collaboration',
   },
 ] as const
 
 export type Industry = { name: string; blurb: string; icon: string }
 
+// Sectors covered by the published scene portfolio (reference portfolio HTML) and the deck's use cases.
 export const INDUSTRIES: Industry[] = [
-  { name: 'Filmmaking & VFX', blurb: 'Virtual scouting, set reconstruction, dan kamera previz sebelum hari syuting.', icon: 'gaming' },
-  { name: 'Food & Beverage', blurb: 'Eksplorasi spasial restoran & kafe untuk mendongkrak reservasi meja ZMOT.', icon: 'brand' },
-  { name: 'Hospitality & Hotel', blurb: 'Tur fotorealistis kamar suite dan resort untuk memaksimalkan direct booking.', icon: 'product' },
-  { name: 'Industrial & Manufaktur', blurb: 'Audit virtual pabrik, mesin presisi CNC, dan orientasi teknis jarak jauh.', icon: 'manufacturing' },
-  { name: 'Healthcare & Medis', blurb: 'Digital twin ruang bedah steril presisi sub-3mm untuk simulasi klinis.', icon: 'education' },
-  { name: 'Properti & Arsitektur', blurb: 'Walkthrough apartemen dan residensial skala 1:1 tanpa distorsi lensa wide-angle.', icon: 'architecture' },
-  { name: 'Agrikultur & Riset', blurb: 'Kembaran digital greenhouse pembibitan dan pemantauan mikroklimat botani.', icon: 'government' },
-  { name: 'Memori & Cagar Budaya', blurb: 'Preservasi spasial dekorasi pernikahan mewah dan arsip warisan pusaka abadi.', icon: 'agency' },
+  { name: 'Filmmaking & VFX', blurb: 'Set reconstruction, pre-visualization, dan tech-visualization di lokasi nyata.', icon: 'gaming' },
+  { name: 'Food & Beverage', blurb: 'Eksterior dan interior restoran atau kafe yang bisa dijelajahi sebelum berkunjung.', icon: 'brand' },
+  { name: 'Hospitality', blurb: 'Pratinjau kamar dan venue agar tamu mengenal ruang sebelum check-in.', icon: 'product' },
+  { name: 'Manufacturing', blurb: 'Ruang produksi yang lebih mudah diinspeksi dan dikomunikasikan dari jarak jauh.', icon: 'manufacturing' },
+  { name: 'Healthcare', blurb: 'Rekaman imersif lingkungan klinis untuk peninjauan dan dokumentasi fasilitas.', icon: 'education' },
+  { name: 'Property', blurb: 'Showcase properti untuk peninjauan jarak jauh dan presentasi proyek.', icon: 'architecture' },
+  { name: 'Agriculture', blurb: 'Dokumentasi fasilitas budidaya yang bisa dibagikan dari jarak jauh.', icon: 'government' },
+  { name: 'Memory & Heritage', blurb: 'Preservasi venue pernikahan, acara, dan warisan budaya.', icon: 'agency' },
 ]
 
 export const BUDGET_RANGES = [
@@ -125,5 +147,4 @@ export const TIMELINES = [
 export const SOCIALS = [
   { label: 'Instagram', href: 'https://instagram.com/spatium.studio' },
   { label: 'LinkedIn', href: 'https://linkedin.com/company/spatium-studio' },
-  { label: 'GitHub', href: 'https://github.com/spatium' },
 ] as const

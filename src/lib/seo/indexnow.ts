@@ -59,7 +59,7 @@ export async function submitToIndexNow(
 
   try {
     const key = await getOrCreateIndexNowKey()
-    let baseSiteUrl = siteConfig.url || 'https://www.unimasi.com'
+    let baseSiteUrl = siteConfig.url || 'https://spatium.id'
     try {
       const { getSiteProfile } = await import('@/lib/db/siteProfile')
       const profile = await getSiteProfile()

@@ -1,1 +1,62 @@
-[]
+[
+  {
+    "sourcePath": "/portfolio/grand-glasshouse-wedding-sanctuary",
+    "destinationPath": "/portfolio/wedding-venue",
+    "statusCode": 301,
+    "reason": "Portfolio slug rename (SPATIUM scene catalogue)"
+  },
+  {
+    "sourcePath": "/portfolio/ruang-operasi-bedah-presisi",
+    "destinationPath": "/portfolio/ruang-operasi",
+    "statusCode": 301,
+    "reason": "Portfolio slug rename (SPATIUM scene catalogue)"
+  },
+  {
+    "sourcePath": "/portfolio/unicam-indonesia-manufaktur-presisi",
+    "destinationPath": "/portfolio/unicam-indonesia",
+    "statusCode": 301,
+    "reason": "Portfolio slug rename (SPATIUM scene catalogue)"
+  },
+  {
+    "sourcePath": "/portfolio/batuna-resto-oceanfront-exterior",
+    "destinationPath": "/portfolio/batuna-resto-manado-exterior",
+    "statusCode": 301,
+    "reason": "Portfolio slug rename (SPATIUM scene catalogue)"
+  },
+  {
+    "sourcePath": "/portfolio/batuna-resto-dining-interior",
+    "destinationPath": "/portfolio/batuna-resto-manado-interior",
+    "statusCode": 301,
+    "reason": "Portfolio slug rename (SPATIUM scene catalogue)"
+  },
+  {
+    "sourcePath": "/portfolio/kidang-nyaring-outdoor-canopy",
+    "destinationPath": "/portfolio/kidang-nyaring-cafe-exterior",
+    "statusCode": 301,
+    "reason": "Portfolio slug rename (SPATIUM scene catalogue)"
+  },
+  {
+    "sourcePath": "/portfolio/kidang-nyaring-espresso-interior",
+    "destinationPath": "/portfolio/kidang-nyaring-cafe-interior",
+    "statusCode": 301,
+    "reason": "Portfolio slug rename (SPATIUM scene catalogue)"
+  },
+  {
+    "sourcePath": "/portfolio/greenhouse-anggrek-tropis-presisi",
+    "destinationPath": "/portfolio/greenhouse-anggrek",
+    "statusCode": 301,
+    "reason": "Portfolio slug rename (SPATIUM scene catalogue)"
+  },
+  {
+    "sourcePath": "/portfolio/apartemen-gateway-pasteur-suite",
+    "destinationPath": "/portfolio/apartment-gateway-pasteur-bandung",
+    "statusCode": 301,
+    "reason": "Portfolio slug rename (SPATIUM scene catalogue)"
+  },
+  {
+    "sourcePath": "/portfolio/aston-bogor-executive-suite",
+    "destinationPath": "/portfolio/aston-bogor-suite-double-bedroom",
+    "statusCode": 301,
+    "reason": "Portfolio slug rename (SPATIUM scene catalogue)"
+  }
+]

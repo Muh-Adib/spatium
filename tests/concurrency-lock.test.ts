@@ -15,7 +15,7 @@ describe('Layer 4: Multi-User Concurrency & Editorial Lock', () => {
   })
 
   it('allows an editor to acquire an active lock', () => {
-    const userA = { id: 'usr_editor_a', name: 'Editor A', email: 'editorA@unimasi.com' }
+    const userA = { id: 'usr_editor_a', name: 'Editor A', email: 'editorA@spatium.test' }
     const result = acquireOrRefreshLock(TEST_SLUG, userA)
 
     expect(result.success).toBe(true)
@@ -28,8 +28,8 @@ describe('Layer 4: Multi-User Concurrency & Editorial Lock', () => {
   })
 
   it('blocks second editor from acquiring active lock held by first editor', () => {
-    const userA = { id: 'usr_editor_a', name: 'Editor A', email: 'editorA@unimasi.com' }
-    const userB = { id: 'usr_editor_b', name: 'Editor B', email: 'editorB@unimasi.com' }
+    const userA = { id: 'usr_editor_a', name: 'Editor A', email: 'editorA@spatium.test' }
+    const userB = { id: 'usr_editor_b', name: 'Editor B', email: 'editorB@spatium.test' }
 
     // User A acquires lock
     acquireOrRefreshLock(TEST_SLUG, userA)
@@ -48,8 +48,8 @@ describe('Layer 4: Multi-User Concurrency & Editorial Lock', () => {
   })
 
   it('allows owner to release lock so another editor can acquire it', () => {
-    const userA = { id: 'usr_editor_a', name: 'Editor A', email: 'editorA@unimasi.com' }
-    const userB = { id: 'usr_editor_b', name: 'Editor B', email: 'editorB@unimasi.com' }
+    const userA = { id: 'usr_editor_a', name: 'Editor A', email: 'editorA@spatium.test' }
+    const userB = { id: 'usr_editor_b', name: 'Editor B', email: 'editorB@spatium.test' }
 
     acquireOrRefreshLock(TEST_SLUG, userA)
 
@@ -65,8 +65,8 @@ describe('Layer 4: Multi-User Concurrency & Editorial Lock', () => {
   })
 
   it('prevents non-owners from hijacking or releasing another user lock', () => {
-    const userA = { id: 'usr_editor_a', name: 'Editor A', email: 'editorA@unimasi.com' }
-    const intruder = { id: 'usr_intruder', name: 'Intruder', email: 'intruder@unimasi.com' }
+    const userA = { id: 'usr_editor_a', name: 'Editor A', email: 'editorA@spatium.test' }
+    const intruder = { id: 'usr_intruder', name: 'Intruder', email: 'intruder@spatium.test' }
 
     acquireOrRefreshLock(TEST_SLUG, userA)
 

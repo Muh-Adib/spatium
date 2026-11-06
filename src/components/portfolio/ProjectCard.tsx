@@ -1,25 +1,12 @@
 import Link from 'next/link'
-import { StudioArt } from '@/components/art/StudioArt'
+import { SplatPlaceholder } from '@/components/spatium/SplatPlaceholder'
 import { Icon } from '@/components/Icon'
-import type { Project, ProjectCategory } from '@/data/projects'
-import { Sparkles, Compass } from 'lucide-react'
+import { PROJECT_CATEGORY_LABEL, type Project } from '@/lib/content/spatium-types'
+import { Sparkles } from 'lucide-react'
 import './project-card.css'
 
-export const CATEGORY_LABEL: Record<ProjectCategory, string> = {
-  marketing: 'Marketing & Retail',
-  hospitality: 'Hospitality & Wisata',
-  healthcare: 'Healthcare & Medis',
-  industrial: 'Industrial & Manufaktur',
-  agriculture: 'Agrikultur & Riset',
-  property: 'Properti & Arsitektur',
-  memory: 'Memori & Dokumenter',
-  filmmaking: 'Filmmaking & VFX',
-  entertainment: 'Entertainment & Installation',
-  '2d': '2D Animation',
-  '3d': '3D Animation',
-  motion: 'Motion Graphics',
-  assets: 'Digital Assets',
-}
+/** Sector labels (re-exported for pages that render category pills). */
+export const CATEGORY_LABEL = PROJECT_CATEGORY_LABEL
 
 const UNKNOWN_CATEGORY_LABEL = '3D Gaussian Splatting'
 
@@ -29,11 +16,11 @@ type ProjectCardProps = {
 }
 
 export function ProjectCard({ project, featured = false }: ProjectCardProps) {
-  const categoryLabel = CATEGORY_LABEL[project.category as ProjectCategory] || UNKNOWN_CATEGORY_LABEL
+  const categoryLabel = project.category === 'unknown' ? UNKNOWN_CATEGORY_LABEL : CATEGORY_LABEL[project.category]
 
   return (
     <article className={`project-card card card--hover${featured ? ' project-card--featured' : ''}`}>
-      <Link href={`/portfolio/${project.slug}`} className="project-card__link" aria-label={`${project.title} — view case study`}>
+      <Link href={`/portfolio/${project.slug}`} className="project-card__link" aria-label={`${project.title} — lihat scene`}>
         <div className="project-card__media relative">
           {project.posterUrl ? (
             <img
@@ -43,7 +30,7 @@ export function ProjectCard({ project, featured = false }: ProjectCardProps) {
               className="w-full h-full object-cover"
             />
           ) : (
-            <StudioArt variant={project.variant ?? 0} />
+            <SplatPlaceholder seed={project.variant ?? 0} />
           )}
 
           {/* 3DGS Indicator Badge */}
@@ -56,7 +43,7 @@ export function ProjectCard({ project, featured = false }: ProjectCardProps) {
 
           <span className="project-card__overlay" aria-hidden="true">
             <span className="project-card__cta">
-              Lihat Studi Kasus
+              Lihat Scene
               <Icon name="arrow-up-right" size={16} />
             </span>
           </span>
@@ -73,7 +60,7 @@ export function ProjectCard({ project, featured = false }: ProjectCardProps) {
                 {project.client}
               </span>
             ) : null}
-            <span className="project-card__year mono ml-auto">{project.year || 2024}</span>
+            {project.year ? <span className="project-card__year mono ml-auto">{project.year}</span> : null}
           </div>
           <h3 className="project-card__title">{project.title}</h3>
           <p className="project-card__tagline">{project.tagline || project.brief || ''}</p>

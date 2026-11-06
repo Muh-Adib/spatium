@@ -13,8 +13,9 @@ export const contract = contractFromJson<Contract>(contractJson);
 
 const createDatabase = () => postgres({
   contract,
+  // Local-dev fallback mirrors .env.example; set DATABASE_URL in every real environment.
   url: process.env['DATABASE_URL'] ||
-    'postgresql://segiatech:segiatech_secret@localhost:5433/segiatech?schema=public',
+    'postgresql://spatium:spatium@localhost:5432/spatium?schema=public',
 });
 
 type Database = ReturnType<typeof createDatabase>;
@@ -24,7 +25,8 @@ const globalForPrisma = globalThis as unknown as { prismaDb?: Database };
 const isInstanceStale = Boolean(
   globalForPrisma.prismaDb &&
   (!(globalForPrisma.prismaDb as any).orm?.public?.IndexingSubmission ||
-   !(globalForPrisma.prismaDb as any).orm?.public?.Site)
+   !(globalForPrisma.prismaDb as any).orm?.public?.Site ||
+   !(globalForPrisma.prismaDb as any).orm?.public?.McpApiKey)
 );
 
 export const db: Database = (!globalForPrisma.prismaDb || isInstanceStale)

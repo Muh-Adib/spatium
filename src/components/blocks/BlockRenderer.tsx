@@ -39,6 +39,7 @@ import { ProcessTimelineBlock } from '@/blocks/ProcessTimelineBlock'
 import { StatsTickerBlock } from '@/blocks/StatsTickerBlock'
 import { InteractiveCtaBlock, TextEditorialBlock } from '@/blocks/InteractiveCtaBlock'
 import { getAnimationClasses } from '@/lib/blocks/animation'
+import { SplatViewerBlock } from './SplatViewerBlock'
 
 interface BlockRendererProps {
   blocks?: any[]
@@ -79,7 +80,7 @@ function renderBlockContent(block: any, idx: number, contextData?: BlockRenderer
   const type = block.type || block.__component
 
   switch (type) {
-    // UNIMASI Dedicated Cinema Blocks
+    // Dedicated Cinema Blocks
     case 'hero-cinema':
       return <HeroCinemaBlock block={block} />
     case 'hero-portfolio':
@@ -187,6 +188,8 @@ function renderBlockContent(block: any, idx: number, contextData?: BlockRenderer
       return <VideoSectionBlockComponent block={block} />
     case 'blocks.live-embed':
       return <LiveEmbedBlockComponent block={block} />
+    case 'splat-viewer':
+      return <SplatViewerBlock block={block} />
     default:
       return null
   }

@@ -424,9 +424,9 @@ export function analyzeContentSeo(input: SeoAnalysisInput): DetailedSeoAnalysisR
   }
 
   // 11. Internal & External Links
-  const internalLinksRegex = /href=["'](?:\/|\/layanan|\/portofolio|\/solusi|\/artikel|\/kontak|https?:\/\/(?:www\.)?unimasi\.com)[^"']*["']/gi
+  const internalLinksRegex = /href=["'](?:\/|\/services|\/portfolio|\/journal|\/about|\/contact|\/layanan|\/portofolio|\/solusi|\/artikel|\/kontak|https?:\/\/(?:www\.)?spatium\.id)[^"']*["']/gi
   const internalLinks = content.match(internalLinksRegex) || []
-  const externalLinksRegex = /href=["']https?:\/\/(?!www\.unimasi\.com|unimasi\.com|localhost)[^"']+["']/gi
+  const externalLinksRegex = /href=["']https?:\/\/(?!www\.spatium\.id|spatium\.id|localhost)[^"']+["']/gi
   const externalLinks = content.match(externalLinksRegex) || []
 
   if (internalLinks.length >= 2) {

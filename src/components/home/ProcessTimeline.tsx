@@ -15,16 +15,16 @@ export function ProcessTimeline() {
       <div className="container container--wide">
         <SectionHead
           id="process-title"
-          eyebrow="Our process"
+          eyebrow="Alur kerja"
           title={
             <>
-              Five stages, <span className="accent">no black boxes</span>.
+              Empat tahap, <span className="accent">tanpa kotak hitam</span>.
             </>
           }
           aside={
             <p className="lede">
-              You see the work as it happens — every stage produces something concrete to review and
-              approve before the next one begins.
+              Dari dunia nyata ke 3D Gaussian Splat — setiap tahap menghasilkan data yang bisa
+              ditinjau sebelum lanjut ke tahap berikutnya.
             </p>
           }
         />

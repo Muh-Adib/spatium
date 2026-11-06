@@ -34,10 +34,8 @@ import {
   Image as ImageIcon,
 } from 'lucide-react'
 import StudioVisualEditor, { StudioBlock, StudioViewMode } from './StudioVisualEditor'
-import StudioBlockProperties from './StudioBlockProperties'
 import StudioSeoInspector from './StudioSeoInspector'
 import MediaPickerModal from './MediaPickerModal'
-import { StudioAiSidebar } from './StudioAiSidebar'
 import { Tooltip } from '@/components/ui/Tooltip'
 import { Locale } from '@/lib/seo/schema'
 
@@ -68,8 +66,8 @@ export interface PortfolioItem {
 }
 
 function generateDefaultPortfolioBlocks(title: string, client: string, summary: string, heroImage: string): StudioBlock[] {
-  const heroTitle = title || 'SPATIUM 3D Gaussian Splatting Showcase'
-  const heroDesc = summary || 'Rekonstruksi spasial fotorealistis, pemindaian LiDAR presisi tinggi, dan tur interaktif 3DGS 60 FPS bersama SPATIUM.'
+  const heroTitle = title
+  const heroDesc = summary
   return [
     {
       id: `hero-${Date.now()}-1`,
@@ -78,10 +76,10 @@ function generateDefaultPortfolioBlocks(title: string, client: string, summary: 
       headline: heroTitle,
       highlightWord: 'Spatial Computing',
       badge: 'SPATIUM SPATIAL TECHNOLOGY STUDIO',
-      client: client || 'Mitra SPATIUM',
+      client,
       description: heroDesc,
       subheadline: heroDesc,
-      showreelUrl: 'https://superspl.at/s?id=dc1cd13b',
+      showreelUrl: '',
       data: {
         badge: 'SPATIUM SPATIAL TECHNOLOGY STUDIO',
         headline: heroTitle,
@@ -89,10 +87,11 @@ function generateDefaultPortfolioBlocks(title: string, client: string, summary: 
         primaryCta: { label: 'Jelajahi 3DGS', href: '#splat-viewer' },
         secondaryCta: { label: 'Konsultasi Spasial', href: '/contact' },
       },
+      // Values intentionally empty: fill with measured project data only.
       metrics: [
-        { label: 'Kerapatan Partikel', value: '15.1M Splats' },
-        { label: 'Akurasi Geometri', value: 'Sub-5mm' },
-        { label: 'Rendering Engine', value: '60 FPS WebGL' },
+        { label: 'Jumlah Splat', value: '' },
+        { label: 'Luas Area Dipindai', value: '' },
+        { label: 'Format Output', value: '' },
       ],
     },
     {
@@ -109,7 +108,7 @@ function generateDefaultPortfolioBlocks(title: string, client: string, summary: 
         {
           step: '02',
           title: 'Point Cloud Densification',
-          description: 'Komputasi awan titik berkerapatan tinggi dengan akurasi sub-sentimeter toleransi < 5mm.',
+          description: 'Registrasi dan pembersihan point cloud berkerapatan tinggi sebagai fondasi geometri yang terukur.',
         },
         {
           step: '03',
@@ -119,7 +118,7 @@ function generateDefaultPortfolioBlocks(title: string, client: string, summary: 
         {
           step: '04',
           title: '3D Gaussian Splatting (3DGS)',
-          description: 'Pelatihan radiance fields menjadi representasi elipsoid fotorealistis 60 FPS di WebGL browser.',
+          description: 'Pelatihan 3D Gaussian Splat menjadi ruang fotorealistis yang bisa dijelajahi langsung di browser.',
         },
       ],
       data: {
@@ -127,51 +126,41 @@ function generateDefaultPortfolioBlocks(title: string, client: string, summary: 
         description: 'Metodologi 4-fase terpadu SPATIUM dari pemindaian sensor hingga representasi neural radiance fields WebGL.',
         steps: [
           { stepNumber: '01', title: 'Laser Scan & Drone Capture', summary: 'Akuisisi data multi-sensor LiDAR darat dan drone resolusi tinggi untuk jutaan koordinat XYZ.' },
-          { stepNumber: '02', title: 'Point Cloud Densification', summary: 'Komputasi awan titik berkerapatan tinggi dengan akurasi sub-sentimeter toleransi < 5mm.' },
+          { stepNumber: '02', title: 'Point Cloud Densification', summary: 'Registrasi dan pembersihan point cloud berkerapatan tinggi sebagai fondasi geometri yang terukur.' },
           { stepNumber: '03', title: '3D Geometry & CAD Reconstruction', summary: 'Pemodelan mesh dan kalibrasi batas ruang arsitektur untuk integrasi software 3D profesional.' },
-          { stepNumber: '04', title: '3D Gaussian Splatting (3DGS)', summary: 'Pelatihan radiance fields menjadi representasi elipsoid fotorealistis 60 FPS di WebGL browser.' },
+          { stepNumber: '04', title: '3D Gaussian Splatting (3DGS)', summary: 'Pelatihan 3D Gaussian Splat menjadi ruang fotorealistis yang bisa dijelajahi langsung di browser.' },
         ],
       },
     },
     {
       id: `stats-${Date.now()}-3`,
       type: 'stats-ticker',
-      title: 'Metrik Dampak Visual & Engagement Audiens',
+      // Values intentionally empty: fill with verified project data only (zero-mock policy).
+      title: 'Data Proyek',
       items: [
-        { label: 'Frame Dirender', value: '140,000+' },
-        { label: 'Tingkat Retensi Rata-rata', value: '89.4%' },
-        { label: 'Penghargaan & Seleksi', value: '12 Nominasi' },
-        { label: 'Engagement Rate Sosial', value: '18.7%' },
+        { label: 'Titik Pemindaian', value: '' },
+        { label: 'Luas Area', value: '' },
+        { label: 'Durasi Capture', value: '' },
       ],
       data: {
-        title: 'Metrik Dampak Visual & Engagement Audiens',
+        title: 'Data Proyek',
         metrics: [
-          { label: 'Frame Dirender', value: '140,000+' },
-          { label: 'Tingkat Retensi Rata-rata', value: '89.4%' },
-          { label: 'Penghargaan & Seleksi', value: '12 Nominasi' },
-          { label: 'Engagement Rate Sosial', value: '18.7%' },
+          { label: 'Titik Pemindaian', value: '' },
+          { label: 'Luas Area', value: '' },
+          { label: 'Durasi Capture', value: '' },
         ],
       },
     },
     {
-      id: `quote-${Date.now()}-4`,
-      type: 'executive-quote-card',
-      quote: client
-        ? `UNIMASI berhasil mentransformasi visi dan narasi kompleks ${client} menjadi mahakarya animasi visual yang memukau jutaan pemirsa.`
-        : 'Standar animasi sinematik dan kedalaman estetika UNIMASI mendefinisikan ulang cara brand kami berkomunikasi secara emosional dengan audiens global.',
-      author: client ? `Creative Lead, ${client}` : 'Head of Creative Strategy',
-      role: 'Creative Partner',
-    },
-    {
       id: `cta-${Date.now()}-5`,
       type: 'interactive-cta',
-      title: 'Wujudkan Proyek Animasi & Motion Visual Anda',
-      description: 'Diskusikan produksi animasi komersial, kampanye brand 3D, atau eksplorasi CGI imersif langsung bersama sutradara visual UNIMASI.',
-      buttonText: 'Mulai Proyek Animasi',
+      title: 'Wujudkan Digital Twin Ruang Anda',
+      description: 'Diskusikan kebutuhan laser scan, point cloud, dan 3D Gaussian Splat untuk film, marketing, instalasi, atau dokumentasi kenangan bersama tim SPATIUM.',
+      buttonText: 'Mulai Proyek Spasial',
       data: {
-        headline: 'Wujudkan Proyek Animasi & Motion Visual Anda',
-        body: 'Diskusikan produksi animasi komersial, kampanye brand 3D, atau eksplorasi CGI imersif langsung bersama sutradara visual UNIMASI.',
-        primaryCta: { label: 'Mulai Proyek Animasi', href: '/kontak' },
+        headline: 'Wujudkan Digital Twin Ruang Anda',
+        body: 'Diskusikan kebutuhan laser scan, point cloud, dan 3D Gaussian Splat untuk film, marketing, instalasi, atau dokumentasi kenangan bersama tim SPATIUM.',
+        primaryCta: { label: 'Mulai Proyek Spasial', href: '/contact' },
       },
     },
   ]
@@ -190,8 +179,7 @@ export function StudioPortfolioManager() {
 
   // Full Studio Editor Mode State (Max 2 Panels)
   const [editorMode, setEditorMode] = useState<boolean>(false)
-  const [viewMode, setViewMode] = useState<StudioViewMode>('canvas')
-  const [aiOpen, setAiOpen] = useState(false)
+  const [viewMode, setViewMode] = useState<StudioViewMode>('split-preview')
   const [saving, setSaving] = useState(false)
   const [saveMessage, setSaveMessage] = useState('')
   const [errorMessage, setErrorMessage] = useState('')
@@ -207,7 +195,7 @@ export function StudioPortfolioManager() {
   const [formYear, setFormYear] = useState(new Date().getFullYear().toString())
   const [formCategory, setFormCategory] = useState('')
   const [formSummary, setFormSummary] = useState('')
-  const [formHeroImage, setFormHeroImage] = useState('/images/portfolio/telkom-dfe.webp')
+  const [formHeroImage, setFormHeroImage] = useState('/images/spatium/web/pipe-04-splat.webp')
   const [formHeroAlt, setFormHeroAlt] = useState('')
   const [mediaPickerOpen, setMediaPickerOpen] = useState(false)
   const [showCoverAltModal, setShowCoverAltModal] = useState(false)
@@ -243,8 +231,8 @@ export function StudioPortfolioManager() {
   const [tourUploadSlug, setTourUploadSlug] = useState('')
   const [tourUploadClient, setTourUploadClient] = useState('')
   const [tourUploadCategory, setTourUploadCategory] = useState('Marketing & Branding')
-  const [tourUploadPointCount, setTourUploadPointCount] = useState('14.2M Splats')
-  const [tourUploadAccuracy, setTourUploadAccuracy] = useState('Sub-centimeter (5mm)')
+  const [tourUploadPointCount, setTourUploadPointCount] = useState('')
+  const [tourUploadAccuracy, setTourUploadAccuracy] = useState('')
   const [tourUploadSplatId, setTourUploadSplatId] = useState('')
   const [tourUploadExternalUrl, setTourUploadExternalUrl] = useState('')
   const [tourUploadFile, setTourUploadFile] = useState<File | null>(null)
@@ -293,45 +281,38 @@ export function StudioPortfolioManager() {
 
   // Create New Portfolio
   const handleAddNew = () => {
+    // New items start empty and as DRAFT: every value must come from the real project
+    // (AGENTS.md §3.3 — no prefilled metrics, clients or scene links).
     setFormId(null)
-    setFormTitle('SPATIUM 3D Gaussian Splatting Showcase')
+    setFormTitle('')
     const initialSlug = `spatium-capture-${Date.now().toString().slice(-4)}`
     setFormSlug(initialSlug)
-    setFormClient('Mitra SPATIUM')
-    setFormYear(new Date().getFullYear().toString())
-    setFormCategory(availableCategories[0] || 'Marketing & Branding')
-    setFormSummary('Rekonstruksi spasial fotorealistis 3D Gaussian Splatting dengan akurasi sub-sentimeter pada 60 FPS real-time WebGL.')
-    setFormHeroImage('/images/spatium/page_01_0.jpg')
-    setFormHeroAlt('SPATIUM Spatial Technology Studio')
-    setFormLiveUrl('https://superspl.at/s?id=dc1cd13b')
+    setFormClient('')
+    setFormYear('')
+    setFormCategory(availableCategories[0] || '')
+    setFormSummary('')
+    setFormHeroImage('')
+    setFormHeroAlt('')
+    setFormLiveUrl('')
     setFormFeatured(false)
-    setFormStatus('published')
-    setFormChallenge('Membutuhkan dokumentasi spasial interaktif fidelitas tinggi yang dapat diakses secara instan dari web tanpa distorsi sudut lensa.')
-    setFormApproach('Mengembangkan alur pemindaian LiDAR darat dan fotogrametri drone berkerapatan tinggi yang dikonversi menjadi medan radiansi 3DGS.')
-    setFormSolution('Memproduksi tur spasial WebGL 60 FPS mandiri dengan navigasi kamera bebas dan akurasi sub-sentimeter.')
-    setFormProcess('LiDAR Sensor Scan, Drone Aerial Capture, Point Cloud Densification, 3D Geometry Reconstruction, 3DGS WebGL Delivery.')
-    setFormResult('Memberikan pengalaman verifikasi visual 1:1 tanpa batasan jarak fisik, meningkatkan konversi dan keyakinan pembeli (ZMOT).')
-    setFormMetrics([
-      { label: 'Kerapatan Partikel', value: '15.1M Splats', detail: 'Fidelitas visual neural radiance field' },
-      { label: 'Akurasi Geometri', value: 'Sub-5mm', detail: 'Survei koordinat laser LiDAR darat' },
-      { label: 'Kecepatan Frame', value: '60 FPS', detail: 'Real-time WebGL di semua peramban' },
-    ])
-    setFormTechnologies(['3D Gaussian Splatting', 'Terrestrial LiDAR Scanner', 'SuperSplat WebGL', 'Drone Photogrammetry', 'Three.js'])
+    setFormStatus('draft')
+    setFormChallenge('')
+    setFormApproach('')
+    setFormSolution('')
+    setFormProcess('')
+    setFormResult('')
+    setFormMetrics([])
+    setFormTechnologies(['3D Gaussian Splatting'])
 
     // Initialize Default Visual Blocks
-    const defaultBlocks = generateDefaultPortfolioBlocks(
-      'SPATIUM 3D Gaussian Splatting Showcase',
-      'Mitra SPATIUM',
-      'Rekonstruksi spasial fotorealistis 3D Gaussian Splatting dengan akurasi sub-sentimeter pada 60 FPS real-time WebGL.',
-      '/images/spatium/page_01_0.jpg'
-    )
+    const defaultBlocks = generateDefaultPortfolioBlocks('', '', '', '')
     setFormBlocks(defaultBlocks)
 
     // Reset SEO
-    setSeoTitle('SPATIUM 3D Gaussian Splatting Showcase — Reality Capture')
-    setMetaDesc('Eksplorasi tur spasial interaktif 3D Gaussian Splatting dan digital twin fotorealistis dari SPATIUM.')
-    setFocusKeyphrase('3d gaussian splatting indonesia')
-    setRelatedKeyphrases(['digital twin spasial', 'lidar reality capture'])
+    setSeoTitle('')
+    setMetaDesc('')
+    setFocusKeyphrase('')
+    setRelatedKeyphrases([])
     setCanonicalUrl(`${siteConfig.url}/portfolio/${initialSlug}`)
 
     setSelectedBlockId(defaultBlocks[0]?.id || null)
@@ -393,7 +374,7 @@ export function StudioPortfolioManager() {
     setFormYear((item.year || new Date().getFullYear()).toString())
     setFormCategory(item.category || availableCategories[0] || 'Immersive Software & Edutainment')
     setFormSummary(item.summary || '')
-    setFormHeroImage(item.heroImage || '/images/portfolio/telkom-dfe.webp')
+    setFormHeroImage(item.heroImage || '/images/spatium/web/pipe-04-splat.webp')
     let extractedAlt = ''
     if (item.seoData) {
       try {
@@ -402,7 +383,7 @@ export function StudioPortfolioManager() {
       } catch (err) { console.warn("[observable error]:", err) }
     }
     if (!extractedAlt && item.title) {
-      extractedAlt = `${item.title} - UNIMASI Portofolio`
+      extractedAlt = `${item.title} - Portofolio SPATIUM`
     }
     setFormHeroAlt(extractedAlt)
     setFormLiveUrl(item.liveUrl || '')
@@ -459,13 +440,13 @@ export function StudioPortfolioManager() {
         item.title,
         item.client || '',
         item.summary || '',
-        item.heroImage || '/images/portfolio/telkom-dfe.webp'
+        item.heroImage || '/images/spatium/web/pipe-04-splat.webp'
       )
     }
     setFormBlocks(parsedBlocks)
 
     // SEO Data
-    setSeoTitle(item.metaTitle || `${item.title} — Studi Kasus UNIMASI`)
+    setSeoTitle(item.metaTitle || `${item.title} — Studi Kasus SPATIUM`)
     setMetaDesc(item.metaDescription || item.summary || '')
     setFocusKeyphrase(item.focusKeyphrase || '')
     let parsedRelated: string[] = []
@@ -477,7 +458,7 @@ export function StudioPortfolioManager() {
       }
     }
     setRelatedKeyphrases(Array.isArray(parsedRelated) ? parsedRelated : [])
-    setCanonicalUrl(`https://unimasi.studio/portfolio/${item.slug}`)
+    setCanonicalUrl(`${siteConfig.url}/portfolio/${item.slug}`)
 
     setSelectedBlockId(parsedBlocks[0]?.id || null)
     setShowPropertiesDrawer(true)
@@ -573,59 +554,6 @@ export function StudioPortfolioManager() {
     }
   }
 
-  // Selected Block Manipulation
-  const currentSelectedBlock = formBlocks.find((b) => b.id === selectedBlockId)
-
-  const handleUpdateSelectedBlock = (updatedFields: Partial<StudioBlock> | any) => {
-    if (!selectedBlockId) return
-    setFormBlocks((prev) =>
-      prev.map((b) => {
-        if (b.id !== selectedBlockId) return b
-        return {
-          ...b,
-          ...updatedFields,
-          ...(b.data ? { data: { ...b.data, ...updatedFields } } : {}),
-        }
-      })
-    )
-  }
-
-  const handleDuplicateSelectedBlock = () => {
-    if (!selectedBlockId) return
-    const idx = formBlocks.findIndex((b) => b.id === selectedBlockId)
-    if (idx === -1) return
-    const blockToCopy = formBlocks[idx]
-    const duplicatedBlock: StudioBlock = {
-      ...JSON.parse(JSON.stringify(blockToCopy)),
-      id: `${blockToCopy.type}-${Date.now()}`,
-    }
-    const nextBlocks = [...formBlocks]
-    nextBlocks.splice(idx + 1, 0, duplicatedBlock)
-    setFormBlocks(nextBlocks)
-    setSelectedBlockId(duplicatedBlock.id)
-  }
-
-  const handleDeleteSelectedBlock = () => {
-    if (!selectedBlockId) return
-    setFormBlocks((prev) => prev.filter((b) => b.id !== selectedBlockId))
-    setSelectedBlockId(null)
-  }
-
-  const handleMoveBlock = (direction: 'up' | 'down') => {
-    if (!selectedBlockId) return
-    const idx = formBlocks.findIndex((b) => b.id === selectedBlockId)
-    if (idx === -1) return
-    if (direction === 'up' && idx === 0) return
-    if (direction === 'down' && idx === formBlocks.length - 1) return
-
-    const targetIdx = direction === 'up' ? idx - 1 : idx + 1
-    const nextBlocks = [...formBlocks]
-    const temp = nextBlocks[idx]
-    nextBlocks[idx] = nextBlocks[targetIdx]
-    nextBlocks[targetIdx] = temp
-    setFormBlocks(nextBlocks)
-  }
-
   // Metric helpers
   const handleAddMetric = () => {
     setFormMetrics([...formMetrics, { label: 'Metrik Baru', value: '100%', detail: 'Deskripsi singkat' }])
@@ -685,7 +613,7 @@ export function StudioPortfolioManager() {
   // ─────────────────────────────────────────────────────────────────────────────
   if (editorMode) {
     return (
-      <div className="fixed inset-0 z-50 flex h-screen w-screen flex-col overflow-hidden bg-[#0D0D0D] text-white antialiased selection:bg-[#FFD600] selection:text-black">
+      <div className="fixed inset-0 z-50 flex h-screen w-screen flex-col overflow-hidden bg-[#0D0D0D] text-white antialiased selection:bg-[#4d8bff] selection:text-black">
         {/* Top Dedicated Studio Master Header */}
         <header className="h-14 shrink-0 px-4 sm:px-6 bg-[var(--studio-sidebar-bg)] border-b border-white/[0.08] flex items-center justify-between gap-3 z-30 select-none overflow-hidden flex-nowrap">
           <div className="flex items-center gap-2 sm:gap-2.5 min-w-0 flex-1 max-w-[55%] lg:max-w-[60%] overflow-hidden flex-nowrap whitespace-nowrap">
@@ -703,9 +631,9 @@ export function StudioPortfolioManager() {
             </Tooltip>
             <div className="h-4 w-px bg-white/10 hidden sm:block shrink-0" />
             <div className="flex items-center gap-2 min-w-0 flex-1 overflow-hidden flex-nowrap whitespace-nowrap">
-              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-[#FFD600]/15 border border-[#FFD600]/30 text-[#FFD600] uppercase tracking-wider shrink-0">
-                <Briefcase className="w-3 h-3 text-[#FFD600]" />
-                <span className="hidden sm:inline">PORTOFOLIO • 3D MOTION</span>
+              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-[#4d8bff]/15 border border-[#4d8bff]/30 text-[#4d8bff] uppercase tracking-wider shrink-0">
+                <Briefcase className="w-3 h-3 text-[#4d8bff]" />
+                <span className="hidden sm:inline">PORTOFOLIO • DIGITAL TWIN</span>
               </span>
               {formCategory && (
                 <span className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-white/5 text-neutral-400 border border-white/10 hidden md:inline-block shrink-0 truncate max-w-[120px]">
@@ -739,7 +667,7 @@ export function StudioPortfolioManager() {
                     : 'text-neutral-400 hover:text-white'
                 }`}
               >
-                <PenSquare className="w-3.5 h-3.5 text-[#FFD600]" />
+                <PenSquare className="w-3.5 h-3.5 text-[#4d8bff]" />
                 <span className="hidden sm:inline">Kanvas</span>
               </button>
             </Tooltip>
@@ -790,22 +718,6 @@ export function StudioPortfolioManager() {
               </Tooltip>
             )}
 
-            {/* AI Copilot Drawer Toggle */}
-            <Tooltip label="AI Copilot" hint="Asisten AI penyusun blok & copy kontekstual" side="bottom">
-              <button
-                type="button"
-                onClick={() => setAiOpen(!aiOpen)}
-                className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-mono border transition-all ${
-                  aiOpen
-                    ? 'bg-purple-500/20 border-purple-500/50 text-purple-300'
-                    : 'bg-white/5 border-white/10 text-neutral-300 hover:text-white hover:border-purple-500/30'
-                }`}
-              >
-                <Sparkles className="w-3.5 h-3.5 text-purple-400" />
-                <span className="hidden lg:inline">AI Copilot</span>
-              </button>
-            </Tooltip>
-
             {/* Toggle Inspector / Properties Panel */}
             {viewMode !== 'full-preview' && (
               <Tooltip label={showPropertiesDrawer ? 'Tutup Panel' : 'Buka Panel'} hint="Panel pengaturan blok & SEO" side="bottom">
@@ -814,7 +726,7 @@ export function StudioPortfolioManager() {
                   onClick={() => setShowPropertiesDrawer(!showPropertiesDrawer)}
                   className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-mono border transition-all ${
                     showPropertiesDrawer
-                      ? 'bg-[#FFD600]/20 border-[#FFD600]/50 text-[#FFD600]'
+                      ? 'bg-[#4d8bff]/20 border-[#4d8bff]/50 text-[#4d8bff]'
                       : 'bg-white/5 border-white/10 text-neutral-400 hover:text-white'
                   }`}
                 >
@@ -852,7 +764,7 @@ export function StudioPortfolioManager() {
                 type="button"
                 onClick={handleSavePortfolio}
                 disabled={saving || !isBlocksValid}
-                className="inline-flex items-center gap-2 px-4 py-1.5 rounded-xl bg-[#FFD600] text-[#191919] font-medium text-xs font-mono uppercase tracking-wider hover:bg-[#FFE855] transition-all shadow-[0_0_15px_rgba(255, 214, 0,0.25)] disabled:opacity-50"
+                className="inline-flex items-center gap-2 px-4 py-1.5 rounded-xl bg-[#4d8bff] text-[#191919] font-medium text-xs font-mono uppercase tracking-wider hover:bg-[#6fb0ff] transition-all shadow-[0_0_15px_rgba(77, 139, 255,0.25)] disabled:opacity-50"
               >
                 <Save className="w-3.5 h-3.5" />
                 <span>{saving ? 'Menyimpan...' : 'Simpan'}</span>
@@ -869,45 +781,20 @@ export function StudioPortfolioManager() {
               blocks={formBlocks}
               onChangeBlocks={setFormBlocks}
               selectedBlockId={selectedBlockId}
-              onSelectBlock={(id) => {
-                setSelectedBlockId(id)
-                if (id) setShowPropertiesDrawer(true)
-              }}
+              onSelectBlock={setSelectedBlockId}
               targetType="portfolio"
               contextData={{ portfolios: items }}
-              title={formTitle}
-              slug={formSlug}
-              onToggleInspector={() => setShowPropertiesDrawer(!showPropertiesDrawer)}
-              isInspectorOpen={showPropertiesDrawer}
+              draftId={formId ? String(formId) : 'new'}
+              onSave={handleSavePortfolio}
               onValidationChange={handleBlockValidation}
               viewMode={viewMode}
-              onViewModeChange={setViewMode}
             />
           </div>
 
           {/* 2. DOCKED RIGHT PANEL: Contextual Inspector (Block Properties / Story / Meta / SEO) */}
           {showPropertiesDrawer && viewMode !== 'full-preview' && (
             <aside className="w-full sm:w-[380px] xl:w-[420px] shrink-0 border-l border-white/[0.08] bg-[var(--studio-bg)] h-full overflow-y-auto z-20 flex flex-col p-4 space-y-4">
-              {selectedBlockId && currentSelectedBlock ? (
-                <div className="rounded-2xl overflow-hidden border border-white/10 flex-1 min-h-[500px]">
-                  <StudioBlockProperties
-                    block={currentSelectedBlock}
-                    onUpdateBlock={handleUpdateSelectedBlock}
-                    onDeselect={() => setSelectedBlockId(null)}
-                    onMoveUp={() => handleMoveBlock('up')}
-                    onMoveDown={() => handleMoveBlock('down')}
-                    onDuplicate={handleDuplicateSelectedBlock}
-                    onDelete={handleDeleteSelectedBlock}
-                    allPortfolios={items.map((it) => ({
-                      id: it.id || 0,
-                      slug: it.slug,
-                      title: it.title,
-                      client: it.client,
-                      heroImage: it.heroImage,
-                    }))}
-                  />
-                </div>
-              ) : (
+              {(
                 <div className="space-y-4">
                   {/* Tab Switcher: Story vs Meta vs SEO */}
                   <div className="flex rounded-2xl bg-surface-overlay p-1 border border-white/10 shadow-md">
@@ -916,7 +803,7 @@ export function StudioPortfolioManager() {
                       onClick={() => setActiveInspectorTab('story')}
                       className={`flex-1 py-2 text-xs font-mono font-medium rounded-xl transition-all ${
                         activeInspectorTab === 'story'
-                          ? 'bg-[#FFD600] text-[#191919] shadow font-bold'
+                          ? 'bg-[#4d8bff] text-[#191919] shadow font-bold'
                           : 'text-neutral-400 hover:text-white'
                       }`}
                     >
@@ -927,7 +814,7 @@ export function StudioPortfolioManager() {
                       onClick={() => setActiveInspectorTab('meta')}
                       className={`flex-1 py-2 text-xs font-mono font-medium rounded-xl transition-all ${
                         activeInspectorTab === 'meta'
-                          ? 'bg-[#FFD600] text-[#191919] shadow font-bold'
+                          ? 'bg-[#4d8bff] text-[#191919] shadow font-bold'
                           : 'text-neutral-400 hover:text-white'
                       }`}
                     >
@@ -938,7 +825,7 @@ export function StudioPortfolioManager() {
                       onClick={() => setActiveInspectorTab('seo')}
                       className={`flex-1 py-2 text-xs font-mono font-medium rounded-xl transition-all ${
                         activeInspectorTab === 'seo'
-                          ? 'bg-[#FFD600] text-[#191919] shadow font-bold'
+                          ? 'bg-[#4d8bff] text-[#191919] shadow font-bold'
                           : 'text-neutral-400 hover:text-white'
                       }`}
                     >
@@ -951,7 +838,7 @@ export function StudioPortfolioManager() {
                     <div className="p-5 rounded-3xl bg-surface-overlay border border-white/10 space-y-4 shadow-xl">
                       <div className="border-b border-white/10 pb-3">
                         <h3 className="font-display text-sm font-bold text-white flex items-center gap-2">
-                          <FileText className="w-4 h-4 text-[#FFD600]" />
+                          <FileText className="w-4 h-4 text-[#4d8bff]" />
                           <span>Narasi Struktur Studi Kasus</span>
                         </h3>
                         <p className="text-[11px] text-neutral-400 mt-0.5">
@@ -969,7 +856,7 @@ export function StudioPortfolioManager() {
                           value={formSummary}
                           onChange={(e) => setFormSummary(e.target.value)}
                           placeholder="Ringkasan dampak bisnis dan inovasi teknologi studi kasus ini..."
-                          className="w-full px-3 py-2 text-xs bg-[var(--studio-bg)] border border-white/10 rounded-xl text-white placeholder-neutral-500 focus:outline-none focus:border-[#FFD600]"
+                          className="w-full px-3 py-2 text-xs bg-[var(--studio-bg)] border border-white/10 rounded-xl text-white placeholder-neutral-500 focus:outline-none focus:border-[#4d8bff]"
                         />
                       </div>
 
@@ -984,7 +871,7 @@ export function StudioPortfolioManager() {
                             value={formChallenge}
                             onChange={(e) => setFormChallenge(e.target.value)}
                             placeholder="Apa masalah utama yang dihadapi klien sebelum proyek dimulai?"
-                            className="w-full px-3 py-2 text-xs bg-[var(--studio-bg)] border border-white/10 rounded-xl text-white placeholder-neutral-500 focus:outline-none focus:border-[#FFD600]"
+                            className="w-full px-3 py-2 text-xs bg-[var(--studio-bg)] border border-white/10 rounded-xl text-white placeholder-neutral-500 focus:outline-none focus:border-[#4d8bff]"
                           />
                         </div>
 
@@ -997,7 +884,7 @@ export function StudioPortfolioManager() {
                             value={formApproach}
                             onChange={(e) => setFormApproach(e.target.value)}
                             placeholder="Metodologi, riset teknis, dan arsitektur yang dipilih..."
-                            className="w-full px-3 py-2 text-xs bg-[var(--studio-bg)] border border-white/10 rounded-xl text-white placeholder-neutral-500 focus:outline-none focus:border-[#FFD600]"
+                            className="w-full px-3 py-2 text-xs bg-[var(--studio-bg)] border border-white/10 rounded-xl text-white placeholder-neutral-500 focus:outline-none focus:border-[#4d8bff]"
                           />
                         </div>
 
@@ -1010,7 +897,7 @@ export function StudioPortfolioManager() {
                             value={formSolution}
                             onChange={(e) => setFormSolution(e.target.value)}
                             placeholder="Detail fitur, modul interaktif, dan sistem yang dibangun..."
-                            className="w-full px-3 py-2 text-xs bg-[var(--studio-bg)] border border-white/10 rounded-xl text-white placeholder-neutral-500 focus:outline-none focus:border-[#FFD600]"
+                            className="w-full px-3 py-2 text-xs bg-[var(--studio-bg)] border border-white/10 rounded-xl text-white placeholder-neutral-500 focus:outline-none focus:border-[#4d8bff]"
                           />
                         </div>
 
@@ -1023,7 +910,7 @@ export function StudioPortfolioManager() {
                             value={formResult}
                             onChange={(e) => setFormResult(e.target.value)}
                             placeholder="Hasil konversi, peningkatan performa, atau umpan balik pengguna..."
-                            className="w-full px-3 py-2 text-xs bg-[var(--studio-bg)] border border-white/10 rounded-xl text-white placeholder-neutral-500 focus:outline-none focus:border-[#FFD600]"
+                            className="w-full px-3 py-2 text-xs bg-[var(--studio-bg)] border border-white/10 rounded-xl text-white placeholder-neutral-500 focus:outline-none focus:border-[#4d8bff]"
                           />
                         </div>
                       </div>
@@ -1038,7 +925,7 @@ export function StudioPortfolioManager() {
                           <button
                             type="button"
                             onClick={handleAddMetric}
-                            className="text-[10px] font-mono text-[#FFD600] hover:underline flex items-center gap-1"
+                            className="text-[10px] font-mono text-[#4d8bff] hover:underline flex items-center gap-1"
                           >
                             <Plus className="w-3 h-3" />
                             Tambah Metrik
@@ -1054,14 +941,14 @@ export function StudioPortfolioManager() {
                                   value={met.value}
                                   onChange={(e) => handleUpdateMetric(i, 'value', e.target.value)}
                                   placeholder="Nilai (e.g. 3.4x)"
-                                  className="w-24 px-2 py-1 text-xs font-mono font-bold text-emerald-400 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:border-[#FFD600]"
+                                  className="w-24 px-2 py-1 text-xs font-mono font-bold text-emerald-400 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:border-[#4d8bff]"
                                 />
                                 <input
                                   type="text"
                                   value={met.label}
                                   onChange={(e) => handleUpdateMetric(i, 'label', e.target.value)}
                                   placeholder="Label metrik"
-                                  className="flex-1 px-2 py-1 text-xs bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:border-[#FFD600]"
+                                  className="flex-1 px-2 py-1 text-xs bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:border-[#4d8bff]"
                                 />
                                 <button
                                   type="button"
@@ -1118,7 +1005,7 @@ export function StudioPortfolioManager() {
                               }
                             }}
                             placeholder="Ketik teknologi (e.g. Three.js)..."
-                            className="flex-1 px-3 py-1.5 text-xs bg-[var(--studio-bg)] border border-white/10 rounded-xl text-white placeholder-neutral-500 focus:outline-none focus:border-[#FFD600]"
+                            className="flex-1 px-3 py-1.5 text-xs bg-[var(--studio-bg)] border border-white/10 rounded-xl text-white placeholder-neutral-500 focus:outline-none focus:border-[#4d8bff]"
                           />
                           <button
                             type="button"
@@ -1137,7 +1024,7 @@ export function StudioPortfolioManager() {
                     <div className="p-5 rounded-3xl bg-surface-overlay border border-white/10 space-y-4 shadow-xl">
                       <div className="border-b border-white/10 pb-3">
                         <h3 className="font-display text-sm font-bold text-white flex items-center gap-2">
-                          <Briefcase className="w-4 h-4 text-[#FFD600]" />
+                          <Briefcase className="w-4 h-4 text-[#4d8bff]" />
                           <span>Identitas &amp; Pengaturan Proyek</span>
                         </h3>
                         <p className="text-[11px] text-neutral-400 mt-0.5">
@@ -1155,7 +1042,7 @@ export function StudioPortfolioManager() {
                           value={formTitle}
                           onChange={(e) => setFormTitle(e.target.value)}
                           placeholder="Judul proyek studi kasus..."
-                          className="w-full px-3 py-2 text-xs bg-[var(--studio-bg)] border border-white/10 rounded-xl text-white placeholder-neutral-500 focus:outline-none focus:border-[#FFD600]"
+                          className="w-full px-3 py-2 text-xs bg-[var(--studio-bg)] border border-white/10 rounded-xl text-white placeholder-neutral-500 focus:outline-none focus:border-[#4d8bff]"
                         />
                       </div>
 
@@ -1170,7 +1057,7 @@ export function StudioPortfolioManager() {
                             value={formSlug}
                             onChange={(e) => setFormSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]+/g, '-'))}
                             placeholder="slug-proyek"
-                            className="flex-1 px-3 py-2 text-xs font-mono bg-[var(--studio-bg)] border border-white/10 rounded-xl text-white placeholder-neutral-500 focus:outline-none focus:border-[#FFD600]"
+                            className="flex-1 px-3 py-2 text-xs font-mono bg-[var(--studio-bg)] border border-white/10 rounded-xl text-white placeholder-neutral-500 focus:outline-none focus:border-[#4d8bff]"
                           />
                         </div>
                       </div>
@@ -1186,7 +1073,7 @@ export function StudioPortfolioManager() {
                             value={formClient}
                             onChange={(e) => setFormClient(e.target.value)}
                             placeholder="Nama Klien Korporat..."
-                            className="w-full px-3 py-2 text-xs bg-[var(--studio-bg)] border border-white/10 rounded-xl text-white placeholder-neutral-500 focus:outline-none focus:border-[#FFD600]"
+                            className="w-full px-3 py-2 text-xs bg-[var(--studio-bg)] border border-white/10 rounded-xl text-white placeholder-neutral-500 focus:outline-none focus:border-[#4d8bff]"
                           />
                         </div>
                         <div>
@@ -1197,7 +1084,7 @@ export function StudioPortfolioManager() {
                             type="number"
                             value={formYear}
                             onChange={(e) => setFormYear(e.target.value)}
-                            className="w-full px-3 py-2 text-xs font-mono bg-[var(--studio-bg)] border border-white/10 rounded-xl text-white focus:outline-none focus:border-[#FFD600]"
+                            className="w-full px-3 py-2 text-xs font-mono bg-[var(--studio-bg)] border border-white/10 rounded-xl text-white focus:outline-none focus:border-[#4d8bff]"
                           />
                         </div>
                       </div>
@@ -1210,7 +1097,7 @@ export function StudioPortfolioManager() {
                         <select
                           value={formCategory}
                           onChange={(e) => setFormCategory(e.target.value)}
-                          className="w-full px-3 py-2 text-xs bg-[var(--studio-bg)] border border-white/10 rounded-xl text-white focus:outline-none focus:border-[#FFD600]"
+                          className="w-full px-3 py-2 text-xs bg-[var(--studio-bg)] border border-white/10 rounded-xl text-white focus:outline-none focus:border-[#4d8bff]"
                         >
                           {availableCategories.map((cat) => (
                             <option key={cat} value={cat}>
@@ -1269,7 +1156,7 @@ export function StudioPortfolioManager() {
                               <button
                                 type="button"
                                 onClick={() => setShowCoverAltModal(true)}
-                                className="px-2.5 py-1 rounded-lg bg-[#FFD600]/20 hover:bg-[#FFD600]/30 text-[10px] text-[#FFD600] flex items-center gap-1 backdrop-blur-sm"
+                                className="px-2.5 py-1 rounded-lg bg-[#4d8bff]/20 hover:bg-[#4d8bff]/30 text-[10px] text-[#4d8bff] flex items-center gap-1 backdrop-blur-sm"
                               >
                                 <Maximize2 className="w-3 h-3" />
                                 <span>Edit Alt Text</span>
@@ -1283,8 +1170,8 @@ export function StudioPortfolioManager() {
                             type="text"
                             value={formHeroImage}
                             onChange={(e) => setFormHeroImage(e.target.value)}
-                            placeholder="/images/portfolio/..."
-                            className="w-full px-3 py-2 text-xs font-mono bg-[var(--studio-bg)] border border-white/10 rounded-xl text-white placeholder-neutral-500 focus:outline-none focus:border-[#FFD600]"
+                            placeholder="/images/spatium/web/..."
+                            className="w-full px-3 py-2 text-xs font-mono bg-[var(--studio-bg)] border border-white/10 rounded-xl text-white placeholder-neutral-500 focus:outline-none focus:border-[#4d8bff]"
                           />
                         </div>
 
@@ -1311,7 +1198,7 @@ export function StudioPortfolioManager() {
                               <button
                                 type="button"
                                 onClick={() => {
-                                  const auto = `${formTitle || 'Portofolio'} - Solusi Rekayasa Digital UNIMASI`.slice(0, 120)
+                                  const auto = `${formTitle || 'Portofolio'} - Digital Twin SPATIUM`.slice(0, 120)
                                   setFormHeroAlt(auto)
                                 }}
                                 className="text-[10px] text-accent-400 hover:text-accent-300 flex items-center gap-0.5"
@@ -1337,7 +1224,7 @@ export function StudioPortfolioManager() {
                               value={formHeroAlt}
                               onChange={(e) => setFormHeroAlt(e.target.value)}
                               placeholder="Deskripsi visual untuk pembaca layar & Google Images..."
-                              className="w-full px-3 py-2 text-xs bg-[var(--studio-bg)] border border-white/10 rounded-xl text-white placeholder-neutral-500 focus:outline-none focus:border-[#FFD600] pr-14"
+                              className="w-full px-3 py-2 text-xs bg-[var(--studio-bg)] border border-white/10 rounded-xl text-white placeholder-neutral-500 focus:outline-none focus:border-[#4d8bff] pr-14"
                             />
                             <span
                               className={`absolute right-2.5 top-2 text-[10px] font-mono ${
@@ -1363,7 +1250,7 @@ export function StudioPortfolioManager() {
                           <div className="w-full max-w-lg rounded-2xl bg-[var(--studio-bg)] border border-white/15 shadow-2xl p-5 space-y-4 text-left">
                             <div className="flex items-center justify-between pb-3 border-b border-white/10">
                               <div className="flex items-center gap-2">
-                                <div className="p-1.5 rounded-lg bg-[#FFD600]/10 border border-[#FFD600]/20 text-[#FFD600]">
+                                <div className="p-1.5 rounded-lg bg-[#4d8bff]/10 border border-[#4d8bff]/20 text-[#4d8bff]">
                                   <Sparkles className="w-4 h-4" />
                                 </div>
                                 <div>
@@ -1436,14 +1323,14 @@ export function StudioPortfolioManager() {
                                 onChange={(e) => setFormHeroAlt(e.target.value)}
                                 rows={3}
                                 placeholder="Tuliskan deskripsi visual representasi cover untuk screen reader dan SEO..."
-                                className="w-full rounded-xl bg-black/40 border border-white/15 p-2.5 text-xs text-white focus:outline-none focus:border-[#FFD600]"
+                                className="w-full rounded-xl bg-black/40 border border-white/15 p-2.5 text-xs text-white focus:outline-none focus:border-[#4d8bff]"
                               />
                             </div>
 
                             {/* Preset Pills */}
                             <div className="flex flex-wrap gap-1.5">
                               {[
-                                `${formTitle || 'Portofolio'} - Implementasi Sistem Digital UNIMASI`,
+                                `${formTitle || 'Portofolio'} - Pemindaian Ruang SPATIUM`,
                                 `Tampilan arsitektur sistem dan antarmuka ${formTitle || 'proyek'}`,
                                 `Solusi digital terintegrasi ${formCategory || 'Teknologi'}: ${formTitle || 'Karya'}`,
                               ].map((preset, idx) => (
@@ -1482,7 +1369,7 @@ export function StudioPortfolioManager() {
                           value={formLiveUrl}
                           onChange={(e) => setFormLiveUrl(e.target.value)}
                           placeholder="https://superspl.at/s?id=... atau /tours/nama-proyek/index.html"
-                          className="w-full px-3 py-2 text-xs font-mono bg-[var(--studio-bg)] border border-white/10 rounded-xl text-white placeholder-neutral-500 focus:outline-none focus:border-[#FFD600]"
+                          className="w-full px-3 py-2 text-xs font-mono bg-[var(--studio-bg)] border border-white/10 rounded-xl text-white placeholder-neutral-500 focus:outline-none focus:border-[#4d8bff]"
                         />
                       </div>
 
@@ -1495,7 +1382,7 @@ export function StudioPortfolioManager() {
                           <select
                             value={formStatus}
                             onChange={(e) => setFormStatus(e.target.value as 'draft' | 'in_review' | 'approved' | 'published' | 'archived')}
-                            className="w-full px-3 py-2 text-xs font-mono bg-[var(--studio-bg)] border border-white/10 rounded-xl text-white focus:outline-none focus:border-[#FFD600]"
+                            className="w-full px-3 py-2 text-xs font-mono bg-[var(--studio-bg)] border border-white/10 rounded-xl text-white focus:outline-none focus:border-[#4d8bff]"
                           >
                             <option value="draft">Draft (Draf Internal)</option>
                             <option value="in_review">In Review (Sedang Direview)</option>
@@ -1510,7 +1397,7 @@ export function StudioPortfolioManager() {
                             type="checkbox"
                             checked={formFeatured}
                             onChange={(e) => setFormFeatured(e.target.checked)}
-                            className="w-4 h-4 rounded text-[#FFD600] focus:ring-0 bg-black/40 border-white/20"
+                            className="w-4 h-4 rounded text-[#4d8bff] focus:ring-0 bg-black/40 border-white/20"
                           />
                           <div>
                             <span className="text-xs font-semibold text-white block">
@@ -1591,21 +1478,6 @@ export function StudioPortfolioManager() {
           currentUrl={formHeroImage}
           title="Pilih Media Cover Portofolio"
         />
-
-        {/* Studio AI Copilot Drawer */}
-        {aiOpen && (
-          <StudioAiSidebar
-            isOpen={aiOpen}
-            onClose={() => setAiOpen(false)}
-            variant="drawer"
-            pageContext={{
-              title: formTitle,
-              slug: formSlug,
-              status: formStatus,
-              category: formCategory,
-            }}
-          />
-        )}
       </div>
     )
   }
@@ -1624,7 +1496,7 @@ export function StudioPortfolioManager() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Cari studi kasus berdasarkan judul, nama klien, atau kategori..."
-            className="w-full pl-9 pr-3 py-1.5 rounded-xl bg-neutral-900 border border-white/10 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-[#FFD600]"
+            className="w-full pl-9 pr-3 py-1.5 rounded-xl bg-neutral-900 border border-white/10 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-[#4d8bff]"
           />
         </div>
 
@@ -1662,7 +1534,7 @@ export function StudioPortfolioManager() {
             <button
               type="button"
               onClick={handleAddNew}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#FFD600] text-[#191919] font-medium text-xs font-mono uppercase tracking-wider hover:bg-[#FFE855] transition-all shadow-sm"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#4d8bff] text-[#191919] font-medium text-xs font-mono uppercase tracking-wider hover:bg-[#6fb0ff] transition-all shadow-sm"
             >
               <Plus className="w-3.5 h-3.5" />
               <span>Tambah</span>
@@ -1680,7 +1552,7 @@ export function StudioPortfolioManager() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Cari studi kasus berdasarkan judul, nama klien, atau kategori..."
-            className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-surface-overlay border border-white/10 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-[#FFD600]"
+            className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-surface-overlay border border-white/10 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-[#4d8bff]"
           />
         </div>
 
@@ -1690,7 +1562,7 @@ export function StudioPortfolioManager() {
             onClick={() => setSelectedCategoryFilter('ALL')}
             className={`px-3 py-1.5 rounded-xl text-xs font-mono whitespace-nowrap transition-all ${
               selectedCategoryFilter === 'ALL'
-                ? 'bg-[#FFD600] text-[#191919] font-bold'
+                ? 'bg-[#4d8bff] text-[#191919] font-bold'
                 : 'bg-white/5 text-neutral-400 hover:text-white border border-white/10'
             }`}
           >
@@ -1706,7 +1578,7 @@ export function StudioPortfolioManager() {
                 onClick={() => setSelectedCategoryFilter(cat)}
                 className={`px-3 py-1.5 rounded-xl text-xs font-mono whitespace-nowrap transition-all ${
                   selectedCategoryFilter === cat
-                    ? 'bg-[#FFD600] text-[#191919] font-bold'
+                    ? 'bg-[#4d8bff] text-[#191919] font-bold'
                     : 'bg-white/5 text-neutral-400 hover:text-white border border-white/10'
                 }`}
               >
@@ -1720,7 +1592,7 @@ export function StudioPortfolioManager() {
       {/* Grid of Portfolios */}
       {loading ? (
         <div className="p-16 text-center text-xs text-neutral-400 font-mono flex items-center justify-center gap-2">
-          <RefreshCw className="w-4 h-4 animate-spin text-[#FFD600]" />
+          <RefreshCw className="w-4 h-4 animate-spin text-[#4d8bff]" />
           <span>Memuat data portofolio dari basis data SQLite...</span>
         </div>
       ) : filteredItems.length === 0 ? (
@@ -1744,7 +1616,7 @@ export function StudioPortfolioManager() {
             return (
               <div
                 key={item.slug}
-                className="p-5 rounded-3xl bg-surface-overlay border border-white/10 hover:border-[#FFD600]/40 transition-all flex flex-col justify-between group shadow-xl"
+                className="p-5 rounded-3xl bg-surface-overlay border border-white/10 hover:border-[#4d8bff]/40 transition-all flex flex-col justify-between group shadow-xl"
               >
                 <div className="space-y-3">
                   {/* Hero Media Thumbnail */}
@@ -1759,17 +1631,17 @@ export function StudioPortfolioManager() {
                       />
                     ) : (
                       <div className="w-full h-full bg-gradient-to-br from-[#060A17] via-[#0F3A79]/40 to-[#060A17] p-4 flex flex-col justify-between relative overflow-hidden group-hover:scale-[1.02] transition-transform duration-500">
-                        <div className="absolute inset-0 bg-[radial-gradient(#FFD60018_1px,transparent_1px)] bg-[size:12px_12px] pointer-events-none" />
+                        <div className="absolute inset-0 bg-[radial-gradient(#4d8bff18_1px,transparent_1px)] bg-[size:12px_12px] pointer-events-none" />
                         <div className="relative z-10 flex items-center justify-between">
-                          <span className="px-2 py-0.5 rounded text-[9px] font-mono font-bold bg-[#FFD600]/15 text-[#FFD600] border border-[#FFD600]/30 uppercase tracking-wider">
-                            UNIMASI MOTION
+                          <span className="px-2 py-0.5 rounded text-[9px] font-mono font-bold bg-[#4d8bff]/15 text-[#4d8bff] border border-[#4d8bff]/30 uppercase tracking-wider">
+                            SPATIUM
                           </span>
                           <span className="text-[9px] font-mono text-info-300/80">
                             16:9 DCI
                           </span>
                         </div>
                         <div className="relative z-10 text-center my-auto py-2">
-                          <div className="w-11 h-11 rounded-2xl bg-[#FFD600]/10 border border-[#FFD600]/30 mx-auto flex items-center justify-center text-[#FFD600] font-syne font-bold text-sm mb-1.5 shadow-[0_0_15px_rgba(255,214,0,0.2)] group-hover:scale-110 transition-transform">
+                          <div className="w-11 h-11 rounded-2xl bg-[#4d8bff]/10 border border-[#4d8bff]/30 mx-auto flex items-center justify-center text-[#4d8bff] font-syne font-bold text-sm mb-1.5 shadow-[0_0_15px_rgba(77,139,255,0.2)] group-hover:scale-110 transition-transform">
                             ▶
                           </div>
                           <p className="text-[11px] font-syne font-bold text-white/90 truncate max-w-[200px] mx-auto">
@@ -1777,8 +1649,8 @@ export function StudioPortfolioManager() {
                           </p>
                         </div>
                         <div className="relative z-10 flex items-center justify-between text-[9px] font-mono text-neutral-400 border-t border-white/5 pt-1.5">
-                          <span>SHOWREEL</span>
-                          <span className="text-[#FFD600] font-semibold">4K RENDER</span>
+                          <span>WALKTHROUGH</span>
+                          <span className="text-[#4d8bff] font-semibold">3D SPLAT</span>
                         </div>
                       </div>
                     )}
@@ -1788,14 +1660,14 @@ export function StudioPortfolioManager() {
                       </span>
                     )}
                     <span className="absolute top-2.5 right-2.5 px-2.5 py-0.5 rounded-full bg-black/70 backdrop-blur-md text-white text-[10px] font-mono border border-white/10">
-                      {item.year || 2026}
+                      {item.year || '—'}
                     </span>
                   </div>
 
                   {/* Metadata Header */}
                   <div>
                     <div className="flex items-center justify-between text-xs font-mono text-neutral-400 mb-1.5">
-                      <span className="text-[#FFD600] font-semibold uppercase truncate max-w-[160px]">
+                      <span className="text-[#4d8bff] font-semibold uppercase truncate max-w-[160px]">
                         {item.client || 'Mitra Korporat'}
                       </span>
                       <span className="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 font-medium text-[10px] border border-emerald-500/20 uppercase">
@@ -1803,11 +1675,11 @@ export function StudioPortfolioManager() {
                       </span>
                     </div>
 
-                    <h3 className="font-display text-base font-bold text-white group-hover:text-[#FFD600] transition-colors line-clamp-1">
+                    <h3 className="font-display text-base font-bold text-white group-hover:text-[#4d8bff] transition-colors line-clamp-1">
                       {item.title}
                     </h3>
                     <p className="text-xs text-neutral-400 mt-1 line-clamp-2 leading-relaxed">
-                      {item.summary || 'Studi kasus inovasi rekayasa digital dari tim UNIMASI.'}
+                      {item.summary || 'Studi kasus digital twin dari tim SPATIUM.'}
                     </p>
 
                     <div className="mt-3 flex items-center gap-2 text-[11px] font-mono text-neutral-400">
@@ -1837,7 +1709,7 @@ export function StudioPortfolioManager() {
                     <button
                       type="button"
                       onClick={() => handleEditItem(item)}
-                      className="px-3.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-mono text-[#FFD600] hover:text-[#FFE855] font-semibold transition-all inline-flex items-center gap-1.5"
+                      className="px-3.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-mono text-[#4d8bff] hover:text-[#6fb0ff] font-semibold transition-all inline-flex items-center gap-1.5"
                     >
                       <Edit className="w-3.5 h-3.5" />
                       <span>Edit Studi Kasus &amp; Blok</span>
@@ -2012,7 +1884,7 @@ export function StudioPortfolioManager() {
 
               {/* Or Direct Embed SuperSplat / External URL */}
               <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/10">
-                <span className="text-xs font-mono uppercase tracking-wider text-[#FFD600] font-semibold block mb-2">
+                <span className="text-xs font-mono uppercase tracking-wider text-[#4d8bff] font-semibold block mb-2">
                   Atau Gunakan SuperSplat ID / URL Eksternal
                 </span>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -2025,7 +1897,7 @@ export function StudioPortfolioManager() {
                       value={tourUploadSplatId}
                       onChange={(e) => setTourUploadSplatId(e.target.value)}
                       placeholder="e318925e"
-                      className="w-full px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-xs text-white placeholder-neutral-600 focus:outline-none focus:border-[#FFD600]"
+                      className="w-full px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-xs text-white placeholder-neutral-600 focus:outline-none focus:border-[#4d8bff]"
                     />
                   </div>
 
@@ -2038,7 +1910,7 @@ export function StudioPortfolioManager() {
                       value={tourUploadExternalUrl}
                       onChange={(e) => setTourUploadExternalUrl(e.target.value)}
                       placeholder="https://superspl.at/s?id=..."
-                      className="w-full px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-xs text-white placeholder-neutral-600 focus:outline-none focus:border-[#FFD600]"
+                      className="w-full px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-xs text-white placeholder-neutral-600 focus:outline-none focus:border-[#4d8bff]"
                     />
                   </div>
                 </div>

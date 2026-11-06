@@ -1,104 +1,28 @@
-import type { ReactNode } from 'react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { Breadcrumbs } from '@/components/ui/PageHero'
-import { StudioArt } from '@/components/art/StudioArt'
-import { ArticleCard } from '@/components/journal/ArticleCard'
+import { SplatPlaceholder } from '@/components/spatium/SplatPlaceholder'
+import { ArticleCard, type ArticleCardItem } from '@/components/journal/ArticleCard'
 import { CTASection } from '@/components/ui/CTASection'
 import { Reveal } from '@/components/ui/Reveal'
 import { SectionHead } from '@/components/ui/SectionHead'
 import { Icon } from '@/components/Icon'
-import {
-  SORTED_ARTICLES,
-  formatDate,
-  getArticle,
-  getRelatedArticles,
-  type Article,
-  type Block,
-} from '@/data/articles'
-import { getCoreArticleBySlug, getCoreArticles } from '@/lib/core'
+import { getJournalArticleBySlug, getJournalArticles, getUseCases } from '@/lib/content/spatium'
+import { formatDate, type JournalArticle } from '@/lib/content/spatium-types'
 import { sanitizeHtmlContent } from '@/lib/security/sanitize-html'
 import { siteConfig } from '@/config/site'
 import '@/pages/article.css'
+import { redirectIfMoved } from '@/lib/redirects/resolve'
 
 const SITE_URL = siteConfig.url
 
-async function resolveArticle(slug: string): Promise<{
-  article: Article
-  htmlContent?: string
-} | null> {
-  const local = getArticle(slug)
-  const core = await getCoreArticleBySlug(slug)
-
-  // DB/Core is the source of truth once an admin-edited article exists for
-  // this slug. Local static data only supplies the article shell (CTA links,
-  // art variant) — never its editable fields.
-  if (core) {
-    const categoryName =
-      typeof core.category === 'string'
-        ? core.category
-        : core.category?.name || local?.category || 'Process'
-    const authorName =
-      typeof core.author === 'string'
-        ? core.author
-        : core.author?.name || local?.author || 'UNIMASI'
-    const tagNames = core.tags
-      ? core.tags.map((t) => (typeof t === 'string' ? t : t.name || ''))
-      : local?.tags || []
-
-    const coreArticle: Article = {
-      slug: core.slug,
-      title: core.title,
-      category: categoryName as unknown as Article['category'],
-      excerpt: core.excerpt || '',
-      metaDescription: core.seo?.metaDescription || core.seoData?.metaDescription || core.excerpt || '',
-      date: core.publishedAt || core.createdAt || new Date().toISOString(),
-      author: authorName,
-      readMinutes: core.readingTime || local?.readMinutes || 5,
-      tags: tagNames.filter(Boolean),
-      // Non-editable presentation shell: reuse the static article's art/link
-      // scaffolding when the slug matches, otherwise sensible defaults.
-      artVariant: local?.artVariant ?? 1,
-      body: [],
-      serviceCta: local?.serviceCta ?? {
-        label: 'Need Animation Production?',
-        to: '/contact',
-        blurb: 'From explainer videos to 3D cinematics, we help brands move.',
-      },
-      relatedLinks: local?.relatedLinks ?? [
-        { label: 'View our portfolio', to: '/portfolio' },
-        { label: 'Browse services', to: '/services' },
-      ],
-      relatedSlugs: local?.relatedSlugs ?? [],
-    }
-
-    return {
-      article: coreArticle,
-      htmlContent: core.content,
-    }
-  }
-
-  if (local) {
-    return {
-      article: local,
-      htmlContent: undefined,
-    }
-  }
-
-  return null
-}
+export const revalidate = 300
 
 export async function generateStaticParams() {
-  const slugs = new Set<string>(SORTED_ARTICLES.map((article) => article.slug))
-  try {
-    const core = await getCoreArticles({ pageSize: 100 })
-    if (core && core.articles) {
-      for (const article of core.articles) slugs.add(article.slug)
-    }
-  } catch (err) { console.warn("[observable error]:", err) }
-
-  return Array.from(slugs).map((slug) => ({ slug }))
+  // getJournalArticles() logs and returns [] when the DB is unreachable at build time.
+  const articles = await getJournalArticles()
+  return articles.map((article) => ({ slug: article.slug }))
 }
 
 export async function generateMetadata({
@@ -107,21 +31,16 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>
 }): Promise<Metadata> {
   const { slug } = await params
-  const resolved = await resolveArticle(slug)
-  if (!resolved) return { title: 'Article Not Found' }
-  const { article } = resolved
+  const article = await getJournalArticleBySlug(slug)
+  if (!article) return { title: 'Artikel tidak ditemukan' }
 
   const desc =
     article.metaDescription.length > 160
       ? `${article.metaDescription.slice(0, 157).trimEnd()}…`
       : article.metaDescription
-  // The article title from Core may already carry a brand suffix; strip it so
-  // the root layout template does not produce "… · UNIMASI · UNIMASI".
-  const cleanTitle = article.title
-    .replace(/\s*[·|–—-]\s*UNIMASI\s*$/i, '')
-    .replace(/\s*UNIMASI\s*$/i, '')
-    .trim()
-  const title = cleanTitle.length > 55 ? `${cleanTitle.slice(0, 52).trimEnd()}…` : cleanTitle
+  const cleanTitle = article.metaTitle.replace(/\s*[·|–—-]\s*SPATIUM\s*$/i, '').trim()
+  const title = cleanTitle.length > 60 ? `${cleanTitle.slice(0, 57).trimEnd()}…` : cleanTitle
+  const ogImage = article.coverUrl || `${SITE_URL}/icon-512.png`
 
   return {
     title,
@@ -136,13 +55,13 @@ export async function generateMetadata({
       publishedTime: article.date,
       authors: [article.author],
       url: `${SITE_URL}/journal/${article.slug}`,
-      images: [{ url: `${SITE_URL}/favicon.svg` }],
+      images: [{ url: ogImage }],
     },
     twitter: {
       card: 'summary_large_image',
       title,
       description: desc,
-      images: [`${SITE_URL}/favicon.svg`],
+      images: [ogImage],
     },
   }
 }
@@ -156,92 +75,31 @@ function slugify(text: string): string {
     .slice(0, 60)
 }
 
-/** Renders **bold**, *italic* and [links](/path) inside a text string. */
-function renderInline(text: string): ReactNode[] {
-  const pattern = /(\*\*[^*]+\*\*|\*[^*]+\*|\[[^\]]+\]\([^)]+\))/g
-  const out: ReactNode[] = []
-  let lastIndex = 0
-  let key = 0
-  let match: RegExpExecArray | null
-
-  while ((match = pattern.exec(text)) !== null) {
-    if (match.index > lastIndex) out.push(text.slice(lastIndex, match.index))
-    const token = match[0]
-
-    if (token.startsWith('**')) {
-      out.push(<strong key={key++}>{token.slice(2, -2)}</strong>)
-    } else if (token.startsWith('*')) {
-      out.push(<em key={key++}>{token.slice(1, -1)}</em>)
-    } else {
-      const link = /^\[([^\]]+)\]\(([^)]+)\)$/.exec(token)
-      if (link) {
-        const [, label, href] = link
-        out.push(
-          href.startsWith('/') ? (
-            <Link key={key++} href={href}>
-              {label}
-            </Link>
-          ) : (
-            <a key={key++} href={href} target="_blank" rel="noreferrer noopener">
-              {label}
-            </a>
-          ),
-        )
-      } else {
-        out.push(token)
-      }
-    }
-    lastIndex = match.index + token.length
-  }
-
-  if (lastIndex < text.length) out.push(text.slice(lastIndex))
-  return out
+/** Adds anchor ids to <h2> elements and returns them for the table of contents. */
+function withHeadingAnchors(html: string): { html: string; headings: { id: string; text: string }[] } {
+  const headings: { id: string; text: string }[] = []
+  const out = html.replace(/<h2(\s[^>]*)?>([\s\S]*?)<\/h2>/gi, (match, attrs: string | undefined, inner: string) => {
+    if (attrs && /\sid=/.test(attrs)) return match
+    const text = inner.replace(/<[^>]+>/g, '').replace(/&amp;/g, '&').trim()
+    const id = slugify(text) || `bagian-${headings.length + 1}`
+    headings.push({ id, text })
+    return `<h2${attrs ?? ''} id="${id}">${inner}</h2>`
+  })
+  return { html: out, headings }
 }
 
-function BlockRenderer({ block }: { block: Block }) {
-  switch (block.type) {
-    case 'h2':
-      return <h2 id={slugify(block.text)}>{block.text}</h2>
-    case 'h3':
-      return <h3>{block.text}</h3>
-    case 'p':
-      return <p>{renderInline(block.text)}</p>
-    case 'ul':
-      return (
-        <ul>
-          {block.items.map((item) => (
-            <li key={item}>{renderInline(item)}</li>
-          ))}
-        </ul>
-      )
-    case 'ol':
-      return (
-        <ol>
-          {block.items.map((item) => (
-            <li key={item}>{renderInline(item)}</li>
-          ))}
-        </ol>
-      )
-    case 'quote':
-      return (
-        <blockquote>
-          <Icon name="quote" size={22} />
-          <p>{renderInline(block.text)}</p>
-          {block.cite ? <cite>{block.cite}</cite> : null}
-        </blockquote>
-      )
-    case 'callout':
-      return (
-        <aside className="article-callout">
-          <p className="article-callout__title">
-            <Icon name="bolt" size={15} />
-            {block.title}
-          </p>
-          <p>{renderInline(block.text)}</p>
-        </aside>
-      )
-    default:
-      return null
+function toCard(a: JournalArticle, index: number): ArticleCardItem {
+  return {
+    slug: a.slug,
+    href: `/journal/${a.slug}`,
+    title: a.title,
+    category: a.category,
+    excerpt: a.excerpt,
+    date: a.date,
+    author: a.author,
+    readMinutes: a.readMinutes,
+    featuredImageUrl: a.coverUrl ?? null,
+    artVariant: (index % 4) + 1,
   }
 }
 
@@ -251,13 +109,27 @@ export default async function ArticleDetailPage({
   params: Promise<{ slug: string }>
 }) {
   const { slug } = await params
-  const resolved = await resolveArticle(slug)
+  const article = await getJournalArticleBySlug(slug)
+  if (!article) {
+    await redirectIfMoved(`/journal/${slug}`)
+    notFound()
+  }
 
-  if (!resolved) notFound()
-  const { article, htmlContent } = resolved
+  const [allArticles, useCases] = await Promise.all([getJournalArticles(), getUseCases()])
+  const others = allArticles.filter((a) => a.slug !== article.slug)
+  const related = [
+    ...others.filter((a) => a.categorySlug && a.categorySlug === article.categorySlug),
+    ...others.filter((a) => !a.categorySlug || a.categorySlug !== article.categorySlug),
+  ].slice(0, 3)
 
-  const related = getRelatedArticles(article)
-  const headings = article.body.filter((b): b is Extract<Block, { type: 'h2' }> => b.type === 'h2')
+  // Article categories share slugs with use cases; otherwise point to the portfolio.
+  const useCase = useCases.find((u) => u.slug === article.categorySlug)
+  const serviceCta = useCase
+    ? { label: useCase.name, to: `/services/${useCase.slug}`, blurb: useCase.summary }
+    : { label: 'Jelajahi scene 3DGS', to: '/portfolio', blurb: 'Lihat ruang nyata yang sudah kami capture, langsung di browser.' }
+
+  const { html, headings } = withHeadingAnchors(article.html)
+  const artVariant = (Math.max(0, allArticles.findIndex((a) => a.slug === article.slug)) % 4) + 1
 
   const jsonLd = [
     {
@@ -271,7 +143,7 @@ export default async function ArticleDetailPage({
       articleSection: article.category,
       keywords: article.tags.join(', '),
       author: { '@type': 'Organization', name: article.author, url: SITE_URL },
-      publisher: { '@type': 'Organization', name: 'UNIMASI', url: SITE_URL },
+      publisher: { '@type': 'Organization', name: 'SPATIUM', url: SITE_URL },
       mainEntityOfPage: { '@type': 'WebPage', '@id': `${SITE_URL}/journal/${article.slug}` },
     },
     {
@@ -279,7 +151,7 @@ export default async function ArticleDetailPage({
       '@type': 'BreadcrumbList',
       itemListElement: [
         { '@type': 'ListItem', position: 1, name: 'Home', item: SITE_URL },
-        { '@type': 'ListItem', position: 2, name: 'Journal', item: `${SITE_URL}/journal` },
+        { '@type': 'ListItem', position: 2, name: 'Artikel', item: `${SITE_URL}/journal` },
         {
           '@type': 'ListItem',
           position: 3,
@@ -304,7 +176,7 @@ export default async function ArticleDetailPage({
             <Breadcrumbs
               items={[
                 { label: 'Home', to: '/' },
-                { label: 'Journal', to: '/journal' },
+                { label: 'Artikel', to: '/journal' },
                 { label: article.category, to: `/journal?category=${encodeURIComponent(article.category)}` },
                 { label: article.title },
               ]}
@@ -312,7 +184,7 @@ export default async function ArticleDetailPage({
 
             <div className="article__header-top">
               <span className="pill pill--accent">{article.category}</span>
-              <span className="mono article__read">{article.readMinutes} min read</span>
+              <span className="mono article__read">{article.readMinutes} menit baca</span>
             </div>
 
             <h1 className="article__title display-lg">{article.title}</h1>
@@ -320,17 +192,17 @@ export default async function ArticleDetailPage({
 
             <dl className="article__meta">
               <div>
-                <dt>Published</dt>
+                <dt>Terbit</dt>
                 <dd>
                   <time dateTime={article.date}>{formatDate(article.date)}</time>
                 </dd>
               </div>
               <div>
-                <dt>Author</dt>
+                <dt>Penulis</dt>
                 <dd>{article.author}</dd>
               </div>
               <div>
-                <dt>Topic</dt>
+                <dt>Topik</dt>
                 <dd>{article.category}</dd>
               </div>
             </dl>
@@ -339,19 +211,24 @@ export default async function ArticleDetailPage({
 
         <div className="container container--wide article__banner-wrap">
           <Reveal className="article__banner" variant="scale">
-            <StudioArt variant={article.artVariant} caption={article.category} />
+            {article.coverUrl ? (
+              /* eslint-disable-next-line @next/next/no-img-element */
+              <img src={article.coverUrl} alt={article.title} className="w-full h-full object-cover" />
+            ) : (
+              <div className="relative w-full h-full aspect-video"><SplatPlaceholder seed={artVariant} label={article.category} /></div>
+            )}
           </Reveal>
         </div>
 
         <div className="container container--wide article__layout">
           <aside className="article__aside">
             <div className="article-toc">
-              <p className="mono article-toc__label">In this article</p>
+              <p className="mono article-toc__label">Dalam artikel ini</p>
               {headings.length > 0 ? (
                 <ol>
                   {headings.map((heading, i) => (
-                    <li key={heading.text}>
-                      <a href={`#${slugify(heading.text)}`}>
+                    <li key={heading.id}>
+                      <a href={`#${heading.id}`}>
                         <span className="mono">{String(i + 1).padStart(2, '0')}</span>
                         {heading.text}
                       </a>
@@ -359,7 +236,7 @@ export default async function ArticleDetailPage({
                   ))}
                 </ol>
               ) : (
-                <p className="article-toc__empty">Short read — no sections.</p>
+                <p className="article-toc__empty">Bacaan singkat — tanpa subbagian.</p>
               )}
 
               <p className="mono article-toc__label">Tags</p>
@@ -374,24 +251,18 @@ export default async function ArticleDetailPage({
           </aside>
 
           <div className="article__body">
-            {article.body && article.body.length > 0 ? (
-              article.body.map((block, i) => (
-                <BlockRenderer key={i} block={block} />
-              ))
-            ) : htmlContent ? (
-              <div
-                className="article-rendered-body"
-                dangerouslySetInnerHTML={{ __html: sanitizeHtmlContent(htmlContent) }}
-              />
-            ) : null}
+            <div
+              className="article-rendered-body"
+              dangerouslySetInnerHTML={{ __html: sanitizeHtmlContent(html) }}
+            />
 
             <Reveal className="article__service-cta">
               <div className="article__service-cta-inner">
-                <p className="mono article__service-cta-label">Related service</p>
-                <h2>{article.serviceCta.label}</h2>
-                <p>{article.serviceCta.blurb}</p>
-                <Link href={article.serviceCta.to} className="btn btn--primary">
-                  Explore
+                <p className="mono article__service-cta-label">{useCase ? 'Layanan terkait' : 'Portofolio'}</p>
+                <h2>{serviceCta.label}</h2>
+                <p>{serviceCta.blurb}</p>
+                <Link href={serviceCta.to} className="btn btn--primary">
+                  Jelajahi
                   <span className="btn__icon">
                     <Icon name="arrow-right" size={16} />
                   </span>
@@ -399,24 +270,10 @@ export default async function ArticleDetailPage({
               </div>
             </Reveal>
 
-            <nav className="article__internal" aria-label="Related pages">
-              <p className="mono article__internal-label">Keep reading</p>
-              <ul>
-                {article.relatedLinks.map((link) => (
-                  <li key={link.to + link.label}>
-                    <Link href={link.to} className="link-arrow">
-                      {link.label}
-                      <Icon name="arrow-right" size={15} />
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </nav>
-
             <p className="article__back">
               <Link href="/journal" className="link-arrow">
                 <Icon name="arrow-left" size={15} />
-                All articles
+                Semua artikel
               </Link>
             </p>
           </div>
@@ -425,10 +282,10 @@ export default async function ArticleDetailPage({
         {related.length > 0 ? (
           <section className="section section--deep article__related" aria-labelledby="related-title">
             <div className="container container--wide">
-              <SectionHead id="related-title" eyebrow="Related articles" title="Continue reading" />
+              <SectionHead id="related-title" eyebrow="Artikel terkait" title="Lanjut membaca" />
               <div className="article__related-grid">
-                {related.map((item) => (
-                  <ArticleCard key={item.slug} article={item} />
+                {related.map((item, i) => (
+                  <ArticleCard key={item.slug} article={toCard(item, i)} />
                 ))}
               </div>
             </div>
@@ -438,14 +295,14 @@ export default async function ArticleDetailPage({
 
       <CTASection
         id="article-cta"
-        eyebrow="Next step"
+        eyebrow="Langkah berikutnya"
         title={
           <>
-            Put this thinking to work on <span className="accent">your project</span>.
+            Terapkan pada <span className="accent">ruang Anda</span>.
           </>
         }
-        body="Send the brief and we will apply the same discipline to your film — with scope, timeline and pipeline set out clearly."
-        secondary={{ label: 'Browse journal', to: '/journal' }}
+        body="Ceritakan lokasi dan tujuan Anda. Kami akan menjelaskan alur capture, keluaran, dan cakupan pekerjaan secara terbuka."
+        secondary={{ label: 'Lihat artikel lain', to: '/journal' }}
       />
     </>
   )

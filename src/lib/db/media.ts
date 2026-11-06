@@ -559,7 +559,7 @@ export function matchImageForArticle(
   else if (kwLower.includes('brand') || kwLower.includes('branding') || kwLower.includes('logo')) url = '/images/articles/brand-identity-design.jpg'
   else if (kwLower.includes('simrs') || kwLower.includes('rumah sakit') || kwLower.includes('medis') || kwLower.includes('kesehatan')) url = '/images/articles/healthcare-hospital-system.jpg'
 
-  const brandName = 'UNIMASI'
+  const brandName = 'SPATIUM'
 
   const displayKw = keyword || 'Teknologi Digital'
   const displayCity = city ? ` di ${city}` : ''

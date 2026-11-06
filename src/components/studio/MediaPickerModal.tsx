@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback, useId, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import Image from 'next/image'
 import {
@@ -84,15 +84,20 @@ export default function MediaPickerModal({
     setMounted(true)
   }, [])
 
+  // Native modal dialog: showModal() traps focus and makes the page inert;
+  // focus returns to the opener when the picker closes.
+  const dialogRef = useRef<HTMLDialogElement>(null)
+  const titleId = useId()
   useEffect(() => {
-    if (isOpen) {
-      const prevOverflow = document.body.style.overflow
-      document.body.style.overflow = 'hidden'
-      return () => {
-        document.body.style.overflow = prevOverflow
-      }
+    if (!isOpen || !mounted) return
+    const dialog = dialogRef.current
+    const opener = document.activeElement instanceof HTMLElement ? document.activeElement : null
+    if (dialog && !dialog.open) dialog.showModal()
+    return () => {
+      if (dialog?.open) dialog.close()
+      if (opener?.isConnected) opener.focus()
     }
-  }, [isOpen])
+  }, [isOpen, mounted])
 
   useEffect(() => {
     if (isOpen) {
@@ -101,16 +106,6 @@ export default function MediaPickerModal({
     }
   }, [isOpen, fetchMedia, currentUrl])
 
-  // Close on Escape key
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isOpen) {
-        onClose()
-      }
-    }
-    window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [isOpen, onClose])
 
   if (!isOpen || !mounted) return null
 
@@ -172,38 +167,46 @@ export default function MediaPickerModal({
     }
   }
 
+  const focusRing = 'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-400'
+
   return createPortal(
-    <div
-      className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-6 bg-black/80 backdrop-blur-sm animate-fadeIn"
-      onClick={onClose}
+    <dialog
+      ref={dialogRef}
+      aria-labelledby={titleId}
+      onCancel={(e) => {
+        e.preventDefault()
+        onClose()
+      }}
+      onMouseDown={(e) => {
+        if (e.target === e.currentTarget) onClose()
+      }}
+      className="m-auto w-[calc(100vw-1.5rem)] max-w-5xl overflow-hidden rounded-3xl border border-white/15 bg-[var(--studio-bg)] p-0 text-neutral-200 shadow-2xl backdrop:bg-black/80"
     >
-      <div
-        className="relative w-full max-w-5xl h-[90vh] max-h-[820px] bg-[var(--studio-bg)] border border-white/15 rounded-3xl shadow-2xl flex flex-col overflow-hidden text-neutral-200"
-        onClick={(e) => e.stopPropagation()}
-      >
+      <div className="relative flex h-[90dvh] max-h-[820px] w-full flex-col overflow-hidden">
         {/* Header Modal */}
-        <div className="px-6 py-4 border-b border-white/10 flex items-center justify-between bg-black/40">
+        <div className="px-4 sm:px-6 py-4 border-b border-white/10 flex flex-wrap items-center justify-between gap-3 bg-black/40">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl bg-accent-500/15 text-accent-400 flex items-center justify-center border border-accent-500/20">
-              <ImageIcon className="w-5 h-5" />
+              <ImageIcon className="w-5 h-5" aria-hidden="true" />
             </div>
             <div>
-              <h3 className="text-sm sm:text-base font-bold text-white tracking-wide">
+              <h3 id={titleId} className="text-sm sm:text-base font-bold text-white tracking-wide">
                 {title}
               </h3>
               <p className="text-[11px] font-mono text-neutral-400">
-                Pustaka Media Digital UNIMASI ({pagination.total} Aset Tersedia)
+                Pustaka Media Digital SPATIUM ({pagination.total} Aset Tersedia)
               </p>
             </div>
           </div>
 
           <div className="flex items-center gap-2">
             {/* Nav Tabs */}
-            <div className="flex items-center bg-white/5 border border-white/10 rounded-xl p-1 text-xs font-mono">
+            <div role="group" aria-label="Sumber gambar" className="flex flex-wrap items-center bg-white/5 border border-white/10 rounded-xl p-1 text-xs font-mono">
               <button
                 type="button"
+                aria-pressed={activeTab === 'library'}
                 onClick={() => setActiveTab('library')}
-                className={`px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 ${
+                className={`${focusRing} px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 ${
                   activeTab === 'library'
                     ? 'bg-accent-500 text-black font-bold shadow-sm'
                     : 'text-neutral-400 hover:text-white'
@@ -214,8 +217,9 @@ export default function MediaPickerModal({
               </button>
               <button
                 type="button"
+                aria-pressed={activeTab === 'upload'}
                 onClick={() => setActiveTab('upload')}
-                className={`px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 ${
+                className={`${focusRing} px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 ${
                   activeTab === 'upload'
                     ? 'bg-accent-500 text-black font-bold shadow-sm'
                     : 'text-neutral-400 hover:text-white'
@@ -226,8 +230,9 @@ export default function MediaPickerModal({
               </button>
               <button
                 type="button"
+                aria-pressed={activeTab === 'url'}
                 onClick={() => setActiveTab('url')}
-                className={`px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 ${
+                className={`${focusRing} px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 ${
                   activeTab === 'url'
                     ? 'bg-accent-500 text-black font-bold shadow-sm'
                     : 'text-neutral-400 hover:text-white'
@@ -242,10 +247,11 @@ export default function MediaPickerModal({
             <button
               type="button"
               onClick={onClose}
-              className="w-9 h-9 rounded-xl bg-white/5 hover:bg-white/10 text-neutral-400 hover:text-white flex items-center justify-center transition-colors border border-white/10 ml-2"
+              aria-label="Tutup"
+              className={`${focusRing} w-9 h-9 rounded-xl bg-white/5 hover:bg-white/10 text-neutral-300 hover:text-white flex items-center justify-center transition-colors border border-white/10 ml-2`}
               title="Tutup (Esc)"
             >
-              <X className="w-4 h-4" />
+              <X className="w-4 h-4" aria-hidden="true" />
             </button>
           </div>
         </div>
@@ -257,19 +263,20 @@ export default function MediaPickerModal({
             <div className="flex-1 flex flex-col overflow-hidden">
               {/* Filter & Search Bar */}
               <div className="px-6 py-3 border-b border-white/10 bg-black/20 flex flex-wrap items-center justify-between gap-3">
-                <div className="flex items-center gap-2">
-                  <span className="text-[11px] font-mono text-neutral-500 uppercase tracking-wider font-semibold">
+                <div role="group" aria-label="Kategori" className="flex flex-wrap items-center gap-2">
+                  <span className="text-[11px] font-mono text-neutral-400 uppercase tracking-wider font-semibold" aria-hidden="true">
                     Kategori:
                   </span>
                   {(['all', 'uploads', 'articles', 'brand'] as const).map((cat) => (
                     <button
                       key={cat}
                       type="button"
+                      aria-pressed={folder === cat}
                       onClick={() => {
                         setFolder(cat)
                         setPage(1)
                       }}
-                      className={`text-[11px] font-mono px-2.5 py-1 rounded-lg border transition-all ${
+                      className={`${focusRing} text-[11px] font-mono px-2.5 py-1 rounded-lg border transition-all ${
                         folder === cat
                           ? 'bg-white/15 text-white border-white/30 font-bold'
                           : 'bg-white/5 text-neutral-400 border-white/5 hover:text-white hover:bg-white/10'
@@ -287,25 +294,27 @@ export default function MediaPickerModal({
                 </div>
 
                 {/* Search Input */}
-                <div className="relative min-w-[240px]">
-                  <Search className="w-3.5 h-3.5 text-neutral-500 absolute left-3 top-1/2 -translate-y-1/2" />
+                <div className="relative min-w-[min(240px,100%)] flex-1 sm:flex-none">
+                  <Search className="w-3.5 h-3.5 text-neutral-500 absolute left-3 top-1/2 -translate-y-1/2" aria-hidden="true" />
                   <input
-                    type="text"
+                    type="search"
+                    aria-label="Cari gambar"
                     value={search}
                     onChange={(e) => {
                       setSearch(e.target.value)
                       setPage(1)
                     }}
                     placeholder="Cari nama gambar atau slug..."
-                    className="w-full pl-8 pr-7 py-1.5 text-xs rounded-xl bg-black/50 border border-white/15 text-white placeholder:text-neutral-500 focus:outline-none focus:border-accent-400"
+                    className="w-full pl-8 pr-7 py-1.5 text-base sm:text-xs rounded-xl bg-black/50 border border-white/15 text-white placeholder:text-neutral-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent-400"
                   />
                   {search && (
                     <button
                       type="button"
+                      aria-label="Hapus pencarian"
                       onClick={() => setSearch('')}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-white"
+                      className={`${focusRing} absolute right-2 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-white`}
                     >
-                      <X className="w-3 h-3" />
+                      <X className="w-3 h-3" aria-hidden="true" />
                     </button>
                   )}
                 </div>
@@ -331,19 +340,25 @@ export default function MediaPickerModal({
                         <button
                           key={item.url}
                           type="button"
+                          aria-pressed={isSelected}
+                          aria-label={item.name}
                           onClick={() => setSelectedUrl(item.url)}
-                          className={`group relative aspect-[16/10] rounded-xl overflow-hidden border text-left transition-all ${
+                          onDoubleClick={() => {
+                            onSelect(item.url, item)
+                            onClose()
+                          }}
+                          className={`${focusRing} group relative aspect-[16/10] rounded-xl overflow-hidden border text-left transition-all ${
                             isSelected
-                              ? 'ring-2 ring-accent-400 border-accent-400 scale-[1.02] shadow-lg shadow-accent-500/10'
+                              ? 'ring-2 ring-accent-400 border-accent-400 motion-safe:scale-[1.02] shadow-lg shadow-accent-500/10'
                               : 'border-white/10 hover:border-white/30 bg-black/40'
                           }`}
                         >
                           <Image
                             src={item.url}
-                            alt={item.name}
+                            alt=""
                             fill
                             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 200px"
-                            className="object-cover group-hover:scale-105 transition-transform duration-300"
+                            className="object-cover motion-safe:group-hover:scale-105 motion-safe:transition-transform motion-safe:duration-300"
                             loading="lazy"
                           />
 
@@ -351,13 +366,13 @@ export default function MediaPickerModal({
                           {isSelected && (
                             <div className="absolute inset-0 bg-accent-500/25 flex items-center justify-center">
                               <div className="w-7 h-7 rounded-full bg-accent-500 text-black flex items-center justify-center shadow-lg font-bold">
-                                <Check className="w-4 h-4 stroke-[3]" />
+                                <Check className="w-4 h-4 stroke-[3]" aria-hidden="true" />
                               </div>
                             </div>
                           )}
 
                           {/* Hover Details Bar */}
-                          <div className="absolute inset-x-0 bottom-0 p-1.5 bg-gradient-to-t from-black/90 via-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
+                          <div aria-hidden="true" className="absolute inset-x-0 bottom-0 p-1.5 bg-gradient-to-t from-black/90 via-black/60 to-transparent opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 transition-opacity">
                             <p className="text-[10px] font-mono text-white truncate font-medium">
                               {item.name}
                             </p>
@@ -385,8 +400,8 @@ export default function MediaPickerModal({
                       onClick={() => setPage((p) => Math.max(1, p - 1))}
                       className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 disabled:opacity-30 disabled:cursor-not-allowed flex items-center gap-1"
                     >
-                      <ChevronLeft className="w-3.5 h-3.5" />
-                      <span>Prev</span>
+                      <ChevronLeft className="w-3.5 h-3.5" aria-hidden="true" />
+                      <span>Sebelumnya</span>
                     </button>
                     <button
                       type="button"
@@ -394,8 +409,8 @@ export default function MediaPickerModal({
                       onClick={() => setPage((p) => Math.min(pagination.totalPages, p + 1))}
                       className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 disabled:opacity-30 disabled:cursor-not-allowed flex items-center gap-1"
                     >
-                      <span>Next</span>
-                      <ChevronRight className="w-3.5 h-3.5" />
+                      <span>Berikutnya</span>
+                      <ChevronRight className="w-3.5 h-3.5" aria-hidden="true" />
                     </button>
                   </div>
                 </div>
@@ -408,28 +423,28 @@ export default function MediaPickerModal({
             <div className="flex-1 p-8 flex flex-col items-center justify-center">
               <div className="w-full max-w-xl p-8 rounded-3xl border-2 border-dashed border-white/20 hover:border-accent-400/60 bg-black/30 text-center transition-colors">
                 <div className="w-16 h-16 rounded-2xl bg-accent-500/15 text-accent-400 border border-accent-500/20 flex items-center justify-center mx-auto mb-4">
-                  <Upload className={`w-8 h-8 ${uploading ? 'animate-bounce' : ''}`} />
+                  <Upload className={`w-8 h-8 ${uploading ? 'motion-safe:animate-bounce' : ''}`} aria-hidden="true" />
                 </div>
                 <h4 className="text-base font-bold text-white mb-1">
                   {uploading ? 'Mengunggah Gambar ke Server...' : 'Pilih atau Drag File Gambar'}
                 </h4>
                 <p className="text-xs text-neutral-400 mb-6 font-mono max-w-sm mx-auto leading-relaxed">
-                  Mendukung format WebP, AVIF, PNG, JPG, dan GIF. Otomatis disimpan dan dioptimasi di server UNIMASI.
+                  Mendukung format WebP, AVIF, PNG, JPG, dan GIF. Otomatis disimpan dan dioptimasi di server SPATIUM.
                 </p>
 
                 {uploadError && (
-                  <div className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-xs text-red-300 font-mono">
+                  <div role="alert" className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-xs text-red-300 font-mono">
                     {uploadError}
                   </div>
                 )}
                 {uploadSuccess && (
-                  <div className="mb-4 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-xs text-emerald-300 font-mono">
+                  <div role="status" className="mb-4 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-xs text-emerald-300 font-mono">
                     {uploadSuccess}
                   </div>
                 )}
 
-                <label className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-accent-500 hover:bg-accent-400 text-black font-bold text-xs cursor-pointer shadow-lg transition-transform hover:scale-105">
-                  <Upload className="w-4 h-4 stroke-[2.5]" />
+                <label className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-accent-500 hover:bg-accent-300 text-black font-bold text-xs cursor-pointer shadow-lg focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-accent-400">
+                  <Upload className="w-4 h-4 stroke-[2.5]" aria-hidden="true" />
                   <span>Pilih File dari Komputer</span>
                   <input
                     type="file"
@@ -439,7 +454,7 @@ export default function MediaPickerModal({
                       const file = e.target.files?.[0]
                       if (file) handleFileUpload(file)
                     }}
-                    className="hidden"
+                    className="sr-only"
                   />
                 </label>
               </div>
@@ -461,26 +476,22 @@ export default function MediaPickerModal({
                 </p>
                 <input
                   type="text"
+                  inputMode="url"
+                  aria-label="URL gambar"
                   value={customUrlInput}
                   onChange={(e) => {
                     setCustomUrlInput(e.target.value)
                     setSelectedUrl(e.target.value)
                   }}
                   placeholder="https://contoh.com/gambar-cover.jpg atau /uploads/..."
-                  className="w-full p-3 rounded-xl bg-black/60 border border-white/15 text-xs font-mono text-white placeholder:text-neutral-600 focus:outline-none focus:border-accent-400"
+                  className="w-full p-3 rounded-xl bg-black/60 border border-white/15 text-base sm:text-xs font-mono text-white placeholder:text-neutral-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent-400"
                 />
 
                 {/* Mini Preview */}
                 {customUrlInput && (
                   <div className="relative aspect-video w-full rounded-xl overflow-hidden border border-white/10 bg-black">
-                    <Image
-                      src={customUrlInput}
-                      alt="Preview"
-                      fill
-                      sizes="480px"
-                      className="object-cover"
-                      onError={() => {}}
-                    />
+                    {/* Plain <img>: arbitrary external URL; decorative preview of the URL typed above. */}
+                    <img src={customUrlInput} alt="" className="h-full w-full object-cover" />
                   </div>
                 )}
               </div>
@@ -489,16 +500,17 @@ export default function MediaPickerModal({
         </div>
 
         {/* Footer Actions */}
-        <div className="px-6 py-3.5 border-t border-white/10 bg-black/60 flex items-center justify-between">
+        <div className="px-4 sm:px-6 py-3.5 border-t border-white/10 bg-black/60 flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             {selectedUrl ? (
               <div className="flex items-center gap-2.5">
                 <div className="relative w-12 h-8 rounded-lg overflow-hidden border border-white/20 bg-black shrink-0">
-                  <Image src={selectedUrl} alt="Selected" fill sizes="48px" className="object-cover" />
+                  {/* Plain <img>: the selection may be an arbitrary URL. */}
+                  <img src={selectedUrl} alt="" className="h-full w-full object-cover" />
                 </div>
-                <div className="text-xs truncate max-w-[320px] font-mono">
+                <div className="text-xs min-w-0 max-w-[320px] font-mono [overflow-wrap:anywhere]">
                   <span className="text-neutral-400 block text-[10px]">Terpilih:</span>
-                  <span className="text-white font-medium truncate block">{selectedUrl}</span>
+                  <span className="text-white font-medium block">{selectedUrl}</span>
                 </div>
               </div>
             ) : (
@@ -510,7 +522,7 @@ export default function MediaPickerModal({
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-neutral-300 text-xs font-mono font-medium transition-colors"
+              className={`${focusRing} px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-neutral-300 text-xs font-mono font-medium transition-colors`}
             >
               Batal
             </button>
@@ -518,14 +530,14 @@ export default function MediaPickerModal({
               type="button"
               disabled={!selectedUrl}
               onClick={handleConfirmSelect}
-              className="px-5 py-2 rounded-xl bg-accent-500 hover:bg-accent-400 text-black font-bold text-xs font-sans transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-md hover:shadow-accent-500/20"
+              className={`${focusRing} px-5 py-2 rounded-xl bg-accent-500 hover:bg-accent-300 text-black font-bold text-xs font-sans transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-md`}
             >
               Gunakan Gambar Ini
             </button>
           </div>
         </div>
       </div>
-    </div>,
+    </dialog>,
     document.body
   )
 }

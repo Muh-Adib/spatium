@@ -394,7 +394,7 @@ export function StudioClientsManager() {
                 <input
                   type="text"
                   required
-                  placeholder="/images/clients/unified-gray/mandiri.svg atau https://..."
+                  placeholder="/images/... atau https://..."
                   value={logoUrl}
                   onChange={(e) => setLogoUrl(e.target.value)}
                   className="w-full rounded-xl border border-white/15 bg-neutral-900 px-3.5 py-2 text-xs text-white placeholder-neutral-600 focus:outline-none focus:border-[#F68609]"

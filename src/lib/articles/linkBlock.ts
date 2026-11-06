@@ -1,5 +1,6 @@
 export interface CollapsibleLinkItem { text: string; href: string; url?: string }
-const escapeHtml = (value: string) => value.replace(/[&<>"']/g, (character) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[character]!)
+const HTML_ESCAPES: Record<string, string> = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }
+const escapeHtml = (value: string) => value.replace(/[&<>"']/g, (character) => HTML_ESCAPES[character] ?? character)
 
 /** Existing manually edited related-link blocks; no keyword/tag generation. */
 export function generateCollapsibleLinksHtml(links: CollapsibleLinkItem[], title = 'Informasi & Layanan Terkait'): string {

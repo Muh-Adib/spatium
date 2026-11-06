@@ -38,7 +38,7 @@ export function BrandLogo({
   return (
     <div className={`flex items-center gap-2 select-none py-1 px-1 sm:px-1.5 ${className}`}>
       <Image
-        src="/images/spatium-logo.png"
+        src="/brand/logo-spatium-white.svg"
         alt={siteName}
         width={130}
         height={34}

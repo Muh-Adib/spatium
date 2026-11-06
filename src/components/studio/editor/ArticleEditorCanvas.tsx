@@ -1,12 +1,11 @@
 'use client'
 
-import React, { useState, useRef, useEffect, useLayoutEffect } from 'react'
+import React, { memo, useState, useRef, useEffect, useLayoutEffect } from 'react'
 import { createPortal } from 'react-dom'
 import { CategoryCombobox } from './CategoryCombobox'
 import { siteConfig } from '@/config/site'
 import { sanitizeHtmlContent } from '@/lib/security/sanitize-html'
 import {
-  AlignLeft,
   Heading2,
   Heading3,
   Quote,
@@ -20,9 +19,7 @@ import {
   ChevronUp,
   ChevronDown,
   Table as TableIcon,
-  Columns,
   Trash2,
-  Check,
   Plus,
   Link2,
   Bold,
@@ -34,20 +31,26 @@ import {
   Layers,
   Sparkles,
   Upload,
-  X,
+  AlertTriangle,
 } from 'lucide-react'
 import {
   ContentBlock,
   BlockType,
   TableBlock,
   extractEmbedUrl,
-  extractTitleAndContentFromMarkdown,
   generateHeadingSlug,
 } from '@/lib/articles/blockEditor'
+import { EditorDialog, dialogButton } from './EditorDialog'
 
 /**
  * Auto-resizing Textarea component (Notion/Medium canvas standard).
  */
+type AutoResizeTextareaProps = Omit<React.TextareaHTMLAttributes<HTMLTextAreaElement>, 'value' | 'onChange'> & {
+  value: string
+  onChange: (val: string) => void
+  minHeight?: number
+}
+
 export function AutoResizeTextarea({
   value,
   onChange,
@@ -55,14 +58,7 @@ export function AutoResizeTextarea({
   className = '',
   minHeight = 24,
   ...props
-}: {
-  value: string
-  onChange: (val: string) => void
-  placeholder?: string
-  className?: string
-  minHeight?: number
-  [key: string]: any
-}) {
+}: AutoResizeTextareaProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   const adjustHeight = () => {
@@ -133,11 +129,14 @@ export function RichContentEditable({
   initialHtml,
   onChange,
   placeholder,
+  label,
   className = '',
 }: {
   initialHtml: string
   onChange: (html: string) => void
   placeholder?: string
+  /** Accessible name of the editable region (a placeholder is not a label). */
+  label: string
   className?: string
 }) {
   const ref = useRef<HTMLDivElement>(null)
@@ -152,17 +151,6 @@ export function RichContentEditable({
   } | null>(null)
   const [showLinkInput, setShowLinkInput] = useState(false)
   const [linkInputUrl, setLinkInputUrl] = useState('')
-
-  // Hovered Link Preview State
-  const [hoveredLink, setHoveredLink] = useState<{
-    url: string
-    label: string
-    element: HTMLAnchorElement
-    top: number
-    left: number
-  } | null>(null)
-  const [editingHoveredUrl, setEditingHoveredUrl] = useState<string | null>(null)
-  const linkHoverTimerRef = useRef<NodeJS.Timeout | null>(null)
 
   useEffect(() => {
     setMounted(true)
@@ -236,6 +224,12 @@ export function RichContentEditable({
   }
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Escape' && selectionToolbar) {
+      e.stopPropagation()
+      setShowLinkInput(false)
+      setSelectionToolbar(null)
+      return
+    }
     if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
       e.preventDefault()
       const sel = window.getSelection()
@@ -252,13 +246,16 @@ export function RichContentEditable({
         ref={ref}
         contentEditable
         suppressContentEditableWarning
+        role="textbox"
+        aria-multiline="true"
+        aria-label={label}
         onInput={handleInput}
         onBlur={handleBlur}
         onMouseUp={checkSelection}
         onKeyUp={checkSelection}
         onKeyDown={handleKeyDown}
         data-placeholder={placeholder}
-        className={`focus:outline-none min-h-[28px] empty:before:content-[attr(data-placeholder)] empty:before:text-neutral-600 empty:before:pointer-events-none ${className}`}
+        className={`min-h-[28px] empty:before:content-[attr(data-placeholder)] empty:before:text-neutral-600 empty:before:pointer-events-none ${className}`}
       />
 
       {/* Floating Selection Bubble Toolbar */}
@@ -271,25 +268,38 @@ export function RichContentEditable({
               left: `${selectionToolbar.left}px`,
               transform: 'translateX(-50%)',
             }}
-            className="fixed z-50 flex items-center gap-0.5 bg-surface-elevated border border-white/20 rounded-xl px-1.5 py-1 shadow-2xl backdrop-blur-xl animate-fadeIn text-xs text-white"
-            onMouseDown={(e) => e.preventDefault()}
+            role="toolbar"
+            aria-label="Format teks terpilih"
+            className="fixed z-50 flex items-center gap-0.5 bg-surface-elevated border border-white/20 rounded-xl px-1.5 py-1 shadow-2xl backdrop-blur-xl text-xs text-white"
+            onMouseDown={(e) => {
+              if (!(e.target instanceof HTMLInputElement)) e.preventDefault()
+            }}
+            onKeyDown={(e) => {
+              if (e.key === 'Escape') {
+                setShowLinkInput(false)
+                setSelectionToolbar(null)
+                ref.current?.focus()
+              }
+            }}
           >
             {showLinkInput ? (
               <form onSubmit={handleInsertLink} className="flex items-center gap-1.5 px-1 py-0.5">
-                <Link2 className="w-3.5 h-3.5 text-accent-400 shrink-0" />
+                <Link2 className="w-3.5 h-3.5 text-accent-400 shrink-0" aria-hidden="true" />
                 <input
                   type="text"
+                  inputMode="url"
+                  aria-label="URL tautan"
                   autoFocus
                   value={linkInputUrl}
                   onChange={(e) => setLinkInputUrl(e.target.value)}
-                  placeholder="https://... atau /layanan"
+                  placeholder="https://... atau /services"
                   className="bg-black/60 border border-white/20 rounded-lg px-2 py-1 text-xs text-white placeholder:text-neutral-500 focus:outline-none focus:border-accent-400 w-48 font-mono"
                 />
                 <button
                   type="submit"
-                  className="px-2 py-1 rounded-lg bg-accent-500 text-black font-bold text-xs hover:bg-accent-400 transition-colors"
+                  className="px-2 py-1 rounded-lg bg-accent-500 text-accent-950 font-bold text-xs hover:bg-accent-300 transition-colors"
                 >
-                  OK
+                  Sisipkan
                 </button>
                 <button
                   type="button"
@@ -306,32 +316,36 @@ export function RichContentEditable({
                   onClick={() => applyFormat('bold')}
                   className="p-1.5 rounded-lg hover:bg-white/10 text-neutral-200 hover:text-white transition-colors"
                   title="Bold (Ctrl+B / ⌘B)"
+                  aria-label="Tebal"
                 >
-                  <Bold className="w-3.5 h-3.5" />
+                  <Bold className="w-3.5 h-3.5" aria-hidden="true" />
                 </button>
                 <button
                   type="button"
                   onClick={() => applyFormat('italic')}
                   className="p-1.5 rounded-lg hover:bg-white/10 text-neutral-200 hover:text-white transition-colors"
                   title="Italic (Ctrl+I / ⌘I)"
+                  aria-label="Miring"
                 >
-                  <Italic className="w-3.5 h-3.5" />
+                  <Italic className="w-3.5 h-3.5" aria-hidden="true" />
                 </button>
                 <button
                   type="button"
                   onClick={() => applyFormat('underline')}
                   className="p-1.5 rounded-lg hover:bg-white/10 text-neutral-200 hover:text-white transition-colors"
                   title="Underline (Ctrl+U / ⌘U)"
+                  aria-label="Garis bawah"
                 >
-                  <Underline className="w-3.5 h-3.5" />
+                  <Underline className="w-3.5 h-3.5" aria-hidden="true" />
                 </button>
                 <button
                   type="button"
                   onClick={() => applyFormat('strikeThrough')}
                   className="p-1.5 rounded-lg hover:bg-white/10 text-neutral-200 hover:text-white transition-colors"
                   title="Strikethrough"
+                  aria-label="Coret"
                 >
-                  <Strikethrough className="w-3.5 h-3.5" />
+                  <Strikethrough className="w-3.5 h-3.5" aria-hidden="true" />
                 </button>
                 <div className="h-4 w-px bg-white/20 mx-1" />
                 <button
@@ -340,16 +354,17 @@ export function RichContentEditable({
                   className="p-1.5 rounded-lg hover:bg-white/10 text-accent-300 hover:text-accent-200 transition-colors flex items-center gap-1 font-semibold"
                   title="Sisipkan Tautan (Ctrl+K / ⌘K)"
                 >
-                  <Link2 className="w-3.5 h-3.5" />
-                  <span className="text-[11px]">Link</span>
+                  <Link2 className="w-3.5 h-3.5" aria-hidden="true" />
+                  <span className="text-[11px]">Tautan</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => applyFormat('unlink')}
                   className="p-1.5 rounded-lg hover:bg-red-500/20 text-neutral-400 hover:text-red-300 transition-colors"
                   title="Hapus Tautan"
+                  aria-label="Hapus tautan"
                 >
-                  <Unlink className="w-3.5 h-3.5" />
+                  <Unlink className="w-3.5 h-3.5" aria-hidden="true" />
                 </button>
               </>
             )}
@@ -369,12 +384,14 @@ export function RichListItemEditable({
   onEnter,
   onDeleteIfEmpty,
   placeholder = 'Tulis poin...',
+  label,
 }: {
   initialHtml: string
   onChange: (html: string) => void
   onEnter?: () => void
   onDeleteIfEmpty?: () => void
   placeholder?: string
+  label: string
 }) {
   const ref = useRef<HTMLDivElement>(null)
   const isComposingRef = useRef(false)
@@ -415,11 +432,13 @@ export function RichListItemEditable({
       ref={ref}
       contentEditable
       suppressContentEditableWarning
+      role="textbox"
+      aria-label={label}
       onInput={handleInput}
       onBlur={handleBlur}
       onKeyDown={handleKeyDown}
       data-placeholder={placeholder}
-      className="flex-1 bg-transparent border-0 border-b border-transparent focus:border-white/20 text-xs text-neutral-200 focus:outline-none py-1 min-h-[22px] empty:before:content-[attr(data-placeholder)] empty:before:text-neutral-600 [&_strong]:font-bold [&_strong]:text-white [&_b]:font-bold [&_b]:text-white [&_a]:text-accent-400 [&_a]:underline"
+      className="flex-1 bg-transparent border-0 border-b border-transparent focus:border-accent-400 text-xs text-neutral-200 focus:outline-none py-1 min-h-[22px] empty:before:content-[attr(data-placeholder)] empty:before:text-neutral-600 [&_strong]:font-bold [&_strong]:text-white [&_b]:font-bold [&_b]:text-white [&_a]:text-accent-400 [&_a]:underline"
     />
   )
 }
@@ -511,8 +530,8 @@ export function NotionTableEditor({
       {/* Top Table Control Bar */}
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 pb-2.5">
         <div className="flex items-center gap-2">
-          <TableIcon className="w-3.5 h-3.5 text-blue-400" />
-          <span className="text-xs font-semibold text-blue-300 font-mono">Tabel Data (Notion-style)</span>
+          <TableIcon className="w-3.5 h-3.5 text-blue-400" aria-hidden="true" />
+          <span className="text-xs font-semibold text-blue-300 font-mono">Tabel data</span>
           <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-white/5 text-neutral-400 border border-white/10">
             {columnCount} Kolom × {rows.length} Baris
           </span>
@@ -522,6 +541,7 @@ export function NotionTableEditor({
           <button
             type="button"
             onClick={() => onUpdateBlock(block.id, { hasHeaderRow: !hasHeaders })}
+            aria-pressed={hasHeaders}
             className={`px-2 py-1 rounded-md text-[11px] font-medium transition-colors ${
               hasHeaders ? 'bg-white/15 text-white' : 'text-neutral-400 hover:text-white'
             }`}
@@ -583,16 +603,17 @@ export function NotionTableEditor({
                         value={headers[colIdx] || ''}
                         onChange={(e) => handleUpdateHeader(colIdx, e.target.value)}
                         placeholder={`Kolom ${colIdx + 1}`}
+                        aria-label={`Judul kolom ${colIdx + 1}`}
                         className="w-full bg-transparent border-0 border-b border-transparent focus:border-accent-400 font-semibold text-xs text-white focus:outline-none p-1 placeholder:text-neutral-500"
                       />
                       {columnCount > 1 && (
                         <button
                           type="button"
                           onClick={() => handleDeleteColumn(colIdx)}
-                          className="opacity-0 group-hover/th:opacity-100 p-0.5 text-neutral-500 hover:text-red-400 transition-opacity"
-                          title="Hapus Kolom"
+                          className="opacity-60 group-hover/th:opacity-100 focus-visible:opacity-100 p-1 text-neutral-400 hover:text-red-400 transition-opacity"
+                          aria-label={`Hapus kolom ${colIdx + 1}`}
                         >
-                          <Trash2 className="w-3 h-3" />
+                          <Trash2 className="w-3 h-3" aria-hidden="true" />
                         </button>
                       )}
                     </div>
@@ -612,6 +633,7 @@ export function NotionTableEditor({
                       initialHtml={row[colIdx] || ''}
                       onChange={(val) => handleUpdateCell(rowIdx, colIdx, val)}
                       placeholder="Ketik..."
+                      label={`Sel baris ${rowIdx + 1}, kolom ${colIdx + 1}`}
                     />
                   </td>
                 ))}
@@ -620,10 +642,10 @@ export function NotionTableEditor({
                     <button
                       type="button"
                       onClick={() => handleDeleteRow(rowIdx)}
-                      className="opacity-0 group-hover/tr:opacity-100 p-1 text-neutral-500 hover:text-red-400 transition-opacity"
-                      title="Hapus Baris"
+                      className="opacity-60 group-hover/tr:opacity-100 focus-visible:opacity-100 p-1 text-neutral-400 hover:text-red-400 transition-opacity"
+                      aria-label={`Hapus baris ${rowIdx + 1}`}
                     >
-                      <Trash2 className="w-3 h-3" />
+                      <Trash2 className="w-3 h-3" aria-hidden="true" />
                     </button>
                   )}
                 </td>
@@ -649,6 +671,615 @@ export function NotionTableEditor({
   )
 }
 
+/** Stable callbacks for block mutations (created once in the editor page). */
+export interface BlockActions {
+  add: (type: BlockType) => void
+  update: (id: string, updated: Partial<ContentBlock>) => void
+  remove: (id: string) => void
+  move: (id: string, direction: 'up' | 'down') => void
+  convert: (id: string, targetType: BlockType) => void
+  toggleRawHtml: (id: string) => void
+  openMediaPicker: (id: string) => void
+  splitHtml: (id: string) => void
+}
+
+const CONVERTIBLE_TYPES: Array<{ type: BlockType; label: string }> = [
+  { type: 'paragraph', label: 'Paragraf' },
+  { type: 'heading2', label: 'Subjudul H2' },
+  { type: 'heading3', label: 'Subjudul H3' },
+  { type: 'quote', label: 'Kutipan' },
+  { type: 'list', label: 'Daftar' },
+  { type: 'code', label: 'Kode' },
+  { type: 'table', label: 'Tabel' },
+  { type: 'html', label: 'HTML kustom' },
+]
+
+const ADDABLE_TYPES: Array<{ type: BlockType; label: string; icon: typeof FileText; iconClass: string }> = [
+  { type: 'paragraph', label: 'Paragraf', icon: FileText, iconClass: 'text-accent-400' },
+  { type: 'heading2', label: 'Subjudul H2', icon: Heading2, iconClass: 'text-info-300' },
+  { type: 'heading3', label: 'Subjudul H3', icon: Heading3, iconClass: 'text-info-300' },
+  { type: 'image', label: 'Gambar', icon: ImageIcon, iconClass: 'text-emerald-400' },
+  { type: 'video', label: 'Video', icon: Video, iconClass: 'text-rose-400' },
+  { type: 'quote', label: 'Kutipan', icon: Quote, iconClass: 'text-amber-400' },
+  { type: 'list', label: 'Daftar', icon: List, iconClass: 'text-purple-400' },
+  { type: 'faq', label: 'FAQ', icon: HelpCircle, iconClass: 'text-teal-400' },
+  { type: 'code', label: 'Kode', icon: Code, iconClass: 'text-cyan-400' },
+  { type: 'html', label: 'HTML', icon: Code, iconClass: 'text-amber-400' },
+  { type: 'divider', label: 'Garis pemisah', icon: Minus, iconClass: 'text-neutral-400' },
+  { type: 'internal-links', label: 'Tautan internal', icon: Link2, iconClass: 'text-emerald-400' },
+  { type: 'table', label: 'Tabel', icon: TableIcon, iconClass: 'text-blue-400' },
+]
+
+const toolbarBtn =
+  'inline-flex h-7 min-w-7 items-center justify-center rounded px-1 text-neutral-300 hover:bg-white/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-30'
+
+interface BlockRowProps {
+  block: ContentBlock
+  index: number
+  count: number
+  isRaw: boolean
+  actions: BlockActions
+}
+
+/**
+ * One block in the canvas. Memoized: typing in one block only re-renders that row, because
+ * untouched blocks keep their object identity and `actions` is stable.
+ */
+const BlockRow = memo(function BlockRow({ block, index, count, isRaw, actions }: BlockRowProps) {
+  const label = getBlockLabel(block.type)
+  const position = `Blok ${index + 1} dari ${count}`
+  const typeOptions = CONVERTIBLE_TYPES.some((o) => o.type === block.type)
+    ? CONVERTIBLE_TYPES
+    : [{ type: block.type, label }, ...CONVERTIBLE_TYPES]
+
+  return (
+    <div
+      role="group"
+      aria-label={`${position}: ${label}`}
+      data-block-index={index}
+      tabIndex={-1}
+      className="relative group rounded-xl py-1.5 px-3 -mx-3 transition-colors hover:bg-white/[0.02] border border-transparent hover:border-white/10 focus-within:border-accent-400"
+    >
+      {/* Block toolbar: in-flow on small screens, floating on hover/focus from sm up */}
+      <div
+        role="toolbar"
+        aria-label={`Alat ${position}`}
+        className="mb-1 flex items-center justify-end gap-1 text-[11px] text-neutral-300 sm:absolute sm:-top-4 sm:right-2 sm:z-10 sm:mb-0 sm:rounded-md sm:border sm:border-white/15 sm:bg-surface-elevated sm:px-1.5 sm:py-0.5 sm:shadow-xl sm:opacity-0 sm:group-hover:opacity-100 sm:focus-within:opacity-100 motion-safe:transition-opacity"
+      >
+        <label className="sr-only" htmlFor={`block-${block.id}-type`}>
+          Jenis {position}
+        </label>
+        <select
+          id={`block-${block.id}-type`}
+          value={block.type}
+          onChange={(e) => {
+            const next = typeOptions.find((o) => o.type === e.target.value)
+            if (next) actions.convert(block.id, next.type)
+          }}
+          className="h-7 rounded border border-white/15 bg-surface-elevated px-1.5 font-mono text-[11px] text-white"
+        >
+          {typeOptions.map((o) => (
+            <option key={o.type} value={o.type}>
+              {o.label}
+            </option>
+          ))}
+        </select>
+
+        {(block.type === 'paragraph' || block.type === 'quote' || block.type === 'list') && (
+          <button
+            type="button"
+            onClick={() => actions.toggleRawHtml(block.id)}
+            aria-pressed={isRaw}
+            aria-label="Edit sebagai HTML"
+            title="Edit sebagai HTML"
+            className={`${toolbarBtn} font-mono ${isRaw ? 'bg-accent-500/25 text-accent-300' : ''}`}
+          >
+            &lt;/&gt;
+          </button>
+        )}
+
+        <button
+          type="button"
+          onClick={() => actions.move(block.id, 'up')}
+          disabled={index === 0}
+          aria-label={`Pindahkan ${label.toLowerCase()} ke atas`}
+          title="Pindah ke atas"
+          className={toolbarBtn}
+        >
+          <ChevronUp className="w-3.5 h-3.5" aria-hidden="true" />
+        </button>
+        <button
+          type="button"
+          onClick={() => actions.move(block.id, 'down')}
+          disabled={index === count - 1}
+          aria-label={`Pindahkan ${label.toLowerCase()} ke bawah`}
+          title="Pindah ke bawah"
+          className={toolbarBtn}
+        >
+          <ChevronDown className="w-3.5 h-3.5" aria-hidden="true" />
+        </button>
+        <button
+          type="button"
+          onClick={() => actions.remove(block.id)}
+          aria-label={`Hapus ${label.toLowerCase()} (bisa diurungkan)`}
+          title="Hapus blok"
+          className={`${toolbarBtn} text-rose-300 hover:bg-rose-500/20 hover:text-rose-200`}
+        >
+          <Trash2 className="w-3.5 h-3.5" aria-hidden="true" />
+        </button>
+      </div>
+
+      <BlockBody block={block} isRaw={isRaw} actions={actions} position={position} />
+    </div>
+  )
+})
+
+function BlockBody({ block, isRaw, actions, position }: { block: ContentBlock; isRaw: boolean; actions: BlockActions; position: string }) {
+  const update = actions.update
+  switch (block.type) {
+    case 'paragraph':
+      return isRaw ? (
+        <AutoResizeTextarea
+          value={block.text}
+          onChange={(val) => update(block.id, { text: val })}
+          aria-label={`HTML paragraf, ${position}`}
+          placeholder="Ketik kode HTML atau paragraf..."
+          minHeight={28}
+          className="w-full bg-black/40 border border-white/10 rounded-lg p-2 font-mono text-xs text-emerald-300 placeholder:text-neutral-500 leading-relaxed"
+        />
+      ) : (
+        <RichContentEditable
+          initialHtml={block.text}
+          onChange={(val) => update(block.id, { text: val })}
+          label={`Paragraf, ${position}`}
+          placeholder="Mulai ketik paragraf… Pilih teks untuk format; Ctrl/⌘+K untuk tautan."
+          className="w-full bg-transparent border-0 text-[15px] sm:text-base text-neutral-200 leading-[1.75] font-sans p-0 focus-visible:outline-none selection:bg-accent-500/30"
+        />
+      )
+
+    case 'heading2':
+    case 'heading3': {
+      const anchor = generateHeadingSlug(block.text)
+      const isH2 = block.type === 'heading2'
+      return (
+        <div className="relative pt-1">
+          <AutoResizeTextarea
+            value={block.text}
+            onChange={(val) => update(block.id, { text: val })}
+            aria-label={`${isH2 ? 'Subjudul H2' : 'Subjudul H3'}, ${position}`}
+            placeholder={isH2 ? 'Subjudul H2...' : 'Subjudul H3...'}
+            minHeight={isH2 ? 32 : 28}
+            className={`w-full bg-transparent border-0 placeholder:text-neutral-500 leading-snug font-display p-0 focus-visible:outline-none ${
+              isH2 ? 'text-xl sm:text-2xl font-bold text-white' : 'text-lg sm:text-xl font-semibold text-neutral-200'
+            }`}
+          />
+          {anchor && (
+            <p className="mt-1 break-all font-mono text-[10px] text-neutral-400">
+              <span className="sr-only">Anchor tautan: </span>#{anchor}
+            </p>
+          )}
+        </div>
+      )
+    }
+
+    case 'image':
+      return (
+        <div className="rounded-xl border border-white/10 bg-black/40 p-3 space-y-2.5">
+          <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-neutral-300">
+            <span className="flex items-center gap-1.5 font-semibold text-emerald-300">
+              <ImageIcon className="w-3.5 h-3.5" aria-hidden="true" />
+              <span>Gambar</span>
+            </span>
+            <button
+              type="button"
+              onClick={() => actions.openMediaPicker(block.id)}
+              className="px-2.5 py-1 rounded-md bg-white/10 hover:bg-white/15 text-white text-[11px] font-semibold transition-colors"
+            >
+              {block.url ? 'Ganti gambar' : 'Pilih gambar'}
+            </button>
+          </div>
+
+          {block.url && (
+            <div className="relative aspect-[16/9] w-full max-w-xl mx-auto rounded-lg overflow-hidden border border-white/10 bg-neutral-900">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={block.url} alt={block.alt || ''} className="w-full h-full object-cover" />
+            </div>
+          )}
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+            <div>
+              <label htmlFor={`block-${block.id}-alt`} className="text-[11px] font-mono text-neutral-300 block mb-0.5">
+                Alt text (wajib)
+              </label>
+              <input
+                id={`block-${block.id}-alt`}
+                type="text"
+                value={block.alt || ''}
+                onChange={(e) => update(block.id, { alt: e.target.value })}
+                aria-invalid={block.url && !block.alt?.trim() ? true : undefined}
+                aria-describedby={block.url && !block.alt?.trim() ? `block-${block.id}-alt-error` : undefined}
+                placeholder="Deskripsi singkat gambar..."
+                className="w-full rounded-lg bg-black/40 border border-white/15 p-1.5 text-xs text-white aria-[invalid=true]:border-amber-400"
+              />
+              {block.url && !block.alt?.trim() && (
+                <p id={`block-${block.id}-alt-error`} className="mt-1 flex items-center gap-1 text-[11px] text-amber-300">
+                  <AlertTriangle className="w-3 h-3 shrink-0" aria-hidden="true" />
+                  Isi alt text agar artikel bisa diterbitkan.
+                </p>
+              )}
+            </div>
+            <div>
+              <label htmlFor={`block-${block.id}-caption`} className="text-[11px] font-mono text-neutral-300 block mb-0.5">
+                Keterangan (opsional)
+              </label>
+              <input
+                id={`block-${block.id}-caption`}
+                type="text"
+                value={block.caption || ''}
+                onChange={(e) => update(block.id, { caption: e.target.value })}
+                placeholder="Keterangan gambar..."
+                className="w-full rounded-lg bg-black/40 border border-white/15 p-1.5 text-xs text-white"
+              />
+            </div>
+          </div>
+        </div>
+      )
+
+    case 'video':
+      return (
+        <div className="rounded-xl border border-white/10 bg-black/40 p-3 space-y-2.5">
+          <label htmlFor={`block-${block.id}-url`} className="flex items-center gap-1.5 text-xs font-semibold text-rose-300">
+            <Video className="w-3.5 h-3.5" aria-hidden="true" />
+            <span>URL video YouTube / Vimeo</span>
+          </label>
+          <input
+            id={`block-${block.id}-url`}
+            type="url"
+            inputMode="url"
+            value={block.url || ''}
+            onChange={(e) => update(block.id, { url: e.target.value, embedUrl: extractEmbedUrl(e.target.value) })}
+            placeholder="https://youtube.com/watch?v=..."
+            className="w-full rounded-lg bg-black/40 border border-white/15 p-2 text-xs font-mono text-neutral-200"
+          />
+          {block.url && (
+            <div className="aspect-video w-full max-w-xl mx-auto rounded-lg overflow-hidden border border-white/10 bg-black">
+              <iframe
+                src={block.embedUrl || extractEmbedUrl(block.url)}
+                title={block.title || 'Pratinjau video'}
+                className="w-full h-full border-0"
+                allowFullScreen
+              />
+            </div>
+          )}
+        </div>
+      )
+
+    case 'quote':
+      return (
+        <div className="border-l-4 border-amber-400 bg-amber-400/[0.04] p-4 rounded-r-xl space-y-2">
+          {isRaw ? (
+            <AutoResizeTextarea
+              value={block.text}
+              onChange={(val) => update(block.id, { text: val })}
+              aria-label={`HTML kutipan, ${position}`}
+              placeholder="Ketik kutipan (HTML)..."
+              minHeight={32}
+              className="w-full bg-black/40 border border-white/10 rounded-lg p-2.5 font-mono text-xs text-amber-300 leading-relaxed"
+            />
+          ) : (
+            <RichContentEditable
+              initialHtml={block.text}
+              onChange={(val) => update(block.id, { text: val })}
+              label={`Kutipan, ${position}`}
+              placeholder="Ketik kutipan di sini..."
+              className="text-base sm:text-lg italic text-neutral-100 leading-relaxed min-h-[32px] focus-visible:outline-none [&_strong]:font-bold [&_strong]:text-white [&_b]:font-bold [&_b]:text-white [&_a]:text-accent-300 [&_a]:underline"
+            />
+          )}
+          <div className="flex items-center gap-2 pt-1 border-t border-white/5">
+            <span className="text-[11px] font-mono text-neutral-400" aria-hidden="true">—</span>
+            <input
+              type="text"
+              value={block.author || ''}
+              onChange={(e) => update(block.id, { author: e.target.value })}
+              aria-label="Sumber kutipan (opsional)"
+              placeholder="Nama tokoh / pakar (opsional)"
+              className="min-w-0 flex-1 bg-transparent border-0 text-xs text-amber-300 placeholder:text-neutral-500 p-0 font-medium"
+            />
+          </div>
+        </div>
+      )
+
+    case 'list':
+      return (
+        <div className="rounded-xl border border-white/10 bg-black/30 p-3 space-y-2">
+          <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-neutral-300">
+            <span className="flex items-center gap-1.5 font-semibold text-purple-300">
+              <List className="w-3.5 h-3.5" aria-hidden="true" />
+              <span>Daftar {block.ordered ? 'bernomor' : 'poin'}</span>
+            </span>
+            <button
+              type="button"
+              onClick={() => update(block.id, { ordered: !block.ordered })}
+              className="text-[11px] text-accent-300 underline-offset-2 hover:underline"
+            >
+              Ubah ke {block.ordered ? 'poin' : 'nomor'}
+            </button>
+          </div>
+
+          <ol className="space-y-1.5 pl-2 list-none">
+            {block.items.map((item, itemIdx) => (
+              <li key={itemIdx} className="flex items-start gap-2 group/item">
+                <span className="text-xs text-neutral-400 font-mono w-4 text-right shrink-0 pt-1" aria-hidden="true">
+                  {block.ordered ? `${itemIdx + 1}.` : '•'}
+                </span>
+                {isRaw ? (
+                  <input
+                    type="text"
+                    value={item}
+                    aria-label={`Poin ${itemIdx + 1} (HTML)`}
+                    onChange={(e) => {
+                      const newItems = [...block.items]
+                      newItems[itemIdx] = e.target.value
+                      update(block.id, { items: newItems })
+                    }}
+                    className="flex-1 bg-black/40 border border-white/10 rounded px-2 py-1 font-mono text-xs text-neutral-200"
+                    placeholder="Tulis poin (HTML)..."
+                  />
+                ) : (
+                  <RichListItemEditable
+                    initialHtml={item}
+                    label={`Poin ${itemIdx + 1}`}
+                    onChange={(val) => {
+                      const newItems = [...block.items]
+                      newItems[itemIdx] = val
+                      update(block.id, { items: newItems })
+                    }}
+                    onEnter={() => {
+                      const newItems = [...block.items]
+                      newItems.splice(itemIdx + 1, 0, '')
+                      update(block.id, { items: newItems })
+                    }}
+                    onDeleteIfEmpty={() => {
+                      if (block.items.length > 1) update(block.id, { items: block.items.filter((_, i) => i !== itemIdx) })
+                    }}
+                    placeholder="Tulis poin..."
+                  />
+                )}
+                <button
+                  type="button"
+                  onClick={() => {
+                    const newItems = block.items.filter((_, i) => i !== itemIdx)
+                    update(block.id, { items: newItems.length ? newItems : [''] })
+                  }}
+                  className="p-1 text-neutral-400 hover:text-red-400 transition-colors opacity-60 group-hover/item:opacity-100 focus-visible:opacity-100"
+                  aria-label={`Hapus poin ${itemIdx + 1}`}
+                >
+                  <Trash2 className="w-3 h-3" aria-hidden="true" />
+                </button>
+              </li>
+            ))}
+          </ol>
+
+          <button
+            type="button"
+            onClick={() => update(block.id, { items: [...block.items, ''] })}
+            className="inline-flex items-center gap-1 text-[11px] text-accent-300 hover:text-white font-semibold pt-1"
+          >
+            <Plus className="w-3 h-3" aria-hidden="true" />
+            <span>Tambah poin</span>
+          </button>
+        </div>
+      )
+
+    case 'faq':
+      return (
+        <div className="rounded-xl border border-teal-500/25 bg-teal-950/10 p-3 space-y-2">
+          <p className="flex items-center gap-1.5 text-xs font-semibold text-teal-300">
+            <HelpCircle className="w-3.5 h-3.5" aria-hidden="true" />
+            <span>FAQ</span>
+          </p>
+          <input
+            type="text"
+            value={block.question}
+            onChange={(e) => update(block.id, { question: e.target.value })}
+            aria-label="Pertanyaan"
+            placeholder="Pertanyaan?"
+            className="w-full bg-black/40 border border-white/15 rounded-lg p-2 text-xs font-bold text-white"
+          />
+          <AutoResizeTextarea
+            value={block.answer}
+            onChange={(val) => update(block.id, { answer: val })}
+            aria-label="Jawaban"
+            placeholder="Jawaban ringkas dan informatif..."
+            minHeight={40}
+            className="w-full bg-black/40 border border-white/15 rounded-lg p-2 text-xs text-neutral-200 leading-relaxed"
+          />
+        </div>
+      )
+
+    case 'code':
+      return (
+        <div className="rounded-xl border border-white/15 bg-black/70 p-3 space-y-2">
+          <div className="flex items-center justify-between gap-2 text-xs text-neutral-300">
+            <label htmlFor={`block-${block.id}-code`} className="flex items-center gap-1.5 font-mono text-cyan-300">
+              <Code className="w-3.5 h-3.5" aria-hidden="true" />
+              <span>Kode program</span>
+            </label>
+            <select
+              value={block.language || 'typescript'}
+              onChange={(e) => update(block.id, { language: e.target.value })}
+              aria-label="Bahasa kode"
+              className="bg-white/10 border border-white/15 rounded px-2 py-0.5 text-[11px] font-mono text-white"
+            >
+              <option value="typescript">TypeScript</option>
+              <option value="javascript">JavaScript</option>
+              <option value="html">HTML</option>
+              <option value="css">CSS</option>
+              <option value="python">Python</option>
+              <option value="bash">Bash / Shell</option>
+              <option value="sql">SQL</option>
+              <option value="json">JSON</option>
+            </select>
+          </div>
+          <textarea
+            id={`block-${block.id}-code`}
+            rows={5}
+            value={block.code}
+            onChange={(e) => update(block.id, { code: e.target.value })}
+            className="w-full font-mono text-xs bg-black/50 border border-white/10 rounded-lg p-3 text-cyan-300 leading-relaxed"
+            placeholder="// Tulis kode..."
+          />
+        </div>
+      )
+
+    case 'divider':
+      return (
+        <div className="py-3 flex items-center justify-center">
+          <hr className="h-px w-full border-0 bg-white/15" />
+        </div>
+      )
+
+    case 'html':
+      return (
+        <div className="rounded-xl border border-amber-500/30 bg-black/60 p-3.5 space-y-3">
+          <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
+            <span className="flex items-center gap-2 font-semibold text-amber-300">
+              <Code className="w-3.5 h-3.5" aria-hidden="true" />
+              HTML kustom / impor
+            </span>
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={() => actions.splitHtml(block.id)}
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 border border-amber-500/30 text-xs font-semibold transition-colors"
+                title="Ubah tag HTML di blok ini menjadi blok terpisah (judul, paragraf, daftar, dll.)"
+              >
+                <Sparkles className="w-3.5 h-3.5" aria-hidden="true" />
+                <span>Pecah jadi blok standar</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => actions.toggleRawHtml(block.id)}
+                aria-pressed={isRaw}
+                className="px-2.5 py-1 rounded-md text-xs font-mono font-medium bg-white/10 text-neutral-200 hover:text-white"
+              >
+                {isRaw ? 'Lihat pratinjau' : 'Edit kode'}
+              </button>
+            </div>
+          </div>
+
+          {isRaw ? (
+            <AutoResizeTextarea
+              value={block.html}
+              onChange={(val) => update(block.id, { html: val })}
+              aria-label={`Kode HTML, ${position}`}
+              placeholder="<div>...</div>"
+              minHeight={90}
+              className="w-full bg-black/70 border border-white/10 rounded-lg p-3 font-mono text-xs text-amber-300 leading-relaxed"
+            />
+          ) : (
+            <div
+              className="prose prose-invert max-w-none text-xs p-3.5 bg-neutral-900/60 rounded-xl border border-white/10 overflow-x-auto text-neutral-300"
+              dangerouslySetInnerHTML={{ __html: sanitizeHtmlContent(block.html) }}
+            />
+          )}
+        </div>
+      )
+
+    case 'internal-links':
+      return (
+        <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/[0.04] p-3.5 space-y-3">
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-emerald-500/20 pb-2.5">
+            <div className="flex items-center gap-2 flex-1 min-w-[12rem]">
+              <Link2 className="w-4 h-4 text-emerald-400 shrink-0" aria-hidden="true" />
+              <input
+                type="text"
+                value={block.title ?? ''}
+                onChange={(e) => update(block.id, { title: e.target.value })}
+                aria-label="Judul grup tautan internal"
+                placeholder="Judul grup tautan internal..."
+                className="bg-transparent border-0 border-b border-transparent focus:border-emerald-400/50 font-semibold text-xs sm:text-sm text-emerald-300 w-full"
+              />
+            </div>
+            <button
+              type="button"
+              onClick={() => update(block.id, { links: [...(block.links || []), { text: '', href: '' }] })}
+              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-200 text-xs font-semibold transition-colors"
+            >
+              <Plus className="w-3.5 h-3.5" aria-hidden="true" />
+              <span>Tambah tautan ({block.links?.length || 0})</span>
+            </button>
+          </div>
+
+          {!block.links || block.links.length === 0 ? (
+            <p className="text-xs text-neutral-400 py-2 text-center">Belum ada tautan. Pilih &ldquo;Tambah tautan&rdquo;.</p>
+          ) : (
+            <ul className="space-y-2">
+              {block.links.map((link, linkIdx) => (
+                <li key={linkIdx} className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 p-2 rounded-lg bg-black/40 border border-white/5">
+                  <input
+                    type="text"
+                    value={link.text}
+                    aria-label={`Teks tautan ${linkIdx + 1}`}
+                    onChange={(e) => {
+                      const newLinks = [...block.links]
+                      newLinks[linkIdx] = { ...newLinks[linkIdx], text: e.target.value }
+                      update(block.id, { links: newLinks })
+                    }}
+                    placeholder="Teks tautan..."
+                    className="min-w-0 flex-1 bg-transparent border-0 border-b border-white/10 text-xs text-white placeholder:text-neutral-500 py-1"
+                  />
+                  <div className="flex min-w-0 flex-1 items-center gap-1.5">
+                    <input
+                      type="text"
+                      inputMode="url"
+                      value={link.href}
+                      aria-label={`URL tautan ${linkIdx + 1}`}
+                      onChange={(e) => {
+                        const newLinks = [...block.links]
+                        newLinks[linkIdx] = { ...newLinks[linkIdx], href: e.target.value }
+                        update(block.id, { links: newLinks })
+                      }}
+                      placeholder="/services/... atau https://..."
+                      className="min-w-0 w-full bg-transparent border-0 border-b border-white/10 font-mono text-[11px] text-accent-300 placeholder:text-neutral-500 py-1"
+                    />
+                    {link.href && (
+                      <a
+                        href={link.href.startsWith('/') ? `${siteConfig.url}${link.href}` : link.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="p-1 text-neutral-300 hover:text-white transition-colors shrink-0"
+                        aria-label={`Buka tautan ${linkIdx + 1} di tab baru`}
+                      >
+                        <ExternalLink className="w-3.5 h-3.5" aria-hidden="true" />
+                      </a>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => update(block.id, { links: block.links.filter((_, i) => i !== linkIdx) })}
+                      className="p-1 text-neutral-400 hover:text-red-400 transition-colors shrink-0"
+                      aria-label={`Hapus tautan ${linkIdx + 1}`}
+                    >
+                      <Trash2 className="w-3.5 h-3.5" aria-hidden="true" />
+                    </button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )
+
+    case 'table':
+      return <NotionTableEditor block={block} onUpdateBlock={update} />
+
+    default: {
+      const unreachable: never = block
+      return unreachable
+    }
+  }
+}
+
 interface ArticleEditorCanvasProps {
   title: string
   onTitleChange: (val: string) => void
@@ -658,26 +1289,17 @@ interface ArticleEditorCanvasProps {
   onCategoryChange: (cat: string) => void
   editorStyle: 'blocks' | 'raw'
   onEditorStyleChange: (style: 'blocks' | 'raw') => void
-  onConvertRawToBlocks?: () => void
-  onImportMarkdown?: (markdown: string, useExtractedTitle?: boolean) => void
-  onConvertSingleHtmlBlockToBlocks?: (blockId: string) => void
+  onConvertRawToBlocks: () => void
+  onImportMarkdown: (markdown: string, useExtractedTitle: boolean) => void
   rawContent: string
   onRawContentChange: (val: string) => void
   blocks: ContentBlock[]
-  onAddBlock: (type: BlockType) => void
-  onUpdateBlock: (id: string, updated: Partial<ContentBlock>) => void
-  onRemoveBlock: (id: string) => void
-  onMoveBlock: (index: number, direction: 'up' | 'down') => void
-  onConvertBlockType: (blockId: string, targetType: BlockType) => void
+  blockActions: BlockActions
   rawHtmlBlockIds: Record<string, boolean>
-  onToggleRawHtmlBlock: (blockId: string) => void
-  activeTypeDropdownBlockId: string | null
-  onSetActiveTypeDropdownBlockId: (id: string | null) => void
-  onOpenMediaPickerForBlock: (blockId: string) => void
   isFocusMode: boolean
 }
 
-export function ArticleEditorCanvas({
+export const ArticleEditorCanvas = memo(function ArticleEditorCanvas({
   title,
   onTitleChange,
   slug,
@@ -688,64 +1310,42 @@ export function ArticleEditorCanvas({
   onEditorStyleChange,
   onConvertRawToBlocks,
   onImportMarkdown,
-  onConvertSingleHtmlBlockToBlocks,
   rawContent,
   onRawContentChange,
   blocks,
-  onAddBlock,
-  onUpdateBlock,
-  onRemoveBlock,
-  onMoveBlock,
-  onConvertBlockType,
+  blockActions,
   rawHtmlBlockIds,
-  onToggleRawHtmlBlock,
-  activeTypeDropdownBlockId,
-  onSetActiveTypeDropdownBlockId,
-  onOpenMediaPickerForBlock,
   isFocusMode,
 }: ArticleEditorCanvasProps) {
   const [isImportModalOpen, setIsImportModalOpen] = useState(false)
   const [importText, setImportText] = useState('')
   const [useExtractedTitle, setUseExtractedTitle] = useState(true)
-  const [importSuccessMessage, setImportSuccessMessage] = useState<string | null>(null)
+  const [importError, setImportError] = useState<string | null>(null)
 
-  const handleExecuteImport = () => {
-    if (!importText.trim()) return
-    if (onImportMarkdown) {
-      onImportMarkdown(importText, useExtractedTitle)
-    } else {
-      if (useExtractedTitle) {
-        const { title: extractedTitle, content: remainingContent } = extractTitleAndContentFromMarkdown(importText)
-        if (extractedTitle) {
-          onTitleChange(extractedTitle)
-          onRawContentChange(remainingContent || importText)
-        } else {
-          onRawContentChange(importText)
-        }
-      } else {
-        onRawContentChange(importText)
-      }
-      onConvertRawToBlocks?.()
+  const handleExecuteImport = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!importText.trim()) {
+      setImportError('Tempel teks Markdown terlebih dahulu.')
+      document.getElementById('markdown-import-text')?.focus()
+      return
     }
+    onImportMarkdown(importText, useExtractedTitle)
     setIsImportModalOpen(false)
     setImportText('')
-    setImportSuccessMessage('Format Markdown dari ChatGPT/AI berhasil dikonversi menjadi blok visual!')
-    setTimeout(() => setImportSuccessMessage(null), 4000)
+    setImportError(null)
   }
+
   return (
-    <div className="flex-1 h-full overflow-y-auto px-4 py-6 sm:px-8 sm:py-8 lg:px-12 lg:py-10 scrollbar-thin">
-      <div
-        className={`mx-auto w-full transition-all duration-300 ${
-          isFocusMode ? 'max-w-4xl' : 'max-w-3xl'
-        }`}
-      >
-        {/* Document Header Metadata: Category & URL Slug */}
+    <div className="flex-1 min-w-0 h-full overflow-y-auto px-4 py-6 sm:px-8 sm:py-8 lg:px-12 lg:py-10 scrollbar-thin">
+      <div className={`mx-auto w-full ${isFocusMode ? 'max-w-4xl' : 'max-w-3xl'}`}>
+        {/* Document header metadata: category & URL */}
         <div className="flex flex-wrap items-center justify-between gap-3 pb-4 mb-6 border-b border-white/[0.08]">
           <div className="flex items-center gap-2">
-            <span className="text-[10px] font-mono text-neutral-500 uppercase tracking-wider font-semibold">
-              Kategori:
-            </span>
+            <label htmlFor="article-category-canvas" className="text-[11px] font-mono text-neutral-400 uppercase tracking-wider font-semibold">
+              Kategori
+            </label>
             <CategoryCombobox
+              id="article-category-canvas"
               value={category}
               onChange={onCategoryChange}
               categoriesList={categoriesList}
@@ -753,942 +1353,204 @@ export function ArticleEditorCanvas({
             />
           </div>
 
-          <div className="flex items-center gap-1.5 text-xs font-mono text-neutral-500 truncate max-w-xs sm:max-w-md">
-            <span className="text-neutral-600">/artikel/</span>
-            <span className="text-accent-400/90 font-medium truncate">{slug || '...'}</span>
-          </div>
+          <p className="flex min-w-0 items-center gap-1 text-xs font-mono text-neutral-400">
+            <span className="sr-only">URL artikel: </span>
+            <span>/journal/</span>
+            <span className="text-accent-300 font-medium break-all">{slug || '…'}</span>
+          </p>
         </div>
 
-        {/* Title Field: Frameless, Clean, Auto-Resize */}
+        {/* Title */}
         <div className="mb-6">
+          <label htmlFor="article-title" className="sr-only">
+            Judul artikel
+          </label>
           <AutoResizeTextarea
+            id="article-title"
             value={title}
             onChange={onTitleChange}
-            placeholder="Ketik Judul Artikel di Sini..."
+            placeholder="Ketik judul artikel di sini…"
             minHeight={48}
-            className="w-full bg-transparent border-0 border-b border-transparent hover:border-white/10 focus:border-white/20 text-3xl sm:text-4xl lg:text-[40px] font-extrabold text-white placeholder:text-neutral-700 focus:outline-none leading-[1.2] transition-colors font-display pb-3 p-0 focus:ring-0"
+            className="w-full bg-transparent border-0 border-b-2 border-transparent hover:border-white/10 focus:border-accent-400 focus-visible:outline-none text-3xl sm:text-4xl lg:text-[40px] font-extrabold text-white placeholder:text-neutral-500 leading-[1.2] transition-colors font-display pb-3 p-0"
           />
         </div>
 
-        {/* Sub-bar: Content Mode Selector (Kanvas Blok vs Raw HTML) */}
+        {/* Content mode bar */}
         <div className="flex flex-wrap items-center justify-between gap-3 pt-2 pb-3 mb-6 border-b border-white/[0.08]">
-          <div className="flex items-center gap-2">
-            <Layers className="w-3.5 h-3.5 text-accent-400" />
-            <span className="text-xs font-mono font-bold uppercase tracking-wider text-neutral-400">
-              Isi Konten Editorial
+          <h2 className="flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-wider text-neutral-300">
+            <Layers className="w-3.5 h-3.5 text-accent-400" aria-hidden="true" />
+            <span>Isi artikel</span>
+            <span className="text-[11px] font-normal normal-case px-2 py-0.5 rounded bg-white/5 text-neutral-300 border border-white/10">
+              {editorStyle === 'blocks' ? `${blocks.length} blok` : 'HTML / Markdown'}
             </span>
-            <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-white/5 text-neutral-400 border border-white/10">
-              {editorStyle === 'blocks' ? `${blocks.length} Blok Visual` : 'Mode Raw HTML / MD'}
-            </span>
-          </div>
+          </h2>
 
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <button
               type="button"
               onClick={() => setIsImportModalOpen(true)}
-              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold text-info-300 hover:text-white bg-info/10 hover:bg-info/20 border border-info/25 transition-all shadow-sm cursor-pointer"
-              title="Tempel atau impor teks artikel dari ChatGPT / Claude dalam format Markdown"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-info-300 hover:text-white bg-info/10 hover:bg-info/20 border border-info/25 transition-colors"
             >
-              <Sparkles className="w-3.5 h-3.5 text-info" />
-              <span>Impor Markdown (AI)</span>
+              <Upload className="w-3.5 h-3.5" aria-hidden="true" />
+              <span>Impor Markdown</span>
             </button>
 
-            <div className="flex items-center gap-1 p-0.5 rounded-lg bg-black/40 border border-white/10 text-xs">
-              <button
-                type="button"
-                onClick={() => onEditorStyleChange('blocks')}
-                className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-[11px] font-medium transition-all ${
-                  editorStyle === 'blocks'
-                    ? 'bg-white/15 text-white font-bold shadow-sm'
-                    : 'text-neutral-400 hover:text-white'
-                }`}
-              >
-                <Layers className="w-3.5 h-3.5 text-accent-400" />
-                <span>Kanvas Blok</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => onEditorStyleChange('raw')}
-                className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-[11px] font-medium transition-all ${
-                  editorStyle === 'raw'
-                    ? 'bg-white/15 text-white font-bold shadow-sm'
-                    : 'text-neutral-400 hover:text-white'
-                }`}
-              >
-                <Code className="w-3.5 h-3.5 text-emerald-400" />
-                <span>Raw HTML / MD</span>
-              </button>
+            <div role="radiogroup" aria-label="Mode penyuntingan isi" className="flex items-center gap-1 p-0.5 rounded-lg bg-black/40 border border-white/10 text-xs">
+              {(
+                [
+                  { id: 'blocks', label: 'Blok', icon: Layers },
+                  { id: 'raw', label: 'HTML / MD', icon: Code },
+                ] as const
+              ).map((opt) => {
+                const Icon = opt.icon
+                const active = editorStyle === opt.id
+                return (
+                  <button
+                    key={opt.id}
+                    type="button"
+                    role="radio"
+                    aria-checked={active}
+                    onClick={() => onEditorStyleChange(opt.id)}
+                    className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-[11px] font-medium transition-colors ${
+                      active ? 'bg-white/15 text-white font-bold' : 'text-neutral-300 hover:text-white'
+                    }`}
+                  >
+                    <Icon className="w-3.5 h-3.5" aria-hidden="true" />
+                    <span>{opt.label}</span>
+                  </button>
+                )
+              })}
             </div>
           </div>
         </div>
 
-        {importSuccessMessage && (
-          <div className="mb-4 p-3 rounded-xl bg-info/15 border border-info/30 flex items-center justify-between text-xs text-info-300 animate-in fade-in duration-200">
-            <div className="flex items-center gap-2">
-              <Check className="w-4 h-4 text-info shrink-0" />
-              <span>{importSuccessMessage}</span>
-            </div>
-            <button
-              type="button"
-              onClick={() => setImportSuccessMessage(null)}
-              className="text-info hover:text-white"
-            >
-              <X className="w-3.5 h-3.5" />
-            </button>
-          </div>
-        )}
-
-        {/* Content Body: Raw HTML or Blocks */}
         {editorStyle === 'raw' ? (
           <div className="space-y-3">
-            {/* Conversion Action Bar */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 rounded-xl bg-blue-500/10 border border-blue-400/25">
-              <div className="flex items-center gap-2 text-xs text-blue-300">
-                <Code className="w-4 h-4 text-blue-400 shrink-0" />
-                <span>Mode Raw aktif. Anda dapat menempel Markdown dari ChatGPT atau menulis HTML langsung, lalu klik tombol konversi.</span>
-              </div>
-              {onConvertRawToBlocks && (
-                <button
-                  type="button"
-                  onClick={onConvertRawToBlocks}
-                  className="inline-flex items-center justify-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-blue-500 hover:bg-blue-400 text-white text-xs font-bold transition-all shadow-md shrink-0 cursor-pointer"
-                >
-                  <Sparkles className="w-3.5 h-3.5" />
-                  <span>Konversi ke Blok Visual</span>
-                </button>
-              )}
+              <p className="flex items-center gap-2 text-xs text-blue-200">
+                <Code className="w-4 h-4 text-blue-300 shrink-0" aria-hidden="true" />
+                <span>Tulis HTML atau tempel Markdown, lalu ubah ke blok. Beralih ke mode Blok juga mengonversi otomatis.</span>
+              </p>
+              <button
+                type="button"
+                onClick={onConvertRawToBlocks}
+                className="inline-flex items-center justify-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-white/10 hover:bg-white/15 border border-white/20 text-white text-xs font-bold transition-colors shrink-0"
+              >
+                <Sparkles className="w-3.5 h-3.5" aria-hidden="true" />
+                <span>Ubah ke blok</span>
+              </button>
             </div>
 
+            <label htmlFor="article-raw-content" className="sr-only">
+              Isi artikel (HTML atau Markdown)
+            </label>
             <textarea
+              id="article-raw-content"
               rows={22}
               value={rawContent}
               onChange={(e) => onRawContentChange(e.target.value)}
-              className="w-full font-mono text-xs bg-black/50 border border-white/15 rounded-2xl p-5 text-emerald-300 focus:outline-none focus:border-accent-400 leading-relaxed"
-              placeholder={`# Judul Artikel\n## Subjudul Bagian\n\nTempel teks Markdown dari ChatGPT / Claude atau kode HTML artikel di sini...\n\n| Kolom 1 | Kolom 2 |\n|---|---|\n| Nilai 1 | Nilai 2 |`}
+              className="w-full font-mono text-xs bg-black/50 border border-white/15 rounded-2xl p-5 text-emerald-300 leading-relaxed"
+              placeholder={`# Judul Artikel\n## Subjudul Bagian\n\nTempel Markdown atau tulis HTML artikel di sini...`}
             />
-
-            <div className="flex items-center justify-between pt-1">
-              <p className="text-[11px] text-neutral-500 italic">
-                Perubahan pada raw HTML/MD akan otomatis tersinkronisasi saat Anda beralih ke Kanvas Blok atau mengklik &ldquo;Konversi ke Blok Visual&rdquo;.
-              </p>
-            </div>
           </div>
         ) : (
           <div className="space-y-3">
             {blocks.map((block, idx) => (
-              <div
-                key={block.id ? `${block.id}-${idx}` : `block-${idx}`}
-                className="relative group rounded-xl py-1.5 px-3 -mx-3 transition-colors hover:bg-white/[0.02] border border-transparent hover:border-white/5"
-              >
-                {/* Floating Gutter Controls on Hover */}
-                <div className="absolute -top-3.5 right-2 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-all z-10 flex items-center gap-1 bg-surface-elevated border border-white/15 rounded-md px-1.5 py-0.5 shadow-xl text-[10px] text-neutral-300">
-                  {/* Type switcher dropdown */}
-                  <div className="relative">
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        onSetActiveTypeDropdownBlockId(
-                          activeTypeDropdownBlockId === block.id ? null : block.id
-                        )
-                      }}
-                      className="inline-flex items-center gap-1 font-mono uppercase text-neutral-300 hover:text-white text-[9px] px-1.5 py-0.5 rounded bg-white/5 hover:bg-white/10 font-semibold transition-colors"
-                      title="Ubah jenis blok"
-                    >
-                      {block.type === 'paragraph' && <AlignLeft className="w-2.5 h-2.5 text-accent-400" />}
-                      {block.type === 'heading2' && <Heading2 className="w-2.5 h-2.5 text-accent-400" />}
-                      {block.type === 'heading3' && <Heading3 className="w-2.5 h-2.5 text-accent-400" />}
-                      {block.type === 'quote' && <Quote className="w-2.5 h-2.5 text-accent-400" />}
-                      {block.type === 'list' && <List className="w-2.5 h-2.5 text-accent-400" />}
-                      {block.type === 'code' && <Code className="w-2.5 h-2.5 text-accent-400" />}
-                      {block.type === 'table' && <TableIcon className="w-2.5 h-2.5 text-accent-400" />}
-                      <span>{getBlockLabel(block.type)}</span>
-                      <ChevronDown className="w-2.5 h-2.5 text-neutral-400" />
-                    </button>
-
-                    {activeTypeDropdownBlockId === block.id && (
-                      <div
-                        className="absolute top-full right-0 mt-1.5 z-50 w-48 p-1 bg-surface-elevated/95 border border-white/10 rounded-xl shadow-2xl shadow-black/80 backdrop-blur-xl animate-in fade-in zoom-in-95 duration-100"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <div className="px-2.5 py-1 text-[9px] font-mono text-neutral-400 uppercase tracking-wider border-b border-white/[0.06] mb-1">
-                          Ubah Jenis Blok
-                        </div>
-                        {[
-                          { type: 'paragraph' as const, label: 'Paragraf (Teks)', icon: AlignLeft },
-                          { type: 'heading2' as const, label: 'Subjudul H2', icon: Heading2 },
-                          { type: 'heading3' as const, label: 'Subjudul H3', icon: Heading3 },
-                          { type: 'quote' as const, label: 'Kutipan (Quote)', icon: Quote },
-                          { type: 'list' as const, label: 'Daftar (List)', icon: List },
-                          { type: 'code' as const, label: 'Kode Program', icon: Code },
-                          { type: 'table' as const, label: 'Tabel (Notion)', icon: TableIcon },
-                          { type: 'html' as const, label: 'HTML Kustom', icon: Code },
-                        ].map((item) => {
-                          const Icon = item.icon
-                          const isCurrent = block.type === item.type
-                          return (
-                            <button
-                              key={item.type}
-                              type="button"
-                              onClick={() => onConvertBlockType(block.id, item.type)}
-                              className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs text-left transition-colors cursor-pointer ${
-                                isCurrent
-                                  ? 'bg-info/15 text-info-300 font-semibold'
-                                  : 'text-neutral-300 hover:bg-white/10 hover:text-white'
-                              }`}
-                            >
-                              <div className="flex items-center gap-2">
-                                <Icon className={`w-3.5 h-3.5 ${isCurrent ? 'text-info' : 'text-neutral-400'}`} />
-                                <span>{item.label}</span>
-                              </div>
-                              {isCurrent && <Check className="w-3.5 h-3.5 text-info" />}
-                            </button>
-                          )
-                        })}
-                      </div>
-                    )}
-                  </div>
-
-                  {['paragraph', 'quote', 'list'].includes(block.type) && (
-                    <button
-                      type="button"
-                      onClick={() => onToggleRawHtmlBlock(block.id)}
-                      className={`p-0.5 px-1 rounded font-mono text-[9px] transition-colors ${
-                        rawHtmlBlockIds[block.id]
-                          ? 'bg-accent-500/30 text-accent-300 font-bold'
-                          : 'hover:bg-white/10 text-neutral-400 hover:text-neutral-200'
-                      }`}
-                      title={rawHtmlBlockIds[block.id] ? 'Tampilan Visual' : 'Lihat HTML'}
-                    >
-                      &lt;/&gt;
-                    </button>
-                  )}
-
-                  <div className="h-3 w-px bg-white/15 mx-0.5" />
-
-                  <button
-                    type="button"
-                    onClick={() => onMoveBlock(idx, 'up')}
-                    disabled={idx === 0}
-                    className="p-1 rounded hover:bg-white/10 disabled:opacity-20 text-neutral-300"
-                    title="Pindah ke Atas"
-                  >
-                    <ChevronUp className="w-3 h-3" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => onMoveBlock(idx, 'down')}
-                    disabled={idx === blocks.length - 1}
-                    className="p-1 rounded hover:bg-white/10 disabled:opacity-20 text-neutral-300"
-                    title="Pindah ke Bawah"
-                  >
-                    <ChevronDown className="w-3 h-3" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => onRemoveBlock(block.id)}
-                    className="p-1 rounded hover:bg-red-500/20 text-red-400"
-                    title="Hapus Blok"
-                  >
-                    <Trash2 className="w-3 h-3" />
-                  </button>
-                </div>
-
-                {/* 1. Paragraph */}
-                {block.type === 'paragraph' && (
-                  <div>
-                    {rawHtmlBlockIds[block.id] ? (
-                      <AutoResizeTextarea
-                        value={block.text}
-                        onChange={(val) => onUpdateBlock(block.id, { text: val })}
-                        placeholder="Ketik kode HTML atau paragraf..."
-                        minHeight={28}
-                        className="w-full bg-black/40 border border-white/10 rounded-lg p-2 font-mono text-xs text-emerald-300 placeholder:text-neutral-600 focus:outline-none leading-relaxed"
-                      />
-                    ) : (
-                      <RichContentEditable
-                        initialHtml={block.text}
-                        onChange={(val) => onUpdateBlock(block.id, { text: val })}
-                        placeholder="Mulai ketik paragraf di sini... (Blok teks untuk format atau Cmd/Ctrl+B, Cmd/Ctrl+K)"
-                        className="w-full bg-transparent border-0 text-[15px] sm:text-base text-neutral-200 placeholder:text-neutral-600 focus:outline-none leading-[1.75] font-sans p-0 focus:ring-0 selection:bg-accent-500/30"
-                      />
-                    )}
-                  </div>
-                )}
-
-                {/* 2. Heading 2 */}
-                {block.type === 'heading2' && (
-                  <div className="relative pt-1 group/h2">
-                    {generateHeadingSlug(block.text) && (
-                      <span
-                        className="absolute -top-2 right-0 text-[10px] font-mono text-neutral-400 bg-black/60 border border-white/10 px-1.5 py-0.5 rounded select-none opacity-60 group-hover/h2:opacity-100 transition-opacity z-10"
-                        title="Anchor ID otomatis untuk TOC & jump links"
-                      >
-                        #{generateHeadingSlug(block.text)}
-                      </span>
-                    )}
-                    <AutoResizeTextarea
-                      value={block.text}
-                      onChange={(val) => onUpdateBlock(block.id, { text: val })}
-                      placeholder="Subjudul H2..."
-                      minHeight={32}
-                      className="w-full bg-transparent border-0 text-xl sm:text-2xl font-bold text-white placeholder:text-neutral-600 focus:outline-none leading-snug font-display p-0 focus:ring-0 pr-28"
-                    />
-                  </div>
-                )}
-
-                {/* 3. Heading 3 */}
-                {block.type === 'heading3' && (
-                  <div className="relative pt-1 group/h3">
-                    {generateHeadingSlug(block.text) && (
-                      <span
-                        className="absolute -top-2 right-0 text-[10px] font-mono text-neutral-400 bg-black/60 border border-white/10 px-1.5 py-0.5 rounded select-none opacity-60 group-hover/h3:opacity-100 transition-opacity z-10"
-                        title="Anchor ID otomatis untuk TOC & jump links"
-                      >
-                        #{generateHeadingSlug(block.text)}
-                      </span>
-                    )}
-                    <AutoResizeTextarea
-                      value={block.text}
-                      onChange={(val) => onUpdateBlock(block.id, { text: val })}
-                      placeholder="Subjudul H3..."
-                      minHeight={28}
-                      className="w-full bg-transparent border-0 text-lg sm:text-xl font-semibold text-neutral-200 placeholder:text-neutral-600 focus:outline-none leading-snug font-display p-0 focus:ring-0 pr-28"
-                    />
-                  </div>
-                )}
-
-                {/* 4. Image Block */}
-                {block.type === 'image' && (
-                  <div className="rounded-xl border border-white/10 bg-black/40 p-3 space-y-2.5">
-                    <div className="flex items-center justify-between text-xs text-neutral-400">
-                      <span className="flex items-center gap-1.5 font-semibold text-emerald-400">
-                        <ImageIcon className="w-3.5 h-3.5" />
-                        <span>Blok Gambar Artikel</span>
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() => onOpenMediaPickerForBlock(block.id)}
-                        className="px-2.5 py-1 rounded-md bg-white/10 hover:bg-white/15 text-white text-[11px] font-semibold transition-colors"
-                      >
-                        Pilih / Ganti Gambar
-                      </button>
-                    </div>
-
-                    {block.url && (
-                      <div className="relative aspect-[16/9] w-full max-w-xl mx-auto rounded-lg overflow-hidden border border-white/10 bg-neutral-900">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
-                          src={block.url}
-                          alt={block.alt || 'Gambar'}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                    )}
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-                      <div>
-                        <label className="text-[10px] font-mono text-neutral-400 block mb-0.5">
-                          Alt Text (Aksesibilitas / SEO)*:
-                        </label>
-                        <input
-                          type="text"
-                          value={block.alt || ''}
-                          onChange={(e) => onUpdateBlock(block.id, { alt: e.target.value })}
-                          placeholder="Deskripsi singkat gambar..."
-                          className="w-full rounded-lg bg-black/40 border border-white/10 p-1.5 text-xs text-white focus:outline-none focus:border-accent-400"
-                        />
-                      </div>
-                      <div>
-                        <label className="text-[10px] font-mono text-neutral-400 block mb-0.5">
-                          Keterangan / Caption:
-                        </label>
-                        <input
-                          type="text"
-                          value={block.caption || ''}
-                          onChange={(e) => onUpdateBlock(block.id, { caption: e.target.value })}
-                          placeholder="Keterangan gambar..."
-                          className="w-full rounded-lg bg-black/40 border border-white/10 p-1.5 text-xs text-white focus:outline-none focus:border-accent-400"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* 5. Video Block */}
-                {block.type === 'video' && (
-                  <div className="rounded-xl border border-white/10 bg-black/40 p-3 space-y-2.5">
-                    <div className="flex items-center gap-1.5 text-xs font-semibold text-rose-400">
-                      <Video className="w-3.5 h-3.5" />
-                      <span>Blok Video Embed</span>
-                    </div>
-
-                    <div>
-                      <input
-                        type="text"
-                        value={block.url || ''}
-                        onChange={(e) =>
-                          onUpdateBlock(block.id, {
-                            url: e.target.value,
-                            embedUrl: extractEmbedUrl(e.target.value),
-                          })
-                        }
-                        placeholder="Tempel URL YouTube / Vimeo (https://youtube.com/watch?v=...)"
-                        className="w-full rounded-lg bg-black/40 border border-white/10 p-2 text-xs font-mono text-neutral-200 focus:outline-none focus:border-accent-400"
-                      />
-                    </div>
-
-                    {block.url && (
-                      <div className="aspect-video w-full max-w-xl mx-auto rounded-lg overflow-hidden border border-white/10 bg-black">
-                        <iframe
-                          src={block.embedUrl || extractEmbedUrl(block.url)}
-                          title={block.title || 'Video'}
-                          className="w-full h-full border-0"
-                          allowFullScreen
-                        />
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {/* 6. Quote Block */}
-                {block.type === 'quote' && (
-                  <div className="border-l-4 border-amber-400 bg-amber-400/[0.04] p-4 rounded-r-xl space-y-2">
-                    {rawHtmlBlockIds[block.id] ? (
-                      <AutoResizeTextarea
-                        value={block.text}
-                        onChange={(val) => onUpdateBlock(block.id, { text: val })}
-                        placeholder="Ketik kutipan di sini (HTML: <strong>, dll)..."
-                        minHeight={32}
-                        className="w-full bg-black/40 border border-white/10 rounded-lg p-2.5 font-mono text-xs text-amber-300 focus:outline-none focus:border-amber-400 leading-relaxed"
-                      />
-                    ) : (
-                      <RichContentEditable
-                        initialHtml={block.text}
-                        onChange={(val) => onUpdateBlock(block.id, { text: val })}
-                        placeholder="Ketik kutipan di sini..."
-                        className="text-base sm:text-lg italic text-neutral-100 placeholder:text-neutral-600 focus:outline-none leading-relaxed min-h-[32px] [&_strong]:font-bold [&_strong]:text-white [&_b]:font-bold [&_b]:text-white [&_a]:text-accent-400 [&_a]:underline"
-                      />
-                    )}
-                    <div className="flex items-center gap-2 pt-1 border-t border-white/5">
-                      <span className="text-[11px] font-mono text-neutral-500">—</span>
-                      <input
-                        type="text"
-                        value={block.author || ''}
-                        onChange={(e) => onUpdateBlock(block.id, { author: e.target.value })}
-                        placeholder="Nama Tokoh / Pakar (Opsional)"
-                        className="bg-transparent border-0 text-xs text-amber-300 placeholder:text-neutral-600 focus:outline-none p-0 focus:ring-0 font-medium"
-                      />
-                    </div>
-                  </div>
-                )}
-
-                {/* 7. List Block */}
-                {block.type === 'list' && (
-                  <div className="rounded-xl border border-white/10 bg-black/30 p-3 space-y-2">
-                    <div className="flex items-center justify-between text-xs text-neutral-400">
-                      <span className="flex items-center gap-1.5 font-semibold text-purple-400">
-                        <List className="w-3.5 h-3.5" />
-                        <span>Daftar Poin ({block.ordered ? 'Berurutan 1, 2, 3' : 'Bullet Poin'})</span>
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() => onUpdateBlock(block.id, { ordered: !block.ordered })}
-                        className="text-[11px] text-accent-400 hover:underline"
-                      >
-                        Ubah ke {block.ordered ? 'Bullet' : 'Nomor'}
-                      </button>
-                    </div>
-
-                    <div className="space-y-1.5 pl-2">
-                      {block.items.map((item, itemIdx) => (
-                        <div key={itemIdx} className="flex items-start gap-2 group/item">
-                          <span className="text-xs text-neutral-500 font-mono w-4 text-right shrink-0 pt-1">
-                            {block.ordered ? `${itemIdx + 1}.` : '•'}
-                          </span>
-                          {rawHtmlBlockIds[block.id] ? (
-                            <input
-                              type="text"
-                              value={item}
-                              onChange={(e) => {
-                                const newItems = [...block.items]
-                                newItems[itemIdx] = e.target.value
-                                onUpdateBlock(block.id, { items: newItems })
-                              }}
-                              className="flex-1 bg-black/40 border border-white/10 rounded px-2 py-1 font-mono text-xs text-neutral-200 focus:outline-none focus:border-accent-400"
-                              placeholder="Tulis poin (HTML)..."
-                            />
-                          ) : (
-                            <RichListItemEditable
-                              initialHtml={item}
-                              onChange={(val) => {
-                                const newItems = [...block.items]
-                                newItems[itemIdx] = val
-                                onUpdateBlock(block.id, { items: newItems })
-                              }}
-                              onEnter={() => {
-                                const newItems = [...block.items]
-                                newItems.splice(itemIdx + 1, 0, '')
-                                onUpdateBlock(block.id, { items: newItems })
-                              }}
-                              onDeleteIfEmpty={() => {
-                                if (block.items.length > 1) {
-                                  const newItems = block.items.filter((_, i) => i !== itemIdx)
-                                  onUpdateBlock(block.id, { items: newItems })
-                                }
-                              }}
-                              placeholder="Tulis poin..."
-                            />
-                          )}
-                          <button
-                            type="button"
-                            onClick={() => {
-                              const newItems = block.items.filter((_, i) => i !== itemIdx)
-                              onUpdateBlock(block.id, { items: newItems.length ? newItems : [''] })
-                            }}
-                            className="p-1 text-neutral-500 hover:text-red-400 transition-colors opacity-40 group-hover/item:opacity-100"
-                            title="Hapus Poin"
-                          >
-                            <Trash2 className="w-3 h-3" />
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={() => onUpdateBlock(block.id, { items: [...block.items, ''] })}
-                      className="inline-flex items-center gap-1 text-[11px] text-accent-400 hover:text-accent-300 font-semibold pt-1"
-                    >
-                      <Plus className="w-3 h-3" />
-                      <span>Tambah Poin</span>
-                    </button>
-                  </div>
-                )}
-
-                {/* 8. FAQ Block */}
-                {block.type === 'faq' && (
-                  <div className="rounded-xl border border-teal-500/20 bg-teal-950/10 p-3 space-y-2">
-                    <div className="flex items-center gap-1.5 text-xs font-semibold text-teal-400">
-                      <HelpCircle className="w-3.5 h-3.5" />
-                      <span>FAQ (Struktur AI Overview / SERP)</span>
-                    </div>
-                    <input
-                      type="text"
-                      value={block.question}
-                      onChange={(e) => onUpdateBlock(block.id, { question: e.target.value })}
-                      placeholder="Pertanyaan (Q)?"
-                      className="w-full bg-black/40 border border-white/10 rounded-lg p-2 text-xs font-bold text-white focus:outline-none focus:border-accent-400"
-                    />
-                    <AutoResizeTextarea
-                      value={block.answer}
-                      onChange={(val) => onUpdateBlock(block.id, { answer: val })}
-                      placeholder="Jawaban ringkas dan informatif (A)..."
-                      minHeight={40}
-                      className="w-full bg-black/40 border border-white/10 rounded-lg p-2 text-xs text-neutral-300 focus:outline-none focus:border-accent-400 leading-relaxed"
-                    />
-                  </div>
-                )}
-
-                {/* 9. Code Block */}
-                {block.type === 'code' && (
-                  <div className="rounded-xl border border-white/15 bg-black/70 p-3 space-y-2">
-                    <div className="flex items-center justify-between text-xs text-neutral-400">
-                      <span className="flex items-center gap-1.5 font-mono text-cyan-400">
-                        <Code className="w-3.5 h-3.5" />
-                        <span>Kode Program</span>
-                      </span>
-                      <select
-                        value={block.language || 'typescript'}
-                        onChange={(e) => onUpdateBlock(block.id, { language: e.target.value })}
-                        className="bg-white/10 border border-white/15 rounded px-2 py-0.5 text-[11px] font-mono text-white focus:outline-none"
-                      >
-                        <option value="typescript" className="bg-surface-elevated">TypeScript</option>
-                        <option value="javascript" className="bg-surface-elevated">JavaScript</option>
-                        <option value="html" className="bg-surface-elevated">HTML</option>
-                        <option value="css" className="bg-surface-elevated">CSS</option>
-                        <option value="python" className="bg-surface-elevated">Python</option>
-                        <option value="bash" className="bg-surface-elevated">Bash / Shell</option>
-                        <option value="sql" className="bg-surface-elevated">SQL</option>
-                        <option value="json" className="bg-surface-elevated">JSON</option>
-                      </select>
-                    </div>
-                    <textarea
-                      rows={5}
-                      value={block.code}
-                      onChange={(e) => onUpdateBlock(block.id, { code: e.target.value })}
-                      className="w-full font-mono text-xs bg-black/50 border border-white/10 rounded-lg p-3 text-cyan-300 focus:outline-none focus:border-accent-400 leading-relaxed"
-                      placeholder="// Tulis kode..."
-                    />
-                  </div>
-                )}
-
-                {/* 10. Divider */}
-                {block.type === 'divider' && (
-                  <div className="py-3 flex items-center justify-center">
-                    <div className="h-px w-full bg-white/10" />
-                  </div>
-                )}
-
-                {/* 11. HTML Block */}
-                {block.type === 'html' && (
-                  <div className="rounded-xl border border-amber-500/30 bg-black/60 p-3.5 space-y-3">
-                    <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
-                      <div className="flex items-center gap-2">
-                        <Code className="w-3.5 h-3.5 text-amber-400" />
-                        <span className="font-semibold text-amber-300">Blok HTML Kustom / Impor</span>
-                        <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20">
-                          Raw HTML
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        {onConvertSingleHtmlBlockToBlocks && (
-                          <button
-                            type="button"
-                            onClick={() => onConvertSingleHtmlBlockToBlocks(block.id)}
-                            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 text-xs font-semibold transition-colors"
-                            title="Konversi tag HTML di dalam blok ini menjadi blok terpisah (judul, paragraf, list, dll)"
-                          >
-                            <Sparkles className="w-3.5 h-3.5" />
-                            <span>Pecah Jadi Blok Standar</span>
-                          </button>
-                        )}
-                        <button
-                          type="button"
-                          onClick={() => onToggleRawHtmlBlock(block.id)}
-                          className={`px-2.5 py-1 rounded-md text-xs font-mono font-medium transition-colors ${
-                            rawHtmlBlockIds[block.id]
-                              ? 'bg-white/20 text-white'
-                              : 'bg-white/5 text-neutral-400 hover:text-white'
-                          }`}
-                        >
-                          {rawHtmlBlockIds[block.id] ? 'Lihat Pratinjau' : 'Edit Kode'}
-                        </button>
-                      </div>
-                    </div>
-
-                    {rawHtmlBlockIds[block.id] ? (
-                      <AutoResizeTextarea
-                        value={block.html}
-                        onChange={(val) => onUpdateBlock(block.id, { html: val })}
-                        placeholder="<div>...</div>"
-                        minHeight={90}
-                        className="w-full bg-black/70 border border-white/10 rounded-lg p-3 font-mono text-xs text-amber-300 focus:outline-none focus:border-amber-400 leading-relaxed"
-                      />
-                    ) : (
-                      <div
-                        className="prose prose-invert max-w-none text-xs p-3.5 bg-neutral-900/60 rounded-xl border border-white/10 overflow-x-auto text-neutral-300"
-                        dangerouslySetInnerHTML={{ __html: sanitizeHtmlContent(block.html) }}
-                      />
-                    )}
-                  </div>
-                )}
-
-                {/* 12. Internal Links Block */}
-                {block.type === 'internal-links' && (
-                  <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/[0.04] p-3.5 space-y-3">
-                    <div className="flex flex-wrap items-center justify-between gap-2 border-b border-emerald-500/20 pb-2.5">
-                      <div className="flex items-center gap-2 flex-1 min-w-[200px]">
-                        <Link2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                        <input
-                          type="text"
-                          value={block.title || 'Indeks Tautan Internal Terkait (SEO Reference)'}
-                          onChange={(e) => onUpdateBlock(block.id, { title: e.target.value })}
-                          placeholder="Judul Grup Tautan Internal..."
-                          className="bg-transparent border-0 border-b border-transparent focus:border-emerald-400/50 font-semibold text-xs sm:text-sm text-emerald-300 focus:outline-none w-full"
-                        />
-                      </div>
-                      <div className="flex items-center gap-2 shrink-0">
-                        <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                          {block.links?.length || 0} Tautan
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            const newLinks = [...(block.links || []), { text: '', href: '' }]
-                            onUpdateBlock(block.id, { links: newLinks })
-                          }}
-                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 text-xs font-semibold transition-colors"
-                        >
-                          <Plus className="w-3.5 h-3.5" />
-                          <span>Tambah Tautan</span>
-                        </button>
-                      </div>
-                    </div>
-
-                    {(!block.links || block.links.length === 0) ? (
-                      <p className="text-xs text-neutral-500 italic py-2 text-center">
-                        Belum ada tautan internal. Klik &quot;Tambah Tautan&quot; untuk menyematkan link relevan.
-                      </p>
-                    ) : (
-                      <div className="space-y-2">
-                        {block.links.map((link, linkIdx) => (
-                          <div
-                            key={linkIdx}
-                            className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 p-2 rounded-lg bg-black/40 border border-white/5 group/link"
-                          >
-                            <span className="text-xs text-emerald-500 font-mono w-4 text-center shrink-0 hidden sm:inline">
-                              •
-                            </span>
-                            <div className="flex-1">
-                              <input
-                                type="text"
-                                value={link.text}
-                                onChange={(e) => {
-                                  const newLinks = [...block.links]
-                                  newLinks[linkIdx] = { ...newLinks[linkIdx], text: e.target.value }
-                                  onUpdateBlock(block.id, { links: newLinks })
-                                }}
-                                placeholder="Teks Tautan (Anchor Text)..."
-                                className="w-full bg-transparent border-0 border-b border-transparent focus:border-accent-400 text-xs text-white placeholder:text-neutral-500 focus:outline-none py-1"
-                              />
-                            </div>
-                            <div className="flex-1 flex items-center gap-1.5">
-                              <input
-                                type="text"
-                                value={link.href}
-                                onChange={(e) => {
-                                  const newLinks = [...block.links]
-                                  newLinks[linkIdx] = { ...newLinks[linkIdx], href: e.target.value }
-                                  onUpdateBlock(block.id, { links: newLinks })
-                                }}
-                                placeholder="URL (/layanan/..., https://...)"
-                                className="w-full bg-transparent border-0 border-b border-transparent focus:border-accent-400 font-mono text-[11px] text-accent-300 placeholder:text-neutral-500 focus:outline-none py-1"
-                              />
-                              {link.href && (
-                                <a
-                                  href={link.href.startsWith('/') ? `${siteConfig.url}${link.href}` : link.href}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="p-1 text-neutral-400 hover:text-white transition-colors shrink-0"
-                                  title="Tes Buka Tautan"
-                                >
-                                  <ExternalLink className="w-3.5 h-3.5" />
-                                </a>
-                              )}
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  const newLinks = block.links.filter((_, i) => i !== linkIdx)
-                                  onUpdateBlock(block.id, { links: newLinks })
-                                }}
-                                className="p-1 text-neutral-500 hover:text-red-400 transition-colors shrink-0"
-                                title="Hapus Tautan Ini"
-                              >
-                                <Trash2 className="w-3.5 h-3.5" />
-                              </button>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {/* 13. Table Block (Notion-style) */}
-                {block.type === 'table' && (
-                  <NotionTableEditor
-                    block={block}
-                    onUpdateBlock={onUpdateBlock}
-                  />
-                )}
-              </div>
+              <BlockRow
+                key={block.id}
+                block={block}
+                index={idx}
+                count={blocks.length}
+                isRaw={Boolean(rawHtmlBlockIds[block.id])}
+                actions={blockActions}
+              />
             ))}
 
-            {/* Compact Bottom Inserter Bar */}
+            {/* Block inserter */}
             <div className="pt-6 mt-6 border-t border-white/[0.08]">
-              <div className="flex flex-wrap items-center gap-1.5">
-                <span className="text-[11px] font-mono text-neutral-500 font-semibold mr-1">
-                  + Tambah:
-                </span>
-                <button
-                  type="button"
-                  onClick={() => onAddBlock('paragraph')}
-                  className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-xs text-neutral-300 hover:text-white flex items-center gap-1.5 transition-colors"
-                >
-                  <FileText className="w-3.5 h-3.5 text-accent-400" />
-                  <span>Paragraf</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => onAddBlock('heading2')}
-                  className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-xs text-neutral-300 hover:text-white flex items-center gap-1.5 transition-colors"
-                >
-                  <Heading2 className="w-3.5 h-3.5 text-info" />
-                  <span>Subjudul H2</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => onAddBlock('heading3')}
-                  className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-xs text-neutral-300 hover:text-white flex items-center gap-1.5 transition-colors"
-                >
-                  <Heading3 className="w-3.5 h-3.5 text-info" />
-                  <span>Subjudul H3</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => onAddBlock('image')}
-                  className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-xs text-neutral-300 hover:text-white flex items-center gap-1.5 transition-colors"
-                >
-                  <ImageIcon className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>Gambar</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => onAddBlock('video')}
-                  className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-xs text-neutral-300 hover:text-white flex items-center gap-1.5 transition-colors"
-                >
-                  <Video className="w-3.5 h-3.5 text-rose-400" />
-                  <span>Video</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => onAddBlock('quote')}
-                  className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-xs text-neutral-300 hover:text-white flex items-center gap-1.5 transition-colors"
-                >
-                  <Quote className="w-3.5 h-3.5 text-amber-400" />
-                  <span>Kutipan</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => onAddBlock('list')}
-                  className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-xs text-neutral-300 hover:text-white flex items-center gap-1.5 transition-colors"
-                >
-                  <List className="w-3.5 h-3.5 text-purple-400" />
-                  <span>Daftar</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => onAddBlock('faq')}
-                  className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-xs text-neutral-300 hover:text-white flex items-center gap-1.5 transition-colors"
-                >
-                  <HelpCircle className="w-3.5 h-3.5 text-teal-400" />
-                  <span>FAQ</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => onAddBlock('code')}
-                  className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-xs text-neutral-300 hover:text-white flex items-center gap-1.5 transition-colors"
-                >
-                  <Code className="w-3.5 h-3.5 text-cyan-400" />
-                  <span>Kode</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => onAddBlock('html')}
-                  className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-xs text-neutral-300 hover:text-white flex items-center gap-1.5 transition-colors"
-                  title="Tambah blok HTML kustom"
-                >
-                  <Code className="w-3.5 h-3.5 text-amber-400" />
-                  <span>HTML</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => onAddBlock('divider')}
-                  className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-xs text-neutral-300 hover:text-white flex items-center gap-1.5 transition-colors"
-                >
-                  <Minus className="w-3.5 h-3.5 text-neutral-400" />
-                  <span>Garis</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => onAddBlock('internal-links')}
-                  className="px-2.5 py-1 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 text-xs text-emerald-300 hover:text-emerald-200 flex items-center gap-1.5 transition-colors"
-                  title="Tambah indeks tautan internal SEO"
-                >
-                  <Link2 className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>Tautan SEO</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => onAddBlock('table')}
-                  className="px-2.5 py-1 rounded-lg bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20 text-xs text-blue-300 hover:text-blue-200 flex items-center gap-1.5 transition-colors"
-                  title="Tambah tabel data Notion-style"
-                >
-                  <TableIcon className="w-3.5 h-3.5 text-blue-400" />
-                  <span>Tabel</span>
-                </button>
-              </div>
+              <h3 id="block-inserter-heading" className="mb-2 text-[11px] font-mono text-neutral-300 font-semibold">
+                Tambah blok
+              </h3>
+              <ul aria-labelledby="block-inserter-heading" className="flex flex-wrap items-center gap-1.5">
+                {ADDABLE_TYPES.map((item) => {
+                  const Icon = item.icon
+                  return (
+                    <li key={item.type}>
+                      <button
+                        type="button"
+                        onClick={() => blockActions.add(item.type)}
+                        className="min-h-8 px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-xs text-neutral-200 hover:text-white flex items-center gap-1.5 transition-colors"
+                      >
+                        <Icon className={`w-3.5 h-3.5 ${item.iconClass}`} aria-hidden="true" />
+                        <span>{item.label}</span>
+                      </button>
+                    </li>
+                  )
+                })}
+              </ul>
             </div>
           </div>
         )}
 
-        {/* Import Markdown Modal */}
-        {isImportModalOpen && (
-          <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
-            <div className="w-full max-w-2xl bg-[var(--studio-bg)] border border-white/15 rounded-2xl shadow-2xl p-5 sm:p-6 space-y-4 animate-in fade-in zoom-in-95 duration-150">
-              <div className="flex items-start justify-between gap-3 pb-3 border-b border-white/10">
-                <div className="flex items-center gap-2.5">
-                  <div className="p-2 rounded-xl bg-info/10 border border-info/20 text-info">
-                    <Sparkles className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <h3 className="text-base font-bold text-white flex items-center gap-2">
-                      <span>Impor Dokumen Markdown (ChatGPT / AI)</span>
-                      <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-info/15 text-info-300 border border-info/20">
-                        Auto Parser
-                      </span>
-                    </h3>
-                    <p className="text-xs text-neutral-400 mt-0.5">
-                      Tempel teks Markdown langsung dari ChatGPT, Claude, atau text editor. Struktur heading, kutipan, daftar poin, dan tabel akan otomatis dipecah menjadi blok visual.
-                    </p>
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setIsImportModalOpen(false)}
-                  className="p-1.5 rounded-lg text-neutral-400 hover:text-white hover:bg-white/10 transition-colors"
-                  title="Tutup Modal"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-
-              <div>
-                <textarea
-                  rows={13}
-                  value={importText}
-                  onChange={(e) => setImportText(e.target.value)}
-                  autoFocus
-                  className="w-full font-mono text-xs bg-black/70 border border-white/15 rounded-xl p-4 text-emerald-300 focus:outline-none focus:border-accent-400 leading-relaxed scrollbar-thin resize-none"
-                  placeholder={`# Judul Artikel\n## Subjudul Bagian\n\n> **Kutipan penting.** Penjelasan kutipan...\n\nParagraf penjelasan dengan **tebal** dan [tautan](#link)...\n\n| Jenis Layanan | Cocok Untuk | Fokus Utama |\n|---|---|---|\n| Website Profil | Perusahaan Resmi | Kredibilitas |\n\n1. [Poin Daftar Isi](#poin-1)\n2. [Poin Kedua](#poin-2)`}
-                />
-              </div>
-
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2">
-                <label className="flex items-center gap-2 text-xs text-neutral-300 cursor-pointer select-none">
-                  <input
-                    type="checkbox"
-                    checked={useExtractedTitle}
-                    onChange={(e) => setUseExtractedTitle(e.target.checked)}
-                    className="rounded border-white/20 bg-black/40 text-info focus:ring-0 focus:ring-offset-0"
-                  />
-                  <span>Ambil judul otomatis dari baris pertama <code className="text-[11px] text-info-300 font-mono"># Judul</code></span>
-                </label>
-
-                <div className="flex items-center justify-end gap-2 shrink-0">
-                  <button
-                    type="button"
-                    onClick={() => setIsImportModalOpen(false)}
-                    className="px-3.5 py-1.5 rounded-lg text-xs text-neutral-400 hover:text-white hover:bg-white/5 transition-colors"
-                  >
-                    Batal
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleExecuteImport}
-                    disabled={!importText.trim()}
-                    className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-info hover:bg-info disabled:opacity-40 disabled:hover:bg-accent-500 text-accent-950 text-xs font-bold transition-all shadow-md cursor-pointer"
-                  >
-                    <Sparkles className="w-3.5 h-3.5" />
-                    <span>Konversi ke Blok Visual</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
+        <EditorDialog
+          open={isImportModalOpen}
+          onClose={() => {
+            setIsImportModalOpen(false)
+            setImportError(null)
+          }}
+          size="lg"
+          icon={<Upload className="h-5 w-5 text-info-300" />}
+          title="Impor Markdown"
+          description="Tempel Markdown dari editor teks atau asisten AI. Judul, subjudul, kutipan, daftar, dan tabel diubah menjadi blok. Blok yang ada saat ini akan diganti."
+          initialFocusId="markdown-import-text"
+          footer={
+            <>
+              <button type="button" onClick={() => setIsImportModalOpen(false)} className={dialogButton.secondary}>
+                Batal
+              </button>
+              <button type="submit" form="markdown-import-form" className={dialogButton.primary}>
+                Ubah ke blok
+              </button>
+            </>
+          }
+        >
+          <form id="markdown-import-form" onSubmit={handleExecuteImport} noValidate className="space-y-3">
+            <label htmlFor="markdown-import-text" className="block text-xs font-semibold text-neutral-200">
+              Teks Markdown
+            </label>
+            <textarea
+              id="markdown-import-text"
+              rows={13}
+              value={importText}
+              onChange={(e) => {
+                setImportText(e.target.value)
+                if (importError) setImportError(null)
+              }}
+              aria-invalid={importError ? true : undefined}
+              aria-describedby={importError ? 'markdown-import-error' : undefined}
+              className="w-full font-mono text-xs bg-black/70 border border-white/15 rounded-xl p-4 text-emerald-300 leading-relaxed scrollbar-thin resize-y"
+              placeholder={`# Judul Artikel\n## Subjudul Bagian\n\nParagraf dengan **tebal** dan [tautan](/services)...`}
+            />
+            {importError && (
+              <p id="markdown-import-error" className="flex items-center gap-1 text-xs text-amber-300">
+                <AlertTriangle className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+                {importError}
+              </p>
+            )}
+            <label className="flex items-center gap-2 text-xs text-neutral-200 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={useExtractedTitle}
+                onChange={(e) => setUseExtractedTitle(e.target.checked)}
+                className="h-4 w-4 rounded border-white/30 bg-black/40"
+              />
+              <span>
+                Pakai baris <code className="text-[11px] text-info-300 font-mono"># Judul</code> sebagai judul artikel (jika judul masih kosong)
+              </span>
+            </label>
+          </form>
+        </EditorDialog>
       </div>
     </div>
   )
-}
+})

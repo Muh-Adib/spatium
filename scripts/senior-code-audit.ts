@@ -317,7 +317,10 @@ if (process.argv[1]?.includes('senior-code-audit')) {
   }
 
   // Save report to disk
-  const reportPath = path.join(targetDir, 'docs', 'SENIOR_AUDIT_REPORT.json');
+  // Generated output, not documentation: written to the gitignored scratch dir.
+  const reportDir = path.join(targetDir, '.tmp', 'reports');
+  fs.mkdirSync(reportDir, { recursive: true });
+  const reportPath = path.join(reportDir, 'senior-audit-report.json');
   fs.mkdirSync(path.dirname(reportPath), { recursive: true });
   fs.writeFileSync(reportPath, JSON.stringify({ summary, elapsedMs: elapsed, findings }, null, 2));
   console.log(`📄 Detailed JSON report written to: ${reportPath}`);

@@ -21,7 +21,8 @@ export async function GET(
 
   try {
     const article = await getArticleBySlug(slug)
-    if (!article) {
+    // Only published articles are deliverable; drafts are reported as not found.
+    if (!article || article.status !== 'published') {
       return jsonResponse({ error: 'Article not found', slug }, 404)
     }
 

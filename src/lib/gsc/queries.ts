@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/db/prisma'
+import { siteConfig } from '@/config/site'
 import { Integration, connectedResult, notConnected } from '../integration/result'
 import { querySearchAnalytics, GscSearchAnalyticsRow } from './client'
 
@@ -53,7 +54,7 @@ export interface GscCountryItem {
  * Fetch Search Console performance metrics with SQLite caching and real Google API.
  * Zero-mock compliant: returns honest disconnected state when credentials are not configured or API fails.
  */
-export async function getGscOverview(siteUrl = 'https://www.unimasi.com'): Promise<Integration<GscOverview>> {
+export async function getGscOverview(siteUrl: string = siteConfig.url): Promise<Integration<GscOverview>> {
   const serviceEmail = process.env.GSC_CLIENT_EMAIL
   const privateKey = process.env.GSC_PRIVATE_KEY
 
@@ -154,7 +155,7 @@ export async function getGscOverview(siteUrl = 'https://www.unimasi.com'): Promi
  * Fetch top queries for keyword suggestions and SEO analysis.
  * Zero-mock compliant: queries live Google Search Console API or returns honest error/disconnected state.
  */
-export async function getGscTopQueries(limit = 20, siteUrl = 'https://www.unimasi.com'): Promise<Integration<GscQueryItem[]>> {
+export async function getGscTopQueries(limit = 20, siteUrl: string = siteConfig.url): Promise<Integration<GscQueryItem[]>> {
   const serviceEmail = process.env.GSC_CLIENT_EMAIL
   const privateKey = process.env.GSC_PRIVATE_KEY
 
@@ -196,7 +197,7 @@ export async function getGscTopQueries(limit = 20, siteUrl = 'https://www.unimas
 /**
  * Fetch top landing pages from Google Search Console API.
  */
-export async function getGscPages(limit = 50, siteUrl = 'https://www.unimasi.com'): Promise<Integration<GscPageItem[]>> {
+export async function getGscPages(limit = 50, siteUrl: string = siteConfig.url): Promise<Integration<GscPageItem[]>> {
   const serviceEmail = process.env.GSC_CLIENT_EMAIL
   const privateKey = process.env.GSC_PRIVATE_KEY
 
@@ -238,7 +239,7 @@ export async function getGscPages(limit = 50, siteUrl = 'https://www.unimasi.com
 /**
  * Fetch device breakdown (DESKTOP, MOBILE, TABLET) from Google Search Console API.
  */
-export async function getGscDevices(siteUrl = 'https://www.unimasi.com'): Promise<Integration<GscDeviceItem[]>> {
+export async function getGscDevices(siteUrl: string = siteConfig.url): Promise<Integration<GscDeviceItem[]>> {
   const serviceEmail = process.env.GSC_CLIENT_EMAIL
   const privateKey = process.env.GSC_PRIVATE_KEY
 
@@ -279,7 +280,7 @@ export async function getGscDevices(siteUrl = 'https://www.unimasi.com'): Promis
 /**
  * Fetch country breakdown from Google Search Console API.
  */
-export async function getGscCountries(limit = 50, siteUrl = 'https://www.unimasi.com'): Promise<Integration<GscCountryItem[]>> {
+export async function getGscCountries(limit = 50, siteUrl: string = siteConfig.url): Promise<Integration<GscCountryItem[]>> {
   const serviceEmail = process.env.GSC_CLIENT_EMAIL
   const privateKey = process.env.GSC_PRIVATE_KEY
 

@@ -1,7 +1,8 @@
 /**
  * Brand-specific JSON-LD @graph builder.
  *
- * UNIMASI is an Animation & Motion Design studio. Per the task rules, no
+ * SPATIUM is a Spatial Technology Studio (digital twin for the creative
+ * industry). Per the task rules, no
  * address, telephone, or email may be emitted unless verified — those fields
  * are omitted entirely rather than filled with placeholders.
  */
@@ -62,7 +63,7 @@ export function buildBrandGraph(input: BrandGraphInput): Schema {
       '3D Gaussian Splatting',
       'LiDAR Laser Scanning',
       'Photogrammetry Digital Twin',
-      'Spatial Computing & WebGL',
+      'Spatial Computing',
       'Virtual Scouting & Previz',
     ],
   })

@@ -29,7 +29,7 @@ function askQuestion(query: string, hidden = false): Promise<string> {
 
 async function main() {
   console.log('\n╔══════════════════════════════════════════════════════════════╗')
-  console.log('║       SEGIA Digital Platform — Create Superadmin CLI         ║')
+  console.log('║       SPATIUM Studio — Create Superadmin CLI                ║')
   console.log('╚══════════════════════════════════════════════════════════════╝\n')
 
   const email = await askQuestion('Superadmin Email: ')

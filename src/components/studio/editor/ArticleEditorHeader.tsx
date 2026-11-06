@@ -1,7 +1,6 @@
 'use client'
 
-import React, { useState, useRef, useEffect } from 'react'
-import Link from 'next/link'
+import { memo, useEffect, useId, useRef, useState } from 'react'
 import { siteConfig } from '@/config/site'
 import {
   ArrowLeft,
@@ -9,489 +8,351 @@ import {
   Send,
   Eye,
   Sliders,
-  Sparkles,
-  Bot,
   Calendar,
   Check,
-  CheckCircle2,
   Clock,
-  Layers,
   ChevronDown,
   Columns,
   PenSquare,
-  Search,
-  Maximize2,
   ExternalLink,
+  Keyboard,
+  HardDrive,
+  CircleDot,
 } from 'lucide-react'
-import { useIndexingCooldown } from '@/hooks/useIndexingCooldown'
+import type { ArticleEditorStatus } from '@/lib/articles/editorState'
 
 export type EditorViewMode = 'focus' | 'split-inspector' | 'split-preview' | 'full-preview'
 
 interface ArticleEditorHeaderProps {
   title: string
   slug: string
-  status: 'draft' | 'in_review' | 'approved' | 'scheduled' | 'published'
+  status: ArticleEditorStatus
   isEditMode: boolean
   isDirty: boolean
   saving: boolean
+  /** Time the browser autosave last wrote a local copy (null = none yet). */
+  localSavedAt: Date | null
   wordCount: number
   readingTimeMinutes: number
-  internalLinksCount: number
   seoScore: number
   viewMode: EditorViewMode
   onViewModeChange: (mode: EditorViewMode) => void
   isInspectorOpen: boolean
   onToggleInspector: () => void
-  isAiOpen: boolean
-  onToggleAi: () => void
-  onSave: (targetStatus?: 'draft' | 'in_review' | 'approved' | 'scheduled' | 'published') => void
-  permissions: {
-    canPublish?: boolean
-    canSubmitForReview?: boolean
-    [key: string]: any
-  }
+  onSave: (targetStatus?: ArticleEditorStatus) => void
+  canPublish: boolean
+  canSubmitForReview: boolean
   publicationDate: string
   onChangePublicationDate: (val: string) => void
   scheduleLocal: string
   onChangeScheduleLocal: (val: string) => void
   publicationTimezone: string
-  onOpenSeoTab: () => void
-  onNavigateBack?: () => void
+  onOpenShortcuts: () => void
+  onNavigateBack: () => void
 }
 
-export function ArticleEditorHeader({
+const STATUS_LABEL: Record<ArticleEditorStatus, string> = {
+  published: 'Terbit',
+  scheduled: 'Terjadwal',
+  in_review: 'Menunggu review',
+  approved: 'Disetujui',
+  draft: 'Draf',
+}
+
+const VIEW_OPTIONS: Array<{ id: EditorViewMode; label: string; icon: typeof PenSquare }> = [
+  { id: 'split-inspector', label: 'Tulis', icon: PenSquare },
+  { id: 'split-preview', label: 'Berdampingan', icon: Columns },
+  { id: 'full-preview', label: 'Pratinjau', icon: Eye },
+]
+
+const fmtTime = (d: Date) => d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })
+
+const secondaryBtn =
+  'inline-flex min-h-9 items-center gap-1.5 rounded-lg border border-white/15 bg-white/5 px-2.5 py-1.5 text-xs font-semibold text-neutral-100 hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-50'
+
+export const ArticleEditorHeader = memo(function ArticleEditorHeader({
   title,
   slug,
   status,
   isEditMode,
   isDirty,
   saving,
+  localSavedAt,
   wordCount,
   readingTimeMinutes,
-  internalLinksCount,
   seoScore,
   viewMode,
   onViewModeChange,
   isInspectorOpen,
   onToggleInspector,
-  isAiOpen,
-  onToggleAi,
   onSave,
-  permissions,
+  canPublish,
+  canSubmitForReview,
   publicationDate,
   onChangePublicationDate,
   scheduleLocal,
   onChangeScheduleLocal,
   publicationTimezone,
-  onOpenSeoTab,
+  onOpenShortcuts,
   onNavigateBack,
 }: ArticleEditorHeaderProps) {
   const [scheduleOpen, setScheduleOpen] = useState(false)
+  const [scheduleError, setScheduleError] = useState<string | null>(null)
   const scheduleRef = useRef<HTMLDivElement>(null)
-
-  // Load indexing status when published to power micro-pills
-  const isPublished = status === 'published'
-  const { status: indexingData } = useIndexingCooldown({
-    type: 'article',
-    idOrSlug: slug,
-    enabled: isPublished && Boolean(slug),
-  })
+  const scheduleTriggerRef = useRef<HTMLButtonElement>(null)
+  const scheduleId = useId()
 
   useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (scheduleRef.current && !scheduleRef.current.contains(event.target as Node)) {
+    if (!scheduleOpen) return
+    const onPointer = (event: MouseEvent) => {
+      if (scheduleRef.current && !scheduleRef.current.contains(event.target as Node)) setScheduleOpen(false)
+    }
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
         setScheduleOpen(false)
+        scheduleTriggerRef.current?.focus()
       }
     }
-    if (scheduleOpen) {
-      document.addEventListener('mousedown', handleClickOutside)
-      return () => document.removeEventListener('mousedown', handleClickOutside)
+    document.addEventListener('mousedown', onPointer)
+    document.addEventListener('keydown', onKey)
+    return () => {
+      document.removeEventListener('mousedown', onPointer)
+      document.removeEventListener('keydown', onKey)
     }
   }, [scheduleOpen])
 
-  // SEO Score color styling
-  const seoBadgeStyle =
-    seoScore >= 80
-      ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/25'
-      : seoScore >= 50
-      ? 'bg-amber-500/15 text-amber-400 border-amber-500/30 hover:bg-amber-500/25'
-      : 'bg-rose-500/15 text-rose-400 border-rose-500/30 hover:bg-rose-500/25'
+  const activeView = viewMode === 'focus' ? 'split-inspector' : viewMode
+  const seoTone = seoScore >= 80 ? 'text-emerald-300' : seoScore >= 50 ? 'text-amber-300' : 'text-rose-300'
 
-  // Status badge styling
-  const statusLabel =
-    status === 'published'
-      ? 'Terbit'
-      : status === 'scheduled'
-      ? 'Terjadwal'
-      : status === 'in_review'
-      ? 'Menunggu Review'
-      : 'Draf'
+  let saveIcon = <Check className="h-3.5 w-3.5 text-emerald-300" aria-hidden="true" />
+  let saveText = isEditMode ? 'Tersimpan di server' : 'Belum pernah disimpan'
+  if (saving) {
+    saveIcon = <CircleDot className="h-3.5 w-3.5 text-accent-300" aria-hidden="true" />
+    saveText = 'Menyimpan ke server…'
+  } else if (isDirty) {
+    saveIcon = <HardDrive className="h-3.5 w-3.5 text-amber-300" aria-hidden="true" />
+    saveText = localSavedAt
+      ? `Tersimpan lokal ${fmtTime(localSavedAt)} · belum disimpan ke server`
+      : 'Belum disimpan ke server'
+  }
 
-  const statusBadgeStyle =
-    status === 'published'
-      ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30'
-      : status === 'scheduled'
-      ? 'bg-purple-500/15 text-purple-300 border-purple-500/30'
-      : status === 'in_review'
-      ? 'bg-info/15 text-info-300 border-info/30'
-      : 'bg-white/5 text-neutral-400 border-white/10'
+  const previewHref = slug
+    ? `${siteConfig.url}/journal/${encodeURIComponent(slug)}${status === 'published' ? '' : '?preview=true'}`
+    : null
 
   return (
-    <header className="h-[52px] shrink-0 border-b border-white/[0.08] bg-[var(--studio-sidebar-bg)] px-3 sm:px-4 flex items-center justify-between gap-2 z-30 select-none">
-      {/* ----------------- LEFT: NAV & STATUS ----------------- */}
-      <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-        {onNavigateBack ? (
-          <button
-            type="button"
-            onClick={onNavigateBack}
-            title="Kembali ke Daftar Artikel"
-            className="flex items-center justify-center h-8 w-8 rounded-lg bg-white/5 hover:bg-white/10 text-neutral-300 hover:text-white border border-white/10 transition-colors shrink-0"
-          >
-            <ArrowLeft className="w-4 h-4" />
-          </button>
-        ) : (
-          <Link
-            href="/admin?tab=articles"
-            title="Kembali ke Daftar Artikel"
-            className="flex items-center justify-center h-8 w-8 rounded-lg bg-white/5 hover:bg-white/10 text-neutral-300 hover:text-white border border-white/10 transition-colors shrink-0"
-          >
-            <ArrowLeft className="w-4 h-4" />
-          </Link>
-        )}
+    <header className="z-30 flex min-h-[52px] shrink-0 flex-wrap items-center justify-between gap-x-3 gap-y-1.5 border-b border-white/[0.08] bg-[var(--studio-sidebar-bg)] px-3 py-1.5 sm:px-4">
+      {/* Left: back, status, save state */}
+      <div className="flex min-w-0 items-center gap-2">
+        <button
+          type="button"
+          onClick={onNavigateBack}
+          aria-label="Kembali ke daftar artikel"
+          className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-white/15 bg-white/5 text-neutral-200 hover:bg-white/10 hover:text-white"
+        >
+          <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+        </button>
 
-        <div className="h-4 w-px bg-white/10 hidden sm:block shrink-0" />
+        <h1 className="sr-only">{title ? `Edit artikel: ${title}` : 'Tulis artikel baru'}</h1>
 
-        <div className="flex items-center gap-2 min-w-0">
-          <span
-            className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-mono font-semibold border shrink-0 ${statusBadgeStyle}`}
-          >
-            <span
-              className={`w-1.5 h-1.5 rounded-full ${
-                status === 'published'
-                  ? 'bg-emerald-400'
-                  : status === 'scheduled'
-                  ? 'bg-purple-400'
-                  : status === 'in_review'
-                  ? 'bg-info'
-                  : 'bg-neutral-500'
-              }`}
-            />
-            <span>{statusLabel}</span>
-          </span>
+        <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-white/15 bg-white/5 px-2 py-0.5 font-mono text-[11px] font-semibold text-neutral-100">
+          <span className="sr-only">Status: </span>
+          {STATUS_LABEL[status]}
+        </span>
 
-          {/* Real-time Save status indicator */}
-          <div className="hidden md:flex items-center gap-1.5 text-[11px] font-mono text-neutral-400">
-            {saving ? (
-              <span className="flex items-center gap-1 text-accent-400">
-                <span className="w-1.5 h-1.5 rounded-full bg-accent-400 animate-pulse" />
-                <span>Menyimpan...</span>
-              </span>
-            ) : isDirty ? (
-              <span className="flex items-center gap-1 text-amber-400/90" title="Ada perubahan belum disimpan (Ctrl+S / ⌘S)">
-                <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-                <span>Belum disimpan</span>
-              </span>
-            ) : (
-              <span className="flex items-center gap-1 text-emerald-400/90">
-                <Check className="w-3 h-3 text-emerald-400" />
-                <span>Tersimpan</span>
-              </span>
-            )}
-          </div>
-
-          {/* Indexing Micro-Pill Badges (Only when article is published) */}
-          {status === 'published' && (
-            <div
-              onClick={onOpenSeoTab}
-              title="Status Indeksasi Mesin Pencari (Klik untuk membuka detail di SEO Inspector Tab 4)"
-              className="hidden lg:flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-black/50 border border-white/10 cursor-pointer hover:border-white/20 transition-all text-[10px] font-mono select-none"
-            >
-              {/* Google Micro-Pill */}
-              <span className="flex items-center gap-1" title="Google Search Console URL Inspection Status">
-                <span
-                  className={`w-1.5 h-1.5 rounded-full ${
-                    indexingData?.providers?.google?.status === 'success'
-                      ? 'bg-emerald-400'
-                      : indexingData?.providers?.google?.status === 'rate_limited'
-                      ? 'bg-amber-400'
-                      : indexingData?.providers?.google?.status === 'unconfigured'
-                      ? 'bg-neutral-500'
-                      : indexingData?.providers?.google?.status === 'failed'
-                      ? 'bg-rose-400'
-                      : 'bg-neutral-500'
-                  }`}
-                />
-                <span className="text-neutral-300 font-bold">GSC:</span>
-                <span
-                  className={
-                    indexingData?.providers?.google?.status === 'success'
-                      ? 'text-emerald-400 font-semibold'
-                      : 'text-neutral-400'
-                  }
-                >
-                  {indexingData?.providers?.google?.status === 'success'
-                    ? 'OK'
-                    : indexingData?.providers?.google?.status === 'rate_limited'
-                    ? '429'
-                    : indexingData?.providers?.google?.status === 'unconfigured'
-                    ? 'Off'
-                    : indexingData?.providers?.google?.status === 'failed'
-                    ? 'Err'
-                    : '—'}
-                </span>
-              </span>
-
-              <span className="text-neutral-700">|</span>
-
-              {/* IndexNow Micro-Pill */}
-              <span className="flex items-center gap-1" title="IndexNow (Bing/Yandex) Submission Status">
-                <span
-                  className={`w-1.5 h-1.5 rounded-full ${
-                    indexingData?.providers?.indexnow?.status === 'accepted' || indexingData?.providers?.indexnow?.status === 'success'
-                      ? 'bg-emerald-400'
-                      : indexingData?.providers?.indexnow?.status === 'rate_limited'
-                      ? 'bg-amber-400'
-                      : indexingData?.providers?.indexnow?.status === 'failed'
-                      ? 'bg-rose-400'
-                      : 'bg-neutral-500'
-                  }`}
-                />
-                <span className="text-neutral-300 font-bold">IN:</span>
-                <span
-                  className={
-                    indexingData?.providers?.indexnow?.status === 'accepted' || indexingData?.providers?.indexnow?.status === 'success'
-                      ? 'text-emerald-400 font-semibold'
-                      : 'text-neutral-400'
-                  }
-                >
-                  {indexingData?.providers?.indexnow?.status === 'accepted' || indexingData?.providers?.indexnow?.status === 'success'
-                    ? '202'
-                    : indexingData?.providers?.indexnow?.status === 'rate_limited'
-                    ? '429'
-                    : indexingData?.providers?.indexnow?.status === 'failed'
-                    ? 'Err'
-                    : '—'}
-                </span>
-              </span>
-            </div>
-          )}
-
-          {/* Title preview on desktop */}
-          <span className="text-xs text-neutral-400 hidden xl:inline truncate max-w-[200px] border-l border-white/10 pl-2">
-            {title || 'Tanpa Judul'}
-          </span>
-        </div>
+        <p className="flex min-w-0 items-center gap-1.5 text-[11px] text-neutral-300">
+          {saveIcon}
+          <span className="min-w-0">{saveText}</span>
+        </p>
       </div>
 
-      {/* ----------------- CENTER: STREAMLINED VIEW SWITCHER ----------------- */}
+      {/* Centre: view mode */}
       <div className="flex items-center gap-2">
-        {/* View Mode Segmented Switcher (Kanvas, Split, Pratinjau) */}
-        <div className="flex items-center p-0.5 rounded-lg bg-black/50 border border-white/10 text-xs">
-          <button
-            type="button"
-            onClick={() => onViewModeChange('focus')}
-            title="Kanvas Menulis (Fokus Maksimal)"
-            className={`flex items-center gap-1.5 px-3 py-1 rounded-md text-[11px] font-medium transition-all ${
-              viewMode === 'focus' || viewMode === 'split-inspector'
-                ? 'bg-white/15 text-white font-bold shadow-sm'
-                : 'text-neutral-400 hover:text-white'
-            }`}
-          >
-            <PenSquare className="w-3 h-3 text-accent-400" />
-            <span className="hidden sm:inline">Kanvas</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => onViewModeChange('split-preview')}
-            title="Split View (Editor & Pratinjau Bersandingan)"
-            className={`flex items-center gap-1.5 px-3 py-1 rounded-md text-[11px] font-medium transition-all ${
-              viewMode === 'split-preview'
-                ? 'bg-white/15 text-white font-bold shadow-sm'
-                : 'text-neutral-400 hover:text-white'
-            }`}
-          >
-            <Columns className="w-3 h-3 text-info" />
-            <span className="hidden sm:inline">Split</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => onViewModeChange('full-preview')}
-            title="Pratinjau Penuh Format Publik"
-            className={`flex items-center gap-1.5 px-3 py-1 rounded-md text-[11px] font-medium transition-all ${
-              viewMode === 'full-preview'
-                ? 'bg-white/15 text-white font-bold shadow-sm'
-                : 'text-neutral-400 hover:text-white'
-            }`}
-          >
-            <Eye className="w-3 h-3 text-emerald-400" />
-            <span className="hidden sm:inline">Pratinjau</span>
-          </button>
+        <div role="radiogroup" aria-label="Tampilan editor" className="flex items-center rounded-lg border border-white/10 bg-black/50 p-0.5 text-xs">
+          {VIEW_OPTIONS.map((opt) => {
+            const Icon = opt.icon
+            const checked = activeView === opt.id
+            return (
+              <button
+                key={opt.id}
+                type="button"
+                role="radio"
+                aria-checked={checked}
+                aria-label={opt.label}
+                onClick={() => onViewModeChange(opt.id)}
+                className={`flex min-h-8 items-center gap-1.5 rounded-md px-2.5 py-1 text-[11px] font-medium ${
+                  checked ? 'bg-white/15 font-bold text-white' : 'text-neutral-300 hover:text-white'
+                }`}
+              >
+                <Icon className="h-3.5 w-3.5" aria-hidden="true" />
+                <span className="hidden md:inline">{opt.label}</span>
+              </button>
+            )
+          })}
         </div>
-
-        {/* Word count stats */}
-        <div className="hidden lg:flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-black/40 border border-white/5 text-[11px] font-mono text-neutral-400">
+        <p className="hidden items-center gap-1.5 rounded-lg border border-white/10 bg-black/40 px-2.5 py-1 font-mono text-[11px] text-neutral-300 xl:flex">
           <span>{wordCount} kata</span>
-          <span className="text-neutral-600">·</span>
-          <span>~{readingTimeMinutes} mnt</span>
-        </div>
+          <span aria-hidden="true">·</span>
+          <span>±{readingTimeMinutes} menit baca</span>
+        </p>
       </div>
 
-      {/* ----------------- RIGHT: ACTIONS & PUBLISH ----------------- */}
-      <div className="flex items-center gap-1.5 sm:gap-2">
-        {/* Live Preview Tab Link */}
-        {slug && (
+      {/* Right: actions (one primary) */}
+      <div className="flex items-center gap-1.5">
+        <button type="button" onClick={onOpenShortcuts} aria-label="Pintasan keyboard" aria-keyshortcuts="Shift+?" className={secondaryBtn}>
+          <Keyboard className="h-3.5 w-3.5" aria-hidden="true" />
+          <span className="hidden xl:inline">Pintasan</span>
+        </button>
+
+        {previewHref && (
           <a
-            href={`${siteConfig.url}/artikel/${encodeURIComponent(slug)}${status === 'published' ? '' : '?preview=true'}`}
+            href={previewHref}
             target="_blank"
             rel="noopener noreferrer"
-            title="Buka halaman live preview di tab baru (dapat diakses meski draf belum terbit)"
-            className="flex items-center justify-center h-8 w-8 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-neutral-400 hover:text-white transition-colors shrink-0"
+            aria-label="Buka pratinjau publik di tab baru"
+            className={secondaryBtn}
           >
-            <ExternalLink className="w-3.5 h-3.5" />
+            <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
           </a>
         )}
 
-        {/* AI Copilot Toggle Button */}
-        <button
-          type="button"
-          onClick={onToggleAi}
-          title={isAiOpen ? 'Tutup Asisten AI Copilot' : 'Buka Asisten AI Copilot'}
-          className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold border transition-all ${
-            isAiOpen
-              ? 'bg-accent-500/20 border-accent-400/40 text-accent-300 shadow-sm'
-              : 'bg-white/5 hover:bg-white/10 border-white/10 text-neutral-300 hover:text-white'
-          }`}
-        >
-          <Bot className="w-3.5 h-3.5 text-accent-400" />
-          <span className="hidden sm:inline">AI Copilot</span>
-        </button>
-
-        {/* Unified Document & SEO Panel Toggle (with integrated SEO Score Badge) */}
         <button
           type="button"
           onClick={onToggleInspector}
-          title={isInspectorOpen ? 'Tutup Panel Dokumen & SEO' : 'Buka Panel Dokumen & SEO'}
-          className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold border transition-all ${
-            isInspectorOpen
-              ? 'bg-accent-500/20 border-accent-400/40 text-accent-300 shadow-sm'
-              : `${seoBadgeStyle}`
-          }`}
+          aria-pressed={isInspectorOpen}
+          aria-keyshortcuts="Control+/ Meta+/"
+          aria-label={`Panel Dokumen & SEO, skor SEO ${seoScore} dari 100`}
+          className={secondaryBtn}
         >
-          <Sliders className="w-3.5 h-3.5" />
-          <span className="hidden sm:inline">SEO: {seoScore}/100</span>
+          <Sliders className="h-3.5 w-3.5" aria-hidden="true" />
+          <span className="hidden sm:inline">
+            SEO <span className={`font-mono ${seoTone}`}>{seoScore}</span>
+          </span>
         </button>
 
-        {/* Save Draft Button */}
+        {!(canPublish && status === 'published') && (
         <button
           type="button"
           disabled={saving}
           onClick={() => onSave('draft')}
-          title="Simpan sebagai Draf (Shortcut: ⌘S atau Ctrl+S)"
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/15 text-white text-xs font-semibold border border-white/15 transition-all disabled:opacity-50"
+          aria-keyshortcuts="Control+S Meta+S"
+          className={secondaryBtn}
         >
-          <Save className="w-3.5 h-3.5 text-neutral-300" />
-          <span className="hidden sm:inline">{saving ? 'Menyimpan...' : 'Draf'}</span>
+          <Save className="h-3.5 w-3.5" aria-hidden="true" />
+          <span>Simpan draf</span>
         </button>
+        )}
 
-        {/* Submit Review Button (Author/Reviewer) */}
-        {permissions.canSubmitForReview && !permissions.canPublish && (
+        {canSubmitForReview && !canPublish && (
           <button
             type="button"
             disabled={saving}
             onClick={() => onSave('in_review')}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-info/20 hover:bg-info/30 text-info-300 border border-info/30 text-xs font-semibold transition-all disabled:opacity-50"
+            className="inline-flex min-h-9 items-center gap-1.5 rounded-lg bg-accent-500 px-3 py-1.5 text-xs font-bold text-accent-950 hover:bg-accent-300 disabled:opacity-60"
           >
-            <Clock className="w-3.5 h-3.5" />
-            <span>Ajukan Review</span>
+            <Clock className="h-3.5 w-3.5" aria-hidden="true" />
+            <span>Ajukan review</span>
           </button>
         )}
 
-        {/* Publishing / Scheduling (Editor / Admin) */}
-        {permissions.canPublish && (
+        {canPublish && (
           <div className="relative" ref={scheduleRef}>
-            <div className="inline-flex items-center rounded-lg bg-gradient-to-r from-emerald-500 to-teal-600 shadow-sm border border-emerald-400/30">
+            <div className="inline-flex items-stretch rounded-lg bg-accent-500 text-accent-950">
               <button
                 type="button"
                 disabled={saving}
                 onClick={() => onSave('published')}
-                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-white text-xs font-bold transition-all hover:brightness-110 disabled:opacity-50"
+                className="inline-flex min-h-9 items-center gap-1.5 rounded-s-lg px-3 py-1.5 text-xs font-bold hover:bg-accent-300 disabled:opacity-60"
               >
-                <Send className="w-3.5 h-3.5" />
-                <span>{isEditMode ? 'Perbarui' : 'Terbitkan'}</span>
+                <Send className="h-3.5 w-3.5" aria-hidden="true" />
+                <span>{status === 'published' ? 'Perbarui' : 'Terbitkan'}</span>
               </button>
-
               <button
+                ref={scheduleTriggerRef}
                 type="button"
                 onClick={() => setScheduleOpen((v) => !v)}
-                title="Opsi Jadwal & Waktu Terbit"
-                className="px-1.5 py-1.5 border-l border-emerald-400/30 text-emerald-100 hover:bg-black/20 transition-colors"
+                aria-expanded={scheduleOpen}
+                aria-controls={scheduleId}
+                aria-label="Opsi jadwal terbit"
+                className="inline-flex min-h-9 items-center rounded-e-lg border-s border-accent-950/30 px-2 hover:bg-accent-300"
               >
-                <ChevronDown className="w-3.5 h-3.5" />
+                <ChevronDown className="h-3.5 w-3.5" aria-hidden="true" />
               </button>
             </div>
 
-            {/* Schedule Dropdown Popover */}
             {scheduleOpen && (
-              <div className="absolute right-0 top-full mt-2 w-80 p-4 rounded-2xl bg-surface-elevated/95 border border-white/10 shadow-2xl shadow-black/80 backdrop-blur-xl animate-in fade-in zoom-in-95 duration-100 z-50 text-xs space-y-3">
-                <div className="flex items-center justify-between pb-2 border-b border-white/10 font-semibold text-white">
+              <div
+                id={scheduleId}
+                role="group"
+                aria-label="Opsi jadwal terbit"
+                className="absolute right-0 top-full z-50 mt-2 w-[min(20rem,calc(100vw-1.5rem))] space-y-3 rounded-2xl border border-white/15 bg-surface-elevated p-4 text-xs shadow-2xl"
+              >
+                <p className="flex items-center justify-between gap-2 border-b border-white/10 pb-2 font-semibold text-white">
                   <span className="flex items-center gap-1.5">
-                    <Calendar className="w-3.5 h-3.5 text-accent-400" />
-                    <span>Opsi Jadwal Publikasi</span>
+                    <Calendar className="h-3.5 w-3.5 text-accent-400" aria-hidden="true" />
+                    Jadwal terbit
                   </span>
-                  <span className="text-[10px] font-mono text-neutral-400">{publicationTimezone}</span>
-                </div>
+                  <span className="font-mono text-[10px] font-normal text-neutral-300">{publicationTimezone}</span>
+                </p>
 
                 <div>
-                  <label className="text-[11px] font-mono text-neutral-400 block mb-1">
-                    Jadwal Terbit Otomatis:
+                  <label htmlFor={`${scheduleId}-at`} className="mb-1 block font-mono text-[11px] text-neutral-300">
+                    Terbit otomatis pada
                   </label>
                   <input
+                    id={`${scheduleId}-at`}
                     type="datetime-local"
                     value={scheduleLocal}
-                    onChange={(e) => onChangeScheduleLocal(e.target.value)}
-                    className="w-full rounded-lg border border-white/15 bg-black/40 px-2 py-1.5 text-xs text-white focus:outline-none focus:border-accent-400"
+                    onChange={(e) => {
+                      onChangeScheduleLocal(e.target.value)
+                      if (scheduleError) setScheduleError(null)
+                    }}
+                    aria-invalid={scheduleError ? true : undefined}
+                    aria-describedby={scheduleError ? `${scheduleId}-error` : undefined}
+                    className="w-full rounded-lg border border-white/15 bg-black/40 px-2 py-1.5 text-xs text-white"
                   />
+                  {scheduleError && (
+                    <p id={`${scheduleId}-error`} className="mt-1 text-[11px] text-amber-300">
+                      {scheduleError}
+                    </p>
+                  )}
                   {status === 'scheduled' && (
-                    <span className="text-[10px] text-accent-300 block mt-1 font-mono">
-                      Artikel saat ini terjadwal (belum tampil publik).
-                    </span>
+                    <p className="mt-1 text-[11px] text-neutral-300">Artikel sedang terjadwal dan belum tampil publik.</p>
                   )}
                 </div>
 
                 <div>
-                  <label className="text-[11px] font-mono text-neutral-400 block mb-1">
-                    Tanggal Publikasi Asli (UTC):
+                  <label htmlFor={`${scheduleId}-orig`} className="mb-1 block font-mono text-[11px] text-neutral-300">
+                    Tanggal terbit asli (UTC)
                   </label>
                   <input
+                    id={`${scheduleId}-orig`}
                     type="datetime-local"
                     value={publicationDate ? new Date(publicationDate).toISOString().slice(0, 16) : ''}
-                    onChange={(e) =>
-                      onChangePublicationDate(e.target.value ? new Date(`${e.target.value}Z`).toISOString() : '')
-                    }
-                    className="w-full rounded-lg border border-white/15 bg-black/40 px-2 py-1.5 text-xs text-white focus:outline-none focus:border-accent-400"
+                    onChange={(e) => onChangePublicationDate(e.target.value ? new Date(`${e.target.value}Z`).toISOString() : '')}
+                    className="w-full rounded-lg border border-white/15 bg-black/40 px-2 py-1.5 text-xs text-white"
                   />
                 </div>
 
-                <div className="pt-2 flex justify-between gap-2 border-t border-white/10">
-                  <button
-                    type="button"
-                    disabled={saving || !scheduleLocal}
-                    onClick={() => {
-                      setScheduleOpen(false)
-                      onSave('scheduled')
-                    }}
-                    className="flex-1 py-1.5 px-3 rounded-lg bg-accent-500/20 hover:bg-accent-500/30 text-accent-300 border border-accent-400/30 text-xs font-semibold disabled:opacity-40 transition-all text-center"
-                  >
-                    Simpan Jadwal
+                <div className="flex justify-end gap-2 border-t border-white/10 pt-2">
+                  <button type="button" onClick={() => setScheduleOpen(false)} className={secondaryBtn}>
+                    Tutup
                   </button>
                   <button
                     type="button"
-                    onClick={() => setScheduleOpen(false)}
-                    className="py-1.5 px-3 rounded-lg bg-white/5 hover:bg-white/10 text-neutral-400 hover:text-white text-xs transition-colors"
+                    disabled={saving}
+                    onClick={() => {
+                      if (!scheduleLocal) {
+                        setScheduleError('Pilih tanggal dan jam terbit.')
+                        document.getElementById(`${scheduleId}-at`)?.focus()
+                        return
+                      }
+                      setScheduleOpen(false)
+                      onSave('scheduled')
+                    }}
+                    className={secondaryBtn}
                   >
-                    Tutup
+                    Simpan jadwal
                   </button>
                 </div>
               </div>
@@ -501,4 +362,4 @@ export function ArticleEditorHeader({
       </div>
     </header>
   )
-}
+})

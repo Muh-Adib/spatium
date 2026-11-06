@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Icon } from '@/components/Icon'
-import { SERVICES } from '@/data/services'
+import { getUseCaseNav } from '@/lib/content/spatium'
 import '@/pages/not-found.css'
 
 export const metadata: Metadata = {
@@ -14,7 +14,8 @@ export const metadata: Metadata = {
   },
 }
 
-export default function NotFound() {
+export default async function NotFound() {
+  const services = await getUseCaseNav()
   return (
     <section className="not-found grain">
       <div className="bg-grid not-found__grid" aria-hidden="true" />
@@ -52,7 +53,7 @@ export default function NotFound() {
             <li>
               <Link href="/about">About</Link>
             </li>
-            {SERVICES.map((service) => (
+            {services.map((service) => (
               <li key={service.slug}>
                 <Link href={`/services/${service.slug}`}>{service.name}</Link>
               </li>

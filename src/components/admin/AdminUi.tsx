@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useState, useRef } from 'react'
+import React, { useEffect, useId, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import Link from 'next/link'
 import { Check, ChevronDown, X } from 'lucide-react'
@@ -14,17 +14,18 @@ import { Tooltip } from '@/components/ui/Tooltip'
 export type Tone = 'neutral' | 'primary' | 'success' | 'warning' | 'danger' | 'info' | 'purple'
 
 const BTN_TONES: Record<Tone, string> = {
-  neutral: 'text-neutral-400 hover:text-white hover:bg-white/10',
+  neutral: 'text-neutral-300 hover:text-white hover:bg-white/10',
   primary: 'bg-accent-500 text-accent-950 hover:bg-accent-300',
-  success: 'text-emerald-400 hover:bg-emerald-500/15',
-  warning: 'text-amber-400 hover:bg-amber-500/15',
-  danger: 'text-red-400 hover:bg-red-500/15',
-  info: 'text-info hover:bg-info/15',
-  purple: 'text-purple-400 hover:bg-purple-500/15',
+  success: 'text-emerald-300 hover:bg-emerald-500/15',
+  warning: 'text-amber-300 hover:bg-amber-500/15',
+  danger: 'text-red-300 hover:bg-red-500/15',
+  info: 'text-accent-300 hover:bg-accent-400/15',
+  purple: 'text-purple-300 hover:bg-purple-500/15',
 }
 
 interface IconButtonProps {
   icon: LucideIcon
+  /** Accessible name and tooltip title. Required: icon-only controls must be named. */
   label: string
   hint?: string
   tone?: Tone
@@ -33,6 +34,10 @@ interface IconButtonProps {
   href?: string
   external?: boolean
   onClick?: () => void
+  /**
+   * Unavailable. Rendered with `aria-disabled` (not native `disabled`) so the
+   * control stays focusable and its tooltip explaining why stays reachable.
+   */
   disabled?: boolean
   spinning?: boolean
   active?: boolean
@@ -54,19 +59,32 @@ export function IconButton({
   active,
   className = '',
 }: IconButtonProps) {
-  const cls = `inline-flex ${size === 'sm' ? 'h-8 w-8' : 'h-9 w-9'} shrink-0 items-center justify-center rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-400/60 disabled:cursor-not-allowed disabled:opacity-40 ${
+  const cls = `inline-flex ${size === 'sm' ? 'h-8 w-8' : 'h-9 w-9'} shrink-0 items-center justify-center rounded-lg transition-colors aria-disabled:cursor-not-allowed aria-disabled:opacity-50 ${
     active ? 'bg-white/10 text-white' : BTN_TONES[tone]
   } ${className}`
-  const icon = <Icon className={`h-4 w-4 ${spinning ? 'animate-spin' : ''}`} aria-hidden="true" />
+  const icon = <Icon className={`h-4 w-4 ${spinning ? 'motion-safe:animate-spin' : ''}`} aria-hidden="true" />
 
   return (
     <Tooltip label={label} hint={hint} side={side}>
-      {href ? (
-        <Link href={href} aria-label={label} target={external ? '_blank' : undefined} className={cls}>
+      {href && !disabled ? (
+        <Link
+          href={href}
+          aria-label={external ? `${label} (tab baru)` : label}
+          target={external ? '_blank' : undefined}
+          rel={external ? 'noopener noreferrer' : undefined}
+          className={cls}
+        >
           {icon}
         </Link>
       ) : (
-        <button type="button" aria-label={label} onClick={onClick} disabled={disabled} className={cls}>
+        <button
+          type="button"
+          aria-label={label}
+          aria-disabled={disabled || undefined}
+          aria-pressed={active === undefined ? undefined : active}
+          onClick={disabled ? undefined : onClick}
+          className={cls}
+        >
           {icon}
         </button>
       )}
@@ -82,79 +100,53 @@ export function Panel({ children, className = '' }: { children: React.ReactNode;
   return <div className={`rounded-2xl border border-white/[0.08] bg-surface-elevated ${className}`}>{children}</div>
 }
 
-const STAT_TONES = {
-  sky: 'bg-info/10 text-info',
-  emerald: 'bg-emerald-500/10 text-emerald-400',
-  purple: 'bg-purple-500/10 text-purple-400',
-  amber: 'bg-amber-500/10 text-amber-400',
-} as const
+/* ------------------------------------------------------------------ */
+/* Live status region                                                  */
+/* ------------------------------------------------------------------ */
 
-export function StatCard({
-  icon: Icon,
-  label,
-  value,
-  hint,
-  href,
-  tone = 'sky',
+export type StatusTone = 'success' | 'error' | 'info'
+
+/**
+ * Polite live region that is always mounted (so repeated messages are
+ * announced). Status is carried by an icon + text, not color alone.
+ */
+export function StatusMessage({
+  message,
+  tone = 'info',
+  onDismiss,
+  className = '',
 }: {
-  icon: LucideIcon
-  label: string
-  value: React.ReactNode
-  hint?: string
-  href?: string
-  tone?: keyof typeof STAT_TONES
+  message: string | null
+  tone?: StatusTone
+  onDismiss?: () => void
+  className?: string
 }) {
-  const body = (
-    <div className="flex w-full items-center gap-4 rounded-2xl border border-white/[0.08] bg-surface-elevated p-5 transition-colors hover:border-accent-400/30 hover:bg-surface-overlay">
-      <span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${STAT_TONES[tone]}`}>
-        <Icon className="h-5 w-5" aria-hidden="true" />
-      </span>
-      <span className="min-w-0 text-left">
-        <span className="block truncate text-2xl font-semibold tabular-nums text-white">{value}</span>
-        <span className="block truncate text-xs text-neutral-400">{label}</span>
-      </span>
+  const toneCls =
+    tone === 'success'
+      ? 'border-emerald-400/40 bg-emerald-950/70 text-emerald-100'
+      : tone === 'error'
+      ? 'border-red-400/40 bg-red-950/70 text-red-100'
+      : 'border-accent-400/40 bg-accent-950/80 text-white'
+  const prefix = tone === 'success' ? 'Berhasil:' : tone === 'error' ? 'Gagal:' : 'Info:'
+  return (
+    <div role="status" aria-live="polite" className={className}>
+      {message ? (
+        <div className={`flex items-start gap-3 rounded-xl border px-4 py-3 text-xs ${toneCls}`}>
+          <span className="font-semibold">{prefix}</span>
+          <span className="min-w-0 flex-1 break-words">{message}</span>
+          {onDismiss && (
+            <button
+              type="button"
+              onClick={onDismiss}
+              className="-my-1 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-lg hover:bg-white/10"
+              aria-label="Tutup pesan"
+            >
+              <X className="h-4 w-4" aria-hidden="true" />
+            </button>
+          )}
+        </div>
+      ) : null}
     </div>
-  )
-  return (
-    <Tooltip label={label} hint={hint} side="bottom" className="w-full">
-      {href ? (
-        <Link href={href} className="block w-full">
-          {body}
-        </Link>
-      ) : (
-        body
-      )}
-    </Tooltip>
-  )
-}
-
-const PILL_TONES = {
-  amber: 'bg-amber-500/10 text-amber-300 border-amber-500/25',
-  sky: 'bg-info/10 text-info border-info/25',
-  purple: 'bg-purple-500/10 text-purple-300 border-purple-500/25',
-  emerald: 'bg-emerald-500/10 text-emerald-300 border-emerald-500/25',
-  slate: 'bg-slate-500/10 text-slate-300 border-slate-500/25',
-  red: 'bg-red-500/10 text-red-300 border-red-500/25',
-} as const
-
-export function StatusPill({
-  icon: Icon,
-  label,
-  tone,
-  hint,
-}: {
-  icon?: LucideIcon
-  label: string
-  tone: keyof typeof PILL_TONES
-  hint?: string
-}) {
-  return (
-    <Tooltip label={label} hint={hint} side="top">
-      <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium ${PILL_TONES[tone]}`}>
-        {Icon && <Icon className="h-3.5 w-3.5" aria-hidden="true" />}
-        {label}
-      </span>
-    </Tooltip>
   )
 }
 
@@ -163,13 +155,68 @@ export function StatusPill({
 /* ------------------------------------------------------------------ */
 
 export const fieldCls =
-  'h-10 w-full rounded-xl border border-white/10 bg-white/[0.03] px-3.5 text-sm text-white placeholder:text-neutral-500 transition-colors focus:border-accent-400/60 focus:bg-white/[0.05] focus:outline-none'
+  'h-10 w-full rounded-xl border border-white/20 bg-white/[0.03] px-3.5 text-sm text-white placeholder:text-neutral-400 transition-colors focus:border-accent-400 focus:bg-white/[0.05] aria-[invalid=true]:border-red-400 disabled:opacity-60'
+
+export interface FieldControlProps {
+  id: string
+  'aria-invalid'?: true
+  'aria-describedby'?: string
+}
+
+/**
+ * Label + control + hint + inline error, wired with `for`/`id`,
+ * `aria-invalid` and `aria-describedby`.
+ */
+export function FormField({
+  label,
+  hint,
+  error,
+  action,
+  children,
+  className = '',
+}: {
+  label: React.ReactNode
+  hint?: React.ReactNode
+  error?: string | null
+  /** Optional control rendered beside the label (e.g. "Buat acak"). */
+  action?: React.ReactNode
+  children: (props: FieldControlProps) => React.ReactNode
+  className?: string
+}) {
+  const id = useId()
+  const hintId = `${id}-hint`
+  const errorId = `${id}-error`
+  const describedBy = [hint ? hintId : null, error ? errorId : null].filter(Boolean).join(' ') || undefined
+  return (
+    <div className={`space-y-1.5 ${className}`}>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <label htmlFor={id} className="text-xs font-semibold text-neutral-200">
+          {label}
+        </label>
+        {action}
+      </div>
+      {children({ id, 'aria-invalid': error ? true : undefined, 'aria-describedby': describedBy })}
+      {hint && (
+        <p id={hintId} className="text-[11px] text-neutral-400">
+          {hint}
+        </p>
+      )}
+      {error && (
+        <p id={errorId} className="text-[11px] font-medium text-red-300">
+          <span aria-hidden="true">⚠ </span>
+          {error}
+        </p>
+      )}
+    </div>
+  )
+}
 
 export function SearchField({
   icon: Icon,
   value,
   onChange,
   placeholder,
+  label,
   onEnter,
   mono,
 }: {
@@ -177,49 +224,23 @@ export function SearchField({
   value: string
   onChange: (v: string) => void
   placeholder: string
+  /** Accessible name; defaults to the placeholder. */
+  label?: string
   onEnter?: () => void
   mono?: boolean
 }) {
   return (
     <div className="relative w-full">
-      <Icon className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-500" aria-hidden="true" />
+      <Icon className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" aria-hidden="true" />
       <input
-        type="text"
+        type="search"
         value={value}
         onChange={(e) => onChange(e.target.value)}
         onKeyDown={(e) => e.key === 'Enter' && onEnter?.()}
         placeholder={placeholder}
-        aria-label={placeholder}
+        aria-label={label || placeholder}
         className={`${fieldCls} pl-10 ${mono ? 'font-mono text-xs' : ''}`}
       />
-    </div>
-  )
-}
-
-export function Segmented<T extends string>({
-  options,
-  value,
-  onChange,
-}: {
-  options: { id: T; label: string; hint?: string }[]
-  value: T
-  onChange: (v: T) => void
-}) {
-  return (
-    <div className="inline-flex items-center gap-0.5 rounded-xl border border-white/10 bg-white/[0.03] p-1">
-      {options.map((o) => (
-        <Tooltip key={o.id} label={o.hint} side="top">
-          <button
-            type="button"
-            onClick={() => onChange(o.id)}
-            className={`h-8 rounded-lg px-3 text-xs font-medium transition-colors ${
-              value === o.id ? 'bg-white/10 text-white' : 'text-neutral-400 hover:text-white'
-            }`}
-          >
-            {o.label}
-          </button>
-        </Tooltip>
-      ))}
     </div>
   )
 }
@@ -313,7 +334,7 @@ export function SelectDropdown<T extends string = string>({
         aria-haspopup="listbox"
         aria-expanded={open}
         aria-label={ariaLabel || placeholder}
-        className={`group flex w-full items-center justify-between gap-2 rounded-xl border transition-all text-left select-none focus:outline-none ${heightCls} ${
+        className={`group flex w-full items-center justify-between gap-2 rounded-xl border transition-all text-left select-none ${heightCls} ${
           open
             ? 'border-accent-400/60 bg-white/[0.06] text-white ring-2 ring-accent-400/20 shadow-lg shadow-accent-950/20'
             : 'border-white/10 bg-white/[0.03] text-neutral-200 hover:border-white/20 hover:bg-white/[0.05] hover:text-white'
@@ -403,64 +424,29 @@ export function SelectDropdown<T extends string = string>({
   )
 }
 
+/* ------------------------------------------------------------------ */
+/* Modal — native <dialog>.showModal()                                 */
+/* ------------------------------------------------------------------ */
+
+const MODAL_ICON_TONES = {
+  neutral: 'bg-white/10 text-neutral-100',
+  danger: 'bg-red-500/15 text-red-300',
+  warning: 'bg-amber-500/15 text-amber-300',
+  success: 'bg-emerald-500/15 text-emerald-300',
+  info: 'bg-accent-400/15 text-accent-300',
+} as const
+
 /**
- * Styled Native Select wrapper with custom chevron indicator & dark styling
+ * Modal dialog built on `<dialog>.showModal()`: the background becomes inert,
+ * focus is trapped inside, Escape closes (via `onClose`), and focus returns
+ * to the element that opened it. Mark the field that should receive initial
+ * focus with `data-autofocus`.
  */
-export function NativeSelectField({
-  value,
-  onChange,
-  children,
-  className = '',
-  icon: Icon,
-  'aria-label': ariaLabel,
-}: {
-  value: string
-  onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void
-  children: React.ReactNode
-  className?: string
-  icon?: LucideIcon
-  'aria-label'?: string
-}) {
-  return (
-    <div className={`relative ${className}`}>
-      {Icon && (
-        <Icon
-          className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-500"
-          aria-hidden="true"
-        />
-      )}
-      <select
-        value={value}
-        onChange={onChange}
-        aria-label={ariaLabel}
-        className={`${fieldCls} appearance-none pr-9 ${Icon ? 'pl-10' : 'pl-3.5'} cursor-pointer`}
-      >
-        {children}
-      </select>
-      <ChevronDown
-        className="pointer-events-none absolute right-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400"
-        aria-hidden="true"
-      />
-    </div>
-  )
-}
-
-/* ------------------------------------------------------------------ */
-/* Modal                                                               */
-/* ------------------------------------------------------------------ */
-
-const MODAL_ICON_TONES: Record<string, string> = {
-  neutral: 'bg-white/10 text-neutral-200',
-  danger: 'bg-red-500/15 text-red-400',
-  warning: 'bg-amber-500/15 text-amber-400',
-  success: 'bg-emerald-500/15 text-emerald-400',
-  info: 'bg-info/15 text-info',
-}
-
 export function Modal({
   open,
   onClose,
   title,
+  description,
   icon: Icon,
   tone = 'neutral',
   children,
@@ -470,56 +456,108 @@ export function Modal({
   open: boolean
   onClose: () => void
   title: string
+  description?: React.ReactNode
   icon?: LucideIcon
   tone?: keyof typeof MODAL_ICON_TONES
   children?: React.ReactNode
   footer?: React.ReactNode
   className?: string
 }) {
+  const ref = useRef<HTMLDialogElement>(null)
+  const returnFocusRef = useRef<HTMLElement | null>(null)
+  const onCloseRef = useRef(onClose)
+  const titleId = useId()
+  const descId = useId()
   const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    onCloseRef.current = onClose
+  }, [onClose])
 
   useEffect(() => {
     setMounted(true)
   }, [])
 
   useEffect(() => {
-    if (!open) return
-    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose()
-    window.addEventListener('keydown', onKey)
-    const prevOverflow = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
-    return () => {
-      window.removeEventListener('keydown', onKey)
-      document.body.style.overflow = prevOverflow
+    const dialog = ref.current
+    if (!dialog) return
+    if (open && !dialog.open) {
+      returnFocusRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null
+      dialog.showModal()
+      // Prefer an explicit initial-focus target over the first focusable (the close button).
+      const preferred = dialog.querySelector<HTMLElement>('[data-autofocus]')
+      preferred?.focus()
+    } else if (!open && dialog.open) {
+      dialog.close()
     }
-  }, [open, onClose])
+  }, [open, mounted])
 
-  if (!open || !mounted) return null
+  useEffect(() => {
+    const dialog = ref.current
+    if (!dialog) return
+    const onCancel = (e: Event) => {
+      // Let the parent own the open state; Escape requests a close.
+      e.preventDefault()
+      onCloseRef.current()
+    }
+    const onDialogClose = () => {
+      const target = returnFocusRef.current
+      returnFocusRef.current = null
+      if (target && target.isConnected) target.focus()
+    }
+    dialog.addEventListener('cancel', onCancel)
+    dialog.addEventListener('close', onDialogClose)
+    return () => {
+      dialog.removeEventListener('cancel', onCancel)
+      dialog.removeEventListener('close', onDialogClose)
+    }
+  }, [mounted])
+
+  if (!mounted) return null
 
   return createPortal(
-    <div
-      className="fixed inset-0 z-[100] flex min-h-screen items-center justify-center overflow-y-auto bg-black/80 p-4 backdrop-blur-md animate-in fade-in duration-150"
-      onMouseDown={(e) => e.target === e.currentTarget && onClose()}
+    <dialog
+      ref={ref}
+      aria-labelledby={titleId}
+      aria-describedby={description ? descId : undefined}
+      onMouseDown={(e) => {
+        // A press on the backdrop targets the <dialog> itself.
+        if (e.target === e.currentTarget) onClose()
+      }}
+      className={`studio-admin m-auto w-[min(30rem,calc(100%-2rem))] max-h-[calc(100dvh-2rem)] overflow-y-auto rounded-2xl border border-white/15 bg-surface-overlay p-0 text-white shadow-2xl backdrop:bg-black/75 ${className}`}
     >
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-label={title}
-        className={`relative my-auto w-full max-w-md space-y-5 rounded-2xl border border-white/10 bg-surface-overlay p-6 shadow-2xl animate-in zoom-in-95 duration-150 max-h-[90vh] overflow-y-auto scrollbar-thin ${className}`}
-      >
-        <div className="flex items-start gap-3">
-          {Icon && (
-            <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${MODAL_ICON_TONES[tone]}`}>
-              <Icon className="h-5 w-5" aria-hidden="true" />
-            </span>
-          )}
-          <h3 className="min-w-0 flex-1 pt-2 font-heading text-sm font-semibold text-white">{title}</h3>
-          <IconButton icon={X} label="Tutup" size="sm" onClick={onClose} />
+      {open && (
+        <div className="space-y-5 p-5 sm:p-6">
+          <div className="flex items-start gap-3">
+            {Icon && (
+              <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${MODAL_ICON_TONES[tone]}`}>
+                <Icon className="h-5 w-5" aria-hidden="true" />
+              </span>
+            )}
+            <div className="min-w-0 flex-1 pt-1.5">
+              <h2 id={titleId} className="font-heading text-base font-semibold text-white">
+                {title}
+              </h2>
+              {description && (
+                <div id={descId} className="mt-1 text-xs leading-relaxed text-neutral-300">
+                  {description}
+                </div>
+              )}
+            </div>
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label="Tutup dialog"
+              className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-neutral-300 hover:bg-white/10 hover:text-white"
+            >
+              <X className="h-4 w-4" aria-hidden="true" />
+            </button>
+          </div>
+          {children}
+          {footer && <div className="flex flex-wrap items-center justify-end gap-2 border-t border-white/[0.08] pt-4">{footer}</div>}
         </div>
-        {children}
-        {footer && <div className="flex items-center justify-end gap-2 pt-2 border-t border-white/[0.06]">{footer}</div>}
-      </div>
-    </div>,
+      )}
+    </dialog>,
     document.body
   )
 }
@@ -530,6 +568,7 @@ export function TextButton({
   tone = 'neutral',
   type = 'button',
   disabled = false,
+  busy = false,
   form,
   className = '',
 }: {
@@ -538,22 +577,31 @@ export function TextButton({
   tone?: 'neutral' | 'primary' | 'danger'
   type?: 'button' | 'submit'
   disabled?: boolean
+  /** Request in flight: stays focusable but ignores repeat activation. */
+  busy?: boolean
   form?: string
   className?: string
 }) {
   const t =
     tone === 'primary'
-      ? 'bg-accent-500 text-accent-950 hover:bg-accent-300 disabled:opacity-50 disabled:hover:bg-accent-500'
+      ? 'bg-accent-500 text-accent-950 hover:bg-accent-300'
       : tone === 'danger'
-      ? 'bg-red-500 text-white hover:bg-red-400 disabled:opacity-50 disabled:hover:bg-red-500'
-      : 'text-neutral-300 hover:bg-white/10 hover:text-white disabled:opacity-50 disabled:hover:bg-transparent'
+      ? 'bg-red-600 text-white hover:bg-red-500'
+      : 'border border-white/15 text-neutral-100 hover:bg-white/10 hover:text-white'
   return (
     <button
       type={type}
       form={form}
-      onClick={onClick}
+      onClick={(e) => {
+        if (busy) {
+          e.preventDefault()
+          return
+        }
+        onClick?.()
+      }}
       disabled={disabled}
-      className={`h-9 rounded-xl px-4 text-xs font-semibold transition-colors disabled:cursor-not-allowed ${t} ${className}`}
+      aria-busy={busy || undefined}
+      className={`inline-flex h-10 items-center justify-center gap-2 rounded-xl px-4 text-xs font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50 aria-busy:cursor-progress aria-busy:opacity-80 ${t} ${className}`}
     >
       {children}
     </button>

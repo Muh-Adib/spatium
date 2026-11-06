@@ -2,6 +2,20 @@ import 'server-only'
 import { prisma } from './prisma'
 import type { Portfolio, SEOComponent } from '../content/types'
 
+function coverAltOf(seoData: unknown, fallback: string): string {
+  if (typeof seoData !== 'string' || !seoData) return fallback
+  try {
+    const parsed: unknown = JSON.parse(seoData)
+    if (parsed && typeof parsed === 'object' && 'coverAlt' in parsed) {
+      const alt = (parsed as { coverAlt?: unknown }).coverAlt
+      if (typeof alt === 'string' && alt.trim()) return alt
+    }
+  } catch (err) {
+    console.warn('[portfolio] seoData is not valid JSON:', err)
+  }
+  return fallback
+}
+
 function mapToPortfolio(row: any): Portfolio {
   const seo: SEOComponent = {
     id: row.id,
@@ -13,7 +27,8 @@ function mapToPortfolio(row: any): Portfolio {
   if (row.metrics) {
     try {
       metrics = typeof row.metrics === 'string' ? JSON.parse(row.metrics) : row.metrics
-    } catch {
+    } catch (err) {
+      console.warn('[portfolio] metrics is not valid JSON:', err)
       metrics = []
     }
   }
@@ -22,7 +37,8 @@ function mapToPortfolio(row: any): Portfolio {
   if (row.technologies) {
     try {
       technologies = typeof row.technologies === 'string' ? JSON.parse(row.technologies) : row.technologies
-    } catch {
+    } catch (err) {
+      console.warn('[portfolio] technologies is not valid JSON:', err)
       technologies = []
     }
   }
@@ -31,7 +47,8 @@ function mapToPortfolio(row: any): Portfolio {
   if (row.blocks) {
     try {
       blocks = typeof row.blocks === 'string' ? JSON.parse(row.blocks) : row.blocks
-    } catch {
+    } catch (err) {
+      console.warn('[portfolio] blocks is not valid JSON:', err)
       blocks = []
     }
   }
@@ -56,7 +73,7 @@ function mapToPortfolio(row: any): Portfolio {
           id: row.id,
           documentId: `media-port-${row.slug}`,
           name: row.title,
-          alternativeText: row.title,
+          alternativeText: coverAltOf(row.seoData, row.title),
           caption: null,
           width: 1200,
           height: 675,
@@ -81,10 +98,13 @@ function mapToPortfolio(row: any): Portfolio {
   }
 }
 
-export async function getPortfolios(limit?: number): Promise<Portfolio[]> {
+export async function getPortfolios(limit?: number, options: { publishedOnly?: boolean } = {}): Promise<Portfolio[]> {
   if (!process.env.DATABASE_URL) return []
   try {
-    let query = prisma.orm.public.Portfolio.orderBy((p: any) => p.id.desc())
+    const base = options.publishedOnly
+      ? prisma.orm.public.Portfolio.where({ status: 'published' })
+      : prisma.orm.public.Portfolio
+    let query = base.orderBy((p) => p.id.desc())
     if (limit) {
       query = query.limit(limit)
     }
@@ -96,10 +116,10 @@ export async function getPortfolios(limit?: number): Promise<Portfolio[]> {
   }
 }
 
-export async function getPortfolioBySlug(slug: string): Promise<Portfolio | null> {
+export async function getPortfolioBySlug(slug: string, options: { publishedOnly?: boolean } = {}): Promise<Portfolio | null> {
   if (!process.env.DATABASE_URL) return null
   try {
-    const row = await prisma.orm.public.Portfolio.where({ slug }).first()
+    const row = await prisma.orm.public.Portfolio.where(options.publishedOnly ? { slug, status: 'published' } : { slug }).first()
     if (!row) return null
     return mapToPortfolio(row)
   } catch (err: any) {

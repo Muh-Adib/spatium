@@ -17,18 +17,14 @@ function generateOrganizationSchema(): JsonLdSchema {
     description: site.description,
     contactPoint: {
       '@type': 'ContactPoint',
-      telephone: site.phone,
+      ...(site.phone ? { telephone: site.phone } : {}),
       contactType: 'customer service',
       email: site.email,
       areaServed: 'ID',
       availableLanguage: ['Indonesian', 'English'],
     },
     sameAs: Object.values(site.social).filter(Boolean),
-    address: {
-      '@type': 'PostalAddress',
-      streetAddress: site.address,
-
-    },
+    ...(site.address ? { address: { '@type': 'PostalAddress', streetAddress: site.address } } : {}),
   }
 }
 
@@ -79,7 +75,7 @@ function generateArticleSchema(article: {
     '@type': 'Article',
     headline: article.title,
     description: article.excerpt,
-    url: `${site.url}/artikel/${article.slug}`,
+    url: `${site.url}/journal/${article.slug}`,
     datePublished: article.publishedAt,
     dateModified: article.updatedAt,
     author: article.author
@@ -93,7 +89,7 @@ function generateArticleSchema(article: {
     image: article.featuredImage?.url ?? undefined,
     mainEntityOfPage: {
       '@type': 'WebPage',
-      '@id': `${site.url}/artikel/${article.slug}`,
+      '@id': `${site.url}/journal/${article.slug}`,
     },
   }
 }
@@ -111,7 +107,7 @@ function generatePortfolioSchema(portfolio: {
     '@type': 'CreativeWork',
     name: portfolio.title,
     description: portfolio.summary,
-    url: `${site.url}/portofolio/${portfolio.slug}`,
+    url: `${site.url}/portfolio/${portfolio.slug}`,
     creator: {
       '@type': 'Organization',
       name: site.name,
@@ -145,13 +141,9 @@ function generateLocalBusinessSchema(): JsonLdSchema {
     '@type': 'LocalBusiness',
     name: site.name,
     url: site.url,
-    telephone: site.phone,
+    ...(site.phone ? { telephone: site.phone } : {}),
     email: site.email,
-    address: {
-      '@type': 'PostalAddress',
-      streetAddress: site.address,
-
-    },
+    ...(site.address ? { address: { '@type': 'PostalAddress', streetAddress: site.address } } : {}),
     sameAs: Object.values(site.social).filter(Boolean),
   }
 }
@@ -162,9 +154,9 @@ function generateServicesListSchema(
   return {
     '@context': 'https://schema.org',
     '@type': 'ItemList',
-    name: 'Layanan Rekayasa Software & Solusi Imersif UNIMASI',
+    name: 'Layanan Teknologi Spasial SPATIUM',
     description:
-      'Katalog lengkap layanan rekayasa software kustom, wahana interaktif 3D, sensorik LiDAR, arsitektur web modern, dan sistem digital oleh UNIMASI.',
+      'Layanan digital twin SPATIUM: pemindaian LiDAR, point cloud, geometri 3D, dan 3D Gaussian Splat untuk film & VFX, marketing, instalasi, serta dokumentasi.',
     itemListElement: services.map((svc, idx) => ({
       '@type': 'ListItem',
       position: idx + 1,
@@ -172,7 +164,7 @@ function generateServicesListSchema(
         '@type': 'Service',
         name: svc.name,
         description: svc.shortDescription,
-        url: `${site.url}/layanan/${svc.slug}`,
+        url: `${site.url}/services/${svc.slug}`,
         provider: {
           '@type': 'Organization',
           name: site.name,
@@ -198,7 +190,7 @@ function generateServiceSchema(service: {
     '@type': 'Service',
     name: service.name,
     description: service.description || '',
-    url: `${site.url}/layanan/${service.slug}`,
+    url: `${site.url}/services/${service.slug}`,
     provider: {
       '@type': 'Organization',
       name: site.name,
@@ -223,7 +215,7 @@ function generateCategoryCollectionSchema(category: {
     '@type': 'CollectionPage',
     name: category.title,
     description: category.shortDescription || '',
-    url: `${site.url}/layanan/${category.slug}`,
+    url: `${site.url}/services/${category.slug}`,
     mainEntity: {
       '@type': 'ItemList',
       itemListElement: (category.subServices || []).map((svc, idx) => ({
@@ -233,7 +225,7 @@ function generateCategoryCollectionSchema(category: {
           '@type': 'Service',
           name: svc.name,
           description: svc.shortDescription || '',
-          url: `${site.url}/layanan/${svc.slug}`,
+          url: `${site.url}/services/${svc.slug}`,
         },
       })),
     },

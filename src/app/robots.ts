@@ -4,9 +4,9 @@ import { siteConfig } from '@/config/site'
 const SITE_URL = siteConfig.url
 
 /**
- * Crawler policy (GEO). Search and AI-search crawlers are allowed so UNIMASI
+ * Crawler policy (GEO). Search and AI-search crawlers are allowed so SPATIUM
  * work can be cited; training-only crawlers are disallowed.
- * Owner decision pending — see docs/CONTENT_GAPS.md.
+ * Policy owner: site owner. Adjust the lists below to change crawler access.
  */
 export default function robots(): MetadataRoute.Robots {
   return {

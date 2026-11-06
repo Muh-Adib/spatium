@@ -14,3 +14,6 @@ backend/.next
 out/
 *.tsbuildinfo
 public/uploads/
+
+# Local scratch (QA credentials, temp scripts)
+.tmp/

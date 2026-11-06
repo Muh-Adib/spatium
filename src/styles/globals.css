@@ -197,7 +197,7 @@ p {
   background: var(--yellow);
   display: inline-block;
   flex: none;
-  box-shadow: 0 0 10px rgba(255, 214, 0, 0.7);
+  box-shadow: 0 0 10px rgba(77, 139, 255, 0.7);
   animation: studioPulse 2.4s ease-in-out infinite;
 }
 
@@ -217,8 +217,8 @@ p {
 }
 
 .accent {
-  color: #00e5ff;
-  text-shadow: 0 0 24px rgba(0, 229, 255, 0.4);
+  color: #4d8bff;
+  text-shadow: 0 0 24px rgba(77, 139, 255, 0.4);
 }
 
 .outline-text {
@@ -368,7 +368,7 @@ p {
 .btn--primary:hover {
   --btn-bg: #e6faff;
   --btn-fg: #020617;
-  box-shadow: 0 0 35px rgba(0, 229, 255, 0.45);
+  box-shadow: 0 0 35px rgba(77, 139, 255, 0.45);
 }
 
 .btn--ghost {
@@ -379,9 +379,9 @@ p {
 
 .btn--ghost:hover {
   --btn-bg: rgba(255, 255, 255, 0.08);
-  --btn-border: #00e5ff;
+  --btn-border: #4d8bff;
   --btn-fg: #ffffff;
-  box-shadow: 0 0 20px rgba(0, 229, 255, 0.2);
+  box-shadow: 0 0 20px rgba(77, 139, 255, 0.2);
 }
 
 .btn--dark {
@@ -392,7 +392,7 @@ p {
 
 .btn--dark:hover {
   --btn-bg: var(--space-700);
-  --btn-border: #00e5ff;
+  --btn-border: #4d8bff;
 }
 
 .btn--dark:hover {
@@ -474,8 +474,8 @@ p {
 }
 
 .pill--accent {
-  border-color: rgba(255, 214, 0, 0.4);
-  background: rgba(255, 214, 0, 0.12);
+  border-color: rgba(77, 139, 255, 0.4);
+  background: rgba(77, 139, 255, 0.12);
   color: var(--yellow);
 }
 
@@ -502,7 +502,7 @@ p {
 
 .card--hover:hover {
   transform: translateY(-6px);
-  border-color: rgba(255, 214, 0, 0.5);
+  border-color: rgba(77, 139, 255, 0.5);
   box-shadow: var(--shadow-lg);
 }
 
@@ -531,7 +531,7 @@ p {
 
 .bg-glow--yellow,
 .bg-glow--cyan {
-  background: radial-gradient(circle, rgba(0, 229, 255, 0.25), transparent 65%);
+  background: radial-gradient(circle, rgba(77, 139, 255, 0.25), transparent 65%);
 }
 
 .bg-glow--blue {

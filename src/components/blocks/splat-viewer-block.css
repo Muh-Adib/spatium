@@ -1,0 +1,115 @@
+.svb {
+  padding-block: clamp(2.5rem, 6vw, 5rem);
+}
+
+.svb__inner {
+  width: min(100% - 2 * clamp(1.25rem, 4vw, 3.5rem), 1240px);
+  margin-inline: auto;
+}
+
+.svb__title {
+  margin: 0 0 1.25rem;
+  font-size: clamp(1.5rem, 3vw, 2.4rem);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  color: #eef3ff;
+}
+
+.svb__frame {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border-radius: 20px;
+  background: #02040a;
+  box-shadow:
+    0 0 0 1px rgba(110, 160, 255, 0.28),
+    0 0 30px -6px rgba(59, 123, 255, 0.5);
+}
+
+.svb__iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.svb__poster {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+}
+
+.svb__img {
+  object-fit: cover;
+  filter: brightness(0.55);
+}
+
+.svb__splats {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 30% 60%, rgba(111, 176, 255, 0.4) 0 2px, transparent 3px) 0 0 / 38px 31px,
+    radial-gradient(circle at 70% 30%, rgba(207, 224, 255, 0.28) 0 1.5px, transparent 2.5px) 0 0 / 23px 27px,
+    radial-gradient(ellipse at 50% 100%, rgba(30, 80, 200, 0.5), #02040a 70%);
+}
+
+.svb__play {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 0.5rem;
+  min-height: 44px;
+  padding: 1rem;
+  border: 0;
+  background: none;
+  color: #fff;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.svb__play small {
+  font-weight: 400;
+  color: #9aa9c7;
+}
+
+.svb__ring {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  border: 1px solid rgba(160, 200, 255, 0.7);
+  background: radial-gradient(circle, rgba(59, 123, 255, 0.55), rgba(59, 123, 255, 0.05) 70%);
+  box-shadow: 0 0 36px rgba(59, 123, 255, 0.6);
+}
+
+.svb__play:focus-visible,
+.svb__link:focus-visible {
+  outline: 2px solid #6fb0ff;
+  outline-offset: 3px;
+}
+
+.svb__meta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  margin-top: 1rem;
+}
+
+.svb__caption {
+  margin: 0;
+  max-width: 70ch;
+  color: #9aa9c7;
+}
+
+.svb__link {
+  color: #6fb0ff;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.svb__link:hover {
+  color: #fff;
+}

@@ -92,6 +92,10 @@
       "model": "Location",
       "namespace": "public"
     },
+    "mcp_api_keys": {
+      "model": "McpApiKey",
+      "namespace": "public"
+    },
     "media_items": {
       "model": "MediaItem",
       "namespace": "public"
@@ -3003,6 +3007,117 @@
               },
               "namespaceId": "public",
               "table": "locations"
+            }
+          },
+          "McpApiKey": {
+            "fields": {
+              "createdAt": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "kind": "scalar"
+                }
+              },
+              "createdBy": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "expiresAt": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "id": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
+              "keyHash": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "keyPrefix": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "lastUsedAt": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "name": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "revokedAt": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "scopes": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              }
+            },
+            "relations": {},
+            "storage": {
+              "fields": {
+                "createdAt": {
+                  "column": "created_at"
+                },
+                "createdBy": {
+                  "column": "created_by"
+                },
+                "expiresAt": {
+                  "column": "expires_at"
+                },
+                "id": {
+                  "column": "id"
+                },
+                "keyHash": {
+                  "column": "key_hash"
+                },
+                "keyPrefix": {
+                  "column": "key_prefix"
+                },
+                "lastUsedAt": {
+                  "column": "last_used_at"
+                },
+                "name": {
+                  "column": "name"
+                },
+                "revokedAt": {
+                  "column": "revoked_at"
+                },
+                "scopes": {
+                  "column": "scopes"
+                }
+              },
+              "namespaceId": "public",
+              "table": "mcp_api_keys"
             }
           },
           "MediaItem": {
@@ -9047,6 +9162,86 @@
                 }
               ]
             },
+            "mcp_api_keys": {
+              "columns": {
+                "created_at": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "dataType": "pg/timestamptz",
+                  "default": {
+                    "expression": "now()",
+                    "kind": "function"
+                  },
+                  "nullable": false
+                },
+                "created_by": {
+                  "codecId": "pg/text@1",
+                  "dataType": "pg/text",
+                  "nullable": true
+                },
+                "expires_at": {
+                  "codecId": "pg/text@1",
+                  "dataType": "pg/text",
+                  "nullable": true
+                },
+                "id": {
+                  "codecId": "pg/int4@1",
+                  "dataType": "pg/int4",
+                  "default": {
+                    "expression": "autoincrement()",
+                    "kind": "function"
+                  },
+                  "nullable": false
+                },
+                "key_hash": {
+                  "codecId": "pg/text@1",
+                  "dataType": "pg/text",
+                  "nullable": false
+                },
+                "key_prefix": {
+                  "codecId": "pg/text@1",
+                  "dataType": "pg/text",
+                  "nullable": false
+                },
+                "last_used_at": {
+                  "codecId": "pg/text@1",
+                  "dataType": "pg/text",
+                  "nullable": true
+                },
+                "name": {
+                  "codecId": "pg/text@1",
+                  "dataType": "pg/text",
+                  "nullable": false
+                },
+                "revoked_at": {
+                  "codecId": "pg/text@1",
+                  "dataType": "pg/text",
+                  "nullable": true
+                },
+                "scopes": {
+                  "codecId": "pg/text@1",
+                  "dataType": "pg/text",
+                  "default": {
+                    "kind": "literal",
+                    "value": "[\"blocks:read\",\"pages:read\",\"pages:draft\"]"
+                  },
+                  "nullable": false
+                }
+              },
+              "foreignKeys": [],
+              "indexes": [],
+              "primaryKey": {
+                "columns": [
+                  "id"
+                ]
+              },
+              "uniques": [
+                {
+                  "columns": [
+                    "key_hash"
+                  ]
+                }
+              ]
+            },
             "media_items": {
               "columns": {
                 "alt_text": {
@@ -9359,7 +9554,7 @@
                   "dataType": "pg/text",
                   "default": {
                     "kind": "literal",
-                    "value": "published"
+                    "value": "draft"
                   },
                   "nullable": false
                 },
@@ -11723,7 +11918,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "566b9d39f9029d2fb663793e52a8e3fdd4538c832b09fefd5f6aa1eb12716c4a"
+    "storageHash": "af752f8eb4487e6fcfe71ac8733f0ecc14520cd64fa1f34f2a25ac513aa62c03"
   },
   "execution": {
     "executionHash": "a4bae7ed4fcf0d801cf9d3f4f45277365b2bd42215bc891a0834b89dbb28f9be",

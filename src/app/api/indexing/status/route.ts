@@ -64,7 +64,7 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    targetUrl = `${siteBaseUrl}/artikel/${article.slug}`
+    targetUrl = `${siteBaseUrl}/journal/${article.slug}`
     entityType = 'article'
     entityId = article.id
     entityStatus = article.status
@@ -98,8 +98,8 @@ export async function GET(request: NextRequest) {
       targetUrl = normalizeIndexingUrl(parsed.toString(), siteBaseUrl)
 
       const path = parsed.pathname.toLowerCase()
-      if (path.startsWith('/artikel/')) {
-        const slug = path.replace(/^\/artikel\//, '').replace(/\/+$/, '')
+      if (path.startsWith('/journal/') || path.startsWith('/artikel/')) {
+        const slug = path.replace(/^\/(?:journal|artikel)\//, '').replace(/\/+$/, '')
         const article = await prisma.orm.public.Article.where({ slug }).first()
         if (article) {
           entityType = 'article'

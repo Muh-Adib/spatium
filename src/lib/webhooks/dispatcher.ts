@@ -75,7 +75,7 @@ export async function dispatchRevalidationWebhook(
         headers: {
           'Content-Type': 'application/json',
           'x-revalidate-secret': secret,
-          'User-Agent': 'UNIMASI-Core-WebhookDispatcher/1.0',
+          'User-Agent': 'SPATIUM-Core-WebhookDispatcher/1.0',
         },
         body: JSON.stringify(payload),
         signal: controller.signal,

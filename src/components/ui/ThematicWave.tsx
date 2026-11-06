@@ -34,7 +34,7 @@ const WAVE_LAYERS: WaveLayerConfig[] = [
     secondaryFrequency: 0.0032,
     phaseOffset: 0,
     baseHeightRatio: 0.28,
-    crestRgba: 'rgba(255, 214, 0, 0.18)',
+    crestRgba: 'rgba(77, 139, 255, 0.18)',
     midRgba: 'rgba(12, 12, 12, 0.40)',
     crestLineColor: 'rgba(211, 173, 141, 0.25)',
   },
@@ -60,9 +60,9 @@ const WAVE_LAYERS: WaveLayerConfig[] = [
     secondaryFrequency: 0.0068,
     phaseOffset: 4.5,
     baseHeightRatio: 0.12,
-    crestRgba: 'rgba(255, 214, 0, 0.20)',
+    crestRgba: 'rgba(77, 139, 255, 0.20)',
     midRgba: 'rgba(211, 173, 141, 0.12)',
-    crestLineColor: 'rgba(255, 214, 0, 0.35)',
+    crestLineColor: 'rgba(77, 139, 255, 0.35)',
   },
 ]
 
@@ -209,7 +209,7 @@ function FluidWaveCanvas({
 
 /**
  * ThematicWave Component
- * Renders the signature UNIMASI Midnight Navy & Luminous Biru Tosca ambient background.
+ * Renders the signature SPATIUM midnight & electric-blue ambient background.
  * Uses full-bleed multi-harmonic Canvas wave physics with smooth vertical mask-image
  * to ensure 100% seamless, unclipped, organic wave motion.
  */
@@ -235,7 +235,7 @@ export function ThematicWave({
         className="absolute inset-0 pointer-events-none"
         style={{
           backgroundImage:
-            'radial-gradient(ellipse 75% 45% at 50% 0%, rgba(255, 214, 0, 0.12), transparent 70%), ' +
+            'radial-gradient(ellipse 75% 45% at 50% 0%, rgba(77, 139, 255, 0.12), transparent 70%), ' +
             'radial-gradient(ellipse 60% 45% at 85% 55%, rgba(178, 146, 121, 0.08), transparent 60%), ' +
             'radial-gradient(ellipse 60% 45% at 15% 65%, rgba(211, 173, 141, 0.08), transparent 60%), ' +
             'radial-gradient(ellipse 40% 30% at 50% 85%, rgba(12, 12, 12, 0.8), transparent 60%)',
@@ -243,12 +243,12 @@ export function ThematicWave({
       />
 
       {/* --- 3. Subtle Warm Ambient Spotlight --- */}
-      <div className="absolute -top-[25%] left-1/2 -translate-x-1/2 w-[90vw] max-w-[1200px] h-[620px] rounded-full bg-gradient-to-b from-[#FFD600]/12 via-[#B29279]/08 to-transparent blur-[150px] animate-aurora pointer-events-none" />
+      <div className="absolute -top-[25%] left-1/2 -translate-x-1/2 w-[90vw] max-w-[1200px] h-[620px] rounded-full bg-gradient-to-b from-[#4d8bff]/12 via-[#B29279]/08 to-transparent blur-[150px] animate-aurora pointer-events-none" />
 
       {/* --- 4. Moving Subtle Warm Taupe / Charcoal Mesh Orbs --- */}
-      <div className="absolute -top-[10%] -left-[10%] w-[60vw] h-[60vw] max-w-[750px] max-h-[750px] rounded-full bg-gradient-to-tr from-[#FFD600]/10 via-[#191919]/40 to-transparent blur-[120px] animate-mesh-1" />
+      <div className="absolute -top-[10%] -left-[10%] w-[60vw] h-[60vw] max-w-[750px] max-h-[750px] rounded-full bg-gradient-to-tr from-[#4d8bff]/10 via-[#191919]/40 to-transparent blur-[120px] animate-mesh-1" />
       <div className="absolute top-[25%] -right-[12%] w-[55vw] h-[55vw] max-w-[700px] max-h-[700px] rounded-full bg-gradient-to-bl from-[#B29279]/08 via-[#242424]/50 to-transparent blur-[130px] animate-mesh-2" />
-      <div className="absolute -bottom-[15%] left-[20%] w-[50vw] h-[50vw] max-w-[650px] max-h-[650px] rounded-full bg-gradient-to-t from-[#FFD600]/08 via-[#242424]/60 to-transparent blur-[110px] animate-mesh-1" />
+      <div className="absolute -bottom-[15%] left-[20%] w-[50vw] h-[50vw] max-w-[650px] max-h-[650px] rounded-full bg-gradient-to-t from-[#4d8bff]/08 via-[#242424]/60 to-transparent blur-[110px] animate-mesh-1" />
 
       {/* --- 5. Full-Bleed Organic Fluid Wave Canvas with Smooth Feather Fade --- */}
       {showBottomWave && (

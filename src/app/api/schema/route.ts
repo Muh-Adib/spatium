@@ -16,7 +16,7 @@ export async function GET(req: NextRequest) {
   return NextResponse.json({
     status: 'success',
     version: '4.0.0',
-    specification: 'UNIMASI Studio Platform - Internal SEO Engine & Media Manager',
+    specification: 'SPATIUM Studio Platform - Internal SEO Engine & Media Manager',
     schemas: {
       seo: {
         description: 'Structured SEO data model per locale (Yoast Parity)',
@@ -112,7 +112,7 @@ export async function GET(req: NextRequest) {
     },
     meta: {
       generatedAt: new Date().toISOString(),
-      provider: 'UNIMASI Platform Core',
+      provider: 'SPATIUM Platform Core',
     },
   })
 }

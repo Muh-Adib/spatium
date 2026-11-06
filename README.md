@@ -1,37 +1,42 @@
-# Spatium — Flagship Interactive Digital Platform
+# SPATIUM — Spatial Technology Studio
 
-Interactive platform website for **Spatium**, built as a unified Next.js 16 application with an integrated Studio admin and a Prisma 8 content layer.
+Situs dan Studio Admin SPATIUM: digital twin untuk industri kreatif. Ruang nyata direkam dan direkonstruksi menjadi 3D Gaussian Splat yang bisa dijelajahi dari browser.
+
+Satu aplikasi Next.js 16 berisi situs publik, Studio Admin (`/admin`), API konten, Delivery API, dan server MCP untuk menyusun halaman dari blok.
 
 ## Stack
 
-- **Next.js 16** (App Router, Turbopack) + **React 19** — public site, API routes, and Studio.
-- **Tailwind CSS v3** with token-driven theming (`src/styles/tokens.css`, `src/tokens/tokens.css`).
-- **Prisma 8** (`@prisma/orm-postgres`) — PostgreSQL content layer (`prisma/`).
-- **NextAuth** for Studio access; route security lives in `src/proxy.ts` (Next.js 16 convention — no `middleware.ts`).
-- GSAP for motion; Three.js/WebGL as a progressive enhancement layer.
+Next.js 16 (App Router) · React 19 · Tailwind v3 · PostgreSQL 16 + Prisma 8 · NextAuth v5 · Zod 4 · GSAP · Three.js
 
-## Getting started
+## Mulai
 
 ```bash
 pnpm install
-pnpm run dev          # dev server on http://localhost:3002
-pnpm run build        # production build
-pnpm run start        # serve production build on port 3002
-pnpm run typecheck    # tsc --noEmit
-pnpm test             # run vitest suite
+cp .env.example .env.local     # isi DATABASE_URL dan AUTH_SECRET
+pnpm exec prisma contract emit && pnpm run db:push && pnpm run db:seed
+pnpm run dev                   # http://localhost:3002
 ```
 
-## Routes
+Panduan lengkap: [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md).
 
-| Route | Purpose |
-| --- | --- |
-| `/` | Home |
-| `/services`, `/services/[slug]` | Services catalog and service detail |
-| `/portfolio`, `/portfolio/[slug]` | Case studies |
-| `/journal`, `/journal/[slug]` | Articles |
-| `/about`, `/contact` | Company profile and contact |
-| `/admin` | Studio admin (content, media, SEO) |
+## Rute utama
 
-## Brand
+| Rute | Isi |
+|---|---|
+| `/` | Beranda |
+| `/services`, `/services/[slug]` | Use case dan kapabilitas |
+| `/portfolio`, `/portfolio/[slug]` | Scene 3D Gaussian Splat |
+| `/journal`, `/journal/[slug]` | Artikel |
+| `/[slug]` | Halaman dinamis dari editor blok |
+| `/admin` | Studio Admin (login di `/pawon`) |
+| `/api/mcp` | Server MCP (API key per klien) |
 
-Official brand rules will be placed in `docs/` and referenced in **`AGENTS.md`** as the single source of truth.
+## Verifikasi
+
+```bash
+pnpm run typecheck && pnpm exec vitest run && pnpm run audit:senior && pnpm run build
+```
+
+## Dokumentasi
+
+[docs/README.md](docs/README.md) · aturan kontribusi untuk engineer dan agen koding: [AGENTS.md](AGENTS.md).

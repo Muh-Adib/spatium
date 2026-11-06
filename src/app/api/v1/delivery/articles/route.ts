@@ -17,62 +17,19 @@ export async function GET(request: NextRequest) {
   const category = searchParams.get('category') || undefined
   const search = searchParams.get('search') || undefined
   const locale = (searchParams.get('locale') as 'id' | 'en') || undefined
-  const statusParam = searchParams.get('status')
-  const status = (statusParam === 'draft' || statusParam === 'published' || statusParam === 'all')
-    ? statusParam
-    : 'published'
-
+  // Public delivery only ever exposes published content (drafts stay in Studio).
   try {
-    let result = await getArticles({
+    const result = await getArticles({
       page,
       pageSize,
       category,
       search,
       locale,
-      status: status as import('@/lib/db/articles').ArticleQueryOptions['status'],
+      status: 'published',
     })
-
-    if (!result?.data || result.data.length === 0) {
-      try {
-        const seedArticles = require('@/data/seed/seed_articles.json')
-        const total = seedArticles.length
-        const pageCount = Math.ceil(total / pageSize)
-        const data = seedArticles.slice((page - 1) * pageSize, page * pageSize)
-        result = {
-          data: data as import('@/lib/content/types').Article[],
-          meta: {
-            pagination: {
-              page,
-              pageSize,
-              pageCount,
-              total,
-            }
-          }
-        }
-      } catch (err) { console.warn("[API observable error]:", err) }
-    }
-
     return jsonResponse(result)
   } catch (err) {
     console.error('[delivery:articles] Error:', err)
-    try {
-      const seedArticles = require('@/data/seed/seed_articles.json')
-      const total = seedArticles.length
-      const pageCount = Math.ceil(total / pageSize)
-      const data = seedArticles.slice((page - 1) * pageSize, page * pageSize)
-      return jsonResponse({
-        data,
-        meta: {
-          pagination: {
-            page,
-            pageSize,
-            pageCount,
-            total,
-          }
-        }
-      })
-    } catch {
-      return jsonResponse({ error: 'Failed to retrieve articles' }, 500)
-    }
+    return jsonResponse({ error: 'Failed to retrieve articles' }, 500)
   }
 }

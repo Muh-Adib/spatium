@@ -1,16 +1,10 @@
 import type { Metadata, Viewport } from 'next'
-import { Syne, Plus_Jakarta_Sans, DM_Mono, Montserrat, Inter } from 'next/font/google'
+import { Plus_Jakarta_Sans, DM_Mono, Montserrat, Inter } from 'next/font/google'
 import { SiteShell } from '@/components/layout/SiteShell'
+import { siteConfig } from '@/config/site'
 import '@/styles/tokens.css'
 import '@/styles/globals.css'
 import '@/components/layout/layout.css'
-
-const syne = Syne({
-  subsets: ['latin'],
-  weight: ['600', '700', '800'],
-  variable: '--font-syne',
-  display: 'swap',
-})
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ['latin'],
@@ -44,20 +38,20 @@ const inter = Inter({
 })
 
 export const viewport: Viewport = {
-  themeColor: '#060E1F',
+  themeColor: '#03060D',
   width: 'device-width',
   initialScale: 1,
   viewportFit: 'cover',
 }
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://unimasi.studio'),
+  metadataBase: new URL(siteConfig.url),
   title: {
-    default: 'UNIMASI — Animation & Motion Design Studio',
-    template: '%s · UNIMASI',
+    default: 'SPATIUM — Spatial Technology Studio',
+    template: '%s · SPATIUM',
   },
   description:
-    'UNIMASI is an animation and motion design studio crafting 2D animation, 3D animation and visual production, and motion graphics that make complex ideas move.',
+    'SPATIUM — Spatial Technology Studio. Digital twin for creative industry: real places captured and reconstructed as photorealistic, explorable 3D Gaussian Splats.',
   icons: {
     icon: [
       { url: '/favicon.ico', sizes: 'any' },
@@ -65,21 +59,21 @@ export const metadata: Metadata = {
     ],
     apple: '/apple-touch-icon.png',
   },
+  manifest: '/site.webmanifest',
   openGraph: {
     type: 'website',
-    siteName: 'UNIMASI',
-    title: 'UNIMASI — Animation & Motion Design Studio',
+    siteName: 'SPATIUM',
+    title: 'SPATIUM — Real places. New perspectives.',
     description:
-      'We make ideas move. 2D animation, 3D animation and visual production, and motion graphics for education, industry, and brands.',
-    url: 'https://unimasi.studio/',
-    images: [{ url: '/icon-512.png', width: 512, height: 512, alt: 'UNIMASI' }],
+      'Digital twin for creative industry. Walk, explore, and breathe inside the space as you are truly there.',
+    url: siteConfig.url,
+    images: [{ url: siteConfig.defaultOgImage, alt: 'SPATIUM — Spatial Technology Studio' }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'UNIMASI — Animation & Motion Design Studio',
-    description:
-      'We make ideas move. 2D animation, 3D animation and visual production, and motion graphics for education, industry, and brands.',
-    images: ['/icon-512.png'],
+    title: 'SPATIUM — Real places. New perspectives.',
+    description: 'Digital twin for creative industry. One Point, Unlimited Possibilities.',
+    images: [siteConfig.defaultOgImage],
   },
 }
 
@@ -90,8 +84,8 @@ export default function RootLayout({
 }) {
   return (
     <html
-      lang="en"
-      className={`${syne.variable} ${plusJakartaSans.variable} ${dmMono.variable} ${montserrat.variable} ${inter.variable}`}
+      lang="id"
+      className={`${plusJakartaSans.variable} ${dmMono.variable} ${montserrat.variable} ${inter.variable}`}
     >
       <body>
         <SiteShell>{children}</SiteShell>

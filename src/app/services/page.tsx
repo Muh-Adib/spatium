@@ -8,7 +8,6 @@ import { CTASection } from '@/components/ui/CTASection'
 import { Reveal } from '@/components/ui/Reveal'
 import { SectionHead } from '@/components/ui/SectionHead'
 import { Icon } from '@/components/Icon'
-import { CORE_SERVICES, SERVICES } from '@/data/services'
 import { INDUSTRIES } from '@/data/site'
 import { getCoreServices } from '@/lib/core'
 import { siteConfig } from '@/config/site'
@@ -19,24 +18,25 @@ const SITE_URL = siteConfig.url
 export const metadata: Metadata = {
   title: 'Layanan Teknologi Spasial & 3D Gaussian Splatting',
   description:
-    'Layanan komprehensif SPATIUM: Filmmaking & VFX, Marketing & Branding (ZMOT), Entertainment & Installation, dan Memory & Documentary berbasis 3DGS dan laser LiDAR.',
+    'Layanan SPATIUM: Filmmaking & VFX, Marketing & Branding, Entertainment & Installation, dan Memory & Documentary berbasis digital twin dan 3D Gaussian Splatting.',
   alternates: {
     canonical: `${SITE_URL}/services`,
   },
 }
 
-const jsonLd = SERVICES.map((service) => ({
-  '@context': 'https://schema.org',
-  '@type': 'Service',
-  name: service.name,
-  serviceType: service.name,
-  description: service.metaDescription,
-  url: `${SITE_URL}/services/${service.slug}`,
-  provider: { '@type': 'Organization', name: 'SPATIUM', url: SITE_URL },
-}))
+export const revalidate = 300
 
 export default async function ServicesPage() {
   const services = await getCoreServices()
+  const jsonLd = services.map((service) => ({
+    '@context': 'https://schema.org',
+    '@type': 'Service',
+    name: service.name,
+    serviceType: service.name,
+    description: service.metaDescription,
+    url: `${SITE_URL}/services/${service.slug}`,
+    provider: { '@type': 'Organization', name: 'SPATIUM', url: SITE_URL },
+  }))
   return (
     <>
       <script
@@ -48,25 +48,28 @@ export default async function ServicesPage() {
         eyebrow="SPATIUM SERVICES"
         title={
           <>
-            4 Vertikal Solusi <span className="accent">Spasial &amp; 3DGS</span>.
+            Use case <span className="accent">digital twin</span> untuk industri kreatif.
           </>
         }
-        lede="Dari pra-produksi film, display interaktif ZMOT untuk ritel &amp; kuliner, hingga kalibrasi instalasi seni dan preservasi memori digital beresolusi tinggi."
+        lede="Satu kali capture ruang nyata menjadi fondasi spasial untuk produksi film, pemasaran, instalasi imersif, dan preservasi memori."
         crumbs={[{ label: 'Home', to: '/' }, { label: 'Layanan' }]}
         meta={
           <>
+            {services.length > 0 ? (
+              <span className="pill">
+                <Icon name="layers" size={13} /> {services.length} use case
+              </span>
+            ) : null}
             <span className="pill">
-              <Icon name="layers" size={13} /> 4 Vertikal Utama
-            </span>
-            <span className="pill">
-              <Icon name="clock" size={13} /> Akurasi Sub-5mm
+              <Icon name="layers" size={13} /> Capture once, use everywhere
             </span>
           </>
         }
       />
 
-      <ServicesShowcase initialServices={services} />
+      <ServicesShowcase services={services} />
 
+      {services.length > 0 ? (
       <section className="section services-compare" aria-labelledby="compare-title">
         <div className="container container--wide">
           <SectionHead
@@ -75,18 +78,18 @@ export default async function ServicesPage() {
             title="Pilih Vertikal yang Sesuai Kebutuhan Anda"
             aside={
               <p className="lede">
-                Tinjauan komprehensif atas kapabilitas, hasil serah terima, dan toolchain pemindaian sensor pada setiap vertikal SPATIUM.
+                Kapabilitas, keluaran, dan teknologi yang digunakan pada setiap use case SPATIUM.
               </p>
             }
           />
 
           <Reveal className="compare-table-wrap">
             <table className="compare-table">
-              <caption className="sr-only">Komparasi 4 Vertikal Layanan SPATIUM</caption>
+              <caption className="sr-only">Perbandingan use case layanan SPATIUM</caption>
               <thead>
                 <tr>
                   <th scope="col">Vertikal</th>
-                  {CORE_SERVICES.map((service) => (
+                  {services.map((service) => (
                     <th scope="col" key={service.slug}>
                       <span className="compare-table__index mono">{service.index}</span>
                       <Link href={`/services/${service.slug}`}>{service.shortName}</Link>
@@ -97,13 +100,13 @@ export default async function ServicesPage() {
               <tbody>
                 <tr>
                   <th scope="row">Fokus Utama</th>
-                  {CORE_SERVICES.map((service) => (
+                  {services.map((service) => (
                     <td key={service.slug}>{service.tagline}</td>
                   ))}
                 </tr>
                 <tr>
                   <th scope="row">Kapabilitas Inti</th>
-                  {CORE_SERVICES.map((service) => (
+                  {services.map((service) => (
                     <td key={service.slug}>
                       <ul className="compare-table__list">
                         {service.capabilities.slice(0, 4).map((cap) => (
@@ -114,8 +117,8 @@ export default async function ServicesPage() {
                   ))}
                 </tr>
                 <tr>
-                  <th scope="row">Hasil Serah Terima</th>
-                  {CORE_SERVICES.map((service) => (
+                  <th scope="row">Keluaran</th>
+                  {services.map((service) => (
                     <td key={service.slug}>
                       <ul className="compare-table__list">
                         {service.deliverables.slice(0, 3).map((item) => (
@@ -126,8 +129,8 @@ export default async function ServicesPage() {
                   ))}
                 </tr>
                 <tr>
-                  <th scope="row">Toolchain & Sensor</th>
-                  {CORE_SERVICES.map((service) => (
+                  <th scope="row">Teknologi</th>
+                  {services.map((service) => (
                     <td key={service.slug}>
                       <div className="compare-table__tools">
                         {service.tools.slice(0, 4).map((tool) => (
@@ -141,7 +144,7 @@ export default async function ServicesPage() {
                 </tr>
                 <tr>
                   <th scope="row">&nbsp;</th>
-                  {CORE_SERVICES.map((service) => (
+                  {services.map((service) => (
                     <td key={service.slug}>
                       <Link href={`/services/${service.slug}`} className="link-arrow">
                         Detail Layanan
@@ -164,8 +167,9 @@ export default async function ServicesPage() {
           </ul>
         </div>
       </section>
+      ) : null}
 
-      <Capabilities />
+      <Capabilities service={services.find((s) => s.slug === 'entertainment-installation') ?? services[0]} />
       <ProcessTimeline />
 
       <CTASection
@@ -176,7 +180,7 @@ export default async function ServicesPage() {
             Konsultasikan ruang fisik Anda dengan <span className="accent">3D Gaussian Splatting</span>.
           </>
         }
-        body="Kami bantu merekomendasikan kombinasi sensor LiDAR darat, drone photogrammetry, dan optimasi WebGL sesuai dengan sasaran bisnis Anda."
+        body="Ceritakan ruang dan tujuan Anda. Kami bantu menentukan alur capture dan keluaran — point cloud, mesh, atau 3D Gaussian Splat — yang paling sesuai."
         primary={{ label: 'Jadwalkan Konsultasi', to: '/contact' }}
         secondary={{ label: 'Lihat Portofolio 3DGS', to: '/portfolio' }}
       />

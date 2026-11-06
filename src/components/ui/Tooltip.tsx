@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 
 type Side = 'top' | 'bottom' | 'left' | 'right'
 
@@ -30,6 +30,16 @@ export function Tooltip({ label, hint, content, side = 'top', disabled, classNam
   const [pos, setPos] = useState<{ x: number; y: number } | null>(null)
 
   const effectiveHint = hint || content
+
+  // WCAG 1.4.13: a visible tooltip must be dismissible without moving focus or pointer.
+  useEffect(() => {
+    if (!pos) return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setPos(null)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [pos])
 
   if (disabled || (!label && !effectiveHint)) return <>{children}</>
 

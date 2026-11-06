@@ -1,6 +1,7 @@
 import 'server-only'
 import { prisma } from './prisma'
 import type { SiteSetting } from '../content/types'
+import { siteConfig } from '@/config/site'
 
 export async function getSiteSetting(): Promise<SiteSetting> {
   let row: any = null
@@ -10,11 +11,8 @@ export async function getSiteSetting(): Promise<SiteSetting> {
     console.error('Failed to get site setting:', err)
   }
 
-  let socialLinks: Record<string, string> = {
-    instagram: 'https://instagram.com/unimasi',
-    linkedin: 'https://linkedin.com/company/unimasi',
-    github: 'https://github.com/unimasi',
-  }
+  // No invented profiles: social links come only from the DB row.
+  let socialLinks: Record<string, string> = {}
 
   if (row?.socialLinks) {
     try {
@@ -25,9 +23,9 @@ export async function getSiteSetting(): Promise<SiteSetting> {
   return {
     id: row?.id || 1,
     documentId: 'site-config-1',
-    siteName: row?.name || 'UNIMASI',
+    siteName: row?.name || siteConfig.name,
     siteDescription: row?.description || undefined,
-    siteUrl: row?.url || 'https://www.unimasi.com',
+    siteUrl: row?.url || siteConfig.url,
     whatsapp: row?.whatsapp || undefined,
     email: row?.email || undefined,
     phone: row?.phone || undefined,

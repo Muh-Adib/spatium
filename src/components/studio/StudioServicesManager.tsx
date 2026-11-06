@@ -21,7 +21,6 @@ import {
   Eye,
   Sliders,
   FolderKanban,
-  Sparkles,
   ChevronRight,
   Globe,
   LayoutTemplate,
@@ -33,9 +32,7 @@ import {
 } from 'lucide-react'
 import StudioVisualEditor, { StudioBlock, StudioViewMode } from './StudioVisualEditor'
 import StudioSeoInspector from './StudioSeoInspector'
-import StudioBlockProperties from './StudioBlockProperties'
 import MediaPickerModal from './MediaPickerModal'
-import { StudioAiSidebar } from './StudioAiSidebar'
 import { Tooltip } from '@/components/ui/Tooltip'
 import { Locale } from '@/lib/seo/schema'
 
@@ -60,8 +57,7 @@ export function StudioServicesManager() {
 
   // Full Studio Editor Mode
   const [editorMode, setEditorMode] = useState<boolean>(false)
-  const [viewMode, setViewMode] = useState<StudioViewMode>('canvas')
-  const [aiOpen, setAiOpen] = useState(false)
+  const [viewMode, setViewMode] = useState<StudioViewMode>('split-preview')
   const [editingType, setEditingType] = useState<'department' | 'service'>('department')
   const [saving, setSaving] = useState(false)
   const [saveMessage, setSaveMessage] = useState('')
@@ -155,7 +151,7 @@ export function StudioServicesManager() {
       setDepTag(cat.tag || '')
       setDepShortDesc(cat.shortDescription || '')
       setDepHeroImage(cat.heroImage || '/images/nav/web-dev.jpg')
-      setDepHeroAlt(cat.heroAlt || (cat.title ? `${cat.title} - Departemen Spesialisasi UNIMASI` : 'Departemen Spesialisasi UNIMASI'))
+      setDepHeroAlt(cat.heroAlt || (cat.title ? `${cat.title} - Use Case SPATIUM` : 'Use Case SPATIUM'))
       setDepThemePreset(cat.themePreset || 'charcoal')
       setDepOrder(String(cat.order ?? 0))
       setDepStatus(cat.status || 'published')
@@ -166,7 +162,7 @@ export function StudioServicesManager() {
       setMetaDesc(cat.metaDescription || cat.shortDescription || '')
       setFocusKeyphrase(cat.focusKeyphrase || cat.title)
       setRelatedKeyphrases(cat.relatedKeyphrases || [])
-      setCanonicalUrl(cat.canonicalUrl || `https://www.unimasi.com/layanan/${cat.slug}`)
+      setCanonicalUrl(cat.canonicalUrl || '')
     } else {
       setDepId(null)
       setDepSlug('')
@@ -174,7 +170,7 @@ export function StudioServicesManager() {
       setDepTag('DEPARTEMEN SPESIALISASI')
       setDepShortDesc('')
       setDepHeroImage('/images/nav/web-dev.jpg')
-      setDepHeroAlt('Departemen Spesialisasi UNIMASI')
+      setDepHeroAlt('Use Case SPATIUM')
       setDepThemePreset('charcoal')
       setDepOrder(String(categories.length + 1))
       setDepStatus('published')
@@ -203,7 +199,7 @@ export function StudioServicesManager() {
       setSvcShortDesc(svc.shortDescription || '')
       setSvcWhatsappPrompt(svc.whatsappPrompt || '')
       setSvcHeroImage(svc.heroImage?.url || svc.heroImage || '/images/nav/web-dev.jpg')
-      setSvcHeroAlt(svc.heroAlt || (svc.name ? `${svc.name} - Layanan UNIMASI Studio` : 'Layanan UNIMASI Studio'))
+      setSvcHeroAlt(svc.heroAlt || (svc.name ? `${svc.name} - Layanan SPATIUM` : 'Layanan SPATIUM'))
       setSvcOrder(String(svc.order ?? 0))
       setSvcFeatured(Boolean(svc.featured))
       setSvcStatus(svc.status || 'published')
@@ -219,7 +215,7 @@ export function StudioServicesManager() {
           ? JSON.parse(svc.relatedKeyphrases)
           : svc.relatedKeyphrases || []
       )
-      setCanonicalUrl(`https://unimasi.studio/services/${svc.slug}`)
+      setCanonicalUrl(`${siteConfig.url}/services/${svc.slug}`)
       setSvcSelectedPortfolios([])
     } else {
       setSvcId(null)
@@ -230,9 +226,9 @@ export function StudioServicesManager() {
       setSvcCategoryBadge(categories[0]?.title || '')
       setSvcHighlightWord('')
       setSvcShortDesc('')
-      setSvcWhatsappPrompt('Halo UNIMASI, saya ingin konsultasi layanan.')
+      setSvcWhatsappPrompt('Halo SPATIUM, saya ingin konsultasi layanan.')
       setSvcHeroImage('/images/nav/web-dev.jpg')
-      setSvcHeroAlt('Layanan UNIMASI Studio')
+      setSvcHeroAlt('Layanan SPATIUM')
       setSvcOrder(String(services.length + 1))
       setSvcFeatured(false)
       setSvcStatus('published')
@@ -381,69 +377,12 @@ export function StudioServicesManager() {
   const currentContentText =
     editingType === 'department' ? blocksToPlainText(depBlocks) : blocksToPlainText(svcBlocks)
 
-  const activeBlocks = editingType === 'department' ? depBlocks : svcBlocks
-  const currentSelectedBlock = activeBlocks.find((b) => b.id === selectedBlockId) || null
-
-  const handleUpdateSelectedBlock = (updatedFields: any) => {
-    if (!selectedBlockId) return
-    if (editingType === 'department') {
-      setDepBlocks((prev) =>
-        prev.map((b) => (b.id === selectedBlockId ? { ...b, ...updatedFields } : b))
-      )
-    } else {
-      setSvcBlocks((prev) =>
-        prev.map((b) => (b.id === selectedBlockId ? { ...b, ...updatedFields } : b))
-      )
-    }
-  }
-
-  const handleMoveBlock = (direction: 'up' | 'down') => {
-    if (!selectedBlockId) return
-    const currentBlocks = editingType === 'department' ? [...depBlocks] : [...svcBlocks]
-    const idx = currentBlocks.findIndex((b) => b.id === selectedBlockId)
-    if (idx === -1) return
-    const targetIdx = direction === 'up' ? idx - 1 : idx + 1
-    if (targetIdx < 0 || targetIdx >= currentBlocks.length) return
-    const temp = currentBlocks[idx]
-    currentBlocks[idx] = currentBlocks[targetIdx]
-    currentBlocks[targetIdx] = temp
-    if (editingType === 'department') setDepBlocks(currentBlocks)
-    else setSvcBlocks(currentBlocks)
-  }
-
-  const handleDuplicateSelectedBlock = () => {
-    if (!selectedBlockId) return
-    const currentBlocks = editingType === 'department' ? [...depBlocks] : [...svcBlocks]
-    const idx = currentBlocks.findIndex((b) => b.id === selectedBlockId)
-    if (idx === -1) return
-    const cloned = {
-      ...JSON.parse(JSON.stringify(currentBlocks[idx])),
-      id: `blk-${Date.now()}`,
-    }
-    currentBlocks.splice(idx + 1, 0, cloned)
-    if (editingType === 'department') setDepBlocks(currentBlocks)
-    else setSvcBlocks(currentBlocks)
-    setSelectedBlockId(cloned.id)
-  }
-
-  const handleDeleteSelectedBlock = () => {
-    if (!selectedBlockId) return
-    if (confirm('Hapus blok ini?')) {
-      if (editingType === 'department') {
-        setDepBlocks((prev) => prev.filter((b) => b.id !== selectedBlockId))
-      } else {
-        setSvcBlocks((prev) => prev.filter((b) => b.id !== selectedBlockId))
-      }
-      setSelectedBlockId(null)
-    }
-  }
-
   // ─────────────────────────────────────────────────────────────────────────────
   // RENDER 1: FULL STUDIO BLOCK BUILDER & SEO INSPECTOR (DEDICATED FULLSCREEN LAYOUT)
   // ─────────────────────────────────────────────────────────────────────────────
   if (editorMode) {
     return (
-      <div className="fixed inset-0 z-50 flex h-screen w-screen flex-col overflow-hidden bg-[#0D0D0D] text-white antialiased selection:bg-[#FFD600] selection:text-black">
+      <div className="fixed inset-0 z-50 flex h-screen w-screen flex-col overflow-hidden bg-[#0D0D0D] text-white antialiased selection:bg-[#4d8bff] selection:text-black">
         {/* Top Dedicated Studio Master Header */}
         <header className="h-14 shrink-0 px-4 sm:px-6 bg-[var(--studio-sidebar-bg)] border-b border-white/[0.08] flex items-center justify-between gap-3 z-30 select-none">
           <div className="flex items-center gap-2.5 min-w-0 flex-1 max-w-[45%] md:max-w-[50%]">
@@ -461,8 +400,8 @@ export function StudioServicesManager() {
             </Tooltip>
             <div className="h-4 w-px bg-white/10 hidden sm:block shrink-0" />
             <div className="flex items-center gap-2 min-w-0 overflow-hidden">
-              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-[#FFD600]/15 border border-[#FFD600]/40 text-[#FFD600] uppercase tracking-wider shrink-0">
-                <Layers className="w-3 h-3 text-[#FFD600]" />
+              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-[#4d8bff]/15 border border-[#4d8bff]/40 text-[#4d8bff] uppercase tracking-wider shrink-0">
+                <Layers className="w-3 h-3 text-[#4d8bff]" />
                 <span className="hidden sm:inline">{editingType === 'department' ? 'DEPARTEMEN' : 'LAYANAN'}</span>
               </span>
               <span className="text-xs text-neutral-600 hidden sm:inline shrink-0">/</span>
@@ -484,7 +423,7 @@ export function StudioServicesManager() {
                     : 'text-neutral-400 hover:text-white'
                 }`}
               >
-                <PenSquare className="w-3.5 h-3.5 text-[#FFD600]" />
+                <PenSquare className="w-3.5 h-3.5 text-[#4d8bff]" />
                 <span className="hidden sm:inline">Kanvas</span>
               </button>
             </Tooltip>
@@ -519,22 +458,6 @@ export function StudioServicesManager() {
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
-            {/* AI Copilot Drawer Toggle */}
-            <Tooltip label="AI Copilot" hint="Asisten AI penyusun blok & copy kontekstual" side="bottom">
-              <button
-                type="button"
-                onClick={() => setAiOpen(!aiOpen)}
-                className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-mono border transition-all ${
-                  aiOpen
-                    ? 'bg-[#FFD600]/20 border-[#FFD600]/50 text-[#FFD600]'
-                    : 'bg-white/5 border-white/10 text-neutral-300 hover:text-white hover:border-[#FFD600]/30'
-                }`}
-              >
-                <Sparkles className="w-3.5 h-3.5 text-[#FFD600]" />
-                <span className="hidden lg:inline">AI Copilot</span>
-              </button>
-            </Tooltip>
-
             {/* Toggle Inspector / Properties Panel */}
             {viewMode !== 'full-preview' && (
               <Tooltip label={showPropertiesDrawer ? 'Tutup Panel' : 'Buka Panel'} hint="Panel pengaturan blok & SEO" side="bottom">
@@ -543,7 +466,7 @@ export function StudioServicesManager() {
                   onClick={() => setShowPropertiesDrawer(!showPropertiesDrawer)}
                   className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-mono border transition-all ${
                     showPropertiesDrawer
-                      ? 'bg-[#FFD600]/20 border-[#FFD600]/50 text-[#FFD600]'
+                      ? 'bg-[#4d8bff]/20 border-[#4d8bff]/50 text-[#4d8bff]'
                       : 'bg-white/5 border-white/10 text-neutral-400 hover:text-white'
                   }`}
                 >
@@ -575,7 +498,7 @@ export function StudioServicesManager() {
                 type="button"
                 onClick={editingType === 'department' ? handleSaveDepartment : handleSaveService}
                 disabled={saving || !isBlocksValid}
-                className="inline-flex items-center gap-2 px-4 py-1.5 rounded-xl bg-[#FFD600] text-[#191919] font-medium text-xs font-mono uppercase tracking-wider hover:bg-[#FFE855] transition-all shadow-[0_0_15px_rgba(255, 214, 0,0.25)] disabled:opacity-50"
+                className="inline-flex items-center gap-2 px-4 py-1.5 rounded-xl bg-[#4d8bff] text-[#191919] font-medium text-xs font-mono uppercase tracking-wider hover:bg-[#6fb0ff] transition-all shadow-[0_0_15px_rgba(77, 139, 255,0.25)] disabled:opacity-50"
               >
                 <Save className="w-3.5 h-3.5" />
                 <span>{saving ? 'Menyimpan...' : 'Simpan Halaman'}</span>
@@ -592,42 +515,23 @@ export function StudioServicesManager() {
               blocks={editingType === 'department' ? depBlocks : svcBlocks}
               onChangeBlocks={editingType === 'department' ? setDepBlocks : setSvcBlocks}
               selectedBlockId={selectedBlockId}
-              onSelectBlock={(id) => {
-                setSelectedBlockId(id)
-                if (id) setShowPropertiesDrawer(true)
-              }}
+              onSelectBlock={setSelectedBlockId}
               targetType={editingType}
               contextData={{
                 portfolios: allPortfolios,
                 subServices: editingType === 'department' ? services.filter((s) => s.categoryId === depId) : undefined,
               }}
-              title={editingType === 'department' ? depTitle : svcName}
-              slug={editingType === 'department' ? depSlug : svcSlug}
-              onToggleInspector={() => setShowPropertiesDrawer(!showPropertiesDrawer)}
-              isInspectorOpen={showPropertiesDrawer}
+              draftId={editingType === 'department' ? `category-${depId ?? 'new'}` : `service-${svcId ?? 'new'}`}
+              onSave={editingType === 'department' ? handleSaveDepartment : handleSaveService}
               onValidationChange={handleBlockValidation}
               viewMode={viewMode}
-              onViewModeChange={setViewMode}
             />
           </div>
 
           {/* 2. DOCKED RIGHT PANEL: Contextual Inspector (Block Properties / Document / SEO) */}
           {showPropertiesDrawer && viewMode !== 'full-preview' && (
             <aside className="w-full sm:w-[380px] xl:w-[420px] shrink-0 border-l border-white/[0.08] bg-[var(--studio-bg)] h-full overflow-y-auto z-20 flex flex-col p-4 space-y-4">
-              {selectedBlockId && currentSelectedBlock ? (
-                <div className="rounded-2xl overflow-hidden border border-white/10 flex-1 min-h-[500px]">
-                  <StudioBlockProperties
-                    block={currentSelectedBlock}
-                    onUpdateBlock={handleUpdateSelectedBlock}
-                    onDeselect={() => setSelectedBlockId(null)}
-                    onMoveUp={() => handleMoveBlock('up')}
-                    onMoveDown={() => handleMoveBlock('down')}
-                    onDuplicate={handleDuplicateSelectedBlock}
-                    onDelete={handleDeleteSelectedBlock}
-                    allPortfolios={allPortfolios}
-                  />
-                </div>
-              ) : (
+              {(
                 <div className="space-y-4">
                   {/* Tab Switcher: Meta vs SEO */}
                   <div className="flex rounded-2xl bg-surface-overlay p-1 border border-white/10 shadow-md">
@@ -636,7 +540,7 @@ export function StudioServicesManager() {
                       onClick={() => setActiveInspectorTab('meta')}
                       className={`flex-1 py-2 text-xs font-mono font-medium rounded-xl transition-all ${
                         activeInspectorTab === 'meta'
-                          ? 'bg-[#FFD600] text-[#191919] shadow font-bold'
+                          ? 'bg-[#4d8bff] text-[#191919] shadow font-bold'
                           : 'text-neutral-400 hover:text-white'
                       }`}
                     >
@@ -647,7 +551,7 @@ export function StudioServicesManager() {
                       onClick={() => setActiveInspectorTab('seo')}
                       className={`flex-1 py-2 text-xs font-mono font-medium rounded-xl transition-all ${
                         activeInspectorTab === 'seo'
-                          ? 'bg-[#FFD600] text-[#191919] shadow font-bold'
+                          ? 'bg-[#4d8bff] text-[#191919] shadow font-bold'
                           : 'text-neutral-400 hover:text-white'
                       }`}
                     >
@@ -676,7 +580,7 @@ export function StudioServicesManager() {
                                 setDepTitle(e.target.value)
                                 if (!depId) {
                                   setDepSlug(e.target.value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''))
-                                  setSeoTitle(`${e.target.value} — Spesialisasi UNIMASI`)
+                                  setSeoTitle(`${e.target.value} — SPATIUM`)
                                   setFocusKeyphrase(e.target.value)
                                 }
                               }}
@@ -684,7 +588,7 @@ export function StudioServicesManager() {
                             />
                           </div>
                           <div>
-                            <label htmlFor="dep-slug-input" className="block text-xs font-mono text-neutral-400 mb-1">Slug URL (/layanan/...)</label>
+                            <label htmlFor="dep-slug-input" className="block text-xs font-mono text-neutral-400 mb-1">Slug URL (/services/...)</label>
                             <input
                               id="dep-slug-input"
                               name="depSlug"
@@ -776,7 +680,7 @@ export function StudioServicesManager() {
                               type="checkbox"
                               checked={depShowInNav}
                               onChange={(e) => setDepShowInNav(e.target.checked)}
-                              className="w-4 h-4 rounded text-[#FFD600] accent-[#FFD600]"
+                              className="w-4 h-4 rounded text-[#4d8bff] accent-[#4d8bff]"
                             />
                           </div>
                         </>
@@ -794,7 +698,7 @@ export function StudioServicesManager() {
                                 setSvcName(e.target.value)
                                 if (!svcId) {
                                   setSvcSlug(e.target.value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''))
-                                  setSeoTitle(`${e.target.value} — Layanan UNIMASI`)
+                                  setSeoTitle(`${e.target.value} — Layanan SPATIUM`)
                                   setFocusKeyphrase(e.target.value)
                                 }
                               }}
@@ -825,7 +729,7 @@ export function StudioServicesManager() {
                             </select>
                           </div>
                           <div>
-                            <label htmlFor="svc-slug-input" className="block text-xs font-mono text-neutral-400 mb-1">Slug URL (/layanan/...)</label>
+                            <label htmlFor="svc-slug-input" className="block text-xs font-mono text-neutral-400 mb-1">Slug URL (/services/...)</label>
                             <input
                               id="svc-slug-input"
                               name="svcSlug"
@@ -910,7 +814,7 @@ export function StudioServicesManager() {
                                       htmlFor={`svc-portfolio-${p.id}`}
                                       className={`flex items-center gap-2 p-2 rounded-xl text-xs cursor-pointer transition-colors ${
                                         isChecked
-                                          ? 'bg-[#FFD600]/15 text-[#FFD600]'
+                                          ? 'bg-[#4d8bff]/15 text-[#4d8bff]'
                                           : 'text-neutral-300 hover:bg-white/5'
                                       }`}
                                     >
@@ -929,7 +833,7 @@ export function StudioServicesManager() {
                                             )
                                           }
                                         }}
-                                        className="rounded text-[#FFD600] accent-[#FFD600]"
+                                        className="rounded text-[#4d8bff] accent-[#4d8bff]"
                                       />
                                       <span className="truncate">{p.title}</span>
                                     </label>
@@ -1046,21 +950,6 @@ export function StudioServicesManager() {
           currentUrl={mediaPickerTarget === 'dep' ? depHeroImage : svcHeroImage}
           title={`Pilih Media Cover ${mediaPickerTarget === 'dep' ? 'Departemen' : 'Layanan'}`}
         />
-
-        {/* Studio AI Copilot Drawer */}
-        {aiOpen && (
-          <StudioAiSidebar
-            isOpen={aiOpen}
-            onClose={() => setAiOpen(false)}
-            variant="drawer"
-            pageContext={{
-              title: editingType === 'department' ? depTitle : svcName,
-              slug: editingType === 'department' ? depSlug : svcSlug,
-              status: editingType === 'department' ? depStatus : svcStatus,
-              category: editingType === 'department' ? depTag : svcCategoryBadge,
-            }}
-          />
-        )}
       </div>
     )
   }
@@ -1079,7 +968,7 @@ export function StudioServicesManager() {
             onClick={() => setActiveTab('departments')}
             className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-mono font-medium transition-all ${
               activeTab === 'departments'
-                ? 'bg-[#FFD600] text-[#191919] font-bold shadow-sm'
+                ? 'bg-[#4d8bff] text-[#191919] font-bold shadow-sm'
                 : 'text-neutral-400 hover:text-white hover:bg-white/5'
             }`}
           >
@@ -1091,7 +980,7 @@ export function StudioServicesManager() {
             onClick={() => setActiveTab('services')}
             className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-mono font-medium transition-all ${
               activeTab === 'services'
-                ? 'bg-[#FFD600] text-[#191919] font-bold shadow-sm'
+                ? 'bg-[#4d8bff] text-[#191919] font-bold shadow-sm'
                 : 'text-neutral-400 hover:text-white hover:bg-white/5'
             }`}
           >
@@ -1107,7 +996,7 @@ export function StudioServicesManager() {
               <button
                 type="button"
                 onClick={() => handleEditDepartment()}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#FFD600] text-[#191919] font-medium text-xs font-mono uppercase tracking-wider hover:bg-[#FFE855] transition-all shadow-sm"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#4d8bff] text-[#191919] font-medium text-xs font-mono uppercase tracking-wider hover:bg-[#6fb0ff] transition-all shadow-sm"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>Tambah Departemen</span>
@@ -1118,7 +1007,7 @@ export function StudioServicesManager() {
               <button
                 type="button"
                 onClick={() => handleEditService()}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#FFD600] text-[#191919] font-medium text-xs font-mono uppercase tracking-wider hover:bg-[#FFE855] transition-all shadow-sm"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#4d8bff] text-[#191919] font-medium text-xs font-mono uppercase tracking-wider hover:bg-[#6fb0ff] transition-all shadow-sm"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>Tambah Layanan</span>
@@ -1136,11 +1025,11 @@ export function StudioServicesManager() {
             return (
               <div
                 key={cat.id}
-                className="p-6 rounded-3xl bg-surface-overlay border border-white/10 hover:border-[#FFD600]/40 transition-all flex flex-col justify-between group shadow-xl"
+                className="p-6 rounded-3xl bg-surface-overlay border border-white/10 hover:border-[#4d8bff]/40 transition-all flex flex-col justify-between group shadow-xl"
               >
                 <div>
                   <div className="flex items-center justify-between gap-2 mb-3">
-                    <span className="font-mono text-[10px] text-[#FFD600] uppercase px-2.5 py-0.5 rounded-full bg-[#FFD600]/10 border border-[#FFD600]/20 font-semibold truncate">
+                    <span className="font-mono text-[10px] text-[#4d8bff] uppercase px-2.5 py-0.5 rounded-full bg-[#4d8bff]/10 border border-[#4d8bff]/20 font-semibold truncate">
                       {cat.tag || 'SPESIALISASI'}
                     </span>
                     <div className="flex items-center gap-1.5 text-neutral-400 text-xs font-mono">
@@ -1150,7 +1039,7 @@ export function StudioServicesManager() {
                     </div>
                   </div>
 
-                  <h3 className="font-display text-lg font-bold text-white group-hover:text-[#FFD600] transition-colors">
+                  <h3 className="font-display text-lg font-bold text-white group-hover:text-[#4d8bff] transition-colors">
                     {cat.title}
                   </h3>
                   <p className="text-xs text-neutral-400 mt-2 line-clamp-2 leading-relaxed">
@@ -1178,7 +1067,7 @@ export function StudioServicesManager() {
 
                 <div className="mt-6 pt-4 border-t border-white/5 flex items-center justify-between">
                   <a
-                    href={`${siteConfig.url}/layanan/${cat.slug}`}
+                    href={`${siteConfig.url}/services`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-1.5 text-xs font-mono text-neutral-400 hover:text-white"
@@ -1191,7 +1080,7 @@ export function StudioServicesManager() {
                     <button
                       type="button"
                       onClick={() => handleEditDepartment(cat)}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-xs font-mono text-[#FFD600] hover:bg-white/10"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-xs font-mono text-[#4d8bff] hover:bg-white/10"
                     >
                       <Edit className="w-3.5 h-3.5" />
                       <span>Edit & Blok</span>
@@ -1224,7 +1113,7 @@ export function StudioServicesManager() {
               >
                 <div className="flex items-center justify-between border-b border-white/10 pb-3">
                   <div>
-                    <span className="font-mono text-[10px] text-[#FFD600] uppercase font-semibold">
+                    <span className="font-mono text-[10px] text-[#4d8bff] uppercase font-semibold">
                       DEPARTEMEN
                     </span>
                     <h2 className="font-display text-base sm:text-lg font-bold text-white">
@@ -1262,7 +1151,7 @@ export function StudioServicesManager() {
 
                         <div className="mt-4 pt-3 border-t border-white/5 flex items-center justify-between">
                           <a
-                            href={`${siteConfig.url}/layanan/${svc.slug}`}
+                            href={`${siteConfig.url}/services/${svc.slug}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-neutral-400 hover:text-white"
@@ -1273,7 +1162,7 @@ export function StudioServicesManager() {
                             <button
                               type="button"
                               onClick={() => handleEditService(svc)}
-                              className="px-2.5 py-1 rounded-lg bg-white/5 border border-white/10 text-xs font-mono text-[#FFD600] hover:bg-white/10"
+                              className="px-2.5 py-1 rounded-lg bg-white/5 border border-white/10 text-xs font-mono text-[#4d8bff] hover:bg-white/10"
                             >
                               Edit
                             </button>

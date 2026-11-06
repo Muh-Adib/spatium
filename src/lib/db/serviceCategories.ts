@@ -57,11 +57,14 @@ export function mapCategoryRow(row: any): ServiceCategoryEntity {
   }
 }
 
-export async function getServiceCategories(): Promise<ServiceCategoryEntity[]> {
+export async function getServiceCategories(options: { publishedOnly?: boolean } = {}): Promise<ServiceCategoryEntity[]> {
   if (!process.env.DATABASE_URL) return []
   try {
-    const rows = await prisma.orm.public.ServiceCategory
-      .orderBy((c: any) => c.order.asc())
+    const base = options.publishedOnly
+      ? prisma.orm.public.ServiceCategory.where({ status: 'published' })
+      : prisma.orm.public.ServiceCategory
+    const rows = await base
+      .orderBy((c) => c.order.asc())
       .all()
     return rows.map(mapCategoryRow)
   } catch (err: any) {

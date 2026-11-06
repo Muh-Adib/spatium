@@ -121,10 +121,13 @@ function mapToService(row: any): Service {
   }
 }
 
-export async function getServices(limit?: number): Promise<Service[]> {
+export async function getServices(limit?: number, options: { publishedOnly?: boolean } = {}): Promise<Service[]> {
   if (!process.env.DATABASE_URL) return []
   try {
-    let query = prisma.orm.public.Service.orderBy((s: any) => s.order.asc())
+    const base = options.publishedOnly
+      ? prisma.orm.public.Service.where({ status: 'published' })
+      : prisma.orm.public.Service
+    let query = base.orderBy((s) => s.order.asc())
     if (limit) query = query.limit(limit)
     const rows = await query.all()
     return rows.map(mapToService)
@@ -162,34 +165,21 @@ export async function getServicesByCategoryId(categoryId: number): Promise<Servi
 export async function getServiceWithDetails(slug: string) {
   if (!process.env.DATABASE_URL) return null
   try {
-    const row = await prisma.orm.public.Service.where({ slug }).first()
+    const row = await prisma.orm.public.Service.where({ slug, status: 'published' }).first()
     if (!row) return null
     const svc = mapToService(row)
 
-    // Lookup category slug
-    let categorySlug = 'software-product'
+    // Lookup category slug (null when the service is not linked to a category)
+    let categorySlug: string | null = null
     if (row.categoryId) {
       const cat = await prisma.orm.public.ServiceCategory.where({ id: row.categoryId }).first()
-      if (cat?.slug) {
-        categorySlug = cat.slug
-      }
+      categorySlug = cat?.slug ?? null
     }
 
-    // Safe defaults for ServiceDetailView fallback
-    const safePrimaryMedia = svc.primaryMedia || {
-      type: 'image',
-      imageUrl: row.heroImage || '/images/nav/web-dev.jpg',
-      altText: row.name,
-      badgeText: row.categoryBadge || 'ENTERPRISE SOLUTION',
-    }
-
-    const safeMetrics = svc.metrics && svc.metrics.length > 0 ? svc.metrics : [
-      { label: 'SLA Uptime', value: '99.9%' },
-      { label: 'Standard', value: 'ISO / OWASP' },
-      { label: 'Architecture', value: 'Modular Cloud' },
-    ]
-
-    const safeWhatsappPrompt = svc.whatsappPrompt || `Halo SPATIUM, saya ingin konsultasi mengenai layanan ${svc.name}.`
+    // No fictional defaults (AGENTS.md §3.3): absent media/metrics stay empty.
+    const primaryMedia =
+      svc.primaryMedia ||
+      (row.heroImage ? { type: 'image', imageUrl: row.heroImage, altText: row.name, badgeText: row.categoryBadge || null } : null)
 
     // Portofolio terkait via relation
     const linkedRels = await prisma.orm.public.ServicePortfolio
@@ -210,10 +200,10 @@ export async function getServiceWithDetails(slug: string) {
     return {
       ...svc,
       categorySlug,
-      index: svc.indexNumber || '01',
-      primaryMedia: safePrimaryMedia,
-      metrics: safeMetrics,
-      whatsappPrompt: safeWhatsappPrompt,
+      index: svc.indexNumber || null,
+      primaryMedia,
+      metrics: svc.metrics ?? [],
+      whatsappPrompt: svc.whatsappPrompt || null,
       portfolioItems: linkedPortfolios,
     }
   } catch (err) {

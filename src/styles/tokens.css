@@ -2,13 +2,13 @@
 
 /* ==========================================================================
    SPATIUM — Design tokens
-   Obsidian Void · Electric Cyan · Photonic White · Slate
+   Midnight Space · Electric Blue · Photonic White (per Spatium product deck)
    Clean, clear, generous spatial architecture
    ========================================================================== */
 
 :root {
   /* --- Core palette ----------------------------------------------------- */
-  --space-950: #020408;
+  --space-950: #03060d;
   --space-900: #040711;
   --space-850: #070c1b;
   --space-800: #0a1124;
@@ -28,17 +28,17 @@
   --navy-400: var(--space-400);
 
   /* Primary Accent: Luminescent Cyan & Azure (Spatial / LiDAR / Radiance Fields) */
-  --cyan: #00e5ff;
-  --cyan-500: #00e5ff;
-  --cyan-400: #38bdf8;
-  --cyan-soft: #7dd3fc;
-  --cyan-glow: rgba(0, 229, 255, 0.35);
+  --cyan: #4d8bff;
+  --cyan-500: #4d8bff;
+  --cyan-400: #6fb0ff;
+  --cyan-soft: #a9caff;
+  --cyan-glow: rgba(77, 139, 255, 0.35);
 
   /* Remap yellow aliases to clean cyan/white so no lingering yellow appears */
-  --yellow: #00e5ff;
-  --yellow-500: #00e5ff;
-  --yellow-600: #0284c7;
-  --yellow-soft: #38bdf8;
+  --yellow: #4d8bff;
+  --yellow-500: #4d8bff;
+  --yellow-600: #2f69f0;
+  --yellow-soft: #6fb0ff;
 
   --white: #ffffff;
   --paper: #f8fafc;
@@ -119,8 +119,7 @@
   --shadow-sm: 0 2px 10px rgba(0, 0, 0, 0.35);
   --shadow-md: 0 18px 44px -22px rgba(0, 0, 0, 0.75);
   --shadow-lg: 0 44px 90px -40px rgba(0, 0, 0, 0.9);
-  --shadow-cyan: 0 0 35px rgba(0, 229, 255, 0.35);
-  --shadow-yellow: var(--shadow-cyan);
+  --shadow-cyan: 0 0 35px rgba(77, 139, 255, 0.35);
 
   /* --- Motion ----------------------------------------------------------- */
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
@@ -141,10 +140,10 @@
    ========================================================================== */
 :root {
   /* Brand Semantic */
-  --color-brand-primary: #00e5ff;
-  --color-brand-primary-hover: #38bdf8;
-  --color-brand-primary-active: #0284c7;
-  --color-brand-primary-subtle: rgba(0, 229, 255, 0.12);
+  --color-brand-primary: #4d8bff;
+  --color-brand-primary-hover: #6fb0ff;
+  --color-brand-primary-active: #2f69f0;
+  --color-brand-primary-subtle: rgba(77, 139, 255, 0.12);
 
   /* Surface Semantic */
   --color-surface-base: var(--bg);
@@ -157,30 +156,30 @@
   --color-text-secondary: var(--text-muted);
   --color-text-muted: var(--text-dim);
   --color-text-inverse: var(--ink);
-  --color-text-accent: #00e5ff;
+  --color-text-accent: #4d8bff;
 
   /* Border Semantic */
   --color-border: var(--line);
   --color-border-subtle: rgba(255, 255, 255, 0.06);
-  --color-border-strong: rgba(0, 229, 255, 0.35);
+  --color-border-strong: rgba(77, 139, 255, 0.35);
 
   /* Status */
   --color-success: var(--success);
   --color-danger: var(--danger);
   --color-warning: #f59e0b;
-  --color-info: #00e5ff;
+  --color-info: #4d8bff;
 
   /* Component Layer: Studio Admin */
   --studio-bg: var(--space-950);
   --studio-sidebar-bg: #040813;
   --studio-topbar-bg: rgba(4, 7, 17, 0.88);
-  --studio-accent: #00e5ff;
-  --studio-accent-hover: #38bdf8;
-  --studio-border: rgba(0, 229, 255, 0.15);
+  --studio-accent: #4d8bff;
+  --studio-accent-hover: #6fb0ff;
+  --studio-border: rgba(77, 139, 255, 0.15);
   --studio-text: var(--text);
   --studio-text-muted: var(--text-muted);
-  --studio-nav-active: rgba(0, 229, 255, 0.12);
-  --studio-nav-active-indicator: #00e5ff;
+  --studio-nav-active: rgba(77, 139, 255, 0.12);
+  --studio-nav-active-indicator: #4d8bff;
 
   /* Radius Scale */
   --radius-sm: 0.375rem;

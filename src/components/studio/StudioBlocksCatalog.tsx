@@ -1,339 +1,274 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useMemo, useState } from 'react'
+import { Check, Copy, Search } from 'lucide-react'
 import {
-  Boxes,
-  Sparkles,
-  Layers,
-  Code2,
-  Copy,
-  Check,
-  Eye,
-  Sliders,
-  Play,
-  Maximize2,
-  Info,
-  Palette,
-  Workflow,
-  Search,
-} from 'lucide-react'
+  BLOCK_CATALOG,
+  BLOCK_CATEGORY_LABEL,
+  blockJsonSchema,
+  type BlockCatalogEntry,
+  type BlockCategory,
+  type BlockField,
+  type BlockTarget,
+} from '@/lib/blocks/catalog'
+import { filterBlocks } from './blocks/model'
+import { BlockPreview } from './blocks/BlockPreview'
+import { CategoryIcon } from './blocks/icons'
+import { Badge, Button, FOCUS_RING, inputClass } from './blocks/ui'
 
-export interface BlockManifestItem {
-  type: string
-  name: string
-  category: string
-  description: string
-  dataSchema: Record<string, { type: string; required?: boolean; description?: string }>
-  settingsSchema?: Record<string, any[]>
-  samplePayload: {
-    type: string
-    data: Record<string, any>
-    settings?: Record<string, any>
-  }
+const TARGET_LABEL: Record<BlockTarget, string> = {
+  page: 'Halaman',
+  portfolio: 'Portofolio',
+  service: 'Layanan',
+  solution: 'Solusi',
 }
 
-export function StudioBlocksCatalog() {
-  const [blocks, setBlocks] = useState<BlockManifestItem[]>([])
-  const [loading, setLoading] = useState(true)
-  const [search, setSearch] = useState('')
-  const [selectedCategory, setSelectedCategory] = useState('all')
-  const [activeBlock, setActiveBlock] = useState<BlockManifestItem | null>(null)
-  const [activeTab, setActiveTab] = useState<'schema' | 'settings' | 'json' | 'preview'>('schema')
-  const [copied, setCopied] = useState(false)
+const KIND_LABEL: Record<BlockField['kind'], string> = {
+  text: 'Teks',
+  textarea: 'Teks panjang',
+  url: 'URL',
+  number: 'Angka',
+  boolean: 'Ya/tidak',
+  select: 'Pilihan',
+  image: 'Gambar + alt',
+  link: 'Tautan (label + URL)',
+  stringList: 'Daftar teks',
+  list: 'Daftar item',
+  table: 'Baris tabel',
+}
 
-  useEffect(() => {
-    async function loadManifest() {
-      try {
-        const res = await fetch('/api/blocks/manifest')
-        const json = await res.json()
-        if (json && Array.isArray(json.blocks)) {
-          setBlocks(json.blocks)
-          if (json.blocks.length > 0) {
-            setActiveBlock(json.blocks[0])
+function FieldRows({ fields, depth = 0 }: { fields: readonly BlockField[]; depth?: number }) {
+  return (
+    <>
+      {fields.map((f) => (
+        <React.Fragment key={`${depth}-${f.key}`}>
+          <tr className="border-t border-white/10 align-top">
+            <td className="py-2 pr-3 text-white" style={{ paddingInlineStart: `${depth * 1}rem` }}>
+              {depth > 0 ? <span aria-hidden="true">└ </span> : null}
+              {f.label}
+              {f.required ? <span className="ml-1 text-xs text-red-300">(wajib)</span> : null}
+            </td>
+            <td className="py-2 pr-3 font-mono text-xs text-neutral-300 [overflow-wrap:anywhere]">
+              {f.key}
+              {f.kind === 'image' ? ` + ${f.altKey}` : ''}
+            </td>
+            <td className="py-2 text-neutral-300">{KIND_LABEL[f.kind]}</td>
+          </tr>
+          {f.kind === 'list' ? <FieldRows fields={f.fields} depth={depth + 1} /> : null}
+        </React.Fragment>
+      ))}
+    </>
+  )
+}
+
+function CopyButton({ text, label }: { text: string; label: string }) {
+  const [state, setState] = useState<'idle' | 'copied' | 'failed'>('idle')
+  return (
+    <>
+      <Button
+        size="sm"
+        icon={state === 'copied' ? Check : Copy}
+        onClick={async () => {
+          try {
+            await navigator.clipboard.writeText(text)
+            setState('copied')
+          } catch (err) {
+            console.warn('[blocks-catalog] clipboard write failed:', err)
+            setState('failed')
           }
-        }
-      } catch (err) {
-        console.error('Failed to load blocks manifest:', err)
-      } finally {
-        setLoading(false)
-      }
-    }
-    loadManifest()
-  }, [])
+        }}
+      >
+        {state === 'copied' ? 'Tersalin' : label}
+      </Button>
+      <span role="status" className="sr-only">
+        {state === 'copied' ? `${label}: tersalin ke clipboard.` : state === 'failed' ? 'Gagal menyalin. Pilih teks lalu salin manual.' : ''}
+      </span>
+    </>
+  )
+}
 
-  const categories = ['all', ...Array.from(new Set(blocks.map((b) => b.category)))]
-
-  const filteredBlocks = blocks.filter((b) => {
-    const matchCat = selectedCategory === 'all' || b.category === selectedCategory
-    const matchSearch =
-      search === '' ||
-      b.name.toLowerCase().includes(search.toLowerCase()) ||
-      b.type.toLowerCase().includes(search.toLowerCase()) ||
-      b.description.toLowerCase().includes(search.toLowerCase())
-    return matchCat && matchSearch
-  })
-
-  const handleCopyJson = () => {
-    if (!activeBlock) return
-    navigator.clipboard.writeText(JSON.stringify(activeBlock.samplePayload, null, 2))
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
-  }
-
-  if (loading) {
-    return (
-      <div className="flex h-64 w-full items-center justify-center rounded-2xl border border-white/10 bg-[var(--studio-sidebar-bg)]">
-        <div className="flex flex-col items-center gap-3 text-neutral-400">
-          <div className="h-6 w-6 animate-spin rounded-full border-2 border-accent-400 border-t-transparent" />
-          <span className="font-mono text-xs">Memuat Manifest Blok Frontend…</span>
-        </div>
-      </div>
-    )
-  }
+function Detail({ entry }: { entry: BlockCatalogEntry }) {
+  const example = useMemo(() => JSON.stringify(entry.example, null, 2), [entry])
+  const schema = useMemo(() => JSON.stringify(blockJsonSchema(entry.type), null, 2), [entry])
+  const previewBlocks = useMemo(() => [{ ...entry.example, id: `example-${entry.type}`, type: entry.type }], [entry])
 
   return (
-    <div className="space-y-6">
-      {/* Top Banner */}
-      <div className="rounded-2xl border border-white/10 bg-gradient-to-r from-[#181818] via-[#141414] to-[#111111] p-6 shadow-xl">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="space-y-1.5">
-            <div className="flex items-center gap-2.5">
-              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent-500/10 text-accent-400 ring-1 ring-accent-500/30">
-                <Boxes className="h-4 w-4" />
-              </span>
-              <h2 className="text-lg font-bold text-white tracking-tight">Katalog Dynamic Blocks &amp; Manifest</h2>
-              <span className="rounded-full bg-white/10 px-2.5 py-0.5 font-mono text-[11px] font-semibold text-neutral-300">
-                {blocks.length} Blok Terdaftar
-              </span>
-            </div>
-            <p className="text-xs text-neutral-400 leading-relaxed max-w-3xl">
-              Komponen visual didefinisikan secara independen di frontend, namun struktur data, schema parameter, opsi ukuran, dan preset animasinya dikenali oleh Core Backend sehingga AI Agent dapat menyusun halaman frontend secara terstruktur.
-            </p>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <a
-              href="/api/blocks/manifest"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3.5 py-2 text-xs font-semibold text-neutral-300 hover:bg-white/10 hover:text-white transition-colors"
-            >
-              <Code2 className="h-3.5 w-3.5 text-accent-400" />
-              <span>Buka Raw JSON API</span>
-            </a>
-          </div>
+    <article aria-labelledby="catalog-detail-title" className="space-y-6">
+      <header className="space-y-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <h3 id="catalog-detail-title" className="font-heading text-xl font-semibold text-white">
+            {entry.label}
+          </h3>
+          <Badge tone="neutral">{BLOCK_CATEGORY_LABEL[entry.category]}</Badge>
         </div>
-      </div>
+        <p className="font-mono text-xs text-neutral-400">type: {entry.type}</p>
+        <p className="max-w-prose text-sm leading-relaxed text-neutral-200">{entry.description}</p>
+        <p className="flex flex-wrap items-center gap-1.5 text-xs text-neutral-300">
+          Dipakai di:
+          {entry.targets.map((t) => (
+            <Badge key={t} tone="info">
+              {TARGET_LABEL[t]}
+            </Badge>
+          ))}
+        </p>
+      </header>
 
-      {/* Main Grid: Explorer & Inspector */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Left Column: Block List (5 cols) */}
-        <div className="lg:col-span-5 space-y-4">
-          {/* Search & Category Filter */}
-          <div className="rounded-2xl border border-white/10 bg-[var(--studio-sidebar-bg)] p-3 space-y-3">
-            <div className="relative">
-              <Search className="h-3.5 w-3.5 text-neutral-500 absolute left-3 top-1/2 -translate-y-1/2" />
-              <input
-                type="search"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Cari blok atau tipe..."
-                className="w-full rounded-xl border border-white/10 bg-white/5 pl-9 pr-3 py-2 text-xs text-white placeholder-neutral-500 focus:outline-none focus:ring-1 focus:ring-accent-400"
-              />
-            </div>
+      <section aria-labelledby="catalog-fields" className="space-y-2">
+        <h4 id="catalog-fields" className="text-sm font-semibold text-white">
+          Kolom formulir
+        </h4>
+        <div className="overflow-x-auto rounded-xl border border-white/10 px-3">
+          <table className="w-full min-w-[28rem] text-left text-sm">
+            <thead>
+              <tr className="text-xs text-neutral-400">
+                <th scope="col" className="py-2 pr-3 font-medium">
+                  Label
+                </th>
+                <th scope="col" className="py-2 pr-3 font-medium">
+                  Kunci
+                </th>
+                <th scope="col" className="py-2 font-medium">
+                  Jenis
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <FieldRows fields={entry.fields} />
+            </tbody>
+          </table>
+        </div>
+      </section>
 
-            <div className="flex flex-wrap gap-1.5">
-              {categories.map((cat) => (
-                <button
-                  key={cat}
-                  onClick={() => setSelectedCategory(cat)}
-                  className={`rounded-lg px-2.5 py-1 text-[11px] font-medium transition-colors ${
-                    selectedCategory === cat
-                      ? 'bg-accent-500/20 text-accent-300 border border-accent-500/40'
-                      : 'bg-white/5 text-neutral-400 hover:text-white hover:bg-white/10'
-                  }`}
-                >
-                  {cat.toUpperCase()}
-                </button>
-              ))}
-            </div>
+      <section aria-labelledby="catalog-preview" className="space-y-2">
+        <h4 id="catalog-preview" className="text-sm font-semibold text-white">
+          Pratinjau contoh
+        </h4>
+        <div className="max-h-[28rem] overflow-y-auto rounded-xl border border-white/10">
+          <BlockPreview blocks={previewBlocks} selectedId={null} scrollToSelected={false} />
+        </div>
+      </section>
+
+      <section aria-labelledby="catalog-example" className="space-y-2">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h4 id="catalog-example" className="text-sm font-semibold text-white">
+            Contoh payload
+          </h4>
+          <CopyButton text={example} label="Salin contoh" />
+        </div>
+        <pre tabIndex={0} aria-label="Contoh payload JSON" className={`max-h-72 overflow-auto rounded-xl border border-white/10 bg-black/40 p-3 font-mono text-xs leading-relaxed text-neutral-200 ${FOCUS_RING}`}>
+          {example}
+        </pre>
+      </section>
+
+      <section aria-labelledby="catalog-schema" className="space-y-2">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h4 id="catalog-schema" className="text-sm font-semibold text-white">
+            JSON Schema
+          </h4>
+          <CopyButton text={schema} label="Salin JSON Schema" />
+        </div>
+        <details className="rounded-xl border border-white/10">
+          <summary className={`cursor-pointer rounded-xl px-3 py-2 text-sm text-neutral-200 ${FOCUS_RING}`}>Tampilkan skema (untuk MCP / integrasi)</summary>
+          <pre tabIndex={0} aria-label="JSON Schema" className={`max-h-96 overflow-auto border-t border-white/10 bg-black/40 p-3 font-mono text-xs leading-relaxed text-neutral-200 ${FOCUS_RING}`}>
+            {schema}
+          </pre>
+        </details>
+      </section>
+    </article>
+  )
+}
+
+const CATEGORIES = Object.keys(BLOCK_CATEGORY_LABEL) as BlockCategory[]
+
+/**
+ * "Blok" tab: the block catalogue as editors and integrators see it — label,
+ * description, form fields, a rendered example, the example payload and the
+ * JSON Schema. Reads `lib/blocks/catalog` directly (same source as the editor,
+ * `/api/blocks/manifest` and MCP).
+ */
+export function StudioBlocksCatalog() {
+  const [query, setQuery] = useState('')
+  const [category, setCategory] = useState<BlockCategory | 'all'>('all')
+  const [selectedType, setSelectedType] = useState(BLOCK_CATALOG[0]?.type ?? '')
+
+  const results = useMemo(
+    () => filterBlocks(BLOCK_CATALOG, query).filter((e) => category === 'all' || e.category === category),
+    [query, category],
+  )
+  const selected = BLOCK_CATALOG.find((e) => e.type === selectedType) ?? results[0]
+
+  return (
+    <div className="space-y-5">
+      <header className="space-y-1">
+        <h2 className="font-heading text-lg font-semibold text-white">Katalog blok</h2>
+        <p className="max-w-prose text-sm text-neutral-300">
+          {BLOCK_CATALOG.length} jenis blok yang bisa dipakai di halaman, portofolio, dan layanan. Sumber yang sama dipakai editor blok, API manifest,
+          dan MCP.
+        </p>
+      </header>
+
+      <div className="grid gap-5 lg:grid-cols-[minmax(16rem,22rem)_minmax(0,1fr)]">
+        <div className="space-y-3">
+          <div className="relative">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" aria-hidden="true" />
+            <label htmlFor="catalog-search" className="sr-only">
+              Cari blok
+            </label>
+            <input
+              id="catalog-search"
+              type="search"
+              value={query}
+              placeholder="Cari blok…"
+              onChange={(e) => setQuery(e.target.value)}
+              className={inputClass(false, 'h-10 pl-9')}
+            />
           </div>
-
-          {/* Cards List */}
-          <div className="space-y-2.5 max-h-[620px] overflow-y-auto pr-1 scrollbar-none">
-            {filteredBlocks.map((block) => {
-              const isSelected = activeBlock?.type === block.type
+          <div>
+            <label htmlFor="catalog-category" className="mb-1 block text-xs text-neutral-300">
+              Kategori
+            </label>
+            <select id="catalog-category" value={category} onChange={(e) => setCategory(e.target.value as BlockCategory | 'all')} className={inputClass(false, 'h-10')}>
+              <option value="all">Semua kategori</option>
+              {CATEGORIES.map((c) => (
+                <option key={c} value={c}>
+                  {BLOCK_CATEGORY_LABEL[c]}
+                </option>
+              ))}
+            </select>
+          </div>
+          <p role="status" className="text-xs text-neutral-400">
+            {results.length} blok
+          </p>
+          <ul className="space-y-1" aria-label="Daftar blok">
+            {results.map((entry) => {
+              const isSelected = entry.type === selected?.type
               return (
-                <button
-                  key={block.type}
-                  onClick={() => setActiveBlock(block)}
-                  className={`w-full text-left rounded-2xl p-4 transition-all border ${
-                    isSelected
-                      ? 'border-accent-400/50 bg-white/[0.08] shadow-lg ring-1 ring-accent-400/20'
-                      : 'border-white/5 bg-[var(--studio-sidebar-bg)] hover:border-white/15 hover:bg-white/[0.04]'
-                  }`}
-                >
-                  <div className="flex items-center justify-between gap-2 mb-1.5">
-                    <span className="font-mono text-[10px] font-semibold text-accent-400 uppercase tracking-wider px-2 py-0.5 rounded bg-accent-500/10 border border-accent-500/20">
-                      {block.category}
+                <li key={entry.type}>
+                  <button
+                    type="button"
+                    aria-current={isSelected ? 'true' : undefined}
+                    onClick={() => setSelectedType(entry.type)}
+                    className={`flex w-full items-start gap-3 rounded-lg border px-3 py-2 text-left ${
+                      isSelected ? 'border-accent-400/70 bg-accent-500/10' : 'border-transparent hover:bg-white/[0.05]'
+                    } ${FOCUS_RING}`}
+                  >
+                    <span className="mt-0.5 text-neutral-300">
+                      <CategoryIcon category={entry.category} />
                     </span>
-                    <span className="font-mono text-[10px] text-neutral-500">{block.type}</span>
-                  </div>
-                  <h3 className="text-sm font-bold text-white mb-1">{block.name}</h3>
-                  <p className="text-xs text-neutral-400 line-clamp-2 leading-relaxed">{block.description}</p>
-                </button>
+                    <span className="min-w-0">
+                      <span className="block text-sm font-medium text-white">{entry.label}</span>
+                      <span className="block font-mono text-xs text-neutral-400">{entry.type}</span>
+                    </span>
+                  </button>
+                </li>
               )
             })}
-          </div>
+          </ul>
+          {results.length === 0 ? <p className="text-sm text-neutral-300">Tidak ada blok yang cocok. Hapus filter atau coba kata lain.</p> : null}
         </div>
 
-        {/* Right Column: Inspector Details (7 cols) */}
-        <div className="lg:col-span-7">
-          {activeBlock ? (
-            <div className="rounded-2xl border border-white/10 bg-[var(--studio-sidebar-bg)] p-6 space-y-6 shadow-xl">
-              {/* Header */}
-              <div className="flex items-start justify-between gap-4 border-b border-white/10 pb-5">
-                <div>
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="font-mono text-xs font-bold text-accent-400 px-2 py-0.5 rounded bg-accent-500/10 border border-accent-500/20">
-                      {activeBlock.category.toUpperCase()}
-                    </span>
-                    <span className="font-mono text-xs text-neutral-400">{activeBlock.type}</span>
-                  </div>
-                  <h3 className="text-xl font-extrabold text-white">{activeBlock.name}</h3>
-                  <p className="text-xs text-neutral-400 mt-1">{activeBlock.description}</p>
-                </div>
-
-                <button
-                  onClick={handleCopyJson}
-                  className="flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-semibold text-neutral-300 hover:bg-white/10 hover:text-white transition-colors shrink-0"
-                >
-                  {copied ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5 text-accent-400" />}
-                  <span>{copied ? 'Tersalin' : 'Salin Payload AI'}</span>
-                </button>
-              </div>
-
-              {/* Tabs */}
-              <div className="flex border-b border-white/10 gap-4 text-xs font-semibold">
-                <button
-                  onClick={() => setActiveTab('schema')}
-                  className={`pb-2.5 transition-colors border-b-2 ${
-                    activeTab === 'schema'
-                      ? 'border-accent-400 text-white'
-                      : 'border-transparent text-neutral-400 hover:text-neutral-200'
-                  }`}
-                >
-                  Data Schema ({Object.keys(activeBlock.dataSchema || {}).length} Variabel)
-                </button>
-                <button
-                  onClick={() => setActiveTab('settings')}
-                  className={`pb-2.5 transition-colors border-b-2 ${
-                    activeTab === 'settings'
-                      ? 'border-accent-400 text-white'
-                      : 'border-transparent text-neutral-400 hover:text-neutral-200'
-                  }`}
-                >
-                  Animasi &amp; Tampilan
-                </button>
-                <button
-                  onClick={() => setActiveTab('json')}
-                  className={`pb-2.5 transition-colors border-b-2 ${
-                    activeTab === 'json'
-                      ? 'border-accent-400 text-white'
-                      : 'border-transparent text-neutral-400 hover:text-neutral-200'
-                  }`}
-                >
-                  Agent JSON Payload
-                </button>
-              </div>
-
-              {/* Tab 1: Data Schema */}
-              {activeTab === 'schema' && (
-                <div className="space-y-3">
-                  <div className="rounded-xl border border-white/10 overflow-hidden">
-                    <table className="w-full text-left text-xs">
-                      <thead className="bg-white/5 text-neutral-400 font-mono text-[10px] uppercase border-b border-white/10">
-                        <tr>
-                          <th className="p-3">Variabel / Field</th>
-                          <th className="p-3">Tipe Data</th>
-                          <th className="p-3">Wajib</th>
-                          <th className="p-3">Keterangan</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-white/5">
-                        {Object.entries(activeBlock.dataSchema || {}).map(([key, def]) => (
-                          <tr key={key} className="hover:bg-white/[0.02]">
-                            <td className="p-3 font-mono font-bold text-accent-300">{key}</td>
-                            <td className="p-3 font-mono text-neutral-400">{def.type}</td>
-                            <td className="p-3">
-                              {def.required ? (
-                                <span className="text-[10px] font-bold text-amber-400 bg-amber-400/10 px-1.5 py-0.5 rounded border border-amber-400/20">
-                                  REQUIRED
-                                </span>
-                              ) : (
-                                <span className="text-[10px] text-neutral-500">OPSIONAL</span>
-                              )}
-                            </td>
-                            <td className="p-3 text-neutral-300 text-[11px]">{def.description || '—'}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              )}
-
-              {/* Tab 2: Settings & Animation */}
-              {activeTab === 'settings' && (
-                <div className="space-y-4">
-                  {activeBlock.settingsSchema ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      {Object.entries(activeBlock.settingsSchema).map(([settingKey, options]) => (
-                        <div key={settingKey} className="rounded-xl border border-white/10 bg-white/5 p-4 space-y-2">
-                          <div className="flex items-center gap-2">
-                            <Sliders className="h-3.5 w-3.5 text-accent-400" />
-                            <h4 className="font-mono text-xs font-bold text-white capitalize">{settingKey}</h4>
-                          </div>
-                          <div className="flex flex-wrap gap-1.5">
-                            {Array.isArray(options) ? (
-                              options.map((opt) => (
-                                <span
-                                  key={String(opt)}
-                                  className="rounded px-2 py-0.5 font-mono text-[10px] bg-black/40 text-neutral-300 border border-white/10"
-                                >
-                                  {String(opt)}
-                                </span>
-                              ))
-                            ) : (
-                              <span className="text-xs text-neutral-400">{String(options)}</span>
-                            )}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-xs text-neutral-500">Tidak ada pengaturan khusus untuk blok ini.</p>
-                  )}
-                </div>
-              )}
-
-              {/* Tab 3: JSON Payload */}
-              {activeTab === 'json' && (
-                <div className="space-y-3">
-                  <div className="relative rounded-xl border border-white/10 bg-[#0d0d0d] p-4 font-mono text-xs text-neutral-300 overflow-x-auto">
-                    <pre>{JSON.stringify(activeBlock.samplePayload, null, 2)}</pre>
-                  </div>
-                  <p className="text-[11px] text-neutral-500 leading-relaxed">
-                    Format payload ini digunakan oleh AI Agent (Copilot) saat memanggil tool mutasi pembuatan halaman backend (<code className="text-accent-400">POST /api/v1/pages</code>).
-                  </p>
-                </div>
-              )}
-            </div>
-          ) : (
-            <div className="flex h-64 items-center justify-center rounded-2xl border border-white/10 bg-[var(--studio-sidebar-bg)] text-neutral-500 text-xs">
-              Pilih salah satu blok dari daftar untuk melihat spesifikasi detail.
-            </div>
-          )}
+        <div className="min-w-0 rounded-2xl border border-white/10 bg-surface-elevated p-4 sm:p-6">
+          {selected ? <Detail entry={selected} /> : <p className="text-sm text-neutral-300">Pilih blok untuk melihat detailnya.</p>}
         </div>
       </div>
     </div>

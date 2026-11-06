@@ -1,23 +1,21 @@
 import Link from 'next/link'
-import { CORE_SERVICES } from '@/data/services'
-import { getCoreServices } from '@/lib/core'
+import type { Service } from '@/lib/content/spatium-types'
 import { ServiceVisual } from '@/components/services/ServiceVisual'
 import { Icon } from '@/components/Icon'
 import { Reveal } from '@/components/ui/Reveal'
 import { SectionHead } from '@/components/ui/SectionHead'
 import './services-showcase.css'
 
-export async function ServicesShowcase({ initialServices }: { initialServices?: any[] } = {}) {
-  const services = initialServices || (await getCoreServices())
-  const displayServices = (services && services.length > 0 ? services : CORE_SERVICES).slice(0, 4)
-  if (!displayServices || displayServices.length === 0) return null
+export function ServicesShowcase({ services }: { services: Service[] }) {
+  const displayServices = services.slice(0, 4)
+  if (displayServices.length === 0) return null
 
   return (
     <section className="section services-showcase" id="services" aria-labelledby="services-title">
       <div className="container container--wide">
         <SectionHead
           id="services-title"
-          eyebrow="4 Vertikal Layanan Spasial"
+          eyebrow="Use case"
           title={
             <>
               Solusi Teknologi Spasial &amp; <span className="accent">Reality Capture</span>.
@@ -26,7 +24,7 @@ export async function ServicesShowcase({ initialServices }: { initialServices?: 
           aside={
             <>
               <p className="lede">
-                Dari rekonstruksi set film virtual, display interaktif ZMOT ritel &amp; F&B, hingga digital twin presisi sub-sentimeter dan preservasi memori abadi.
+                Dari rekonstruksi set film, spatial tour untuk bisnis, instalasi imersif, hingga preservasi memori — semuanya berangkat dari satu kali capture ruang nyata.
               </p>
               <Link href="/services" className="link-arrow">
                 Lihat Seluruh Layanan
@@ -37,7 +35,7 @@ export async function ServicesShowcase({ initialServices }: { initialServices?: 
         />
 
         <div className="services-showcase__list">
-          {displayServices.map((service: any, index: number) => (
+          {displayServices.map((service, index) => (
             <article
               className={`service-block${index % 2 === 1 ? ' service-block--reverse' : ''}`}
               key={service.slug}
@@ -46,10 +44,10 @@ export async function ServicesShowcase({ initialServices }: { initialServices?: 
               <div className="service-block__copy">
                 <Reveal variant={index % 2 === 0 ? 'left' : 'right'}>
                   <div className="service-block__index-row">
-                    <span className="service-block__index">{service.index || `0${index + 1}`}</span>
+                    <span className="service-block__index">{service.index}</span>
                     <span className="service-block__rule" aria-hidden="true" />
-                    <span className="pill" style={{ borderColor: 'transparent', background: 'rgba(255,214,0,0.12)', color: 'var(--yellow)' }}>
-                      {service.shortName || service.name}
+                    <span className="pill" style={{ borderColor: 'transparent', background: 'rgba(77, 139, 255, 0.12)', color: '#6fb0ff' }}>
+                      {service.shortName}
                     </span>
                   </div>
 
@@ -61,16 +59,16 @@ export async function ServicesShowcase({ initialServices }: { initialServices?: 
                   <p className="service-block__summary">{service.summary}</p>
 
                   <ul className="service-block__capabilities">
-                    {(service.capabilities || []).slice(0, 6).map((cap: any) => (
-                      <li key={typeof cap === 'string' ? cap : cap.title}>
+                    {service.capabilities.slice(0, 6).map((cap) => (
+                      <li key={cap.slug}>
                         <Icon name="check" size={14} />
-                        {typeof cap === 'string' ? cap : cap.title}
+                        {cap.title}
                       </li>
                     ))}
                   </ul>
 
                   <Link href={`/services/${service.slug}`} className="btn btn--ghost">
-                    Explore {service.shortName || service.name}
+                    Lihat {service.shortName}
                     <span className="btn__icon">
                       <Icon name="arrow-right" size={16} />
                     </span>
@@ -88,7 +86,7 @@ export async function ServicesShowcase({ initialServices }: { initialServices?: 
                       <i />
                     </span>
                   </div>
-                  <ServiceVisual kind={service.visual || '2d'} />
+                  <ServiceVisual kind={service.visual} />
                 </div>
               </Reveal>
             </article>

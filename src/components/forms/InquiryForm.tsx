@@ -1,7 +1,7 @@
 'use client'
 
 import { useId, useMemo, useRef, useState } from 'react'
-import { SERVICES } from '@/data/services'
+import type { ServiceNavItem } from '@/lib/content/spatium-types'
 import { BUDGET_RANGES, CONTACT, TIMELINES } from '@/data/site'
 import { Icon } from '@/components/Icon'
 import './inquiry-form.css'
@@ -59,7 +59,7 @@ function buildEmailBody(values: Fields): string {
   ].join('\n')
 }
 
-export function InquiryForm() {
+export function InquiryForm({ services = [] }: { services?: ServiceNavItem[] }) {
   const uid = useId()
   const [values, setValues] = useState<Fields>(EMPTY)
   const [errors, setErrors] = useState<Errors>({})
@@ -189,7 +189,7 @@ export function InquiryForm() {
             </label>
             <select {...fieldProps('service')}>
               <option value="">Pilih vertikal layanan…</option>
-              {SERVICES.map((service) => (
+              {services.map((service) => (
                 <option key={service.slug} value={service.name}>
                   {service.name}
                 </option>
@@ -280,14 +280,13 @@ export function InquiryForm() {
 
         <div className="inquiry__submit">
           <button type="submit" className="btn btn--primary" disabled={status === 'submitting'}>
-            {status === 'submitting' ? 'Sending…' : 'Send project inquiry'}
+            {status === 'submitting' ? 'Mengirim…' : 'Kirim brief proyek'}
             <span className="btn__icon">
               <Icon name="arrow-right" size={17} />
             </span>
           </button>
           <p className="inquiry__submit-note">
-            We reply within two working days. Fields marked <span aria-hidden="true">*</span> are
-            required.
+            Kolom bertanda <span aria-hidden="true">*</span> wajib diisi.
           </p>
         </div>
       </form>
@@ -304,12 +303,12 @@ export function InquiryForm() {
             <Icon name="check" size={20} />
           </span>
           <h3>
-            {ENDPOINT ? 'Inquiry received' : 'Your inquiry is ready to send'}
+            {ENDPOINT ? 'Brief diterima' : 'Brief siap dikirim'}
           </h3>
           <p>
             {ENDPOINT
-              ? 'Thanks — your brief is logged and the studio will come back to you within two working days.'
-              : 'This build has no server endpoint configured, so nothing was transmitted. Your details are compiled below — send them with one click, or copy the summary into your own email client.'}
+              ? 'Terima kasih — brief Anda sudah kami terima dan tim SPATIUM akan menghubungi Anda.'
+              : 'Formulir ini belum terhubung ke server, jadi belum ada data yang terkirim. Ringkasan brief Anda ada di bawah — kirim lewat email dengan satu klik, atau salin ke email Anda.'}
           </p>
 
           <pre className="inquiry__summary">{buildEmailBody(values)}</pre>

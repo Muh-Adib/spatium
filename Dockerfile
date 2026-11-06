@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-# UNIMASI Studio — multi-stage production image (Next.js 16 standalone with pnpm)
+# SPATIUM — multi-stage production image (Next.js 16 standalone with pnpm)
 
 FROM node:22-alpine AS deps
 WORKDIR /app
@@ -19,21 +19,23 @@ COPY . .
 
 # NEXT_PUBLIC_* are inlined at build time — pass them as build args.
 ARG NEXT_PUBLIC_SITE_URL
-ARG NEXT_PUBLIC_CORE_URL
-ARG NEXT_PUBLIC_CORE_SITE_KEY
 ARG NEXT_PUBLIC_GA_ID
 ARG NEXT_PUBLIC_GTM_ID
 ARG NEXT_PUBLIC_WHATSAPP
+ARG NEXT_PUBLIC_PHONE
+ARG NEXT_PUBLIC_STUDIO_ADDRESS
+ARG NEXT_PUBLIC_STUDIO_HOURS
 ENV NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL \
-    NEXT_PUBLIC_CORE_URL=$NEXT_PUBLIC_CORE_URL \
-    NEXT_PUBLIC_CORE_SITE_KEY=$NEXT_PUBLIC_CORE_SITE_KEY \
     NEXT_PUBLIC_GA_ID=$NEXT_PUBLIC_GA_ID \
     NEXT_PUBLIC_GTM_ID=$NEXT_PUBLIC_GTM_ID \
     NEXT_PUBLIC_WHATSAPP=$NEXT_PUBLIC_WHATSAPP \
+    NEXT_PUBLIC_PHONE=$NEXT_PUBLIC_PHONE \
+    NEXT_PUBLIC_STUDIO_ADDRESS=$NEXT_PUBLIC_STUDIO_ADDRESS \
+    NEXT_PUBLIC_STUDIO_HOURS=$NEXT_PUBLIC_STUDIO_HOURS \
     NEXT_TELEMETRY_DISABLED=1
 
 # Prisma contract generation needs no DB connection.
-RUN pnpm exec prisma contract emit || true
+RUN pnpm exec prisma contract emit
 RUN pnpm run build
 
 FROM node:22-alpine AS runner

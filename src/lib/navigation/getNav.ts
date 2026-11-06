@@ -1,7 +1,6 @@
 import type { NavEntry, NavSection, NavItem } from '@/config/navigation'
 import { getNavServiceCategories } from '@/lib/db/serviceCategories'
 import { getServices } from '@/lib/db/services'
-import { getSolutions } from '@/lib/db/solutions'
 import { getPortfolios } from '@/lib/db/portfolio'
 import { getCategories } from '@/lib/content/queries'
 import { getArticles as getArticlesDb } from '@/lib/db/articles'
@@ -39,75 +38,33 @@ function resolveNavImageUrl(img: any, fallback: string): string {
   return fallback
 }
 
+/** Log a failed nav data source and return an honest empty value (no mock data). */
+function logNavFallback<T>(source: string, err: unknown, empty: T): T {
+  console.warn(`[navigation] Failed to load ${source}; rendering without it.`, err)
+  return empty
+}
+
 /**
  * Dynamically builds top navigation entries entirely from the SQLite database.
  * No hardcoded fake slugs or broken URLs. Reusable for any brand.
  */
 export async function getNavigationEntries(): Promise<NavEntry[]> {
   try {
-    const [navCategories, allServices, allSolutions, allPortfolios, allCategories, recentArticlesResult] =
+    const [navCategories, allServices, allPortfolios, allCategories, recentArticlesResult] =
       await Promise.all([
-        getNavServiceCategories().catch(() => []),
-        getServices().catch(() => []),
-        getSolutions().catch(() => []),
-        getPortfolios().catch(() => []),
-        getCategories().catch(() => []),
-        getArticlesDb({ pageSize: 4 }).catch(() => ({ data: [], total: 0, page: 1, pageSize: 4, totalPages: 0 })),
+        getNavServiceCategories().catch((err) => logNavFallback('service categories', err, [])),
+        getServices().catch((err) => logNavFallback('services', err, [])),
+        getPortfolios().catch((err) => logNavFallback('portfolios', err, [])),
+        getCategories().catch((err) => logNavFallback('article categories', err, [])),
+        getArticlesDb({ pageSize: 4 }).catch((err) =>
+          logNavFallback('recent articles', err, { data: [], total: 0, page: 1, pageSize: 4, totalPages: 0 })
+        ),
       ])
 
     const entries: NavEntry[] = []
 
     // ─────────────────────────────────────────────────────────────────────────
-    // 1. SOLUSI (Dynamic from database)
-    // ─────────────────────────────────────────────────────────────────────────
-    const publishedSolutions = allSolutions.filter((s: any) => s.status === 'published' || !s.status)
-    if (publishedSolutions.length > 0) {
-      const solCategoryMap = new Map<string, typeof publishedSolutions>()
-      for (const sol of publishedSolutions) {
-        const catName = sol.category
-          ? sol.category.replace(/_/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())
-          : 'Solusi Unggulan'
-        if (!solCategoryMap.has(catName)) {
-          solCategoryMap.set(catName, [])
-        }
-        solCategoryMap.get(catName)!.push(sol)
-      }
-
-      const solSections: NavSection[] = []
-      for (const [catName, items] of solCategoryMap.entries()) {
-        solSections.push({
-          title: catName,
-          items: items.slice(0, 4).map((s: any) => ({
-            label: s.title,
-            href: `/solusi/${s.slug}`,
-            description: s.shortDescription || '',
-            isPopular: Boolean(s.featured),
-            image: resolveNavImageUrl(s.heroImage, '/images/portfolio/telkom-dfe.webp'),
-          })),
-        })
-        if (solSections.length >= 3) break
-      }
-
-      entries.push({
-        label: 'Solusi',
-        href: '/solusi',
-        mega: solSections.length > 0,
-        megaHeader: {
-          tag: 'SOLUTIONS',
-          viewAllLabel: 'LIHAT SEMUA SOLUSI',
-          viewAllHref: '/solusi',
-        },
-        sections: solSections,
-      })
-    } else {
-      entries.push({
-        label: 'Solusi',
-        href: '/solusi',
-      })
-    }
-
-    // ─────────────────────────────────────────────────────────────────────────
-    // 2. LAYANAN (Dynamic from database)
+    // 1. LAYANAN (Dynamic from database)
     // ─────────────────────────────────────────────────────────────────────────
     if (navCategories.length > 0 && allServices.length > 0) {
       const dynamicServiceSections = navCategories
@@ -117,10 +74,10 @@ export async function getNavigationEntries(): Promise<NavEntry[]> {
             title: cat.title.split('&')[0].trim(),
             items: childServices.slice(0, 5).map((cs: any) => ({
               label: cs.name,
-              href: `/layanan/${cs.slug}`,
+              href: `/services/${cs.slug}`,
               description: cs.shortDescription || '',
               isPopular: Boolean(cs.featured),
-              image: resolveNavImageUrl(cs.heroImage?.url || cs.primaryMedia?.imageUrl || cs.heroImage, '/images/nav/web-dev.jpg'),
+              image: resolveNavImageUrl(cs.heroImage?.url || cs.primaryMedia?.imageUrl || cs.heroImage, '/images/spatium/web/way-digitaltwin.webp'),
             })),
           }
         })
@@ -128,34 +85,34 @@ export async function getNavigationEntries(): Promise<NavEntry[]> {
 
       entries.push({
         label: 'Layanan',
-        href: '/layanan',
+        href: '/services',
         mega: dynamicServiceSections.length > 0,
         megaHeader: {
           tag: 'SERVICES',
           viewAllLabel: 'LIHAT SEMUA LAYANAN',
-          viewAllHref: '/layanan',
+          viewAllHref: '/services',
         },
         sections: dynamicServiceSections,
       })
     } else if (allServices.length > 0) {
       entries.push({
         label: 'Layanan',
-        href: '/layanan',
+        href: '/services',
         mega: true,
         megaHeader: {
           tag: 'SERVICES',
           viewAllLabel: 'LIHAT SEMUA LAYANAN',
-          viewAllHref: '/layanan',
+          viewAllHref: '/services',
         },
         sections: [
           {
             title: 'Layanan Utama',
             items: allServices.slice(0, 6).map((cs: any) => ({
               label: cs.name,
-              href: `/layanan/${cs.slug}`,
+              href: `/services/${cs.slug}`,
               description: cs.shortDescription || '',
               isPopular: Boolean(cs.featured),
-              image: resolveNavImageUrl(cs.heroImage?.url || cs.primaryMedia?.imageUrl || cs.heroImage, '/images/nav/web-dev.jpg'),
+              image: resolveNavImageUrl(cs.heroImage?.url || cs.primaryMedia?.imageUrl || cs.heroImage, '/images/spatium/web/way-digitaltwin.webp'),
             })),
           },
         ],
@@ -163,12 +120,12 @@ export async function getNavigationEntries(): Promise<NavEntry[]> {
     } else {
       entries.push({
         label: 'Layanan',
-        href: '/layanan',
+        href: '/services',
       })
     }
 
     // ─────────────────────────────────────────────────────────────────────────
-    // 3. PORTOFOLIO (Dynamic from database)
+    // 2. PORTOFOLIO (Dynamic from database)
     // ─────────────────────────────────────────────────────────────────────────
     if (allPortfolios.length > 0) {
       const portCategoryMap = new Map<string, any[]>()
@@ -189,7 +146,7 @@ export async function getNavigationEntries(): Promise<NavEntry[]> {
             href: `/portfolio/${p.slug}`,
             description: p.summary || p.client || '',
             isPopular: Boolean(p.featured),
-            image: resolveNavImageUrl(p.heroMedia?.url || p.heroImage, '/images/portfolio/telkom-dfe.webp'),
+            image: resolveNavImageUrl(p.heroMedia?.url || p.heroImage, '/images/spatium/web/hub.webp'),
           })),
         })
         if (portSections.length >= 3) break
@@ -214,7 +171,7 @@ export async function getNavigationEntries(): Promise<NavEntry[]> {
     }
 
     // ─────────────────────────────────────────────────────────────────────────
-    // 4. ARTIKEL (Dynamic from database)
+    // 3. ARTIKEL (Dynamic from database)
     // ─────────────────────────────────────────────────────────────────────────
     const recentArticles = (recentArticlesResult as { data?: unknown[] }).data || []
     if (allCategories.length > 0 || recentArticles.length > 0) {
@@ -225,10 +182,10 @@ export async function getNavigationEntries(): Promise<NavEntry[]> {
           title: 'Kategori Artikel',
           items: allCategories.slice(0, 4).map((c: any) => ({
             label: c.name,
-            href: `/artikel?kategori=${c.slug}`,
+            href: `/journal?category=${c.slug}`,
             description: c.description || 'Koleksi artikel dan riset seputar ' + c.name,
             isPopular: true,
-            image: '/images/articles/web-architecture.jpg',
+            image: '/images/spatium/web/spatial-media.webp',
           })),
         })
       }
@@ -238,42 +195,46 @@ export async function getNavigationEntries(): Promise<NavEntry[]> {
           title: 'Artikel Terbaru',
           items: recentArticles.slice(0, 3).map((a: any) => ({
             label: a.title,
-            href: `/artikel/${a.slug}`,
+            href: `/journal/${a.slug}`,
             description: a.excerpt ? a.excerpt.slice(0, 80) + '...' : '',
             isPopular: false,
-            image: resolveNavImageUrl(a.featuredImage || a.coverUrl, '/images/articles/web-architecture.jpg'),
+            image: resolveNavImageUrl(a.featuredImage || a.coverUrl, '/images/spatium/web/spatial-media.webp'),
           })),
         })
       }
 
       entries.push({
         label: 'Artikel',
-        href: '/artikel',
+        href: '/journal',
         mega: articleSections.length > 0,
         megaHeader: {
           tag: 'KNOWLEDGE BASE',
           viewAllLabel: 'BACA SEMUA ARTIKEL',
-          viewAllHref: '/artikel',
+          viewAllHref: '/journal',
         },
         sections: articleSections,
       })
     } else {
       entries.push({
         label: 'Artikel',
-        href: '/artikel',
+        href: '/journal',
       })
     }
 
     // ─────────────────────────────────────────────────────────────────────────
-    // 5. TENTANG & KONTAK
+    // 4. TENTANG & KONTAK
     // ─────────────────────────────────────────────────────────────────────────
     entries.push({
       label: 'Tentang',
-      href: '/tentang',
+      href: '/about',
+    })
+    entries.push({
+      label: 'Kontak',
+      href: '/contact',
     })
 
     return entries
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('Error fetching dynamic navigation from DB:', err)
     return [
       { label: 'Services', href: '/services' },
@@ -290,10 +251,9 @@ export async function getNavigationEntries(): Promise<NavEntry[]> {
  */
 export async function getFooterNavEntries(): Promise<FooterNavSection[]> {
   try {
-    const [allServices, allSolutions, allCategories] = await Promise.all([
-      getServices().catch(() => []),
-      getSolutions().catch(() => []),
-      getCategories().catch(() => []),
+    const [allServices, allCategories] = await Promise.all([
+      getServices().catch((err) => logNavFallback('services', err, [])),
+      getCategories().catch((err) => logNavFallback('article categories', err, [])),
     ])
 
     const sections: FooterNavSection[] = []
@@ -315,14 +275,14 @@ export async function getFooterNavEntries(): Promise<FooterNavSection[]> {
         title: 'Journal',
         items: allCategories.slice(0, 5).map((c: any) => ({
           label: c.name,
-          href: `/journal?kategori=${c.slug}`,
+          href: `/journal?category=${c.slug}`,
         })),
       })
     }
 
     // 3. Studio Column
     sections.push({
-      title: 'UNIMASI Studio',
+      title: 'SPATIUM',
       items: [
         { label: 'Tentang Kami', href: '/about' },
         { label: 'Portfolio', href: '/portfolio' },
@@ -331,11 +291,11 @@ export async function getFooterNavEntries(): Promise<FooterNavSection[]> {
     })
 
     return sections
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('Error fetching footer navigation from DB:', err)
     return [
       {
-        title: 'UNIMASI Studio',
+        title: 'SPATIUM',
         items: [
           { label: 'About', href: '/about' },
           { label: 'Services', href: '/services' },

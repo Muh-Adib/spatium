@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useRef, useEffect, useMemo } from 'react'
+import React, { useState, useRef, useEffect, useMemo, useId } from 'react'
 import { Check, ChevronDown, Plus, Tag } from 'lucide-react'
 
 interface CategoryItem {
@@ -15,6 +15,8 @@ interface CategoryComboboxProps {
   placeholder?: string
   className?: string
   variant?: 'canvas' | 'inspector'
+  /** Id of the text input, so an external `<label htmlFor>` names it. */
+  id?: string
 }
 
 export function CategoryCombobox({
@@ -24,7 +26,12 @@ export function CategoryCombobox({
   placeholder = 'Pilih atau ketik kategori…',
   className = '',
   variant = 'canvas',
+  id,
 }: CategoryComboboxProps) {
+  const autoId = useId()
+  const inputId = id ?? `category-${autoId}`
+  const listboxId = `${inputId}-listbox`
+  const optionId = (i: number) => `${inputId}-option-${i}`
   const [isOpen, setIsOpen] = useState(false)
   const [query, setQuery] = useState(value || '')
   const [highlightedIndex, setHighlightedIndex] = useState<number>(-1)
@@ -108,8 +115,14 @@ export function CategoryCombobox({
         selectCategory(query.trim())
       }
     } else if (e.key === 'Escape') {
+      if (isOpen) {
+        e.preventDefault()
+        e.stopPropagation()
+      }
       setIsOpen(false)
       setQuery(value || '')
+    } else if (e.key === 'Tab') {
+      setIsOpen(false)
     }
   }
 
@@ -130,13 +143,20 @@ export function CategoryCombobox({
       <div
         className={`flex items-center gap-1.5 transition-all ${
           isCanvas
-            ? 'bg-white/5 hover:bg-white/10 border border-white/10 focus-within:border-accent-400 rounded-lg px-2.5 py-1 text-xs text-neutral-200'
-            : 'w-full rounded-lg bg-black/40 border border-white/15 px-2.5 py-1.5 text-xs text-white focus-within:border-accent-400 focus-within:ring-1 focus-within:ring-accent-400/30'
+            ? 'bg-white/5 hover:bg-white/10 border border-white/15 focus-within:border-accent-400 focus-within:ring-2 focus-within:ring-accent-400 rounded-lg px-2.5 py-1 text-xs text-neutral-100'
+            : 'w-full rounded-lg bg-black/40 border border-white/15 px-2.5 py-1.5 text-xs text-white focus-within:border-accent-400 focus-within:ring-2 focus-within:ring-accent-400'
         }`}
       >
-        <Tag className="w-3 h-3 text-accent-400/70 shrink-0" aria-hidden="true" />
+        <Tag className="w-3 h-3 text-accent-400 shrink-0" aria-hidden="true" />
         <input
           ref={inputRef}
+          id={inputId}
+          role="combobox"
+          aria-expanded={isOpen}
+          aria-controls={listboxId}
+          aria-autocomplete="list"
+          aria-activedescendant={isOpen && highlightedIndex >= 0 ? optionId(highlightedIndex) : undefined}
+          autoComplete="off"
           type="text"
           value={query}
           onChange={(e) => {
@@ -147,7 +167,7 @@ export function CategoryCombobox({
           onFocus={() => setIsOpen(true)}
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
-          className="bg-transparent border-0 p-0 text-inherit focus:outline-none focus:ring-0 w-full placeholder:text-neutral-500 font-medium"
+          className="bg-transparent border-0 p-0 text-inherit focus-visible:outline-none w-full min-w-0 placeholder:text-neutral-500 font-medium"
         />
         <button
           type="button"
@@ -155,11 +175,11 @@ export function CategoryCombobox({
             setIsOpen((prev) => !prev)
             if (!isOpen) inputRef.current?.focus()
           }}
-          className="p-0.5 text-neutral-400 hover:text-white shrink-0 focus:outline-none"
+          className="p-0.5 text-neutral-300 hover:text-white shrink-0"
           tabIndex={-1}
-          aria-label="Buka daftar kategori"
+          aria-hidden="true"
         >
-          <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${isOpen ? 'rotate-180 text-accent-400' : ''}`} />
+          <ChevronDown className={`w-3.5 h-3.5 motion-safe:transition-transform ${isOpen ? 'rotate-180 text-accent-400' : ''}`} />
         </button>
       </div>
 
@@ -167,28 +187,33 @@ export function CategoryCombobox({
       {isOpen && (
         <div
           ref={listRef}
+          id={listboxId}
+          role="listbox"
+          aria-label="Kategori"
           className="absolute z-50 mt-1 max-h-60 w-full min-w-[240px] overflow-auto rounded-xl border border-white/15 bg-surface-elevated py-1 shadow-2xl backdrop-blur-xl animate-fadeIn text-xs"
         >
           {showCreateOption && (
-            <button
-              type="button"
+            <div
+              id={optionId(0)}
+              role="option"
+              aria-selected={highlightedIndex === 0}
               onMouseDown={(e) => {
                 e.preventDefault()
                 selectCategory(query.trim())
               }}
-              className={`w-full flex items-center gap-2 px-3 py-2 text-left text-accent-400 hover:bg-white/[0.08] transition-colors border-b border-white/[0.06] font-medium ${
+              className={`cursor-pointer w-full flex items-center gap-2 px-3 py-2 text-left text-accent-400 hover:bg-white/[0.08] transition-colors border-b border-white/[0.06] font-medium ${
                 highlightedIndex === 0 ? 'bg-white/[0.08]' : ''
               }`}
             >
-              <Plus className="w-3.5 h-3.5 shrink-0" />
-              <span className="truncate">
+              <Plus className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+              <span className="break-words">
                 Buat kategori baru: <strong className="text-white">&ldquo;{query.trim()}&rdquo;</strong>
               </span>
-            </button>
+            </div>
           )}
 
           {filtered.length === 0 && !showCreateOption ? (
-            <div className="px-3 py-3 text-center text-neutral-500 font-mono text-[11px]">
+            <div role="presentation" className="px-3 py-3 text-center text-neutral-400 font-mono text-[11px]">
               Tidak ada kategori yang cocok.
             </div>
           ) : (
@@ -198,20 +223,22 @@ export function CategoryCombobox({
               const isHighlighted = highlightedIndex === itemIdx
 
               return (
-                <button
+                <div
                   key={cat.slug || cat.name}
-                  type="button"
+                  id={optionId(itemIdx)}
+                  role="option"
+                  aria-selected={isSelected}
                   onMouseDown={(e) => {
                     e.preventDefault()
                     selectCategory(cat.name)
                   }}
-                  className={`w-full flex items-center justify-between px-3 py-1.5 text-left text-neutral-200 hover:bg-white/[0.06] transition-colors ${
+                  className={`cursor-pointer w-full flex items-center justify-between px-3 py-1.5 text-left text-neutral-200 hover:bg-white/[0.06] transition-colors ${
                     isHighlighted ? 'bg-white/[0.08] text-white' : ''
                   } ${isSelected ? 'font-semibold text-accent-300' : ''}`}
                 >
-                  <span className="truncate">{cat.name}</span>
-                  {isSelected && <Check className="w-3.5 h-3.5 text-accent-400 shrink-0 ml-2" />}
-                </button>
+                  <span className="break-words">{cat.name}</span>
+                  {isSelected && <Check className="w-3.5 h-3.5 text-accent-400 shrink-0 ml-2" aria-hidden="true" />}
+                </div>
               )
             })
           )}

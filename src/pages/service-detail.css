@@ -78,7 +78,7 @@
 }
 
 .detail-capability:hover {
-  border-color: rgba(255, 214, 0, 0.45);
+  border-color: rgba(77, 139, 255, 0.45);
   transform: translateY(-4px);
 }
 
@@ -173,7 +173,7 @@
   margin-top: 4px;
   border-radius: 50%;
   background: var(--yellow);
-  box-shadow: 0 0 0 4px rgba(255, 214, 0, 0.14);
+  box-shadow: 0 0 0 4px rgba(77, 139, 255, 0.14);
 }
 
 .detail-timeline__list div {
@@ -224,7 +224,7 @@
 }
 
 .faq-item[open] {
-  border-color: rgba(255, 214, 0, 0.4);
+  border-color: rgba(77, 139, 255, 0.4);
 }
 
 .faq-item summary {

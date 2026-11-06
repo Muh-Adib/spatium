@@ -8,11 +8,13 @@ import { prisma } from '@/lib/db/prisma'
 import { revalidatePath } from 'next/cache'
 import { dispatchRevalidationWebhook } from '@/lib/webhooks/dispatcher'
 import { releaseArticleLock } from '@/lib/articles/locks'
-import fs from 'fs'
-import path from 'path'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
+
+/** Error detail for API responses: never exposed in production (AGENTS.md §3.6). */
+const errorDetails = (error: unknown): string | undefined =>
+  process.env.NODE_ENV === 'production' ? undefined : error instanceof Error ? error.message : String(error)
 import {
   requireUser,
   authenticateRequest,
@@ -55,7 +57,7 @@ export async function GET(request: NextRequest) {
         }
         return NextResponse.json({ error: 'Artikel tidak ditemukan' }, { status: 404 })
       } catch (dbErr) {
-        console.error('SQLite getArticleBySlug failed:', dbErr)
+        console.error('[api/articles] getArticleBySlug failed:', dbErr)
         return NextResponse.json({ error: 'Gagal mengambil artikel dari basis data' }, { status: 500 })
       }
     }
@@ -96,10 +98,10 @@ export async function GET(request: NextRequest) {
           }
         )
       }
-    } catch (dbErr: any) {
-      console.error('SQLite articles query failed:', dbErr)
+    } catch (dbErr) {
+      console.error('[api/articles] articles query failed:', dbErr)
       return NextResponse.json(
-        { error: 'Gagal mengambil data artikel dari basis data', details: dbErr.message },
+        { error: 'Gagal mengambil data artikel dari basis data', details: errorDetails(dbErr) },
         { status: 500 }
       )
     }
@@ -113,7 +115,7 @@ export async function GET(request: NextRequest) {
     })
   } catch (error) {
     return NextResponse.json(
-      { error: 'Gagal mengambil data artikel', details: String(error) },
+      { error: 'Gagal mengambil data artikel', details: errorDetails(error) },
       { status: 500 }
     )
   }
@@ -152,7 +154,7 @@ export async function POST(request: NextRequest) {
       slug,
       excerpt = '',
       content = '',
-      category = 'Teknologi',
+      category = '',
       author,
       tags,
       featuredImage,
@@ -217,7 +219,7 @@ export async function POST(request: NextRequest) {
       ? content
       : `<p>${content.replace(/\n\n/g, '</p><p>').replace(/\n/g, '<br/>')}</p>`
 
-    const finalMetaTitle = metaTitle || `${title} — UNIMASI`
+    const finalMetaTitle = metaTitle || `${title} — SPATIUM`
     const finalMetaDesc = metaDescription || excerpt || title
 
     // Enforce Publication Gate if publishing (Section 3.4)
@@ -259,8 +261,8 @@ export async function POST(request: NextRequest) {
       update: { name: authorName },
     })
 
-    // 1. Persist to SQLite Database
-    let createdArticle: any = null
+    // 1. Persist to PostgreSQL (Prisma)
+    let createdArticle: Awaited<ReturnType<typeof createArticle>> | null = null
     try {
       const existing = await getArticleBySlug(cleanSlug)
       if (existing) {
@@ -291,10 +293,10 @@ export async function POST(request: NextRequest) {
           primaryCategory: primaryCategory || categoryName,
         })
       }
-    } catch (dbErr: any) {
-      console.error('Failed to save article to SQLite:', dbErr)
+    } catch (dbErr) {
+      console.error('[api/articles] createArticle failed:', dbErr)
       return NextResponse.json(
-        { error: 'Gagal menyimpan artikel ke basis data.', details: dbErr.message },
+        { error: 'Gagal menyimpan artikel ke basis data.', details: errorDetails(dbErr) },
         { status: 500 }
       )
     }
@@ -302,8 +304,8 @@ export async function POST(request: NextRequest) {
     // On-demand Real-time Cache Purge
     try {
       revalidatePath('/', 'layout')
-      revalidatePath('/artikel')
-      revalidatePath(`/artikel/${cleanSlug}`)
+      revalidatePath('/journal')
+      revalidatePath(`/journal/${cleanSlug}`)
       revalidatePath('/admin')
     } catch (e) {
       console.warn('[Cache Revalidate] Failed in POST /api/articles:', e)
@@ -314,7 +316,7 @@ export async function POST(request: NextRequest) {
       dispatchRevalidationWebhook({
         type: 'article',
         slug: cleanSlug,
-        path: `/artikel/${cleanSlug}`,
+        path: `/journal/${cleanSlug}`,
         tags: ['articles', `article:${cleanSlug}`],
       }).catch((webhookErr) => {
         console.warn('[WebhookDispatcher] POST /api/articles webhook error:', webhookErr)
@@ -324,7 +326,7 @@ export async function POST(request: NextRequest) {
     // Automated Indexing Trigger (Next.js 16 after() non-blocking execution)
     // Strictly isolates drafts, in_review, and scheduled articles
     if (targetStatus === 'published') {
-      const targetUrl = normalizeIndexingUrl(`/artikel/${cleanSlug}`)
+      const targetUrl = normalizeIndexingUrl(`/journal/${cleanSlug}`)
       const articleId = createdArticle?.id
       const actor = user.name || user.id || 'user'
       let robots: string | null = null
@@ -369,12 +371,12 @@ export async function POST(request: NextRequest) {
           ? 'Artikel diajukan untuk review editorial!'
           : 'Draf artikel berhasil disimpan di database!',
       slug: cleanSlug,
-      url: `/artikel/${cleanSlug}`,
+      url: `/journal/${cleanSlug}`,
     })
   } catch (error) {
     if (error instanceof Error && /Jadwal|Zona waktu/.test(error.message)) return NextResponse.json({ error: error.message }, { status: 400 })
     return NextResponse.json(
-      { error: 'Gagal menyimpan artikel', details: String(error) },
+      { error: 'Gagal menyimpan artikel', details: errorDetails(error) },
       { status: 500 }
     )
   }
@@ -402,13 +404,13 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: 'Slug artikel tidak disertakan.' }, { status: 400 })
     }
 
-    // 1. Delete from SQLite DB
+    // 1. Delete from PostgreSQL (Prisma)
     try {
       await deleteArticle(slug, user.id)
-    } catch (dbErr: any) {
-      console.error('SQLite article delete failed:', dbErr)
+    } catch (dbErr) {
+      console.error('[api/articles] deleteArticle failed:', dbErr)
       return NextResponse.json(
-        { error: 'Gagal menghapus artikel dari basis data.', details: dbErr.message },
+        { error: 'Gagal menghapus artikel dari basis data.', details: errorDetails(dbErr) },
         { status: 500 }
       )
     }
@@ -416,8 +418,8 @@ export async function DELETE(request: NextRequest) {
     // On-demand Real-time Cache Purge
     try {
       revalidatePath('/', 'layout')
-      revalidatePath('/artikel')
-      revalidatePath(`/artikel/${slug}`)
+      revalidatePath('/journal')
+      revalidatePath(`/journal/${slug}`)
       revalidatePath('/admin')
     } catch (e) {
       console.warn('[Cache Revalidate] Failed in DELETE /api/articles:', e)
@@ -428,7 +430,7 @@ export async function DELETE(request: NextRequest) {
       dispatchRevalidationWebhook({
         type: 'article',
         slug,
-        path: `/artikel/${slug}`,
+        path: `/journal/${slug}`,
         tags: ['articles', `article:${slug}`],
       }).catch((webhookErr) => {
         console.warn('[WebhookDispatcher] DELETE /api/articles webhook error:', webhookErr)
@@ -441,7 +443,7 @@ export async function DELETE(request: NextRequest) {
     })
   } catch (error) {
     return NextResponse.json(
-      { error: 'Gagal menghapus artikel', details: String(error) },
+      { error: 'Gagal menghapus artikel', details: errorDetails(error) },
       { status: 500 }
     )
   }
@@ -560,7 +562,7 @@ export async function PATCH(request: NextRequest) {
     // Validate the resulting live/scheduled record, including status-less PATCH requests.
     const schedule = nextStatus === 'scheduled' ? normalizeSchedule(body.scheduledAt, body.publicationTimezone) : {}
     if (effectiveStatus === 'published' || effectiveStatus === 'scheduled') {
-      const existing: any = existingArticle
+      const existing = existingArticle
       const activeContent = content !== undefined ? content : (existing.content || '')
       const contentImages = extractContentImages(activeContent)
       const activeTitle = title ?? existing.title ?? ''
@@ -617,7 +619,7 @@ export async function PATCH(request: NextRequest) {
       const saved = existingAuthor || await prisma.orm.public.Author.create({ name: authorName, slug: authorSlug || `author-${Date.now()}`, email: user.role === 'AUTHOR' ? user.email : null })
       relations.authorId = saved.id
     }
-    // 1. Update SQLite DB
+    // 1. Update PostgreSQL (Prisma)
     try {
       await updateArticle(lookupSlug, {
         ...(slug !== lookupSlug ? { slug } : {}),
@@ -643,10 +645,10 @@ export async function PATCH(request: NextRequest) {
         ...(nextStatus ? { status: nextStatus as 'draft' | 'in_review' | 'approved' | 'scheduled' | 'published' } : {}),
         ...(explicitPublishedAt ? { publishedAt: explicitPublishedAt } : nextStatus === 'published' && !existingArticle.publishedAt ? { publishedAt: timestamp } : {}),
       })
-    } catch (dbErr: any) {
-      console.error('SQLite updateArticle error:', dbErr)
+    } catch (dbErr) {
+      console.error('[api/articles] updateArticle failed:', dbErr)
       return NextResponse.json(
-        { error: 'Gagal memperbarui artikel di basis data.', details: dbErr.message },
+        { error: 'Gagal memperbarui artikel di basis data.', details: errorDetails(dbErr) },
         { status: 500 }
       )
     }
@@ -654,9 +656,9 @@ export async function PATCH(request: NextRequest) {
     // On-demand Real-time Cache Purge
     try {
       revalidatePath('/', 'layout')
-      revalidatePath('/artikel')
-      revalidatePath(`/artikel/${lookupSlug}`)
-      revalidatePath(`/artikel/${slug}`)
+      revalidatePath('/journal')
+      revalidatePath(`/journal/${lookupSlug}`)
+      revalidatePath(`/journal/${slug}`)
       revalidatePath('/admin')
     } catch (e) {
       console.warn('[Cache Revalidate] Failed in PATCH /api/articles:', e)
@@ -668,7 +670,7 @@ export async function PATCH(request: NextRequest) {
       dispatchRevalidationWebhook({
         type: 'article',
         slug: activeSlug,
-        path: `/artikel/${activeSlug}`,
+        path: `/journal/${activeSlug}`,
         tags: ['articles', `article:${activeSlug}`],
       }).catch((webhookErr) => {
         console.warn('[WebhookDispatcher] PATCH /api/articles webhook error:', webhookErr)
@@ -679,7 +681,7 @@ export async function PATCH(request: NextRequest) {
     // Strictly isolates drafts, in_review, future scheduled, and archived states
     if (effectiveStatus === 'published') {
       const targetSlug = slug || lookupSlug
-      const targetUrl = normalizeIndexingUrl(`/artikel/${targetSlug}`)
+      const targetUrl = normalizeIndexingUrl(`/journal/${targetSlug}`)
       const articleId = existingArticle.id
       const actor = user.name || user.id || 'user'
       const wasAlreadyPublished = currentStatus === 'published'
@@ -715,8 +717,9 @@ export async function PATCH(request: NextRequest) {
       }
     }
 
-    // Release multi-user editing lock on successful save
-    releaseArticleLock(lookupSlug, user.id)
+    // The editor keeps its advisory lock after a save (it is still open); the lock is
+    // released when the editor closes or expires via TTL. Release the old key on rename.
+    if (slug && slug !== lookupSlug) releaseArticleLock(lookupSlug, user.id)
 
     return NextResponse.json({
       success: true,
@@ -727,7 +730,7 @@ export async function PATCH(request: NextRequest) {
   } catch (error) {
     if (error instanceof Error && /Jadwal|Zona waktu/.test(error.message)) return NextResponse.json({ error: error.message }, { status: 400 })
     return NextResponse.json(
-      { error: 'Gagal memperbarui artikel', details: String(error) },
+      { error: 'Gagal memperbarui artikel', details: errorDetails(error) },
       { status: 500 }
     )
   }

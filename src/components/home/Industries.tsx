@@ -10,17 +10,16 @@ export function Industries() {
       <div className="container container--wide">
         <SectionHead
           id="industries-title"
-          eyebrow="Industries we serve"
+          eyebrow="Sektor"
           title={
             <>
-              Different sectors, <span className="industries__accent">same job</span>: make it
-              understood.
+              Satu pipeline, <span className="industries__accent">banyak sektor</span>.
             </>
           }
           aside={
             <p className="lede">
-              We adapt the pipeline to the sector — a safety module and a product launch film are
-              built differently, even when the craft is identical.
+              Laser scan, point cloud, 3D geometry, dan 3D Gaussian Splat yang sama — output-nya
+              disesuaikan dengan kebutuhan tiap sektor.
             </p>
           }
         />

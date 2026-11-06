@@ -16,21 +16,10 @@ export async function GET(request: NextRequest) {
   const limit = limitParam ? parseInt(limitParam, 10) : undefined
 
   try {
-    let portfolios = await getPortfolios(limit)
-    if (!portfolios || portfolios.length === 0) {
-      try {
-        const seedPortfolio = require('@/data/seed/seed_portfolio.json')
-        portfolios = limit ? seedPortfolio.slice(0, limit) : seedPortfolio
-      } catch (err) { console.warn("[API observable error]:", err) }
-    }
+    const portfolios = await getPortfolios(limit, { publishedOnly: true })
     return jsonResponse({ portfolios })
   } catch (err) {
     console.error('[delivery:portfolios] Error:', err)
-    try {
-      const seedPortfolio = require('@/data/seed/seed_portfolio.json')
-      return jsonResponse({ portfolios: limit ? seedPortfolio.slice(0, limit) : seedPortfolio })
-    } catch {
-      return jsonResponse({ error: 'Failed to retrieve portfolios' }, 500)
-    }
+    return jsonResponse({ error: 'Failed to retrieve portfolios' }, 500)
   }
 }

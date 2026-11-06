@@ -9,7 +9,8 @@ function constantTimeEqual(a: string, b: string): boolean {
     const bufB = Buffer.from(b)
     if (bufA.length !== bufB.length) return false
     return crypto.timingSafeEqual(bufA, bufB)
-  } catch {
+  } catch (err) {
+    console.warn('[auth] constantTimeEqual failed:', err)
     return false
   }
 }
@@ -65,7 +66,12 @@ export async function validateCredentials(emailInput?: unknown, passwordInput?: 
     if (u && u.passwordHash) {
       const isValid = await verifyAnyPassword(password, u.passwordHash)
       if (isValid) {
-        const role = roleMap[u.role.toLowerCase()] || 'SUPER_ADMIN'
+        const role = roleMap[u.role.toLowerCase()]
+        if (!role) {
+          // Unknown roles get no access rather than silently becoming SUPER_ADMIN.
+          console.warn(`[auth] Login refused: unknown role "${u.role}" for ${u.email}`)
+          return null
+        }
         return {
           id: u.id,
           name: u.name,
@@ -84,14 +90,12 @@ export async function validateCredentials(emailInput?: unknown, passwordInput?: 
     process.env.BOOTSTRAP_ADMIN_PASSWORD_HASH?.trim() ||
     process.env.BOOTSTRAP_ADMIN_PASSWORD?.trim()
 
-  const isBootstrapEmailMatch =
-    email === bootstrapEmail ||
-    email === 'admin@spatium.id'
+  const isBootstrapEmailMatch = email === bootstrapEmail
 
   if (isBootstrapEmailMatch && bootstrapSecret) {
     const isValid = await verifyAnyPassword(password, bootstrapSecret)
     if (isValid) {
-      syncUserRecord(bootstrapEmail, 'Bootstrap Super Admin', password).catch(() => {})
+      void syncUserRecord(bootstrapEmail, 'Bootstrap Super Admin', password)
       return {
         id: 'bootstrap-super-admin',
         name: 'Bootstrap Super Admin',
@@ -101,46 +105,19 @@ export async function validateCredentials(emailInput?: unknown, passwordInput?: 
     }
   }
 
-  // 3. Resilient Master Super Admin Fallback (Anti Lock-Out for UDP & Spatium)
-  const masterAdmins = [
-    {
-      email: 'adib@udp.co.id',
-      name: 'Adib IT',
-      validPasswords: ['QzU5D0gv4vXFHF@@QCc3^1)D', 'Spatium2026!', 'Unimasi2026!', 'SegiaTech2026!'],
-    },
-    {
-      email: 'admin@spatium.id',
-      name: 'Super Admin Spatium',
-      validPasswords: ['Spatium2026!', 'QzU5D0gv4vXFHF@@QCc3^1)D'],
-    },
-  ]
-
-  for (const master of masterAdmins) {
-    if (email === master.email || rawInput.toLowerCase() === master.name.toLowerCase()) {
-      const isMatch = master.validPasswords.some((vp) => constantTimeEqual(password, vp))
-      if (isMatch) {
-        syncUserRecord(master.email, master.name, password).catch(() => {})
-        return {
-          id: `usr_${master.email.replace(/[^a-z0-9]+/g, '_')}`,
-          name: master.name,
-          email: master.email,
-          role: 'SUPER_ADMIN',
-        }
-      }
-    }
-  }
-
+  // No hardcoded fallback accounts: recovery goes through BOOTSTRAP_ADMIN_* env
+  // or `scripts/create-superadmin.ts`.
   return null
 }
 
 async function syncUserRecord(email: string, name: string, plainPassword: string) {
   try {
-    const existing = await prisma.orm.public.User.where({ email }).first().catch(() => null)
+    const existing = await prisma.orm.public.User.where({ email }).first()
     const passwordHash = await hashPasswordScrypt(plainPassword)
     if (existing) {
       await prisma.orm.public.User.where({ id: existing.id }).update({
         passwordHash,
-      }).catch(() => {})
+      })
     } else {
       await prisma.orm.public.User.create({
         id: `usr_${email.replace(/[^a-z0-9]+/g, '_')}`,
@@ -148,9 +125,9 @@ async function syncUserRecord(email: string, name: string, plainPassword: string
         email,
         role: 'super_admin',
         passwordHash,
-      }).catch(() => {})
+      })
     }
-  } catch {
-    // Graceful silent fallback
+  } catch (err) {
+    console.warn(`[auth] syncUserRecord failed for ${email}:`, err)
   }
 }

@@ -34,7 +34,7 @@ import {
   ArrowRight,
   FileCode,
 } from 'lucide-react'
-import { siteConfig } from '@/config/site'
+import { siteConfig, whatsappHref } from '@/config/site'
 import { ThematicWave } from '@/components/ui/ThematicWave'
 import { IframeEmbed } from '@/components/ui/IframeEmbed'
 import { sanitizeHtmlContent } from '@/lib/security/sanitize-html'
@@ -84,7 +84,7 @@ export function HeroDepartmentBlock({ block }: { block: any }) {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
             <div className="lg:col-span-7">
               {badge && (
-                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.04] text-accent border border-accent/30 text-xs font-mono mb-6 backdrop-blur-md shadow-yellow">
+                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.04] text-accent border border-accent/30 text-xs font-mono mb-6 backdrop-blur-md">
                   <Layers className="w-3.5 h-3.5 text-accent" />
                   <span>{badge}</span>
                 </div>
@@ -151,7 +151,7 @@ export function HeroDepartmentBlock({ block }: { block: any }) {
               <div className="relative aspect-[16/10] sm:aspect-[21/9] w-full overflow-hidden bg-black">
                 <Image
                   src={heroImage}
-                  alt={block?.alt || (block as { data?: { alt?: string } })?.data?.alt || title || 'UNIMASI Showcase'}
+                  alt={block?.alt || (block as { data?: { alt?: string } })?.data?.alt || title || 'Visual digital twin SPATIUM'}
                   fill
                   priority
                   className="object-cover object-top group-hover:scale-[1.02] transition-transform duration-700"
@@ -176,7 +176,7 @@ export function HeroDepartmentBlock({ block }: { block: any }) {
       <div className="container relative z-10 max-w-6xl mx-auto px-4 sm:px-6">
         <div className="max-w-4xl">
           {badge && (
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[var(--surface-translucent)] text-accent border border-accent/30 text-xs font-mono mb-6 backdrop-blur-md shadow-yellow">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[var(--surface-translucent)] text-accent border border-accent/30 text-xs font-mono mb-6 backdrop-blur-md">
               <Layers className="w-3.5 h-3.5 text-accent" />
               <span>{badge}</span>
             </div>
@@ -236,7 +236,7 @@ export function HeroDepartmentBlock({ block }: { block: any }) {
             <div className="relative aspect-[16/10] sm:aspect-[21/9] w-full overflow-hidden bg-black">
               <Image
                 src={heroImage}
-                alt={block?.alt || (block as { data?: { alt?: string } })?.data?.alt || title || 'UNIMASI Showcase'}
+                alt={block?.alt || (block as { data?: { alt?: string } })?.data?.alt || title || 'Visual digital twin SPATIUM'}
                 fill
                 priority
                 className="object-cover object-top group-hover:scale-[1.015] transition-transform duration-700"
@@ -288,14 +288,14 @@ export function HeroServiceBlock({ block }: { block: any }) {
     data.name ||
     block?.title ||
     data.title ||
-    'Pengembangan Sistem & Rekayasa Digital'
+    'Layanan Spasial SPATIUM'
   const highlightWord = block?.highlightWord || data.highlightWord || ''
   const badge =
     block?.categoryBadge ||
     data.categoryBadge ||
     block?.badge ||
     data.badge ||
-    'Layanan Rekayasa'
+    'Layanan Spasial'
   const description =
     block?.description ||
     data.description ||
@@ -316,7 +316,7 @@ export function HeroServiceBlock({ block }: { block: any }) {
 
       <div className="container relative z-10 max-w-5xl mx-auto px-4 sm:px-6">
         {badge && (
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[var(--surface-translucent)] text-accent border border-accent/30 text-xs font-mono mb-6 backdrop-blur-md shadow-yellow">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[var(--surface-translucent)] text-accent border border-accent/30 text-xs font-mono mb-6 backdrop-blur-md">
             <Zap className="w-3.5 h-3.5 text-accent" />
             <span>{badge}</span>
           </div>
@@ -351,10 +351,10 @@ export function HeroServiceBlock({ block }: { block: any }) {
         )}
 
         {/* WhatsApp CTA button */}
-        {whatsappPrompt && (
+        {whatsappPrompt && whatsappHref(siteConfig.whatsapp, whatsappPrompt) && (
           <div className="mt-8 flex flex-wrap gap-4 items-center">
             <Link
-              href={`https://wa.me/${siteConfig.whatsapp}?text=${encodeURIComponent(whatsappPrompt)}`}
+              href={whatsappHref(siteConfig.whatsapp, whatsappPrompt) ?? '/contact'}
               target="_blank"
               rel="noopener noreferrer"
               className="btn btn--primary"
@@ -392,9 +392,9 @@ export function HeroServiceBlock({ block }: { block: any }) {
               <div className="relative aspect-[16/10] sm:aspect-video rounded-2xl overflow-hidden bg-gradient-to-br from-[var(--color-background)] via-[#0F3A79]/40 to-[var(--color-background)] p-6 flex flex-col justify-between border border-[var(--card-border)]">
                 <div className="flex items-center justify-between">
                   <span className="px-2.5 py-1 rounded text-[10px] font-mono font-bold bg-accent/15 text-accent border border-accent/30 uppercase tracking-wider">
-                    UNIMASI SHOWREEL
+                    SPATIUM 3DGS
                   </span>
-                  <span className="text-xs font-mono text-[var(--text-muted)]">16:9 4K DCI</span>
+                  <span className="text-xs font-mono text-[var(--text-muted)]">Walkable Reality</span>
                 </div>
                 <div className="text-center my-auto py-4">
                   <div className="w-12 h-12 rounded-2xl bg-accent/10 border border-accent/30 mx-auto flex items-center justify-center text-accent font-heading font-bold text-lg mb-2">
@@ -788,13 +788,13 @@ export function ComparisonMatrixBlock({ block }: { block: any }) {
     pickRows(data.items)
   const rows = (
     rawRows || [
-      { feature: 'Kualitas Produksi', unimasi: 'Standar studio sinematik 4K', traditional: 'Aset stok generik' },
-      { feature: 'Storytelling', unimasi: 'Narasi khusus sesuai tujuan komunikasi', traditional: 'Visual tanpa konteks' },
-      { feature: 'Hak Kepemilikan Aset', unimasi: '100% hak milik klien', traditional: 'Lisensi terbatas platform' },
+      { feature: 'Pengalaman Ruang', highlight: 'Walkable 3D Gaussian Splat dari ruang nyata', traditional: 'Foto atau video statis' },
+      { feature: 'Akurasi Data', highlight: 'Berbasis laser scan dan point cloud terkalibrasi', traditional: 'Estimasi visual tanpa skala' },
+      { feature: 'Pemanfaatan Aset', highlight: 'Pindai sekali, pakai untuk banyak format keluaran', traditional: 'Satu aset untuk satu kebutuhan' },
     ]
   ).map((row: any) => ({
     feature: row.feature || row.aspect || row.title || '',
-    unimasi: row.unimasi || row.segia || '',
+    highlight: row.highlight || row.unimasi || row.segia || '',
     traditional: row.traditional || row.conventional || '',
   }))
   const title = block?.title || data.title || 'Mengapa Memilih Layanan Kami untuk Proyek Anda'
@@ -827,7 +827,7 @@ export function ComparisonMatrixBlock({ block }: { block: any }) {
             </div>
             <div className="p-4 md:col-span-4 bg-accent/10 text-accent font-bold uppercase tracking-wider flex items-center gap-2 border-l border-r border-accent/20">
               <Check className="w-4 h-4 text-accent" />
-              <span>Standar UNIMASI</span>
+              <span>Standar SPATIUM</span>
             </div>
             <div className="p-4 md:col-span-4 text-[var(--text-muted)] font-semibold uppercase tracking-wider">
               Agensi Konvensional
@@ -847,7 +847,7 @@ export function ComparisonMatrixBlock({ block }: { block: any }) {
                 </div>
                 <div className="p-4 md:col-span-4 bg-accent/[0.04] border-l border-r border-accent/15 font-mono text-xs text-accent flex items-center gap-2">
                   <CheckCircle2 className="w-4 h-4 text-accent shrink-0" />
-                  <span>{row.unimasi}</span>
+                  <span>{row.highlight}</span>
                 </div>
                 <div className="p-4 md:col-span-4 font-mono text-xs text-[var(--text-dim)] flex items-center gap-2">
                   <XCircle className="w-4 h-4 text-[var(--text-dim)] shrink-0" />
@@ -1219,7 +1219,7 @@ export function PortfolioProofGridBlock({
                 <div className="relative aspect-[16/10] overflow-hidden">
                   <Image
                     src={p.heroImage}
-                    alt={p.alt || p.title || 'Portofolio UNIMASI'}
+                    alt={p.alt || p.title || 'Portofolio SPATIUM'}
                     fill
                     className="object-cover group-hover:scale-105 transition-transform duration-500"
                     sizes="(max-width: 640px) 100vw, 50vw"
@@ -1305,12 +1305,12 @@ export interface StudioCTAProps {
 }
 
 export function StudioCTA({
-  headline = 'Siap Merekayasa Transformasi Digital Bisnis Anda?',
-  subheadline = 'Diskusikan visi, tantangan sistem, atau kebutuhan aplikasi imersif Anda bersama tim spesialis kami.',
+  headline = 'Siap Menghadirkan Ruang Nyata Anda dalam 3D?',
+  subheadline = 'Diskusikan lokasi, tujuan penggunaan, dan format keluaran (point cloud, geometri 3D, atau 3D Gaussian Splat) bersama tim SPATIUM.',
   secondaryLabel = 'Jelajahi Layanan',
-  secondaryHref = '/layanan',
+  secondaryHref = '/services',
 }: StudioCTAProps) {
-  const whatsappUrl = `https://wa.me/${siteConfig.whatsapp}?text=Halo,%20saya%20ingin%20berkonsultasi%20mengenai%20proyek%20rekayasa%20digital.`
+  const whatsappUrl = whatsappHref(siteConfig.whatsapp, 'Halo SPATIUM, saya ingin berkonsultasi mengenai proyek digital twin.')
 
   return (
     <section className="section-py relative overflow-hidden bg-[var(--surface-2)] text-white border-t border-[var(--card-border)]" aria-label="Ajakan Bertindak">
@@ -1325,17 +1325,26 @@ export function StudioCTA({
             {subheadline}
           </p>
           <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-5">
-            <a
-              href={whatsappUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn btn--primary w-full sm:w-auto"
-            >
-              <span className="btn__icon">
-                <MessageSquare className="w-4 h-4" />
-              </span>
-              <span>Konsultasi Proyek (WhatsApp)</span>
-            </a>
+            {whatsappUrl ? (
+              <a
+                href={whatsappUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn btn--primary w-full sm:w-auto"
+              >
+                <span className="btn__icon">
+                  <MessageSquare className="w-4 h-4" />
+                </span>
+                <span>Konsultasi Proyek (WhatsApp)</span>
+              </a>
+            ) : (
+              <Link href="/contact" className="btn btn--primary w-full sm:w-auto">
+                <span className="btn__icon">
+                  <MessageSquare className="w-4 h-4" />
+                </span>
+                <span>Konsultasi Proyek</span>
+              </Link>
+            )}
             <Link
               href={secondaryHref}
               className="btn btn--ghost w-full sm:w-auto"
@@ -1347,7 +1356,7 @@ export function StudioCTA({
             </Link>
           </div>
           <div className="mt-8 text-xs font-mono text-[var(--text-dim)]">
-            Atau kirimkan brief sistem via email ke{' '}
+            Atau kirimkan brief proyek via email ke{' '}
             <a href={`mailto:${siteConfig.email}`} className="text-accent hover:underline font-semibold">
               {siteConfig.email}
             </a>
@@ -1359,7 +1368,7 @@ export function StudioCTA({
             </div>
             <div className="flex items-center justify-center gap-2">
               <FileCode className="w-4 h-4 text-accent shrink-0" />
-              <span>Arsitektur &amp; Estimasi Gratis</span>
+              <span>Estimasi Lingkup Gratis</span>
             </div>
             <div className="flex items-center justify-center gap-2">
               <ShieldCheck className="w-4 h-4 text-accent shrink-0" />
@@ -1376,10 +1385,10 @@ export function StudioCtaBlock({ block }: { block: any }) {
   const data = block?.data || block || {}
   return (
     <StudioCTA
-      headline={block?.headline || data.headline || block?.title || data.title || 'Mulai Proyek Digital Anda'}
-      subheadline={block?.subheadline || data.subheadline || block?.description || data.description || 'Konsultasikan arsitektur dan kebutuhan spesifik sistem Anda.'}
+      headline={block?.headline || data.headline || block?.title || data.title || 'Mulai Proyek Spasial Anda'}
+      subheadline={block?.subheadline || data.subheadline || block?.description || data.description || 'Konsultasikan lokasi, tujuan, dan format keluaran digital twin yang Anda butuhkan.'}
       secondaryLabel={block?.buttonText || data.buttonText || block?.ctaText || data.ctaText || 'Konsultasi Sekarang'}
-      secondaryHref={block?.buttonUrl || data.buttonUrl || block?.ctaUrl || data.ctaUrl || `https://wa.me/${siteConfig.whatsapp}`}
+      secondaryHref={block?.buttonUrl || data.buttonUrl || block?.ctaUrl || data.ctaUrl || '/contact'}
     />
   )
 }
@@ -1483,7 +1492,7 @@ export function InternalLinksBlock({ block }: { block: any }) {
       <div className="container max-w-3xl mx-auto px-4 sm:px-6">
         {title && (
           <h3 className="font-heading text-lg sm:text-xl font-bold tracking-tight text-white mb-4 flex items-center gap-2">
-            <span className="w-1.5 h-4 bg-[#FFD600] rounded-sm inline-block" />
+            <span className="w-1.5 h-4 bg-[#4d8bff] rounded-sm inline-block" />
             {title}
           </h3>
         )}
@@ -1496,11 +1505,11 @@ export function InternalLinksBlock({ block }: { block: any }) {
               <Link
                 key={idx}
                 href={href}
-                className="group block p-4 rounded-lg border border-white/10 bg-white/[0.02] hover:bg-white/[0.05] hover:border-[#FFD600]/40 transition-all"
+                className="group block p-4 rounded-lg border border-white/10 bg-white/[0.02] hover:bg-white/[0.05] hover:border-[#4d8bff]/40 transition-all"
               >
-                <div className="flex items-center justify-between text-sm font-medium text-white group-hover:text-[#FFD600] transition-colors">
+                <div className="flex items-center justify-between text-sm font-medium text-white group-hover:text-[#4d8bff] transition-colors">
                   <span>{text}</span>
-                  <span className="text-xs text-[#FFD600] opacity-0 group-hover:opacity-100 transition-opacity">→</span>
+                  <span className="text-xs text-[#4d8bff] opacity-0 group-hover:opacity-100 transition-opacity">→</span>
                 </div>
                 {desc && (
                   <p className="mt-1 text-xs text-[var(--text-muted)] line-clamp-2">
@@ -1553,14 +1562,14 @@ export function DepartmentServiceListBlock({
             image: resolveImage(cs.heroImage),
             tags: Array.isArray(cs.technologies)
               ? cs.technologies.slice(0, 3).map((t: any) => (typeof t === 'string' ? t : t?.name || 'Fitur'))
-              : ['Animasi 4K', 'Master Delivery'],
+              : ['3D Gaussian Splat', 'Digital Twin'],
           }
         })
       : null
 
   if (!items || items.length === 0) return null
 
-  const title = block?.title || data.title || 'Layanan Animasi & Motion Design yang Kami Sediakan'
+  const title = block?.title || data.title || 'Layanan Spasial yang Kami Sediakan'
   const description = block?.description || data.description
 
   return (
@@ -1571,7 +1580,7 @@ export function DepartmentServiceListBlock({
       <div className="container max-w-6xl mx-auto px-4 sm:px-6 relative z-10">
         <div className="mb-14 max-w-3xl">
           <span className="font-mono text-xs uppercase tracking-widest text-accent font-semibold block mb-2">
-            Layanan Studio UNIMASI
+            Layanan SPATIUM
           </span>
           <h2 className="font-heading text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-white leading-tight">
             {title}
@@ -1598,7 +1607,7 @@ export function DepartmentServiceListBlock({
                     <div className="relative aspect-[16/9] w-full overflow-hidden bg-[var(--color-surface)] border-b border-white/5">
                       <Image
                         src={finalImg}
-                        alt={item.alt || item.altText || item.name || 'Layanan Animasi UNIMASI'}
+                        alt={item.alt || item.altText || item.name || 'Layanan SPATIUM'}
                         fill
                         className="object-cover object-top group-hover:scale-105 transition-transform duration-700"
                         sizes="(max-width: 768px) 100vw, 550px"
@@ -1709,7 +1718,7 @@ export function VisualShowcaseGalleryBlock({ block }: { block: any }) {
                   {item.image ? (
                     <Image
                       src={item.image}
-                      alt={item.alt || item.altText || item.title || 'Karya Animasi UNIMASI'}
+                      alt={item.alt || item.altText || item.title || 'Karya SPATIUM'}
                       fill
                       className="object-cover object-top group-hover:scale-105 transition-transform duration-700"
                       sizes="(max-width: 1024px) 100vw, 400px"
@@ -1902,11 +1911,11 @@ export function MediaShowcaseBlock({ block }: { block: any }) {
 // ─── 21. Hero Portfolio / Case Study ──────────────────────────────────────────
 export function HeroPortfolioBlock({ block }: { block: any }) {
   const data = block?.data || block || {}
-  const title = block?.title || data.title || block?.headline || data.headline || 'Studi Kasus Animasi & Motion'
-  const client = block?.client || data.client || 'UNIMASI Studio Partner'
+  const title = block?.title || data.title || block?.headline || data.headline || 'Studi Kasus Digital Twin'
+  const client = block?.client || data.client || ''
   const year = block?.year || data.year || new Date().getFullYear()
-  const category = block?.category || data.category || '3D Animation'
-  const discipline = block?.discipline || data.discipline || 'Animation & Visual Production'
+  const category = block?.category || data.category || 'Digital Twin'
+  const discipline = block?.discipline || data.discipline || 'Spatial Capture & 3D Gaussian Splatting'
   const summary = block?.summary || data.summary || block?.description || data.description || ''
   const heroImage = block?.heroImage || data.heroImage || block?.posterUrl || data.posterUrl || ''
   const videoUrl = block?.videoUrl || data.videoUrl || ''
@@ -1946,10 +1955,12 @@ export function HeroPortfolioBlock({ block }: { block: any }) {
 
         {/* Client & Discipline Info */}
         <div className="mt-4 flex flex-wrap items-center gap-4 text-xs sm:text-sm font-mono text-[var(--text-muted)]">
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-accent" />
-            <span>Klien: <strong className="text-white">{client}</strong></span>
-          </div>
+          {client && (
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-accent" />
+              <span>Klien: <strong className="text-white">{client}</strong></span>
+            </div>
+          )}
           {discipline && (
             <div className="flex items-center gap-2">
               <span className="text-neutral-600">•</span>
@@ -1983,14 +1994,14 @@ export function HeroPortfolioBlock({ block }: { block: any }) {
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/20" />
                 <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between text-xs font-mono text-neutral-300">
                   <span className="px-3 py-1 rounded-full bg-black/60 backdrop-blur border border-white/10 text-white">
-                    {client} &bull; {category}
+                    {client ? <>{client} &bull; {category}</> : category}
                   </span>
                   {liveUrl && (
                     <a
                       href={liveUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-accent text-black font-bold hover:bg-[#ffe855] transition-colors shadow"
+                      className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-accent text-black font-bold hover:bg-[#6fb0ff] transition-colors shadow"
                     >
                       <span>Lihat Live Preview</span>
                       <ExternalLink className="w-3.5 h-3.5 text-black" />
@@ -2014,7 +2025,7 @@ export function HeroPortfolioBlock({ block }: { block: any }) {
           {primaryCta?.href && (
             <Link
               href={primaryCta.href}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-accent text-[var(--color-primaryForeground)] font-bold text-xs font-mono uppercase tracking-wider hover:bg-[#ffe855] transition-all shadow-[0_0_20px_rgba(255,214,0,0.25)]"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-accent text-[var(--color-primaryForeground)] font-bold text-xs font-mono uppercase tracking-wider hover:bg-[#6fb0ff] transition-all shadow-[0_0_20px_rgba(77,139,255,0.25)]"
             >
               <span>{primaryCta.label || 'Konsultasi Brief Ini'}</span>
               <ArrowRight className="w-4 h-4 text-[var(--color-primaryForeground)]" />
@@ -2029,9 +2040,9 @@ export function HeroPortfolioBlock({ block }: { block: any }) {
 // ─── 22. Portfolio Case Study Narrative ───────────────────────────────────────
 export function PortfolioCaseStudyBlock({ block }: { block: any }) {
   const data = block?.data || block || {}
-  const eyebrow = block?.eyebrow || data.eyebrow || 'Studi Naratif & Rekayasa'
-  const title = block?.title || data.title || 'Tantangan, Pendekatan & Solusi Produksi'
-  const description = block?.description || data.description || 'Bagaimana UNIMASI menerjemahkan brief rumit klien menjadi eksekusi visual berkualitas tinggi.'
+  const eyebrow = block?.eyebrow || data.eyebrow || 'Studi Kasus Spasial'
+  const title = block?.title || data.title || 'Tantangan, Pendekatan & Hasil'
+  const description = block?.description || data.description || 'Bagaimana SPATIUM merekam ruang nyata dan mengubahnya menjadi aset digital twin yang siap dipakai.'
   const challenge = block?.challenge || data.challenge
   const approach = block?.approach || data.approach
   const solution = block?.solution || data.solution
@@ -2141,7 +2152,7 @@ export function PortfolioCaseStudyBlock({ block }: { block: any }) {
 export function HeroSolutionBlock({ block }: { block: any }) {
   const data = block?.data || block || {}
   const badge = block?.badge || data.badge || 'Solusi Bisnis & Industri'
-  const title = block?.title || data.title || block?.headline || data.headline || 'Solusi Animasi & Motion Berorientasi Hasil'
+  const title = block?.title || data.title || block?.headline || data.headline || 'Solusi Spasial Berorientasi Hasil'
   const shortDescription = block?.shortDescription || data.shortDescription || block?.description || data.description || ''
   const heroImage = block?.heroImage || data.heroImage || ''
   const category = block?.category || data.category || 'Enterprise Solution'
@@ -2205,7 +2216,7 @@ export function HeroSolutionBlock({ block }: { block: any }) {
               {primaryCta?.href && (
                 <Link
                   href={primaryCta.href}
-                  className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-accent text-[var(--color-primaryForeground)] font-bold text-xs font-mono uppercase tracking-wider hover:bg-[#ffe855] transition-all shadow-[0_0_25px_rgba(255,214,0,0.3)]"
+                  className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-accent text-[var(--color-primaryForeground)] font-bold text-xs font-mono uppercase tracking-wider hover:bg-[#6fb0ff] transition-all shadow-[0_0_25px_rgba(77,139,255,0.3)]"
                 >
                   <span>{primaryCta.label || 'Konsultasi Solusi'}</span>
                   <ArrowRight className="w-4 h-4 text-[var(--color-primaryForeground)]" />
@@ -2245,7 +2256,7 @@ export function HeroSolutionBlock({ block }: { block: any }) {
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none" />
                 <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between text-[11px] font-mono text-neutral-300">
                   <span className="px-2.5 py-1 rounded-full bg-black/70 backdrop-blur border border-white/10 text-accent font-semibold">
-                    UNIMASI Engine
+                    SPATIUM 3DGS
                   </span>
                   <span className="text-white/80">Tailored Production</span>
                 </div>

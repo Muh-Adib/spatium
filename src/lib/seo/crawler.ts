@@ -49,7 +49,7 @@ export async function runLiveCrawler(options: {
     recommendation: string
   }> = []
 
-  const userAgent = 'UNIMASI-SEO-Crawler/2.0 (+https://unimasi.com/bot)'
+  const userAgent = 'SPATIUM-SEO-Crawler/2.0 (+https://spatium.id/bot)'
 
   while (queue.length > 0 && visitedUrls.size < maxPages) {
     const currentUrl = queue.shift()!

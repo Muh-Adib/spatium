@@ -17,7 +17,7 @@ const SITE_URL = siteConfig.url
 export const metadata: Metadata = {
   title: 'Wawasan Spasial & Riset 3DGS — SPATIUM',
   description:
-    'Wawasan dan riset mendalam seputar 3D Gaussian Splatting, LiDAR laser scanning, virtual scouting sinematik, dan strategi Zero Moment of Truth dari SPATIUM Studio.',
+    'Artikel SPATIUM seputar 3D Gaussian Splatting, digital twin, previz film, spatial tour untuk bisnis, dan preservasi memori.',
   alternates: {
     canonical: `${SITE_URL}/journal`,
   },
@@ -36,7 +36,7 @@ export default async function JournalPage({
   const page = Math.max(1, parseInt(params.page || '1', 10) || 1)
   const pageSize = 12
 
-  // Fetch articles from UNIMASI Core Delivery API
+  // Published articles from PostgreSQL (honest empty result on DB failure)
   const [articlesData, categoriesData] = await Promise.all([
     getCoreArticles({
       page,
@@ -55,12 +55,10 @@ export default async function JournalPage({
     href: `/journal/${p.slug}`,
     title: p.title,
     category: getCategoryName(p.category),
-    excerpt:
-      p.seoData?.metaDescription ||
-      p.seo?.metaDescription ||
-      (p.excerpt ? p.excerpt.replace(/<[^>]+>/g, '').slice(0, 160) + '…' : ''),
+    excerpt: p.excerpt ? p.excerpt.replace(/<[^>]+>/g, '') : p.seo?.metaDescription || '',
     date: p.publishedAt || p.createdAt || '',
     author: getAuthorName(p.author),
+    readMinutes: p.readingTime,
     featuredImageUrl: getMediaUrl(p.featuredImage, p.coverUrl),
   }))
 
@@ -68,16 +66,16 @@ export default async function JournalPage({
     {
       '@context': 'https://schema.org',
       '@type': 'Blog',
-      name: 'UNIMASI Journal',
+      name: 'SPATIUM Journal',
       url: `${SITE_URL}/journal`,
       description:
-        'Practical writing on animation briefs, 3D CGI production pipelines, and motion design.',
+        'Artikel SPATIUM seputar digital twin dan 3D Gaussian Splatting untuk industri kreatif.',
       blogPost: items.slice(0, 10).map((article) => ({
         '@type': 'BlogPosting',
         headline: article.title,
-        url: `${SITE_URL}/${article.slug}/`,
+        url: `${SITE_URL}/journal/${article.slug}`,
         datePublished: article.date,
-        author: { '@type': 'Organization', name: 'UNIMASI' },
+        author: { '@type': 'Organization', name: article.author || 'SPATIUM' },
       })),
     },
   ]
@@ -91,7 +89,7 @@ export default async function JournalPage({
       <Suspense
         fallback={
           <div className="container" style={{ padding: '8rem 0', textAlign: 'center' }}>
-            Loading journal...
+            Memuat artikel...
           </div>
         }
       >

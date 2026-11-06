@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
     })
 
     try {
-      revalidatePath('/artikel')
+      revalidatePath('/journal')
       revalidatePath('/admin')
     } catch (err) {
       console.warn('[revalidatePath error in /api/categories]:', err)
@@ -98,7 +98,7 @@ export async function PATCH(request: NextRequest) {
     }
 
     try {
-      revalidatePath('/artikel')
+      revalidatePath('/journal')
       revalidatePath('/admin')
     } catch (err) {
       console.warn('[revalidatePath error in /api/categories]:', err)
@@ -156,7 +156,7 @@ export async function DELETE(request: NextRequest) {
     })
 
     try {
-      revalidatePath('/artikel')
+      revalidatePath('/journal')
       revalidatePath('/admin')
     } catch (err) {
       console.warn('[revalidatePath error in /api/categories]:', err)

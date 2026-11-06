@@ -61,13 +61,14 @@ const config: Config = {
           600: '#1E315B',
           500: '#2A437A',
         },
-        // accent maps to yellow for Studio
+        // SPATIUM accent (electric blue). Pairings checked for contrast:
+        // accent-950 text on accent-500 = 5.3:1, accent-400 on midnight = 6.2:1.
         accent: {
-          DEFAULT: '#FFD600',
-          300: '#FFE855',
-          400: '#FFD600',
-          500: '#FFD600',
-          950: '#030611',
+          DEFAULT: '#4d8bff',
+          300: '#6fb0ff',
+          400: '#4d8bff',
+          500: '#3b7bff',
+          950: '#03060d',
         },
         // Info/status hue — kept separate from brand accent (yellow = primary,
         // blue = info, amber = warning). Not part of the yellow brand palette.
@@ -83,7 +84,8 @@ const config: Config = {
       fontFamily: {
         // Official brand heading font (AGENTS.md): Montserrat.
         heading: ['var(--font-montserrat)', 'var(--font-display)', 'Montserrat', 'sans-serif'],
-        syne: ['var(--font-syne)', 'Syne', 'sans-serif'],
+        // Legacy alias kept for existing class names; SPATIUM uses one sans family.
+        syne: ['var(--font-plus-jakarta)', 'Plus Jakarta Sans', 'system-ui', 'sans-serif'],
         body: ['var(--font-plus-jakarta)', 'var(--font-body)', 'Plus Jakarta Sans', 'sans-serif'],
         sans: ['var(--font-plus-jakarta)', 'var(--font-body)', 'Plus Jakarta Sans', 'sans-serif'],
         display: ['var(--font-montserrat)', 'var(--font-display)', 'Montserrat', 'sans-serif'],

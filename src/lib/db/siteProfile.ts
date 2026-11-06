@@ -122,8 +122,8 @@ export async function updateSiteProfile(data: Partial<SiteProfileEntity>): Promi
         update: payload,
         create: {
           id: 1,
-          name: payload.name || 'UNIMASI',
-          url: payload.url || 'https://www.unimasi.com',
+          name: payload.name || 'SPATIUM',
+          url: payload.url || 'https://spatium.id',
           ...payload,
         },
       }
@@ -134,8 +134,8 @@ export async function updateSiteProfile(data: Partial<SiteProfileEntity>): Promi
 
   try {
     revalidatePath('/', 'layout')
-    revalidatePath('/kontak')
-    revalidatePath('/tentang')
+    revalidatePath('/contact')
+    revalidatePath('/about')
   } catch (err) { console.warn("[observable error]:", err) }
 
   return getSiteProfile()

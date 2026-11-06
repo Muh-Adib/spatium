@@ -37,7 +37,7 @@ export async function getRedirect(rawPath: string): Promise<Redirect | null> {
     prisma.orm.public.Redirect
       .where({ id: match.id })
       .update({ hitCount: (match.hitCount || 0) + 1 })
-      .catch(() => {})
+      .catch((err: unknown) => console.warn('[redirects] hit counter update failed:', err))
 
     return {
       id: match.id,
@@ -49,6 +49,7 @@ export async function getRedirect(rawPath: string): Promise<Redirect | null> {
       reason: match.reason || undefined,
     }
   } catch (err) {
+    console.error('[redirects] lookup failed for', rawPath, err)
     return null
   }
 }

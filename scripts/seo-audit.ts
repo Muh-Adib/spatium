@@ -6,14 +6,15 @@
  *   npm run build && npm start &
  *   BASE_URL=http://localhost:3002 npm run seo-audit
  *
- * Output: docs/SEO_AUDIT.md + docs/seo-audit.csv
+ * Output (gitignored): .tmp/reports/seo-audit.md + .tmp/reports/seo-audit.csv
  */
 import fs from 'node:fs'
 import path from 'node:path'
 
 const ROOT = path.resolve(import.meta.dirname, '..')
 const BASE = (process.env.BASE_URL || 'http://localhost:3002').replace(/\/$/, '')
-const DOCS = path.join(ROOT, 'docs')
+const DOCS = path.join(ROOT, '.tmp', 'reports')
+fs.mkdirSync(DOCS, { recursive: true })
 
 interface Row {
   url: string
@@ -148,11 +149,11 @@ async function main() {
       `| ${r.url} | ${r.status} | ${r.titleLen} | ${r.descLen} | ${r.canonical ? '✓' : '✗'} | ${r.h1Count} | ${r.jsonLdCount} | ${r.imagesMissingAlt} | ${r.ogComplete ? '✓' : '✗'} | ${r.issues.join('; ') || '—'} |`
     ),
   ].join('\n')
-  fs.writeFileSync(path.join(DOCS, 'SEO_AUDIT.md'), md)
+  fs.writeFileSync(path.join(DOCS, 'seo-audit.md'), md)
 
   console.log(`✔ ${rows.length} pages, ${failing.length} with issues`)
-  console.log('  docs/SEO_AUDIT.md')
-  console.log('  docs/seo-audit.csv')
+  console.log('  .tmp/reports/seo-audit.md')
+  console.log('  .tmp/reports/seo-audit.csv')
   if (failing.length > 0) process.exitCode = 0 // report only; do not fail CI on warnings
 }
 

@@ -109,7 +109,7 @@ export function JournalClient({
             Riset &amp; Inovasi <span className="accent">3D Gaussian Splatting</span>.
           </>
         }
-        lede="Eksplorasi tulisan teknis, studi kasus pemindaian laser LiDAR, strategi Zero Moment of Truth (ZMOT), dan komputasi spasial dari tim spesialis SPATIUM."
+        lede="Tulisan tentang digital twin, 3D Gaussian Splatting, dan pemanfaatannya untuk film, pemasaran, instalasi imersif, dan preservasi memori."
         crumbs={[{ label: 'Home', to: '/' }, { label: 'Artikel' }]}
         meta={
           <>
@@ -141,7 +141,7 @@ export function JournalClient({
               <input
                 id="journal-search-input"
                 type="search"
-                placeholder="Search across 1,100+ articles, topics or keywords…"
+                placeholder="Cari artikel, topik, atau kata kunci…"
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
               />
@@ -279,7 +279,11 @@ export function JournalClient({
           ) : (
             <div className="journal-index__empty">
               <Icon name="search" size={24} />
-              <p>No articles found matching that filter or search term.</p>
+              <p>
+                {totalAllCount === 0 && currentCategory === 'all' && !currentQuery
+                  ? 'Belum ada artikel yang dipublikasikan.'
+                  : 'Tidak ada artikel yang cocok dengan filter atau kata kunci tersebut.'}
+              </p>
               <button
                 type="button"
                 className="btn btn--ghost"
@@ -288,7 +292,7 @@ export function JournalClient({
                   navigate('all', '', 1)
                 }}
               >
-                Reset filters
+                Reset filter
               </button>
             </div>
           )}
@@ -297,14 +301,14 @@ export function JournalClient({
 
       <CTASection
         id="journal-cta"
-        eyebrow="Talk to the studio"
+        eyebrow="Hubungi studio"
         title={
           <>
-            Have a question we have not <span className="accent">written about</span>?
+            Punya pertanyaan yang belum <span className="accent">kami bahas</span>?
           </>
         }
-        body="Send it over. We answer real questions about animation pipelines, scope, videotron production, and what is realistically achievable."
-        secondary={{ label: 'See services', to: '/services' }}
+        body="Kirimkan kepada kami. Kami menjawab pertanyaan nyata seputar capture ruang, digital twin, 3D Gaussian Splatting, dan apa yang realistis untuk proyek Anda."
+        secondary={{ label: 'Lihat layanan', to: '/services' }}
       />
     </>
   )

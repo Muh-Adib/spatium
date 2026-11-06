@@ -1,5 +1,5 @@
 /**
- * UNIMASI Dynamic Block Element Contracts (Server-Driven UI)
+ * SPATIUM Dynamic Block Element Contracts (Server-Driven UI)
  *
  * Each block has:
  * - `type`: Unique identifier string
@@ -168,7 +168,7 @@ export interface InternalLinksBlockInstance {
   settings?: Record<string, any>
 }
 
-export interface GenericUnimasiBlockInstance {
+export interface GenericSduiBlockInstance {
   id?: string
   type: string
   data: Record<string, any>
@@ -176,7 +176,7 @@ export interface GenericUnimasiBlockInstance {
 }
 
 // Union of all block instances
-export type UnimasiBlockInstance =
+export type SduiBlockInstance =
   | HeroCinemaBlockInstance
   | ProcessTimelineBlockInstance
   | StatsTickerBlockInstance
@@ -184,7 +184,7 @@ export type UnimasiBlockInstance =
   | TextEditorialBlockInstance
   | TableBlockInstance
   | InternalLinksBlockInstance
-  | GenericUnimasiBlockInstance
+  | GenericSduiBlockInstance
 
 /**
  * Manifest Schema describing all available blocks for CMS & AI Agents.
@@ -201,5 +201,5 @@ export interface BlockManifestEntry {
     height?: BlockSize[]
     [key: string]: any
   }
-  samplePayload: UnimasiBlockInstance
+  samplePayload: SduiBlockInstance
 }

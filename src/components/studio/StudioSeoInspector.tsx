@@ -1,14 +1,12 @@
 'use client'
 
 import { siteConfig } from '@/config/site'
-import React, { useState, useMemo, useEffect } from 'react'
+import React, { useState, useMemo, useEffect, useRef } from 'react'
 import Image from 'next/image'
 import {
-  Sparkles,
   CheckCircle2,
   AlertTriangle,
   XCircle,
-  HelpCircle,
   Search,
   Globe,
   Share2,
@@ -18,22 +16,17 @@ import {
   Plus,
   X,
   RefreshCw,
-  Copy,
-  ExternalLink,
   ShieldAlert,
-  Layers,
   FileText,
   Bookmark,
-  ChevronDown,
-  ChevronUp,
   Clock,
   Info,
   Image as ImageIcon,
 } from 'lucide-react'
-import { Locale, ContentSeo, PublicationGateResult } from '@/lib/seo/schema'
-import { getStoredAiCredentials, triggerAiKeyPrompt } from '@/lib/ai/key-manager'
+import { Locale, PublicationGateResult } from '@/lib/seo/schema'
 import { analyzeContentSeo, DetailedSeoAnalysisResult } from '@/lib/seo/analyzer'
 import { checkPublicationGate } from '@/lib/seo/validation'
+import { resolveSeoTemplate } from '@/lib/articles/editorState'
 import { useIndexingCooldown } from '@/hooks/useIndexingCooldown'
 
 export interface StudioSeoInspectorProps {
@@ -105,7 +98,26 @@ export interface StudioSeoInspectorProps {
   articleStatus?: 'draft' | 'in_review' | 'approved' | 'scheduled' | 'published' | string
   articleUrl?: string
   articleId?: number
+  /**
+   * Precomputed analysis (the article editor computes it once, debounced). When omitted the
+   * inspector analyses the content itself (portfolio / services / solutions managers).
+   */
+  analysis?: DetailedSeoAnalysisResult
+  /** Ask the inspector to reveal and focus one of its fields (e.g. from the publication gate). */
+  focusRequest?: { id: string; nonce: number } | null
 }
+
+type SeoSubTab = 'serp' | 'readability' | 'social' | 'advanced'
+
+const SUB_TABS: Array<{ id: SeoSubTab; label: string; icon: typeof Search; iconClass: string }> = [
+  { id: 'serp', label: 'SERP', icon: Search, iconClass: 'text-accent-400' },
+  { id: 'readability', label: 'Keterbacaan', icon: FileText, iconClass: 'text-info-300' },
+  { id: 'social', label: 'Sosial', icon: Share2, iconClass: 'text-purple-300' },
+  { id: 'advanced', label: 'Lanjutan', icon: Sliders, iconClass: 'text-amber-300' },
+]
+
+/** Field ids that live in the SERP sub-tab (used to switch tabs before focusing). */
+const SERP_FIELD_IDS = new Set(['seo-title-input', 'seo-meta-description-input', 'seo-slug-input', 'seo-cover-alt-input', 'seo-focus-keyphrase-input'])
 
 const TEMPLATE_VARS = [
   { code: '%title%', label: 'Judul Asli' },
@@ -158,6 +170,8 @@ export default function StudioSeoInspector({
   articleStatus,
   articleUrl,
   articleId,
+  analysis: providedAnalysis,
+  focusRequest,
 }: StudioSeoInspectorProps) {
   const [site, setSite] = useState<{ name: string; url: string }>({ name: siteConfig.name, url: siteConfig.url })
   useEffect(() => {
@@ -169,7 +183,7 @@ export default function StudioSeoInspector({
   }, [])
 
   // Hook into live indexing cooldown and status
-  const indexingTargetUrl = articleUrl || canonicalUrl || (slug ? `${site.url}/artikel/${slug}` : '')
+  const indexingTargetUrl = articleUrl || canonicalUrl || (slug ? `${site.url}/journal/${slug}` : '')
   const {
     status: indexingData,
     loading: indexingLoading,
@@ -191,27 +205,44 @@ export default function StudioSeoInspector({
   })
 
   // Navigation inside SEO panel
-  const [activeTab, setActiveTab] = useState<'serp' | 'readability' | 'social' | 'advanced'>('serp')
+  const [activeTab, setActiveTab] = useState<SeoSubTab>('serp')
   const [serpDevice, setSerpDevice] = useState<'desktop' | 'mobile'>('desktop')
   const [newRelatedKw, setNewRelatedKw] = useState('')
-  const [generatingAiField, setGeneratingAiField] = useState<string | null>(null)
-  const [aiError, setAiError] = useState<string | null>(null)
-  const [showAltFixModal, setShowAltFixModal] = useState(false)
-  const [tempAlt, setTempAlt] = useState('')
+  const [relatedKwError, setRelatedKwError] = useState<string | null>(null)
+  const subTabRefs = useRef<Partial<Record<SeoSubTab, HTMLButtonElement | null>>>({})
 
-  // 1. Resolve template variables into actual preview text
-  const resolveTemplate = (text: string): string => {
-    if (!text) return ''
-    const now = new Date()
-    return text
-      .replace(/%{1,2}title%{1,2}/g, articleTitle || 'Judul Konten')
-      .replace(/%{1,2}sitename%{1,2}/g, site.name)
-      .replace(/%{1,2}sep%{1,2}/g, '—')
-      .replace(/%{1,2}category%{1,2}/g, category || 'Teknologi')
-      .replace(/%{1,2}date%{1,2}/g, now.getFullYear().toString())
+  // Reveal + focus a requested field (publication gate "Perbaiki" links).
+  useEffect(() => {
+    if (!focusRequest) return
+    if (SERP_FIELD_IDS.has(focusRequest.id)) setActiveTab('serp')
+    const frame = requestAnimationFrame(() => {
+      const el = document.getElementById(focusRequest.id)
+      if (el) {
+        el.focus()
+        el.scrollIntoView({ block: 'center' })
+      }
+    })
+    return () => cancelAnimationFrame(frame)
+  }, [focusRequest])
+
+  const onSubTabKeyDown = (e: React.KeyboardEvent<HTMLButtonElement>, index: number) => {
+    let next = -1
+    if (e.key === 'ArrowRight') next = (index + 1) % SUB_TABS.length
+    else if (e.key === 'ArrowLeft') next = (index - 1 + SUB_TABS.length) % SUB_TABS.length
+    else if (e.key === 'Home') next = 0
+    else if (e.key === 'End') next = SUB_TABS.length - 1
+    const tab = SUB_TABS[next]
+    if (!tab) return
+    e.preventDefault()
+    setActiveTab(tab.id)
+    subTabRefs.current[tab.id]?.focus()
   }
 
-  const effectiveTitle = resolveTemplate(seoTitle) || articleTitle || 'Judul Konten — UNIMASI'
+  // 1. Resolve template variables into actual preview text
+  const resolveTemplate = (text: string): string =>
+    resolveSeoTemplate(text, { title: articleTitle, siteName: site.name, category })
+
+  const effectiveTitle = resolveTemplate(seoTitle) || articleTitle || 'Judul Konten — SPATIUM'
   const effectiveDescription = resolveTemplate(metaDescription) || articleExcerpt || 'Ringkasan konten yang informatif untuk mesin pencari.'
 
   // Estimated pixel width for desktop title (~600px standard cut off in SERP)
@@ -240,6 +271,7 @@ export default function StudioSeoInspector({
   }, [coverUrl, coverAlt, contentImages])
 
   const analysis: DetailedSeoAnalysisResult = useMemo(() => {
+    if (providedAnalysis) return providedAnalysis
     return analyzeContentSeo({
       title: articleTitle,
       seoTitle: effectiveTitle,
@@ -252,7 +284,7 @@ export default function StudioSeoInspector({
       isCornerstone,
       images: allImages,
     })
-  }, [articleTitle, effectiveTitle, effectiveDescription, slug, content, focusKeyphrase, relatedKeyphrases, locale, isCornerstone, allImages])
+  }, [providedAnalysis, articleTitle, effectiveTitle, effectiveDescription, slug, content, focusKeyphrase, relatedKeyphrases, locale, isCornerstone, allImages])
 
   // 3. Publication Gate Pre-check
   const publicationGate: PublicationGateResult = useMemo(() => {
@@ -272,89 +304,19 @@ export default function StudioSeoInspector({
     })
   }, [locale, articleTitle, slug, effectiveDescription, effectiveTitle, existingSlugs, contentImages, coverUrl, coverAlt])
 
-  // 4. AI Suggestion Handler with Fallback
-  const handleAiSuggest = async (field: 'title' | 'metaDescription' | 'slug' | 'all') => {
-    const creds = getStoredAiCredentials()
-    if (!creds.hasKey) {
-      triggerAiKeyPrompt({
-        featureName: 'Saran SEO Otomatis (AI)',
-        reason: 'Silakan tambahkan API Key Google AI Studio atau OpenRouter Anda untuk menggunakan asisten AI pembuat judul, deskripsi, dan slug SEO.',
-        provider: creds.provider,
-        onSuccess: () => {
-          handleAiSuggest(field)
-        },
-      })
-      return
-    }
-
-    setGeneratingAiField(field)
-    setAiError(null)
-
-    try {
-      const res = await fetch('/api/seo/suggest', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          field: field === 'title' ? 'seoTitle' : field,
-          locale,
-          title: articleTitle,
-          excerpt: articleExcerpt,
-          content: content.slice(0, 3000),
-          focusKeyphrase: focusKeyphrase || articleTitle.split(' ').slice(0, 3).join(' '),
-          existingTitles: [],
-          existingSlugs: existingSlugs,
-          aiConfig: {
-            provider: creds.provider,
-            apiKey: creds.apiKey,
-            model: creds.model,
-            proxyUrl: creds.proxyUrl,
-          },
-        }),
-      })
-
-      const data = await res.json()
-      if (!res.ok) {
-        throw new Error(data.error || 'Gagal menghasilkan saran SEO')
-      }
-
-      if (data.needsKey) {
-        triggerAiKeyPrompt({
-          featureName: 'Saran SEO Otomatis (AI)',
-          reason: 'Kunci API belum diisi atau tidak valid. Silakan periksa kembali API Key Anda.',
-          provider: creds.provider,
-        })
-        return
-      }
-
-      const titleVal = data.seoTitle || data.data?.seoTitle || (field === 'title' ? (data.data?.value || data.value) : undefined)
-      const descVal = data.metaDescription || data.data?.metaDescription || (field === 'metaDescription' ? (data.data?.value || data.value) : undefined)
-      const slugVal = data.slug || data.data?.slug || (field === 'slug' ? (data.data?.value || data.value) : undefined)
-
-      if (titleVal && (field === 'title' || field === 'all')) {
-        onChangeSeoTitle(titleVal)
-      }
-      if (descVal && (field === 'metaDescription' || field === 'all')) {
-        onChangeMetaDescription(descVal)
-      }
-      if (slugVal && (field === 'slug' || field === 'all')) {
-        onChangeSlug(slugVal)
-      }
-    } catch (err: any) {
-      setAiError(err.message || 'Gagal memanggil asisten SEO')
-    } finally {
-      setGeneratingAiField(null)
-    }
-  }
-
   // 5. Related Keyphrases Management
   const handleAddRelatedKeyphrase = () => {
     const trimmed = newRelatedKw.trim()
     if (!trimmed) return
     if (relatedKeyphrases.length >= 5) {
-      alert('Maksimal 5 related keyphrases')
+      setRelatedKwError('Maksimal 5 keyphrase terkait.')
       return
     }
-    if (relatedKeyphrases.includes(trimmed)) return
+    if (relatedKeyphrases.includes(trimmed)) {
+      setRelatedKwError('Keyphrase ini sudah ada.')
+      return
+    }
+    setRelatedKwError(null)
     onChangeRelatedKeyphrases([...relatedKeyphrases, trimmed])
     setNewRelatedKw('')
   }
@@ -383,21 +345,25 @@ export default function StudioSeoInspector({
           </div>
 
           {/* Bilingual Switcher */}
-          <div className="flex items-center gap-1 p-0.5 rounded-lg bg-black/60 border border-white/10">
+          <div role="radiogroup" aria-label="Bahasa konten" className="flex items-center gap-1 p-0.5 rounded-lg bg-black/60 border border-white/10">
             <button
               type="button"
+              role="radio"
+              aria-checked={locale === 'id'}
               onClick={() => onChangeLocale('id')}
               className={`px-2 py-0.5 rounded text-[11px] font-mono font-bold transition-all ${
-                locale === 'id' ? 'bg-accent-500 text-black shadow-sm' : 'text-neutral-400 hover:text-white'
+                locale === 'id' ? 'bg-accent-500 text-accent-950' : 'text-neutral-400 hover:text-white'
               }`}
             >
               ID (Indonesia)
             </button>
             <button
               type="button"
+              role="radio"
+              aria-checked={locale === 'en'}
               onClick={() => onChangeLocale('en')}
               className={`px-2 py-0.5 rounded text-[11px] font-mono font-bold transition-all ${
-                locale === 'en' ? 'bg-accent-500 text-black shadow-sm' : 'text-neutral-400 hover:text-white'
+                locale === 'en' ? 'bg-accent-500 text-accent-950' : 'text-neutral-400 hover:text-white'
               }`}
             >
               EN (English)
@@ -408,15 +374,16 @@ export default function StudioSeoInspector({
         {/* Translation Group & Cornerstone */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1 border-t border-white/5">
           <div>
-            <label className="text-[10px] font-mono text-neutral-400 block mb-1">
-              Grup Terjemahan (Translation Group ID)
+            <label htmlFor="seo-translation-group" className="text-[11px] font-mono text-neutral-300 block mb-1">
+              Grup terjemahan (ID penghubung ID/EN)
             </label>
             <input
+              id="seo-translation-group"
               type="text"
               value={translationGroupId}
               onChange={(e) => onChangeTranslationGroupId(e.target.value)}
               placeholder="UUID penghubung ID/EN..."
-              className="w-full rounded-lg bg-black/40 border border-white/10 px-2.5 py-1 text-[11px] font-mono text-neutral-300 focus:outline-none focus:border-accent-400"
+              className="w-full rounded-lg bg-black/40 border border-white/10 px-2.5 py-1 text-[11px] font-mono text-neutral-300 focus:border-accent-400"
             />
           </div>
 
@@ -509,107 +476,81 @@ export default function StudioSeoInspector({
             <span>Gerbang Publikasi Terkunci ({publicationGate.violations.length} Masalah Wajib)</span>
           </div>
           <ul className="space-y-1 text-[11px] text-red-200/90 pl-6 list-disc">
-            {publicationGate.violations.map((v: any, i: number) => (
+            {publicationGate.violations.map((v, i) => (
               <li key={i}>{v.message}</li>
             ))}
           </ul>
-          {publicationGate.violations.some((v: any) => v.field === 'heroVisual.altText' || v.rule?.includes('hero')) && (
-            <div className="pt-2 mt-2 border-t border-red-500/20 flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-black/40 p-2.5 rounded-xl">
-              <div className="flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-amber-400 shrink-0" />
-                <span className="text-[11px] text-red-200">
-                  Hero / Cover image wajib memiliki deskripsi Alt Text (maks. 125 kar).
-                </span>
-              </div>
-              <button
-                type="button"
-                onClick={() => {
-                  setTempAlt(coverAlt || '')
-                  setShowAltFixModal(true)
-                }}
-                className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-500/25 hover:bg-red-500/40 border border-red-400/50 text-white text-xs font-semibold shadow-sm transition-all hover:scale-[1.02]"
-              >
-                <Sparkles className="w-3.5 h-3.5 text-amber-300 animate-pulse" />
-                <span>⚡ Perbaiki Alt Text Cover Sekarang</span>
-              </button>
-            </div>
+          {publicationGate.violations.some((v) => v.field === 'heroVisual.altText') && (
+            <button
+              type="button"
+              onClick={() => {
+                setActiveTab('serp')
+                requestAnimationFrame(() => document.getElementById('seo-cover-alt-input')?.focus())
+              }}
+              className="inline-flex min-h-8 items-center gap-1.5 rounded-lg border border-rose-300/50 bg-rose-500/20 px-3 py-1.5 text-xs font-semibold text-white hover:bg-rose-500/30"
+            >
+              Isi alt text sampul
+            </button>
           )}
         </div>
       )}
 
-      {/* ─── Navigation Sub-Tabs ────────────────────────────────────────── */}
-      <div className="flex items-center gap-1 p-1 rounded-xl bg-black/40 border border-white/10 text-xs font-medium">
-        <button
-          type="button"
-          onClick={() => setActiveTab('serp')}
-          className={`flex-1 py-1.5 px-2 rounded-lg flex items-center justify-center gap-1.5 transition-all ${
-            activeTab === 'serp' ? 'bg-white/15 text-white font-bold' : 'text-neutral-400 hover:text-white'
-          }`}
-        >
-          <Search className="w-3 h-3 text-accent-400" />
-          <span>SEO & SERP</span>
-        </button>
-        <button
-          type="button"
-          onClick={() => setActiveTab('readability')}
-          className={`flex-1 py-1.5 px-2 rounded-lg flex items-center justify-center gap-1.5 transition-all ${
-            activeTab === 'readability' ? 'bg-white/15 text-white font-bold' : 'text-neutral-400 hover:text-white'
-          }`}
-        >
-          <FileText className="w-3 h-3 text-info" />
-          <span>Keterbacaan</span>
-        </button>
-        <button
-          type="button"
-          onClick={() => setActiveTab('social')}
-          className={`flex-1 py-1.5 px-2 rounded-lg flex items-center justify-center gap-1.5 transition-all ${
-            activeTab === 'social' ? 'bg-white/15 text-white font-bold' : 'text-neutral-400 hover:text-white'
-          }`}
-        >
-          <Share2 className="w-3 h-3 text-purple-400" />
-          <span>Sosial</span>
-        </button>
-        <button
-          type="button"
-          onClick={() => setActiveTab('advanced')}
-          className={`flex-1 py-1.5 px-2 rounded-lg flex items-center justify-center gap-1.5 transition-all ${
-            activeTab === 'advanced' ? 'bg-white/15 text-white font-bold' : 'text-neutral-400 hover:text-white'
-          }`}
-        >
-          <Sliders className="w-3 h-3 text-amber-400" />
-          <span>Advanced</span>
-        </button>
+      {/* ─── Navigation Sub-Tabs (APG tabs) ─────────────────────────────── */}
+      <div role="tablist" aria-label="Bagian SEO" className="grid grid-cols-2 gap-1 p-1 rounded-xl bg-black/40 border border-white/10 text-xs font-medium">
+        {SUB_TABS.map((tab, i) => {
+          const Icon = tab.icon
+          const selected = activeTab === tab.id
+          return (
+            <button
+              key={tab.id}
+              ref={(el) => {
+                subTabRefs.current[tab.id] = el
+              }}
+              id={`seo-subtab-${tab.id}`}
+              type="button"
+              role="tab"
+              aria-selected={selected}
+              aria-controls="seo-subtab-panel"
+              tabIndex={selected ? 0 : -1}
+              onClick={() => setActiveTab(tab.id)}
+              onKeyDown={(e) => onSubTabKeyDown(e, i)}
+              className={`flex-1 min-h-8 py-1.5 px-2 rounded-lg flex items-center justify-center gap-1.5 ${
+                selected ? 'bg-white/15 text-white font-bold' : 'text-neutral-300 hover:text-white'
+              }`}
+            >
+              <Icon className={`w-3 h-3 ${tab.iconClass}`} aria-hidden="true" />
+              <span>{tab.label}</span>
+            </button>
+          )
+        })}
       </div>
 
+      <div id="seo-subtab-panel" role="tabpanel" aria-labelledby={`seo-subtab-${activeTab}`} className="space-y-4">
       {/* ─── TAB 1: SEO & SERP ─────────────────────────────────────────── */}
       {activeTab === 'serp' && (
         <div className="space-y-4 max-w-full overflow-x-hidden">
           {/* Focus Keyphrase */}
           <div className="rounded-2xl border border-white/10 bg-[var(--studio-sidebar-bg)] p-4 space-y-3">
             <div className="flex items-center justify-between pb-2 border-b border-white/10">
-              <label className="text-xs font-mono font-bold text-neutral-300 uppercase flex items-center gap-1.5">
-                <Search className="w-3.5 h-3.5 text-accent-400" />
-                <span>Focus Keyphrase (Kata Kunci Utama)</span>
+              <label htmlFor="seo-focus-keyphrase-input" className="text-xs font-mono font-bold text-neutral-300 uppercase flex items-center gap-1.5">
+                <Search className="w-3.5 h-3.5 text-accent-400" aria-hidden="true" />
+                <span>Focus keyphrase</span>
               </label>
               {focusKeyphrase && (
-                <span
-                  className={`w-2.5 h-2.5 rounded-full ${
-                    analysis.indicators.some((i) => i.id === 'kw-title' && i.status === 'good')
-                      ? 'bg-emerald-400'
-                      : 'bg-amber-400'
-                  }`}
-                  title="Status Keyphrase di Judul"
-                />
+                <span className="text-[11px] font-mono text-neutral-300">
+                  {analysis.indicators.some((i) => i.id === 'kw-title' && i.status === 'good') ? '✓ Ada di judul' : '! Belum di judul'}
+                </span>
               )}
             </div>
 
             <div className="space-y-2">
               <input
+                id="seo-focus-keyphrase-input"
                 type="text"
                 value={focusKeyphrase}
                 onChange={(e) => onChangeFocusKeyphrase(e.target.value)}
                 placeholder="Contoh: jasa pembuatan website nextjs"
-                className="w-full rounded-xl bg-black/40 border border-white/15 p-2.5 text-xs text-white placeholder:text-neutral-500 focus:outline-none focus:border-accent-400"
+                className="w-full rounded-xl bg-black/40 border border-white/15 p-2.5 text-xs text-white placeholder:text-neutral-500 focus:border-accent-400"
               />
               <p className="text-[10px] text-neutral-400">
                 Keyphrase utama yang ingin diranking di Google untuk bahasa [{locale.toUpperCase()}].
@@ -618,9 +559,9 @@ export default function StudioSeoInspector({
 
             {/* Related Keyphrases (Multi-input) */}
             <div className="pt-2 border-t border-white/5 space-y-2">
-              <label className="text-[11px] font-mono text-neutral-400 font-semibold block">
-                Related Keyphrases (Maks 5)
-              </label>
+              <p id="seo-related-label" className="text-[11px] font-mono text-neutral-300 font-semibold block">
+                Keyphrase terkait (maks. 5)
+              </p>
               <div className="flex flex-wrap gap-1.5">
                 {relatedKeyphrases.map((kw, i) => (
                   <span
@@ -631,9 +572,10 @@ export default function StudioSeoInspector({
                     <button
                       type="button"
                       onClick={() => handleRemoveRelatedKeyphrase(kw)}
+                      aria-label={`Hapus keyphrase ${kw}`}
                       className="p-0.5 hover:text-red-400 transition-colors"
                     >
-                      <X className="w-3 h-3" />
+                      <X className="w-3 h-3" aria-hidden="true" />
                     </button>
                   </span>
                 ))}
@@ -643,8 +585,14 @@ export default function StudioSeoInspector({
                 <div className="flex gap-2">
                   <input
                     type="text"
+                    aria-labelledby="seo-related-label"
+                    aria-invalid={relatedKwError ? true : undefined}
+                    aria-describedby={relatedKwError ? 'seo-related-error' : undefined}
                     value={newRelatedKw}
-                    onChange={(e) => setNewRelatedKw(e.target.value)}
+                    onChange={(e) => {
+                      setNewRelatedKw(e.target.value)
+                      if (relatedKwError) setRelatedKwError(null)
+                    }}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter') {
                         e.preventDefault()
@@ -652,17 +600,22 @@ export default function StudioSeoInspector({
                       }
                     }}
                     placeholder="Tambah kata kunci turunan..."
-                    className="flex-1 rounded-lg bg-black/40 border border-white/10 px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-accent-400"
+                    className="flex-1 rounded-lg bg-black/40 border border-white/10 px-2.5 py-1.5 text-xs text-white focus:border-accent-400"
                   />
                   <button
                     type="button"
                     onClick={handleAddRelatedKeyphrase}
-                    disabled={!newRelatedKw.trim()}
-                    className="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/15 text-white text-xs font-semibold disabled:opacity-40"
+                    aria-label="Tambah keyphrase terkait"
+                    className="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/15 text-white text-xs font-semibold"
                   >
-                    <Plus className="w-3.5 h-3.5" />
+                    <Plus className="w-3.5 h-3.5" aria-hidden="true" />
                   </button>
                 </div>
+              )}
+              {relatedKwError && (
+                <p id="seo-related-error" className="text-[11px] text-amber-300">
+                  {relatedKwError}
+                </p>
               )}
             </div>
           </div>
@@ -671,22 +624,26 @@ export default function StudioSeoInspector({
           <div className="rounded-2xl border border-white/10 bg-[var(--studio-sidebar-bg)] p-4 space-y-3">
             <div className="flex items-center justify-between pb-2 border-b border-white/10">
               <span className="text-xs font-mono font-bold text-neutral-300 uppercase">Google SERP Preview</span>
-              <div className="flex items-center gap-1 p-0.5 rounded-lg bg-black/50 border border-white/10">
+              <div role="radiogroup" aria-label="Perangkat pratinjau" className="flex items-center gap-1 p-0.5 rounded-lg bg-black/50 border border-white/10">
                 <button
                   type="button"
+                  role="radio"
+                  aria-checked={serpDevice === 'desktop'}
                   onClick={() => setSerpDevice('desktop')}
-                  className={`p-1 rounded ${serpDevice === 'desktop' ? 'bg-white/20 text-white' : 'text-neutral-400'}`}
-                  title="Desktop Preview"
+                  className={`p-1.5 rounded ${serpDevice === 'desktop' ? 'bg-white/20 text-white' : 'text-neutral-300'}`}
+                  aria-label="Desktop"
                 >
-                  <Monitor className="w-3.5 h-3.5" />
+                  <Monitor className="w-3.5 h-3.5" aria-hidden="true" />
                 </button>
                 <button
                   type="button"
+                  role="radio"
+                  aria-checked={serpDevice === 'mobile'}
                   onClick={() => setSerpDevice('mobile')}
-                  className={`p-1 rounded ${serpDevice === 'mobile' ? 'bg-white/20 text-white' : 'text-neutral-400'}`}
-                  title="Mobile Preview"
+                  className={`p-1.5 rounded ${serpDevice === 'mobile' ? 'bg-white/20 text-white' : 'text-neutral-300'}`}
+                  aria-label="Seluler"
                 >
-                  <Smartphone className="w-3.5 h-3.5" />
+                  <Smartphone className="w-3.5 h-3.5" aria-hidden="true" />
                 </button>
               </div>
             </div>
@@ -703,16 +660,16 @@ export default function StudioSeoInspector({
                 </div>
                 <div className="leading-tight min-w-0 flex-1 overflow-hidden">
                   <p className="text-[11px] font-normal text-neutral-700 truncate">{site.name}</p>
-                  <p className="text-[10px] text-neutral-500 truncate block max-w-full" title={`${site.url} > artikel > ${slug || ''}`}>
-                    {site.url} &gt; artikel &gt; {slug || '...'}
+                  <p className="text-[10px] text-neutral-500 truncate block max-w-full" title={`${site.url} > journal > ${slug || ''}`}>
+                    {site.url} &gt; journal &gt; {slug || '...'}
                   </p>
                 </div>
               </div>
 
               {/* SERP Title */}
-              <h3 className="text-[16px] text-[#1a0dab] hover:underline font-normal leading-snug line-clamp-2 cursor-pointer mt-0.5 break-words">
+              <p className="text-[16px] text-[#1a0dab] font-normal leading-snug line-clamp-2 mt-0.5 break-words">
                 {effectiveTitle}
-              </h3>
+              </p>
 
               {/* SERP Description */}
               <p className="text-[12px] text-[#4d5156] line-clamp-2 leading-relaxed mt-1 break-words">
@@ -779,44 +736,21 @@ export default function StudioSeoInspector({
           <div className="rounded-2xl border border-white/10 bg-[var(--studio-sidebar-bg)] p-4 space-y-4">
             <div className="flex items-center justify-between pb-2 border-b border-white/10">
               <span className="text-xs font-mono font-bold text-neutral-300 uppercase">Input & Template Variabel</span>
-              <button
-                type="button"
-                onClick={() => handleAiSuggest('all')}
-                disabled={generatingAiField !== null}
-                className="px-2.5 py-1 rounded-lg bg-accent-500/15 hover:bg-accent-500/25 border border-accent-500/30 text-accent-300 text-[11px] font-semibold flex items-center gap-1.5 disabled:opacity-50"
-              >
-                <Sparkles className="w-3 h-3 text-accent-400" />
-                <span>{generatingAiField === 'all' ? 'Mengoptimalkan...' : 'Generate AI Lengkap'}</span>
-              </button>
             </div>
-
-            {aiError && (
-              <div className="p-2 rounded-lg bg-red-500/10 border border-red-500/20 text-[11px] text-red-300">
-                {aiError}
-              </div>
-            )}
 
             {/* SEO Title Field */}
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
-                <label className="text-[11px] font-mono text-neutral-400 font-semibold">SEO Title Template</label>
-                <button
-                  type="button"
-                  onClick={() => handleAiSuggest('title')}
-                  disabled={generatingAiField !== null}
-                  className="text-[10px] text-accent-400 hover:text-accent-300 flex items-center gap-1 disabled:opacity-50"
-                >
-                  <Sparkles className="w-2.5 h-2.5" />
-                  <span>Saran AI</span>
-                </button>
+                <label htmlFor="seo-title-input" className="text-[11px] font-mono text-neutral-300 font-semibold">SEO title</label>
               </div>
 
               <input
+                id="seo-title-input"
                 type="text"
                 value={seoTitle}
                 onChange={(e) => onChangeSeoTitle(e.target.value)}
                 placeholder="%title% %sep% %sitename%"
-                className="w-full rounded-xl bg-black/40 border border-white/15 p-2.5 text-xs text-white focus:outline-none focus:border-accent-400 font-mono"
+                className="w-full rounded-xl bg-black/40 border border-white/15 p-2.5 text-xs text-white focus:border-accent-400 font-mono"
               />
 
               {/* Template Var Pills for Title */}
@@ -826,6 +760,7 @@ export default function StudioSeoInspector({
                     key={v.code}
                     type="button"
                     onClick={() => insertVariable('title', v.code)}
+                    aria-label={`Sisipkan ${v.label} ke SEO title`}
                     className="px-2 py-0.5 rounded-md bg-white/5 hover:bg-white/10 border border-white/10 text-[10px] font-mono text-neutral-300"
                   >
                     +{v.code}
@@ -837,24 +772,16 @@ export default function StudioSeoInspector({
             {/* Meta Description Field */}
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
-                <label className="text-[11px] font-mono text-neutral-400 font-semibold">Meta Description</label>
-                <button
-                  type="button"
-                  onClick={() => handleAiSuggest('metaDescription')}
-                  disabled={generatingAiField !== null}
-                  className="text-[10px] text-accent-400 hover:text-accent-300 flex items-center gap-1 disabled:opacity-50"
-                >
-                  <Sparkles className="w-2.5 h-2.5" />
-                  <span>Saran AI</span>
-                </button>
+                <label htmlFor="seo-meta-description-input" className="text-[11px] font-mono text-neutral-300 font-semibold">Meta description</label>
               </div>
 
               <textarea
+                id="seo-meta-description-input"
                 value={metaDescription}
                 onChange={(e) => onChangeMetaDescription(e.target.value)}
                 rows={3}
                 placeholder="Tulis deskripsi 120-160 karakter yang memuat focus keyphrase dan ajakan bertindak..."
-                className="w-full rounded-xl bg-black/40 border border-white/15 p-2.5 text-xs text-white focus:outline-none focus:border-accent-400 leading-relaxed"
+                className="w-full rounded-xl bg-black/40 border border-white/15 p-2.5 text-xs text-white focus:border-accent-400 leading-relaxed"
               />
 
               {/* Template Var Pills for Description */}
@@ -864,6 +791,7 @@ export default function StudioSeoInspector({
                     key={v.code}
                     type="button"
                     onClick={() => insertVariable('desc', v.code)}
+                    aria-label={`Sisipkan ${v.label} ke meta description`}
                     className="px-2 py-0.5 rounded-md bg-white/5 hover:bg-white/10 border border-white/10 text-[10px] font-mono text-neutral-300"
                   >
                     +{v.code}
@@ -875,23 +803,15 @@ export default function StudioSeoInspector({
             {/* Slug Field */}
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
-                <label className="text-[11px] font-mono text-neutral-400 font-semibold">Slug URL</label>
-                <button
-                  type="button"
-                  onClick={() => handleAiSuggest('slug')}
-                  disabled={generatingAiField !== null}
-                  className="text-[10px] text-accent-400 hover:text-accent-300 flex items-center gap-1 disabled:opacity-50"
-                >
-                  <Sparkles className="w-2.5 h-2.5" />
-                  <span>Saran Slug</span>
-                </button>
+                <label htmlFor="seo-slug-input" className="text-[11px] font-mono text-neutral-300 font-semibold">Slug URL</label>
               </div>
               <input
+                id="seo-slug-input"
                 type="text"
                 value={slug}
                 onChange={(e) => onChangeSlug(e.target.value)}
                 placeholder="slug-artikel-anda"
-                className="w-full rounded-xl bg-black/40 border border-white/15 p-2 text-xs font-mono text-neutral-300 focus:outline-none focus:border-accent-400"
+                className="w-full rounded-xl bg-black/40 border border-white/15 p-2 text-xs font-mono text-neutral-300 focus:border-accent-400"
               />
             </div>
           </div>
@@ -912,7 +832,7 @@ export default function StudioSeoInspector({
                     <span>Alt Text Siap</span>
                   </span>
                 ) : (
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-mono bg-red-500/15 text-red-400 border border-red-500/30 animate-pulse">
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-mono bg-red-500/15 text-red-400 border border-red-500/30">
                     <AlertTriangle className="w-3 h-3" />
                     <span>Alt Text Wajib Diisi</span>
                   </span>
@@ -956,41 +876,20 @@ export default function StudioSeoInspector({
               {/* Alt Text Input */}
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
-                  <label className="text-[11px] font-mono text-neutral-400 font-semibold">
-                    Deskripsi Alt Text [{locale.toUpperCase()}]
+                  <label htmlFor="seo-cover-alt-input" className="text-[11px] font-mono text-neutral-300 font-semibold">
+                    Alt text sampul [{locale.toUpperCase()}]
                   </label>
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const candidate = `${articleTitle || 'Visual'} - UNIMASI Rekayasa Sistem Digital`.slice(0, 120)
-                        onChangeCoverAlt?.(candidate)
-                      }}
-                      className="text-[10px] text-accent-400 hover:text-accent-300 flex items-center gap-1"
-                    >
-                      <Sparkles className="w-2.5 h-2.5" />
-                      <span>Saran AI</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setTempAlt(coverAlt || '')
-                        setShowAltFixModal(true)
-                      }}
-                      className="text-[10px] text-neutral-400 hover:text-white underline underline-offset-2"
-                    >
-                      Buka Pop-up
-                    </button>
-                  </div>
                 </div>
 
                 <div className="relative">
                   <input
+                    id="seo-cover-alt-input"
                     type="text"
                     value={coverAlt}
+                    aria-describedby="seo-cover-alt-hint"
                     onChange={(e) => onChangeCoverAlt?.(e.target.value)}
                     placeholder="Deskripsi spesifik tentang isi gambar untuk pembaca layar..."
-                    className="w-full rounded-xl bg-black/40 border border-white/15 p-2.5 text-xs text-white focus:outline-none focus:border-accent-400 pr-16"
+                    className="w-full rounded-xl bg-black/40 border border-white/15 p-2.5 text-xs text-white focus:border-accent-400 pr-16"
                   />
                   <span
                     className={`absolute right-2.5 top-2.5 text-[10px] font-mono ${
@@ -1004,7 +903,7 @@ export default function StudioSeoInspector({
                     {coverAlt.length}/125
                   </span>
                 </div>
-                <p className="text-[10px] text-neutral-500">
+                <p id="seo-cover-alt-hint" className="text-[10px] text-neutral-400">
                   Wajib untuk Gerbang Publikasi. Maksimal 125 karakter, hindari kata awal &quot;gambar/foto&quot;.
                 </p>
               </div>
@@ -1014,7 +913,7 @@ export default function StudioSeoInspector({
           {/* Real-time Checklist Audit */}
           <div className="rounded-2xl border border-white/10 bg-[var(--studio-sidebar-bg)] p-4 space-y-2.5">
             <h4 className="text-xs font-mono font-bold text-neutral-300 uppercase pb-2 border-b border-white/10">
-              Checklist Analisis SEO Yoast-Parity
+              Checklist analisis SEO
             </h4>
 
             <div className="space-y-1.5">
@@ -1119,7 +1018,7 @@ export default function StudioSeoInspector({
                 )}
               </div>
               <div className="p-3 bg-neutral-950/80 border-t border-white/10 space-y-1">
-                <span className="text-[9px] font-mono text-neutral-400 uppercase">UNIMASI.ID</span>
+                <span className="text-[9px] font-mono text-neutral-400 uppercase">SPATIUM.ID</span>
                 <h5 className="text-xs font-bold text-white line-clamp-1">
                   {socialOg.title || effectiveTitle}
                 </h5>
@@ -1132,43 +1031,47 @@ export default function StudioSeoInspector({
             {/* Social OG Overrides */}
             <div className="space-y-2 pt-2 border-t border-white/5">
               <div>
-                <label className="text-[10px] font-mono text-neutral-400 block mb-1">OG Title Kustom</label>
+                <label htmlFor="seo-og-title" className="text-[11px] font-mono text-neutral-300 block mb-1">Judul OG kustom</label>
                 <input
+                  id="seo-og-title"
                   type="text"
                   value={socialOg.title || ''}
                   onChange={(e) => onChangeSocialOg({ ...socialOg, title: e.target.value })}
                   placeholder="Kosongkan untuk pakai SEO Title..."
-                  className="w-full rounded-lg bg-black/40 border border-white/10 p-2 text-xs text-white focus:outline-none focus:border-accent-400"
+                  className="w-full rounded-lg bg-black/40 border border-white/10 p-2 text-xs text-white focus:border-accent-400"
                 />
               </div>
 
               <div>
-                <label className="text-[10px] font-mono text-neutral-400 block mb-1">OG Description Kustom</label>
+                <label htmlFor="seo-og-description" className="text-[11px] font-mono text-neutral-300 block mb-1">Deskripsi OG kustom</label>
                 <textarea
+                  id="seo-og-description"
                   value={socialOg.description || ''}
                   onChange={(e) => onChangeSocialOg({ ...socialOg, description: e.target.value })}
                   rows={2}
                   placeholder="Kosongkan untuk pakai Meta Description..."
-                  className="w-full rounded-lg bg-black/40 border border-white/10 p-2 text-xs text-white focus:outline-none focus:border-accent-400"
+                  className="w-full rounded-lg bg-black/40 border border-white/10 p-2 text-xs text-white focus:border-accent-400"
                 />
               </div>
 
               <div>
-                <label className="text-[10px] font-mono text-neutral-400 block mb-1">OG Image URL & Alt Text</label>
+                <p className="text-[11px] font-mono text-neutral-300 block mb-1">Gambar OG</p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   <input
                     type="text"
                     value={socialOg.image || ''}
                     onChange={(e) => onChangeSocialOg({ ...socialOg, image: e.target.value })}
+                    aria-label="URL gambar OG"
                     placeholder="URL gambar OG (1200x630)"
-                    className="w-full rounded-lg bg-black/40 border border-white/10 p-2 text-xs text-white font-mono focus:outline-none focus:border-accent-400"
+                    className="w-full rounded-lg bg-black/40 border border-white/10 p-2 text-xs text-white font-mono focus:border-accent-400"
                   />
                   <input
                     type="text"
                     value={socialOg.imageAlt || ''}
                     onChange={(e) => onChangeSocialOg({ ...socialOg, imageAlt: e.target.value })}
+                    aria-label="Alt text gambar OG"
                     placeholder="Alt text gambar OG"
-                    className="w-full rounded-lg bg-black/40 border border-white/10 p-2 text-xs text-white focus:outline-none focus:border-accent-400"
+                    className="w-full rounded-lg bg-black/40 border border-white/10 p-2 text-xs text-white focus:border-accent-400"
                   />
                 </div>
               </div>
@@ -1227,10 +1130,10 @@ export default function StudioSeoInspector({
                   type="button"
                   onClick={refreshIndexing}
                   disabled={indexingLoading}
-                  title="Segarkan data status dari server"
-                  className="p-1 rounded-lg bg-white/5 hover:bg-white/10 text-neutral-400 hover:text-white transition-colors disabled:opacity-50"
+                  aria-label="Segarkan status indeksasi"
+                  className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-neutral-400 hover:text-white transition-colors disabled:opacity-50"
                 >
-                  <RefreshCw className={`w-3.5 h-3.5 ${indexingLoading ? 'animate-spin text-accent-400' : ''}`} />
+                  <RefreshCw className={`w-3.5 h-3.5 ${indexingLoading ? 'motion-safe:animate-spin text-accent-400' : ''}`} aria-hidden="true" />
                 </button>
               </div>
             </div>
@@ -1239,7 +1142,7 @@ export default function StudioSeoInspector({
             <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-black/40 border border-white/5 text-[11px] font-mono text-neutral-300">
               <span className="text-neutral-500 shrink-0">Target URL:</span>
               <span className="truncate text-accent-300 select-all" title={indexingTargetUrl}>
-                {indexingTargetUrl || `https://www.unimasi.com/artikel/${slug || '...'}`}
+                {indexingTargetUrl || `${site.url}/journal/${slug || '...'}`}
               </span>
             </div>
 
@@ -1381,7 +1284,7 @@ export default function StudioSeoInspector({
               <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 space-y-2">
                 <div className="flex items-center justify-between text-xs text-amber-300 font-semibold">
                   <span className="flex items-center gap-1.5">
-                    <Clock className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
+                    <Clock className="w-3.5 h-3.5 text-amber-400" />
                     <span>Masa Jeda 24 Jam Sedang Berjalan</span>
                   </span>
                   <span className="font-mono text-amber-400 font-bold">{remainingFormatted}</span>
@@ -1477,44 +1380,48 @@ export default function StudioSeoInspector({
 
             {/* Canonical URL */}
             <div className="space-y-1">
-              <label className="text-[11px] font-mono text-neutral-400 font-semibold block">
-                URL Kanonikal Kustom (Canonical URL)
+              <label htmlFor="seo-canonical-url" className="text-[11px] font-mono text-neutral-300 font-semibold block">
+                URL kanonikal kustom
               </label>
               <input
+                id="seo-canonical-url"
+                inputMode="url"
                 type="text"
                 value={canonicalUrl}
                 onChange={(e) => onChangeCanonicalUrl(e.target.value)}
                 placeholder="Kosongkan untuk memakai URL artikel ini secara default..."
-                className="w-full rounded-xl bg-black/40 border border-white/15 p-2.5 text-xs text-white font-mono focus:outline-none focus:border-accent-400"
+                className="w-full rounded-xl bg-black/40 border border-white/15 p-2.5 text-xs text-white font-mono focus:border-accent-400"
               />
               <span className="text-[10px] text-neutral-500 font-mono block">
-                Default: https://www.unimasi.com/artikel/{slug}
+                Default: {site.url}/journal/{'{slug}'}
               </span>
             </div>
 
             {/* Breadcrumb Title */}
             <div className="space-y-1">
-              <label className="text-[11px] font-mono text-neutral-400 font-semibold block">
-                Judul Breadcrumb Khusus
+              <label htmlFor="seo-breadcrumb-title" className="text-[11px] font-mono text-neutral-300 font-semibold block">
+                Judul breadcrumb khusus
               </label>
               <input
+                id="seo-breadcrumb-title"
                 type="text"
                 value={breadcrumbTitle}
                 onChange={(e) => onChangeBreadcrumbTitle(e.target.value)}
                 placeholder="Kosongkan untuk memakai judul artikel..."
-                className="w-full rounded-xl bg-black/40 border border-white/15 p-2.5 text-xs text-white focus:outline-none focus:border-accent-400"
+                className="w-full rounded-xl bg-black/40 border border-white/15 p-2.5 text-xs text-white focus:border-accent-400"
               />
             </div>
 
             {/* Schema Type */}
             <div className="space-y-1">
-              <label className="text-[11px] font-mono text-neutral-400 font-semibold block">
-                Tipe Schema JSON-LD
+              <label htmlFor="seo-schema-type" className="text-[11px] font-mono text-neutral-300 font-semibold block">
+                Tipe schema JSON-LD
               </label>
               <select
+                id="seo-schema-type"
                 value={schemaType}
                 onChange={(e) => onChangeSchemaType(e.target.value as 'Article' | 'BlogPosting' | 'TechArticle' | 'NewsArticle')}
-                className="w-full rounded-xl bg-black/40 border border-white/15 p-2.5 text-xs text-white focus:outline-none focus:border-accent-400"
+                className="w-full rounded-xl bg-black/40 border border-white/15 p-2.5 text-xs text-white focus:border-accent-400"
               >
                 <option value="Article" className="bg-surface-overlay">Article (Umum)</option>
                 <option value="BlogPosting" className="bg-surface-overlay">BlogPosting (Postingan Blog)</option>
@@ -1526,179 +1433,7 @@ export default function StudioSeoInspector({
         </div>
       )}
 
-      {/* ─── Cover Image & Alt Text Quick-Fix Modal ─── */}
-      {showAltFixModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fadeIn">
-          <div className="w-full max-w-lg rounded-2xl bg-[var(--studio-bg)] border border-white/15 shadow-2xl p-5 space-y-4 text-left">
-            <div className="flex items-center justify-between pb-3 border-b border-white/10">
-              <div className="flex items-center gap-2">
-                <div className="p-1.5 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400">
-                  <Sparkles className="w-4 h-4 text-amber-400" />
-                </div>
-                <div>
-                  <h3 className="text-sm font-semibold text-white">Perbaiki Alt Text Cover / Hero Visual</h3>
-                  <p className="text-[11px] text-neutral-400">Wajib untuk membuka Gerbang Publikasi [{locale.toUpperCase()}]</p>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => setShowAltFixModal(false)}
-                className="p-1.5 rounded-lg text-neutral-400 hover:text-white hover:bg-white/10 transition-colors"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            {/* Image Preview & Media Picker Shortcut */}
-            {coverUrl ? (
-              <div className="relative h-32 w-full rounded-xl overflow-hidden border border-white/10 bg-black/50 group">
-                <Image
-                  src={coverUrl}
-                  alt={tempAlt || 'Preview cover'}
-                  fill
-                  className="object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex items-end p-2.5 justify-between">
-                  <span className="text-[10px] font-mono text-neutral-300 truncate max-w-[70%]">
-                    {coverUrl}
-                  </span>
-                  {onOpenMediaPickerForCover && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setShowAltFixModal(false)
-                        onOpenMediaPickerForCover()
-                      }}
-                      className="px-2 py-1 rounded bg-black/70 hover:bg-black border border-white/20 text-[10px] text-neutral-200 transition-colors flex items-center gap-1"
-                    >
-                      <Layers className="w-3 h-3 text-info" />
-                      <span>Ganti Media</span>
-                    </button>
-                  )}
-                </div>
-              </div>
-            ) : (
-              <div className="p-4 rounded-xl border border-dashed border-white/15 bg-white/5 text-center space-y-2">
-                <ImageIcon className="w-6 h-6 text-neutral-500 mx-auto" />
-                <p className="text-xs text-neutral-400">Belum ada URL gambar cover yang ditentukan.</p>
-                {onOpenMediaPickerForCover && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setShowAltFixModal(false)
-                      onOpenMediaPickerForCover()
-                    }}
-                    className="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/15 border border-white/15 text-xs text-white inline-flex items-center gap-1.5"
-                  >
-                    <Layers className="w-3.5 h-3.5 text-info" />
-                    <span>Pilih dari Galeri Media</span>
-                  </button>
-                )}
-              </div>
-            )}
-
-            {/* Alt Text Textarea & Char Counter */}
-            <div className="space-y-1.5">
-              <div className="flex items-center justify-between">
-                <label className="text-xs font-mono font-semibold text-neutral-300">
-                  Deskripsi Alt Text (Maks. 125 Karakter)
-                </label>
-                <span
-                  className={`text-[10px] font-mono ${
-                    tempAlt.trim().length > 125
-                      ? 'text-red-400 font-bold'
-                      : tempAlt.trim().length >= 10
-                      ? 'text-emerald-400'
-                      : 'text-neutral-500'
-                  }`}
-                >
-                  {tempAlt.trim().length} / 125 kar
-                </span>
-              </div>
-              <textarea
-                value={tempAlt}
-                onChange={(e) => setTempAlt(e.target.value)}
-                rows={3}
-                placeholder={`Deskripsikan visual hero ini secara jelas dan informatif untuk bahasa [${locale.toUpperCase()}]...`}
-                className="w-full rounded-xl bg-black/40 border border-white/15 p-2.5 text-xs text-white focus:outline-none focus:border-[#FFD600]"
-              />
-
-              {/* Real-time warning feedback */}
-              {/^(gambar|foto|image of|photo of|picture of)\b/i.test(tempAlt.trim()) && (
-                <p className="text-[11px] text-amber-400 flex items-center gap-1">
-                  <AlertTriangle className="w-3 h-3 shrink-0" />
-                  <span>Hindari kata awal &quot;gambar/foto&quot; karena pembaca layar mengatakannya secara otomatis.</span>
-                </p>
-              )}
-              {tempAlt.trim().length > 125 && (
-                <p className="text-[11px] text-red-400 flex items-center gap-1">
-                  <XCircle className="w-3 h-3 shrink-0" />
-                  <span>Alt text melebihi 125 karakter. Harap ringkas agar ramah indeks Google Images.</span>
-                </p>
-              )}
-            </div>
-
-            {/* Preset & AI Suggestions */}
-            <div className="space-y-1.5">
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] font-mono text-neutral-400 uppercase">Saran & Rekomendasi Cepat:</span>
-                <button
-                  type="button"
-                  onClick={() => {
-                    const candidate = `${articleTitle || 'Visual'} - Solusi Rekayasa Digital UNIMASI`.slice(0, 120)
-                    setTempAlt(candidate)
-                  }}
-                  className="text-[10px] text-amber-300 hover:text-amber-200 flex items-center gap-1"
-                >
-                  <Sparkles className="w-2.5 h-2.5" />
-                  <span>Saran Cerdas</span>
-                </button>
-              </div>
-              <div className="flex flex-wrap gap-1.5">
-                {[
-                  `${articleTitle || 'Proyek'} - Implementasi Sistem Digital UNIMASI`,
-                  `Arsitektur dan antarmuka visual ${articleTitle || 'karya'}`,
-                  `Solusi teknologi inovatif ${category || 'UNIMASI'}: ${articleTitle || 'Digital'}`,
-                ].map((preset, idx) => (
-                  <button
-                    key={idx}
-                    type="button"
-                    onClick={() => setTempAlt(preset.slice(0, 120))}
-                    className="text-left px-2 py-1 rounded bg-white/5 hover:bg-white/10 border border-white/10 text-[10px] text-neutral-300 line-clamp-1 transition-colors"
-                  >
-                    + {preset.slice(0, 50)}...
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Modal Actions */}
-            <div className="flex items-center justify-end gap-2 pt-3 border-t border-white/10">
-              <button
-                type="button"
-                onClick={() => setShowAltFixModal(false)}
-                className="px-3.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-xs text-neutral-300 transition-colors"
-              >
-                Batal
-              </button>
-              <button
-                type="button"
-                disabled={!tempAlt.trim() || tempAlt.trim().length > 125 || /^(gambar|foto|image of|photo of|picture of)\b/i.test(tempAlt.trim())}
-                onClick={() => {
-                  if (onChangeCoverAlt) {
-                    onChangeCoverAlt(tempAlt.trim())
-                  }
-                  setShowAltFixModal(false)
-                }}
-                className="px-4 py-1.5 rounded-xl bg-[#FFD600] hover:bg-[#E0B285] text-black font-semibold text-xs transition-colors flex items-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed shadow-md"
-              >
-                <CheckCircle2 className="w-3.5 h-3.5" />
-                <span>Terapkan Alt Text & Buka Kunci</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      </div>
     </div>
   )
 }

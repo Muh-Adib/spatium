@@ -1,7 +1,6 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import Link from 'next/link'
 import { useAuth } from '@/lib/auth/AuthContext'
 import {
   Settings,
@@ -18,8 +17,6 @@ import {
   FileText,
   AlertTriangle,
   Lock,
-  Bot,
-  ArrowRight,
 } from 'lucide-react'
 
 interface SiteConfig {
@@ -34,22 +31,20 @@ interface SiteConfig {
   defaultArticleStatus: 'draft' | 'in_review' | 'published'
   maxUploadMb: number
   enforceAltText: boolean
-  mcpEnabled: boolean
 }
 
 const DEFAULT_CONFIG: SiteConfig = {
-  siteName: 'UNIMASI Studio',
-  tagline: 'We Make Ideas Move — 2D & 3D Animation, Motion Graphics & Videotron',
-  canonicalUrl: 'https://unimasi.studio',
-  contactEmail: 'hello@unimasi.studio',
-  titleTemplate: '%s — UNIMASI Studio',
-  defaultMetaDescription: 'UNIMASI adalah studio animasi 2D, 3D, motion graphics, dan visual production untuk edukasi, industri, dan brand terkemuka.',
-  googleVerification: 'google-site-verification=unimasi-studio-gsc-verified',
+  siteName: 'SPATIUM',
+  tagline: 'Real places. New perspectives.',
+  canonicalUrl: 'https://spatium.id',
+  contactEmail: 'hello@spatium.id',
+  titleTemplate: '%s — SPATIUM',
+  defaultMetaDescription: 'SPATIUM adalah studio teknologi spasial: laser scan, point cloud, geometri 3D, dan 3D Gaussian Splat untuk digital twin industri kreatif.',
+  googleVerification: '',
   robotsIndex: true,
   defaultArticleStatus: 'draft',
   maxUploadMb: 10,
   enforceAltText: true,
-  mcpEnabled: true,
 }
 
 export function StudioSettings() {
@@ -74,7 +69,7 @@ export function StudioSettings() {
     message: '',
   })
 
-  // Muat setting dari backend database SQLite
+  // Muat setting dari database PostgreSQL
   useEffect(() => {
     fetch('/api/settings')
       .then((res) => res.json())
@@ -92,11 +87,12 @@ export function StudioSettings() {
             defaultArticleStatus: res.data.defaultArticleStatus || prev.defaultArticleStatus,
             maxUploadMb: typeof res.data.maxUploadMb === 'number' ? res.data.maxUploadMb : prev.maxUploadMb,
             enforceAltText: typeof res.data.enforceAltText === 'boolean' ? res.data.enforceAltText : prev.enforceAltText,
-            mcpEnabled: typeof res.data.mcpEnabled === 'boolean' ? res.data.mcpEnabled : prev.mcpEnabled,
           }))
         }
       })
-      .catch(() => {})
+      .catch((err: unknown) => {
+        console.warn('[settings] Could not load site settings:', err)
+      })
   }, [])
 
   const handleSave = async () => {
@@ -160,7 +156,7 @@ export function StudioSettings() {
     setModalState({
       open: true,
       title: 'Kembalikan Pengaturan Bawaan',
-      message: 'Apakah Anda yakin ingin mengembalikan seluruh konfigurasi situs ke pengaturan bawaan UNIMASI?',
+      message: 'Apakah Anda yakin ingin mengembalikan seluruh konfigurasi situs ke pengaturan bawaan SPATIUM?',
       type: 'confirm',
       confirmText: 'Kembalikan Bawaan',
       onConfirm: async () => {
@@ -401,7 +397,7 @@ export function StudioSettings() {
                 <option value="published" className="bg-surface-overlay">Published (Langsung Terbit Publik)</option>
               </select>
               <span className="text-[10px] text-neutral-500 font-mono mt-0.5 block">
-                AGENTS.md Bagian 8 mewajibkan konten baru/AI default ke status draf.
+                AGENTS.md Bagian 8 mewajibkan konten baru default ke status draf.
               </span>
             </div>
 
@@ -437,41 +433,12 @@ export function StudioSettings() {
           </div>
         </div>
 
-        {/* Card: Dedicated Agentic AI & Tools Configuration Banner */}
-        <div className="rounded-2xl border border-info/30 bg-gradient-to-b from-info-950/20 to-[var(--studio-bg)] p-5 space-y-4 shadow-soft-sm">
-          <div className="flex items-center justify-between pb-2 border-b border-white/10">
-            <div className="flex items-center gap-2">
-              <Bot className="w-4 h-4 text-accent-400" />
-              <h3 className="text-xs font-bold text-white font-mono uppercase tracking-wider">
-                Konfigurasi Agentic AI &amp; Tools Native
-              </h3>
-            </div>
-            <span className="badge bg-purple-500/20 text-purple-300 border border-purple-500/30 text-[9px] font-mono">
-              Google AI Studio &amp; OpenRouter
-            </span>
-          </div>
-
-          <p className="text-xs text-neutral-300 leading-relaxed">
-            Kelola mandiri API Key untuk Google AI Studio (Gemini) atau OpenRouter (Minimax, DeepSeek, Claude), atur model default, dan aktifkan 8 tools native UNIMASI untuk akses basis data lokal, SERP, dan SEO.
-          </p>
-
-          <div className="pt-1">
-            <Link
-              href="/admin?tab=ai-settings"
-              className="inline-flex items-center justify-between w-full px-4 py-2.5 rounded-xl bg-accent-600 hover:bg-accent-500 text-white text-xs font-semibold shadow-md transition-all group"
-            >
-              <span>Buka Panel Pengaturan Agentic AI &amp; Tools</span>
-              <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
-            </Link>
-          </div>
-        </div>
-
-        {/* Card 4: Status Engine SQLite & Cache */}
+        {/* Card 4: Database & cache */}
         <div className="rounded-2xl border border-white/10 bg-[var(--studio-bg)] p-5 space-y-4">
           <div className="flex items-center gap-2 pb-2 border-b border-white/10">
             <Database className="w-4 h-4 text-emerald-400" />
             <h3 className="text-xs font-bold text-neutral-300 font-mono uppercase tracking-wider">
-              Engine SQLite &amp; Pemeliharaan Cache
+              Database &amp; pemeliharaan cache
             </h3>
           </div>
 
@@ -483,15 +450,7 @@ export function StudioSettings() {
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-neutral-400">Database Engine:</span>
-                <span className="text-white">PostgreSQL (High-Performance Engine)</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-neutral-400">Next.js Framework:</span>
-                <span className="text-info-300 font-bold">v16.3.6 (Turbopack + React 19)</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-neutral-400">Model Context Protocol:</span>
-                <span className="text-purple-300 font-bold">mcp/server.js (Standby)</span>
+                <span className="text-white">PostgreSQL 16</span>
               </div>
             </div>
 

@@ -8,7 +8,7 @@
 }
 
 .article-card:hover {
-  border-color: rgba(255, 214, 0, 0.45);
+  border-color: rgba(77, 139, 255, 0.45);
   transform: translateY(-5px);
 }
 
@@ -19,6 +19,7 @@
 }
 
 .article-card__media {
+  position: relative;
   aspect-ratio: 16 / 9;
   overflow: hidden;
   border-bottom: 1px solid var(--line);

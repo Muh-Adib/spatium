@@ -3,7 +3,6 @@ import { analyzeContentSeo } from '@/lib/seo/analyzer'
 import { prisma } from '@/lib/db/prisma'
 import { Locale } from '@/lib/seo/schema'
 import { requireUser } from '@/lib/auth/rbac'
-import { checkVoiceMatch } from '@/lib/voice/checker'
 
 export async function POST(request: NextRequest) {
   const auth = await requireUser(request)
@@ -51,20 +50,8 @@ export async function POST(request: NextRequest) {
       otherContentKeyphrases: otherKws,
     })
 
-    let voiceMatch = null
-    if (content && typeof content === 'string' && content.trim().length > 20) {
-      try {
-        voiceMatch = await checkVoiceMatch(content)
-      } catch (voiceErr: any) {
-        console.warn('[seo:analyze] Voice check skipped:', voiceErr.message)
-      }
-    }
-
     return NextResponse.json({
-      data: {
-        ...result,
-        voiceMatch,
-      },
+      data: result,
       errors: [],
       warnings: [],
       meta: {

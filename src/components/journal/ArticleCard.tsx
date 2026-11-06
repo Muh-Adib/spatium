@@ -1,7 +1,6 @@
 import Link from 'next/link'
-import { StudioArt } from '@/components/art/StudioArt'
+import { SplatPlaceholder } from '@/components/spatium/SplatPlaceholder'
 import { Icon } from '@/components/Icon'
-import { formatDate, type Article } from '@/data/articles'
 import './article-card.css'
 
 export type ArticleCardItem = {
@@ -28,7 +27,7 @@ export function ArticleCard({ article, featured = false }: ArticleCardProps) {
     (article.slug.startsWith('/') ? article.slug : `/journal/${article.slug}`)
 
   const formattedDate = article.date
-    ? new Date(article.date).toLocaleDateString('en-US', {
+    ? new Date(article.date).toLocaleDateString('id-ID', {
         year: 'numeric',
         month: 'short',
         day: 'numeric',
@@ -47,7 +46,7 @@ export function ArticleCard({ article, featured = false }: ArticleCardProps) {
               loading="lazy"
             />
           ) : (
-            <StudioArt variant={article.artVariant ?? 1} />
+            <SplatPlaceholder seed={article.artVariant ?? 1} />
           )}
         </div>
         <div className="article-card__body">
@@ -62,9 +61,11 @@ export function ArticleCard({ article, featured = false }: ArticleCardProps) {
           <h3 className="article-card__title">{article.title}</h3>
           <p className="article-card__excerpt">{article.excerpt}</p>
           <span className="article-card__foot">
-            <span className="mono article-card__read">{article.readMinutes || 5} min read</span>
+            {article.readMinutes ? (
+              <span className="mono article-card__read">{article.readMinutes} menit baca</span>
+            ) : null}
             <span className="link-arrow">
-              Read article
+              Baca artikel
               <Icon name="arrow-right" size={15} />
             </span>
           </span>

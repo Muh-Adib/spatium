@@ -24,7 +24,7 @@
 
 .journal-search:focus-within {
   border-color: var(--yellow);
-  box-shadow: 0 0 0 3px rgba(255, 214, 0, 0.14);
+  box-shadow: 0 0 0 3px rgba(77, 139, 255, 0.14);
 }
 
 .journal-search > svg {

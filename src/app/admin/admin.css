@@ -1,0 +1,55 @@
+/*
+ * SPATIUM Studio Admin — scoped styles.
+ * Applied under `.studio-admin` (shell root, editor root and every <dialog>,
+ * which renders in the top layer outside the shell).
+ */
+
+/* Visible keyboard focus. #6fb0ff on the midnight surfaces is ≥ 7:1, and the
+   2px offset keeps it clear of filled accent buttons (≥ 3:1, WCAG 1.4.11).
+   Programmatic focus targets (tabindex=-1 headings/main) get no ring.
+   Specificity (0,3,0)+ beats Tailwind's `focus:outline-none` (0,2,0). */
+.studio-admin :is(a, button, input, select, textarea, summary, [tabindex]:not([tabindex='-1'])):focus-visible,
+.studio-admin:is(dialog) :is(a, button, input, select, textarea, summary, [tabindex]:not([tabindex='-1'])):focus-visible {
+  outline: 2px solid #6fb0ff;
+  outline-offset: 2px;
+}
+
+@media (forced-colors: active) {
+  .studio-admin :is(a, button, input, select, textarea, summary, [tabindex]:not([tabindex='-1'])):focus-visible {
+    outline-color: Highlight;
+  }
+}
+
+/* Skip link: first focusable element, visible only on focus. */
+.studio-skip-link {
+  position: absolute;
+  inset-inline-start: 0.75rem;
+  top: 0.75rem;
+  z-index: 200;
+  transform: translateY(-200%);
+  border-radius: 0.75rem;
+  background: #3b7bff;
+  color: #03060d;
+  padding: 0.625rem 1rem;
+  font-size: 0.8125rem;
+  font-weight: 700;
+}
+.studio-skip-link:focus {
+  transform: none;
+}
+
+.studio-admin dialog::backdrop,
+dialog.studio-admin::backdrop {
+  background: rgb(0 0 0 / 0.75);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .studio-admin *,
+  .studio-admin *::before,
+  .studio-admin *::after,
+  dialog.studio-admin * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

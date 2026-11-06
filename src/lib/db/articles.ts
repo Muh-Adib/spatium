@@ -592,11 +592,11 @@ export async function updateArticle(
     await recordRevision(tx.orm.public, { ...previous, articleTags: previousTags }, actor || 'system', 'before_update')
     if (tags !== undefined) payload.tags = JSON.stringify(await replaceArticleTags(tx.orm.public, previous.id, tags))
     if (data.slug && data.slug !== slug) {
-      for (const sourcePath of [`/${slug}`, `/artikel/${slug}`]) {
+      for (const sourcePath of [`/${slug}`, `/artikel/${slug}`, `/journal/${slug}`]) {
         await tx.orm.public.Redirect.upsert({
           conflictOn: { sourcePath },
-          create: { sourcePath, destinationPath: `/artikel/${data.slug}`, statusCode: 301, active: true },
-          update: { destinationPath: `/artikel/${data.slug}`, statusCode: 301, active: true },
+          create: { sourcePath, destinationPath: `/journal/${data.slug}`, statusCode: 301, active: true },
+          update: { destinationPath: `/journal/${data.slug}`, statusCode: 301, active: true },
         })
       }
     }

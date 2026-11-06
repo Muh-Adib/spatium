@@ -58,7 +58,7 @@
 }
 
 .about-discipline:hover {
-  border-color: rgba(255, 214, 0, 0.42);
+  border-color: rgba(77, 139, 255, 0.42);
   transform: translateY(-5px);
 }
 
@@ -111,8 +111,8 @@
   width: 44px;
   height: 44px;
   border-radius: 13px;
-  background: rgba(255, 214, 0, 0.12);
-  border: 1px solid rgba(255, 214, 0, 0.24);
+  background: rgba(77, 139, 255, 0.12);
+  border: 1px solid rgba(77, 139, 255, 0.24);
   color: var(--yellow);
 }
 

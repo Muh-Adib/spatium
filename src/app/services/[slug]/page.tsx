@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { notFound } from 'next/navigation'
+import { notFound, permanentRedirect } from 'next/navigation'
 import { PageHero } from '@/components/ui/PageHero'
 import { ServiceVisual } from '@/components/services/ServiceVisual'
 import { ProjectCard } from '@/components/portfolio/ProjectCard'
@@ -8,36 +8,21 @@ import { CTASection } from '@/components/ui/CTASection'
 import { Reveal } from '@/components/ui/Reveal'
 import { SectionHead } from '@/components/ui/SectionHead'
 import { Icon } from '@/components/Icon'
-import { PROCESS } from '@/data/site'
-import { getService, SERVICES } from '@/data/services'
-import { PROJECTS, type ProjectCategory } from '@/data/projects'
-import { getServiceCategories, getServiceCategoryWithServices } from '@/lib/db/serviceCategories'
-import { getServiceBySlug, getServices } from '@/lib/db/services'
+import { SPATIAL_PIPELINE } from '@/config/spatium-story'
+import { getParentUseCaseSlug, getProjects, getUseCases } from '@/lib/content/spatium'
 import { BlockRenderer } from '@/components/blocks/BlockRenderer'
 import { siteConfig } from '@/config/site'
 import '@/pages/service-detail.css'
+import { redirectIfMoved } from '@/lib/redirects/resolve'
 
 const SITE_URL = siteConfig.url
 
-const CATEGORY_BY_SERVICE: Record<string, ProjectCategory> = {
-  'filmmaking-vfx': 'filmmaking',
-  'marketing-branding': 'marketing',
-  'entertainment-installation': 'entertainment',
-  'memory-documentary': 'memory',
-  '2d-animation': '2d',
-  '3d-animation': '3d',
-  'motion-graphics': 'motion',
-  'digital-assets-ai': 'assets',
-}
+export const revalidate = 300
 
 export async function generateStaticParams() {
-  const slugs = new Set<string>(SERVICES.map((service) => service.slug))
-  try {
-    const [categories, services] = await Promise.all([getServiceCategories(), getServices()])
-    for (const category of categories) slugs.add(category.slug)
-    for (const service of services) slugs.add(service.slug)
-  } catch (err) { console.warn("[observable error]:", err) }
-  return Array.from(slugs).map((slug) => ({ slug }))
+  // getUseCases() logs and returns [] when the DB is unreachable at build time.
+  const useCases = await getUseCases()
+  return useCases.map((service) => ({ slug: service.slug }))
 }
 
 export async function generateMetadata({
@@ -46,20 +31,13 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>
 }): Promise<Metadata> {
   const { slug } = await params
-  const dbCat = process.env.DATABASE_URL ? await getServiceCategoryWithServices(slug).catch(() => null) : null
-  const dbSvc = process.env.DATABASE_URL && !dbCat ? await getServiceBySlug(slug).catch(() => null) : null
-  const dbItem: any = dbCat || dbSvc
+  const service = (await getUseCases()).find((s) => s.slug === slug)
+  if (!service) return { title: 'Layanan tidak ditemukan' }
 
-  const service = getService(slug)
-  if (!dbItem && !service) return { title: 'Service Not Found' }
-
-  const fullTitle = dbItem?.metaTitle || (service ? `${service.name} Services` : `${dbItem?.title || dbItem?.name} Services`)
-  const serpTitle = fullTitle.length > 52 ? `${fullTitle.slice(0, 48).trimEnd()}…` : fullTitle
+  const serpTitle = service.metaTitle.length > 60 ? `${service.metaTitle.slice(0, 57).trimEnd()}…` : service.metaTitle
   const desc =
-    dbItem?.metaDescription ||
-    dbItem?.shortDescription ||
-    (service?.metaDescription ? (service.metaDescription.length > 160 ? `${service.metaDescription.slice(0, 157).trimEnd()}…` : service.metaDescription) : '')
-  const ogImg = dbItem?.heroImage || '/icon-512.png'
+    service.metaDescription.length > 160 ? `${service.metaDescription.slice(0, 157).trimEnd()}…` : service.metaDescription
+  const ogImg = service.image || '/icon-512.png'
 
   return {
     title: serpTitle,
@@ -73,7 +51,7 @@ export async function generateMetadata({
       description: desc,
       url: `${SITE_URL}/services/${slug}`,
       siteName: 'SPATIUM',
-      images: [{ url: ogImg, width: 512, height: 512, alt: 'SPATIUM' }],
+      images: [{ url: ogImg, width: 1200, height: 630, alt: service.imageAlt }],
     },
     twitter: { card: 'summary_large_image', title: `${serpTitle} · SPATIUM`, description: desc, images: [ogImg] },
   }
@@ -85,24 +63,24 @@ export default async function ServiceDetailPage({
   params: Promise<{ slug: string }>
 }) {
   const { slug } = await params
-  const dbCat = process.env.DATABASE_URL ? await getServiceCategoryWithServices(slug).catch(() => null) : null
-  const dbSvc = process.env.DATABASE_URL && !dbCat ? await getServiceBySlug(slug).catch(() => null) : null
-  const dbItem: any = dbCat || dbSvc
-  const dbBlocks = dbItem?.blocks && Array.isArray(dbItem.blocks) ? dbItem.blocks : []
+  const [useCases, projects] = await Promise.all([getUseCases(), getProjects()])
+  const view = useCases.find((s) => s.slug === slug)
 
-  const service = getService(slug)
-  if (!dbItem && !service) notFound()
+  if (!view) {
+    // Derivative capabilities live on their parent use-case page.
+    const parent = await getParentUseCaseSlug(slug)
+    if (parent) permanentRedirect(`/services/${parent}#${slug}`)
+    await redirectIfMoved(`/services/${slug}`)
+    notFound()
+  }
 
-  const serviceName = dbItem?.title || dbItem?.name || service?.name || ''
-  const serviceDesc = dbItem?.metaDescription || dbItem?.shortDescription || service?.metaDescription || ''
-
-  const jsonLd: any[] = [
+  const jsonLd: Record<string, unknown>[] = [
     {
       '@context': 'https://schema.org',
       '@type': 'Service',
-      name: serviceName,
-      serviceType: serviceName,
-      description: serviceDesc,
+      name: view.name,
+      serviceType: view.name,
+      description: view.metaDescription,
       url: `${SITE_URL}/services/${slug}`,
       provider: { '@type': 'Organization', name: 'SPATIUM', url: SITE_URL },
     },
@@ -111,70 +89,22 @@ export default async function ServiceDetailPage({
       '@type': 'BreadcrumbList',
       itemListElement: [
         { '@type': 'ListItem', position: 1, name: 'Home', item: SITE_URL },
-        { '@type': 'ListItem', position: 2, name: 'Services', item: `${SITE_URL}/services` },
+        { '@type': 'ListItem', position: 2, name: 'Layanan', item: `${SITE_URL}/services` },
         {
           '@type': 'ListItem',
           position: 3,
-          name: serviceName,
+          name: view.name,
           item: `${SITE_URL}/services/${slug}`,
         },
       ],
     },
   ]
 
-  if (dbBlocks.length > 0) {
-    const contextData = dbCat
-      ? { subServices: dbCat.subServices || [] }
-      : { portfolios: (dbSvc as { portfolioItems?: unknown[] })?.portfolioItems || [] }
-    return (
-      <main className="min-h-screen bg-[var(--color-background)] text-white">
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-        />
-        <BlockRenderer blocks={dbBlocks} contextData={contextData} />
-      </main>
-    )
-  }
-
-  if (!dbItem && !service) notFound()
-
-  // Static fallback shell: DB row (admin-edited) supplies the editable copy;
-  // the static entry only pads structural fields (capability grid, FAQ shape)
-  // the DB model does not carry.
-  const view = {
-    slug,
-    index: dbItem?.indexNumber || service?.index || '01',
-    name: dbItem?.title || dbItem?.name || service?.name || '',
-    shortName: service?.shortName || dbItem?.title || dbItem?.name || '',
-    tagline: dbItem?.tag || dbItem?.shortDescription || service?.tagline || '',
-    summary: dbItem?.shortDescription || dbItem?.description || service?.summary || '',
-    metaDescription: serviceDesc,
-    intro:
-      service?.intro ||
-      [dbItem?.longDescription || dbItem?.description || dbItem?.shortDescription].filter(Boolean) as string[],
-    capabilities:
-      service?.capabilities ||
-      ((dbItem?.features || []) as { title?: string; description?: string }[]).map((f) => ({
-        title: f.title || '',
-        description: f.description || '',
-      })),
-    deliverables: (dbItem?.deliverables as string[] | undefined) || service?.deliverables || [],
-    tools:
-      service?.tools ||
-      ((dbItem?.technologies || []) as { name?: string }[]).map((t) => t.name || '').filter(Boolean),
-    visual: service?.visual || '2d',
-    faqs:
-      service?.faqs ||
-      ((dbItem?.faq || []) as { question?: string; answer?: string }[]).map((f) => ({
-        q: f.question || '',
-        a: f.answer || '',
-      })),
-  }
-
-  const relatedProjects = PROJECTS.filter(
-    (project) => project.category === CATEGORY_BY_SERVICE[view.slug],
-  ).slice(0, 3)
+  // Related scenes are the portfolio pages this use case links to (internal-links block).
+  const relatedSlugs = view.related
+    .map((r) => /^\/portfolio\/([^/?#]+)/.exec(r.to)?.[1])
+    .filter((s): s is string => Boolean(s))
+  const relatedProjects = projects.filter((p) => relatedSlugs.includes(p.slug)).slice(0, 3)
 
   if (view.faqs.length > 0) {
     jsonLd.push({
@@ -188,7 +118,7 @@ export default async function ServiceDetailPage({
     })
   }
 
-  const otherServices = SERVICES.filter((item) => item.slug !== view.slug)
+  const otherServices = useCases.filter((item) => item.slug !== view.slug)
 
   return (
     <>
@@ -198,17 +128,17 @@ export default async function ServiceDetailPage({
       />
 
       <PageHero
-        eyebrow={`Service ${view.index}`}
+        eyebrow={`Use case ${view.index}`}
         title={view.name}
         lede={view.summary}
         crumbs={[
           { label: 'Home', to: '/' },
-          { label: 'Services', to: '/services' },
+          { label: 'Layanan', to: '/services' },
           { label: view.shortName },
         ]}
         meta={
           <>
-            <span className="pill pill--accent">{view.tagline}</span>
+            {view.tagline ? <span className="pill pill--accent">{view.tagline}</span> : null}
             {view.tools.slice(0, 3).map((tool) => (
               <span className="pill" key={tool}>
                 {tool}
@@ -222,7 +152,7 @@ export default async function ServiceDetailPage({
         <div className="container container--wide detail-intro__inner">
           <Reveal className="detail-intro__copy">
             <h2 className="sr-only" id="detail-intro-title">
-              About this service
+              Tentang layanan ini
             </h2>
             {view.intro.map((paragraph) => (
               <p key={paragraph.slice(0, 24)} className="detail-intro__paragraph">
@@ -230,13 +160,15 @@ export default async function ServiceDetailPage({
               </p>
             ))}
 
-            <ul className="detail-intro__tools">
-              {view.tools.map((tool) => (
-                <li className="pill" key={tool}>
-                  {tool}
-                </li>
-              ))}
-            </ul>
+            {view.tools.length > 0 ? (
+              <ul className="detail-intro__tools">
+                {view.tools.map((tool) => (
+                  <li className="pill" key={tool}>
+                    {tool}
+                  </li>
+                ))}
+              </ul>
+            ) : null}
           </Reveal>
 
           <Reveal className="detail-intro__visual" variant="scale" delay={100}>
@@ -251,63 +183,68 @@ export default async function ServiceDetailPage({
         </div>
       </section>
 
-      <section className="section detail-capabilities" aria-labelledby="capabilities-heading">
-        <div className="container container--wide">
-          <SectionHead
-            id="capabilities-heading"
-            eyebrow="What this covers"
-            title={`${view.shortName} capabilities`}
-            aside={
-              <p className="lede">
-                Each capability can be scoped on its own or combined into a single production. Mixed
-                scopes are quoted as one project.
-              </p>
-            }
-          />
+      {view.capabilities.length > 0 ? (
+        <section className="section detail-capabilities" aria-labelledby="capabilities-heading">
+          <div className="container container--wide">
+            <SectionHead
+              id="capabilities-heading"
+              eyebrow="Cakupan"
+              title={`Kapabilitas ${view.shortName}`}
+              aside={
+                <p className="lede">
+                  Setiap kapabilitas bisa dikerjakan terpisah atau digabungkan dalam satu proyek, berangkat
+                  dari data capture yang sama.
+                </p>
+              }
+            />
 
-          <ul className="detail-capabilities__grid">
-            {view.capabilities.map((cap, i) => (
-              <Reveal as="li" key={cap.title} delay={i * 60} className="detail-capability">
-                <span className="detail-capability__num mono">{String(i + 1).padStart(2, '0')}</span>
-                <h3 className="detail-capability__title">{cap.title}</h3>
-                <p className="detail-capability__body">{cap.description}</p>
-              </Reveal>
-            ))}
-          </ul>
-        </div>
-      </section>
+            <ul className="detail-capabilities__grid">
+              {view.capabilities.map((cap, i) => (
+                <Reveal as="li" key={cap.slug} id={cap.slug} delay={i * 60} className="detail-capability">
+                  <span className="detail-capability__num mono">{String(i + 1).padStart(2, '0')}</span>
+                  <h3 className="detail-capability__title">{cap.title}</h3>
+                  <p className="detail-capability__body">{cap.description}</p>
+                </Reveal>
+              ))}
+            </ul>
+          </div>
+        </section>
+      ) : null}
 
       <section className="section section--deep detail-deliverables" aria-labelledby="deliverables-heading">
         <div className="container container--wide detail-deliverables__inner">
-          <Reveal className="detail-deliverables__copy">
-            <p className="eyebrow">Deliverables</p>
-            <h2 className="display-md" id="deliverables-heading">
-              What you <span className="accent">receive</span>.
-            </h2>
-            <p className="lede">
-              Every engagement ends with master files, platform exports and the source project so your
-              team is never locked out of its own work.
-            </p>
+          {view.deliverables.length > 0 ? (
+            <Reveal className="detail-deliverables__copy">
+              <p className="eyebrow">Keluaran</p>
+              <h2 className="display-md" id="deliverables-heading">
+                Apa yang <span className="accent">Anda terima</span>.
+              </h2>
+              <p className="lede">Keluaran disesuaikan dengan tujuan proyek; berikut yang umum untuk use case ini.</p>
 
-            <ul className="detail-deliverables__list">
-              {view.deliverables.map((item) => (
-                <li key={item}>
-                  <Icon name="check" size={15} />
-                  {item}
-                </li>
-              ))}
-            </ul>
-          </Reveal>
+              <ul className="detail-deliverables__list">
+                {view.deliverables.map((item) => (
+                  <li key={item}>
+                    <Icon name="check" size={15} />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </Reveal>
+          ) : (
+            <h2 className="sr-only" id="deliverables-heading">
+              Alur kerja
+            </h2>
+          )}
 
           <Reveal className="detail-timeline" delay={100}>
-            <p className="mono detail-timeline__label">Production stages used</p>
+            <p className="mono detail-timeline__label">Alur digital twin</p>
             <ol className="detail-timeline__list">
-              {PROCESS.map((step) => (
+              {SPATIAL_PIPELINE.map((step) => (
                 <li key={step.index}>
                   <span className="detail-timeline__dot" aria-hidden="true" />
                   <div>
                     <strong>{step.title}</strong>
-                    <span className="mono">{step.duration}</span>
+                    <span className="mono">{step.caption}</span>
                   </div>
                 </li>
               ))}
@@ -316,41 +253,45 @@ export default async function ServiceDetailPage({
         </div>
       </section>
 
-      <section className="section detail-faq" aria-labelledby="faq-heading">
-        <div className="container container--wide detail-faq__inner">
-          <Reveal className="detail-faq__head">
-            <p className="eyebrow">Good to know</p>
-            <h2 className="display-md" id="faq-heading">
-              Frequently asked
-            </h2>
-          </Reveal>
+      {view.extraBlocks.length > 0 ? <BlockRenderer blocks={view.extraBlocks} /> : null}
 
-          <div className="detail-faq__list">
-            {view.faqs.map((faq, i) => (
-              <Reveal key={faq.q} delay={i * 60}>
-                <details className="faq-item">
-                  <summary>
-                    <span>{faq.q}</span>
-                    <Icon name="plus" size={18} />
-                  </summary>
-                  <p>{faq.a}</p>
-                </details>
-              </Reveal>
-            ))}
+      {view.faqs.length > 0 ? (
+        <section className="section detail-faq" aria-labelledby="faq-heading">
+          <div className="container container--wide detail-faq__inner">
+            <Reveal className="detail-faq__head">
+              <p className="eyebrow">Perlu diketahui</p>
+              <h2 className="display-md" id="faq-heading">
+                Pertanyaan umum
+              </h2>
+            </Reveal>
+
+            <div className="detail-faq__list">
+              {view.faqs.map((faq, i) => (
+                <Reveal key={faq.q} delay={i * 60}>
+                  <details className="faq-item">
+                    <summary>
+                      <span>{faq.q}</span>
+                      <Icon name="plus" size={18} />
+                    </summary>
+                    <p>{faq.a}</p>
+                  </details>
+                </Reveal>
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      ) : null}
 
       {relatedProjects.length > 0 ? (
         <section className="section detail-work" aria-labelledby="detail-work-heading">
           <div className="container container--wide">
             <SectionHead
               id="detail-work-heading"
-              eyebrow="Related work"
-              title={`${view.shortName} capability studies`}
+              eyebrow="Scene terkait"
+              title={`Contoh capture untuk ${view.shortName}`}
               aside={
-                <Link href={`/portfolio?category=${CATEGORY_BY_SERVICE[view.slug]}`} className="link-arrow">
-                  See all {view.shortName} work
+                <Link href="/portfolio" className="link-arrow">
+                  Lihat semua scene
                   <Icon name="arrow-right" size={16} />
                 </Link>
               }
@@ -364,37 +305,39 @@ export default async function ServiceDetailPage({
         </section>
       ) : null}
 
-      <section className="section detail-next" aria-labelledby="detail-next-heading">
-        <div className="container container--wide">
-          <SectionHead id="detail-next-heading" eyebrow="Other services" title="Keep exploring" />
-          <ul className="detail-next__grid">
-            {otherServices.map((item) => (
-              <Reveal as="li" key={item.slug}>
-                <Link href={`/services/${item.slug}`} className="detail-next__card card card--hover">
-                  <span className="detail-next__index mono">{item.index}</span>
-                  <h3>{item.name}</h3>
-                  <p>{item.tagline}</p>
-                  <span className="link-arrow">
-                    View service
-                    <Icon name="arrow-right" size={15} />
-                  </span>
-                </Link>
-              </Reveal>
-            ))}
-          </ul>
-        </div>
-      </section>
+      {otherServices.length > 0 ? (
+        <section className="section detail-next" aria-labelledby="detail-next-heading">
+          <div className="container container--wide">
+            <SectionHead id="detail-next-heading" eyebrow="Use case lain" title="Jelajahi lebih lanjut" />
+            <ul className="detail-next__grid">
+              {otherServices.map((item) => (
+                <Reveal as="li" key={item.slug}>
+                  <Link href={`/services/${item.slug}`} className="detail-next__card card card--hover">
+                    <span className="detail-next__index mono">{item.index}</span>
+                    <h3>{item.name}</h3>
+                    <p>{item.tagline}</p>
+                    <span className="link-arrow">
+                      Lihat layanan
+                      <Icon name="arrow-right" size={15} />
+                    </span>
+                  </Link>
+                </Reveal>
+              ))}
+            </ul>
+          </div>
+        </section>
+      ) : null}
 
       <CTASection
         id="service-cta"
-        eyebrow="Start here"
+        eyebrow="Mulai di sini"
         title={
           <>
-            Brief us on your <span className="accent">{view.shortName}</span> project.
+            Diskusikan proyek <span className="accent">{view.shortName}</span> Anda.
           </>
         }
-        body="Send the message, the audience and the deadline. We will respond with a recommended pipeline and an honest scope."
-        secondary={{ label: 'Browse portfolio', to: '/portfolio' }}
+        body="Ceritakan lokasi, tujuan, dan tenggat Anda. Kami akan merekomendasikan alur capture dan keluaran yang sesuai, dengan cakupan yang jelas."
+        secondary={{ label: 'Lihat portofolio', to: '/portfolio' }}
       />
     </>
   )

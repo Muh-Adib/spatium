@@ -25,13 +25,13 @@ export async function revalidateCatalog(
     switch (entity) {
       case 'category':
         // Category change revalidates overview, child routes, and home/navigation
-        revalidatePath('/layanan')
+        revalidatePath('/services')
         if (slug) {
-          revalidatePath(`/layanan/${slug}`)
+          revalidatePath(`/services/${slug}`)
         }
         if (childSlugs && childSlugs.length > 0) {
           for (const cSlug of childSlugs) {
-            revalidatePath(`/layanan/${cSlug}`)
+            revalidatePath(`/services/${cSlug}`)
           }
         }
         revalidatePath('/')
@@ -39,27 +39,25 @@ export async function revalidateCatalog(
         break
 
       case 'service':
-        revalidatePath('/layanan')
+        revalidatePath('/services')
         if (slug) {
-          revalidatePath(`/layanan/${slug}`)
+          revalidatePath(`/services/${slug}`)
         }
         revalidatePath('/')
         revalidatePath('/sitemap.xml')
         break
 
       case 'solution':
-        revalidatePath('/solusi')
-        if (slug) {
-          revalidatePath(`/solusi/${slug}`)
-        }
+        // Solutions have no public route anymore (legacy /solusi → /services).
+        revalidatePath('/services')
         revalidatePath('/')
         revalidatePath('/sitemap.xml')
         break
 
       case 'portfolio':
-        revalidatePath('/portofolio')
+        revalidatePath('/portfolio')
         if (slug) {
-          revalidatePath(`/portofolio/${slug}`)
+          revalidatePath(`/portfolio/${slug}`)
         }
         revalidatePath('/')
         revalidatePath('/sitemap.xml')
@@ -67,14 +65,13 @@ export async function revalidateCatalog(
 
       case 'template':
       case 'config':
-        revalidatePath('/layanan')
-        revalidatePath('/solusi')
+        revalidatePath('/services')
         break
 
       case 'article':
-        revalidatePath('/artikel')
+        revalidatePath('/journal')
         if (slug) {
-          revalidatePath(`/artikel/${slug}`)
+          revalidatePath(`/journal/${slug}`)
         }
         revalidatePath('/')
         revalidatePath('/sitemap.xml')
@@ -97,13 +94,13 @@ export async function revalidateCatalog(
 
       const entityPath = slug
         ? entity === 'service'
-          ? `/layanan/${slug}`
+          ? `/services/${slug}`
           : entity === 'portfolio'
-          ? `/portofolio/${slug}`
+          ? `/portfolio/${slug}`
           : entity === 'article'
-          ? `/artikel/${slug}`
+          ? `/journal/${slug}`
           : entity === 'solution'
-          ? `/solusi/${slug}`
+          ? '/services'
           : undefined
         : undefined
 

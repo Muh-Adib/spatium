@@ -1,6 +1,6 @@
 /** A canonical must point to a content URL, never its migrated redirect source. */
 export function articleCanonical(article: { slug: string; canonicalUrl?: string | null; wpSourceUrl?: string | null }, siteUrl: string): string {
-  return contentCanonical(article.canonicalUrl, article.wpSourceUrl, `/artikel/${article.slug}`, siteUrl)
+  return contentCanonical(article.canonicalUrl, article.wpSourceUrl, `/journal/${article.slug}`, siteUrl)
 }
 
 export function contentCanonical(value: string | null | undefined, sourceUrl: string | null | undefined, targetPath: string, siteUrl: string): string {

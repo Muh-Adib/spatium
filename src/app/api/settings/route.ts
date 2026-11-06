@@ -4,6 +4,27 @@ import { revalidatePath } from 'next/cache'
 import { requireRole } from '@/lib/auth/rbac'
 import { settingsMutationSchema, validateBody } from '@/lib/validation/api-schemas'
 
+function parseSocialLinks(raw: string | null | undefined): Record<string, string> {
+  if (!raw) return {}
+  try {
+    const parsed: unknown = JSON.parse(raw)
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return {}
+    const out: Record<string, string> = {}
+    for (const [key, value] of Object.entries(parsed)) {
+      if (typeof value === 'string' && value.trim()) out[key] = value
+    }
+    return out
+  } catch (error: unknown) {
+    console.warn('[api/settings] SiteConfig.socialLinks is not valid JSON:', error)
+    return {}
+  }
+}
+
+function publicErrorMessage(error: unknown, fallback: string): string {
+  if (process.env.NODE_ENV === 'production') return fallback
+  return error instanceof Error && error.message ? error.message : fallback
+}
+
 export async function GET() {
   try {
     const row = await prisma.orm.public.SiteConfig.where({ id: 1 }).first()
@@ -21,33 +42,31 @@ export async function GET() {
           address: row.address || '',
           logoUrl: row.logoUrl || '',
           faviconUrl: row.faviconUrl || '',
-          socialLinks: row.socialLinks ? JSON.parse(row.socialLinks) : {},
+          socialLinks: parseSocialLinks(row.socialLinks),
         },
       })
     }
     return NextResponse.json({
       success: true,
       data: {
-        name: 'UNIMASI Studio',
-        tagline: 'We Make Ideas Move — 2D & 3D Animation, Motion Graphics & Videotron',
-        description: 'UNIMASI adalah studio animasi 2D, 3D, motion graphics, dan visual production untuk edukasi, industri, dan brands.',
-        url: 'https://unimasi.studio',
+        name: 'SPATIUM',
+        tagline: 'Real places. New perspectives.',
+        description:
+          'SPATIUM adalah studio teknologi spasial: laser scan, point cloud, geometri 3D, dan 3D Gaussian Splat untuk digital twin industri kreatif.',
+        url: 'https://spatium.id',
         whatsapp: process.env.NEXT_PUBLIC_WHATSAPP || '',
-        email: 'hello@unimasi.studio',
+        email: 'hello@spatium.id',
         phone: process.env.NEXT_PUBLIC_PHONE || '',
-        address: 'Yogyakarta, Indonesia',
-        logoUrl: '/logo/unimasi-coloured.webp',
+        address: '',
+        logoUrl: '/brand/logo-spatium-white.svg',
         faviconUrl: '/favicon.svg',
-        socialLinks: {
-          instagram: 'https://instagram.com/unimasi.studio',
-          linkedin: 'https://linkedin.com/company/unimasi',
-          github: 'https://github.com/unimasi',
-        },
+        socialLinks: {},
       },
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
+    console.error('[api/settings] GET failed:', error)
     return NextResponse.json(
-      { success: false, error: error.message || 'Gagal memuat pengaturan.' },
+      { success: false, error: publicErrorMessage(error, 'Gagal memuat pengaturan.') },
       { status: 500 }
     )
   }
@@ -74,10 +93,10 @@ export async function POST(request: NextRequest) {
     const existing = await prisma.orm.public.SiteConfig.where({ id: 1 }).first()
 
     const payload = {
-      name: String(bodyRecord.siteName || body.name || 'UNIMASI Studio'),
+      name: String(bodyRecord.siteName || body.name || 'SPATIUM'),
       tagline: body.tagline || null,
       description: body.metaDescription || (typeof bodyRecord.description === 'string' ? bodyRecord.description : null),
-      url: String(bodyRecord.canonicalUrl || bodyRecord.url || 'https://www.unimasi.com'),
+      url: String(bodyRecord.canonicalUrl || bodyRecord.url || 'https://spatium.id'),
       whatsapp: body.whatsapp || null,
       email: body.contactEmail || (typeof bodyRecord.email === 'string' ? bodyRecord.email : null),
       phone: bodyRecord.phone ? String(bodyRecord.phone) : (body.contactPhone || null),
@@ -91,7 +110,8 @@ export async function POST(request: NextRequest) {
       const siteUrl = new URL(payload.url)
       if (!['http:', 'https:'].includes(siteUrl.protocol) || siteUrl.username || siteUrl.password || siteUrl.search || siteUrl.hash) throw new Error('invalid')
       payload.url = siteUrl.href.replace(/\/$/, '')
-    } catch {
+    } catch (urlError: unknown) {
+      console.warn('[api/settings] Rejected invalid site URL:', urlError)
       return NextResponse.json({ success: false, error: 'URL website harus berupa HTTP/HTTPS tanpa kredensial, query, atau fragmen.' }, { status: 400 })
     }
 
@@ -107,18 +127,18 @@ export async function POST(request: NextRequest) {
     // Trigger instant ISR revalidation for layout and landing pages
     try {
       revalidatePath('/', 'layout')
-      revalidatePath('/kontak')
-      revalidatePath('/tentang')
+      revalidatePath('/contact')
+      revalidatePath('/about')
     } catch (err) { console.warn("[API observable error]:", err) }
 
     return NextResponse.json({
       success: true,
       message: 'Pengaturan situs berhasil diperbarui ke database dan cache revalidasi aktif.',
     })
-  } catch (error: any) {
-    console.error('Error saving site settings:', error)
+  } catch (error: unknown) {
+    console.error('[api/settings] POST failed:', error)
     return NextResponse.json(
-      { success: false, error: error.message || 'Gagal menyimpan pengaturan situs.' },
+      { success: false, error: publicErrorMessage(error, 'Gagal menyimpan pengaturan situs.') },
       { status: 500 }
     )
   }

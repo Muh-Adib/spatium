@@ -1,227 +1,257 @@
 [
   {
-    "slug": "2d-explainer-animation",
-    "name": "2D Explainer Animation",
-    "categorySlug": "2d-animation",
-    "indexNumber": "01.1",
-    "shortDescription": "2D Explainer Animation — bagian dari 2D Animation.",
+    "documentId": "svc-set-reconstruction",
+    "slug": "set-reconstruction",
+    "name": "Set Reconstruction",
+    "categorySlug": "filmmaking-vfx",
+    "indexNumber": "01",
+    "shortDescription": "Lokasi atau set nyata direkonstruksi menjadi ruang digital yang bisa dijelajahi tim kreatif.",
+    "description": "Lokasi atau set nyata direkonstruksi menjadi ruang digital yang bisa dijelajahi tim kreatif.",
     "order": 1,
-    "status": "published"
+    "status": "published",
+    "seo": {
+      "metaTitle": "Set Reconstruction — Filmmaking & VFX",
+      "metaDescription": "Lokasi atau set nyata direkonstruksi menjadi ruang digital yang bisa dijelajahi tim kreatif. Bagian dari layanan Filmmaking & VFX SPATIUM."
+    }
   },
   {
-    "slug": "2d-educational-animation",
-    "name": "2D Educational Animation",
-    "categorySlug": "2d-animation",
-    "indexNumber": "01.2",
-    "shortDescription": "2D Educational Animation — bagian dari 2D Animation.",
+    "documentId": "svc-pre-visualization",
+    "slug": "pre-visualization",
+    "name": "Pre-visualization",
+    "categorySlug": "filmmaking-vfx",
+    "indexNumber": "02",
+    "shortDescription": "Capture 3DGS dikembangkan menjadi 3D concept dan previz untuk merancang adegan di atas lokasi asli.",
+    "description": "Capture 3DGS dikembangkan menjadi 3D concept dan previz untuk merancang adegan di atas lokasi asli.",
     "order": 2,
-    "status": "published"
+    "status": "published",
+    "seo": {
+      "metaTitle": "Pre-visualization — Filmmaking & VFX",
+      "metaDescription": "Capture 3DGS dikembangkan menjadi 3D concept dan previz untuk merancang adegan di atas lokasi asli. Bagian dari layanan Filmmaking & VFX SPATIUM."
+    }
   },
   {
-    "slug": "2d-character-animation",
-    "name": "2D Character Animation",
-    "categorySlug": "2d-animation",
-    "indexNumber": "01.3",
-    "shortDescription": "2D Character Animation — bagian dari 2D Animation.",
+    "documentId": "svc-tech-visualization",
+    "slug": "tech-visualization",
+    "name": "Tech-visualization",
+    "categorySlug": "filmmaking-vfx",
+    "indexNumber": "03",
+    "shortDescription": "Perencanaan posisi kamera, lampu, dan blocking kru langsung di dalam digital twin lokasi.",
+    "description": "Perencanaan posisi kamera, lampu, dan blocking kru langsung di dalam digital twin lokasi.",
     "order": 3,
-    "status": "published"
+    "status": "published",
+    "seo": {
+      "metaTitle": "Tech-visualization — Filmmaking & VFX",
+      "metaDescription": "Perencanaan posisi kamera, lampu, dan blocking kru langsung di dalam digital twin lokasi. Bagian dari layanan Filmmaking & VFX SPATIUM."
+    }
   },
   {
-    "slug": "2d-infographic-animation",
-    "name": "2D Infographic Animation",
-    "categorySlug": "2d-animation",
-    "indexNumber": "01.4",
-    "shortDescription": "2D Infographic Animation — bagian dari 2D Animation.",
+    "documentId": "svc-location-planning-on-site-supervision",
+    "slug": "location-planning-on-site-supervision",
+    "name": "Location Planning & On-site Supervision",
+    "categorySlug": "filmmaking-vfx",
+    "indexNumber": "04",
+    "shortDescription": "Survei lokasi jarak jauh dan referensi spasial untuk supervisi di lapangan.",
+    "description": "Survei lokasi jarak jauh dan referensi spasial untuk supervisi di lapangan.",
     "order": 4,
-    "status": "published"
+    "status": "published",
+    "seo": {
+      "metaTitle": "Location Planning & On-site Supervision — Filmmaking & VFX",
+      "metaDescription": "Survei lokasi jarak jauh dan referensi spasial untuk supervisi di lapangan. Bagian dari layanan Filmmaking & VFX SPATIUM."
+    }
   },
   {
-    "slug": "2d-illustration-animation",
-    "name": "2D Illustration Animation",
-    "categorySlug": "2d-animation",
-    "indexNumber": "01.5",
-    "shortDescription": "2D Illustration Animation — bagian dari 2D Animation.",
+    "documentId": "svc-virtual-experience",
+    "slug": "virtual-experience",
+    "name": "Virtual Experience",
+    "categorySlug": "marketing-branding",
+    "indexNumber": "01",
+    "shortDescription": "Pengunjung menjelajahi ruang Anda secara bebas langsung dari browser.",
+    "description": "Pengunjung menjelajahi ruang Anda secara bebas langsung dari browser.",
     "order": 5,
-    "status": "published"
+    "status": "published",
+    "seo": {
+      "metaTitle": "Virtual Experience — Marketing & Branding",
+      "metaDescription": "Pengunjung menjelajahi ruang Anda secara bebas langsung dari browser. Bagian dari layanan Marketing & Branding SPATIUM."
+    }
   },
   {
-    "slug": "2d-training-safety-animation",
-    "name": "2D Training & Safety Animation",
-    "categorySlug": "2d-animation",
-    "indexNumber": "01.6",
-    "shortDescription": "2D Training & Safety Animation — bagian dari 2D Animation.",
+    "documentId": "svc-spatial-tour",
+    "slug": "spatial-tour",
+    "name": "Spatial Tour",
+    "categorySlug": "marketing-branding",
+    "indexNumber": "02",
+    "shortDescription": "Navigasi eksterior dan interior yang terhubung dalam satu tur spasial.",
+    "description": "Navigasi eksterior dan interior yang terhubung dalam satu tur spasial.",
     "order": 6,
-    "status": "published"
+    "status": "published",
+    "seo": {
+      "metaTitle": "Spatial Tour — Marketing & Branding",
+      "metaDescription": "Navigasi eksterior dan interior yang terhubung dalam satu tur spasial. Bagian dari layanan Marketing & Branding SPATIUM."
+    }
   },
   {
-    "slug": "3d-product-animation",
-    "name": "3D Product Animation",
-    "categorySlug": "3d-animation-visual-production",
-    "indexNumber": "02.1",
-    "shortDescription": "3D Product Animation — bagian dari 3D Animation & Visual Production.",
-    "order": 1,
-    "status": "published"
-  },
-  {
-    "slug": "3d-industrial-animation",
-    "name": "3D Industrial Animation",
-    "categorySlug": "3d-animation-visual-production",
-    "indexNumber": "02.2",
-    "shortDescription": "3D Industrial Animation — bagian dari 3D Animation & Visual Production.",
-    "order": 2,
-    "status": "published"
-  },
-  {
-    "slug": "3d-architectural-visualization",
-    "name": "3D Architectural Visualization",
-    "categorySlug": "3d-animation-visual-production",
-    "indexNumber": "02.3",
-    "shortDescription": "3D Architectural Visualization — bagian dari 3D Animation & Visual Production.",
-    "order": 3,
-    "status": "published"
-  },
-  {
-    "slug": "3d-modeling-texturing",
-    "name": "3D Modeling & Texturing",
-    "categorySlug": "3d-animation-visual-production",
-    "indexNumber": "02.4",
-    "shortDescription": "3D Modeling & Texturing — bagian dari 3D Animation & Visual Production.",
-    "order": 4,
-    "status": "published"
-  },
-  {
-    "slug": "3d-character-animation",
-    "name": "3D Character Animation",
-    "categorySlug": "3d-animation-visual-production",
-    "indexNumber": "02.5",
-    "shortDescription": "3D Character Animation — bagian dari 3D Animation & Visual Production.",
-    "order": 5,
-    "status": "published"
-  },
-  {
-    "slug": "3d-process-visualization",
-    "name": "3D Process Visualization",
-    "categorySlug": "3d-animation-visual-production",
-    "indexNumber": "02.6",
-    "shortDescription": "3D Process Visualization — bagian dari 3D Animation & Visual Production.",
-    "order": 6,
-    "status": "published"
-  },
-  {
-    "slug": "3d-asset-production",
-    "name": "3D Asset Production",
-    "categorySlug": "3d-animation-visual-production",
-    "indexNumber": "02.7",
-    "shortDescription": "3D Asset Production — bagian dari 3D Animation & Visual Production.",
+    "documentId": "svc-interactive-showcase",
+    "slug": "interactive-showcase",
+    "name": "Interactive Showcase",
+    "categorySlug": "marketing-branding",
+    "indexNumber": "03",
+    "shortDescription": "Hotspot informasi, 3D map, dan display produk 3D di dalam scene.",
+    "description": "Hotspot informasi, 3D map, dan display produk 3D di dalam scene.",
     "order": 7,
-    "status": "published"
+    "status": "published",
+    "seo": {
+      "metaTitle": "Interactive Showcase — Marketing & Branding",
+      "metaDescription": "Hotspot informasi, 3D map, dan display produk 3D di dalam scene. Bagian dari layanan Marketing & Branding SPATIUM."
+    }
   },
   {
-    "slug": "corporate-motion-graphics",
-    "name": "Corporate Motion Graphics",
-    "categorySlug": "motion-graphics",
-    "indexNumber": "03.1",
-    "shortDescription": "Corporate Motion Graphics — bagian dari Motion Graphics.",
-    "order": 1,
-    "status": "published"
+    "documentId": "svc-digital-asset-for-sales-business",
+    "slug": "digital-asset-for-sales-business",
+    "name": "Digital Asset for Sales & Business",
+    "categorySlug": "marketing-branding",
+    "indexNumber": "04",
+    "shortDescription": "Aset spasial yang bisa dipakai ulang untuk website, kampanye, dan tim penjualan.",
+    "description": "Aset spasial yang bisa dipakai ulang untuk website, kampanye, dan tim penjualan.",
+    "order": 8,
+    "status": "published",
+    "seo": {
+      "metaTitle": "Digital Asset for Sales & Business — Marketing & Branding",
+      "metaDescription": "Aset spasial yang bisa dipakai ulang untuk website, kampanye, dan tim penjualan. Bagian dari layanan Marketing & Branding SPATIUM."
+    }
   },
   {
-    "slug": "kinetic-typography",
-    "name": "Kinetic Typography",
-    "categorySlug": "motion-graphics",
-    "indexNumber": "03.2",
-    "shortDescription": "Kinetic Typography — bagian dari Motion Graphics.",
-    "order": 2,
-    "status": "published"
+    "documentId": "svc-vr-ar-experience",
+    "slug": "vr-ar-experience",
+    "name": "VR / AR Experience",
+    "categorySlug": "entertainment-installation",
+    "indexNumber": "01",
+    "shortDescription": "Ruang nyata yang bisa dimasuki dan dijelajahi lewat perangkat imersif.",
+    "description": "Ruang nyata yang bisa dimasuki dan dijelajahi lewat perangkat imersif.",
+    "order": 9,
+    "status": "published",
+    "seo": {
+      "metaTitle": "VR / AR Experience — Entertainment & Installation",
+      "metaDescription": "Ruang nyata yang bisa dimasuki dan dijelajahi lewat perangkat imersif. Bagian dari layanan Entertainment & Installation SPATIUM."
+    }
   },
   {
-    "slug": "animated-infographics",
-    "name": "Animated Infographics",
-    "categorySlug": "motion-graphics",
-    "indexNumber": "03.3",
-    "shortDescription": "Animated Infographics — bagian dari Motion Graphics.",
-    "order": 3,
-    "status": "published"
+    "documentId": "svc-projection-mapping",
+    "slug": "projection-mapping",
+    "name": "Projection Mapping",
+    "categorySlug": "entertainment-installation",
+    "indexNumber": "02",
+    "shortDescription": "Konten proyeksi dirancang di atas geometri ruang yang sebenarnya.",
+    "description": "Konten proyeksi dirancang di atas geometri ruang yang sebenarnya.",
+    "order": 10,
+    "status": "published",
+    "seo": {
+      "metaTitle": "Projection Mapping — Entertainment & Installation",
+      "metaDescription": "Konten proyeksi dirancang di atas geometri ruang yang sebenarnya. Bagian dari layanan Entertainment & Installation SPATIUM."
+    }
   },
   {
-    "slug": "logo-animation",
-    "name": "Logo Animation",
-    "categorySlug": "motion-graphics",
-    "indexNumber": "03.4",
-    "shortDescription": "Logo Animation — bagian dari Motion Graphics.",
-    "order": 4,
-    "status": "published"
+    "documentId": "svc-interactive-installation",
+    "slug": "interactive-installation",
+    "name": "Interactive Installation",
+    "categorySlug": "entertainment-installation",
+    "indexNumber": "03",
+    "shortDescription": "Instalasi yang merespons pengunjung, dibangun dari data spasial lokasi.",
+    "description": "Instalasi yang merespons pengunjung, dibangun dari data spasial lokasi.",
+    "order": 11,
+    "status": "published",
+    "seo": {
+      "metaTitle": "Interactive Installation — Entertainment & Installation",
+      "metaDescription": "Instalasi yang merespons pengunjung, dibangun dari data spasial lokasi. Bagian dari layanan Entertainment & Installation SPATIUM."
+    }
   },
   {
-    "slug": "ui-motion-graphics",
-    "name": "UI Motion Graphics",
-    "categorySlug": "motion-graphics",
-    "indexNumber": "03.5",
-    "shortDescription": "UI Motion Graphics — bagian dari Motion Graphics.",
-    "order": 5,
-    "status": "published"
+    "documentId": "svc-location-based-entertainment",
+    "slug": "location-based-entertainment",
+    "name": "Location-based Entertainment",
+    "categorySlug": "entertainment-installation",
+    "indexNumber": "04",
+    "shortDescription": "Pengalaman hiburan yang terikat pada tempat, didukung digital twin venue.",
+    "description": "Pengalaman hiburan yang terikat pada tempat, didukung digital twin venue.",
+    "order": 12,
+    "status": "published",
+    "seo": {
+      "metaTitle": "Location-based Entertainment — Entertainment & Installation",
+      "metaDescription": "Pengalaman hiburan yang terikat pada tempat, didukung digital twin venue. Bagian dari layanan Entertainment & Installation SPATIUM."
+    }
   },
   {
-    "slug": "motion-graphics-package",
-    "name": "Motion Graphics Package",
-    "categorySlug": "motion-graphics",
-    "indexNumber": "03.6",
-    "shortDescription": "Motion Graphics Package — bagian dari Motion Graphics.",
-    "order": 6,
-    "status": "published"
+    "documentId": "svc-immersive-wedding-memory",
+    "slug": "immersive-wedding-memory",
+    "name": "Immersive Wedding Memory",
+    "categorySlug": "memory-documentary",
+    "indexNumber": "01",
+    "shortDescription": "Venue dan dekorasi pernikahan diabadikan sebagai ruang yang bisa dijelajahi.",
+    "description": "Venue dan dekorasi pernikahan diabadikan sebagai ruang yang bisa dijelajahi.",
+    "order": 13,
+    "status": "published",
+    "seo": {
+      "metaTitle": "Immersive Wedding Memory — Memory & Documentary",
+      "metaDescription": "Venue dan dekorasi pernikahan diabadikan sebagai ruang yang bisa dijelajahi. Bagian dari layanan Memory & Documentary SPATIUM."
+    }
   },
   {
-    "slug": "video-graphics-compositing",
-    "name": "Video Graphics & Compositing",
-    "categorySlug": "motion-graphics",
-    "indexNumber": "03.7",
-    "shortDescription": "Video Graphics & Compositing — bagian dari Motion Graphics.",
-    "order": 7,
-    "status": "published"
+    "documentId": "svc-event-documentation",
+    "slug": "event-documentation",
+    "name": "Event Documentation",
+    "categorySlug": "memory-documentary",
+    "indexNumber": "02",
+    "shortDescription": "Dokumentasi spasial acara, melengkapi foto dan video.",
+    "description": "Dokumentasi spasial acara, melengkapi foto dan video.",
+    "order": 14,
+    "status": "published",
+    "seo": {
+      "metaTitle": "Event Documentation — Memory & Documentary",
+      "metaDescription": "Dokumentasi spasial acara, melengkapi foto dan video. Bagian dari layanan Memory & Documentary SPATIUM."
+    }
   },
   {
-    "slug": "3d-asset-library",
-    "name": "3D Asset Library",
-    "categorySlug": "digital-visual-assets-ai-assisted-production",
-    "indexNumber": "04.1",
-    "shortDescription": "3D Asset Library — bagian dari Digital Visual Assets & AI-Assisted Production.",
-    "order": 1,
-    "status": "published"
+    "documentId": "svc-cultural-heritage",
+    "slug": "cultural-heritage",
+    "name": "Cultural Heritage",
+    "categorySlug": "memory-documentary",
+    "indexNumber": "03",
+    "shortDescription": "Preservasi tempat bersejarah dan budaya dalam bentuk digital.",
+    "description": "Preservasi tempat bersejarah dan budaya dalam bentuk digital.",
+    "order": 15,
+    "status": "published",
+    "seo": {
+      "metaTitle": "Cultural Heritage — Memory & Documentary",
+      "metaDescription": "Preservasi tempat bersejarah dan budaya dalam bentuk digital. Bagian dari layanan Memory & Documentary SPATIUM."
+    }
   },
   {
-    "slug": "real-time-3d-assets",
-    "name": "Real-Time 3D Assets",
-    "categorySlug": "digital-visual-assets-ai-assisted-production",
-    "indexNumber": "04.2",
-    "shortDescription": "Real-Time 3D Assets — bagian dari Digital Visual Assets & AI-Assisted Production.",
-    "order": 2,
-    "status": "published"
+    "documentId": "svc-personal-family-archive",
+    "slug": "personal-family-archive",
+    "name": "Personal & Family Archive",
+    "categorySlug": "memory-documentary",
+    "indexNumber": "04",
+    "shortDescription": "Arsip ruang yang bermakna untuk keluarga, bisa dikunjungi kembali.",
+    "description": "Arsip ruang yang bermakna untuk keluarga, bisa dikunjungi kembali.",
+    "order": 16,
+    "status": "published",
+    "seo": {
+      "metaTitle": "Personal & Family Archive — Memory & Documentary",
+      "metaDescription": "Arsip ruang yang bermakna untuk keluarga, bisa dikunjungi kembali. Bagian dari layanan Memory & Documentary SPATIUM."
+    }
   },
   {
-    "slug": "animation-assets",
-    "name": "Animation Assets",
-    "categorySlug": "digital-visual-assets-ai-assisted-production",
-    "indexNumber": "04.3",
-    "shortDescription": "Animation Assets — bagian dari Digital Visual Assets & AI-Assisted Production.",
-    "order": 3,
-    "status": "published"
-  },
-  {
-    "slug": "ai-assisted-visual-production",
-    "name": "AI-Assisted Visual Production",
-    "categorySlug": "digital-visual-assets-ai-assisted-production",
-    "indexNumber": "04.4",
-    "shortDescription": "AI-Assisted Visual Production — bagian dari Digital Visual Assets & AI-Assisted Production.",
-    "order": 4,
-    "status": "published"
-  },
-  {
-    "slug": "high-volume-visual-production",
-    "name": "High-Volume Visual Production",
-    "categorySlug": "digital-visual-assets-ai-assisted-production",
-    "indexNumber": "04.5",
-    "shortDescription": "High-Volume Visual Production — bagian dari Digital Visual Assets & AI-Assisted Production.",
-    "order": 5,
-    "status": "published"
+    "documentId": "svc-interactive-storytelling",
+    "slug": "interactive-storytelling",
+    "name": "Interactive Storytelling",
+    "categorySlug": "memory-documentary",
+    "indexNumber": "05",
+    "shortDescription": "Cerita yang dituturkan melalui ruang, hotspot, dan objek 3D.",
+    "description": "Cerita yang dituturkan melalui ruang, hotspot, dan objek 3D.",
+    "order": 17,
+    "status": "published",
+    "seo": {
+      "metaTitle": "Interactive Storytelling — Memory & Documentary",
+      "metaDescription": "Cerita yang dituturkan melalui ruang, hotspot, dan objek 3D. Bagian dari layanan Memory & Documentary SPATIUM."
+    }
   }
 ]

@@ -83,9 +83,24 @@ export const PUBLIC_API_RULES: PublicApiRule[] = [
   },
 ]
 
-export function isPublicApi(pathname: string, method: string): boolean {
+/**
+ * API routes that authenticate themselves at route level with their own
+ * credential scheme, so the proxy neither requires a Studio session nor applies
+ * the same-origin mutation check (CLI clients send no cookies or Origin).
+ * Each route MUST verify credentials and the Origin header itself.
+ */
+export const ROUTE_AUTHENTICATED_API_RULES: PublicApiRule[] = [
+  {
+    path: '/api/mcp',
+    methods: ['GET', 'POST', 'DELETE'],
+    reason: 'MCP Streamable HTTP endpoint: per-client API keys (Bearer spm_…) + Origin validation in src/lib/mcp/server.ts',
+    exact: true,
+  },
+]
+
+function matchesApiRule(rules: PublicApiRule[], pathname: string, method: string): boolean {
   const normMethod = method.toUpperCase()
-  return PUBLIC_API_RULES.some((rule) => {
+  return rules.some((rule) => {
     const allowsMethod =
       rule.methods.includes(normMethod) ||
       (normMethod === 'HEAD' && rule.methods.includes('GET'))
@@ -99,13 +114,21 @@ export function isPublicApi(pathname: string, method: string): boolean {
   })
 }
 
+export function isPublicApi(pathname: string, method: string): boolean {
+  return matchesApiRule(PUBLIC_API_RULES, pathname, method)
+}
+
+export function isRouteAuthenticatedApi(pathname: string, method: string): boolean {
+  return matchesApiRule(ROUTE_AUTHENTICATED_API_RULES, pathname, method)
+}
+
 async function routeProxy(request: NextRequest) {
   const { pathname } = request.nextUrl
   const method = request.method
 
   // 1. Guard /api/** routes
   if (pathname.startsWith('/api')) {
-    if (isPublicApi(pathname, method)) {
+    if (isPublicApi(pathname, method) || isRouteAuthenticatedApi(pathname, method)) {
       return NextResponse.next()
     }
 

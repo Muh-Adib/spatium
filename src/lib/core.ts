@@ -1,16 +1,17 @@
 /**
- * UNIMASI Core Engine Client for UNIMASI Studio (Next.js App Router)
+ * SPATIUM content facade for public pages.
  *
- * Provides typed access to the Core Headless Delivery API:
- * - Articles, Journal posts, and Categories
- * - Portfolio & Services
- * - SEO Metadata & Site Config
- *
- * Includes built-in caching via Next.js ISR (tags: ['core-content'])
- * and graceful fallback to local data if Core is ever temporarily unreachable.
+ * Every function here reads PostgreSQL (via `src/lib/db/*` and
+ * `src/lib/content/spatium.ts`). There is no static or seed fallback: on a
+ * database error the functions log via console.error and return an honest
+ * empty result (`[]` / `null`), per AGENTS.md §3.3.
  */
 
-import { SORTED_ARTICLES, type Article as LocalArticle } from '@/data/articles'
+import 'server-only'
+import { getArticleBySlug, getArticles } from '@/lib/db/articles'
+import { getProjects, getUseCases } from '@/lib/content/spatium'
+import type { Article as CmsArticle } from '@/lib/content/types'
+import type { Project, Service } from '@/lib/content/spatium-types'
 
 export interface CoreCategory {
   id?: number | string
@@ -48,7 +49,7 @@ export interface CoreSEO {
   ogImage?: string
   robotsIndex?: boolean
   robotsFollow?: boolean
-  yoastSchema?: any
+  yoastSchema?: unknown
 }
 
 export interface CoreArticle {
@@ -72,7 +73,7 @@ export interface CoreArticle {
     seoTitle?: string
     metaDescription?: string
   } | null
-  yoastSchema?: any
+  yoastSchema?: unknown
 }
 
 export interface CoreArticlesResponse {
@@ -89,51 +90,6 @@ export interface CoreArticlesResponse {
 
 export interface CoreArticleDetailResponse {
   article: CoreArticle
-}
-
-const CORE_API_URL =
-  process.env.CORE_API_URL ||
-  process.env.NEXT_PUBLIC_CORE_URL ||
-  `http://127.0.0.1:${process.env.PORT || '3002'}`
-
-const CORE_SITE_KEY =
-  process.env.CORE_SITE_KEY ||
-  process.env.NEXT_PUBLIC_CORE_SITE_KEY ||
-  'site_sec_spatium'
-
-/**
- * Standard fetch wrapper for UNIMASI Core Delivery API with Next.js caching.
- */
-async function coreFetch<T>(endpoint: string, options: RequestInit = {}): Promise<T | null> {
-  const url = `${CORE_API_URL.replace(/\/$/, '')}${endpoint}`
-  const headers = {
-    'Content-Type': 'application/json',
-    'x-site-key': CORE_SITE_KEY,
-    ...(options.headers || {}),
-  }
-
-  try {
-    const res = await fetch(url, {
-      ...options,
-      headers,
-      // Cache with Next.js ISR tags for on-demand revalidation
-      next: {
-        revalidate: 300, // 5 minutes cache
-        tags: ['core-content', 'core-articles'],
-        ...((options as { next?: Record<string, unknown> })?.next || {}),
-      },
-    })
-
-    if (!res.ok) {
-      console.warn(`[Core API] Request failed: ${res.status} ${res.statusText} (${url})`)
-      return null
-    }
-
-    return await res.json()
-  } catch (error) {
-    console.error(`[Core API] Network or fetch error for ${url}:`, error)
-    return null
-  }
 }
 
 /**
@@ -168,14 +124,41 @@ export function getTagNames(tags?: (CoreTag | string)[]): string[] {
 export function getMediaUrl(media?: CoreMedia | null, coverUrl?: string | null): string | null {
   const candidate = media?.url || coverUrl
   if (!candidate) return null
-  if (candidate.startsWith('http://') || candidate.startsWith('https://')) {
+  if (candidate.startsWith('http://') || candidate.startsWith('https://') || candidate.startsWith('/')) {
     return candidate
   }
-  return `${CORE_API_URL.replace(/\/$/, '')}${candidate.startsWith('/') ? '' : '/'}${candidate}`
+  return `/${candidate}`
+}
+
+function toCoreArticle(a: CmsArticle): CoreArticle {
+  return {
+    id: a.id,
+    documentId: a.documentId,
+    slug: a.slug,
+    title: a.title,
+    excerpt: a.excerpt,
+    content: a.content,
+    readingTime: a.readingTime,
+    publishedAt: a.publishedAt ?? undefined,
+    createdAt: a.createdAt,
+    updatedAt: a.updatedAt,
+    category: a.category ? { id: a.category.id, name: a.category.name, slug: a.category.slug } : null,
+    author: a.author ? { id: a.author.id, name: a.author.name, slug: a.author.slug } : null,
+    tags: (a.tags ?? []).map((t) => ({ id: t.id, name: t.name, slug: t.slug })),
+    coverUrl: a.coverUrl ?? null,
+    seo: a.seo
+      ? {
+          metaTitle: a.seo.metaTitle,
+          metaDescription: a.seo.metaDescription,
+          canonicalUrl: a.seo.canonicalUrl,
+        }
+      : null,
+  }
 }
 
 /**
- * Fetch paginated articles from UNIMASI Core with query & category filters.
+ * Paginated published articles from PostgreSQL, filtered by category slug/name
+ * and search text. Empty result (logged) on DB failure.
  */
 export async function getCoreArticles(params: {
   page?: number
@@ -191,92 +174,62 @@ export async function getCoreArticles(params: {
 }> {
   const page = Math.max(1, params.page || 1)
   const pageSize = params.pageSize || 12
-
-  let filtered = [...SORTED_ARTICLES]
-  if (params.category && params.category !== 'all') {
-    filtered = filtered.filter((a) => a.category.toLowerCase() === params.category!.toLowerCase())
+  const empty = { articles: [], total: 0, page, pageSize, pageCount: 0 }
+  if (!process.env.DATABASE_URL) {
+    console.error('[core] DATABASE_URL is not set — no articles.')
+    return empty
   }
-  if (params.search) {
-    const q = params.search.toLowerCase()
-    filtered = filtered.filter((a) => a.title.toLowerCase().includes(q) || a.excerpt.toLowerCase().includes(q))
-  }
-
-  const total = filtered.length
-  const pageCount = Math.max(1, Math.ceil(total / pageSize))
-  const slice = filtered.slice((page - 1) * pageSize, page * pageSize)
-
-  const adapted: CoreArticle[] = slice.map((loc, idx) => ({
-    id: idx + 1,
-    slug: loc.slug,
-    title: loc.title,
-    excerpt: loc.excerpt,
-    category: loc.category,
-    author: loc.author,
-    publishedAt: loc.date,
-    readingTime: loc.readMinutes,
-    tags: loc.tags.map((t) => ({ name: t, slug: t.toLowerCase() })),
-  }))
-
-  return {
-    articles: adapted,
-    total,
-    page,
-    pageSize,
-    pageCount,
-  }
-}
-
-/**
- * Fetch a single article by slug from SPATIUM Core.
- */
-export async function getCoreArticleBySlug(slug: string): Promise<CoreArticle | null> {
-  const localMatch = SORTED_ARTICLES.find((a) => a.slug === slug)
-  if (localMatch) {
+  try {
+    const result = await getArticles({
+      page,
+      pageSize,
+      status: 'published',
+      category: params.category && params.category !== 'all' ? params.category : undefined,
+      search: params.search || undefined,
+    })
     return {
-      id: localMatch.slug,
-      slug: localMatch.slug,
-      title: localMatch.title,
-      excerpt: localMatch.excerpt,
-      content: localMatch.body
-        .map((b) => {
-          if (b.type === 'p') return `<p>${b.text}</p>`
-          if (b.type === 'h2') return `<h2>${b.text}</h2>`
-          if (b.type === 'h3') return `<h3>${b.text}</h3>`
-          if (b.type === 'ul') return `<ul>${b.items.map((i) => `<li>${i}</li>`).join('')}</ul>`
-          if (b.type === 'ol') return `<ol>${b.items.map((i) => `<li>${i}</li>`).join('')}</ol>`
-          if (b.type === 'quote') return `<blockquote><p>${b.text}</p></blockquote>`
-          return ''
-        })
-        .join('\n'),
-      category: localMatch.category,
-      author: localMatch.author,
-      publishedAt: localMatch.date,
-      readingTime: localMatch.readMinutes,
-      tags: localMatch.tags.map((t) => ({ name: t, slug: t.toLowerCase() })),
-      seo: {
-        metaTitle: `${localMatch.title} — SPATIUM`,
-        metaDescription: localMatch.metaDescription,
-        canonicalUrl: `https://spatium.id/journal/${localMatch.slug}`,
-      },
+      articles: result.data.map(toCoreArticle),
+      total: result.meta.pagination.total,
+      page,
+      pageSize,
+      pageCount: result.meta.pagination.pageCount,
     }
+  } catch (err) {
+    console.error('[core] getCoreArticles failed:', err)
+    return empty
   }
-
-  return null
 }
 
-/**
- * Fetch all categories and counts for filter UI.
- */
-export async function getCoreCategories(): Promise<{ name: string; count: number }[]> {
-  const counts: Record<string, number> = {}
-  SORTED_ARTICLES.forEach((art) => {
-    const cat = art.category
-    counts[cat] = (counts[cat] || 0) + 1
-  })
+/** A single published article by slug, or null (missing / unpublished / DB error). */
+export async function getCoreArticleBySlug(slug: string): Promise<CoreArticle | null> {
+  if (!process.env.DATABASE_URL) return null
+  try {
+    const article = await getArticleBySlug(slug)
+    if (!article || article.status !== 'published') return null
+    return toCoreArticle(article)
+  } catch (err) {
+    console.error('[core] getCoreArticleBySlug failed:', err)
+    return null
+  }
+}
 
-  return Object.entries(counts)
-    .sort((a, b) => b[1] - a[1])
-    .map(([name, count]) => ({ name, count }))
+/** Categories with published-article counts (non-empty only), for filter UI. */
+export async function getCoreCategories(): Promise<{ name: string; slug: string; count: number }[]> {
+  if (!process.env.DATABASE_URL) return []
+  try {
+    const result = await getArticles({ page: 1, pageSize: 100, status: 'published' })
+    const counts = new Map<string, { name: string; slug: string; count: number }>()
+    for (const a of result.data) {
+      if (!a.category) continue
+      const entry = counts.get(a.category.slug) ?? { name: a.category.name, slug: a.category.slug, count: 0 }
+      entry.count += 1
+      counts.set(a.category.slug, entry)
+    }
+    return [...counts.values()].sort((a, b) => b.count - a.count)
+  } catch (err) {
+    console.error('[core] getCoreCategories failed:', err)
+    return []
+  }
 }
 
 export interface CoreServiceItem {
@@ -310,15 +263,14 @@ export interface CorePartnerItem {
   tier?: string
 }
 
-import { SERVICES } from '@/data/services'
-import { PROJECTS } from '@/data/projects'
-
-export async function getCoreServices(): Promise<any[]> {
-  return SERVICES || []
+/** Published core use cases (service categories + capabilities). */
+export async function getCoreServices(): Promise<Service[]> {
+  return getUseCases()
 }
 
-export async function getCorePortfolios(): Promise<CorePortfolioItem[]> {
-  return (PROJECTS as unknown as CorePortfolioItem[]) || []
+/** Published portfolio scenes. */
+export async function getCorePortfolios(): Promise<Project[]> {
+  return getProjects()
 }
 
 export async function getCorePartners(): Promise<CorePartnerItem[]> {
@@ -327,16 +279,16 @@ export async function getCorePartners(): Promise<CorePartnerItem[]> {
   }
   try {
     const { getClientLogos } = await import('@/lib/content/clients')
-    const timeout = new Promise<null>((resolve) => setTimeout(() => resolve(null), 600))
-    const dbItems = await Promise.race([getClientLogos(), timeout])
-    if (!dbItems || !Array.isArray(dbItems)) return []
+    const dbItems = await getClientLogos()
     return dbItems.map((c) => ({
       id: c.id,
       name: c.name,
       logo: c.src,
       alt: c.alt,
     }))
-  } catch {
+  } catch (err) {
+    console.error('[core] getCorePartners failed:', err)
     return []
   }
 }
+

@@ -20,7 +20,7 @@ export async function GET(
   }
 
   try {
-    const portfolio = await getPortfolioBySlug(slug)
+    const portfolio = await getPortfolioBySlug(slug, { publishedOnly: true })
     if (!portfolio) {
       return jsonResponse({ error: 'Portfolio not found', slug }, 404)
     }

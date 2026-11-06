@@ -1,1636 +1,1125 @@
 'use client'
 
-import React, { useState, useEffect, useRef, useMemo, Suspense } from 'react'
+import React, {
+  Suspense,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useReducer,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
+import { AlertTriangle, CheckCircle2, ExternalLink, RotateCcw, X } from 'lucide-react'
 import { siteConfig } from '@/config/site'
 import { useAuth } from '@/lib/auth/AuthContext'
 import {
-  RefreshCw,
-  AlertTriangle,
-  CheckCircle2,
-  ExternalLink,
-  Sparkles,
-  X,
-} from 'lucide-react'
-import {
-  ContentBlock,
-  BlockType,
   blocksToContent,
   contentToBlocks,
-  calculateSeoScore,
-  extractEmbedUrl,
-  generateBlockId,
   extractTitleAndContentFromMarkdown,
+  generateBlockId,
+  type BlockType,
+  type ContentBlock,
 } from '@/lib/articles/blockEditor'
-import MediaPickerModal from '@/components/studio/MediaPickerModal'
-import { StudioAiSidebar } from '@/components/studio/StudioAiSidebar'
-import { Locale } from '@/lib/seo/schema'
+import { convertBlock, createBlock, publishableImageBlocks } from '@/lib/articles/blockFactory'
+import {
+  EditorArticleSchema,
+  articleEditorReducer,
+  articleToDoc,
+  createEmptyDoc,
+  localDraftDiffers,
+  localDraftKey,
+  parseLocalDraft,
+  resolveSeoTemplate,
+  serializeLocalDraft,
+  setFieldAction,
+  slugify,
+  type ArticleDoc,
+  type ArticleEditorStatus,
+  type LocalDraft,
+} from '@/lib/articles/editorState'
 import { checkPublicationGate } from '@/lib/seo/validation'
 import { analyzeContentSeo } from '@/lib/seo/analyzer'
-import type { StudioAiArticleContext } from '@/components/studio/StudioAiSidebar'
-
-// Modular Studio Article Components
-import { ArticleEditorHeader, EditorViewMode } from '@/components/studio/editor/ArticleEditorHeader'
-import { ArticleEditorCanvas } from '@/components/studio/editor/ArticleEditorCanvas'
-import { ArticleEditorInspector } from '@/components/studio/editor/ArticleEditorInspector'
+import MediaPickerModal from '@/components/studio/MediaPickerModal'
+import { ArticleEditorHeader, type EditorViewMode } from '@/components/studio/editor/ArticleEditorHeader'
+import { ArticleEditorCanvas, type BlockActions } from '@/components/studio/editor/ArticleEditorCanvas'
+import { ArticleEditorInspector, type InspectorTab } from '@/components/studio/editor/ArticleEditorInspector'
 import { ArticleLivePreview } from '@/components/studio/editor/ArticleLivePreview'
-import { ArticlePublicationGateModal } from '@/components/studio/editor/ArticlePublicationGateModal'
-import { ArticleLinkModal } from '@/components/studio/editor/ArticleLinkModal'
+import { ArticlePublicationGateModal, type GateIssue } from '@/components/studio/editor/ArticlePublicationGateModal'
 import { ArticleUnsavedModal } from '@/components/studio/editor/ArticleUnsavedModal'
+import { ArticleConflictModal } from '@/components/studio/editor/ArticleConflictModal'
+import { ArticleShortcutsDialog } from '@/components/studio/editor/ArticleShortcutsDialog'
+
+/** Heartbeat for the advisory edit lock (server TTL is 45 s, see src/lib/articles/locks.ts). */
+const LOCK_HEARTBEAT_MS = 25_000
+const AUTOSAVE_DELAY_MS = 1_200
+const ANALYSIS_DELAY_MS = 300
+const SLUG_DELAY_MS = 400
+const ARTICLES_LIST_URL = '/admin?tab=articles'
+
+// ---------------------------------------------------------------------------
+// Small hooks
+// ---------------------------------------------------------------------------
+
+/** Latest-closure callback with a stable identity (keeps memoized children from re-rendering). */
+function useStableCallback<A extends unknown[], R>(fn: (...args: A) => R): (...args: A) => R {
+  const ref = useRef(fn)
+  useLayoutEffect(() => {
+    ref.current = fn
+  })
+  return useCallback((...args: A) => ref.current(...args), [])
+}
+
+function useDebouncedValue<T>(value: T, delay: number): T {
+  const [debounced, setDebounced] = useState(value)
+  useEffect(() => {
+    const t = setTimeout(() => setDebounced(value), delay)
+    return () => clearTimeout(t)
+  }, [value, delay])
+  return debounced
+}
+
+function useMediaQuery(query: string, serverValue: boolean): boolean {
+  return useSyncExternalStore(
+    (cb) => {
+      const mql = window.matchMedia(query)
+      mql.addEventListener('change', cb)
+      return () => mql.removeEventListener('change', cb)
+    },
+    () => window.matchMedia(query).matches,
+    () => serverValue,
+  )
+}
+
+const isTextEntry = (target: EventTarget | null) =>
+  target instanceof HTMLElement &&
+  (target.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName))
+
+/** Focus an element once it exists (it may live in a panel that is being opened). */
+function focusWhenReady(id: string, attempts = 12) {
+  const el = document.getElementById(id)
+  if (el) {
+    const details = el.closest('details')
+    if (details && !details.open) details.open = true
+    el.focus()
+    el.scrollIntoView({ block: 'center' })
+    return
+  }
+  if (attempts > 0) requestAnimationFrame(() => focusWhenReady(id, attempts - 1))
+}
+
+const GATE_FIELD_LABELS: Record<string, string> = {
+  slug: 'Slug URL',
+  seoTitle: 'SEO title',
+  metaDescription: 'Meta description',
+  'heroVisual.altText': 'Alt text gambar sampul',
+}
+
+function gateFieldLabel(field: string): string | null {
+  const image = /^images\[(\d+)\]\.altText$/.exec(field)
+  if (image) return `Alt text gambar ${Number(image[1]) + 1}`
+  return GATE_FIELD_LABELS[field] ?? null
+}
+
+type Notice = { tone: 'success'; text: string; url?: string; urlLabel?: string } | { tone: 'error'; text: string }
+
+// ---------------------------------------------------------------------------
+// Editor
+// ---------------------------------------------------------------------------
 
 function ArticleEditorInner() {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const { actorName, permissions, getAuthHeaders } = useAuth()
+
+  // `editSlug` is the persisted slug of the article on the server (null = not created yet).
   const [editSlug, setEditSlug] = useState<string | null>(searchParams?.get('slug') ?? null)
   const isEditMode = Boolean(editSlug)
   const locallySavedSlugRef = useRef<string | null>(null)
+  const authHeadersRef = useRef(getAuthHeaders)
+  authHeadersRef.current = getAuthHeaders
 
-  const { role, actorName, permissions, getAuthHeaders } = useAuth()
+  const [state, dispatch] = useReducer(articleEditorReducer, undefined, () => ({
+    doc: createEmptyDoc(),
+    isDirty: false,
+    slugTouched: false,
+  }))
+  const { doc, isDirty } = state
+  const stateRef = useRef(state)
+  stateRef.current = state
 
-  // Multi-User Presence & Safe Concurrency Locks
+  // Server sync
+  const [loading, setLoading] = useState<boolean>(isEditMode)
+  const [loadError, setLoadError] = useState<string | null>(null)
   const [loadedUpdatedAt, setLoadedUpdatedAt] = useState<string | null>(null)
-  const [activeLockUser, setActiveLockUser] = useState<{ name: string; email: string } | null>(null)
-  const [conflictModalOpen, setConflictModalOpen] = useState(false)
-  const [conflictServerUpdatedAt, setConflictServerUpdatedAt] = useState<string | null>(null)
-
-  // Layout & View Modes
-  const [viewMode, setViewMode] = useState<EditorViewMode>('split-inspector')
-  const [isInspectorOpen, setIsInspectorOpen] = useState(true)
-  const [inspectorTab, setInspectorTab] = useState<'document' | 'seo'>('document')
-  const [editorStyle, setEditorStyle] = useState<'blocks' | 'raw'>('blocks')
-  const [loadingInitial, setLoadingInitial] = useState<boolean>(isEditMode)
-
-  // AI Copilot Mode
-  const [aiMode, setAiMode] = useState<'idle' | 'docked' | 'expanded' | 'widget'>('idle')
-  const [aiWidth, setAiWidth] = useState(420)
-
-  // Core Fields
-  const [title, setTitle] = useState('')
-  const [slug, setSlug] = useState('')
-  const [tagInput, setTagInput] = useState('')
-  const [category, setCategory] = useState('Website Development')
-  const [categoriesList, setCategoriesList] = useState<Array<{ name: string; slug?: string }>>([])
-  const [author, setAuthor] = useState(actorName || '')
-  const [coverUrl, setCoverUrl] = useState('')
-  const [coverAlt, setCoverAlt] = useState('')
-  const [excerpt, setExcerpt] = useState('')
-  const [targetKeyword, setTargetKeyword] = useState('')
-  const [status, setStatus] = useState<'draft' | 'in_review' | 'approved' | 'scheduled' | 'published'>('draft')
-  const [scheduleLocal, setScheduleLocal] = useState('')
-  const publicationTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone
-
-  // Multilingual & SEO States
-  const [locale, setLocale] = useState<Locale>('id')
-  const [translationGroupId, setTranslationGroupId] = useState<string>('')
-  const [isCornerstone, setIsCornerstone] = useState<boolean>(false)
-  const [focusKeyphrase, setFocusKeyphrase] = useState<string>('')
-  const [relatedKeyphrases, setRelatedKeyphrases] = useState<string[]>([])
-  const [seoTitle, setSeoTitle] = useState<string>('')
-  const [metaDescription, setMetaDescription] = useState<string>('')
-  const [canonicalUrl, setCanonicalUrl] = useState<string>('')
-  const [breadcrumbTitle, setBreadcrumbTitle] = useState<string>('')
-  const [baseSeoData, setBaseSeoData] = useState<Record<string, any>>({})
-  const [schemaChanged, setSchemaChanged] = useState(false)
-  const [publicationDate, setPublicationDate] = useState('')
-  const [schemaType, setSchemaType] = useState<'Article' | 'BlogPosting' | 'TechArticle' | 'NewsArticle'>('Article')
-  const [robots, setRobots] = useState<{ index: boolean; follow: boolean; noarchive?: boolean; nosnippet?: boolean }>({
-    index: true,
-    follow: true,
-  })
-  const [socialOg, setSocialOg] = useState<{ title?: string; description?: string; image?: string; imageAlt?: string }>({})
-  const [socialTwitter, setSocialTwitter] = useState<{
-    card?: 'summary' | 'summary_large_image'
-    title?: string
-    description?: string
-    image?: string
-    imageAlt?: string
-  }>({ card: 'summary_large_image' })
-
-  // Blocks
-  const [blocks, setBlocks] = useState<ContentBlock[]>([
-    {
-      id: 'b1',
-      type: 'paragraph',
-      text: 'Mulai ketik paragraf pembuka artikel Anda di sini...',
-    },
-  ])
-  const [rawContent, setRawContent] = useState<string>('')
-  const [rawHtmlBlockIds, setRawHtmlBlockIds] = useState<Record<string, boolean>>({})
-  const [activeTypeDropdownBlockId, setActiveTypeDropdownBlockId] = useState<string | null>(null)
-
-  // Status & Save States
   const [saving, setSaving] = useState(false)
-  const [isDirty, setIsDirty] = useState(false)
-  const [successData, setSuccessData] = useState<{ url: string; title: string; action: string } | null>(null)
-  const [errorMessage, setErrorMessage] = useState('')
-  const [gateViolations, setGateViolations] = useState<string[]>([])
+  const [activeLockUser, setActiveLockUser] = useState<{ name: string; email: string } | null>(null)
+  const [conflict, setConflict] = useState<{ serverUpdatedAt: string | null } | null>(null)
+  const [gateIssues, setGateIssues] = useState<GateIssue[]>([])
+  const gateImageIdsRef = useRef<string[]>([])
 
-  // Modals
-  const [linkModalOpen, setLinkModalOpen] = useState(false)
-  const [activeLinkBlockId, setActiveLinkBlockId] = useState<string | null>(null)
-  const [linkUrlInput, setLinkUrlInput] = useState('')
-  const [linkTextInput, setLinkTextInput] = useState('')
+  // Local autosave
+  const [localSavedAt, setLocalSavedAt] = useState<Date | null>(null)
+  const [pendingLocalDraft, setPendingLocalDraft] = useState<LocalDraft | null>(null)
 
-  const [mediaPickerOpen, setMediaPickerOpen] = useState(false)
-  const [mediaPickerTarget, setMediaPickerTarget] = useState<'cover' | { blockId: string }>('cover')
+  // Layout
+  const isWide = useMediaQuery('(min-width: 1024px)', true)
+  const [viewMode, setViewMode] = useState<EditorViewMode>('split-inspector')
+  const [inspectorOpen, setInspectorOpen] = useState(true)
+  const [inspectorTab, setInspectorTab] = useState<InspectorTab>('document')
+  const [seoFocusRequest, setSeoFocusRequest] = useState<{ id: string; nonce: number } | null>(null)
+  const [rawHtmlBlockIds, setRawHtmlBlockIds] = useState<Record<string, boolean>>({})
+  const [shortcutsOpen, setShortcutsOpen] = useState(false)
+  const [leave, setLeave] = useState<{ open: boolean; url: string | null }>({ open: false, url: null })
+
+  // Misc
+  const [categoriesList, setCategoriesList] = useState<Array<{ name: string; slug?: string }>>([])
+  const [media, setMedia] = useState<{ open: boolean; target: 'cover' | { blockId: string } }>({ open: false, target: 'cover' })
   const [uploadingCover, setUploadingCover] = useState(false)
+  const [notice, setNotice] = useState<Notice | null>(null)
+  const [undo, setUndo] = useState<{ block: ContentBlock; index: number } | null>(null)
+  const [announcement, setAnnouncement] = useState('')
 
-  // Unsaved Changes Guard & Modal States
-  const [showUnsavedModal, setShowUnsavedModal] = useState(false)
-  const [pendingNavigationUrl, setPendingNavigationUrl] = useState<string | null>(null)
-
-  // Load Categories
+  // The inspector starts closed on narrow screens (it opens as a sheet there).
+  const narrowInitRef = useRef(false)
   useEffect(() => {
-    async function loadCategories() {
-      try {
-        const res = await fetch('/api/categories')
-        const json = await res.json()
-        if (json.success && Array.isArray(json.data) && json.data.length > 0) {
-          setCategoriesList(json.data.map((c: any) => ({ name: c.name, slug: c.slug })))
-        }
-      } catch (err) { console.warn("[observable error]:", err) }
-    }
-    loadCategories()
+    if (narrowInitRef.current) return
+    narrowInitRef.current = true
+    if (!window.matchMedia('(min-width: 1024px)').matches) setInspectorOpen(false)
   }, [])
 
-  // Sync author with authenticated actor
+  const setField = useCallback(<K extends keyof ArticleDoc>(field: K, value: ArticleDoc[K]) => dispatch(setFieldAction(field, value)), [])
+  const setSlug = useCallback((slug: string) => dispatch({ type: 'setSlug', slug }), [])
+  const setTitle = useCallback((title: string) => dispatch(setFieldAction('title', title)), [])
+  const setCategory = useCallback((category: string) => dispatch(setFieldAction('category', category)), [])
+  const setRawContent = useCallback((raw: string) => dispatch(setFieldAction('rawContent', raw)), [])
+
+  // ---------------- Data loading ----------------
   useEffect(() => {
-    if (actorName && !isEditMode) {
-      setAuthor(actorName)
+    const controller = new AbortController()
+    fetch('/api/categories', { signal: controller.signal })
+      .then((res) => res.json())
+      .then((json: { success?: boolean; data?: Array<{ name?: unknown; slug?: unknown }> }) => {
+        if (json.success && Array.isArray(json.data)) {
+          setCategoriesList(
+            json.data
+              .filter((c): c is { name: string; slug?: unknown } => typeof c.name === 'string')
+              .map((c) => ({ name: c.name, slug: typeof c.slug === 'string' ? c.slug : undefined })),
+          )
+        }
+      })
+      .catch((err: unknown) => {
+        if (!(err instanceof DOMException && err.name === 'AbortError')) console.warn('[ArticleEditor] Categories unavailable:', err)
+      })
+    return () => controller.abort()
+  }, [])
+
+  // New article: default the author to the signed-in user.
+  useEffect(() => {
+    if (actorName && !isEditMode && !stateRef.current.doc.author) {
+      dispatch({ type: 'patch', patch: { author: actorName }, dirty: false })
     }
   }, [actorName, isEditMode])
 
-  // Load article for edit mode
+  // Offer to restore a browser draft for a new article.
+  useEffect(() => {
+    if (isEditMode) return
+    try {
+      const local = parseLocalDraft(localStorage.getItem(localDraftKey(null)))
+      if (local && (local.doc.title.trim() || local.doc.blocks.length > 1)) setPendingLocalDraft(local)
+    } catch (err) {
+      console.warn('[ArticleEditor] Local draft unavailable:', err)
+    }
+    // Only on first mount for new articles.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   useEffect(() => {
     if (!editSlug) return
-
-    // If this slug was just saved locally from the current editor session, don't re-fetch/overwrite state
+    // The slug was just created/renamed by our own save: the editor already holds that state.
     if (locallySavedSlugRef.current === editSlug) return
 
-    let isMounted = true
-    setLoadingInitial(true)
-    setErrorMessage('')
+    const controller = new AbortController()
+    setLoading(true)
+    setLoadError(null)
 
-    fetch(`/api/articles?slug=${encodeURIComponent(editSlug)}`)
-      .then((res) => {
-        if (!res.ok) throw new Error('Artikel tidak ditemukan')
-        return res.json()
+    fetch(`/api/articles?slug=${encodeURIComponent(editSlug)}`, { signal: controller.signal })
+      .then(async (res) => {
+        if (!res.ok) throw new Error(res.status === 404 ? 'Artikel tidak ditemukan.' : `Gagal memuat artikel (HTTP ${res.status}).`)
+        const json: unknown = await res.json()
+        const parsed = EditorArticleSchema.safeParse((json as { article?: unknown } | null)?.article)
+        if (!parsed.success) throw new Error('Data artikel dari server tidak sesuai format.')
+        const loaded = articleToDoc(parsed.data, editSlug, actorName || '')
+        dispatch({ type: 'load', doc: loaded })
+        setLoadedUpdatedAt(parsed.data.updatedAt ?? null)
+
+        try {
+          const local = parseLocalDraft(localStorage.getItem(localDraftKey(editSlug)))
+          if (local && localDraftDiffers(local.doc, loaded)) setPendingLocalDraft(local)
+        } catch (err) {
+          console.warn('[ArticleEditor] Local draft unavailable:', err)
+        }
       })
-      .then((data) => {
-        if (!isMounted) return
-        const art = data.article
-        if (!art) throw new Error('Data artikel kosong')
-
-        setTitle(art.title || '')
-        setSlug(art.slug || editSlug)
-        setLoadedUpdatedAt(art.updatedAt || null)
-        setTagInput((art.tags || []).map((tag: { name: string }) => tag.name).join(', '))
-        setCategory(art.category?.name || art.category || 'Website Development')
-        setAuthor(art.author?.name || art.author || actorName || '')
-        setCoverUrl(art.coverUrl || art.featuredImage?.url || '')
-        setExcerpt(art.excerpt || '')
-        setStatus((art.status as 'draft' | 'in_review' | 'approved' | 'scheduled' | 'published') || 'draft')
-        if (art.scheduledAt) {
-          const scheduled = new Date(art.scheduledAt)
-          setScheduleLocal(new Date(scheduled.getTime() - scheduled.getTimezoneOffset() * 60_000).toISOString().slice(0, 16))
-        }
-
-        if (art.seo?.metaTitle) {
-          const parts = art.seo.metaTitle.split('—')
-          if (parts[0]) setTargetKeyword(parts[0].trim().split(' ').slice(0, 3).join(' '))
-        }
-
-        setLocale((art.locale as 'id' | 'en') || 'id')
-        setTranslationGroupId(art.translationGroupId || '')
-        setIsCornerstone(Boolean(art.isCornerstone))
-        const rawSeoData = (art.seoData && typeof art.seoData === 'object' ? art.seoData : {}) as Record<string, unknown>
-        const keyphrase = art.focusKeyphrase || art.targetKeyword || art.seo?.focusTopic || art.primaryKeyword || (typeof rawSeoData.focusKeyphrase === 'string' ? rawSeoData.focusKeyphrase : '')
-        setFocusKeyphrase(keyphrase)
-        if (keyphrase) setTargetKeyword(keyphrase)
-        const relKws = Array.isArray(art.relatedKeyphrases)
-          ? art.relatedKeyphrases
-          : Array.isArray(rawSeoData.relatedKeyphrases)
-          ? (rawSeoData.relatedKeyphrases as string[])
-          : []
-        setRelatedKeyphrases(relKws)
-        setSeoTitle(art.metaTitle || art.seo?.metaTitle || '')
-        setMetaDescription(art.metaDescription || art.seo?.metaDescription || '')
-        setCoverAlt(art.featuredImage?.alternativeText || art.coverAlt || '')
-        setCanonicalUrl(art.seo?.canonicalUrl || '')
-        setBreadcrumbTitle(art.seo?.breadcrumbTitle || (typeof rawSeoData.breadcrumbTitle === 'string' ? rawSeoData.breadcrumbTitle : ''))
-        setBaseSeoData(art.seoData || {})
-        setSchemaChanged(false)
-        setPublicationDate(art.publishedAt || '')
-        setSchemaType(art.seo?.schema?.type || 'Article')
-        if (art.seo?.robots) setRobots(art.seo.robots)
-        if (art.seo?.openGraph) setSocialOg(art.seo.openGraph)
-        if (art.seo?.twitter) setSocialTwitter(art.seo.twitter)
-
-        if (art.content) {
-          setRawContent(art.content)
-          const parsed = contentToBlocks(art.content)
-          if (parsed.length > 0) {
-            setBlocks(parsed)
-          } else {
-            setBlocks([
-              {
-                id: 'b1',
-                type: 'paragraph',
-                text: art.content.replace(/<[^>]*>/g, ' ').slice(0, 500),
-              },
-            ])
-          }
-        }
-        setIsDirty(false)
-      })
-      .catch((err) => {
-        if (isMounted) {
-          setErrorMessage(err.message || 'Gagal memuat artikel untuk diedit')
-        }
+      .catch((err: unknown) => {
+        if (err instanceof DOMException && err.name === 'AbortError') return
+        console.error('[ArticleEditor] Load failed:', err)
+        setLoadError(err instanceof Error ? err.message : 'Gagal memuat artikel.')
       })
       .finally(() => {
-        if (isMounted) setLoadingInitial(false)
+        if (!controller.signal.aborted) setLoading(false)
       })
 
-    return () => {
-      isMounted = false
-    }
-  }, [editSlug, actorName])
+    return () => controller.abort()
+    // actorName only provides a fallback author; re-fetching when it resolves would discard edits.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [editSlug])
 
-  // Multi-user lock heartbeat & collision detection
+  // ---------------- Advisory edit lock ----------------
+  // Only articles that exist on the server are locked, keyed by the persisted slug — which does
+  // not change while typing (title/slug edits only take effect on save). One POST per heartbeat.
+  const lockSlug = isEditMode && !loading && !loadError ? editSlug : null
   useEffect(() => {
-    const activeTargetSlug = editSlug || slug
-    if (!activeTargetSlug) return
+    if (!lockSlug) return
+    let cancelled = false
 
-    let isMounted = true
-    const checkAndAcquireLock = async () => {
+    const heartbeat = async () => {
       try {
-        const res = await fetch(`/api/articles/lock?slug=${encodeURIComponent(activeTargetSlug)}`, {
-          headers: getAuthHeaders(),
-        })
-        if (res.ok) {
-          const data = await res.json()
-          if (data.isLocked && data.lockInfo) {
-            if (isMounted) {
-              setActiveLockUser({
-                name: data.lockInfo.userName,
-                email: data.lockInfo.userEmail,
-              })
-            }
-            return
-          } else {
-            if (isMounted) setActiveLockUser(null)
-          }
-        }
-
-        await fetch('/api/articles/lock', {
+        const res = await fetch('/api/articles/lock', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            ...getAuthHeaders(),
-          },
-          body: JSON.stringify({ slug: activeTargetSlug }),
+          headers: { 'Content-Type': 'application/json', ...authHeadersRef.current() },
+          body: JSON.stringify({ slug: lockSlug }),
         })
-      } catch (err) {
-        console.warn('[ArticleEditor] Lock heartbeat warning:', err)
-      }
-    }
-
-    checkAndAcquireLock()
-    const interval = setInterval(checkAndAcquireLock, 25_000)
-
-    return () => {
-      isMounted = false
-      clearInterval(interval)
-      if (activeTargetSlug) {
-        fetch(`/api/articles/lock?slug=${encodeURIComponent(activeTargetSlug)}`, {
-          method: 'DELETE',
-          headers: getAuthHeaders(),
-          keepalive: true,
-        }).catch(() => {})
-      }
-    }
-  }, [editSlug, slug, getAuthHeaders])
-
-  // Auto-slug on title change if not editing
-  const handleTitleChange = (val: string) => {
-    setTitle(val)
-    setIsDirty(true)
-    if (!isEditMode) {
-      const autoSlug = val
-        .toLowerCase()
-        .trim()
-        .replace(/[^\w\s-]/g, '')
-        .replace(/[\s_-]+/g, '-')
-        .replace(/^-+|-+$/g, '')
-      setSlug(autoSlug)
-    }
-  }
-
-  // Handle Bidirectional Editor Style (Blocks <-> Raw HTML / Markdown)
-  const handleEditorStyleChange = (targetStyle: 'blocks' | 'raw') => {
-    if (targetStyle === editorStyle) return
-
-    if (targetStyle === 'blocks') {
-      // User was in Raw HTML/MD mode and switches to Blocks!
-      if (rawContent && rawContent.trim()) {
-        const { title: extractedTitle, content: remainingContent } = extractTitleAndContentFromMarkdown(rawContent)
-        if (extractedTitle && (!title || title.trim() === '' || title === 'Artikel Baru')) {
-          handleTitleChange(extractedTitle)
-          const converted = contentToBlocks(remainingContent || rawContent)
-          if (converted.length > 0) {
-            setBlocks(converted)
-            setIsDirty(true)
-          }
+        if (cancelled) return
+        if (res.status === 423) {
+          const body = (await res.json()) as { lockedBy?: { name?: string; email?: string } }
+          setActiveLockUser({ name: body.lockedBy?.name || 'Editor lain', email: body.lockedBy?.email || '' })
+        } else if (res.ok) {
+          setActiveLockUser(null)
         } else {
-          const converted = contentToBlocks(rawContent)
-          if (converted.length > 0) {
-            setBlocks(converted)
-            setIsDirty(true)
-          }
+          console.warn('[ArticleEditor] Lock heartbeat rejected:', res.status)
         }
+      } catch (err) {
+        console.warn('[ArticleEditor] Lock heartbeat failed:', err)
       }
-      setEditorStyle('blocks')
-    } else {
-      // User was in Blocks mode and switches to Raw HTML!
-      const serialized = blocksToContent(blocks)
-      setRawContent(serialized)
-      setEditorStyle('raw')
     }
-  }
 
-  // Explicit conversion from Raw HTML / Markdown to Blocks
-  const handleConvertRawToBlocks = () => {
-    if (!rawContent || !rawContent.trim()) return
-    const { title: extractedTitle, content: remainingContent } = extractTitleAndContentFromMarkdown(rawContent)
-    if (extractedTitle && (!title || title.trim() === '' || title === 'Artikel Baru')) {
-      handleTitleChange(extractedTitle)
-      const converted = contentToBlocks(remainingContent || rawContent)
-      if (converted.length > 0) {
-        setBlocks(converted)
-        setEditorStyle('blocks')
-        setIsDirty(true)
-      }
-      return
+    void heartbeat()
+    const interval = setInterval(heartbeat, LOCK_HEARTBEAT_MS)
+    return () => {
+      cancelled = true
+      clearInterval(interval)
+      fetch(`/api/articles/lock?slug=${encodeURIComponent(lockSlug)}`, {
+        method: 'DELETE',
+        headers: authHeadersRef.current(),
+        keepalive: true,
+      }).catch((err: unknown) => console.warn('[ArticleEditor] Lock release failed:', err))
     }
-    const converted = contentToBlocks(rawContent)
-    if (converted.length > 0) {
-      setBlocks(converted)
-      setEditorStyle('blocks')
-      setIsDirty(true)
-    }
-  }
+  }, [lockSlug])
 
-  // Direct Markdown Import Handler (ChatGPT / Claude / .md text)
-  const handleImportMarkdown = (markdown: string, useExtractedTitle = true) => {
-    if (!markdown || !markdown.trim()) return
-    const { title: extractedTitle, content: remainingContent } = extractTitleAndContentFromMarkdown(markdown)
-    if (useExtractedTitle && extractedTitle && (!title || title.trim() === '' || title === 'Artikel Baru')) {
-      handleTitleChange(extractedTitle)
-      const converted = contentToBlocks(remainingContent || markdown)
-      if (converted.length > 0) {
-        setBlocks(converted)
-        setEditorStyle('blocks')
-        setIsDirty(true)
-      }
-      return
-    }
-    const converted = contentToBlocks(markdown)
-    if (converted.length > 0) {
-      setBlocks(converted)
-      setEditorStyle('blocks')
-      setIsDirty(true)
-    }
-  }
-
-  // Convert a single HTML block into multiple granular blocks
-  const handleConvertSingleHtmlBlockToBlocks = (blockId: string) => {
-    const target = blocks.find((b) => b.id === blockId)
-    if (!target || target.type !== 'html' || !target.html) return
-    const innerBlocks = contentToBlocks(target.html).map((b) => ({
-      ...b,
-      id: generateBlockId('b'),
-    }))
-    if (innerBlocks.length > 0) {
-      setBlocks((prev) => {
-        const idx = prev.findIndex((b) => b.id === blockId)
-        if (idx === -1) return prev
-        const newBlocks = [...prev]
-        newBlocks.splice(idx, 1, ...innerBlocks)
-        return newBlocks
-      })
-      setIsDirty(true)
-    }
-  }
-
-  // Sinkronisasi blocks ke raw content saat dalam mode blocks
+  // ---------------- Derived values ----------------
+  // New articles: derive the slug from the title once typing pauses (until the slug is edited by hand).
   useEffect(() => {
-    if (editorStyle === 'blocks') {
-      setRawContent(blocksToContent(blocks))
-    }
-  }, [blocks, editorStyle])
+    if (isEditMode || state.slugTouched) return
+    const t = setTimeout(() => dispatch({ type: 'autoSlug', slug: slugify(doc.title) }), SLUG_DELAY_MS)
+    return () => clearTimeout(t)
+  }, [doc.title, isEditMode, state.slugTouched])
 
-  // SEO Score calculation & Real-time Content Analysis
-  const currentContent = editorStyle === 'blocks' ? blocksToContent(blocks) : rawContent
-  const activeKeyphrase = focusKeyphrase || targetKeyword || title.split(' ').slice(0, 2).join(' ')
-
+  // SEO is computed once, from a debounced snapshot, and passed to header + inspector.
+  const analysisDoc = useDebouncedValue(doc, ANALYSIS_DELAY_MS)
+  const analysisContent = useMemo(
+    () => (analysisDoc.editorStyle === 'blocks' ? blocksToContent(analysisDoc.blocks) : analysisDoc.rawContent),
+    [analysisDoc.blocks, analysisDoc.rawContent, analysisDoc.editorStyle],
+  )
+  const contentImages = useMemo(
+    () => publishableImageBlocks(analysisDoc.blocks).map((b) => ({ url: b.url, altText: b.alt || b.caption || '', decorative: false })),
+    [analysisDoc.blocks],
+  )
   const seoAnalysis = useMemo(() => {
+    const d = analysisDoc
+    const vars = { title: d.title, siteName: siteConfig.name, category: d.category }
     return analyzeContentSeo({
-      title,
-      seoTitle: seoTitle || title,
-      metaDescription: metaDescription || excerpt,
-      slug: slug || editSlug || '',
-      content: currentContent,
-      focusKeyphrase: activeKeyphrase,
-      relatedKeyphrases,
-      locale,
-      isCornerstone,
+      title: d.title,
+      seoTitle: resolveSeoTemplate(d.seoTitle, vars) || d.title,
+      metaDescription: resolveSeoTemplate(d.metaDescription, vars) || d.excerpt,
+      slug: d.slug || editSlug || '',
+      content: analysisContent,
+      focusKeyphrase: d.focusKeyphrase || d.targetKeyword || d.title.split(' ').slice(0, 2).join(' '),
+      relatedKeyphrases: d.relatedKeyphrases,
+      locale: d.locale,
+      isCornerstone: d.isCornerstone,
       images: [
-        ...(coverUrl ? [{ url: coverUrl, alt: coverAlt }] : []),
-        ...blocks
-          .filter((b): b is import('@/lib/articles/blockEditor').ImageBlock => b.type === 'image' && Boolean((b as { url?: string }).url))
-          .map((b) => ({ url: b.url, alt: b.alt })),
+        ...(d.coverUrl ? [{ url: d.coverUrl, alt: d.coverAlt }] : []),
+        ...contentImages.map((img) => ({ url: img.url, alt: img.altText })),
       ],
     })
-  }, [
-    title,
-    seoTitle,
-    metaDescription,
-    slug,
-    editSlug,
-    currentContent,
-    activeKeyphrase,
-    relatedKeyphrases,
-    locale,
-    isCornerstone,
-    coverUrl,
-    coverAlt,
-    blocks,
-  ])
-
-  const seoReport = calculateSeoScore({
-    title,
-    excerpt,
-    content: currentContent,
-    targetKeyword: activeKeyphrase,
-    blocks,
-  })
-
-  const wordCount = currentContent.replace(/<[^>]*>/g, ' ').split(/\s+/).filter(Boolean).length
+  }, [analysisDoc, analysisContent, contentImages, editSlug])
+  const wordCount = seoAnalysis.metrics.wordCount
   const readingTimeMinutes = Math.max(1, Math.ceil(wordCount / 180))
-  const internalLinksCount = (currentContent.match(/<a\s+[^>]*href=["']([^"']+)["'][^>]*>/gi) || []).length
 
-  const isPlaceholderString = (val?: string | null) => {
-    if (!val || typeof val !== 'string') return false
-    const l = val.toLowerCase().trim()
-    return (
-      l.includes('judul menarik & berbobot') ||
-      l.includes('berbobot (40-65') ||
-      l.includes('kata kunci fokus') ||
-      l.includes('judul baru yang dioptimalkan') ||
-      l.includes('judul seo | unimasi') ||
-      l.includes('deskripsi meta memikat') ||
-      l.includes('deskripsi visual gambar') ||
-      l === 'paragraf...' ||
-      l === 'penjelasan...' ||
-      l === 'subjudul h2' ||
-      l === 'subjudul h3' ||
-      l === 'judul-kebab-case'
-    )
-  }
-
-  // Synchronized callback to apply AI-generated article improvements directly to editor state
-  const handleApplyArticleChanges = (changes: Partial<StudioAiArticleContext>) => {
-    if (changes.title && !isPlaceholderString(changes.title)) setTitle(changes.title)
-    if (changes.slug && !isPlaceholderString(changes.slug)) setSlug(changes.slug)
-    if (changes.category && !isPlaceholderString(changes.category)) setCategory(changes.category)
-    if (changes.tagInput) setTagInput(changes.tagInput)
-    if (changes.author) setAuthor(changes.author)
-    if (changes.coverAlt && !isPlaceholderString(changes.coverAlt)) setCoverAlt(changes.coverAlt)
-    if (changes.excerpt && !isPlaceholderString(changes.excerpt)) setExcerpt(changes.excerpt)
-    if (changes.targetKeyword && !isPlaceholderString(changes.targetKeyword)) setTargetKeyword(changes.targetKeyword)
-    if (changes.focusKeyphrase && !isPlaceholderString(changes.focusKeyphrase)) {
-      setFocusKeyphrase(changes.focusKeyphrase)
-      if (!changes.targetKeyword || isPlaceholderString(changes.targetKeyword)) setTargetKeyword(changes.focusKeyphrase)
-    }
-    if (changes.relatedKeyphrases && Array.isArray(changes.relatedKeyphrases)) {
-      setRelatedKeyphrases(changes.relatedKeyphrases)
-    }
-    if (changes.seoTitle && !isPlaceholderString(changes.seoTitle)) setSeoTitle(changes.seoTitle)
-    if (changes.metaDescription && !isPlaceholderString(changes.metaDescription)) {
-      setMetaDescription(changes.metaDescription)
-      if (!changes.excerpt || isPlaceholderString(changes.excerpt)) setExcerpt(changes.metaDescription)
-    }
-    if (changes.canonicalUrl) setCanonicalUrl(changes.canonicalUrl)
-    if (changes.schemaType) setSchemaType(changes.schemaType as 'Article' | 'BlogPosting' | 'TechArticle' | 'NewsArticle')
-
-    const cleanBlocks = changes.blocks && Array.isArray(changes.blocks)
-      ? changes.blocks.filter((b: Record<string, unknown>) => !isPlaceholderString(typeof b?.text === 'string' ? b.text : '') && !isPlaceholderString(typeof b?.title === 'string' ? b.title : ''))
-      : []
-
-    if (cleanBlocks.length > 0) {
-      setBlocks(cleanBlocks)
-      setRawContent(blocksToContent(cleanBlocks))
-    } else if (changes.content && !isPlaceholderString(changes.content)) {
-      setRawContent(changes.content)
-      const parsed = contentToBlocks(changes.content)
-      const nonDummy = (parsed as Array<{ text?: string; title?: string }>).filter((b) => !isPlaceholderString(typeof b?.text === 'string' ? b.text : '') && !isPlaceholderString(typeof b?.title === 'string' ? b.title : '')) as typeof parsed
-      if (nonDummy.length > 0) {
-        setBlocks(nonDummy)
-      } else {
-        setBlocks([
-          {
-            id: generateBlockId('b'),
-            type: 'paragraph',
-            text: changes.content,
-          },
-        ])
+  // ---------------- Local autosave ----------------
+  useEffect(() => {
+    if (!isDirty || loading || pendingLocalDraft) return
+    const t = setTimeout(() => {
+      try {
+        localStorage.setItem(localDraftKey(editSlug), serializeLocalDraft(doc, loadedUpdatedAt))
+        setLocalSavedAt(new Date())
+      } catch (err) {
+        console.warn('[ArticleEditor] Local autosave failed (storage full or blocked):', err)
       }
+    }, AUTOSAVE_DELAY_MS)
+    return () => clearTimeout(t)
+  }, [doc, isDirty, loading, pendingLocalDraft, editSlug, loadedUpdatedAt])
+
+  const clearLocalDrafts = (...slugs: Array<string | null>) => {
+    try {
+      for (const s of slugs) localStorage.removeItem(localDraftKey(s))
+    } catch (err) {
+      console.warn('[ArticleEditor] Could not clear local draft:', err)
     }
-    setIsDirty(true)
-    const effectiveTitle = (changes.title && !isPlaceholderString(changes.title)) ? changes.title : (title || 'Draf Artikel')
-    setSuccessData({
-      url: `${siteConfig.url}/artikel/${slug || editSlug || 'draf-baru'}`,
-      title: effectiveTitle,
-      action: 'dioptimalkan oleh AI (Perubahan berhasil diterapkan ke editor)',
+    setLocalSavedAt(null)
+  }
+
+  // ---------------- Block actions (stable) ----------------
+  const blockActions = useMemo<BlockActions>(() => {
+    const updateBlocks = (update: (prev: ContentBlock[]) => ContentBlock[]) => dispatch({ type: 'updateBlocks', update })
+    return {
+      add: (type: BlockType) => {
+        const block = createBlock(type)
+        updateBlocks((prev) => [...prev, block])
+        if (type === 'image') setMedia({ open: true, target: { blockId: block.id } })
+        else requestAnimationFrame(() => {
+          const row = document.querySelector<HTMLElement>(`[data-block-index="${stateRef.current.doc.blocks.length - 1}"]`)
+          const field = row?.querySelector<HTMLElement>('[contenteditable="true"], textarea, input:not([type="checkbox"])')
+          ;(field ?? row)?.focus()
+        })
+      },
+      update: (id, updated) =>
+        updateBlocks((prev) => prev.map((b) => (b.id === id ? ({ ...b, ...updated } as ContentBlock) : b))),
+      remove: (id) => {
+        const blocks = stateRef.current.doc.blocks
+        const index = blocks.findIndex((b) => b.id === id)
+        const block = blocks[index]
+        if (!block) return
+        updateBlocks((prev) => prev.filter((b) => b.id !== id))
+        setUndo({ block, index })
+        setAnnouncement(`Blok ${index + 1} dihapus. Pilih Urungkan untuk mengembalikannya.`)
+        requestAnimationFrame(() => {
+          const next =
+            document.querySelector<HTMLElement>(`[data-block-index="${index}"]`) ??
+            document.querySelector<HTMLElement>(`[data-block-index="${index - 1}"]`)
+          next?.focus()
+        })
+      },
+      move: (id, direction) => {
+        const blocks = stateRef.current.doc.blocks
+        const index = blocks.findIndex((b) => b.id === id)
+        const target = direction === 'up' ? index - 1 : index + 1
+        if (index < 0 || target < 0 || target >= blocks.length) return
+        updateBlocks((prev) => {
+          const next = [...prev]
+          const [moved] = next.splice(index, 1)
+          if (moved) next.splice(target, 0, moved)
+          return next
+        })
+        setAnnouncement(`Blok dipindah ke posisi ${target + 1} dari ${blocks.length}.`)
+      },
+      convert: (id, targetType) => updateBlocks((prev) => prev.map((b) => (b.id === id ? convertBlock(b, targetType) : b))),
+      toggleRawHtml: (id) => setRawHtmlBlockIds((prev) => ({ ...prev, [id]: !prev[id] })),
+      openMediaPicker: (id) => setMedia({ open: true, target: { blockId: id } }),
+      splitHtml: (id) =>
+        updateBlocks((prev) => {
+          const index = prev.findIndex((b) => b.id === id)
+          const target = prev[index]
+          if (!target || target.type !== 'html' || !target.html) return prev
+          const inner = contentToBlocks(target.html).map((b) => ({ ...b, id: generateBlockId('b') }))
+          if (inner.length === 0) return prev
+          const next = [...prev]
+          next.splice(index, 1, ...inner)
+          return next
+        }),
+    }
+  }, [])
+
+  const undoRemove = () => {
+    if (!undo) return
+    const { block, index } = undo
+    dispatch({
+      type: 'updateBlocks',
+      update: (prev) => {
+        const next = [...prev]
+        next.splice(Math.min(index, next.length), 0, block)
+        return next
+      },
     })
+    setUndo(null)
+    setAnnouncement(`Blok ${index + 1} dikembalikan.`)
+    requestAnimationFrame(() => document.querySelector<HTMLElement>(`[data-block-index="${index}"]`)?.focus())
   }
 
-  // Complete page context passed to StudioAiSidebar so the agent has 100% full awareness of this article
-  const articlePageContext: StudioAiArticleContext = useMemo(() => ({
-    title: title || 'Draf Artikel Baru',
-    slug: slug || editSlug || 'draf-baru',
-    originalSlug: editSlug || undefined,
-    category,
-    tagInput,
-    author,
-    status,
-    locale,
-    coverUrl,
-    coverAlt,
-    excerpt,
-    targetKeyword,
-    focusKeyphrase: focusKeyphrase || targetKeyword,
-    relatedKeyphrases,
-    seoTitle,
-    metaDescription,
-    canonicalUrl,
-    breadcrumbTitle,
-    schemaType,
-    robots,
-    content: currentContent,
-    blocks,
-    wordCount,
-    readingTimeMinutes,
-    internalLinksCount,
-    seoScore: seoAnalysis.seoScore,
-    seoGrade: seoAnalysis.overallStatus === 'good' ? 'Sangat Baik' : seoAnalysis.overallStatus === 'ok' ? 'Cukup' : 'Perlu Perbaikan',
-    seoIndicators: seoAnalysis.indicators,
-    readabilityScore: seoAnalysis.readabilityScore,
-    readabilityIndicators: seoAnalysis.readabilityIndicators,
-    seoMetrics: seoAnalysis.metrics,
-    gateViolations,
-    locationName: `Studio Editor Artikel (${slug || editSlug || 'draf-baru'})`,
-  }), [
-    title,
-    slug,
-    editSlug,
-    category,
-    tagInput,
-    author,
-    status,
-    locale,
-    coverUrl,
-    coverAlt,
-    excerpt,
-    targetKeyword,
-    focusKeyphrase,
-    relatedKeyphrases,
-    seoTitle,
-    metaDescription,
-    canonicalUrl,
-    breadcrumbTitle,
-    schemaType,
-    robots,
-    currentContent,
-    blocks,
-    wordCount,
-    readingTimeMinutes,
-    internalLinksCount,
-    seoAnalysis,
-    gateViolations,
-  ])
+  // ---------------- Content mode & import ----------------
+  const applyConvertedContent = (raw: string, useExtractedTitle: boolean) => {
+    if (!raw.trim()) return
+    const current = stateRef.current.doc
+    const { title: extracted, content } = extractTitleAndContentFromMarkdown(raw)
+    const takeTitle = useExtractedTitle && Boolean(extracted) && !current.title.trim()
+    const blocks = contentToBlocks(takeTitle ? content || raw : raw)
+    if (blocks.length === 0) return
+    dispatch({ type: 'patch', patch: { blocks, editorStyle: 'blocks', ...(takeTitle && extracted ? { title: extracted } : {}) } })
+    setAnnouncement(`${blocks.length} blok dibuat dari teks.`)
+  }
 
-  // Block Manipulation Handlers
-  const addBlock = (type: BlockType) => {
-    setIsDirty(true)
-    const id = generateBlockId('b')
-    let newBlock: ContentBlock
-
-    switch (type) {
-      case 'heading2':
-        newBlock = { id, type: 'heading2', text: 'Subjudul Bagian Baru (H2)' }
-        break
-      case 'heading3':
-        newBlock = { id, type: 'heading3', text: 'Poin Pembahasan Subtopik (H3)' }
-        break
-      case 'image':
-        newBlock = {
-          id,
-          type: 'image',
-          url: '/images/articles/web-architecture.jpg',
-          alt: `${title || 'Artikel UNIMASI'} - Ilustrasi`,
-          caption: 'Keterangan visual animasi atau produksi 3D.',
-          alignment: 'center',
-        }
-        break
-      case 'video':
-        newBlock = {
-          id,
-          type: 'video',
-          url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-          title: 'Video Demonstrasi Animasi',
-          embedUrl: 'https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ',
-        }
-        break
-      case 'quote':
-        newBlock = {
-          id,
-          type: 'quote',
-          text: 'Kutipan penting atau visi animasi kreatif yang mempertegas poin artikel.',
-          author: 'Pakar Animasi UNIMASI Studio',
-        }
-        break
-      case 'list':
-        newBlock = {
-          id,
-          type: 'list',
-          items: ['Poin analisis pertama', 'Poin analisis kedua', 'Langkah mitigasi berikutnya'],
-          ordered: false,
-        }
-        break
-      case 'faq':
-        newBlock = {
-          id,
-          type: 'faq',
-          question: 'Pertanyaan teknis utama yang dijawab artikel ini?',
-          answer: 'Jawaban langsung, terstruktur, dan berbasis data untuk audiens enterprise dan Google SERP AI Overview.',
-        }
-        break
-      case 'code':
-        newBlock = {
-          id,
-          type: 'code',
-          code: '// Implementasi arsitektur Next.js 16 App Router\nexport const dynamic = "force-static";',
-          language: 'typescript',
-        }
-        break
-      case 'html':
-        newBlock = {
-          id,
-          type: 'html',
-          html: '<div class="p-4 bg-white/5 rounded-xl border border-white/10">\n  <p>Tulis kode HTML kustom atau sematan di sini...</p>\n</div>',
-        }
-        break
-      case 'divider':
-        newBlock = { id, type: 'divider' }
-        break
-      case 'internal-links':
-        newBlock = {
-          id,
-          type: 'internal-links',
-          title: 'Indeks Tautan Internal Terkait (SEO Reference)',
-          links: [
-            { text: 'Layanan Animasi 3D & Visual UNIMASI', href: '/services/3d-animation' },
-            { text: 'Konsultasi Produksi Animasi', href: '/contact' },
-          ],
-        }
-        break
-      case 'table':
-        newBlock = {
-          id,
-          type: 'table',
-          headers: ['Parameter Produksi', 'Standar UNIMASI Studio', 'Rekomendasi'],
-          rows: [
-            ['Pipeline Animasi', 'Hybrid 2D/3D & Real-time Assets', 'Disarankan'],
-            ['Akurasi Visual & Modeling', 'CAD-accurate 3D & Cinema Quality', 'Prioritas Utama'],
-          ],
-        }
-        break
-      case 'paragraph':
-      default:
-        newBlock = { id, type: 'paragraph', text: 'Tulis paragraf penjelasan baru Anda di sini...' }
-        break
+  const handleEditorStyleChange = useStableCallback((target: 'blocks' | 'raw') => {
+    const current = stateRef.current.doc
+    if (target === current.editorStyle) return
+    if (target === 'blocks') {
+      if (current.rawContent.trim()) applyConvertedContent(current.rawContent, true)
+      else dispatch({ type: 'patch', patch: { editorStyle: 'blocks' }, dirty: false })
+    } else {
+      dispatch({ type: 'patch', patch: { rawContent: blocksToContent(current.blocks), editorStyle: 'raw' }, dirty: false })
     }
+  })
+  const handleConvertRawToBlocks = useStableCallback(() => applyConvertedContent(stateRef.current.doc.rawContent, true))
+  const handleImportMarkdown = useStableCallback((markdown: string, useExtractedTitle: boolean) => applyConvertedContent(markdown, useExtractedTitle))
 
-    setBlocks((prev) => [...prev, newBlock])
-  }
-
-  const updateBlock = (id: string, updated: Partial<ContentBlock>) => {
-    setIsDirty(true)
-    setBlocks((prev) => prev.map((b) => (b.id === id ? ({ ...b, ...updated } as ContentBlock) : b)))
-  }
-
-  const removeBlock = (id: string) => {
-    setIsDirty(true)
-    setBlocks((prev) => prev.filter((b) => b.id !== id))
-  }
-
-  const moveBlock = (index: number, direction: 'up' | 'down') => {
-    const targetIdx = direction === 'up' ? index - 1 : index + 1
-    if (targetIdx < 0 || targetIdx >= blocks.length) return
-    setIsDirty(true)
-    const newArr = [...blocks]
-    const temp = newArr[index]
-    newArr[index] = newArr[targetIdx]
-    newArr[targetIdx] = temp
-    setBlocks(newArr)
-  }
-
-  const convertBlockType = (blockId: string, targetType: BlockType) => {
-    setIsDirty(true)
-    setBlocks((prev) =>
-      prev.map((block) => {
-        if (block.id !== blockId) return block
-
-        let textContent = ''
-        if ('text' in block && typeof block.text === 'string') {
-          textContent = block.text
-        } else if (block.type === 'list' && Array.isArray(block.items)) {
-          textContent = block.items.join('\n')
-        } else if (block.type === 'code' && typeof block.code === 'string') {
-          textContent = block.code
-        } else if (block.type === 'faq') {
-          textContent = `${block.question}\n${block.answer}`
-        } else if (block.type === 'table') {
-          textContent = [block.headers.join(' | '), ...block.rows.map((r) => r.join(' | '))].join('\n')
-        } else if (block.type === 'html' && typeof block.html === 'string') {
-          textContent = block.html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()
-        }
-
-        switch (targetType) {
-          case 'heading2':
-            return { id: block.id, type: 'heading2', text: textContent || 'Subjudul H2...' }
-          case 'heading3':
-            return { id: block.id, type: 'heading3', text: textContent || 'Subjudul H3...' }
-          case 'quote':
-            return { id: block.id, type: 'quote', text: textContent || 'Kutipan...', author: (block as { author?: string }).author || '' }
-          case 'list': {
-            const rawLines = textContent
-              ? textContent.split('\n').map((l) => l.replace(/^[-*•\d.]+\s*/, '').trim()).filter(Boolean)
-              : []
-            return { id: block.id, type: 'list', items: rawLines.length > 0 ? rawLines : ['Poin pertama...'], ordered: false }
-          }
-          case 'code':
-            return { id: block.id, type: 'code', code: textContent.replace(/<[^>]*>/g, '') || '// Kode...', language: 'typescript' }
-          case 'table':
-            return {
-              id: block.id,
-              type: 'table',
-              headers: ['Fitur / Topik', 'Deskripsi Spesifikasi', 'Catatan'],
-              rows: [
-                ['Item Utama', textContent || 'Rincian penjelasan spesifikasi', 'Standar'],
-              ],
-            }
-          case 'html':
-            return {
-              id: block.id,
-              type: 'html',
-              html: textContent ? `<p>${textContent}</p>` : '<div class="p-3 bg-white/5 rounded-lg"><p>Konten HTML</p></div>',
-            }
-          case 'paragraph':
-          default:
-            return { id: block.id, type: 'paragraph', text: textContent || 'Tulis paragraf di sini...' }
-        }
-      })
-    )
-    setActiveTypeDropdownBlockId(null)
-  }
-
-  // File Upload Helper
-  const uploadFile = async (file: File): Promise<string> => {
-    const formData = new FormData()
-    formData.append('file', file)
-    const res = await fetch('/api/upload', {
-      method: 'POST',
-      body: formData,
-    })
-    const data = await res.json()
-    if (!res.ok || !data.success) {
-      throw new Error(data.error || 'Gagal mengunggah file gambar.')
-    }
-    return data.url
-  }
-
-  const handleCoverUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  // ---------------- Media ----------------
+  const handleCoverUpload = useStableCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
     setUploadingCover(true)
     try {
-      const url = await uploadFile(file)
-      setCoverUrl(url)
-      setIsDirty(true)
-    } catch (err: any) {
-      setErrorMessage(err.message || 'Gagal mengunggah cover.')
+      const formData = new FormData()
+      formData.append('file', file)
+      const res = await fetch('/api/upload', { method: 'POST', body: formData })
+      const data = (await res.json()) as { success?: boolean; url?: string; error?: string }
+      if (!res.ok || !data.success || !data.url) throw new Error(data.error || 'Gagal mengunggah gambar.')
+      setField('coverUrl', data.url)
+    } catch (err) {
+      console.error('[ArticleEditor] Cover upload failed:', err)
+      setNotice({ tone: 'error', text: err instanceof Error ? err.message : 'Gagal mengunggah gambar sampul.' })
     } finally {
       setUploadingCover(false)
     }
-  }
+  })
 
   const handleMediaSelect = (url: string) => {
-    setIsDirty(true)
-    if (mediaPickerTarget === 'cover') {
-      setCoverUrl(url)
-    } else if (typeof mediaPickerTarget === 'object' && mediaPickerTarget.blockId) {
-      updateBlock(mediaPickerTarget.blockId, { url })
-    }
-    setMediaPickerOpen(false)
+    if (media.target === 'cover') setField('coverUrl', url)
+    else blockActions.update(media.target.blockId, { url })
+    setMedia((m) => ({ ...m, open: false }))
   }
+  const openCoverPicker = useStableCallback(() => setMedia({ open: true, target: 'cover' }))
 
-  // Handle Save / Publish (Multi-User Safe Concurrency)
-  const handleSave = async (
-    targetStatus?: 'draft' | 'in_review' | 'approved' | 'scheduled' | 'published',
-    forceOverwrite?: boolean
-  ): Promise<boolean> => {
-    if (!title.trim()) {
-      setErrorMessage('Judul artikel wajib diisi.')
+  // ---------------- Save ----------------
+  const handleSave = async (targetStatus?: ArticleEditorStatus, forceOverwrite = false): Promise<boolean> => {
+    const current = stateRef.current.doc
+    if (!current.title.trim()) {
+      setNotice({ tone: 'error', text: 'Judul artikel wajib diisi.' })
+      focusWhenReady('article-title')
       return false
     }
 
-    const finalContent = editorStyle === 'blocks' ? blocksToContent(blocks) : rawContent
+    const blocks = current.editorStyle === 'blocks' ? current.blocks : contentToBlocks(current.rawContent)
+    const finalContent = current.editorStyle === 'blocks' ? blocksToContent(blocks) : current.rawContent
     if (!finalContent.trim()) {
-      setErrorMessage('Konten artikel tidak boleh kosong.')
+      setNotice({ tone: 'error', text: 'Isi artikel masih kosong.' })
       return false
     }
 
-    const finalStatus = targetStatus || status
-
-    // Ensure active blocks are in sync if saving from raw mode
-    const effectiveBlocks = editorStyle === 'blocks' ? blocks : contentToBlocks(finalContent)
-    if (editorStyle === 'raw' && effectiveBlocks.length > 0) {
-      setBlocks(effectiveBlocks)
-    }
-
-    // Publication Gate Pre-check before saving as published
-    const contentImages = effectiveBlocks
-      .filter((b): b is Extract<ContentBlock, { type: 'image' }> => b.type === 'image' && Boolean(b.url))
-      .map((b) => ({
-        url: b.url || '',
-        altText: b.alt || b.caption || '',
-        decorative: false,
-      }))
+    const finalStatus = targetStatus ?? current.status
+    const finalSlug = current.slug.trim() || slugify(current.title) || editSlug || ''
+    const finalMetaTitle = current.seoTitle.trim() || `${current.title.trim()} — ${siteConfig.name}`
+    const finalMetaDesc = current.metaDescription.trim() || current.excerpt.trim() || current.title.trim()
+    const imageBlocks = publishableImageBlocks(blocks)
 
     if (finalStatus === 'published' || finalStatus === 'scheduled') {
-      const gateCheck = checkPublicationGate({
-        locale,
-        title,
-        slug: slug.trim() || editSlug || '',
-        metaDescription: metaDescription.trim() || excerpt || title,
-        seoTitle: seoTitle.trim() || `${title} — UNIMASI`,
+      const gate = checkPublicationGate({
+        locale: current.locale,
+        title: current.title,
+        slug: finalSlug,
+        metaDescription: finalMetaDesc,
+        seoTitle: finalMetaTitle,
         existingSlugs: [],
-        images: contentImages,
-        heroVisual: coverUrl ? { url: coverUrl, altText: coverAlt, decorative: false } : null,
+        images: imageBlocks.map((b) => ({ url: b.url, altText: b.alt || b.caption || '', decorative: false })),
+        heroVisual: current.coverUrl ? { url: current.coverUrl, altText: current.coverAlt, decorative: false } : null,
       })
-
-      if (!gateCheck.canPublish) {
-        setGateViolations(gateCheck.violations.map((v) => v.message))
+      if (!gate.canPublish) {
+        gateImageIdsRef.current = imageBlocks.map((b) => b.id)
+        setGateIssues(gate.violations.map((v) => ({ message: v.message, field: v.field })))
         return false
       }
     }
 
     setSaving(true)
-    setErrorMessage('')
-    setSuccessData(null)
-
+    setNotice(null)
     try {
-      const finalMetaTitle = seoTitle.trim() || `${title} — UNIMASI`
-      const finalMetaDesc = metaDescription.trim() || excerpt || title
-
+      const tags = current.tagInput.split(',').map((t) => t.trim()).filter(Boolean)
+      const translationGroupId = current.translationGroupId.trim() || undefined
+      const baseOg = current.baseSeoData.openGraph && typeof current.baseSeoData.openGraph === 'object' ? current.baseSeoData.openGraph : {}
+      const baseTw = current.baseSeoData.twitter && typeof current.baseSeoData.twitter === 'object' ? current.baseSeoData.twitter : {}
       const payload = {
-        slug: slug.trim() || editSlug,
+        slug: finalSlug,
         originalSlug: isEditMode ? editSlug : undefined,
-        publishedAt: publicationDate || undefined,
-        title: title.trim(),
-        excerpt: excerpt.trim() || title.trim(),
+        publishedAt: current.publicationDate || undefined,
+        title: current.title.trim(),
+        excerpt: current.excerpt.trim() || current.title.trim(),
         content: finalContent,
-        category,
-        tags: tagInput.split(',').map((tag) => tag.trim()).filter(Boolean),
-        author,
-        coverUrl,
-        coverAlt,
+        category: current.category,
+        tags,
+        author: current.author,
+        coverUrl: current.coverUrl,
+        coverAlt: current.coverAlt,
         status: finalStatus,
-        scheduledAt: finalStatus === 'scheduled' && scheduleLocal ? new Date(scheduleLocal).toISOString() : undefined,
-        publicationTimezone,
+        scheduledAt: finalStatus === 'scheduled' && current.scheduleLocal ? new Date(current.scheduleLocal).toISOString() : undefined,
+        publicationTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
         expectedUpdatedAt: loadedUpdatedAt,
-        forceOverwrite: Boolean(forceOverwrite),
-
+        forceOverwrite,
         metaTitle: finalMetaTitle,
         metaDescription: finalMetaDesc,
-        locale,
-        translationGroupId: translationGroupId.trim() || undefined,
-        focusKeyphrase: focusKeyphrase.trim() || undefined,
-        relatedKeyphrases,
-        isCornerstone,
-        primaryCategory: category,
+        locale: current.locale,
+        translationGroupId,
+        focusKeyphrase: current.focusKeyphrase.trim() || undefined,
+        relatedKeyphrases: current.relatedKeyphrases,
+        isCornerstone: current.isCornerstone,
+        primaryCategory: current.category,
         seoData: {
-          ...baseSeoData,
-          locale,
-          translationGroupId: translationGroupId.trim() || undefined,
-          focusKeyphrase: focusKeyphrase.trim(),
-          relatedKeyphrases,
+          ...current.baseSeoData,
+          locale: current.locale,
+          translationGroupId,
+          focusKeyphrase: current.focusKeyphrase.trim(),
+          relatedKeyphrases: current.relatedKeyphrases,
           seoTitle: finalMetaTitle,
           metaDescription: finalMetaDesc,
-          slug: slug.trim() || editSlug,
-          canonicalUrl: canonicalUrl.trim() || null,
-          robots,
+          slug: finalSlug,
+          canonicalUrl: current.canonicalUrl.trim() || null,
+          robots: current.robots,
           openGraph: {
-            ...baseSeoData.openGraph,
-            title: socialOg.title || finalMetaTitle,
-            description: socialOg.description || finalMetaDesc,
-            image: socialOg.image || coverUrl,
-            imageAlt: socialOg.imageAlt || coverAlt,
+            ...baseOg,
+            title: current.socialOg.title || finalMetaTitle,
+            description: current.socialOg.description || finalMetaDesc,
+            image: current.socialOg.image || current.coverUrl,
+            imageAlt: current.socialOg.imageAlt || current.coverAlt,
             type: 'article',
-            locale,
+            locale: current.locale,
           },
           twitter: {
-            ...baseSeoData.twitter,
-            card: socialTwitter.card || 'summary_large_image',
-            title: socialTwitter.title || finalMetaTitle,
-            description: socialTwitter.description || finalMetaDesc,
-            image: socialTwitter.image || coverUrl,
-            imageAlt: socialTwitter.imageAlt || coverAlt,
+            ...baseTw,
+            card: current.socialTwitter.card || 'summary_large_image',
+            title: current.socialTwitter.title || finalMetaTitle,
+            description: current.socialTwitter.description || finalMetaDesc,
+            image: current.socialTwitter.image || current.coverUrl,
+            imageAlt: current.socialTwitter.imageAlt || current.coverAlt,
           },
-          schema: schemaChanged ? { type: schemaType } : (baseSeoData.schema || { type: schemaType }),
-          breadcrumbTitle: breadcrumbTitle.trim() || title,
-          isCornerstone,
-          primaryCategory: category,
+          schema: current.schemaChanged ? { type: current.schemaType } : current.baseSeoData.schema || { type: current.schemaType },
+          breadcrumbTitle: current.breadcrumbTitle.trim() || current.title,
+          isCornerstone: current.isCornerstone,
+          primaryCategory: current.category,
         },
       }
 
-      const method = isEditMode ? 'PATCH' : 'POST'
       const res = await fetch('/api/articles', {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-          ...getAuthHeaders(),
-        },
+        method: isEditMode ? 'PATCH' : 'POST',
+        headers: { 'Content-Type': 'application/json', ...authHeadersRef.current() },
         body: JSON.stringify(payload),
       })
+      const data = (await res.json()) as {
+        error?: string
+        conflict?: boolean
+        serverUpdatedAt?: string
+        updatedAt?: string
+        violations?: Array<{ message?: string; field?: string } | string>
+      }
 
-      const data = await res.json()
       if (!res.ok) {
         if (res.status === 409 && data.conflict) {
-          setConflictServerUpdatedAt(data.serverUpdatedAt || null)
-          setConflictModalOpen(true)
-          setErrorMessage(data.error || 'Konflik pengeditan: Artikel ini telah diperbarui oleh pengguna lain.')
+          setConflict({ serverUpdatedAt: data.serverUpdatedAt ?? null })
           return false
         }
-        if (res.status === 422 && data.violations) {
-          setGateViolations(data.violations.map((v: any) => v.message || v))
-          throw new Error('Gerbang publikasi terkunci. Mohon lengkapi syarat SEO/Aksesibilitas.')
+        if (res.status === 422 && Array.isArray(data.violations)) {
+          gateImageIdsRef.current = imageBlocks.map((b) => b.id)
+          setGateIssues(
+            data.violations.map((v) => (typeof v === 'string' ? { message: v } : { message: v.message || 'Syarat publikasi belum terpenuhi.', field: v.field })),
+          )
+          return false
         }
         throw new Error(data.error || 'Gagal menyimpan artikel.')
       }
 
-      if (data.updatedAt) {
-        setLoadedUpdatedAt(data.updatedAt)
-      }
+      if (data.updatedAt) setLoadedUpdatedAt(data.updatedAt)
+      dispatch({ type: 'markSaved', patch: { status: finalStatus, slug: finalSlug, blocks, editorStyle: current.editorStyle } })
+      clearLocalDrafts(editSlug, finalSlug)
+      setUndo(null)
 
-      setStatus(finalStatus)
-      setIsDirty(false)
-      const targetSlug = slug.trim() || editSlug || ''
       const previewSuffix = finalStatus === 'published' ? '' : '?preview=true'
-      setSuccessData({
-        url: `${siteConfig.url}/artikel/${encodeURIComponent(targetSlug)}${previewSuffix}`,
-        title: title,
-        action: finalStatus === 'published' ? 'diterbitkan' : 'disimpan sebagai draf',
+      setNotice({
+        tone: 'success',
+        text: finalStatus === 'published' ? 'Artikel diterbitkan.' : finalStatus === 'scheduled' ? 'Jadwal terbit disimpan.' : 'Tersimpan di server.',
+        url: `${siteConfig.url}/journal/${encodeURIComponent(finalSlug)}${previewSuffix}`,
+        urlLabel: finalStatus === 'published' ? 'Lihat halaman publik' : 'Buka pratinjau',
       })
 
-      // Update local editSlug state so subsequent saves PATCH instead of failing with duplicate POST
-      locallySavedSlugRef.current = targetSlug
-      setEditSlug(targetSlug)
-
-      // Seamlessly update browser URL without full page reload
-      const newUrl = `/admin/buat-artikel?slug=${encodeURIComponent(targetSlug)}`
-      if (typeof window !== 'undefined') {
-        window.history.replaceState({ ...window.history.state, as: newUrl, url: newUrl }, '', newUrl)
-      }
-      router.replace(newUrl, { scroll: false })
+      // Subsequent saves PATCH this slug; update the URL without a reload.
+      locallySavedSlugRef.current = finalSlug
+      setEditSlug(finalSlug)
+      router.replace(`/admin/buat-artikel?slug=${encodeURIComponent(finalSlug)}`, { scroll: false })
       return true
-    } catch (err: any) {
-      setErrorMessage(err.message || 'Terjadi kesalahan sistem saat menyimpan.')
+    } catch (err) {
+      console.error('[ArticleEditor] Save failed:', err)
+      setNotice({ tone: 'error', text: err instanceof Error ? err.message : 'Terjadi kesalahan saat menyimpan.' })
       return false
     } finally {
       setSaving(false)
     }
   }
+  const onSave = useStableCallback((target?: ArticleEditorStatus) => {
+    void handleSave(target)
+  })
 
-  // ------------------ NAVIGATION GUARD & EXIT CONFIRMATION ------------------
-  const handleRequestNavigate = (url: string) => {
-    if (isDirty) {
-      setPendingNavigationUrl(url)
-      setShowUnsavedModal(true)
-    } else {
-      router.push(url)
-    }
+  // ---------------- Gate → field focus ----------------
+  const openInspector = (tab: InspectorTab) => {
+    setInspectorTab(tab)
+    setInspectorOpen(true)
+    if (viewMode === 'full-preview' || viewMode === 'split-preview') setViewMode('split-inspector')
   }
 
-  const handleConfirmDiscard = () => {
-    setIsDirty(false)
-    setShowUnsavedModal(false)
-    const target = pendingNavigationUrl || '/admin?tab=articles'
-    setPendingNavigationUrl(null)
-
-    if (typeof window !== 'undefined') {
-      try {
-        const parsed = new URL(target, window.location.origin)
-        if (parsed.origin === window.location.origin) {
-          router.push(parsed.pathname + parsed.search + parsed.hash)
-          return
-        }
-      } catch (err) { console.warn("[observable error]:", err) }
-      window.location.href = target
-    } else {
-      router.push(target)
-    }
-  }
-
-  const handleSaveAndLeave = async () => {
-    const success = await handleSave('draft')
-    if (success) {
-      setIsDirty(false)
-      setShowUnsavedModal(false)
-      const target = pendingNavigationUrl || '/admin?tab=articles'
-      setPendingNavigationUrl(null)
-
-      if (typeof window !== 'undefined') {
-        try {
-          const parsed = new URL(target, window.location.origin)
-          if (parsed.origin === window.location.origin) {
-            router.push(parsed.pathname + parsed.search + parsed.hash)
-            return
-          }
-        } catch (err) { console.warn("[observable error]:", err) }
-        window.location.href = target
-      } else {
-        router.push(target)
+  const focusGateField = (field: string) => {
+    setGateIssues([])
+    // Let the gate dialog close (and restore focus) before moving focus to the field.
+    setTimeout(() => {
+      const image = /^images\[(\d+)\]\.altText$/.exec(field)
+      if (image) {
+        const blockId = gateImageIdsRef.current[Number(image[1])]
+        if (stateRef.current.doc.editorStyle !== 'blocks') handleEditorStyleChange('blocks')
+        if (viewMode === 'full-preview') setViewMode('split-inspector')
+        if (!isWide) setInspectorOpen(false)
+        if (blockId) focusWhenReady(`block-${blockId}-alt`)
+        return
       }
-    }
-  }
-
-  const handleCancelLeave = () => {
-    setShowUnsavedModal(false)
-    setPendingNavigationUrl(null)
-  }
-
-  // Guard 1: Intercept window unload, tab close, or browser refresh when dirty
-  useEffect(() => {
-    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      if (isDirty) {
-        e.preventDefault()
-        e.returnValue = ''
-        return ''
+      if (field === 'slug') {
+        openInspector('document')
+        focusWhenReady('article-slug')
+      } else if (field === 'heroVisual.altText') {
+        openInspector('document')
+        focusWhenReady('article-cover-alt')
+      } else if (field === 'seoTitle' || field === 'metaDescription') {
+        openInspector('seo')
+        setSeoFocusRequest({ id: field === 'seoTitle' ? 'seo-title-input' : 'seo-meta-description-input', nonce: Date.now() })
       }
-    }
-    window.addEventListener('beforeunload', handleBeforeUnload)
-    return () => window.removeEventListener('beforeunload', handleBeforeUnload)
-  }, [isDirty])
+    }, 30)
+  }
 
-  // Guard 2: Intercept browser back/forward buttons when dirty
+  // ---------------- Navigation guard ----------------
+  const navigate = (target: string) => {
+    try {
+      const parsed = new URL(target, window.location.origin)
+      if (parsed.origin === window.location.origin) {
+        router.push(parsed.pathname + parsed.search + parsed.hash)
+        return
+      }
+    } catch (err) {
+      console.warn('[ArticleEditor] Invalid navigation target:', err)
+    }
+    window.location.href = target
+  }
+
+  const requestNavigate = useStableCallback((url: string) => {
+    if (stateRef.current.isDirty) setLeave({ open: true, url })
+    else router.push(url)
+  })
+
   useEffect(() => {
     if (!isDirty) return
-
-    // Push an additional history entry so pressing browser back triggers popstate instead of exiting
-    const currentState = window.history.state || {}
-    window.history.pushState({ ...currentState, unimasi_guard: true }, '', window.location.href)
-
-    const handlePopState = () => {
-      // Re-push history entry so the user stays on the page until they confirm
-      window.history.pushState({ ...currentState, unimasi_guard: true }, '', window.location.href)
-      setPendingNavigationUrl('/admin?tab=articles')
-      setShowUnsavedModal(true)
+    const onBeforeUnload = (e: BeforeUnloadEvent) => {
+      e.preventDefault()
     }
-
-    window.addEventListener('popstate', handlePopState)
-    return () => {
-      window.removeEventListener('popstate', handlePopState)
+    // Keep the user on the page when Back is pressed; ask first.
+    const guardState = { ...(window.history.state || {}), spatium_guard: true }
+    window.history.pushState(guardState, '', window.location.href)
+    const onPopState = () => {
+      window.history.pushState(guardState, '', window.location.href)
+      setLeave({ open: true, url: ARTICLES_LIST_URL })
     }
-  }, [isDirty])
-
-  // Guard 3: Intercept clicks on links leaving the editor when dirty
-  useEffect(() => {
-    const handleDocumentClick = (e: MouseEvent) => {
-      if (!isDirty) return
-
-      const anchor = (e.target as HTMLElement).closest('a')
-      if (!anchor) return
-
-      const href = anchor.getAttribute('href')
-      if (!href) return
-
-      // Allow hash links within the page (#...)
-      if (href.startsWith('#')) return
-
-      // Allow non-navigational protocols
-      if (href.startsWith('javascript:') || href.startsWith('mailto:') || href.startsWith('tel:')) return
-
-      // Allow new tab links or modified clicks
-      if (anchor.target === '_blank' || e.metaKey || e.ctrlKey || e.shiftKey) return
-
-      try {
-        const targetUrl = new URL(href, window.location.origin)
-        // If clicking the current page with no search/pathname change, ignore
-        if (
-          targetUrl.origin === window.location.origin &&
-          targetUrl.pathname === window.location.pathname &&
-          targetUrl.search === window.location.search
-        ) {
-          return
-        }
-      } catch (err) { console.warn("[observable error]:", err) }
-
+    const onDocumentClick = (e: MouseEvent) => {
+      if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return
+      const anchor = e.target instanceof Element ? e.target.closest('a') : null
+      const href = anchor?.getAttribute('href')
+      if (!anchor || !href || href.startsWith('#') || anchor.target === '_blank') return
+      if (/^(mailto:|tel:|javascript:)/i.test(href)) return
+      const url = new URL(href, window.location.origin)
+      if (url.origin === window.location.origin && url.pathname === window.location.pathname && url.search === window.location.search) return
       e.preventDefault()
       e.stopPropagation()
-      setPendingNavigationUrl(href)
-      setShowUnsavedModal(true)
+      setLeave({ open: true, url: href })
     }
-
-    document.addEventListener('click', handleDocumentClick, true)
+    window.addEventListener('beforeunload', onBeforeUnload)
+    window.addEventListener('popstate', onPopState)
+    document.addEventListener('click', onDocumentClick, true)
     return () => {
-      document.removeEventListener('click', handleDocumentClick, true)
+      window.removeEventListener('beforeunload', onBeforeUnload)
+      window.removeEventListener('popstate', onPopState)
+      document.removeEventListener('click', onDocumentClick, true)
     }
   }, [isDirty])
 
-  // Keyboard Shortcuts: Cmd+S / Ctrl+S to save, Cmd+/ to toggle inspector
+  const leaveDiscard = () => {
+    const target = leave.url || ARTICLES_LIST_URL
+    dispatch({ type: 'markClean' })
+    setLeave({ open: false, url: null })
+    navigate(target)
+  }
+  const leaveSave = async () => {
+    const target = leave.url || ARTICLES_LIST_URL
+    // Save with the current status: leaving must never silently unpublish an article.
+    const ok = await handleSave()
+    if (ok) {
+      setLeave({ open: false, url: null })
+      navigate(target)
+    }
+  }
+
+  // ---------------- Keyboard shortcuts (one stable listener) ----------------
+  const toggleInspector = useStableCallback(() => {
+    setInspectorOpen((open) => !open)
+    if (viewMode !== 'split-inspector' && viewMode !== 'focus') setViewMode('split-inspector')
+  })
+  const keyHandlerRef = useRef<(e: KeyboardEvent) => void>(() => undefined)
+  keyHandlerRef.current = (e: KeyboardEvent) => {
+    const mod = e.metaKey || e.ctrlKey
+    if (mod && e.key.toLowerCase() === 's') {
+      e.preventDefault()
+      void handleSave()
+    } else if (mod && e.key === '/') {
+      e.preventDefault()
+      toggleInspector()
+    } else if (e.key === '?' && !mod && !isTextEntry(e.target)) {
+      e.preventDefault()
+      setShortcutsOpen(true)
+    }
+  }
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === 's') {
-        e.preventDefault()
-        handleSave(status === 'published' ? 'published' : 'draft')
-      }
-      if ((e.metaKey || e.ctrlKey) && e.key === '/') {
-        e.preventDefault()
-        setIsInspectorOpen((prev) => !prev)
-      }
-      if (e.key === 'Escape') {
-        if (showUnsavedModal) {
-          setShowUnsavedModal(false)
-          setPendingNavigationUrl(null)
-          return
-        }
-        if (gateViolations.length > 0) setGateViolations([])
-        if (linkModalOpen) setLinkModalOpen(false)
-        if (aiMode !== 'idle') setAiMode('idle')
-      }
-    }
-    window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [status, gateViolations, linkModalOpen, aiMode, title, blocks, rawContent, showUnsavedModal])
+    const onKeyDown = (e: KeyboardEvent) => keyHandlerRef.current(e)
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [])
 
-  // View Mode Switcher Handling
-  const handleViewModeChange = (mode: EditorViewMode) => {
+  const handleViewModeChange = useStableCallback((mode: EditorViewMode) => {
     setViewMode(mode)
-    if (mode === 'focus') {
-      setIsInspectorOpen(false)
-    } else if (mode === 'split-inspector') {
-      setIsInspectorOpen(true)
-    }
-  }
+    if (mode === 'split-inspector' && isWide) setInspectorOpen(true)
+  })
+  const openShortcuts = useStableCallback(() => setShortcutsOpen(true))
+  const navigateBack = useStableCallback(() => requestNavigate(ARTICLES_LIST_URL))
+  const setPublicationDate = useCallback((v: string) => dispatch(setFieldAction('publicationDate', v)), [])
+  const setScheduleLocal = useCallback((v: string) => dispatch(setFieldAction('scheduleLocal', v)), [])
+  const closeInspector = useCallback(() => setInspectorOpen(false), [])
 
-  const handleOpenSeoTab = () => {
-    setInspectorTab('seo')
-    setIsInspectorOpen(true)
-    if (viewMode === 'focus' || viewMode === 'full-preview') {
-      setViewMode('split-inspector')
-    }
-  }
+  useEffect(() => {
+    document.title = `${doc.title ? `Edit: ${doc.title}` : 'Tulis artikel'} · ${siteConfig.name} Studio`
+  }, [doc.title])
 
-
-  if (loadingInitial) {
+  // ---------------- Render ----------------
+  if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center h-full w-full bg-[var(--studio-bg)] space-y-4">
-        <RefreshCw className="w-8 h-8 text-accent-400 animate-spin" />
-        <h3 className="text-sm font-bold text-white">Memuat Data Artikel...</h3>
-        <p className="text-xs text-neutral-400 font-mono">Memuat konten editorial ({editSlug})</p>
+      <div className="studio-admin flex h-[100dvh] w-full items-center justify-center bg-[var(--studio-bg)] text-sm text-neutral-200" role="status">
+        Memuat artikel {editSlug}…
       </div>
     )
   }
 
+  if (loadError) {
+    return (
+      <main className="studio-admin flex h-[100dvh] w-full flex-col items-center justify-center gap-4 bg-[var(--studio-bg)] p-6 text-center text-white">
+        <AlertTriangle className="h-8 w-8 text-amber-300" aria-hidden="true" />
+        <h1 className="text-lg font-bold">Artikel tidak bisa dibuka</h1>
+        <p className="max-w-md text-sm text-neutral-300">{loadError}</p>
+        <Link href={ARTICLES_LIST_URL} className="rounded-xl bg-accent-500 px-4 py-2 text-sm font-bold text-accent-950 hover:bg-accent-300">
+          Kembali ke daftar artikel
+        </Link>
+      </main>
+    )
+  }
+
+  const showInspector = viewMode === 'split-inspector' || viewMode === 'focus'
+  const canvas = (
+    <ArticleEditorCanvas
+      title={doc.title}
+      onTitleChange={setTitle}
+      slug={doc.slug}
+      category={doc.category}
+      categoriesList={categoriesList}
+      onCategoryChange={setCategory}
+      editorStyle={doc.editorStyle}
+      onEditorStyleChange={handleEditorStyleChange}
+      onConvertRawToBlocks={handleConvertRawToBlocks}
+      onImportMarkdown={handleImportMarkdown}
+      rawContent={doc.rawContent}
+      onRawContentChange={setRawContent}
+      blocks={doc.blocks}
+      blockActions={blockActions}
+      rawHtmlBlockIds={rawHtmlBlockIds}
+      isFocusMode={!inspectorOpen || !isWide}
+    />
+  )
+  const preview = (
+    <ArticleLivePreview
+      title={analysisDoc.title}
+      slug={analysisDoc.slug}
+      category={analysisDoc.category}
+      author={analysisDoc.author}
+      publicationDate={analysisDoc.publicationDate}
+      readingTimeMinutes={readingTimeMinutes}
+      coverUrl={analysisDoc.coverUrl}
+      coverAlt={analysisDoc.coverAlt}
+      excerpt={analysisDoc.excerpt}
+      blocks={analysisDoc.blocks}
+      rawContent={analysisDoc.rawContent}
+      editorStyle={analysisDoc.editorStyle}
+      tags={analysisDoc.tagInput.split(',').map((t) => t.trim()).filter(Boolean)}
+    />
+  )
+
   return (
-    <div className="flex h-screen w-screen flex-col overflow-hidden bg-[var(--studio-bg)] text-neutral-100 antialiased selection:bg-accent-500 selection:text-black">
-      {/* ---------------- 1. COMPACT DEDICATED HEADER ---------------- */}
+    <div className="studio-admin flex h-[100dvh] w-full flex-col overflow-hidden bg-[var(--studio-bg)] text-neutral-100 antialiased selection:bg-accent-500 selection:text-accent-950">
+      <a
+        href="#article-title"
+        className="sr-only z-50 rounded-lg bg-accent-500 px-3 py-2 text-sm font-bold text-accent-950 focus:not-sr-only focus:fixed focus:left-3 focus:top-3"
+      >
+        Langsung ke judul artikel
+      </a>
+
       <ArticleEditorHeader
-        title={title}
-        slug={slug}
-        status={status}
+        title={doc.title}
+        slug={editSlug ?? ''}
+        status={doc.status}
         isEditMode={isEditMode}
         isDirty={isDirty}
         saving={saving}
+        localSavedAt={localSavedAt}
         wordCount={wordCount}
         readingTimeMinutes={readingTimeMinutes}
-        internalLinksCount={internalLinksCount}
-        seoScore={seoReport.score}
+        seoScore={seoAnalysis.seoScore}
         viewMode={viewMode}
         onViewModeChange={handleViewModeChange}
-        isInspectorOpen={isInspectorOpen}
-        onToggleInspector={() => setIsInspectorOpen((v) => !v)}
-        isAiOpen={aiMode !== 'idle'}
-        onToggleAi={() => setAiMode((prev) => (prev === 'idle' ? 'docked' : 'idle'))}
-        onSave={handleSave}
-        permissions={permissions}
-        publicationDate={publicationDate}
+        isInspectorOpen={inspectorOpen && showInspector}
+        onToggleInspector={toggleInspector}
+        onSave={onSave}
+        canPublish={Boolean(permissions.canPublish)}
+        canSubmitForReview={Boolean(permissions.canSubmitForReview)}
+        publicationDate={doc.publicationDate}
         onChangePublicationDate={setPublicationDate}
-        scheduleLocal={scheduleLocal}
+        scheduleLocal={doc.scheduleLocal}
         onChangeScheduleLocal={setScheduleLocal}
-        publicationTimezone={publicationTimezone}
-        onOpenSeoTab={handleOpenSeoTab}
-        onNavigateBack={() => handleRequestNavigate('/admin?tab=articles')}
+        publicationTimezone={Intl.DateTimeFormat().resolvedOptions().timeZone}
+        onOpenShortcuts={openShortcuts}
+        onNavigateBack={navigateBack}
       />
 
-      {/* Multi-User Real-time Presence Banner */}
-      {activeLockUser && (
-        <div className="mx-4 mt-2 p-3 bg-amber-500/15 border border-amber-500/40 rounded-xl flex items-center justify-between gap-3 text-amber-300 text-xs animate-fadeIn z-20">
-          <div className="flex items-center gap-2.5">
-            <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0" />
-            <span>
-              <strong>Perhatian Multi-User:</strong> Artikel ini sedang aktif diedit oleh{' '}
-              <span className="font-semibold underline text-white">{activeLockUser.name}</span> ({activeLockUser.email}).
-              Perubahan Anda dapat bertabrakan jika disimpan bersamaan.
-            </span>
-          </div>
-          <button
-            type="button"
-            onClick={() => setActiveLockUser(null)}
-            className="text-amber-400 hover:text-white p-1 rounded transition-colors text-[11px]"
-            title="Tutup pemberitahuan"
-          >
-            <X className="w-3.5 h-3.5" />
-          </button>
-        </div>
-      )}
+      {/* Polite announcements (block moves/deletes, saves). Region is always mounted. */}
+      <p role="status" aria-live="polite" className="sr-only">
+        {announcement}
+      </p>
 
-      {/* Notification / Toast Banner */}
-      {errorMessage && (
-        <div className="mx-4 mt-2 p-3 rounded-xl bg-red-500/15 border border-red-500/30 flex items-center justify-between text-xs text-red-300 animate-fadeIn z-20">
-          <div className="flex items-center gap-2">
-            <AlertTriangle className="w-4 h-4 text-red-400 shrink-0" />
-            <span>{errorMessage}</span>
-          </div>
-          <button type="button" onClick={() => setErrorMessage('')} className="p-1 text-red-300 hover:text-white">
-            <X className="w-3.5 h-3.5" />
-          </button>
-        </div>
-      )}
-
-      {successData && (
-        <div className="mx-4 mt-2 p-3 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-between text-xs text-emerald-300 animate-fadeIn z-20">
-          <div className="flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-            <span>
-              Artikel <strong>&ldquo;{successData.title}&rdquo;</strong> berhasil {successData.action}!
-            </span>
-          </div>
-          <div className="flex items-center gap-2">
-            <a
-              href={successData.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 font-semibold text-emerald-200"
-            >
-              <span>{status === 'published' ? 'Lihat Publik' : 'Buka Pratinjau'}</span>
-              <ExternalLink className="w-3 h-3" />
-            </a>
-            <button type="button" onClick={() => setSuccessData(null)} className="p-1 text-emerald-300 hover:text-white">
-              <X className="w-3.5 h-3.5" />
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* ---------------- 2. WORKSPACE AREA ---------------- */}
-      <div className="relative flex-1 min-h-0 w-full flex overflow-hidden">
-        {/* VIEW: FULL PREVIEW */}
-        {viewMode === 'full-preview' ? (
-          <ArticleLivePreview
-            title={title}
-            slug={slug}
-            category={category}
-            author={author}
-            publicationDate={publicationDate}
-            readingTimeMinutes={readingTimeMinutes}
-            coverUrl={coverUrl}
-            coverAlt={coverAlt}
-            excerpt={excerpt}
-            blocks={blocks}
-            rawContent={rawContent}
-            editorStyle={editorStyle}
-            tags={tagInput.split(',').map((t) => t.trim()).filter(Boolean)}
-          />
-        ) : viewMode === 'split-preview' ? (
-          /* VIEW: DUAL SPLIT PREVIEW (EDITOR ON LEFT, LIVE PREVIEW ON RIGHT) */
-          <div className="flex-1 flex w-full h-full min-h-0 overflow-hidden divide-x divide-white/[0.08]">
-            <div className="w-1/2 h-full flex flex-col min-h-0">
-              <ArticleEditorCanvas
-                title={title}
-                onTitleChange={handleTitleChange}
-                slug={slug}
-                category={category}
-                categoriesList={categoriesList}
-                onCategoryChange={(val) => { setCategory(val); setIsDirty(true) }}
-                editorStyle={editorStyle}
-                onEditorStyleChange={handleEditorStyleChange}
-                onConvertRawToBlocks={handleConvertRawToBlocks}
-                onImportMarkdown={handleImportMarkdown}
-                onConvertSingleHtmlBlockToBlocks={handleConvertSingleHtmlBlockToBlocks}
-                rawContent={rawContent}
-                onRawContentChange={(val) => { setRawContent(val); setIsDirty(true) }}
-                blocks={blocks}
-                onAddBlock={addBlock}
-                onUpdateBlock={updateBlock}
-                onRemoveBlock={removeBlock}
-                onMoveBlock={moveBlock}
-                onConvertBlockType={convertBlockType}
-                rawHtmlBlockIds={rawHtmlBlockIds}
-                onToggleRawHtmlBlock={(id) => setRawHtmlBlockIds((prev) => ({ ...prev, [id]: !prev[id] }))}
-                activeTypeDropdownBlockId={activeTypeDropdownBlockId}
-                onSetActiveTypeDropdownBlockId={setActiveTypeDropdownBlockId}
-                onOpenMediaPickerForBlock={(blockId) => {
-                  setMediaPickerTarget({ blockId })
-                  setMediaPickerOpen(true)
-                }}
-                isFocusMode={false}
-              />
-            </div>
-            <div className="w-1/2 h-full flex flex-col min-h-0">
-              <ArticleLivePreview
-                title={title}
-                slug={slug}
-                category={category}
-                author={author}
-                publicationDate={publicationDate}
-                readingTimeMinutes={readingTimeMinutes}
-                coverUrl={coverUrl}
-                coverAlt={coverAlt}
-                excerpt={excerpt}
-                blocks={blocks}
-                rawContent={rawContent}
-                editorStyle={editorStyle}
-                tags={tagInput.split(',').map((t) => t.trim()).filter(Boolean)}
-              />
-            </div>
-          </div>
-        ) : (
-          /* VIEW: CANVAS WITH COLLAPSIBLE INSPECTOR (FOCUS OR SPLIT-INSPECTOR) */
-          <div className="flex-1 flex w-full h-full min-h-0 overflow-hidden">
-            <ArticleEditorCanvas
-              title={title}
-              onTitleChange={handleTitleChange}
-              slug={slug}
-              category={category}
-              categoriesList={categoriesList}
-              onCategoryChange={(val) => { setCategory(val); setIsDirty(true) }}
-              editorStyle={editorStyle}
-              onEditorStyleChange={handleEditorStyleChange}
-              onConvertRawToBlocks={handleConvertRawToBlocks}
-              onImportMarkdown={handleImportMarkdown}
-              onConvertSingleHtmlBlockToBlocks={handleConvertSingleHtmlBlockToBlocks}
-              rawContent={rawContent}
-              onRawContentChange={(val) => { setRawContent(val); setIsDirty(true) }}
-              blocks={blocks}
-              onAddBlock={addBlock}
-              onUpdateBlock={updateBlock}
-              onRemoveBlock={removeBlock}
-              onMoveBlock={moveBlock}
-              onConvertBlockType={convertBlockType}
-              rawHtmlBlockIds={rawHtmlBlockIds}
-              onToggleRawHtmlBlock={(id) => setRawHtmlBlockIds((prev) => ({ ...prev, [id]: !prev[id] }))}
-              activeTypeDropdownBlockId={activeTypeDropdownBlockId}
-              onSetActiveTypeDropdownBlockId={setActiveTypeDropdownBlockId}
-              onOpenMediaPickerForBlock={(blockId) => {
-                setMediaPickerTarget({ blockId })
-                setMediaPickerOpen(true)
-              }}
-              isFocusMode={viewMode === 'focus' || !isInspectorOpen}
-            />
-
-            {/* Collapsible Inspector Sidebar */}
-            <ArticleEditorInspector
-              isOpen={isInspectorOpen}
-              onClose={() => setIsInspectorOpen(false)}
-              activeTab={inspectorTab}
-              onTabChange={setInspectorTab}
-              category={category}
-              onCategoryChange={(val) => { setCategory(val); setIsDirty(true) }}
-              categoriesList={categoriesList}
-              tagInput={tagInput}
-              onTagInputChange={(val) => { setTagInput(val); setIsDirty(true) }}
-              author={author}
-              onAuthorChange={(val) => { setAuthor(val); setIsDirty(true) }}
-              slug={slug}
-              onSlugChange={(val) => { setSlug(val); setIsDirty(true) }}
-              targetKeyword={targetKeyword}
-              onTargetKeywordChange={(val) => { setTargetKeyword(val); setIsDirty(true) }}
-              excerpt={excerpt}
-              onExcerptChange={(val) => { setExcerpt(val); setIsDirty(true) }}
-              coverUrl={coverUrl}
-              onCoverUrlChange={(val) => { setCoverUrl(val); setIsDirty(true) }}
-              coverAlt={coverAlt}
-              onCoverAltChange={(val) => { setCoverAlt(val); setIsDirty(true) }}
-              uploadingCover={uploadingCover}
-              onCoverUpload={handleCoverUpload}
-              onOpenMediaPickerForCover={() => {
-                setMediaPickerTarget('cover')
-                setMediaPickerOpen(true)
-              }}
-              internalLinksCount={internalLinksCount}
-              title={title}
-              locale={locale}
-              onChangeLocale={setLocale}
-              translationGroupId={translationGroupId}
-              onChangeTranslationGroupId={setTranslationGroupId}
-              isCornerstone={isCornerstone}
-              onChangeIsCornerstone={setIsCornerstone}
-              focusKeyphrase={focusKeyphrase}
-              onChangeFocusKeyphrase={setFocusKeyphrase}
-              relatedKeyphrases={relatedKeyphrases}
-              onChangeRelatedKeyphrases={setRelatedKeyphrases}
-              seoTitle={seoTitle}
-              onChangeSeoTitle={setSeoTitle}
-              metaDescription={metaDescription}
-              onChangeMetaDescription={setMetaDescription}
-              canonicalUrl={canonicalUrl}
-              onChangeCanonicalUrl={setCanonicalUrl}
-              breadcrumbTitle={breadcrumbTitle}
-              onChangeBreadcrumbTitle={setBreadcrumbTitle}
-              schemaType={schemaType}
-              onChangeSchemaType={(v) => { setSchemaType(v); setSchemaChanged(true) }}
-              robots={robots}
-              onChangeRobots={setRobots}
-              socialOg={socialOg}
-              onChangeSocialOg={setSocialOg}
-              socialTwitter={socialTwitter}
-              onChangeSocialTwitter={setSocialTwitter}
-              currentContent={currentContent}
-              blocks={blocks}
-            />
-          </div>
-        )}
-
-        {/* ---------------- 3. AI COPILOT SIDEBAR ---------------- */}
-        {aiMode === 'docked' && (
-          <div
-            style={{ width: `${aiWidth}px` }}
-            className="relative z-30 h-full shrink-0 flex-col overflow-hidden border-l border-white/[0.08] bg-surface-elevated flex shadow-2xl"
-          >
-            <StudioAiSidebar
-              isOpen
-              variant="panel"
-              pageContext={articlePageContext}
-              onApplyArticleChanges={handleApplyArticleChanges}
-              onClose={() => setAiMode('idle')}
-              onExpand={() => setAiMode('expanded')}
-              onOpenWidget={() => setAiMode('widget')}
-            />
-          </div>
-        )}
-
-        {aiMode === 'expanded' && (
-          <>
-            <div
-              className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm"
-              onClick={() => setAiMode('docked')}
-              aria-hidden="true"
-            />
-            <div className="fixed inset-y-0 right-0 z-50 w-[min(780px,calc(100vw-4rem))] flex flex-col border-l border-white/10 bg-surface-elevated shadow-2xl">
-              <StudioAiSidebar
-                isOpen
-                variant="panel"
-                isExpanded
-                pageContext={articlePageContext}
-                onApplyArticleChanges={handleApplyArticleChanges}
-                onClose={() => setAiMode('idle')}
-                onCollapse={() => setAiMode('docked')}
-                onOpenWidget={() => setAiMode('widget')}
-              />
-            </div>
-          </>
-        )}
-
-        {aiMode === 'widget' && (
-          <div className="fixed bottom-4 right-4 z-50 h-[min(560px,calc(100vh-6rem))] w-[min(380px,calc(100vw-2rem))] overflow-hidden rounded-2xl border border-white/15 shadow-2xl shadow-black/80">
-            <StudioAiSidebar
-              isOpen
-              variant="widget"
-              pageContext={articlePageContext}
-              onApplyArticleChanges={handleApplyArticleChanges}
-              onClose={() => setAiMode('idle')}
-              onOpenPanel={() => setAiMode('docked')}
-            />
-          </div>
-        )}
-      </div>
-
-      {/* ---------------- 4. MODALS ---------------- */}
-      <ArticlePublicationGateModal
-        violations={gateViolations}
-        onClose={() => setGateViolations([])}
-        onFixSeo={() => {
-          setGateViolations([])
-          handleOpenSeoTab()
-        }}
-      />
-
-      <ArticleLinkModal
-        isOpen={linkModalOpen}
-        onClose={() => setLinkModalOpen(false)}
-        linkTextInput={linkTextInput}
-        onChangeLinkTextInput={setLinkTextInput}
-        linkUrlInput={linkUrlInput}
-        onChangeLinkUrlInput={setLinkUrlInput}
-        onSubmit={(e) => {
-          e.preventDefault()
-          if (!activeLinkBlockId || !linkUrlInput.trim()) return
-          const url = linkUrlInput.trim()
-          const text = linkTextInput.trim() || url
-          const formattedTag = `<a href="${url}">${text}</a>`
-          const targetBlock = blocks.find((b) => b.id === activeLinkBlockId)
-          if (targetBlock && targetBlock.type === 'paragraph') {
-            const newText = targetBlock.text ? `${targetBlock.text} ${formattedTag}` : formattedTag
-            updateBlock(activeLinkBlockId, { text: newText })
-          }
-          setLinkModalOpen(false)
-          setActiveLinkBlockId(null)
-          setLinkUrlInput('')
-          setLinkTextInput('')
-        }}
-      />
-
-      <MediaPickerModal
-        isOpen={mediaPickerOpen}
-        onClose={() => setMediaPickerOpen(false)}
-        onSelect={handleMediaSelect}
-        currentUrl={mediaPickerTarget === 'cover' ? coverUrl : undefined}
-        title={
-          mediaPickerTarget === 'cover'
-            ? 'Pilih Visual Cover Hero (Featured Image)'
-            : 'Pilih Gambar dari Pustaka Media'
-        }
-      />
-
-      {/* Confirmation Modal when Leaving with Unsaved Changes */}
-      <ArticleUnsavedModal
-        isOpen={showUnsavedModal}
-        saving={saving}
-        onCancel={handleCancelLeave}
-        onConfirmDiscard={handleConfirmDiscard}
-        onSaveAndLeave={handleSaveAndLeave}
-      />
-
-      {/* Multi-User Concurrency Collision & Conflict Modal */}
-      {conflictModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fadeIn">
-          <div className="bg-surface-overlay border border-amber-500/50 rounded-2xl p-6 max-w-md w-full shadow-2xl shadow-black/90">
-            <div className="flex items-center gap-3 text-amber-400 mb-3">
-              <AlertTriangle className="w-6 h-6 shrink-0" />
-              <h3 className="text-base font-bold text-white">Konflik Pengeditan Multi-User</h3>
-            </div>
-            <p className="text-xs text-neutral-300 leading-relaxed mb-6">
-              Artikel ini telah disimpan dan diperbarui oleh editor lain di database sejak Anda membukanya.
-              Untuk mencegah menimpa tulisan editor lain tanpa sengaja, silakan tentukan tindakan Anda:
+      <div className="space-y-2 px-3 pt-2 empty:hidden sm:px-4">
+        {pendingLocalDraft && (
+          <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-info/40 bg-info/10 p-3 text-xs text-info-300">
+            <p>
+              Ada salinan lokal dari {new Date(pendingLocalDraft.savedAt).toLocaleString('id-ID')} yang belum disimpan ke server.
             </p>
-            <div className="flex flex-col gap-2.5">
+            <div className="flex gap-2">
               <button
                 type="button"
                 onClick={() => {
-                  setConflictModalOpen(false)
-                  window.location.reload()
+                  setPendingLocalDraft(null)
+                  clearLocalDrafts(editSlug)
                 }}
-                className="w-full py-2.5 px-4 bg-info-500 hover:bg-info text-white font-medium rounded-xl text-xs transition-colors"
+                className="rounded-lg border border-white/20 px-3 py-1.5 font-semibold text-white hover:bg-white/10"
               >
-                Muat Ulang Versi Terbaru dari Database (Disarankan)
+                Buang salinan
               </button>
               <button
                 type="button"
-                onClick={async () => {
-                  setConflictModalOpen(false)
-                  await handleSave(undefined, true)
+                onClick={() => {
+                  dispatch({ type: 'restoreLocal', doc: pendingLocalDraft.doc })
+                  setLocalSavedAt(new Date(pendingLocalDraft.savedAt))
+                  setPendingLocalDraft(null)
+                  setAnnouncement('Salinan lokal dipulihkan. Simpan untuk mengirimnya ke server.')
                 }}
-                className="w-full py-2.5 px-4 bg-white/10 hover:bg-white/15 text-amber-300 font-medium rounded-xl text-xs transition-colors border border-amber-500/30"
+                className="rounded-lg bg-accent-500 px-3 py-1.5 font-bold text-accent-950 hover:bg-accent-300"
               >
-                Paksa Simpan & Timpa Perubahan (Force Overwrite)
-              </button>
-              <button
-                type="button"
-                onClick={() => setConflictModalOpen(false)}
-                className="w-full py-2 px-4 text-neutral-400 hover:text-neutral-200 text-xs transition-colors"
-              >
-                Kembali ke Editor Tanpa Menyimpan
+                Pulihkan
               </button>
             </div>
           </div>
+        )}
+
+        {activeLockUser && (
+          <div className="flex items-start justify-between gap-3 rounded-xl border border-amber-500/40 bg-amber-500/15 p-3 text-xs text-amber-200">
+            <p className="flex items-start gap-2">
+              <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+              <span>
+                <strong>{activeLockUser.name}</strong>
+                {activeLockUser.email ? ` (${activeLockUser.email})` : ''} sedang mengedit artikel ini. Menyimpan bersamaan bisa menimpa perubahan.
+              </span>
+            </p>
+            <button
+              type="button"
+              onClick={() => setActiveLockUser(null)}
+              aria-label="Tutup peringatan editor lain"
+              className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg hover:bg-white/10"
+            >
+              <X className="h-3.5 w-3.5" aria-hidden="true" />
+            </button>
+          </div>
+        )}
+
+        <div role="alert" className="empty:hidden">
+          {notice?.tone === 'error' && (
+            <div className="flex items-center justify-between gap-3 rounded-xl border border-rose-500/40 bg-rose-500/15 p-3 text-xs text-rose-100">
+              <p className="flex items-center gap-2">
+                <AlertTriangle className="h-4 w-4 shrink-0" aria-hidden="true" />
+                {notice.text}
+              </p>
+              <button
+                type="button"
+                onClick={() => setNotice(null)}
+                aria-label="Tutup pesan kesalahan"
+                className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg hover:bg-white/10"
+              >
+                <X className="h-3.5 w-3.5" aria-hidden="true" />
+              </button>
+            </div>
+          )}
         </div>
-      )}
+
+        <div role="status" className="empty:hidden">
+          {notice?.tone === 'success' && (
+            <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-emerald-500/40 bg-emerald-500/15 p-3 text-xs text-emerald-100">
+              <p className="flex items-center gap-2">
+                <CheckCircle2 className="h-4 w-4 shrink-0" aria-hidden="true" />
+                {notice.text}
+              </p>
+              <div className="flex items-center gap-2">
+                {notice.url && (
+                  <a
+                    href={notice.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 rounded-lg bg-emerald-500/20 px-2.5 py-1 font-semibold hover:bg-emerald-500/30"
+                  >
+                    {notice.urlLabel}
+                    <ExternalLink className="h-3 w-3" aria-hidden="true" />
+                    <span className="sr-only">(tab baru)</span>
+                  </a>
+                )}
+                <button
+                  type="button"
+                  onClick={() => setNotice(null)}
+                  aria-label="Tutup pesan"
+                  className="inline-flex h-8 w-8 items-center justify-center rounded-lg hover:bg-white/10"
+                >
+                  <X className="h-3.5 w-3.5" aria-hidden="true" />
+                </button>
+              </div>
+            </div>
+          )}
+          {undo && (
+            <div className="mt-2 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-white/15 bg-white/5 p-3 text-xs text-neutral-100">
+              <p>Blok {undo.index + 1} dihapus.</p>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={undoRemove}
+                  className="inline-flex items-center gap-1 rounded-lg border border-white/20 px-2.5 py-1 font-semibold hover:bg-white/10"
+                >
+                  <RotateCcw className="h-3.5 w-3.5" aria-hidden="true" />
+                  Urungkan
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setUndo(null)}
+                  aria-label="Tutup pemberitahuan hapus blok"
+                  className="inline-flex h-8 w-8 items-center justify-center rounded-lg hover:bg-white/10"
+                >
+                  <X className="h-3.5 w-3.5" aria-hidden="true" />
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <main id="editor-main" className="relative flex min-h-0 w-full flex-1 overflow-hidden">
+        {viewMode === 'full-preview' ? (
+          preview
+        ) : viewMode === 'split-preview' ? (
+          <div className="flex h-full min-h-0 w-full flex-1 flex-col divide-y divide-white/[0.08] overflow-hidden lg:flex-row lg:divide-x lg:divide-y-0">
+            <div className="flex min-h-0 flex-1 flex-col lg:w-1/2">{canvas}</div>
+            <div className="flex min-h-0 flex-1 flex-col lg:w-1/2">{preview}</div>
+          </div>
+        ) : (
+          <div className="flex h-full min-h-0 w-full flex-1 overflow-hidden">
+            {canvas}
+            {showInspector && (
+              <ArticleEditorInspector
+                isOpen={inspectorOpen}
+                asSheet={!isWide}
+                onClose={closeInspector}
+                activeTab={inspectorTab}
+                onTabChange={setInspectorTab}
+                doc={doc}
+                setField={setField}
+                setSlug={setSlug}
+                categoriesList={categoriesList}
+                uploadingCover={uploadingCover}
+                onCoverUpload={handleCoverUpload}
+                onOpenMediaPickerForCover={openCoverPicker}
+                internalLinksCount={seoAnalysis.metrics.internalLinkCount}
+                analysisContent={analysisContent}
+                analysis={seoAnalysis}
+                contentImages={contentImages}
+                seoFocusRequest={seoFocusRequest}
+              />
+            )}
+          </div>
+        )}
+      </main>
+
+      <ArticlePublicationGateModal issues={gateIssues} onClose={() => setGateIssues([])} onFixField={focusGateField} fieldLabel={gateFieldLabel} />
+
+      <MediaPickerModal
+        isOpen={media.open}
+        onClose={() => setMedia((m) => ({ ...m, open: false }))}
+        onSelect={handleMediaSelect}
+        currentUrl={media.target === 'cover' ? doc.coverUrl : undefined}
+        title={media.target === 'cover' ? 'Pilih gambar sampul' : 'Pilih gambar dari pustaka media'}
+      />
+
+      <ArticleUnsavedModal
+        isOpen={leave.open}
+        saving={saving}
+        hasLocalCopy={Boolean(localSavedAt)}
+        onCancel={() => setLeave({ open: false, url: null })}
+        onConfirmDiscard={leaveDiscard}
+        onSaveAndLeave={leaveSave}
+      />
+
+      <ArticleConflictModal
+        open={conflict !== null}
+        serverUpdatedAt={conflict?.serverUpdatedAt ?? null}
+        onClose={() => setConflict(null)}
+        onReload={() => {
+          setConflict(null)
+          dispatch({ type: 'markClean' })
+          // Reload after the dirty guard (beforeunload) has been removed by the state update.
+          setTimeout(() => window.location.reload(), 0)
+        }}
+        onForceOverwrite={() => {
+          setConflict(null)
+          void handleSave(undefined, true)
+        }}
+      />
+
+      <ArticleShortcutsDialog open={shortcutsOpen} onClose={() => setShortcutsOpen(false)} />
     </div>
   )
 }
@@ -1639,8 +1128,8 @@ export default function BuatArtikelStudioPage() {
   return (
     <Suspense
       fallback={
-        <div className="flex h-screen w-screen items-center justify-center bg-[var(--studio-bg)] font-mono text-xs text-neutral-400">
-          Memuat Editor Studio…
+        <div className="studio-admin flex h-[100dvh] w-full items-center justify-center bg-[var(--studio-bg)] text-sm text-neutral-300" role="status">
+          Memuat editor…
         </div>
       }
     >

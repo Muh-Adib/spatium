@@ -1,8 +1,6 @@
 'use client'
 
-import React, { useState, useMemo } from 'react'
-import Image from 'next/image'
-import Link from 'next/link'
+import { memo, useState, useMemo } from 'react'
 import { siteConfig } from '@/config/site'
 import {
   Monitor,
@@ -14,7 +12,6 @@ import {
   Clock,
   User,
   Calendar,
-  Layers,
   ListTree,
 } from 'lucide-react'
 import { ContentBlock, generateHeadingSlug } from '@/lib/articles/blockEditor'
@@ -38,7 +35,7 @@ interface ArticleLivePreviewProps {
 
 type DeviceMode = 'desktop' | 'tablet' | 'mobile'
 
-export function ArticleLivePreview({
+export const ArticleLivePreview = memo(function ArticleLivePreview({
   title,
   slug,
   category,
@@ -100,7 +97,7 @@ export function ArticleLivePreview({
             <span>LIVE PREVIEW</span>
           </div>
           <span className="text-xs font-mono text-neutral-400 hidden sm:inline truncate max-w-[200px]">
-            /artikel/{slug || 'preview'}
+            /journal/{slug || 'preview'}
           </span>
         </div>
 
@@ -109,44 +106,47 @@ export function ArticleLivePreview({
           <button
             type="button"
             onClick={() => setDevice('desktop')}
-            title="Desktop View (100%)"
-            className={`p-1 rounded-md transition-all ${
+            aria-label="Pratinjau Desktop (100%)"
+            aria-pressed={device === 'desktop'}
+            className={`p-1.5 rounded-md transition-all ${
               device === 'desktop'
                 ? 'bg-white/20 text-white'
                 : 'text-neutral-400 hover:text-white'
             }`}
           >
-            <Monitor className="w-3.5 h-3.5" />
+            <Monitor className="w-3.5 h-3.5" aria-hidden="true" />
           </button>
           <button
             type="button"
             onClick={() => setDevice('tablet')}
-            title="Tablet View (768px)"
-            className={`p-1 rounded-md transition-all ${
+            aria-label="Pratinjau Tablet (768px)"
+            aria-pressed={device === 'tablet'}
+            className={`p-1.5 rounded-md transition-all ${
               device === 'tablet'
                 ? 'bg-white/20 text-white'
                 : 'text-neutral-400 hover:text-white'
             }`}
           >
-            <Tablet className="w-3.5 h-3.5" />
+            <Tablet className="w-3.5 h-3.5" aria-hidden="true" />
           </button>
           <button
             type="button"
             onClick={() => setDevice('mobile')}
-            title="Mobile View (375px)"
-            className={`p-1 rounded-md transition-all ${
+            aria-label="Pratinjau Seluler (375px)"
+            aria-pressed={device === 'mobile'}
+            className={`p-1.5 rounded-md transition-all ${
               device === 'mobile'
                 ? 'bg-white/20 text-white'
                 : 'text-neutral-400 hover:text-white'
             }`}
           >
-            <Smartphone className="w-3.5 h-3.5" />
+            <Smartphone className="w-3.5 h-3.5" aria-hidden="true" />
           </button>
         </div>
 
         {slug && (
           <a
-            href={`${siteConfig.url}/artikel/${slug}`}
+            href={`${siteConfig.url}/journal/${slug}`}
             target="_blank"
             rel="noopener noreferrer"
             className="hidden sm:inline-flex items-center gap-1 text-[11px] font-mono text-accent-400 hover:text-accent-300 transition-colors"
@@ -171,7 +171,7 @@ export function ArticleLivePreview({
           {/* Simulated Public Article Hero */}
           <div className="relative overflow-hidden bg-surface-overlay px-6 py-10 sm:px-10 sm:py-14 border-b border-white/10">
             {/* Ambient Lighting Glow */}
-            <div className="absolute top-0 right-0 w-80 h-80 bg-[#FFD600]/15 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute top-0 right-0 w-80 h-80 bg-[#4d8bff]/15 rounded-full blur-3xl pointer-events-none" />
             <div className="absolute bottom-0 left-0 w-64 h-64 bg-accent-500/10 rounded-full blur-2xl pointer-events-none" />
 
             <div className="relative z-10 space-y-4">
@@ -181,11 +181,11 @@ export function ArticleLivePreview({
                 <span>/</span>
                 <span>Artikel</span>
                 <span>/</span>
-                <span className="text-[#FFD600] font-semibold">{category}</span>
+                <span className="text-[#4d8bff] font-semibold">{category}</span>
               </div>
 
               {/* Category Badge */}
-              <span className="inline-block px-3 py-1 rounded-full bg-surface-elevated text-[#FFD600] border border-[#FFD600]/30 font-mono text-xs font-semibold">
+              <span className="inline-block px-3 py-1 rounded-full bg-surface-elevated text-[#4d8bff] border border-[#4d8bff]/30 font-mono text-xs font-semibold">
                 {category}
               </span>
 
@@ -197,17 +197,17 @@ export function ArticleLivePreview({
               {/* Metadata row */}
               <div className="flex flex-wrap items-center gap-4 text-xs font-mono text-neutral-300 pt-4 border-t border-white/10">
                 <div className="flex items-center gap-1.5">
-                  <User className="w-3.5 h-3.5 text-[#FFD600]" />
+                  <User className="w-3.5 h-3.5 text-[#4d8bff]" />
                   <span>
-                    Oleh: <strong className="text-white">{author || 'Tim UNIMASI'}</strong>
+                    Oleh: <strong className="text-white">{author || 'Tim SPATIUM'}</strong>
                   </span>
                 </div>
                 <div className="flex items-center gap-1.5">
-                  <Calendar className="w-3.5 h-3.5 text-[#FFD600]" />
+                  <Calendar className="w-3.5 h-3.5 text-[#4d8bff]" />
                   <span>{dateString}</span>
                 </div>
                 <div className="flex items-center gap-1.5">
-                  <Clock className="w-3.5 h-3.5 text-[#FFD600]" />
+                  <Clock className="w-3.5 h-3.5 text-[#4d8bff]" />
                   <span>{readingTimeMinutes} menit baca</span>
                 </div>
               </div>
@@ -232,7 +232,7 @@ export function ArticleLivePreview({
           <div className="p-6 sm:p-10 space-y-6">
             {/* Excerpt Lead Box */}
             {excerpt && (
-              <div className="rounded-2xl border-l-4 border-[#FFD600] bg-[#FFD600]/[0.05] p-5">
+              <div className="rounded-2xl border-l-4 border-[#4d8bff] bg-[#4d8bff]/[0.05] p-5">
                 <p className="text-sm sm:text-base font-medium text-neutral-200 italic leading-relaxed">
                   &ldquo;{excerpt}&rdquo;
                 </p>
@@ -242,10 +242,7 @@ export function ArticleLivePreview({
             {/* Hierarchical Table of Contents (Daftar Isi) */}
             {tocItems.length >= 2 && (
               <nav aria-label="Daftar Isi Artikel" className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 sm:p-5 backdrop-blur-sm shadow-soft-sm">
-                <div
-                  className="flex items-center justify-between cursor-pointer select-none"
-                  onClick={() => setTocExpanded((prev) => !prev)}
-                >
+                <div className="flex items-center justify-between select-none">
                   <div className="flex items-center gap-2">
                     <ListTree className="w-4 h-4 text-accent-400" />
                     <span className="text-xs sm:text-sm font-bold text-white tracking-wide uppercase font-mono">
@@ -257,7 +254,9 @@ export function ArticleLivePreview({
                   </div>
                   <button
                     type="button"
-                    className="text-xs text-neutral-400 hover:text-white flex items-center gap-1 font-mono transition-colors"
+                    onClick={() => setTocExpanded((prev) => !prev)}
+                    aria-expanded={tocExpanded}
+                    className="text-xs text-neutral-300 hover:text-white flex items-center gap-1 font-mono transition-colors"
                   >
                     <span>{tocExpanded ? 'Tutup' : 'Lihat Semua'}</span>
                     <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${tocExpanded ? 'rotate-180' : ''}`} />
@@ -436,6 +435,7 @@ export function ArticleLivePreview({
                           <button
                             type="button"
                             onClick={() => setExpandedFaqIndex(isOpen ? null : idx)}
+                            aria-expanded={isOpen}
                             className="w-full p-4 text-left flex items-center justify-between gap-3 text-sm font-bold text-white hover:bg-white/5 transition-colors"
                           >
                             <span>{block.question}</span>
@@ -554,4 +554,4 @@ export function ArticleLivePreview({
       </div>
     </div>
   )
-}
+})

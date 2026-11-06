@@ -17,26 +17,13 @@ export async function GET(request: NextRequest) {
   const limit = limitParam ? parseInt(limitParam, 10) : undefined
 
   try {
-    let [services, categories] = await Promise.all([
-      getServices(limit),
-      getServiceCategories(),
+    const [services, categories] = await Promise.all([
+      getServices(limit, { publishedOnly: true }),
+      getServiceCategories({ publishedOnly: true }),
     ])
-
-    if (!services || services.length === 0) {
-      try {
-        const seedServices = require('@/data/seed/seed_services.json')
-        services = limit ? seedServices.slice(0, limit) : seedServices
-      } catch (err) { console.warn("[API observable error]:", err) }
-    }
-
     return jsonResponse({ services, categories })
   } catch (err) {
     console.error('[delivery:services] Error:', err)
-    try {
-      const seedServices = require('@/data/seed/seed_services.json')
-      return jsonResponse({ services: limit ? seedServices.slice(0, limit) : seedServices, categories: [] })
-    } catch {
-      return jsonResponse({ error: 'Failed to retrieve services' }, 500)
-    }
+    return jsonResponse({ error: 'Failed to retrieve services' }, 500)
   }
 }

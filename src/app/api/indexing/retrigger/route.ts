@@ -169,7 +169,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    targetUrl = `${siteBaseUrl}/artikel/${article.slug}`
+    targetUrl = `${siteBaseUrl}/journal/${article.slug}`
     entityType = 'article'
     entityId = article.id
   } else if (type === 'page' && idOrSlug !== undefined) {
@@ -214,8 +214,8 @@ export async function POST(request: NextRequest) {
 
       // Cross-reference status if URL corresponds to an Article or Page
       const path = parsed.pathname.toLowerCase()
-      if (path.startsWith('/artikel/')) {
-        const slug = path.replace(/^\/artikel\//, '').replace(/\/+$/, '')
+      if (path.startsWith('/journal/') || path.startsWith('/artikel/')) {
+        const slug = path.replace(/^\/(?:journal|artikel)\//, '').replace(/\/+$/, '')
         const article = await prisma.orm.public.Article.where({ slug }).first()
         if (article) {
           entityType = 'article'

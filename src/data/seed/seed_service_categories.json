@@ -2,45 +2,369 @@
   {
     "slug": "filmmaking-vfx",
     "title": "Filmmaking & VFX",
-    "tag": "01",
-    "shortDescription": "Virtual scouting, set reconstruction presisi 3DGS, Pre-visualization (Previz), dan integrasi kamera Unreal Engine untuk produksi film dan sinema modern.",
+    "tag": "Suitable for Previz, Techviz, and VFX.",
+    "shortDescription": "Set reconstruction, pre-visualization, location planning, dan on-site supervision berbasis lokasi nyata.",
+    "heroImage": "/images/spatium/web/uc-filmmaking.webp",
+    "themePreset": "filmmaking",
     "order": 1,
     "status": "published",
     "showInNav": true,
-    "metaTitle": "Filmmaking & VFX — SPATIUM Spatial Technology Studio",
-    "metaDescription": "Virtual scouting, set reconstruction presisi 3DGS, Previz, dan simulasi kamera Unreal Engine untuk produksi film modern."
+    "metaTitle": "Filmmaking & VFX — Digital Twin & 3D Gaussian Splatting",
+    "metaDescription": "Digital twin untuk filmmaking dari SPATIUM: set reconstruction, pre-visualization, tech-visualization, location planning, dan on-site supervision dengan 3D…",
+    "keyOutcomes": [
+      {
+        "label": "deliverable",
+        "value": "Raw point cloud lokasi"
+      },
+      {
+        "label": "deliverable",
+        "value": "Scene 3D Gaussian Splat"
+      },
+      {
+        "label": "deliverable",
+        "value": "Aset 3D untuk concept & previz"
+      },
+      {
+        "label": "deliverable",
+        "value": "Referensi techviz"
+      },
+      {
+        "label": "tool",
+        "value": "Laser scan"
+      },
+      {
+        "label": "tool",
+        "value": "Point cloud"
+      },
+      {
+        "label": "tool",
+        "value": "3D Gaussian Splatting"
+      },
+      {
+        "label": "imageAlt",
+        "value": "Kru film bekerja di depan rekonstruksi digital set bangunan klasik"
+      }
+    ],
+    "blocks": [
+      {
+        "type": "paragraph",
+        "id": "p-filmmaking-vfx-1",
+        "text": "Lokasi syuting direkam sekali, lalu menjadi fondasi spasial untuk seluruh tim produksi. Dari raw point cloud, lokasi direkonstruksi menjadi 3D Gaussian Splat yang bisa dijelajahi, kemudian dikembangkan menjadi 3D concept dan pre-visualization."
+      },
+      {
+        "type": "paragraph",
+        "id": "p-filmmaking-vfx-2",
+        "text": "Dengan geometri lokasi yang nyata, tim dapat menyusun tech-visualization — posisi kamera, lampu, dan kru — sebelum hari syuting. Dari sekadar menebak, menjadi memverifikasi."
+      },
+      {
+        "type": "faq-accordion",
+        "id": "faq-filmmaking-vfx",
+        "title": "Pertanyaan Umum",
+        "items": [
+          {
+            "question": "Apa bedanya digital twin dengan foto atau video?",
+            "answer": "Foto hanya menangkap gambar dan video hanya menangkap momen. Digital twin menangkap seluruh ruang, objek di sekitarnya, dan konteksnya — sehingga ruang bisa dijelajahi bebas dari sudut mana pun, diukur, dan dikunjungi kembali kapan saja."
+          },
+          {
+            "question": "Apa itu 3D Gaussian Splat?",
+            "answer": "Representasi 3D yang ringan, fotorealistis, dan imersif yang dibangun dari data capture ruang nyata. Gaussian splat efisien untuk rekonstruksi 3D tanpa menurunkan kualitas maupun performa, dan cocok untuk pengalaman real-time, tur virtual, serta aplikasi interaktif."
+          },
+          {
+            "question": "Apakah satu kali capture bisa dipakai untuk banyak kebutuhan?",
+            "answer": "Ya — prinsip kami adalah capture once, use everywhere. Data yang sama bisa menghasilkan point cloud, mesh, tekstur, panorama, maupun output 3D, 2D, interaktif, dan imersif."
+          }
+        ]
+      },
+      {
+        "type": "internal-links",
+        "id": "links-filmmaking-vfx",
+        "title": "Tautan terkait",
+        "links": [
+          {
+            "title": "Marketing & Branding",
+            "url": "/services/marketing-branding"
+          },
+          {
+            "title": "Lihat scene portofolio",
+            "url": "/portfolio"
+          },
+          {
+            "title": "Diskusikan proyek film",
+            "url": "/contact"
+          }
+        ]
+      }
+    ]
   },
   {
     "slug": "marketing-branding",
     "title": "Marketing & Branding",
-    "tag": "02",
-    "shortDescription": "Tur spasial fotorealistik 3D Gaussian Splatting, display interaktif WebGL, dan integrasi Google Maps digital twin yang memicu Zero Moment of Truth (ZMOT).",
+    "tag": "Suitable for First Impression — Zero Moment of Truth (ZMOT).",
+    "shortDescription": "Virtual experience, spatial tour, interactive showcase, dan aset digital untuk penjualan dan bisnis.",
+    "heroImage": "/images/spatium/web/uc-marketing.webp",
+    "themePreset": "marketing",
     "order": 2,
     "status": "published",
     "showInNav": true,
-    "metaTitle": "Marketing & Branding — SPATIUM Spatial Technology Studio",
-    "metaDescription": "Tur spasial fotorealistik 3D Gaussian Splatting dan display interaktif WebGL untuk meningkatkan konversi dan direct booking."
+    "metaTitle": "Marketing & Branding — Digital Twin & 3D Gaussian Splatting",
+    "metaDescription": "Spatial tour dan interactive showcase dari SPATIUM untuk marketing & branding: beri calon pelanggan first impression yang bisa dijelajahi (Zero Moment of…",
+    "keyOutcomes": [
+      {
+        "label": "deliverable",
+        "value": "Spatial tour interaktif"
+      },
+      {
+        "label": "deliverable",
+        "value": "3D map ruang"
+      },
+      {
+        "label": "deliverable",
+        "value": "Display produk 3D"
+      },
+      {
+        "label": "deliverable",
+        "value": "Tautan scene yang bisa dibagikan"
+      },
+      {
+        "label": "tool",
+        "value": "3D Gaussian Splatting"
+      },
+      {
+        "label": "tool",
+        "value": "Interactive web viewer"
+      },
+      {
+        "label": "imageAlt",
+        "value": "Spatial tour villa dengan kolam renang dan denah 3D interaktif"
+      }
+    ],
+    "blocks": [
+      {
+        "type": "paragraph",
+        "id": "p-marketing-branding-1",
+        "text": "Sebuah tempat bisa dilihat dari mana saja — tapi bisakah juga dialami dari mana saja? Spatial tour memberi calon pelanggan kesempatan berjalan, menjelajah, dan merasakan ruang Anda sebelum mereka datang."
+      },
+      {
+        "type": "paragraph",
+        "id": "p-marketing-branding-2",
+        "text": "Momen pertama ketika orang mencari dan menilai tempat Anda (Zero Moment of Truth) menjadi pengalaman yang nyata: peta 3D, eksterior, interior, hingga detail produk dalam satu showcase interaktif."
+      },
+      {
+        "type": "faq-accordion",
+        "id": "faq-marketing-branding",
+        "title": "Pertanyaan Umum",
+        "items": [
+          {
+            "question": "Apa bedanya digital twin dengan foto atau video?",
+            "answer": "Foto hanya menangkap gambar dan video hanya menangkap momen. Digital twin menangkap seluruh ruang, objek di sekitarnya, dan konteksnya — sehingga ruang bisa dijelajahi bebas dari sudut mana pun, diukur, dan dikunjungi kembali kapan saja."
+          },
+          {
+            "question": "Apa itu 3D Gaussian Splat?",
+            "answer": "Representasi 3D yang ringan, fotorealistis, dan imersif yang dibangun dari data capture ruang nyata. Gaussian splat efisien untuk rekonstruksi 3D tanpa menurunkan kualitas maupun performa, dan cocok untuk pengalaman real-time, tur virtual, serta aplikasi interaktif."
+          },
+          {
+            "question": "Apakah satu kali capture bisa dipakai untuk banyak kebutuhan?",
+            "answer": "Ya — prinsip kami adalah capture once, use everywhere. Data yang sama bisa menghasilkan point cloud, mesh, tekstur, panorama, maupun output 3D, 2D, interaktif, dan imersif."
+          }
+        ]
+      },
+      {
+        "type": "internal-links",
+        "id": "links-marketing-branding",
+        "title": "Tautan terkait",
+        "links": [
+          {
+            "title": "Batuna Resto Manado",
+            "url": "/portfolio/batuna-resto-manado-exterior"
+          },
+          {
+            "title": "Kidang Nyaring Cafe",
+            "url": "/portfolio/kidang-nyaring-cafe-exterior"
+          },
+          {
+            "title": "Konsultasikan ruang Anda",
+            "url": "/contact"
+          }
+        ]
+      }
+    ]
   },
   {
     "slug": "entertainment-installation",
     "title": "Entertainment & Installation",
-    "tag": "03",
-    "shortDescription": "Kalibrasi spasial presisi untuk instalasi seni imersif, projection mapping fasad arsitektural, dan pengalaman interaktif berbasis lokasi.",
+    "tag": "Real places as the canvas for immersive experiences.",
+    "shortDescription": "VR / AR experience, projection mapping, interactive installation, dan location-based entertainment.",
+    "heroImage": "/images/spatium/web/uc-entertainment.webp",
+    "themePreset": "entertainment",
     "order": 3,
     "status": "published",
     "showInNav": true,
-    "metaTitle": "Entertainment & Installation — SPATIUM Spatial Technology Studio",
-    "metaDescription": "Kalibrasi projection mapping fasad arsitektural, environment AR/VR, dan instalasi interaktif museum serta pameran seni digital."
+    "metaTitle": "Entertainment & Installation — Digital Twin & 3D Gaussian Splatting",
+    "metaDescription": "Ruang nyata sebagai kanvas pengalaman imersif: VR/AR experience, projection mapping, instalasi interaktif, dan location-based entertainment dari SPATIUM.",
+    "keyOutcomes": [
+      {
+        "label": "deliverable",
+        "value": "Digital twin venue"
+      },
+      {
+        "label": "deliverable",
+        "value": "Aset 3D untuk konten imersif"
+      },
+      {
+        "label": "deliverable",
+        "value": "Referensi geometri untuk proyeksi"
+      },
+      {
+        "label": "tool",
+        "value": "Point cloud"
+      },
+      {
+        "label": "tool",
+        "value": "Mesh"
+      },
+      {
+        "label": "tool",
+        "value": "3D Gaussian Splatting"
+      },
+      {
+        "label": "imageAlt",
+        "value": "Pengunjung di instalasi imersif dengan proyeksi paus bercahaya"
+      }
+    ],
+    "blocks": [
+      {
+        "type": "paragraph",
+        "id": "p-entertainment-installation-1",
+        "text": "Digital twin memberi seniman 3D dan visual tempat nyata untuk berkarya. Ruang yang sudah direkam menjadi kanvas untuk pengalaman VR/AR, projection mapping, dan instalasi interaktif."
+      },
+      {
+        "type": "paragraph",
+        "id": "p-entertainment-installation-2",
+        "text": "Karena data menyimpan skala dan detail asli, konten bisa dirancang presisi mengikuti ruang tempat ia akan ditampilkan."
+      },
+      {
+        "type": "faq-accordion",
+        "id": "faq-entertainment-installation",
+        "title": "Pertanyaan Umum",
+        "items": [
+          {
+            "question": "Apa bedanya digital twin dengan foto atau video?",
+            "answer": "Foto hanya menangkap gambar dan video hanya menangkap momen. Digital twin menangkap seluruh ruang, objek di sekitarnya, dan konteksnya — sehingga ruang bisa dijelajahi bebas dari sudut mana pun, diukur, dan dikunjungi kembali kapan saja."
+          },
+          {
+            "question": "Apa itu 3D Gaussian Splat?",
+            "answer": "Representasi 3D yang ringan, fotorealistis, dan imersif yang dibangun dari data capture ruang nyata. Gaussian splat efisien untuk rekonstruksi 3D tanpa menurunkan kualitas maupun performa, dan cocok untuk pengalaman real-time, tur virtual, serta aplikasi interaktif."
+          },
+          {
+            "question": "Apakah satu kali capture bisa dipakai untuk banyak kebutuhan?",
+            "answer": "Ya — prinsip kami adalah capture once, use everywhere. Data yang sama bisa menghasilkan point cloud, mesh, tekstur, panorama, maupun output 3D, 2D, interaktif, dan imersif."
+          }
+        ]
+      },
+      {
+        "type": "internal-links",
+        "id": "links-entertainment-installation",
+        "title": "Tautan terkait",
+        "links": [
+          {
+            "title": "Memory & Documentary",
+            "url": "/services/memory-documentary"
+          },
+          {
+            "title": "Diskusikan instalasi Anda",
+            "url": "/contact"
+          }
+        ]
+      }
+    ]
   },
   {
     "slug": "memory-documentary",
     "title": "Memory & Documentary",
-    "tag": "04",
-    "shortDescription": "Preservasi spasial 3D fotorealistik momen pernikahan mewah, kembaran digital cagar budaya bersejarah, dan arsip properti keluarga abadi.",
+    "tag": "Suitable for immersive memory preservation.",
+    "shortDescription": "Immersive wedding memory, dokumentasi acara, cultural heritage, arsip pribadi & keluarga, dan interactive storytelling.",
+    "heroImage": "/images/spatium/web/uc-memory.webp",
+    "themePreset": "memory",
     "order": 4,
     "status": "published",
     "showInNav": true,
-    "metaTitle": "Memory & Documentary — SPATIUM Spatial Technology Studio",
-    "metaDescription": "Preservasi spasial 3D momen pernikahan mewah, digital twin cagar budaya bersejarah, dan arsip properti keluarga abadi."
+    "metaTitle": "Memory & Documentary — Digital Twin & 3D Gaussian Splatting",
+    "metaDescription": "Preservasi memori imersif dari SPATIUM: wedding memory, dokumentasi acara, cultural heritage, dan arsip keluarga dalam 3D Gaussian Splat yang bisa dijelajahi.",
+    "keyOutcomes": [
+      {
+        "label": "deliverable",
+        "value": "Scene 3D Gaussian Splat venue"
+      },
+      {
+        "label": "deliverable",
+        "value": "3D map ruang"
+      },
+      {
+        "label": "deliverable",
+        "value": "Galeri objek 3D"
+      },
+      {
+        "label": "deliverable",
+        "value": "Viewer interaktif"
+      },
+      {
+        "label": "tool",
+        "value": "3D Gaussian Splatting"
+      },
+      {
+        "label": "tool",
+        "value": "Interactive web viewer"
+      },
+      {
+        "label": "imageAlt",
+        "value": "Dekorasi pernikahan dan denah 3D venue dalam pengalaman spasial"
+      }
+    ],
+    "blocks": [
+      {
+        "type": "paragraph",
+        "id": "p-memory-documentary-1",
+        "text": "Foto mengabadikan gambar, video mengabadikan momen. Spatial capture mengabadikan ruangnya — dekorasi, tata letak, dan suasana — sehingga momen bisa dikunjungi kembali, kapan saja, dari mana saja."
+      },
+      {
+        "type": "paragraph",
+        "id": "p-memory-documentary-2",
+        "text": "Venue pernikahan, altar, hingga detail bunga direkam dan disajikan sebagai pengalaman interaktif lengkap dengan 3D map, galeri foto, dan galeri objek 3D."
+      },
+      {
+        "type": "faq-accordion",
+        "id": "faq-memory-documentary",
+        "title": "Pertanyaan Umum",
+        "items": [
+          {
+            "question": "Apa bedanya digital twin dengan foto atau video?",
+            "answer": "Foto hanya menangkap gambar dan video hanya menangkap momen. Digital twin menangkap seluruh ruang, objek di sekitarnya, dan konteksnya — sehingga ruang bisa dijelajahi bebas dari sudut mana pun, diukur, dan dikunjungi kembali kapan saja."
+          },
+          {
+            "question": "Apa itu 3D Gaussian Splat?",
+            "answer": "Representasi 3D yang ringan, fotorealistis, dan imersif yang dibangun dari data capture ruang nyata. Gaussian splat efisien untuk rekonstruksi 3D tanpa menurunkan kualitas maupun performa, dan cocok untuk pengalaman real-time, tur virtual, serta aplikasi interaktif."
+          },
+          {
+            "question": "Apakah satu kali capture bisa dipakai untuk banyak kebutuhan?",
+            "answer": "Ya — prinsip kami adalah capture once, use everywhere. Data yang sama bisa menghasilkan point cloud, mesh, tekstur, panorama, maupun output 3D, 2D, interaktif, dan imersif."
+          }
+        ]
+      },
+      {
+        "type": "internal-links",
+        "id": "links-memory-documentary",
+        "title": "Tautan terkait",
+        "links": [
+          {
+            "title": "Wedding Venue",
+            "url": "/portfolio/wedding-venue"
+          },
+          {
+            "title": "Abadikan momen Anda",
+            "url": "/contact"
+          }
+        ]
+      }
+    ]
   }
 ]

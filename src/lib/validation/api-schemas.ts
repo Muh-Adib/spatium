@@ -98,16 +98,6 @@ export const portfolioMutationSchema = z.object({
   relatedKeyphrases: z.unknown().optional(),
 })
 
-// --- 6. AI Chat Mutation Schema ----------------------------------------------
-export const aiChatMutationSchema = z.object({
-  message: z.string().min(1, 'Pesan tidak boleh kosong').max(10000, 'Pesan melebihi batas karakter'),
-  history: z.array(z.object({
-    role: z.enum(['user', 'assistant', 'model', 'system']),
-    content: z.string().max(20000),
-  })).optional().default([]),
-  context: z.record(z.string(), z.unknown()).optional(),
-})
-
 // --- 7. Database Reset Operation Schema --------------------------------------
 export const databaseResetSchema = z.object({
   confirm: z.literal(true, {

@@ -4,7 +4,6 @@ import { HeroCinemaBlock } from '../src/blocks/HeroCinemaBlock'
 import { ProcessTimelineBlock } from '../src/blocks/ProcessTimelineBlock'
 import { StatsTickerBlock } from '../src/blocks/StatsTickerBlock'
 import { InteractiveCtaBlock, TextEditorialBlock } from '../src/blocks/InteractiveCtaBlock'
-import { BlockRenderer as DedicatedBlockRenderer } from '../src/blocks/BlockRenderer'
 import { BlockRenderer as ComponentBlockRenderer } from '../src/components/blocks/BlockRenderer'
 import * as CatalogBlocks from '../src/components/blocks/CatalogBlocks'
 import { parseBlocks, blockSchema } from '../src/lib/blocks/schema'
@@ -42,7 +41,7 @@ function assertCondition(suite: string, name: string, condition: boolean, messag
 }
 
 console.log('================================================================');
-console.log('STARTING EMPIRICAL HARNESS: UNIMASI Milestone 1 Block Verification');
+console.log('STARTING EMPIRICAL HARNESS: SPATIUM Milestone 1 Block Verification');
 console.log('================================================================\n');
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -321,28 +320,6 @@ assertRender('ComponentBlockRenderer', '4.5 dedicated cinema blocks mixture', ()
       { type: 'interactive-cta' },
       { type: 'text-editorial' }
     ]
-  })
-)
-
-// 4.2 Dedicated BlockRenderer (src/blocks/BlockRenderer.tsx)
-assertRender('DedicatedBlockRenderer', '4.6 undefined blocks', () =>
-  React.createElement(DedicatedBlockRenderer, { blocks: undefined })
-)
-assertRender('DedicatedBlockRenderer', '4.7 empty array []', () =>
-  React.createElement(DedicatedBlockRenderer, { blocks: [] })
-)
-assertRender('DedicatedBlockRenderer', '4.8 array with null, undefined, empty object', () =>
-  React.createElement(DedicatedBlockRenderer, { blocks: [null as any, undefined as any, {} as any] })
-)
-assertRender('DedicatedBlockRenderer', '4.9 dedicated cinema blocks mixture', () =>
-  React.createElement(DedicatedBlockRenderer, {
-    blocks: [
-      { id: '1', type: 'hero-cinema', data: { headline: 'Hero Cinema' } },
-      { id: '2', type: 'process-timeline', data: { title: 'Process' } },
-      { id: '3', type: 'stats-ticker', data: { title: 'Stats' } },
-      { id: '4', type: 'interactive-cta', data: { headline: 'CTA' } },
-      { id: '5', type: 'text-editorial', data: { headline: 'Editorial' } }
-    ] as any
   })
 )
 

@@ -38,9 +38,9 @@ export function GaussianSplatViewer({
   title,
   client,
   category,
-  pointCount = '12.4M Splats',
-  accuracy = 'Sub-centimeter (5mm)',
-  captureMethod = 'Terrestrial LiDAR + High-Density Photogrammetry',
+  // Specs render only when measured values are supplied (no fictional defaults).
+  pointCount,
+  accuracy,
   scenePairSlug,
   scenePairLabel,
   heightClass = 'h-[520px] md:h-[640px]',
@@ -54,6 +54,7 @@ export function GaussianSplatViewer({
   // Resolve source URL
   let embedUrl = liveUrl || ''
   if (!embedUrl && splatId) {
+    // `/s?id=` is SuperSplat's embeddable viewer; `/scene/<id>` is the public page.
     embedUrl = `https://superspl.at/s?id=${splatId}`
   }
 
@@ -111,10 +112,10 @@ export function GaussianSplatViewer({
             </div>
           </div>
           <p className="text-xs uppercase font-mono tracking-widest text-cyan-400 font-semibold mb-1">
-            Loading Neural Radiance Field
+            Memuat 3D Gaussian Splat
           </p>
           <p className="text-[11px] text-neutral-400 font-mono">
-            Memuat {pointCount} · WebGL 60 FPS
+            {pointCount ? `${pointCount} · ` : ''}Viewer SuperSplat
           </p>
         </div>
       )}
@@ -128,14 +129,12 @@ export function GaussianSplatViewer({
             <span className="text-[11px] font-mono tracking-wider uppercase text-cyan-400 font-semibold">
               3DGS REALTIME
             </span>
-            <span className="text-white/30 text-xs">|</span>
-            <span className="text-[11px] text-neutral-300 font-mono hidden sm:inline">
-              {pointCount}
-            </span>
-            <span className="text-white/30 text-xs hidden sm:inline">|</span>
-            <span className="text-[11px] text-neutral-300 font-mono hidden md:inline">
-              {accuracy}
-            </span>
+            {pointCount ? (
+              <span className="text-[11px] text-neutral-300 font-mono hidden sm:inline">| {pointCount}</span>
+            ) : null}
+            {accuracy ? (
+              <span className="text-[11px] text-neutral-300 font-mono hidden md:inline">| {accuracy}</span>
+            ) : null}
           </div>
 
           {category && (

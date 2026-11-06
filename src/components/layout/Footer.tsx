@@ -1,8 +1,14 @@
 import Link from 'next/link'
-import { CONTACT, SOCIALS } from '@/data/site'
-import { SERVICES } from '@/data/services'
+import { CONTACT, NAV, SOCIALS } from '@/data/site'
+import { telHref, whatsappHref } from '@/config/site'
 import { Icon } from '@/components/Icon'
 import './footer.css'
+
+// Client-rendered (inside SiteShell), so the service list uses the static
+// navigation-structure fallback in NAV rather than a DB query.
+const SERVICES = (NAV.find((item) => item.to === '/services')?.children ?? [])
+  .filter((child) => child.to !== '/services')
+  .map((child) => ({ slug: child.to.replace('/services/', ''), name: child.label }))
 
 export function Footer() {
   const year = new Date().getFullYear()
@@ -15,7 +21,7 @@ export function Footer() {
           <div className="site-footer__brand">
             <Link href="/" className="footer-logo" aria-label="SPATIUM — Spatial Technology Studio">
               <img
-                src="/images/spatium-logo.png"
+                src="/brand/logo-spatium-white.svg"
                 alt="SPATIUM — Spatial Technology Studio"
                 width={140}
                 height={54}
@@ -72,14 +78,32 @@ export function Footer() {
                 <Icon name="mail" size={16} />
                 <a href={`mailto:${CONTACT.email}`}>{CONTACT.email}</a>
               </li>
-              <li>
-                <Icon name="pin" size={16} />
-                <span>{CONTACT.location}</span>
-              </li>
-              <li>
-                <Icon name="clock" size={16} />
-                <span>{CONTACT.hours}</span>
-              </li>
+              {CONTACT.phone && telHref(CONTACT.phone) && (
+                <li>
+                  <Icon name="phone" size={16} />
+                  <a href={telHref(CONTACT.phone) ?? undefined}>{CONTACT.phone}</a>
+                </li>
+              )}
+              {whatsappHref(CONTACT.whatsapp) && (
+                <li>
+                  <Icon name="phone" size={16} />
+                  <a href={whatsappHref(CONTACT.whatsapp) ?? undefined} target="_blank" rel="noreferrer noopener">
+                    WhatsApp
+                  </a>
+                </li>
+              )}
+              {CONTACT.location && (
+                <li>
+                  <Icon name="pin" size={16} />
+                  <span>{CONTACT.location}</span>
+                </li>
+              )}
+              {CONTACT.hours && (
+                <li>
+                  <Icon name="clock" size={16} />
+                  <span>{CONTACT.hours}</span>
+                </li>
+              )}
             </ul>
             <ul className="site-footer__socials">
               {SOCIALS.map((social) => (
@@ -95,10 +119,10 @@ export function Footer() {
         </div>
 
         <div className="site-footer__bottom">
-          <p>© {year} UNIMASI. All rights reserved.</p>
+          <p>© {year} SPATIUM — Spatial Technology Studio.</p>
           <p className="site-footer__note">
-            Portfolio and article imagery on this site are original studio artwork and illustrative
-            placeholders — no third-party or client assets are used.
+            Visual di situs ini berasal dari capture dan deck produk SPATIUM. Scene interaktif
+            disajikan melalui SuperSplat.
           </p>
         </div>
       </div>

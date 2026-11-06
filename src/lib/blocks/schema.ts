@@ -1,7 +1,7 @@
 /**
  * Block Schema Contract (K-2)
  *
- * Defines Zod schemas for all dynamic presentation blocks in UNIMASI WebShift.
+ * Defines Zod schemas for all dynamic presentation blocks in SPATIUM Studio.
  * Used for strict validation of content blocks across service categories,
  * services, solutions, landing pages, and templates.
  */
@@ -281,6 +281,8 @@ export const comparisonMatrixBlockSchema = z.object({
   description: z.string().max(2000).optional(),
   badge: z.string().max(100).optional(),
   traditionalLabel: z.string().max(100).optional(),
+  highlightLabel: z.string().max(100).optional(),
+  // Legacy aliases (pre-SPATIUM fork) — read-only fallbacks for stored blocks.
   unimasiLabel: z.string().max(100).optional(),
   segiaLabel: z.string().max(100).optional(),
   rows: z
@@ -291,6 +293,8 @@ export const comparisonMatrixBlockSchema = z.object({
         title: z.string().max(200).optional(),
         desc: z.string().max(2000).optional(),
         traditional: z.string().max(2000),
+        highlight: z.string().max(2000).optional(),
+        // Legacy aliases (pre-SPATIUM fork) — read-only fallbacks for stored blocks.
         unimasi: z.string().max(2000).optional(),
         segia: z.string().max(2000).optional(),
       })
@@ -645,7 +649,7 @@ export const caseStudyChapterBlockSchema = z.object({
   content: z.string().max(20000),
 })
 
-// ─── 22. Dedicated UNIMASI Cinema & Editorial Blocks ─────────────────────────
+// ─── 22. Dedicated SPATIUM Cinema & Editorial Blocks ─────────────────────────
 export const heroCinemaBlockSchema = z
   .object({
     id: z.string().optional(),
@@ -869,8 +873,32 @@ export const internalLinksBlockSchema = z.object({
   ).default([]),
 }).passthrough()
 
+// ─── Spatial: SuperSplat scene viewer ─────────────────────────────────────────
+/** SuperSplat scene ids are short alphanumeric hashes (e.g. "e318925e"). */
+export const splatIdSchema = z.string().regex(/^[a-zA-Z0-9_-]{4,64}$/, {
+  message: 'ID scene SuperSplat hanya boleh huruf, angka, garis bawah, atau tanda hubung.',
+})
+
+export const splatViewerBlockSchema = z.object({
+  id: z.string().optional(),
+  type: z.literal('splat-viewer'),
+  /** SuperSplat scene id — the viewer URL is built server-side, never taken from input. */
+  splatId: splatIdSchema,
+  title: z.string().max(200).optional(),
+  caption: z.string().max(1000).optional(),
+  /** Optional still shown until the visitor starts the 3D viewer. */
+  posterUrl: safeUrlSchema.optional(),
+  posterAlt: z.string().max(300).optional(),
+  /** Load the viewer immediately instead of on click (heavier; off by default). */
+  autoLoad: z.boolean().optional(),
+}).refine((b) => !b.posterUrl || Boolean(b.posterAlt && b.posterAlt.trim()), {
+  message: 'posterAlt wajib diisi bila posterUrl dipakai.',
+  path: ['posterAlt'],
+})
+
 // ─── Discriminated Union of All Blocks ────────────────────────────────────────
 export const blockSchema = z.discriminatedUnion('type', [
+  splatViewerBlockSchema,
   heroCinemaBlockSchema,
   processTimelineBlockSchema,
   statsTickerBlockSchema,

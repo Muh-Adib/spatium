@@ -1,22 +1,19 @@
 {
   "$schema": "https://design-tokens.org/schema.json",
   "brand": {
-    "name": "UNIMASI",
-    "descriptor": "Animation & Motion Design",
-    "tagline": "We Make Ideas Move | Make Ideas Move, Explain the Complex",
+    "name": "SPATIUM",
+    "descriptor": "Spatial Technology Studio",
+    "tagline": "Real places. New perspectives. | One Point, Unlimited Possibilities.",
     "version": "3.0.0"
   },
   "primitive": {
     "color": {
-      "yellow": {
-        "50": { "$value": "#FFFDE6", "$type": "color" },
-        "100": { "$value": "#FFF9BF", "$type": "color" },
-        "200": { "$value": "#FFF480", "$type": "color" },
-        "300": { "$value": "#FFEE40", "$type": "color" },
-        "400": { "$value": "#FFE41A", "$type": "color" },
-        "500": { "$value": "#FFD600", "$type": "color" },
-        "600": { "$value": "#D6B400", "$type": "color" },
-        "700": { "$value": "#A38900", "$type": "color" }
+      "electricBlue": {
+        "300": { "$value": "#9cc8ff", "$type": "color" },
+        "400": { "$value": "#6fb0ff", "$type": "color" },
+        "500": { "$value": "#4d8bff", "$type": "color" },
+        "600": { "$value": "#3b7bff", "$type": "color" },
+        "700": { "$value": "#2f69f0", "$type": "color" }
       },
       "darkBlue": {
         "400": { "$value": "#1C58B3", "$type": "color" },
@@ -58,15 +55,15 @@
   },
   "semantic": {
     "color": {
-      "primary": { "$value": "{primitive.color.yellow.500}", "$type": "color" },
-      "primaryHover": { "$value": "{primitive.color.yellow.400}", "$type": "color" },
+      "primary": { "$value": "{primitive.color.electricBlue.500}", "$type": "color" },
+      "primaryHover": { "$value": "{primitive.color.electricBlue.400}", "$type": "color" },
       "primaryForeground": { "$value": "{primitive.color.navy.950}", "$type": "color" },
       "background": { "$value": "{primitive.color.navy.950}", "$type": "color" },
       "foreground": { "$value": "{primitive.color.white}", "$type": "color" },
       "surface": { "$value": "{primitive.color.navy.900}", "$type": "color" },
       "surfaceElevated": { "$value": "{primitive.color.darkBlue.500}", "$type": "color" },
       "textMuted": { "$value": "#8C9BB3", "$type": "color" },
-      "border": { "$value": "rgba(255, 214, 0, 0.2)", "$type": "color" },
+      "border": { "$value": "rgba(77, 139, 255, 0.2)", "$type": "color" },
       "borderSubtle": { "$value": "rgba(255, 255, 255, 0.08)", "$type": "color" }
     }
   },
@@ -84,8 +81,8 @@
     "studio": {
       "bg": { "$value": "{primitive.color.navy.950}", "$type": "color" },
       "sidebarBg": { "$value": "{primitive.color.navy.900}", "$type": "color" },
-      "accent": { "$value": "{primitive.color.yellow.500}", "$type": "color" },
-      "border": { "$value": "rgba(255, 214, 0, 0.15)", "$type": "color" }
+      "accent": { "$value": "{primitive.color.electricBlue.500}", "$type": "color" },
+      "border": { "$value": "rgba(77, 139, 255, 0.15)", "$type": "color" }
     }
   }
 }

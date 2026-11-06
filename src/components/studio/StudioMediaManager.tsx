@@ -13,7 +13,6 @@ import {
   RefreshCw,
   Edit2,
   Trash2,
-  Sparkles,
   ExternalLink,
   Layers,
   ArrowRight,
@@ -22,7 +21,6 @@ import {
   Sliders,
   Check,
 } from 'lucide-react'
-import { getStoredAiCredentials, triggerAiKeyPrompt } from '@/lib/ai/key-manager'
 
 interface MediaItem {
   id: number
@@ -84,7 +82,6 @@ export function StudioMediaManager() {
   const [saving, setSaving] = useState<boolean>(false)
   const [renameWarning, setRenameWarning] = useState<string | null>(null)
   const [saveSuccess, setSaveSuccess] = useState<boolean>(false)
-  const [aiSuggesting, setAiSuggesting] = useState<boolean>(false)
 
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -226,60 +223,6 @@ export function StudioMediaManager() {
       console.error('Rename failed:', err)
     } finally {
       setSaving(false)
-    }
-  }
-
-  const handleGenerateAiAlt = async (targetLocale: 'id' | 'en') => {
-    if (!selectedMedia) return
-    const creds = getStoredAiCredentials()
-    if (!creds.hasKey) {
-      triggerAiKeyPrompt({
-        featureName: 'Generator Alt Text Gambar (AI)',
-        reason: 'Silakan tambahkan API Key Google AI Studio atau OpenRouter Anda untuk membuat Alt Text gambar secara otomatis dengan AI.',
-        provider: creds.provider,
-        onSuccess: () => {
-          handleGenerateAiAlt(targetLocale)
-        },
-      })
-      return
-    }
-
-    setAiSuggesting(true)
-    try {
-      const res = await fetch('/api/seo/suggest', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          field: 'altText',
-          title: title || selectedMedia.fileName,
-          locale: targetLocale,
-          extraParams: { fileName: selectedMedia.fileName },
-          aiConfig: {
-            provider: creds.provider,
-            apiKey: creds.apiKey,
-            model: creds.model,
-            proxyUrl: creds.proxyUrl,
-          },
-        }),
-      })
-      const json = await res.json()
-      if (json.needsKey) {
-        triggerAiKeyPrompt({
-          featureName: 'Generator Alt Text Gambar (AI)',
-          reason: 'Kunci API belum diisi atau tidak valid. Silakan periksa kembali API Key Anda.',
-          provider: creds.provider,
-        })
-        return
-      }
-      const val = json.data?.value || json.value || json.altText
-      if (val) {
-        if (targetLocale === 'id') setAltId(val)
-        else setAltEn(val)
-      }
-    } catch (err) {
-      console.error('AI Alt suggestion error:', err)
-    } finally {
-      setAiSuggesting(false)
     }
   }
 
@@ -667,14 +610,6 @@ export function StudioMediaManager() {
                   <span>Alt Text [ID]</span>
                   <span className="text-rose-400 font-bold">*Wajib</span>
                 </label>
-                <button
-                  onClick={() => handleGenerateAiAlt('id')}
-                  disabled={aiSuggesting}
-                  className="text-[11px] text-info hover:text-info-300 flex items-center gap-1 font-medium transition-colors"
-                >
-                  <Sparkles className="w-3 h-3" />
-                  <span>Saran AI Vision</span>
-                </button>
               </div>
               <textarea
                 rows={2}
@@ -693,14 +628,6 @@ export function StudioMediaManager() {
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <label className="text-xs font-mono text-neutral-400 uppercase">Alt Text [EN]</label>
-                <button
-                  onClick={() => handleGenerateAiAlt('en')}
-                  disabled={aiSuggesting}
-                  className="text-[11px] text-info hover:text-info-300 flex items-center gap-1 font-medium transition-colors"
-                >
-                  <Sparkles className="w-3 h-3" />
-                  <span>Saran AI Vision (EN)</span>
-                </button>
               </div>
               <textarea
                 rows={2}

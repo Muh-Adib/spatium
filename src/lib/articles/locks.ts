@@ -1,6 +1,15 @@
 /**
- * Active Editorial Lock & Heartbeat Presence Manager
- * Prevents concurrent editing collisions and data loss across multiple editors.
+ * Advisory editorial lock ("someone else is editing this article") with heartbeat expiry.
+ *
+ * LIMITATION — in-memory only: locks live in a Map on `globalThis` of the current Node
+ * process. They are lost on restart/redeploy and are NOT shared between instances, so with
+ * more than one app instance two editors can both "hold" the lock. This is acceptable only
+ * because the lock is advisory: data safety comes from optimistic concurrency in
+ * `PATCH /api/articles` (`expectedUpdatedAt` → 409 conflict). Persisting locks needs a small
+ * table (e.g. `EditorLock { key @id, userId, userName, userEmail, expiresAt }`) — none of the
+ * existing tables fits, and `prisma/schema.prisma` is owned by the platform lead.
+ *
+ * Keys are the article's persisted slug (the editor never locks unsaved/new articles).
  */
 
 export interface ActiveEditorLock {

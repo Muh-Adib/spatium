@@ -97,21 +97,21 @@ export async function POST(request: NextRequest) {
           safeTag('articles')
           if (slug) {
             safeTag(`article-${slug}`)
-            safePath(`/artikel/${slug}`)
+            safePath(`/journal/${slug}`)
           }
           break
         case 'service':
           safeTag('services')
           if (slug) {
             safeTag(`service-${slug}`)
-            safePath(`/layanan/${slug}`)
+            safePath(`/services/${slug}`)
           }
           break
         case 'portfolio':
           safeTag('portfolio')
           if (slug) {
             safeTag(`portfolio-${slug}`)
-            safePath(`/portofolio/${slug}`)
+            safePath(`/portfolio/${slug}`)
           }
           break
         case 'page':

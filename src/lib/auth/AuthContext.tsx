@@ -36,8 +36,8 @@ function AuthConsumer({ children }: { children: React.ReactNode }) {
 
   const logout = async () => {
     try {
-      localStorage.removeItem('unimasi_user_role')
-      localStorage.removeItem('unimasi_actor_name')
+      localStorage.removeItem('spatium_user_role')
+      localStorage.removeItem('spatium_actor_name')
       await nextAuthSignOut({ callbackUrl: '/pawon' })
     } catch {
       window.location.href = '/pawon'

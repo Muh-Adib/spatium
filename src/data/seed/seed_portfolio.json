@@ -1,252 +1,340 @@
 [
   {
-    "id": 1,
-    "documentId": "port-grand-glasshouse-wedding-sanctuary",
-    "title": "Grand Glasshouse Wedding Sanctuary",
-    "slug": "grand-glasshouse-wedding-sanctuary",
-    "client": "Private Luxury Estate",
-    "year": 2024,
-    "category": "Memory & Documentary",
-    "discipline": "Memory Preservation · 3D Gaussian Splatting",
-    "summary": "Preservasi spasial 3D fotorealistik momen pernikahan dan kemewahan arsitektur kaca berkilau tanpa batasan waktu.",
-    "challenge": "Dokumentasi video dan foto konvensional tidak mampu menghadirkan kembali pengalaman berdiri di dalam ruangan berhias bunga dan kaca kristal dengan skala 1:1 setelah acara selesai.",
-    "approach": "Pemindaian spasial komprehensif menggunakan rig multi-kamera kalibrasi fotogrametri dan LiDAR terestrial saat dekorasi mencapai kesempurnaan puncak.",
-    "solution": "Rekonstruksi 12.4 juta 3D Gaussian Splats untuk menangkap refraksi kaca, kilau lampu gantung, dan kedalaman susunan bunga secara akurat pada 60 FPS WebGL.",
-    "result": "Mengabadikan momen seumur hidup dalam digital twin abadi yang dapat dikunjungi kembali oleh keluarga kapan saja dari belahan dunia mana pun.",
-    "heroImage": "/images/spatium/page_08_0.jpg",
+    "documentId": "port-wedding-venue",
+    "slug": "wedding-venue",
+    "title": "Wedding Venue",
+    "client": null,
+    "year": null,
+    "category": "Hospitality · Wedding",
+    "summary": "A spatial preview for wedding venues, helping couples and event teams experience the setting before arriving on site.",
+    "challenge": "Pratinjau spasial venue pernikahan agar pasangan dan tim acara dapat merasakan suasana dan tata ruang sebelum datang ke lokasi.",
+    "approach": "Ruang direkam langsung di lokasi untuk mendapatkan data spasial nyata — skala, kedalaman, dan konteks sekitarnya.\nData capture direkonstruksi menjadi 3D Gaussian Splat: representasi ringan, fotorealistis, dan imersif.\nScene dipublikasikan sebagai viewer interaktif di browser sehingga ruang bisa dijelajahi dari mana saja.",
+    "result": "Scene 3D Gaussian Splat\nViewer interaktif berbasis browser\nTautan scene yang bisa dibagikan",
+    "heroImage": null,
     "liveUrl": "https://superspl.at/s?id=e318925e",
-    "featured": true,
+    "featured": false,
     "status": "published",
-    "technologies": ["3D Gaussian Splatting", "SuperSplat WebGL", "LiDAR Terrestrial", "High-Density Photogrammetry"],
+    "technologies": [
+      "3D Gaussian Splatting",
+      "SuperSplat viewer"
+    ],
     "metrics": [
-      { "label": "Point Count", "value": "12.4M Splats" },
-      { "label": "Spatial Accuracy", "value": "< 8mm" },
-      { "label": "Rendering Speed", "value": "60 FPS Real-time" }
-    ]
+      {
+        "label": "sceneUrl",
+        "value": "https://superspl.at/scene/e318925e"
+      }
+    ],
+    "seo": {
+      "metaTitle": "Wedding Venue — Scene 3D Gaussian Splat",
+      "metaDescription": "Pratinjau spasial venue pernikahan agar pasangan dan tim acara dapat merasakan suasana dan tata ruang sebelum datang ke lokasi."
+    }
   },
   {
-    "id": 2,
-    "documentId": "port-ruang-operasi-bedah-presisi",
-    "title": "Ruang Operasi Bedah Presisi Tinggi",
-    "slug": "ruang-operasi-bedah-presisi",
-    "client": "National Referral Hospital",
-    "year": 2024,
-    "category": "Healthcare & Medis",
-    "discipline": "Clinical Spatial Digital Twin",
-    "summary": "Digital twin ruang bedah steril presisi sub-sentimeter untuk simulasi klinis dan orientasi prosedur bedah.",
-    "challenge": "Ruang bedah berteknologi tinggi memerlukan sterilitas ketat 24/7, sehingga orientasi staf medis dan teknisi peralatan tidak dapat dilakukan sembarangan di lokasi fisik.",
-    "approach": "Pemindaian laser LiDAR darat cepat tanpa sentuhan langsung pada area steril dengan kalibrasi koordinat sub-sentimeter (3mm).",
-    "solution": "Pelatihan representasi medan radiansi saraf (3DGS) menghasilkan lingkungan virtual 9.8 juta splats berfidelitas tinggi dengan waypoint navigasi instrumen.",
-    "result": "Memotong durasi orientasi on-site dokter spesialis hingga 65% dan menjamin kepatuhan sterilitas 100%.",
-    "heroImage": "/images/spatium/page_09_0.jpg",
+    "documentId": "port-ruang-operasi",
+    "slug": "ruang-operasi",
+    "title": "Ruang Operasi",
+    "client": null,
+    "year": null,
+    "category": "Healthcare",
+    "summary": "An immersive record of a clinical environment for spatial review, facility documentation, and healthcare communication.",
+    "challenge": "Rekaman imersif lingkungan klinis untuk peninjauan spasial, dokumentasi fasilitas, dan komunikasi layanan kesehatan.",
+    "approach": "Ruang direkam langsung di lokasi untuk mendapatkan data spasial nyata — skala, kedalaman, dan konteks sekitarnya.\nData capture direkonstruksi menjadi 3D Gaussian Splat: representasi ringan, fotorealistis, dan imersif.\nScene dipublikasikan sebagai viewer interaktif di browser sehingga ruang bisa dijelajahi dari mana saja.",
+    "result": "Scene 3D Gaussian Splat\nViewer interaktif berbasis browser\nTautan scene yang bisa dibagikan",
+    "heroImage": null,
     "liveUrl": "https://superspl.at/s?id=551b7432",
-    "featured": true,
+    "featured": false,
     "status": "published",
-    "technologies": ["3D Gaussian Splatting", "Laser LiDAR Scanning", "Zero-Contact Capture", "Clinical Digital Twin"],
+    "technologies": [
+      "3D Gaussian Splatting",
+      "SuperSplat viewer"
+    ],
     "metrics": [
-      { "label": "Point Count", "value": "9.8M Splats" },
-      { "label": "Spatial Accuracy", "value": "3mm (Sub-centimeter)" },
-      { "label": "Sterility Compromise", "value": "0% (Zero Contact)" }
-    ]
+      {
+        "label": "sceneUrl",
+        "value": "https://superspl.at/scene/551b7432"
+      }
+    ],
+    "seo": {
+      "metaTitle": "Ruang Operasi — Scene 3D Gaussian Splat",
+      "metaDescription": "Rekaman imersif lingkungan klinis untuk peninjauan spasial, dokumentasi fasilitas, dan komunikasi layanan kesehatan."
+    }
   },
   {
-    "id": 3,
-    "documentId": "port-unicam-indonesia-manufaktur-presisi",
-    "title": "Fasilitas Manufaktur Presisi Unicam Indonesia",
-    "slug": "unicam-indonesia-manufaktur-presisi",
-    "client": "PT Unicam Indonesia",
-    "year": 2024,
-    "category": "Industrial & Manufaktur",
-    "discipline": "Industrial Plant Digital Twin",
-    "summary": "Rekonstruksi spasial fotorealistik pabrik manufaktur mesin CNC dan lini produksi canggih untuk audit global.",
-    "challenge": "Mitra internasional dari Jepang dan Eropa membutuhkan audit tata letak fasilitas dan verifikasi kapasitas mesin industri tanpa harus menempuh penerbangan jarak jauh.",
-    "approach": "Pemetaan drone fotogrametri indoor dan pemindai LiDAR permukaan lantai industri berkecepatan tinggi.",
-    "solution": "Sintesis 18.5 juta Gaussian Splats mereproduksi pantulan baja mesin CNC, tata pipa utilitas, dan koridor logistik pabrik.",
-    "result": "Berhasil memenangkan kontrak manufaktur internasional bernilai jutaan dolar melalui audit virtual interaktif 60fps.",
-    "heroImage": "/images/spatium/page_07_0.jpg",
+    "documentId": "port-unicam-indonesia",
+    "slug": "unicam-indonesia",
+    "title": "Unicam Indonesia",
+    "client": "Unicam Indonesia",
+    "year": null,
+    "category": "Manufacturing",
+    "summary": "A captured industrial space that makes production environments easier to inspect, communicate, and understand remotely.",
+    "challenge": "Ruang industri yang direkam secara spasial sehingga lingkungan produksi lebih mudah diinspeksi, dikomunikasikan, dan dipahami dari jarak jauh.",
+    "approach": "Ruang direkam langsung di lokasi untuk mendapatkan data spasial nyata — skala, kedalaman, dan konteks sekitarnya.\nData capture direkonstruksi menjadi 3D Gaussian Splat: representasi ringan, fotorealistis, dan imersif.\nScene dipublikasikan sebagai viewer interaktif di browser sehingga ruang bisa dijelajahi dari mana saja.",
+    "result": "Scene 3D Gaussian Splat\nViewer interaktif berbasis browser\nTautan scene yang bisa dibagikan",
+    "heroImage": null,
     "liveUrl": "https://superspl.at/s?id=9c0284e8",
-    "featured": true,
+    "featured": false,
     "status": "published",
-    "technologies": ["3DGS Neural Radiance", "Indoor Drone Photogrammetry", "Floor LiDAR", "Industrial WebGL"],
+    "technologies": [
+      "3D Gaussian Splatting",
+      "SuperSplat viewer"
+    ],
     "metrics": [
-      { "label": "Point Count", "value": "18.5M Splats" },
-      { "label": "Spatial Accuracy", "value": "5mm" },
-      { "label": "Plant Area", "value": "3,200 m²" }
-    ]
+      {
+        "label": "sceneUrl",
+        "value": "https://superspl.at/scene/9c0284e8"
+      }
+    ],
+    "seo": {
+      "metaTitle": "Unicam Indonesia — Scene 3D Gaussian Splat",
+      "metaDescription": "Ruang industri yang direkam secara spasial sehingga lingkungan produksi lebih mudah diinspeksi, dikomunikasikan, dan dipahami dari jarak jauh."
+    }
   },
   {
-    "id": 4,
-    "documentId": "port-batuna-resto-oceanfront-exterior",
-    "title": "Batuna Resto Manado — Oceanfront Exterior & Deck",
-    "slug": "batuna-resto-oceanfront-exterior",
-    "client": "Batuna Resto & Resort",
-    "year": 2024,
-    "category": "Marketing & Branding",
-    "discipline": "Hospitality Exterior Capture",
-    "summary": "Eksplorasi spasial 3D area terbuka dan dek tepi laut Batuna Resto menghadirkan Zero Moment of Truth (ZMOT).",
-    "challenge": "Pelanggan VIP dan pelancong sering ragu memesan area dek luar karena foto statis tidak mampu menangkap suasana panorama laut dan hembusan angin pantai secara nyata.",
-    "approach": "Perekaman drone dan kamera sudut dinamis pada golden hour untuk menangkap gradasi warna matahari terbenam dan tekstur dek kayu.",
-    "solution": "Pemrosesan 15.1 juta splats yang menangkap interaksi cahaya alami pada laut dan struktur atap terbuka secara fotorealistik dengan scene-pair toggle ke area dalam.",
-    "result": "Mendongkrak reservasi meja dek sunset hingga 78% dalam kurun waktu 30 hari pasca peluncuran tur spasial.",
-    "heroImage": "/images/spatium/page_01_0.jpg",
+    "documentId": "port-batuna-resto-manado-exterior",
+    "slug": "batuna-resto-manado-exterior",
+    "title": "Batuna Resto Manado",
+    "client": "Batuna Resto Manado",
+    "year": null,
+    "category": "Food & Beverage · Exterior",
+    "summary": "Exterior capture showcasing the venue’s arrival experience, surroundings, and architectural character.",
+    "challenge": "Capture eksterior yang memperlihatkan pengalaman kedatangan, lingkungan sekitar, dan karakter arsitektur venue — first impression sebelum pelanggan datang (Zero Moment of Truth).",
+    "approach": "Ruang direkam langsung di lokasi untuk mendapatkan data spasial nyata — skala, kedalaman, dan konteks sekitarnya.\nData capture direkonstruksi menjadi 3D Gaussian Splat: representasi ringan, fotorealistis, dan imersif.\nScene dipublikasikan sebagai viewer interaktif di browser sehingga ruang bisa dijelajahi dari mana saja.",
+    "result": "Scene 3D Gaussian Splat\nViewer interaktif berbasis browser\nTautan scene yang bisa dibagikan",
+    "heroImage": "/images/spatium/web/mkt-exterior.webp",
     "liveUrl": "https://superspl.at/s?id=dc1cd13b",
-    "featured": true,
+    "featured": false,
     "status": "published",
-    "technologies": ["3D Gaussian Splatting", "Drone Photogrammetry", "Scene-Pairing", "ZMOT Optimization"],
+    "technologies": [
+      "3D Gaussian Splatting",
+      "SuperSplat viewer"
+    ],
     "metrics": [
-      { "label": "Point Count", "value": "15.1M Splats" },
-      { "label": "Reservation Lift", "value": "+78% ZMOT" },
-      { "label": "Frame Rate", "value": "60 FPS WebGL" }
-    ]
+      {
+        "label": "sceneUrl",
+        "value": "https://superspl.at/scene/dc1cd13b"
+      },
+      {
+        "label": "location",
+        "value": "Manado"
+      },
+      {
+        "label": "scenePair",
+        "value": "batuna-resto-manado-interior",
+        "detail": "Interior"
+      }
+    ],
+    "seo": {
+      "metaTitle": "Batuna Resto Manado — Scene 3D Gaussian Splat",
+      "metaDescription": "Capture eksterior yang memperlihatkan pengalaman kedatangan, lingkungan sekitar, dan karakter arsitektur venue — first impression sebelum pelanggan datang…"
+    },
+    "heroAlt": "Eksterior Batuna Resto Manado dalam spatial tour dengan menu navigasi"
   },
   {
-    "id": 5,
-    "documentId": "port-batuna-resto-dining-interior",
-    "title": "Batuna Resto Manado — Dining Hall & Architectural Interior",
-    "slug": "batuna-resto-dining-interior",
-    "client": "Batuna Resto & Resort",
-    "year": 2024,
-    "category": "Marketing & Branding",
-    "discipline": "Interior Spatial Experience",
-    "summary": "Pengalaman visual berjalan bebas di interior restoran dengan kehangatan tata cahaya kayu dan pemandangan laut lepas.",
-    "challenge": "Tamu menginginkan kepastian posisi meja, jarak privasi, dan atmosfer pencahayaan ruangan sebelum mengadakan perjamuan makan malam privat.",
-    "approach": "Pemindaian fotogrametri padat di setiap lorong meja makan dan sudut bar dengan pencahayaan interior hangat.",
-    "solution": "Optimasi 11.7 juta splats mempertahankan tekstur serat kayu jati dan refleksi kaca jendela tanpa artefak visual, terhubung langsung ke dek eksterior.",
-    "result": "Tingkat pemesanan ruang privat (VIP room) terisi penuh selama 6 akhir pekan berturut-turut.",
-    "heroImage": "/images/spatium/page_02_0.jpg",
+    "documentId": "port-batuna-resto-manado-interior",
+    "slug": "batuna-resto-manado-interior",
+    "title": "Batuna Resto Manado — Interior",
+    "client": "Batuna Resto Manado",
+    "year": null,
+    "category": "Food & Beverage · Interior",
+    "summary": "Step inside the restaurant and explore its interior atmosphere through an interactive spatial capture.",
+    "challenge": "Masuk ke dalam restoran dan jelajahi atmosfer interiornya melalui capture spasial yang interaktif.",
+    "approach": "Ruang direkam langsung di lokasi untuk mendapatkan data spasial nyata — skala, kedalaman, dan konteks sekitarnya.\nData capture direkonstruksi menjadi 3D Gaussian Splat: representasi ringan, fotorealistis, dan imersif.\nScene dipublikasikan sebagai viewer interaktif di browser sehingga ruang bisa dijelajahi dari mana saja.",
+    "result": "Scene 3D Gaussian Splat\nViewer interaktif berbasis browser\nTautan scene yang bisa dibagikan",
+    "heroImage": "/images/spatium/web/mkt-interior.webp",
     "liveUrl": "https://superspl.at/s?id=bd14a26a",
-    "featured": true,
+    "featured": false,
     "status": "published",
-    "technologies": ["3D Gaussian Splatting", "HDR Radiance Capture", "Scene-Pairing", "Mobile Optimization"],
+    "technologies": [
+      "3D Gaussian Splatting",
+      "SuperSplat viewer"
+    ],
     "metrics": [
-      { "label": "Point Count", "value": "11.7M Splats" },
-      { "label": "Spatial Accuracy", "value": "5mm" },
-      { "label": "Pairing", "value": "Terkoneksi Dek Luar" }
-    ]
+      {
+        "label": "sceneUrl",
+        "value": "https://superspl.at/scene/bd14a26a"
+      },
+      {
+        "label": "location",
+        "value": "Manado"
+      },
+      {
+        "label": "scenePair",
+        "value": "batuna-resto-manado-exterior",
+        "detail": "Exterior"
+      }
+    ],
+    "seo": {
+      "metaTitle": "Batuna Resto Manado — Interior — Scene 3D Gaussian Splat",
+      "metaDescription": "Masuk ke dalam restoran dan jelajahi atmosfer interiornya melalui capture spasial yang interaktif."
+    },
+    "heroAlt": "Interior ruang makan Batuna Resto Manado dalam spatial tour"
   },
   {
-    "id": 6,
-    "documentId": "port-kidang-nyaring-outdoor-canopy",
-    "title": "Kidang Nyaring Cafe — Outdoor Canopy & Forest Garden",
-    "slug": "kidang-nyaring-outdoor-canopy",
-    "client": "Kidang Nyaring Coffee",
-    "year": 2024,
-    "category": "Marketing & Branding",
-    "discipline": "F&B Spatial Atmosphere",
-    "summary": "Visualisasi spasial 3D suasana ngopi sejuk di bawah naungan pohon pinus dan kanopi hijau pegunungan Dago.",
-    "challenge": "Kafe berkonsep alam sering kesulitan memperlihatkan luasan area duduk terbuka yang nyaman dan kontur tanah bertingkat melalui foto persegi datar.",
-    "approach": "Pemetaan spasial dengan LiDAR darat dan fotogrametri daun pinus untuk menangkap tembusan sinar matahari.",
-    "solution": "Pelatihan 13.9 juta splats yang mampu mereproduksi kerindangan pepohonan dan suasana santai terbuka, dengan scene-pair ke bar espresso.",
-    "result": "Viral di media sosial sebagai destinasi nongkrong dengan tur 3D interaktif yang dapat dicoba sebelum datang langsung.",
-    "heroImage": "/images/spatium/page_03_0.jpg",
+    "documentId": "port-kidang-nyaring-cafe-exterior",
+    "slug": "kidang-nyaring-cafe-exterior",
+    "title": "Kidang Nyaring Cafe",
+    "client": "Kidang Nyaring Cafe",
+    "year": null,
+    "category": "Food & Beverage · Exterior",
+    "summary": "An interactive exterior preview that brings the café’s setting into a shareable digital space.",
+    "challenge": "Pratinjau eksterior interaktif yang membawa suasana kafe ke dalam ruang digital yang mudah dibagikan.",
+    "approach": "Ruang direkam langsung di lokasi untuk mendapatkan data spasial nyata — skala, kedalaman, dan konteks sekitarnya.\nData capture direkonstruksi menjadi 3D Gaussian Splat: representasi ringan, fotorealistis, dan imersif.\nScene dipublikasikan sebagai viewer interaktif di browser sehingga ruang bisa dijelajahi dari mana saja.",
+    "result": "Scene 3D Gaussian Splat\nViewer interaktif berbasis browser\nTautan scene yang bisa dibagikan",
+    "heroImage": null,
     "liveUrl": "https://superspl.at/s?id=9373a4cd",
-    "featured": true,
+    "featured": false,
     "status": "published",
-    "technologies": ["3DGS Radiance Fields", "Canopy Drone Mapping", "LiDAR Scanner", "Interactive WebGL"],
+    "technologies": [
+      "3D Gaussian Splatting",
+      "SuperSplat viewer"
+    ],
     "metrics": [
-      { "label": "Point Count", "value": "13.9M Splats" },
-      { "label": "Coverage Area", "value": "1,800 m²" },
-      { "label": "Social Reach", "value": "350K+ Immersions" }
-    ]
+      {
+        "label": "sceneUrl",
+        "value": "https://superspl.at/scene/9373a4cd"
+      },
+      {
+        "label": "scenePair",
+        "value": "kidang-nyaring-cafe-interior",
+        "detail": "Interior"
+      }
+    ],
+    "seo": {
+      "metaTitle": "Kidang Nyaring Cafe — Scene 3D Gaussian Splat",
+      "metaDescription": "Pratinjau eksterior interaktif yang membawa suasana kafe ke dalam ruang digital yang mudah dibagikan."
+    }
   },
   {
-    "id": 7,
-    "documentId": "port-kidang-nyaring-espresso-interior",
-    "title": "Kidang Nyaring Cafe — Espresso Bar & Warm Interior",
-    "slug": "kidang-nyaring-espresso-interior",
-    "client": "Kidang Nyaring Coffee",
-    "year": 2024,
-    "category": "Marketing & Branding",
-    "discipline": "Artisanal Coffee Bar Capture",
-    "summary": "Eksplorasi interaktif bar espresso artisanal dan interior bernuansa rustic modern dengan pencahayaan hangat alami.",
-    "challenge": "Menampilkan estetika mesin espresso kopi spesialisasi dan kehangatan interior kayu untuk menarik komunitas kopi dan pekerja jarak jauh.",
-    "approach": "Pengambilan data medan radiansi jarak dekat (close-up) pada mesin kopi, rak seduh manual, dan tempat duduk kayu.",
-    "solution": "Kompresi cerdas 8.2 juta splats menghasilkan waktu muat secepat kilat di koneksi seluler tanpa penurunan detail visual.",
-    "result": "Meningkatkan durasi rata-rata kunjungan pelanggan (dwell time) dan penjualan biji kopi sangrai kemasan sebesar 45%.",
-    "heroImage": "/images/spatium/page_04_0.jpg",
+    "documentId": "port-kidang-nyaring-cafe-interior",
+    "slug": "kidang-nyaring-cafe-interior",
+    "title": "Kidang Nyaring Cafe — Interior",
+    "client": "Kidang Nyaring Cafe",
+    "year": null,
+    "category": "Food & Beverage · Interior",
+    "summary": "Explore the café from within and experience its spatial layout through an immersive digital capture.",
+    "challenge": "Jelajahi kafe dari dalam dan rasakan tata ruangnya melalui capture digital yang imersif.",
+    "approach": "Ruang direkam langsung di lokasi untuk mendapatkan data spasial nyata — skala, kedalaman, dan konteks sekitarnya.\nData capture direkonstruksi menjadi 3D Gaussian Splat: representasi ringan, fotorealistis, dan imersif.\nScene dipublikasikan sebagai viewer interaktif di browser sehingga ruang bisa dijelajahi dari mana saja.",
+    "result": "Scene 3D Gaussian Splat\nViewer interaktif berbasis browser\nTautan scene yang bisa dibagikan",
+    "heroImage": null,
     "liveUrl": "https://superspl.at/s?id=5d7b94aa",
-    "featured": true,
+    "featured": false,
     "status": "published",
-    "technologies": ["3DGS Neural Rendering", "Mobile WebGL", "Close-Up Photogrammetry", "Scene Switcher"],
+    "technologies": [
+      "3D Gaussian Splatting",
+      "SuperSplat viewer"
+    ],
     "metrics": [
-      { "label": "Point Count", "value": "8.2M Splats" },
-      { "label": "Load Time", "value": "< 1.8 detik" },
-      { "label": "Retail Uplift", "value": "+45%" }
-    ]
+      {
+        "label": "sceneUrl",
+        "value": "https://superspl.at/scene/5d7b94aa"
+      },
+      {
+        "label": "scenePair",
+        "value": "kidang-nyaring-cafe-exterior",
+        "detail": "Exterior"
+      }
+    ],
+    "seo": {
+      "metaTitle": "Kidang Nyaring Cafe — Interior — Scene 3D Gaussian Splat",
+      "metaDescription": "Jelajahi kafe dari dalam dan rasakan tata ruangnya melalui capture digital yang imersif."
+    }
   },
   {
-    "id": 8,
-    "documentId": "port-greenhouse-anggrek-tropis-presisi",
-    "title": "Greenhouse Anggrek Tropis Presisi Tinggi",
-    "slug": "greenhouse-anggrek-tropis-presisi",
-    "client": "Flora Botanica Nusantara",
-    "year": 2024,
-    "category": "Agrikultur & Riset",
-    "discipline": "Precision Horticulture Twin",
-    "summary": "Kembaran digital greenhouse anggrek dengan kerapatan mikro untuk inspeksi agrikultur dan pemantauan botani.",
-    "challenge": "Periset botani dan pengelola agribisnis membutuhkan catatan spasial 3D periodik untuk memantau pertumbuhan vegetatif dan sistem sprinkler kabut mikro.",
-    "approach": "Perekaman multi-spektral dan fotogrametri jarak mikro di antara deretan pot anggrek dan atap peneduh greenhouse.",
-    "solution": "Sintesis 16.3 juta Gaussian Splats mereproduksi detail urat daun, kelopak bunga, dan instalasi pipa fertigasi secara tajam.",
-    "result": "Memungkinkan kolaborasi riset botani lintas universitas tanpa memindahkan tanaman berharga dari habitat mikronya.",
-    "heroImage": "/images/spatium/page_05_0.jpg",
+    "documentId": "port-greenhouse-anggrek",
+    "slug": "greenhouse-anggrek",
+    "title": "Greenhouse Anggrek",
+    "client": null,
+    "year": null,
+    "category": "Agriculture · Horticulture",
+    "summary": "A digital look inside a growing environment, useful for documenting spaces and sharing cultivation facilities remotely.",
+    "challenge": "Tampilan digital ke dalam lingkungan budidaya — berguna untuk mendokumentasikan ruang dan membagikan fasilitas tanam dari jarak jauh.",
+    "approach": "Ruang direkam langsung di lokasi untuk mendapatkan data spasial nyata — skala, kedalaman, dan konteks sekitarnya.\nData capture direkonstruksi menjadi 3D Gaussian Splat: representasi ringan, fotorealistis, dan imersif.\nScene dipublikasikan sebagai viewer interaktif di browser sehingga ruang bisa dijelajahi dari mana saja.",
+    "result": "Scene 3D Gaussian Splat\nViewer interaktif berbasis browser\nTautan scene yang bisa dibagikan",
+    "heroImage": null,
     "liveUrl": "https://superspl.at/s?id=b8291451",
-    "featured": true,
+    "featured": false,
     "status": "published",
-    "technologies": ["3D Gaussian Splatting", "Macro Photogrammetry", "Botanical Digital Twin", "LiDAR"],
+    "technologies": [
+      "3D Gaussian Splatting",
+      "SuperSplat viewer"
+    ],
     "metrics": [
-      { "label": "Point Count", "value": "16.3M Splats" },
-      { "label": "Spatial Accuracy", "value": "< 5mm" },
-      { "label": "Flora Varieties", "value": "40+ Spesies" }
-    ]
+      {
+        "label": "sceneUrl",
+        "value": "https://superspl.at/scene/b8291451"
+      }
+    ],
+    "seo": {
+      "metaTitle": "Greenhouse Anggrek — Scene 3D Gaussian Splat",
+      "metaDescription": "Tampilan digital ke dalam lingkungan budidaya — berguna untuk mendokumentasikan ruang dan membagikan fasilitas tanam dari jarak jauh."
+    }
   },
   {
-    "id": 9,
-    "documentId": "port-apartemen-gateway-pasteur-suite",
-    "title": "Apartemen Gateway Pasteur Bandung — Residential Suite",
-    "slug": "apartemen-gateway-pasteur-suite",
-    "client": "Gateway Pasteur Property",
-    "year": 2024,
-    "category": "Properti & Arsitektur",
-    "discipline": "Real Estate Reality Walkthrough",
-    "summary": "Walkthrough spasial 3D apartemen modern skala 1:1 tanpa rekayasa distorsi lensa wide-angle 2D.",
-    "challenge": "Banyak calon pembeli properti merasa tertipu oleh foto wide-angle 2D yang membuat ruangan terlihat luas semu, memicu ketidakpercayaan saat serah terima unit.",
-    "approach": "Pemindaian LiDAR presisi tinggi di setiap sudut ruang tamu, dapur, kamar tidur utama, dan balkon.",
-    "solution": "Rekonstruksi 10.5 juta splats menghasilkan visual fotorealistik sejati dengan proporsi dimensi fisik akurat 100%.",
-    "result": "Mempersingkat siklus penjualan properti (time-to-close) dari rata-rata 42 hari menjadi hanya 14 hari.",
-    "heroImage": "/images/spatium/page_06_0.jpg",
+    "documentId": "port-apartment-gateway-pasteur-bandung",
+    "slug": "apartment-gateway-pasteur-bandung",
+    "title": "Apartment Gateway Pasteur Bandung",
+    "client": "Apartment Gateway Pasteur",
+    "year": null,
+    "category": "Property · Residential",
+    "summary": "A spatial property showcase for remote viewing, project presentation, and a more intuitive sense of place.",
+    "challenge": "Showcase properti spasial untuk peninjauan jarak jauh, presentasi proyek, dan pemahaman ruang yang lebih intuitif.",
+    "approach": "Ruang direkam langsung di lokasi untuk mendapatkan data spasial nyata — skala, kedalaman, dan konteks sekitarnya.\nData capture direkonstruksi menjadi 3D Gaussian Splat: representasi ringan, fotorealistis, dan imersif.\nScene dipublikasikan sebagai viewer interaktif di browser sehingga ruang bisa dijelajahi dari mana saja.",
+    "result": "Scene 3D Gaussian Splat\nViewer interaktif berbasis browser\nTautan scene yang bisa dibagikan",
+    "heroImage": null,
     "liveUrl": "https://superspl.at/s?id=e9d83435",
-    "featured": true,
+    "featured": false,
     "status": "published",
-    "technologies": ["3D Gaussian Splatting", "Terrestrial LiDAR", "Sub-centimeter Geometry", "VR Ready"],
+    "technologies": [
+      "3D Gaussian Splatting",
+      "SuperSplat viewer"
+    ],
     "metrics": [
-      { "label": "Point Count", "value": "10.5M Splats" },
-      { "label": "Scale Fidelity", "value": "1:1 Exact Physical" },
-      { "label": "Sales Cycle", "value": "-66% Days" }
-    ]
+      {
+        "label": "sceneUrl",
+        "value": "https://superspl.at/scene/e9d83435"
+      },
+      {
+        "label": "location",
+        "value": "Bandung"
+      }
+    ],
+    "seo": {
+      "metaTitle": "Apartment Gateway Pasteur Bandung — Scene 3D Gaussian Splat",
+      "metaDescription": "Showcase properti spasial untuk peninjauan jarak jauh, presentasi proyek, dan pemahaman ruang yang lebih intuitif."
+    }
   },
   {
-    "id": 10,
-    "documentId": "port-aston-bogor-executive-suite",
-    "title": "Aston Bogor Hotel — Executive Suite Double Bedroom",
-    "slug": "aston-bogor-executive-suite",
-    "client": "Aston Hotels & Resorts",
-    "year": 2024,
-    "category": "Hospitality & Wisata",
-    "discipline": "Luxury Hotel Reality Showcase",
-    "summary": "Tur spasial fotorealistik kamar suite eksekutif dengan detail tekstur linen dan pencahayaan alami untuk konversi direct-booking.",
-    "challenge": "Hotel bintang empat bersaing ketat memperebutkan tamu bisnis dan keluarga; pengalaman tur virtual konvensional 360 bola sering terlihat terdistorsi dan berkualitas rendah.",
-    "approach": "Perekaman radiansi 3DGS berkecepatan tinggi merekam tekstur kain ranjang, pantulan marmer kamar mandi, dan pemandangan Gunung Salak dari jendela.",
-    "solution": "Pengolahan 9.1 juta splats yang menghadirkan transisi gerakan mulus 60 FPS tanpa lompatan titik bola 360 yang kaku.",
-    "result": "Meningkatkan direct-booking suite sebesar 34% dan menurunkan komisi perantara OTA secara signifikan.",
-    "heroImage": "/images/spatium/page_10_0.jpg",
+    "documentId": "port-aston-bogor-suite-double-bedroom",
+    "slug": "aston-bogor-suite-double-bedroom",
+    "title": "Aston Bogor Suite — Double Bedroom",
+    "client": "Aston Bogor",
+    "year": null,
+    "category": "Hospitality · Hotel",
+    "summary": "An immersive room preview designed to help guests and hospitality teams explore a room before check-in.",
+    "challenge": "Pratinjau kamar yang imersif untuk membantu tamu dan tim hospitality menjelajahi kamar sebelum check-in.",
+    "approach": "Ruang direkam langsung di lokasi untuk mendapatkan data spasial nyata — skala, kedalaman, dan konteks sekitarnya.\nData capture direkonstruksi menjadi 3D Gaussian Splat: representasi ringan, fotorealistis, dan imersif.\nScene dipublikasikan sebagai viewer interaktif di browser sehingga ruang bisa dijelajahi dari mana saja.",
+    "result": "Scene 3D Gaussian Splat\nViewer interaktif berbasis browser\nTautan scene yang bisa dibagikan",
+    "heroImage": null,
     "liveUrl": "https://superspl.at/s?id=26a6709a",
-    "featured": true,
+    "featured": false,
     "status": "published",
-    "technologies": ["3DGS Neural Radiance", "Multi-Exposure HDR", "Hotel Direct-Booking Embed", "WebGL 60fps"],
+    "technologies": [
+      "3D Gaussian Splatting",
+      "SuperSplat viewer"
+    ],
     "metrics": [
-      { "label": "Point Count", "value": "9.1M Splats" },
-      { "label": "Direct Booking", "value": "+34%" },
-      { "label": "Frame Rate", "value": "60 FPS Smooth" }
-    ]
+      {
+        "label": "sceneUrl",
+        "value": "https://superspl.at/scene/26a6709a"
+      },
+      {
+        "label": "location",
+        "value": "Bogor"
+      }
+    ],
+    "seo": {
+      "metaTitle": "Aston Bogor Suite — Double Bedroom — Scene 3D Gaussian Splat",
+      "metaDescription": "Pratinjau kamar yang imersif untuk membantu tamu dan tim hospitality menjelajahi kamar sebelum check-in."
+    }
   }
 ]

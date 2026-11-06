@@ -52,9 +52,10 @@ export async function inspectUrlWithGsc(
     if (!siteUrl) {
       try {
         const profile = await getSiteProfile()
-        siteUrl = profile?.url ? (profile.url.endsWith('/') ? profile.url : `${profile.url}/`) : 'https://www.unimasi.com/'
-      } catch {
-        siteUrl = 'https://www.unimasi.com/'
+        siteUrl = profile?.url ? (profile.url.endsWith('/') ? profile.url : `${profile.url}/`) : 'https://spatium.id/'
+      } catch (err) {
+        console.warn('[gsc/indexing] Failed to resolve site profile URL, using default:', err)
+        siteUrl = 'https://spatium.id/'
       }
     }
 

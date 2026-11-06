@@ -1,539 +1,465 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
-import {
-  Users,
-  UserPlus,
-  Shield,
-  KeyRound,
-  Trash2,
-  Edit3,
-  Search,
-  RefreshCw,
-  CheckCircle2,
-  AlertTriangle,
-  Lock,
-  Copy,
-  Check,
-  Calendar,
-  Mail,
-} from 'lucide-react'
-import type { LucideIcon } from 'lucide-react'
-import { ROLE_META } from '@/lib/admin/tabs'
-import {
-  IconButton,
-  Modal,
-  Panel,
-  SearchField,
-  StatusPill,
-  TextButton,
-  fieldCls,
-} from '@/components/admin/AdminUi'
-import { Tooltip } from '@/components/ui/Tooltip'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { z } from 'zod'
+import { Check, Copy, Edit3, KeyRound, Lock, RefreshCw, Search, Trash2, UserPlus, X } from 'lucide-react'
+import { ROLE_META, ROLE_ORDER, isRole, roleMetaFor } from '@/lib/admin/tabs'
+import { ROLE_PERMISSIONS, type Role, type RolePermissions } from '@/lib/auth/types'
+import { FormField, IconButton, Modal, StatusMessage, TextButton, fieldCls, type StatusTone } from '@/components/admin/AdminUi'
 import { useAuth } from '@/lib/auth/AuthContext'
+import { fetchJson, jsonHeaders } from '@/components/studio/admin/fetchJson'
 
-interface UserItem {
-  id: string
-  name: string
-  email: string
-  role: string
-  createdAt: string | null
-  isBootstrap?: boolean
+const userSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  email: z.string(),
+  role: z.string(),
+  createdAt: z.string().nullable(),
+  isBootstrap: z.boolean().optional(),
+})
+type UserItem = z.infer<typeof userSchema>
+const listSchema = z.object({ users: z.array(userSchema) })
+const messageSchema = z.object({ message: z.string().optional() }).passthrough()
+
+const USER_ADMINS: readonly Role[] = ['SUPER_ADMIN', 'CONTENT_ADMIN']
+
+/** Cryptographically random initial password (no ambiguous characters). */
+function generatePassword(len = 16): string {
+  const chars = 'abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789!@#$%&*'
+  const bytes = new Uint32Array(len)
+  crypto.getRandomValues(bytes)
+  return Array.from(bytes, (b) => chars[b % chars.length]).join('')
 }
 
-const ROLES_LIST = [
-  'SUPER_ADMIN',
-  'CONTENT_ADMIN',
-  'EDITOR',
-  'AUTHOR',
-  'REVIEWER',
-  'SEO_MANAGER',
-  'MEDIA_MANAGER',
-] as const
+type Dialog =
+  | { kind: 'add' }
+  | { kind: 'edit'; user: UserItem }
+  | { kind: 'reset'; user: UserItem }
+  | { kind: 'delete'; user: UserItem }
+  | null
 
-const initials = (name: string) =>
-  (name || 'UNIMASI')
-    .split(' ')
-    .filter(Boolean)
-    .map((n) => n[0])
-    .join('')
-    .slice(0, 2)
-    .toUpperCase() || 'ST'
+type FormErrors = Partial<Record<'name' | 'email' | 'password', string>>
 
-function generateSecurePassword(len = 12): string {
-  const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%&*'
-  let pwd = ''
-  for (let i = 0; i < len; i++) {
-    pwd += chars.charAt(Math.floor(Math.random() * chars.length))
-  }
-  return pwd
+/* ------------------------------------------------------------------ */
+/* Role & permission matrix (formerly the "roles" tab)                 */
+/* ------------------------------------------------------------------ */
+
+const PERMISSION_COLUMNS: { key: keyof RolePermissions; label: string }[] = [
+  { key: 'canCreateArticle', label: 'Buat draf' },
+  { key: 'canSubmitForReview', label: 'Ajukan review' },
+  { key: 'canApprove', label: 'Setujui' },
+  { key: 'canPublish', label: 'Terbitkan' },
+  { key: 'canArchive', label: 'Arsipkan' },
+  { key: 'canDeleteArticle', label: 'Hapus' },
+  { key: 'canManageSeo', label: 'SEO & redirect' },
+]
+
+function RolesMatrix({ currentRole }: { currentRole: Role }) {
+  return (
+    <details className="group rounded-2xl border border-white/10 bg-[var(--studio-bg)]">
+      <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between gap-3 rounded-2xl px-5 py-3 text-sm font-semibold">
+        <span>Peran &amp; hak akses</span>
+        <span className="text-xs font-normal text-neutral-300">
+          <span className="group-open:hidden">Tampilkan</span>
+          <span className="hidden group-open:inline">Sembunyikan</span>
+        </span>
+      </summary>
+      <div className="space-y-3 border-t border-white/10 p-5">
+        <p className="text-xs text-neutral-300">
+          Alur editorial: Draf → Ditinjau → Disetujui → Terbit → Arsip. Hak di bawah ini ditegakkan di server
+          (<code className="font-mono">src/lib/auth/types.ts</code>).
+        </p>
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[40rem] text-left text-xs">
+            <caption className="sr-only">Hak akses per peran</caption>
+            <thead>
+              <tr className="border-b border-white/10 text-neutral-200">
+                <th scope="col" className="py-2 pr-3 font-semibold">Peran</th>
+                {PERMISSION_COLUMNS.map((c) => (
+                  <th key={c.key} scope="col" className="px-2 py-2 text-center font-semibold">
+                    {c.label}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {ROLE_ORDER.map((r) => {
+                const meta = ROLE_META[r]
+                const perms = ROLE_PERMISSIONS[r]
+                return (
+                  <tr key={r} className="border-b border-white/[0.06]">
+                    <th scope="row" className="py-2 pr-3 text-left font-normal">
+                      <span className="font-semibold text-white">{meta.label}</span>
+                      {r === currentRole && <span className="ml-2 text-[11px] text-accent-300">(peran Anda)</span>}
+                      <span className="block text-[11px] text-neutral-300">{meta.description}</span>
+                    </th>
+                    {PERMISSION_COLUMNS.map((c) => (
+                      <td key={c.key} className="px-2 py-2 text-center">
+                        {perms[c.key] ? (
+                          <>
+                            <Check className="mx-auto h-4 w-4 text-emerald-300" aria-hidden="true" />
+                            <span className="sr-only">Ya</span>
+                          </>
+                        ) : (
+                          <>
+                            <X className="mx-auto h-4 w-4 text-neutral-400" aria-hidden="true" />
+                            <span className="sr-only">Tidak</span>
+                          </>
+                        )}
+                      </td>
+                    ))}
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </details>
+  )
 }
+
+/* ------------------------------------------------------------------ */
 
 export function StudioUsersManager() {
-  const { role: currentUserRole, actorName, email: currentEmail } = useAuth()
-  const isSuperAdmin = currentUserRole === 'SUPER_ADMIN'
+  const { role: myRole, email: myEmail, userId } = useAuth()
+  const canManage = USER_ADMINS.includes(myRole)
+  const isSuperAdmin = myRole === 'SUPER_ADMIN'
 
   const [users, setUsers] = useState<UserItem[]>([])
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState<string | null>(null)
+  const [reloadKey, setReloadKey] = useState(0)
   const [search, setSearch] = useState('')
-  const [roleFilter, setRoleFilter] = useState('ALL')
+  const [roleFilter, setRoleFilter] = useState<'ALL' | Role>('ALL')
+  const [notice, setNotice] = useState<{ message: string; tone: StatusTone } | null>(null)
 
-  // Notification
-  const [notice, setNotice] = useState<{ type: 'success' | 'error'; message: string } | null>(null)
-  const notify = (message: string, type: 'success' | 'error' = 'success') => {
-    setNotice({ type, message })
-    setTimeout(() => setNotice(null), 4000)
-  }
-
-  // Modals state
-  const [addModalOpen, setAddModalOpen] = useState(false)
-  const [editModalOpen, setEditModalOpen] = useState(false)
-  const [resetModalOpen, setResetModalOpen] = useState(false)
-  const [deleteModalOpen, setDeleteModalOpen] = useState(false)
-  const [modalError, setModalError] = useState<string | null>(null)
-
-  const [selectedUser, setSelectedUser] = useState<UserItem | null>(null)
-
-  // Add form
-  const [newName, setNewName] = useState('')
-  const [newEmail, setNewEmail] = useState('')
-  const [newRole, setNewRole] = useState<string>('EDITOR')
-  const [newPassword, setNewPassword] = useState('')
+  const [dialog, setDialog] = useState<Dialog>(null)
+  const [name, setName] = useState('')
+  const [email, setEmail] = useState('')
+  const [role, setRole] = useState<Role>('EDITOR')
+  const [password, setPassword] = useState('')
+  const [errors, setErrors] = useState<FormErrors>({})
+  const [formError, setFormError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
-  const [copiedPwd, setCopiedPwd] = useState(false)
-
-  // Edit form
-  const [editName, setEditName] = useState('')
-  const [editRole, setEditRole] = useState('')
-
-  // Reset password form
-  const [resetPassword, setResetPassword] = useState('')
-
-  const fetchUsers = async () => {
-    setLoading(true)
-    try {
-      const res = await fetch('/api/users')
-      const data = await res.json()
-      if (res.ok) {
-        setUsers(data.users || [])
-      } else {
-        notify(data.error || 'Gagal mengambil data pengguna.', 'error')
-      }
-    } catch {
-      notify('Koneksi ke server gagal saat memuat daftar pengguna.', 'error')
-    } finally {
-      setLoading(false)
-    }
-  }
+  const [copied, setCopied] = useState(false)
+  const nameRef = useRef<HTMLInputElement>(null)
+  const emailRef = useRef<HTMLInputElement>(null)
+  const passwordRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
-    fetchUsers()
-  }, [])
+    if (!canManage) {
+      setLoading(false)
+      return
+    }
+    const controller = new AbortController()
+    setLoading(true)
+    fetchJson('/api/users', listSchema, { signal: controller.signal, fallbackError: 'Daftar pengguna belum bisa dimuat.' }).then((r) => {
+      if (controller.signal.aborted) return
+      if (r.ok) {
+        setUsers(r.data.users)
+        setLoadError(null)
+      } else setLoadError(r.error)
+      setLoading(false)
+    })
+    return () => controller.abort()
+  }, [canManage, reloadKey])
 
-  // Filtered users
-  const filteredUsers = users.filter((u) => {
-    const q = search.toLowerCase()
-    const matchesSearch =
-      u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q)
-    const matchesRole = roleFilter === 'ALL' || u.role === roleFilter
-    return matchesSearch && matchesRole
-  })
+  const reload = useCallback(() => setReloadKey((k) => k + 1), [])
 
-  // Handlers
-  const handleOpenAdd = () => {
-    setNewName('')
-    setNewEmail('')
-    setNewRole('EDITOR')
-    setNewPassword(generateSecurePassword())
-    setModalError(null)
-    setAddModalOpen(true)
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase()
+    return users.filter(
+      (u) => (roleFilter === 'ALL' || u.role === roleFilter) && (!q || u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q))
+    )
+  }, [users, search, roleFilter])
+
+  const assignableRoles = ROLE_ORDER.filter((r) => isSuperAdmin || r !== 'SUPER_ADMIN')
+  const isSelf = (u: UserItem) => u.id === userId || u.email.toLowerCase() === myEmail.toLowerCase()
+  const canModify = (u: UserItem) => canManage && !u.isBootstrap && (isSuperAdmin || u.role !== 'SUPER_ADMIN')
+
+  const open = (next: Dialog) => {
+    setErrors({})
+    setFormError(null)
+    setCopied(false)
+    if (next?.kind === 'add') {
+      setName('')
+      setEmail('')
+      setRole('EDITOR')
+      setPassword(generatePassword())
+    } else if (next?.kind === 'edit') {
+      setName(next.user.name)
+      setRole(isRole(next.user.role) ? next.user.role : 'AUTHOR')
+    } else if (next?.kind === 'reset') {
+      setPassword(generatePassword())
+    }
+    setDialog(next)
   }
+  const close = () => setDialog(null)
 
-  const handleCreateUser = async (e?: React.FormEvent) => {
-    if (e) e.preventDefault()
-    setModalError(null)
-
-    if (!newName.trim() || newName.trim().length < 2) {
-      setModalError('Nama pengguna minimal 2 karakter.')
-      return
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!dialog || submitting) return
+    const next: FormErrors = {}
+    if (dialog.kind === 'add' || dialog.kind === 'edit') {
+      if (name.trim().length < 2) next.name = 'Isi nama minimal 2 karakter.'
     }
-    if (!newEmail.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newEmail)) {
-      setModalError('Format alamat email tidak valid.')
-      return
-    }
-    if (!newPassword || newPassword.length < 8) {
-      setModalError('Kata sandi awal minimal 8 karakter.')
-      return
-    }
+    if (dialog.kind === 'add' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) next.email = 'Isi alamat email yang valid, misalnya nama@spatium.id.'
+    if ((dialog.kind === 'add' || dialog.kind === 'reset') && password.length < 8) next.password = 'Kata sandi minimal 8 karakter.'
+    setErrors(next)
+    if (next.name) return nameRef.current?.focus()
+    if (next.email) return emailRef.current?.focus()
+    if (next.password) return passwordRef.current?.focus()
 
     setSubmitting(true)
-    try {
-      const res = await fetch('/api/users', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: newName.trim(),
-          email: newEmail.trim().toLowerCase(),
-          role: newRole,
-          password: newPassword,
-        }),
-      })
-      const data = await res.json()
-      if (res.ok) {
-        notify(`Pengguna baru "${newName}" (${newEmail}) berhasil ditambahkan!`)
-        setAddModalOpen(false)
-        setNewName('')
-        setNewEmail('')
-        setNewPassword('')
-        setModalError(null)
-        fetchUsers()
-      } else {
-        const msg = data.error || data.message || 'Gagal menambahkan pengguna baru.'
-        setModalError(msg)
-        notify(msg, 'error')
-      }
-    } catch {
-      const msg = 'Kesalahan server saat membuat pengguna.'
-      setModalError(msg)
-      notify(msg, 'error')
-    } finally {
+    setFormError(null)
+    const request =
+      dialog.kind === 'add'
+        ? { method: 'POST', body: { name: name.trim(), email: email.trim().toLowerCase(), role, password } }
+        : dialog.kind === 'edit'
+        ? { method: 'PATCH', body: { id: dialog.user.id, name: name.trim(), role } }
+        : dialog.kind === 'reset'
+        ? { method: 'PATCH', body: { id: dialog.user.id, password } }
+        : null
+    if (!request) {
       setSubmitting(false)
-    }
-  }
-
-  const handleOpenEdit = (user: UserItem) => {
-    setSelectedUser(user)
-    setEditName(user.name)
-    setEditRole(user.role)
-    setModalError(null)
-    setEditModalOpen(true)
-  }
-
-  const handleUpdateUser = async (e?: React.FormEvent) => {
-    if (e) e.preventDefault()
-    if (!selectedUser) return
-    setModalError(null)
-
-    if (!editName.trim() || editName.trim().length < 2) {
-      setModalError('Nama pengguna minimal 2 karakter.')
       return
     }
-
-    setSubmitting(true)
-    try {
-      const res = await fetch('/api/users', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          id: selectedUser.id,
-          name: editName.trim(),
-          role: editRole,
-        }),
+    const r = await fetchJson('/api/users', messageSchema, {
+      method: request.method,
+      headers: jsonHeaders,
+      body: JSON.stringify(request.body),
+      fallbackError: 'Perubahan belum tersimpan.',
+    })
+    setSubmitting(false)
+    if (r.ok) {
+      setNotice({
+        tone: 'success',
+        message:
+          dialog.kind === 'add'
+            ? `Akun ${email.trim().toLowerCase()} dibuat. Bagikan kata sandi awal lewat saluran aman.`
+            : dialog.kind === 'reset'
+            ? `Kata sandi ${dialog.user.name} direset.`
+            : r.data.message || 'Data pengguna diperbarui.',
       })
-      const data = await res.json()
-      if (res.ok) {
-        notify(`Data pengguna "${editName}" berhasil diperbarui!`)
-        setEditModalOpen(false)
-        setModalError(null)
-        fetchUsers()
-      } else {
-        const msg = data.error || data.message || 'Gagal memperbarui data pengguna.'
-        setModalError(msg)
-        notify(msg, 'error')
-      }
-    } catch {
-      const msg = 'Kesalahan server saat memperbarui data.'
-      setModalError(msg)
-      notify(msg, 'error')
-    } finally {
-      setSubmitting(false)
-    }
+      close()
+      reload()
+    } else setFormError(r.error)
   }
 
-  const handleOpenReset = (user: UserItem) => {
-    setSelectedUser(user)
-    setResetPassword(generateSecurePassword())
-    setModalError(null)
-    setResetModalOpen(true)
-  }
-
-  const handleResetPassword = async (e?: React.FormEvent) => {
-    if (e) e.preventDefault()
-    if (!selectedUser) return
-    setModalError(null)
-
-    if (!resetPassword || resetPassword.length < 8) {
-      setModalError('Kata sandi baru minimal 8 karakter.')
-      return
-    }
-
+  const handleDelete = async () => {
+    if (dialog?.kind !== 'delete' || submitting) return
     setSubmitting(true)
+    const r = await fetchJson(`/api/users?id=${encodeURIComponent(dialog.user.id)}`, messageSchema, {
+      method: 'DELETE',
+      fallbackError: 'Akun belum terhapus.',
+    })
+    setSubmitting(false)
+    if (r.ok) {
+      setNotice({ tone: 'success', message: r.data.message || `Akun ${dialog.user.name} dihapus.` })
+      close()
+      reload()
+    } else setFormError(r.error)
+  }
+
+  const copyPassword = async () => {
     try {
-      const res = await fetch('/api/users', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          id: selectedUser.id,
-          password: resetPassword,
-        }),
-      })
-      const data = await res.json()
-      if (res.ok) {
-        notify(`Kata sandi untuk "${selectedUser.name}" berhasil direset!`)
-        setResetModalOpen(false)
-        setModalError(null)
-      } else {
-        const msg = data.error || data.message || 'Gagal mereset kata sandi.'
-        setModalError(msg)
-        notify(msg, 'error')
-      }
-    } catch {
-      const msg = 'Kesalahan server saat mereset kata sandi.'
-      setModalError(msg)
-      notify(msg, 'error')
-    } finally {
-      setSubmitting(false)
+      await navigator.clipboard.writeText(password)
+      setCopied(true)
+    } catch (err) {
+      console.warn('[users] Clipboard write failed:', err)
+      setFormError('Kata sandi tidak bisa disalin otomatis. Pilih teksnya lalu salin manual.')
     }
   }
 
-  const handleOpenDelete = (user: UserItem) => {
-    setSelectedUser(user)
-    setModalError(null)
-    setDeleteModalOpen(true)
-  }
-
-  const handleDeleteUser = async () => {
-    if (!selectedUser) return
-    setSubmitting(true)
-    setModalError(null)
-    try {
-      const res = await fetch(`/api/users?id=${encodeURIComponent(selectedUser.id)}`, {
-        method: 'DELETE',
-      })
-      const data = await res.json()
-      if (res.ok) {
-        notify(data.message || `Pengguna "${selectedUser.name}" dihapus.`)
-        setDeleteModalOpen(false)
-        setModalError(null)
-        fetchUsers()
-      } else {
-        const msg = data.error || data.message || 'Gagal menghapus pengguna.'
-        setModalError(msg)
-        notify(msg, 'error')
+  const passwordField = (label: string) => (
+    <FormField
+      label={label}
+      hint="Minimal 8 karakter. Disimpan sebagai hash scrypt."
+      error={errors.password}
+      action={
+        <button type="button" onClick={() => setPassword(generatePassword())} className="min-h-8 rounded-lg px-2 text-[11px] font-semibold text-accent-300 hover:bg-white/10">
+          Buat acak
+        </button>
       }
-    } catch {
-      const msg = 'Kesalahan server saat menghapus pengguna.'
-      setModalError(msg)
-      notify(msg, 'error')
-    } finally {
-      setSubmitting(false)
-    }
-  }
-
-  const copyPasswordToClipboard = (pwd: string) => {
-    navigator.clipboard.writeText(pwd)
-    setCopiedPwd(true)
-    setTimeout(() => setCopiedPwd(false), 2000)
-  }
-
-  return (
-    <div className="space-y-6 text-white">
-      {/* Toast Notification */}
-      {notice && (
-        <div
-          role="status"
-          className={`fixed bottom-6 left-1/2 z-[100] flex max-w-[min(520px,calc(100vw-2rem))] -translate-x-1/2 items-center gap-3 rounded-xl border px-4 py-3 text-xs font-medium shadow-2xl backdrop-blur ${
-            notice.type === 'success'
-              ? 'border-emerald-500/30 bg-emerald-950/90 text-emerald-200'
-              : 'border-red-500/30 bg-red-950/90 text-red-200'
-          }`}
-        >
-          {notice.type === 'success' ? (
-            <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-400" />
-          ) : (
-            <AlertTriangle className="h-4 w-4 shrink-0 text-red-400" />
-          )}
-          <span className="min-w-0 flex-1">{notice.message}</span>
+    >
+      {(p) => (
+        <div className="flex gap-2">
+          <input
+            {...p}
+            ref={passwordRef}
+            data-autofocus={dialog?.kind === 'reset' ? true : undefined}
+            type="text"
+            name="new-password"
+            autoComplete="new-password"
+            spellCheck={false}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className={`${fieldCls} font-mono text-xs`}
+          />
+          <button
+            type="button"
+            onClick={copyPassword}
+            aria-label={copied ? 'Kata sandi tersalin' : 'Salin kata sandi'}
+            className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/20 text-neutral-200 hover:bg-white/10"
+          >
+            {copied ? <Check className="h-4 w-4 text-emerald-300" aria-hidden="true" /> : <Copy className="h-4 w-4" aria-hidden="true" />}
+          </button>
         </div>
       )}
+    </FormField>
+  )
 
-      {/* Action Toolbar */}
-      <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
-        <div className="lg:max-w-md lg:flex-1">
-          <SearchField
-            icon={Search}
-            value={search}
-            onChange={setSearch}
-            placeholder="Cari nama atau email pengguna…"
-          />
-        </div>
-
-        <select
-          value={roleFilter}
-          onChange={(e) => setRoleFilter(e.target.value)}
-          aria-label="Filter berdasarkan peran"
-          className={`${fieldCls} lg:w-56`}
-        >
-          <option value="ALL">Semua Peran</option>
-          {ROLES_LIST.map((r) => (
+  const roleField = (
+    <FormField label="Peran" hint={ROLE_META[role].description}>
+      {(p) => (
+        <select {...p} value={role} onChange={(e) => isRole(e.target.value) && setRole(e.target.value)} className={fieldCls}>
+          {assignableRoles.map((r) => (
             <option key={r} value={r}>
-              {ROLE_META[r]?.label || r}
+              {ROLE_META[r].label}
             </option>
           ))}
         </select>
+      )}
+    </FormField>
+  )
 
-        <span className="font-mono text-xs text-neutral-500 lg:ml-auto">
-          {filteredUsers.length} pengguna
-        </span>
+  if (!canManage) {
+    return (
+      <div className="space-y-6">
+        <p className="rounded-2xl border border-white/10 bg-[var(--studio-bg)] p-5 text-sm text-neutral-200">
+          <Lock className="mr-2 inline h-4 w-4 text-neutral-300" aria-hidden="true" />
+          Pengelolaan akun hanya untuk Super Admin dan Content Admin. Hubungi admin bila perlu akun baru atau perubahan peran.
+        </p>
+        <RolesMatrix currentRole={myRole} />
+      </div>
+    )
+  }
 
-        <div className="flex items-center gap-2">
-          <IconButton
-            icon={RefreshCw}
-            label="Muat ulang data"
-            onClick={fetchUsers}
-            disabled={loading}
-            spinning={loading}
-          />
-          {isSuperAdmin && (
-            <Tooltip side="top" label="Tambah Akun Baru" hint="Buat kredensial akun pengguna studio">
-              <button
-                type="button"
-                onClick={handleOpenAdd}
-                className="inline-flex h-10 items-center gap-2 rounded-xl bg-accent-500 px-4 text-xs font-semibold text-accent-950 shadow-yellow-glow transition-all hover:bg-accent-300"
-              >
-                <UserPlus className="h-4 w-4" />
-                <span>Tambah Pengguna</span>
-              </button>
-            </Tooltip>
-          )}
+  const dialogTitle =
+    dialog?.kind === 'add'
+      ? 'Tambah pengguna'
+      : dialog?.kind === 'edit'
+      ? `Ubah ${dialog.user.name}`
+      : dialog?.kind === 'reset'
+      ? `Reset kata sandi ${dialog.user.name}`
+      : ''
+
+  return (
+    <div className="space-y-6">
+      <StatusMessage message={notice?.message ?? null} tone={notice?.tone} onDismiss={() => setNotice(null)} />
+
+      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end">
+        <div className="min-w-0 sm:w-72">
+          <label htmlFor="users-search" className="mb-1 block text-[11px] font-semibold text-neutral-300">
+            Cari
+          </label>
+          <div className="relative">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" aria-hidden="true" />
+            <input id="users-search" type="search" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Nama atau email" className={`${fieldCls} pl-9`} />
+          </div>
+        </div>
+        <div className="min-w-0 sm:w-56">
+          <label htmlFor="users-role" className="mb-1 block text-[11px] font-semibold text-neutral-300">
+            Peran
+          </label>
+          <select
+            id="users-role"
+            value={roleFilter}
+            onChange={(e) => setRoleFilter(e.target.value === 'ALL' || !isRole(e.target.value) ? 'ALL' : e.target.value)}
+            className={fieldCls}
+          >
+            <option value="ALL">Semua peran</option>
+            {ROLE_ORDER.map((r) => (
+              <option key={r} value={r}>
+                {ROLE_META[r].label}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="flex items-center gap-2 sm:ml-auto">
+          <IconButton icon={RefreshCw} label="Muat ulang daftar pengguna" onClick={reload} spinning={loading} disabled={loading} />
+          <TextButton tone="primary" onClick={() => open({ kind: 'add' })}>
+            <UserPlus className="h-4 w-4" aria-hidden="true" />
+            Tambah pengguna
+          </TextButton>
         </div>
       </div>
 
-      {/* 3. Users Table Panel */}
-      <Panel className="overflow-hidden">
-        {loading ? (
-          <div className="py-24 text-center font-mono text-sm text-neutral-500">Memuat daftar pengguna…</div>
-        ) : filteredUsers.length === 0 ? (
-          <div className="py-24 text-center text-sm text-neutral-500">
-            Tidak ada akun pengguna yang cocok dengan kriteria pencarian.
+      <section aria-labelledby="users-heading" className="overflow-hidden rounded-2xl border border-white/10 bg-[var(--studio-bg)]">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 px-5 py-3">
+          <h2 id="users-heading" className="text-sm font-semibold">
+            Akun studio
+          </h2>
+          <p className="text-xs text-neutral-300" aria-live="polite">
+            {loading ? 'Memuat…' : `${filtered.length} dari ${users.length} pengguna`}
+          </p>
+        </div>
+        {loadError ? (
+          <div role="alert" className="space-y-3 px-5 py-8 text-center text-sm text-red-200">
+            <p>{loadError}</p>
+            <TextButton onClick={reload}>Coba lagi</TextButton>
           </div>
+        ) : !loading && filtered.length === 0 ? (
+          <p className="px-5 py-8 text-center text-sm text-neutral-300">
+            {users.length === 0 ? 'Belum ada akun di database.' : 'Tidak ada pengguna yang cocok dengan filter.'}
+          </p>
         ) : (
-          <div className="overflow-x-auto">
+          <>
+          <p className="px-4 pt-2 text-[11px] text-neutral-300 md:hidden">Geser tabel ke samping untuk melihat semua kolom.</p>
+          <div className="overflow-x-auto" tabIndex={0} role="region" aria-label="Tabel pengguna (bisa digeser)">
             <table className="w-full text-left text-sm">
               <thead>
-                <tr className="border-b border-white/[0.06] text-xs font-medium text-neutral-500">
-                  <th className="px-6 py-4 font-medium">Pengguna</th>
-                  <th className="px-4 py-4 font-medium">Peran / Role</th>
-                  <th className="px-4 py-4 font-medium">Tanggal Dibuat</th>
-                  <th className="px-6 py-4 text-right font-medium">Aksi</th>
+                <tr className="border-b border-white/10 text-xs text-neutral-200">
+                  <th scope="col" className="px-5 py-2.5 font-semibold">Pengguna</th>
+                  <th scope="col" className="px-3 py-2.5 font-semibold">Peran</th>
+                  <th scope="col" className="px-3 py-2.5 font-semibold">Dibuat</th>
+                  <th scope="col" className="px-5 py-2.5 text-right font-semibold">Aksi</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/[0.04]">
-                {filteredUsers.map((user) => {
-                  const roleMeta = ROLE_META[user.role] || ROLE_META.AUTHOR
-                  const RoleIcon = roleMeta.icon
-                  const isCurrent = currentEmail?.toLowerCase() === user.email.toLowerCase()
-
+              <tbody>
+                {filtered.map((u) => {
+                  const meta = roleMetaFor(u.role)
+                  const RoleIcon = meta.icon
+                  const self = isSelf(u)
                   return (
-                    <tr key={user.id} className="transition-colors hover:bg-white/[0.02]">
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-3">
-                          <span className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-accent-500 font-mono text-xs font-bold text-accent-950 ring-1 ring-white/15">
-                            {initials(user.name)}
-                            <span className="absolute -bottom-0.5 -right-0.5 h-2 w-2 rounded-full bg-emerald-400 ring-1 ring-surface-elevated" />
-                          </span>
-                          <div className="min-w-0">
-                            <div className="flex items-center gap-2">
-                              <span className="truncate font-semibold text-white">{user.name}</span>
-                              {isCurrent && (
-                                <span className="rounded bg-info/20 px-1.5 py-0.5 text-[10px] font-medium text-info-300">
-                                  Anda
-                                </span>
-                              )}
-                              {user.isBootstrap && (
-                                <span className="rounded bg-amber-500/20 px-1.5 py-0.5 text-[10px] font-mono text-amber-300">
-                                  Bootstrap
-                                </span>
-                              )}
-                            </div>
-                            <span className="flex items-center gap-1.5 text-xs text-neutral-400">
-                              <Mail className="h-3 w-3 shrink-0 text-neutral-500" />
-                              <span className="truncate font-mono">{user.email}</span>
-                            </span>
-                          </div>
-                        </div>
+                    <tr key={u.id} className="border-b border-white/[0.06] hover:bg-white/[0.03]">
+                      <th scope="row" className="px-5 py-3 text-left font-normal">
+                        <span className="block break-words font-semibold text-white">
+                          {u.name}
+                          {self && <span className="ml-2 text-[11px] font-normal text-accent-300">(Anda)</span>}
+                          {u.isBootstrap && <span className="ml-2 text-[11px] font-normal text-amber-200">(bootstrap env)</span>}
+                        </span>
+                        <span className="block break-all font-mono text-xs text-neutral-300">{u.email}</span>
+                      </th>
+                      <td className="px-3 py-3">
+                        <span className={`inline-flex items-center gap-1.5 rounded-md border px-2 py-0.5 text-xs font-medium ${meta.badge}`}>
+                          <RoleIcon className="h-3 w-3" aria-hidden="true" />
+                          {meta.label}
+                        </span>
                       </td>
-
-                      <td className="px-4 py-4">
-                        <Tooltip label={roleMeta.label} hint={roleMeta.description} side="top">
-                          <span
-                            tabIndex={0}
-                            className={`inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-xs font-medium ${roleMeta.badge}`}
-                          >
-                            <RoleIcon className="h-3 w-3" />
-                            {roleMeta.label}
-                          </span>
-                        </Tooltip>
+                      <td className="whitespace-nowrap px-3 py-3 text-xs text-neutral-200">
+                        {u.createdAt ? new Date(u.createdAt).toLocaleDateString('id-ID', { year: 'numeric', month: 'short', day: 'numeric' }) : '—'}
                       </td>
-
-                      <td className="px-4 py-4 text-xs text-neutral-400 font-mono">
-                        {user.createdAt ? (
-                          <span className="inline-flex items-center gap-1.5">
-                            <Calendar className="h-3.5 w-3.5 text-neutral-500" />
-                            {new Date(user.createdAt).toLocaleDateString('id-ID', {
-                              year: 'numeric',
-                              month: 'short',
-                              day: 'numeric',
-                            })}
-                          </span>
-                        ) : (
-                          <span className="text-neutral-600">—</span>
-                        )}
-                      </td>
-
-                      <td className="px-6 py-4">
+                      <td className="px-5 py-3">
                         <div className="flex items-center justify-end gap-1">
-                          {isSuperAdmin && !user.isBootstrap && (
+                          {canModify(u) ? (
                             <>
+                              <IconButton icon={Edit3} size="sm" label={`Ubah nama dan peran ${u.name}`} onClick={() => open({ kind: 'edit', user: u })} />
+                              <IconButton icon={KeyRound} size="sm" label={`Reset kata sandi ${u.name}`} onClick={() => open({ kind: 'reset', user: u })} />
                               <IconButton
-                                icon={Edit3}
-                                label="Edit nama & peran"
+                                icon={Trash2}
                                 size="sm"
-                                onClick={() => handleOpenEdit(user)}
+                                tone="danger"
+                                label={self ? 'Akun Anda sendiri tidak bisa dihapus' : `Hapus akun ${u.name}`}
+                                disabled={self}
+                                onClick={() => open({ kind: 'delete', user: u })}
                               />
-                              <IconButton
-                                icon={KeyRound}
-                                label="Reset kata sandi"
-                                size="sm"
-                                tone="info"
-                                onClick={() => handleOpenReset(user)}
-                              />
-                              {!isCurrent ? (
-                                <IconButton
-                                  icon={Trash2}
-                                  label="Hapus pengguna"
-                                  size="sm"
-                                  tone="danger"
-                                  onClick={() => handleOpenDelete(user)}
-                                />
-                              ) : (
-                                <Tooltip label="Terlindungi" hint="Akun aktif Anda tidak dapat dihapus.">
-                                  <span tabIndex={0} className="flex h-8 w-8 items-center justify-center text-neutral-600">
-                                    <Lock className="h-3.5 w-3.5" />
-                                  </span>
-                                </Tooltip>
-                              )}
                             </>
-                          )}
-                          {!isSuperAdmin && (
-                            <span className="text-xs text-neutral-600">Hanya Super Admin</span>
-                          )}
-                          {user.isBootstrap && (
-                            <Tooltip label="Akun Server" hint="Dikonfigurasi via server env">
-                              <span tabIndex={0} className="flex h-8 w-8 items-center justify-center text-amber-500/60">
-                                <Shield className="h-3.5 w-3.5" />
-                              </span>
-                            </Tooltip>
+                          ) : (
+                            <span className="text-xs text-neutral-300">
+                              {u.isBootstrap ? 'Diatur lewat env server' : 'Hanya Super Admin'}
+                            </span>
                           )}
                         </div>
                       </td>
@@ -543,360 +469,89 @@ export function StudioUsersManager() {
               </tbody>
             </table>
           </div>
+          </>
         )}
+      </section>
 
-        <div className="flex items-center justify-between border-t border-white/[0.06] px-6 py-3.5 text-xs text-neutral-500 font-mono">
-          <span>Menampilkan {filteredUsers.length} dari {users.length} total pengguna</span>
-          <span>Role Policy: Strict RBAC</span>
-        </div>
-      </Panel>
+      <RolesMatrix currentRole={myRole} />
 
-      {/* 4. MODAL: Tambah Pengguna Baru */}
       <Modal
-        open={addModalOpen}
-        onClose={() => {
-          setAddModalOpen(false)
-          setModalError(null)
-        }}
-        title="Tambah Pengguna Baru"
-        icon={UserPlus}
+        open={dialog !== null && dialog.kind !== 'delete'}
+        onClose={close}
+        title={dialogTitle}
+        icon={dialog?.kind === 'reset' ? KeyRound : dialog?.kind === 'edit' ? Edit3 : UserPlus}
         tone="info"
         footer={
           <>
-            <TextButton
-              onClick={() => {
-                setAddModalOpen(false)
-                setModalError(null)
-              }}
-              disabled={submitting}
-            >
-              Batal
-            </TextButton>
-            <TextButton
-              tone="primary"
-              type="submit"
-              form="add-user-form"
-              disabled={submitting}
-              onClick={() => handleCreateUser()}
-            >
-              {submitting ? 'Menyimpan…' : 'Simpan Pengguna'}
+            <TextButton onClick={close}>Batal</TextButton>
+            <TextButton tone="primary" type="submit" form="user-form" busy={submitting}>
+              {submitting ? 'Menyimpan…' : dialog?.kind === 'reset' ? 'Reset kata sandi' : 'Simpan'}
             </TextButton>
           </>
         }
       >
-        <form id="add-user-form" onSubmit={handleCreateUser} className="space-y-4">
-          {modalError && (
-            <div className="flex items-center gap-2.5 rounded-xl border border-rose-500/30 bg-rose-500/10 p-3 text-xs text-rose-300">
-              <AlertTriangle className="h-4 w-4 shrink-0 text-rose-400" />
-              <span>{modalError}</span>
-            </div>
-          )}
-
-          <div className="space-y-1">
-            <label className="text-xs font-semibold text-neutral-300">Nama Lengkap</label>
-            <input
-              type="text"
-              value={newName}
-              onChange={(e) => {
-                setNewName(e.target.value)
-                if (modalError) setModalError(null)
-              }}
-              placeholder="Contoh: Budi Santoso"
-              className={fieldCls}
-              required
-              minLength={2}
-            />
-          </div>
-
-          <div className="space-y-1">
-            <label className="text-xs font-semibold text-neutral-300">Alamat Email</label>
-            <input
-              type="email"
-              value={newEmail}
-              onChange={(e) => {
-                setNewEmail(e.target.value)
-                if (modalError) setModalError(null)
-              }}
-              placeholder="budi@unimasi.com"
-              className={fieldCls}
-              required
-            />
-          </div>
-
-          <div className="space-y-1">
-            <label className="text-xs font-semibold text-neutral-300">Peran &amp; Hak Akses</label>
-            <select
-              value={newRole}
-              onChange={(e) => setNewRole(e.target.value)}
-              className={fieldCls}
-            >
-              {ROLES_LIST.map((r) => (
-                <option key={r} value={r}>
-                  {ROLE_META[r]?.label} — {ROLE_META[r]?.description}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="space-y-1">
-            <div className="flex items-center justify-between">
-              <label className="text-xs font-semibold text-neutral-300">Kata Sandi Awal</label>
-              <button
-                type="button"
-                onClick={() => {
-                  setNewPassword(generateSecurePassword())
-                  if (modalError) setModalError(null)
-                }}
-                className="text-[11px] text-accent-400 hover:text-accent-300 font-medium"
-              >
-                Generate Acak
-              </button>
-            </div>
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={newPassword}
-                onChange={(e) => {
-                  setNewPassword(e.target.value)
-                  if (modalError) setModalError(null)
-                }}
-                placeholder="Minimal 8 karakter"
-                className={`${fieldCls} font-mono text-xs`}
-                required
-                minLength={8}
-              />
-              <Tooltip label="Salin kata sandi">
-                <button
-                  type="button"
-                  onClick={() => copyPasswordToClipboard(newPassword)}
-                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/[0.03] text-neutral-400 hover:text-white"
-                >
-                  {copiedPwd ? <Check className="h-4 w-4 text-emerald-400" /> : <Copy className="h-4 w-4" />}
-                </button>
-              </Tooltip>
-            </div>
-            <p className="text-[11px] text-neutral-500">
-              Kata sandi akan dienkripsi dengan standar Scrypt sebelum disimpan.
+        <form id="user-form" onSubmit={submit} noValidate className="space-y-4">
+          {formError && (
+            <p role="alert" className="rounded-xl border border-red-400/40 p-3 text-xs text-red-100">
+              {formError}
             </p>
-          </div>
-        </form>
-      </Modal>
-
-      {/* 5. MODAL: Edit Pengguna */}
-      <Modal
-        open={editModalOpen}
-        onClose={() => {
-          setEditModalOpen(false)
-          setModalError(null)
-        }}
-        title="Ubah Data Pengguna"
-        icon={Edit3}
-        tone="info"
-        footer={
-          <>
-            <TextButton
-              onClick={() => {
-                setEditModalOpen(false)
-                setModalError(null)
-              }}
-              disabled={submitting}
-            >
-              Batal
-            </TextButton>
-            <TextButton
-              tone="primary"
-              type="submit"
-              form="edit-user-form"
-              disabled={submitting}
-              onClick={() => handleUpdateUser()}
-            >
-              {submitting ? 'Menyimpan…' : 'Simpan Perubahan'}
-            </TextButton>
-          </>
-        }
-      >
-        <form id="edit-user-form" onSubmit={handleUpdateUser} className="space-y-4">
-          {modalError && (
-            <div className="flex items-center gap-2.5 rounded-xl border border-rose-500/30 bg-rose-500/10 p-3 text-xs text-rose-300">
-              <AlertTriangle className="h-4 w-4 shrink-0 text-rose-400" />
-              <span>{modalError}</span>
-            </div>
           )}
-
-          <div className="space-y-1">
-            <label className="text-xs font-semibold text-neutral-300">Nama Lengkap</label>
-            <input
-              type="text"
-              value={editName}
-              onChange={(e) => {
-                setEditName(e.target.value)
-                if (modalError) setModalError(null)
-              }}
-              className={fieldCls}
-              required
-              minLength={2}
-            />
-          </div>
-
-          <div className="space-y-1">
-            <label className="text-xs font-semibold text-neutral-300">Alamat Email (Tetap)</label>
-            <input
-              type="email"
-              value={selectedUser?.email || ''}
-              disabled
-              className={`${fieldCls} opacity-60 font-mono text-xs`}
-            />
-          </div>
-
-          <div className="space-y-1">
-            <label className="text-xs font-semibold text-neutral-300">Peran &amp; Hak Akses</label>
-            <select
-              value={editRole}
-              onChange={(e) => setEditRole(e.target.value)}
-              className={fieldCls}
-            >
-              {ROLES_LIST.map((r) => (
-                <option key={r} value={r}>
-                  {ROLE_META[r]?.label} — {ROLE_META[r]?.description}
-                </option>
-              ))}
-            </select>
-          </div>
-        </form>
-      </Modal>
-
-      {/* 6. MODAL: Reset Kata Sandi */}
-      <Modal
-        open={resetModalOpen}
-        onClose={() => {
-          setResetModalOpen(false)
-          setModalError(null)
-        }}
-        title="Reset Kata Sandi Pengguna"
-        icon={KeyRound}
-        tone="warning"
-        footer={
-          <>
-            <TextButton
-              onClick={() => {
-                setResetModalOpen(false)
-                setModalError(null)
-              }}
-              disabled={submitting}
-            >
-              Batal
-            </TextButton>
-            <TextButton
-              tone="primary"
-              type="submit"
-              form="reset-user-form"
-              disabled={submitting}
-              onClick={() => handleResetPassword()}
-            >
-              {submitting ? 'Menyimpan…' : 'Reset Kata Sandi'}
-            </TextButton>
-          </>
-        }
-      >
-        <form id="reset-user-form" onSubmit={handleResetPassword} className="space-y-4">
-          {modalError && (
-            <div className="flex items-center gap-2.5 rounded-xl border border-rose-500/30 bg-rose-500/10 p-3 text-xs text-rose-300">
-              <AlertTriangle className="h-4 w-4 shrink-0 text-rose-400" />
-              <span>{modalError}</span>
-            </div>
+          {(dialog?.kind === 'add' || dialog?.kind === 'edit') && (
+            <FormField label="Nama lengkap" error={errors.name}>
+              {(p) => <input {...p} data-autofocus ref={nameRef} type="text" name="name" autoComplete="off" value={name} onChange={(e) => setName(e.target.value)} className={fieldCls} />}
+            </FormField>
           )}
-
-          <p className="text-xs text-neutral-400">
-            Atur kata sandi baru untuk <strong className="text-white">{selectedUser?.name}</strong> ({selectedUser?.email}).
-          </p>
-
-          <div className="space-y-1">
-            <div className="flex items-center justify-between">
-              <label className="text-xs font-semibold text-neutral-300">Kata Sandi Baru</label>
-              <button
-                type="button"
-                onClick={() => {
-                  setResetPassword(generateSecurePassword())
-                  if (modalError) setModalError(null)
-                }}
-                className="text-[11px] text-accent-400 hover:text-accent-300 font-medium"
-              >
-                Generate Acak
-              </button>
-            </div>
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={resetPassword}
-                onChange={(e) => {
-                  setResetPassword(e.target.value)
-                  if (modalError) setModalError(null)
-                }}
-                placeholder="Minimal 8 karakter"
-                className={`${fieldCls} font-mono text-xs`}
-                required
-                minLength={8}
-              />
-              <Tooltip label="Salin kata sandi">
-                <button
-                  type="button"
-                  onClick={() => copyPasswordToClipboard(resetPassword)}
-                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/[0.03] text-neutral-400 hover:text-white"
-                >
-                  {copiedPwd ? <Check className="h-4 w-4 text-emerald-400" /> : <Copy className="h-4 w-4" />}
-                </button>
-              </Tooltip>
-            </div>
-          </div>
+          {dialog?.kind === 'add' && (
+            <FormField label="Email" error={errors.email}>
+              {(p) => (
+                <input {...p} ref={emailRef} type="email" name="email" autoComplete="off" inputMode="email" value={email} onChange={(e) => setEmail(e.target.value)} className={fieldCls} />
+              )}
+            </FormField>
+          )}
+          {dialog?.kind === 'edit' && <p className="text-xs text-neutral-300">Email: <span className="font-mono">{dialog.user.email}</span> (tidak bisa diubah)</p>}
+          {(dialog?.kind === 'add' || dialog?.kind === 'edit') && roleField}
+          {dialog?.kind === 'add' && passwordField('Kata sandi awal')}
+          {dialog?.kind === 'reset' && (
+            <>
+              <p className="text-xs text-neutral-300">
+                Kata sandi lama <span className="font-mono">{dialog.user.email}</span> tidak berlaku lagi setelah disimpan.
+              </p>
+              {passwordField('Kata sandi baru')}
+            </>
+          )}
         </form>
       </Modal>
 
-      {/* 7. MODAL: Konfirmasi Hapus Pengguna */}
       <Modal
-        open={deleteModalOpen}
-        onClose={() => {
-          setDeleteModalOpen(false)
-          setModalError(null)
-        }}
-        title="Hapus Akun Pengguna?"
+        open={dialog?.kind === 'delete'}
+        onClose={close}
+        title="Hapus akun pengguna?"
+        description={
+          dialog?.kind === 'delete' ? (
+            <>
+              {dialog.user.name} ({dialog.user.email}) tidak akan bisa login lagi. Tindakan ini permanen.
+            </>
+          ) : null
+        }
         icon={Trash2}
         tone="danger"
         footer={
           <>
-            <TextButton
-              onClick={() => {
-                setDeleteModalOpen(false)
-                setModalError(null)
-              }}
-              disabled={submitting}
-            >
-              Batal
-            </TextButton>
-            <TextButton
-              tone="danger"
-              disabled={submitting}
-              onClick={handleDeleteUser}
-            >
-              {submitting ? 'Menghapus…' : 'Hapus Permanen'}
+            <TextButton onClick={close}>Batal</TextButton>
+            <TextButton tone="danger" onClick={handleDelete} busy={submitting}>
+              {submitting ? 'Menghapus…' : 'Hapus akun'}
             </TextButton>
           </>
         }
       >
-        <div className="space-y-3 text-xs text-neutral-400">
-          {modalError && (
-            <div className="flex items-center gap-2.5 rounded-xl border border-rose-500/30 bg-rose-500/10 p-3 text-xs text-rose-300">
-              <AlertTriangle className="h-4 w-4 shrink-0 text-rose-400" />
-              <span>{modalError}</span>
-            </div>
-          )}
-          <p>
-            Apakah Anda yakin ingin menghapus akun <strong className="text-white">{selectedUser?.name}</strong> ({selectedUser?.email})?
+        {formError && (
+          <p role="alert" className="rounded-xl border border-red-400/40 p-3 text-xs text-red-100">
+            {formError}
           </p>
-          <p className="text-rose-400/90">
-            Tindakan ini permanen. Pengguna tidak akan dapat login lagi ke studio.
-          </p>
-        </div>
+        )}
       </Modal>
     </div>
   )
 }
+
+export default StudioUsersManager

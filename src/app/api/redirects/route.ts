@@ -56,9 +56,10 @@ export async function GET(request: NextRequest) {
         pageCount,
       },
     })
-  } catch (err: any) {
+  } catch (err) {
+    console.error('[API redirects] GET failed:', err)
     return NextResponse.json(
-      { error: 'Gagal mengambil data redirects dari database', details: err.message },
+      { error: 'Gagal mengambil data redirects dari database' },
       { status: 500 }
     )
   }
@@ -140,9 +141,10 @@ export async function POST(request: NextRequest) {
       sourcePath,
       destinationPath,
     })
-  } catch (err: any) {
+  } catch (err) {
+    console.error('[API redirects] POST failed:', err)
     return NextResponse.json(
-      { error: 'Gagal menyimpan aturan redirect', details: err.message },
+      { error: 'Gagal menyimpan aturan redirect' },
       { status: 500 }
     )
   }
@@ -191,9 +193,10 @@ export async function DELETE(request: NextRequest) {
       success: true,
       message: `Aturan redirect "${existing.sourcePath}" berhasil dihapus oleh ${user.name}.`,
     })
-  } catch (err: any) {
+  } catch (err) {
+    console.error('[API redirects] DELETE failed:', err)
     return NextResponse.json(
-      { error: 'Gagal menghapus aturan redirect', details: err.message },
+      { error: 'Gagal menghapus aturan redirect' },
       { status: 500 }
     )
   }

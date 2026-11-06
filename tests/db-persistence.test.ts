@@ -2,43 +2,52 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest'
 import { db as prisma } from '../prisma/db'
 import { validateCredentials } from '../src/lib/auth/credentials'
 import { getSiteByApiKey } from '../src/lib/db/site'
+import { hashPasswordScrypt } from '../src/lib/auth/crypto'
+import { randomBytes } from 'node:crypto'
 
 describe('Layer 2: Schema Integrity & Database Persistence (Zero-Mock)', () => {
   const TEST_SLUG = `adversarial-test-art-${Date.now()}`
 
   beforeAll(async () => {
-    // Clean up any test records
-    await prisma.orm.public.Article.where({ slug: TEST_SLUG }).delete().catch(() => {})
+    await prisma.orm.public.Article.where({ slug: TEST_SLUG }).delete()
   })
 
   afterAll(async () => {
-    // Final cleanup of test records
-    await prisma.orm.public.Article.where({ slug: TEST_SLUG }).delete().catch(() => {})
+    await prisma.orm.public.Article.where({ slug: TEST_SLUG }).delete()
+    await prisma.orm.public.User.where({ email: TEST_EMAIL }).delete()
   })
 
-  it('validates WordPress user Adib IT via email against real PostgreSQL scrypt hash', async () => {
-    const user = await validateCredentials('adib@udp.co.id', 'QzU5D0gv4vXFHF@@QCc3^1)D')
-    expect(user).not.toBeNull()
-    expect(user?.name).toBe('Adib IT')
-    expect(user?.role).toBe('SUPER_ADMIN')
+  // Credentials are verified against a throw-away user with a random password,
+  // never against real accounts or passwords committed to the repository.
+  const TEST_EMAIL = `persistence-test-${Date.now()}@spatium.test`
+  const TEST_PASSWORD = randomBytes(18).toString('base64url')
+
+  it('validates a user against a real PostgreSQL scrypt hash', async () => {
+    await prisma.orm.public.User.create({
+      id: `usr_test_${Date.now()}`,
+      name: 'Persistence Test',
+      email: TEST_EMAIL,
+      role: 'editor',
+      passwordHash: await hashPasswordScrypt(TEST_PASSWORD),
+    })
+    const user = await validateCredentials(TEST_EMAIL, TEST_PASSWORD)
+    expect(user?.email).toBe(TEST_EMAIL)
+    expect(user?.role).toBe('EDITOR')
   })
 
-  it('validates WordPress user Adib IT via username against real PostgreSQL scrypt hash', async () => {
-    const user = await validateCredentials('Adib IT', 'QzU5D0gv4vXFHF@@QCc3^1)D')
-    expect(user).not.toBeNull()
-    expect(user?.name).toBe('Adib IT')
-    expect(user?.email).toBe('adib@udp.co.id')
+  it('rejects a wrong password', async () => {
+    expect(await validateCredentials(TEST_EMAIL, `${TEST_PASSWORD}x`)).toBeNull()
   })
 
-  it('rejects invalid password for Adib IT in constant time', async () => {
-    const user = await validateCredentials('adib@udp.co.id', 'IncorrectPassword123!')
-    expect(user).toBeNull()
+  it('refuses users with an unknown role instead of escalating them', async () => {
+    await prisma.orm.public.User.where({ email: TEST_EMAIL }).update({ role: 'mystery' })
+    expect(await validateCredentials(TEST_EMAIL, TEST_PASSWORD)).toBeNull()
   })
 
   it('resolves canonical Delivery API Site entity from PostgreSQL', async () => {
-    const site = await getSiteByApiKey('site_sec_unimasi')
+    const site = await getSiteByApiKey('site_sec_spatium')
     expect(site).not.toBeNull()
-    expect(site?.slug).toBe('unimasi')
+    expect(site?.slug).toBe('spatium')
     expect(site?.isActive).toBe(true)
   })
 
@@ -69,7 +78,7 @@ describe('Layer 2: Schema Integrity & Database Persistence (Zero-Mock)', () => {
         title: 'Duplicate Slug Attempt',
         content: '<p>Should fail</p>',
       })
-    } catch (err: any) {
+    } catch {
       duplicateFailed = true
     }
     expect(duplicateFailed).toBe(true)
