@@ -1,11 +1,12 @@
 import React from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
-import { HeroCinemaBlock } from '../src/blocks/HeroCinemaBlock'
-import { ProcessTimelineBlock } from '../src/blocks/ProcessTimelineBlock'
-import { StatsTickerBlock } from '../src/blocks/StatsTickerBlock'
-import { InteractiveCtaBlock, TextEditorialBlock } from '../src/blocks/InteractiveCtaBlock'
+import { HeroCinemaBlock } from '../src/blocks/hero-cinema/HeroCinemaBlock'
+import { ProcessTimelineBlock } from '../src/blocks/process-timeline/ProcessTimelineBlock'
+import { StatsTickerBlock } from '../src/blocks/stats-ticker/StatsTickerBlock'
+import { InteractiveCtaBlock } from '../src/blocks/interactive-cta/InteractiveCtaBlock'
+import { TextEditorialBlock } from '../src/blocks/text-editorial/TextEditorialBlock'
 import { BlockRenderer as ComponentBlockRenderer } from '../src/components/blocks/BlockRenderer'
-import * as CatalogBlocks from '../src/components/blocks/CatalogBlocks'
+import { BLOCK_RENDERERS } from '../src/blocks/renderers'
 import { parseBlocks, blockSchema } from '../src/lib/blocks/schema'
 
 interface TestCaseResult {
@@ -256,37 +257,17 @@ assertRender('TextEditorial', '2.18 TextEditorial nested content', () =>
 // ─────────────────────────────────────────────────────────────────────────────
 // SUITE 3: Catalog Blocks Stress Testing
 // ─────────────────────────────────────────────────────────────────────────────
-console.log('\n--- SUITE 3: CatalogBlocks 20+ Components Stress Test ---')
+console.log('\n--- SUITE 3: Registered Block Renderers Stress Test ---')
 
-const catalogBlockEntries = [
-  { name: 'HeroDepartmentBlock', comp: CatalogBlocks.HeroDepartmentBlock, type: 'hero-department' },
-  { name: 'HeroServiceBlock', comp: CatalogBlocks.HeroServiceBlock, type: 'hero-service' },
-  { name: 'FeatureBentoGridBlock', comp: CatalogBlocks.FeatureBentoGridBlock, type: 'feature-bento-grid' },
-  { name: 'TechStackChipsBlock', comp: CatalogBlocks.TechStackChipsBlock, type: 'tech-stack-chips' },
-  { name: 'ExecutiveQuoteCardBlock', comp: CatalogBlocks.ExecutiveQuoteCardBlock, type: 'executive-quote-card' },
-  { name: 'EngineeringPillarsBlock', comp: CatalogBlocks.EngineeringPillarsBlock, type: 'engineering-pillars' },
-  { name: 'WorkflowPhasesBlock', comp: CatalogBlocks.WorkflowPhasesBlock, type: 'workflow-phases' },
-  { name: 'ComparisonMatrixBlock', comp: CatalogBlocks.ComparisonMatrixBlock, type: 'comparison-matrix' },
-  { name: 'ArchitectureBlueprintBlock', comp: CatalogBlocks.ArchitectureBlueprintBlock, type: 'architecture-blueprint' },
-  { name: 'ClientStatsImpactBlock', comp: CatalogBlocks.ClientStatsImpactBlock, type: 'client-stats-impact' },
-  { name: 'DeliverablesChecklistBlock', comp: CatalogBlocks.DeliverablesChecklistBlock, type: 'deliverables-checklist' },
-  { name: 'InteractiveTechMatrixBlock', comp: CatalogBlocks.InteractiveTechMatrixBlock, type: 'interactive-tech-matrix' },
-  { name: 'PortfolioProofGridBlock', comp: CatalogBlocks.PortfolioProofGridBlock, type: 'portfolio-proof-grid' },
-  { name: 'FaqAccordionBlock', comp: CatalogBlocks.FaqAccordionBlock, type: 'faq-accordion' },
-  { name: 'StudioCtaBlock', comp: CatalogBlocks.StudioCtaBlock, type: 'studio-cta' },
-  { name: 'EditorialParagraphBlock', comp: CatalogBlocks.EditorialParagraphBlock, type: 'editorial-paragraph' },
-  { name: 'EditorialHeadingBlock', comp: CatalogBlocks.EditorialHeadingBlock, type: 'editorial-heading' },
-  { name: 'DepartmentServiceListBlock', comp: CatalogBlocks.DepartmentServiceListBlock, type: 'department-service-list' },
-  { name: 'VisualShowcaseGalleryBlock', comp: CatalogBlocks.VisualShowcaseGalleryBlock, type: 'visual-showcase-gallery' },
-  { name: 'MediaShowcaseBlock', comp: CatalogBlocks.MediaShowcaseBlock, type: 'media-showcase' },
-]
+// Every registered block type, through its registry renderer.
+const catalogBlockEntries = Object.entries(BLOCK_RENDERERS).map(([type, render]) => ({ name: type, render, type }))
 
 for (const entry of catalogBlockEntries) {
-  assertRender('CatalogBlocks', `${entry.name} empty { type: "${entry.type}" }`, () =>
-    React.createElement(entry.comp as any, { block: { type: entry.type } })
+  assertRender('BlockRenderers', `${entry.name} empty { type: "${entry.type}" }`, () =>
+    React.createElement(React.Fragment, null, entry.render({ type: entry.type }))
   )
-  assertRender('CatalogBlocks', `${entry.name} null data { type: "${entry.type}", data: null }`, () =>
-    React.createElement(entry.comp as any, { block: { type: entry.type, data: null } })
+  assertRender('BlockRenderers', `${entry.name} null data { type: "${entry.type}", data: null }`, () =>
+    React.createElement(React.Fragment, null, entry.render({ type: entry.type, data: null }))
   )
 }
 

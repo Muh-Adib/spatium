@@ -21,7 +21,7 @@ src/lib/** (domain & data access) ── prisma/db.ts ── PostgreSQL 16
 ## Prinsip
 
 1. **Database adalah sumber kebenaran** untuk semua konten yang dikelola di Studio: artikel, halaman, portofolio, layanan, redirect, pengaturan. UI publik tidak membaca file seed. Error database dicatat dan ditampilkan sebagai state kosong yang jujur — tidak pernah diganti data palsu.
-2. **Satu katalog blok** (`src/lib/blocks/catalog.ts`) dipakai editor, renderer, API manifest, dan MCP.
+2. **Satu katalog blok** (`src/blocks/registry.ts`, satu modul per tipe di `src/blocks/<tipe>/`) dipakai editor, renderer, API manifest, dan MCP; `src/lib/blocks/catalog.ts` adalah fasadnya.
 3. **Manusia yang mempublikasikan.** Klien MCP dan proses otomatis hanya membuat draft. Publikasi melewati gerbang publikasi.
 4. **Setiap mutasi multi-tabel memakai transaksi**, lengkap dengan revisi (`ContentRevision`) dan audit log (`SeoAuditLog`).
 

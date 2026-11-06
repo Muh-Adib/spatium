@@ -1,11 +1,9 @@
 'use client'
 
-import React from 'react'
-import { ProcessTimelineBlockInstance } from './contracts'
 import { Reveal } from '@/components/ui/Reveal'
 import '@/components/home/process-timeline.css'
 
-export function ProcessTimelineBlock({ block }: { block: ProcessTimelineBlockInstance | any }) {
+export function ProcessTimelineBlock({ block }: { block: any }) {
   const data = block?.data || block || {}
   const title = block?.headline || data.headline || block?.title || data.title || 'Alur Produksi Animasi'
   const description = block?.subheadline || data.subheadline || block?.description || data.description || block?.subtitle || ''

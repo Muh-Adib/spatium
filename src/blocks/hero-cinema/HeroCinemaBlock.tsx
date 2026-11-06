@@ -1,12 +1,11 @@
 'use client'
 
-import React, { useState } from 'react'
+import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { HeroCinemaBlockInstance } from './contracts'
 import { Icon } from '@/components/Icon'
 
-export function HeroCinemaBlock({ block }: { block: HeroCinemaBlockInstance | any }) {
+export function HeroCinemaBlock({ block }: { block: any }) {
   const data = block?.data || block || {}
   const settings = block?.settings || {}
   const heightClass =

@@ -15,14 +15,14 @@ Situs dan Studio Admin **SPATIUM — Spatial Technology Studio** (digital twin u
 ```
 src/
 ├── app/                 # Rute (situs publik, /admin, /api/**, /[slug] halaman dinamis)
-├── blocks/              # Komponen blok tertentu (HeroCinema, ProcessTimeline, …)
+├── blocks/              # Satu folder per tipe blok (definition.ts + renderer), registry.ts, renderers.tsx
 ├── components/
-│   ├── blocks/          # BlockRenderer + komponen blok katalog
+│   ├── blocks/          # BlockRenderer (merender lewat src/blocks/renderers.tsx)
 │   ├── studio/          # UI Studio: blocks/ (editor blok), pages/, editor/ (artikel), mcp/, admin/ (tab)
 │   ├── spatium/         # Homepage (hero splat, section naratif)
 │   └── layout/          # Header, footer
 ├── lib/
-│   ├── blocks/          # schema.ts (Zod), catalog.ts (katalog), publication-gate.ts
+│   ├── blocks/          # define.ts, schema.ts + catalog.ts (fasad dari registry), publication-gate.ts
 │   ├── pages/           # Halaman dinamis: skema input, repository, gerbang, HTTP
 │   ├── mcp/             # Server MCP: protokol, tools, API key, rate limit
 │   ├── articles/        # Model editor artikel, kunci editor
@@ -57,8 +57,9 @@ tests/                   # Vitest (sebagian memakai database lokal)
 - Narasi brand statis (pipeline, manfaat) hanya di `src/config/spatium-story.ts`, bersumber dari deck.
 
 ### 3.4 Blok
-- Satu sumber: `src/lib/blocks/schema.ts` (validasi) + `src/lib/blocks/catalog.ts` (katalog). Jangan menulis daftar tipe blok di tempat lain.
-- Menambah tipe blok: ikuti [`docs/BLOCKS.md`](docs/BLOCKS.md) (skema → renderer → entri katalog → test).
+- Satu sumber: setiap tipe punya `src/blocks/<tipe>/definition.ts` (skema Zod + entri katalog) dan renderer di folder yang sama; `src/blocks/registry.ts` adalah satu-satunya daftar tipe, `src/blocks/renderers.tsx` memetakan renderer (diperiksa tipe). `src/lib/blocks/schema.ts` dan `catalog.ts` adalah fasad turunannya. Jangan menulis daftar tipe blok di tempat lain.
+- Definisi blok tidak boleh mengimpor React (dipakai MCP dan gerbang publikasi di server).
+- Menambah tipe blok: ikuti [`docs/BLOCKS.md`](docs/BLOCKS.md) (definisi → renderer → daftarkan di registry + renderers → test).
 - Iframe hanya ke domain di `src/lib/media/embedValidator.ts`; simpan ID, bukan URL bebas.
 
 ### 3.5 Siklus editorial

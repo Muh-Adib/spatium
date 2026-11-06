@@ -7,7 +7,7 @@ Studio punya dua editor dengan model data yang berbeda:
 | Untuk | Artikel jurnal (`/journal/<slug>`) | Halaman dinamis (`/<slug>`), portofolio, layanan, solusi |
 | Disimpan sebagai | HTML (`Article.content`) | JSON blok (`blocks`) |
 | Dibuka dari | `/admin/buat-artikel` | Tab **Halaman** (`/admin?tab=pages&page=<id>`) dan manajer portofolio/layanan/solusi |
-| Kode | `src/app/admin/buat-artikel/page.tsx`, `src/components/studio/editor/*`, `src/lib/articles/*` | `src/components/studio/blocks/*`, `src/components/studio/pages/*`, `src/lib/blocks/catalog.ts` |
+| Kode | `src/app/admin/buat-artikel/page.tsx`, `src/components/studio/editor/*`, `src/lib/articles/*` | `src/components/studio/blocks/*`, `src/components/studio/pages/*`, `src/blocks/*`, `src/lib/blocks/catalog.ts` |
 
 ## Editor artikel
 

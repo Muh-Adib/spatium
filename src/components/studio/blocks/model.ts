@@ -257,42 +257,21 @@ export function isEmptyFieldValue(value: unknown): boolean {
  * Older blocks stored the same content under alias keys (the schemas still
  * accept them). The form reads the canonical key first, then these aliases,
  * and writing the canonical key drops the aliases so there is one source.
- * Keyed by `type:path` where list indices are omitted (e.g. `internal-links:links.title`).
+ * Declared per catalogue entry (`aliases` in `src/blocks/<type>/definition.ts`),
+ * keyed by field path without list indices (e.g. `links.title`).
  */
-const FIELD_ALIASES: Record<string, readonly string[]> = {
-  'paragraph:content': ['text'],
-  'heading2:content': ['text', 'title'],
-  'heading3:content': ['text', 'title'],
-  'hero-cinema:headline': ['title'],
-  'hero-cinema:subheadline': ['subtitle', 'description'],
-  'interactive-cta:title': ['headline'],
-  'interactive-cta:description': ['subheadline'],
-  'studio-cta:headline': ['title'],
-  'text-editorial:leadText': ['lead'],
-  'text-editorial:body': ['content'],
-  'faq-accordion:items': ['faqs'],
-  'feature-bento-grid:items': ['features'],
-  'feature-bento-grid:items.description': ['desc'],
-  'media-showcase:src': ['image', 'imageUrl', 'url', 'heroImage'],
-  'media-showcase:alt': ['altText'],
-  'internal-links:links.title': ['text', 'name'],
-  'internal-links:links.href': ['url'],
-  'deliverables-checklist:items.description': ['desc'],
-  'workflow-phases:phases.title': ['name'],
-  'workflow-phases:phases.description': ['desc'],
-  'process-timeline:steps.number': ['step'],
-  'hero-portfolio:title': ['headline'],
-}
-
-function aliasKey(type: string, path: FieldPath): string {
-  return `${type}:${path.filter((p) => typeof p === 'string').join('.')}`
+function aliasPath(path: FieldPath): string {
+  return path.filter((p) => typeof p === 'string').join('.')
 }
 
 export function aliasesFor(type: string, path: FieldPath): readonly string[] {
-  return FIELD_ALIASES[aliasKey(type, path)] ?? []
+  const aliases = getBlockEntry(type)?.aliases
+  if (!aliases) return []
+  const key = aliasPath(path)
+  return Object.hasOwn(aliases, key) ? aliases[key] : []
 }
 
-/** Field value with legacy alias fallback (see FIELD_ALIASES). */
+/** Field value with legacy alias fallback (see `aliasesFor`). */
 export function readField(block: EditorBlock, path: FieldPath): unknown {
   const value = getAt(block, path)
   if (!isEmptyFieldValue(value)) return value

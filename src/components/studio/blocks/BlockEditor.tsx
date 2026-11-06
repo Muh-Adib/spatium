@@ -7,7 +7,9 @@ import { BlockOutline, headerSelector, type RowActions } from './BlockOutline'
 import { BlockPalette } from './BlockPalette'
 import { BlockPreview, type ContextData } from './BlockPreview'
 import { useModKeyLabel, useUndoable } from './hooks'
-import { Button, Dialog, IconButton, Kbd } from './ui'
+import { Button, IconButton, Kbd } from './ui'
+import { PanelTabs } from './PanelTabs'
+import { ShortcutsDialog } from './ShortcutsDialog'
 import {
   type EditorBlock,
   catalogIssues,
@@ -436,72 +438,5 @@ export function BlockEditor({
       <BlockPalette open={paletteAt !== null} target={target} placement={placement} onClose={() => setPaletteAt(null)} onPick={insertBlock} />
       <ShortcutsDialog open={shortcutsOpen} onClose={() => setShortcutsOpen(false)} modKey={modKey} canSave={Boolean(onSave)} />
     </div>
-  )
-}
-
-function PanelTabs({ baseId, panels, active, onChange }: { baseId: string; panels: BlockEditorPanel[]; active: string; onChange: (id: string) => void }) {
-  const onKeyDown = (e: React.KeyboardEvent<HTMLButtonElement>, index: number) => {
-    let next = -1
-    if (e.key === 'ArrowRight') next = (index + 1) % panels.length
-    else if (e.key === 'ArrowLeft') next = (index - 1 + panels.length) % panels.length
-    else if (e.key === 'Home') next = 0
-    else if (e.key === 'End') next = panels.length - 1
-    if (next < 0) return
-    e.preventDefault()
-    onChange(panels[next].id)
-    document.getElementById(`${baseId}-tab-${panels[next].id}`)?.focus()
-  }
-  return (
-    <div role="tablist" aria-label="Bagian editor" className="flex shrink-0 gap-1 overflow-x-auto border-b border-white/10 px-3 pt-2">
-      {panels.map((p, i) => {
-        const selected = p.id === active
-        return (
-          <button
-            key={p.id}
-            type="button"
-            role="tab"
-            id={`${baseId}-tab-${p.id}`}
-            aria-selected={selected}
-            aria-controls={`${baseId}-panel-${p.id}`}
-            tabIndex={selected ? 0 : -1}
-            onClick={() => onChange(p.id)}
-            onKeyDown={(e) => onKeyDown(e, i)}
-            className={`-mb-px inline-flex min-h-10 shrink-0 items-center gap-1.5 border-b-2 px-3 text-sm ${
-              selected ? 'border-accent-400 text-white' : 'border-transparent text-neutral-300 hover:text-white'
-            } focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-accent-400`}
-          >
-            {p.label}
-            {p.badge !== undefined && p.badge !== null ? <span className="rounded-full bg-white/10 px-1.5 text-xs text-neutral-200">{p.badge}</span> : null}
-          </button>
-        )
-      })}
-    </div>
-  )
-}
-
-function ShortcutsDialog({ open, onClose, modKey, canSave }: { open: boolean; onClose: () => void; modKey: string; canSave: boolean }) {
-  const rows: [React.ReactNode, string][] = [
-    [<><Kbd>{modKey}</Kbd>+<Kbd>K</Kbd></>, 'Tambah blok (cari, ↑/↓, Enter)'],
-    [<><Kbd>{modKey}</Kbd>+<Kbd>Z</Kbd></>, 'Urungkan'],
-    [<><Kbd>{modKey}</Kbd>+<Kbd>Shift</Kbd>+<Kbd>Z</Kbd></>, 'Ulangi'],
-    ...(canSave ? ([[<><Kbd>{modKey}</Kbd>+<Kbd>S</Kbd></>, 'Simpan']] as [React.ReactNode, string][]) : []),
-    [<><Kbd>↑</Kbd> <Kbd>↓</Kbd></>, 'Pindah antar blok (fokus di judul blok)'],
-    [<><Kbd>Enter</Kbd></>, 'Buka / tutup formulir blok'],
-    [<><Kbd>Alt</Kbd>+<Kbd>↑</Kbd> / <Kbd>↓</Kbd></>, 'Naikkan / turunkan blok'],
-    [<><Kbd>{modKey}</Kbd>+<Kbd>D</Kbd></>, 'Duplikat blok'],
-    [<><Kbd>Delete</Kbd></>, 'Hapus blok (bisa diurungkan)'],
-    [<><Kbd>?</Kbd></>, 'Tampilkan daftar ini'],
-  ]
-  return (
-    <Dialog open={open} onClose={onClose} title="Pintasan keyboard" width={30}>
-      <dl className="divide-y divide-white/10 text-sm">
-        {rows.map(([keys, desc], i) => (
-          <div key={i} className="flex flex-wrap items-center justify-between gap-2 py-2">
-            <dt className="text-neutral-200">{desc}</dt>
-            <dd className="flex items-center gap-1 text-neutral-300">{keys}</dd>
-          </div>
-        ))}
-      </dl>
-    </Dialog>
   )
 }

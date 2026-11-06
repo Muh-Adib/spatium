@@ -1,9 +1,6 @@
 'use client'
 
-import React from 'react'
-import { StatsTickerBlockInstance } from './contracts'
-
-export function StatsTickerBlock({ block }: { block: StatsTickerBlockInstance | any }) {
+export function StatsTickerBlock({ block }: { block: any }) {
   const data = block?.data || block || {}
   const settings = block?.settings || {}
   const cols = settings?.columns === 4 ? 'lg:grid-cols-4' : settings?.columns === 2 ? 'lg:grid-cols-2' : 'lg:grid-cols-3'
