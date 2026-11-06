@@ -1,6 +1,7 @@
 'use client'
 
-import React, { useState, useEffect, useCallback, useId } from 'react'
+import React, { useRef, useState, useEffect, useCallback, useId } from 'react'
+import { useSearchParams } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
 import { siteConfig } from '@/config/site'
@@ -166,6 +167,18 @@ export function StudioServicesManager() {
   useEffect(() => {
     fetchData()
   }, [])
+
+  // Deep link from MCP `editUrl` / notifications: /admin?tab=services&slug=<slug> opens that entry once.
+  const searchParams = useSearchParams()
+  const deepLinkSlug = searchParams?.get('slug') ?? null
+  const deepLinkHandled = useRef(false)
+  useEffect(() => {
+    if (!deepLinkSlug || deepLinkHandled.current) return
+    const match = services.find((entry) => entry.slug === deepLinkSlug)
+    if (!match) return
+    deepLinkHandled.current = true
+    handleEditService(match)
+  }, [deepLinkSlug, services])
 
   // Open Editor for Department
   const handleEditDepartment = (cat?: any) => {

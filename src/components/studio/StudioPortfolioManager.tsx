@@ -1,6 +1,7 @@
 'use client'
 
-import React, { useState, useEffect, useCallback, useMemo, useId } from 'react'
+import React, { useRef, useState, useEffect, useCallback, useMemo, useId } from 'react'
+import { useSearchParams } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
 import { siteConfig } from '@/config/site'
@@ -273,6 +274,18 @@ export function StudioPortfolioManager() {
   useEffect(() => {
     fetchPortfolios()
   }, [])
+
+  // Deep link from MCP `editUrl` / notifications: /admin?tab=portfolio&slug=<slug> opens that entry once.
+  const searchParams = useSearchParams()
+  const deepLinkSlug = searchParams?.get('slug') ?? null
+  const deepLinkHandled = useRef(false)
+  useEffect(() => {
+    if (!deepLinkSlug || deepLinkHandled.current) return
+    const match = items.find((entry) => entry.slug === deepLinkSlug)
+    if (!match) return
+    deepLinkHandled.current = true
+    handleEditItem(match)
+  }, [deepLinkSlug, items])
 
   // Create New Portfolio
   const handleAddNew = () => {
