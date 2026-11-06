@@ -5,13 +5,13 @@ services:
     image: postgres:16-alpine
     restart: unless-stopped
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-uni}
-      POSTGRES_PASSWORD: ${SERVICE_PASSWORD_POSTGRES:-${POSTGRES_PASSWORD:-uni_secure_db_pwd_2026}}
-      POSTGRES_DB: ${POSTGRES_DB:-uni}
+      POSTGRES_USER: ${POSTGRES_USER:-spatium}
+      POSTGRES_PASSWORD: ${SERVICE_PASSWORD_POSTGRES:?SERVICE_PASSWORD_POSTGRES is required}
+      POSTGRES_DB: ${POSTGRES_DB:-spatium}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-uni} -d ${POSTGRES_DB:-uni}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-spatium} -d ${POSTGRES_DB:-spatium}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -19,10 +19,34 @@ services:
     networks:
       - coolify
 
+  # One-shot: applies the Prisma schema on every deploy and seeds only an empty DB
+  # (scripts/seed-if-empty.ts). The app starts only after it exits successfully;
+  # a refused/destructive schema change stops the deploy instead of running new code.
+  migrate:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: migrate
+    restart: "no"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://${POSTGRES_USER:-spatium}:${SERVICE_PASSWORD_POSTGRES}@postgres:5432/${POSTGRES_DB:-spatium}?schema=public
+      SITE_API_KEY: ${SITE_API_KEY:-}
+      SEED_ON_EMPTY: ${SEED_ON_EMPTY:-true}
+    labels:
+      - coolify.exclude_from_hc=true
+    exclude_from_hc: true
+    networks:
+      - coolify
+
   app:
     build:
       context: .
       dockerfile: Dockerfile
+      target: runner
       args:
         COOLIFY_URL: ${COOLIFY_URL:-}
         COOLIFY_FQDN: ${COOLIFY_FQDN:-}
@@ -34,17 +58,21 @@ services:
         NEXT_PUBLIC_PHONE: ${NEXT_PUBLIC_PHONE:-}
         NEXT_PUBLIC_STUDIO_ADDRESS: ${NEXT_PUBLIC_STUDIO_ADDRESS:-}
         NEXT_PUBLIC_STUDIO_HOURS: ${NEXT_PUBLIC_STUDIO_HOURS:-}
+        NEXT_PUBLIC_STUDIO_EMAIL: ${NEXT_PUBLIC_STUDIO_EMAIL:-}
+        NEXT_PUBLIC_INQUIRY_ENDPOINT: ${NEXT_PUBLIC_INQUIRY_ENDPOINT:-}
     restart: unless-stopped
     depends_on:
       postgres:
         condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
     environment:
       NODE_ENV: production
       PORT: "3000"
       HOSTNAME: "0.0.0.0"
       SERVICE_FQDN_APP_3000: ${SERVICE_FQDN_APP_3000:-}
       SERVICE_FQDN_APP: ${SERVICE_FQDN_APP:-}
-      DATABASE_URL: ${DATABASE_URL:-postgresql://${POSTGRES_USER:-uni}:${SERVICE_PASSWORD_POSTGRES:-${POSTGRES_PASSWORD:-uni_secure_db_pwd_2026}}@postgres:5432/${POSTGRES_DB:-uni}?schema=public}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-spatium}:${SERVICE_PASSWORD_POSTGRES}@postgres:5432/${POSTGRES_DB:-spatium}?schema=public
       COOLIFY_URL: ${COOLIFY_URL:-}
       COOLIFY_FQDN: ${COOLIFY_FQDN:-}
       SERVICE_URL_APP: ${SERVICE_URL_APP:-}
@@ -53,7 +81,7 @@ services:
       AUTH_SECRET: ${AUTH_SECRET:?AUTH_SECRET is required}
       AUTH_TRUST_HOST: ${AUTH_TRUST_HOST:-true}
       NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:-${AUTH_SECRET}}
-      REQUIRE_STRONG_AUTH_SECRET: ${REQUIRE_STRONG_AUTH_SECRET:-false}
+      REQUIRE_STRONG_AUTH_SECRET: ${REQUIRE_STRONG_AUTH_SECRET:-true}
       API_BEARER_TOKEN: ${API_BEARER_TOKEN:-}
       SITE_API_KEY: ${SITE_API_KEY:-}
       REVALIDATE_SECRET: ${REVALIDATE_SECRET:-}
@@ -64,11 +92,17 @@ services:
       NEXT_PUBLIC_GA_ID: ${NEXT_PUBLIC_GA_ID:-}
       NEXT_PUBLIC_GTM_ID: ${NEXT_PUBLIC_GTM_ID:-}
       NEXT_PUBLIC_WHATSAPP: ${NEXT_PUBLIC_WHATSAPP:-}
-      BOOTSTRAP_ADMIN_EMAIL: ${BOOTSTRAP_ADMIN_EMAIL:-admin@spatium.id}
+      NEXT_PUBLIC_PHONE: ${NEXT_PUBLIC_PHONE:-}
+      NEXT_PUBLIC_STUDIO_ADDRESS: ${NEXT_PUBLIC_STUDIO_ADDRESS:-}
+      NEXT_PUBLIC_STUDIO_HOURS: ${NEXT_PUBLIC_STUDIO_HOURS:-}
+      NEXT_PUBLIC_STUDIO_EMAIL: ${NEXT_PUBLIC_STUDIO_EMAIL:-}
+      NEXT_PUBLIC_INQUIRY_ENDPOINT: ${NEXT_PUBLIC_INQUIRY_ENDPOINT:-}
+      MCP_ALLOWED_ORIGINS: ${MCP_ALLOWED_ORIGINS:-}
+      BOOTSTRAP_ADMIN_EMAIL: ${BOOTSTRAP_ADMIN_EMAIL:-}
       BOOTSTRAP_ADMIN_PASSWORD_HASH: ${BOOTSTRAP_ADMIN_PASSWORD_HASH:-}
-      # Cloudflare R2 Storage (Coolify S3 Storage)
     volumes:
       - uploads_data:/app/public/uploads
+      - tours_data:/app/public/tours
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3000/api/health"]
       interval: 15s
@@ -81,6 +115,7 @@ services:
 volumes:
   postgres_data:
   uploads_data:
+  tours_data:
 
 networks:
   coolify:

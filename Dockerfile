@@ -25,6 +25,8 @@ ARG NEXT_PUBLIC_WHATSAPP
 ARG NEXT_PUBLIC_PHONE
 ARG NEXT_PUBLIC_STUDIO_ADDRESS
 ARG NEXT_PUBLIC_STUDIO_HOURS
+ARG NEXT_PUBLIC_STUDIO_EMAIL
+ARG NEXT_PUBLIC_INQUIRY_ENDPOINT
 ENV NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL \
     NEXT_PUBLIC_GA_ID=$NEXT_PUBLIC_GA_ID \
     NEXT_PUBLIC_GTM_ID=$NEXT_PUBLIC_GTM_ID \
@@ -32,11 +34,23 @@ ENV NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL \
     NEXT_PUBLIC_PHONE=$NEXT_PUBLIC_PHONE \
     NEXT_PUBLIC_STUDIO_ADDRESS=$NEXT_PUBLIC_STUDIO_ADDRESS \
     NEXT_PUBLIC_STUDIO_HOURS=$NEXT_PUBLIC_STUDIO_HOURS \
+    NEXT_PUBLIC_STUDIO_EMAIL=$NEXT_PUBLIC_STUDIO_EMAIL \
+    NEXT_PUBLIC_INQUIRY_ENDPOINT=$NEXT_PUBLIC_INQUIRY_ENDPOINT \
     NEXT_TELEMETRY_DISABLED=1
 
 # Prisma contract generation needs no DB connection.
 RUN pnpm exec prisma contract emit
 RUN pnpm run build
+
+# One-shot schema migration (+ seed on an empty DB), run by the `migrate` compose service
+# before the app starts. Needs the full dependency tree (prisma CLI, tsx), which the
+# standalone runner image does not have.
+FROM deps AS migrate
+WORKDIR /app
+ENV NODE_ENV=production NEXT_TELEMETRY_DISABLED=1
+COPY . .
+RUN pnpm exec prisma contract emit
+CMD ["sh", "-c", "pnpm exec prisma db update --yes && pnpm exec tsx --conditions=react-server scripts/seed-if-empty.ts"]
 
 FROM node:22-alpine AS runner
 WORKDIR /app

@@ -1,0 +1,19 @@
+# Keep secrets, local state and host-built artifacts out of the image build context.
+.git
+.github
+.next
+node_modules
+.env
+.env.*
+!.env.example
+.tmp
+.termul
+.claude
+coverage
+*.log
+tsconfig.tsbuildinfo
+# Large reference documents not needed at build or runtime
+*.pdf
+docs/brand-guideline
+docs/company-profile
+spatium_studio_reality_capture_portfolio_scifi.html
