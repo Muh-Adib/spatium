@@ -2,7 +2,7 @@
 // Site Configuration — Spatium
 // -----------------------------------------------------------------------------
 
-export function resolveSiteUrl(defaultFallback: string = 'https://spatium.com'): string {
+export function resolveSiteUrl(defaultFallback: string = 'https://spatium.id'): string {
   const envUrl =
     process.env.NEXT_PUBLIC_SITE_URL ||
     process.env.COOLIFY_URL ||
@@ -24,10 +24,10 @@ export const siteConfig = {
   tagline: 'Modern Digital Space & Interactive Solutions',
   description:
     'Spatium — Flagship interactive digital platform and technology solutions.',
-  url: resolveSiteUrl('https://spatium.com'),
+  url: resolveSiteUrl('https://spatium.id'),
   cmsUrl: process.env.CMS_URL ?? '/admin',
   whatsapp: process.env.NEXT_PUBLIC_WHATSAPP || '',
-  email: 'hello@spatium.com',
+  email: 'hello@spatium.id',
   phone: process.env.NEXT_PUBLIC_PHONE || '',
   address: 'Indonesia',
   social: {
