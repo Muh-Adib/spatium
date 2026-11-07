@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db/prisma'
-import { requireUser, requireRole } from '@/lib/auth/rbac'
+import { requireUser } from '@/lib/auth/rbac'
+import { requireCan } from '@/lib/auth/capabilities'
 import { z } from 'zod'
 
 /**
@@ -78,7 +79,7 @@ export async function GET(request: NextRequest) {
 
 // --- POST: Create or Update redirect rule -----------------------------------
 export async function POST(request: NextRequest) {
-  const auth = await requireRole(request, ['SUPER_ADMIN', 'CONTENT_ADMIN', 'SEO_MANAGER', 'EDITOR'])
+  const auth = await requireCan(request, 'redirect:manage')
   if (auth.error) return auth.error
   const user = auth.user
 
@@ -158,7 +159,7 @@ export async function POST(request: NextRequest) {
 
 // --- DELETE: Remove redirect rule -------------------------------------------
 export async function DELETE(request: NextRequest) {
-  const auth = await requireRole(request, ['SUPER_ADMIN', 'CONTENT_ADMIN'])
+  const auth = await requireCan(request, 'redirect:delete')
   if (auth.error) return auth.error
   const user = auth.user
 

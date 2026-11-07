@@ -3,7 +3,8 @@ import { checkRateLimit, clientKey, rateLimitResponse } from '@/lib/security/rat
 import path from 'path'
 import fs from 'fs'
 import sharp from 'sharp'
-import { requireRole, requireUser } from '@/lib/auth/rbac'
+import { requireUser } from '@/lib/auth/rbac'
+import { requireCan } from '@/lib/auth/capabilities'
 import { registerMediaItem } from '@/lib/db/media'
 import {
   detectMimeFromBytes,
@@ -11,7 +12,7 @@ import {
   generateSafeFilename,
   isPathInsideUploads,
 } from '@/lib/media/upload-guard'
-import { MAX_UPLOAD_BYTES, MEDIA_UPLOAD_ROLES, oversizeMessage } from '@/lib/media/media-schema'
+import { MAX_UPLOAD_BYTES, oversizeMessage } from '@/lib/media/media-schema'
 
 const ALLOWED_MIME_TYPES = [
   'image/jpeg',
@@ -28,7 +29,7 @@ const ALLOWED_MIME_TYPES = [
  * media library so it shows up in Studio > Media with its uploader.
  */
 export async function POST(request: NextRequest) {
-  const auth = await requireRole(request, [...MEDIA_UPLOAD_ROLES])
+  const auth = await requireCan(request, 'media:upload')
   if (auth.error) return auth.error
 
   const rl = checkRateLimit({ key: clientKey(request, 'upload'), limit: 30, windowMs: 60_000 })

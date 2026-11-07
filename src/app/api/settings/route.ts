@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db/prisma'
 import { revalidatePath } from 'next/cache'
-import { requireRole } from '@/lib/auth/rbac'
+import { requireCan } from '@/lib/auth/capabilities'
 import { settingsMutationSchema, validateBody } from '@/lib/validation/api-schemas'
 
 function parseSocialLinks(raw: string | null | undefined): Record<string, string> {
@@ -74,7 +74,7 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
-  const auth = await requireRole(request, ['SUPER_ADMIN', 'CONTENT_ADMIN'])
+  const auth = await requireCan(request, 'settings:manage')
   if (auth.error) return auth.error
 
   try {

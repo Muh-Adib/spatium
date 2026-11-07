@@ -23,6 +23,7 @@ import {
   ArticleStatus,
   StatusHistoryEntry,
 } from '@/lib/auth/rbac'
+import { can } from '@/lib/auth/capability-matrix'
 import {
   getArticles,
   getArticleBySlug,
@@ -41,7 +42,7 @@ function ownsArticle(article: { author?: { slug?: string; email?: string } }, us
 export async function GET(request: NextRequest) {
   const auth = await requireUser(request)
   if (auth.error) return auth.error
-  if (auth.user.role === 'MEDIA_MANAGER') return NextResponse.json({ error: 'Tidak berwenang membaca konten editorial.' }, { status: 403 })
+  if (!can(auth.user.role, 'article:read')) return NextResponse.json({ error: 'Tidak berwenang membaca konten editorial.' }, { status: 403 })
 
   try {
     const { searchParams } = new URL(request.url)

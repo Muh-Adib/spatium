@@ -5,7 +5,7 @@ import {
   updateCategory,
   deleteCategory,
 } from '@/lib/db/articles'
-import { requireUser, ROLE_PERMISSIONS } from '@/lib/auth/rbac'
+import { requireCan } from '@/lib/auth/capabilities'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 import { errorResponse } from '@/lib/http/errors'
@@ -46,17 +46,9 @@ export async function GET(request: NextRequest) {
 
 // --- POST: Create a New Category ---------------------------------------------
 export async function POST(request: NextRequest) {
-  const auth = await requireUser(request)
+  const auth = await requireCan(request, 'article-category:create')
   if (auth.error) return auth.error
   const user = auth.user
-
-  const permissions = ROLE_PERMISSIONS[user.role]
-  if (!permissions?.canCreateArticle) {
-    return NextResponse.json(
-      { error: `Peran '${user.role}' tidak memiliki izin membuat kategori.` },
-      { status: 403 }
-    )
-  }
 
   try {
     const parsed = validateBody(categoryCreateSchema, await request.json().catch(() => null))
@@ -84,17 +76,9 @@ export async function POST(request: NextRequest) {
 
 // --- PATCH / PUT: Update an Existing Category --------------------------------
 export async function PATCH(request: NextRequest) {
-  const auth = await requireUser(request)
+  const auth = await requireCan(request, 'article-category:update')
   if (auth.error) return auth.error
   const user = auth.user
-
-  const permissions = ROLE_PERMISSIONS[user.role]
-  if (!permissions?.canEditAnyDraft && user.role !== 'SUPER_ADMIN' && user.role !== 'CONTENT_ADMIN') {
-    return NextResponse.json(
-      { error: `Peran '${user.role}' tidak memiliki izin mengubah kategori.` },
-      { status: 403 }
-    )
-  }
 
   try {
     const parsed = validateBody(categoryUpdateSchema, await request.json().catch(() => null))
@@ -130,17 +114,9 @@ export async function PUT(request: NextRequest) {
 
 // --- DELETE: Safely Delete Category (With Safe Article Reassignment) ---------
 export async function DELETE(request: NextRequest) {
-  const auth = await requireUser(request)
+  const auth = await requireCan(request, 'article-category:delete')
   if (auth.error) return auth.error
   const user = auth.user
-
-  const permissions = ROLE_PERMISSIONS[user.role]
-  if (!permissions?.canDeleteArticle && user.role !== 'SUPER_ADMIN' && user.role !== 'CONTENT_ADMIN') {
-    return NextResponse.json(
-      { error: `Akses ditolak: Peran '${user.role}' tidak berwenang menghapus kategori.` },
-      { status: 403 }
-    )
-  }
 
   try {
     const { searchParams } = new URL(request.url)

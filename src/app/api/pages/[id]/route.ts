@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { requireRole, requireUser } from '@/lib/auth/rbac'
+import { requireUser } from '@/lib/auth/rbac'
+import { can, requireCan } from '@/lib/auth/capabilities'
 import { deletePage, getPageById, publicationIssues, updatePage } from '@/lib/pages/repository'
 import { pagePatchSchema } from '@/lib/pages/page-schema'
-import { PAGE_ROLES, canPublishPages, pathsToRevalidate } from '@/lib/pages/http'
+import { pathsToRevalidate } from '@/lib/pages/http'
 import { pageErrorResponse, parsePageId, readJsonBody, revalidatePublicPaths } from '@/lib/pages/route-helpers'
 
 type Ctx = { params: Promise<{ id: string }> }
@@ -31,7 +32,7 @@ export async function GET(request: NextRequest, ctx: Ctx) {
  * Editing a published page is a publishing decision, so it needs a publisher role.
  */
 export async function PATCH(request: NextRequest, ctx: Ctx) {
-  const auth = await requireRole(request, [...PAGE_ROLES.edit])
+  const auth = await requireCan(request, 'page:update')
   if (auth.error) return auth.error
   const id = parsePageId((await ctx.params).id)
   if (!id.ok) return id.response
@@ -53,9 +54,9 @@ export async function PATCH(request: NextRequest, ctx: Ctx) {
   try {
     const before = await getPageById(id.id)
     if (!before) return notFound()
-    if (before.status === 'published' && !canPublishPages(auth.user.role)) {
+    if (before.status === 'published' && !can(auth.user.role, 'page:publish')) {
       return NextResponse.json(
-        { error: 'Halaman ini sudah terbit. Hanya Content Admin atau Super Admin yang dapat mengubahnya.', code: 'forbidden' },
+        { error: 'Halaman ini sudah terbit. Hanya peran yang boleh menerbitkan halaman yang dapat mengubahnya.', code: 'forbidden' },
         { status: 403 },
       )
     }
@@ -69,7 +70,7 @@ export async function PATCH(request: NextRequest, ctx: Ctx) {
 
 /** DELETE /api/pages/:id — permanent; revision snapshots stay in history. */
 export async function DELETE(request: NextRequest, ctx: Ctx) {
-  const auth = await requireRole(request, [...PAGE_ROLES.delete])
+  const auth = await requireCan(request, 'page:delete')
   if (auth.error) return auth.error
   const id = parsePageId((await ctx.params).id)
   if (!id.ok) return id.response

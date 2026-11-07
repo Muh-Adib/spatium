@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { revalidatePath } from 'next/cache'
-import { requireUser, requireRole } from '@/lib/auth/rbac'
+import { requireUser } from '@/lib/auth/rbac'
+import { requireCan } from '@/lib/auth/capabilities'
 import {
   getAllClientLogos,
   createClientLogo,
@@ -31,9 +32,6 @@ const clientLogoInputSchema = z.object({
 
 const idParamSchema = z.coerce.number().int().positive()
 
-/** Edit the logo strip: same roles as the other content catalogs. */
-const EDIT_ROLES = ['SUPER_ADMIN', 'CONTENT_ADMIN', 'EDITOR'] as const
-const DELETE_ROLES = ['SUPER_ADMIN', 'CONTENT_ADMIN'] as const
 
 /** Logos render on the home page partner strip (src/app/page.tsx via getCorePartners). */
 function revalidatePublic(): void {
@@ -59,7 +57,7 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const auth = await requireRole(request, [...EDIT_ROLES])
+  const auth = await requireCan(request, 'client:manage')
   if (auth.error) return auth.error
   const actor = actorOf(auth.user)
 
@@ -103,7 +101,7 @@ export async function POST(request: NextRequest) {
 }
 
 export async function DELETE(request: NextRequest) {
-  const auth = await requireRole(request, [...DELETE_ROLES])
+  const auth = await requireCan(request, 'client:delete')
   if (auth.error) return auth.error
 
   const id = idParamSchema.safeParse(request.nextUrl.searchParams.get('id'))

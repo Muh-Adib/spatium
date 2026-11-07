@@ -2,12 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import crypto from 'node:crypto'
 import { z } from 'zod'
 import { prisma } from '@/lib/db/prisma'
-import { requireRole } from '@/lib/auth/rbac'
+import { requireCan } from '@/lib/auth/capabilities'
 import { hashPasswordScrypt } from '@/lib/auth/crypto'
-import type { Role } from '@/lib/auth/types'
-
-/** Only these roles may list or manage studio accounts (mirrors TAB_META.users.roles). */
-const USER_ADMINS: Role[] = ['SUPER_ADMIN', 'CONTENT_ADMIN']
 
 const roleSchema = z.enum(['SUPER_ADMIN', 'CONTENT_ADMIN', 'EDITOR', 'AUTHOR', 'REVIEWER', 'SEO_MANAGER', 'MEDIA_MANAGER'])
 const nameSchema = z.string().trim().min(2, 'Nama pengguna minimal 2 karakter.').max(120, 'Nama terlalu panjang.')
@@ -49,7 +45,7 @@ async function readJson(request: NextRequest): Promise<unknown> {
 }
 
 export async function GET(request: NextRequest) {
-  const auth = await requireRole(request, USER_ADMINS)
+  const auth = await requireCan(request, 'user:manage')
   if (auth.error) return auth.error
 
   try {
@@ -76,7 +72,7 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const auth = await requireRole(request, USER_ADMINS)
+  const auth = await requireCan(request, 'user:manage')
   if (auth.error) return auth.error
 
   const parsed = createSchema.safeParse(await readJson(request))
@@ -117,7 +113,7 @@ export async function POST(request: NextRequest) {
 }
 
 export async function PATCH(request: NextRequest) {
-  const auth = await requireRole(request, USER_ADMINS)
+  const auth = await requireCan(request, 'user:manage')
   if (auth.error) return auth.error
 
   const parsed = updateSchema.safeParse(await readJson(request))
@@ -156,7 +152,7 @@ export async function PATCH(request: NextRequest) {
 }
 
 export async function DELETE(request: NextRequest) {
-  const auth = await requireRole(request, USER_ADMINS)
+  const auth = await requireCan(request, 'user:manage')
   if (auth.error) return auth.error
 
   const idParsed = z.string().min(1).max(100).safeParse(request.nextUrl.searchParams.get('id'))

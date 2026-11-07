@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { requireRole, requireUser } from '@/lib/auth/rbac'
+import { requireUser } from '@/lib/auth/rbac'
+import { requireCan } from '@/lib/auth/capabilities'
 import { createPage, listPages } from '@/lib/pages/repository'
 import { pageInputSchema } from '@/lib/pages/page-schema'
-import { PAGE_ROLES, matchesPageQuery, pageListQuerySchema } from '@/lib/pages/http'
+import { matchesPageQuery, pageListQuerySchema } from '@/lib/pages/http'
 import { pageErrorResponse, readJsonBody } from '@/lib/pages/route-helpers'
 
 /** GET /api/pages?status=&q= — page summaries for the Studio list (newest first). */
@@ -28,7 +29,7 @@ export async function GET(request: NextRequest) {
 
 /** POST /api/pages — create a draft page. Body: PageInput. */
 export async function POST(request: NextRequest) {
-  const auth = await requireRole(request, [...PAGE_ROLES.edit])
+  const auth = await requireCan(request, 'page:create')
   if (auth.error) return auth.error
 
   const json = await readJsonBody(request)

@@ -1,15 +1,14 @@
 import { describe, it, expect } from 'vitest'
 import {
   PAGE_ERROR_STATUS,
-  PAGE_ROLES,
-  canPublishPages,
+  capabilityForTransition,
   matchesPageQuery,
   pageErrorPayload,
   pageIdSchema,
   pageStatusBodySchema,
   pathsToRevalidate,
-  rolesForTransition,
 } from '../src/lib/pages/http'
+import { can } from '../src/lib/auth/capability-matrix'
 import { computePageGate, gateIssueTarget } from '../src/lib/pages/gate'
 import { parseRobots, startsWithHero } from '../src/lib/pages/render'
 import { createBlock } from '../src/lib/blocks/catalog'
@@ -32,16 +31,20 @@ describe('pages API: error mapping', () => {
 })
 
 describe('pages API: role policy', () => {
-  it('lets editors edit drafts but not publish, archive or unpublish', () => {
-    expect(PAGE_ROLES.edit).toContain('EDITOR')
-    expect(canPublishPages('EDITOR')).toBe(false)
-    expect(canPublishPages('CONTENT_ADMIN')).toBe(true)
-    expect(rolesForTransition('draft', 'in_review')).toContain('EDITOR')
-    expect(rolesForTransition('in_review', 'draft')).toContain('EDITOR')
-    expect(rolesForTransition('draft', 'published')).not.toContain('EDITOR')
-    expect(rolesForTransition('published', 'draft')).not.toContain('EDITOR')
-    expect(rolesForTransition('draft', 'archived')).not.toContain('EDITOR')
-    expect(PAGE_ROLES.delete).toEqual(['SUPER_ADMIN', 'CONTENT_ADMIN'])
+  it('treats going live, unpublishing and archiving as publishing; draft ⇄ review as editing', () => {
+    expect(capabilityForTransition('draft', 'in_review')).toBe('page:update')
+    expect(capabilityForTransition('in_review', 'draft')).toBe('page:update')
+    expect(capabilityForTransition('draft', 'published')).toBe('page:publish')
+    expect(capabilityForTransition('published', 'draft')).toBe('page:publish')
+    expect(capabilityForTransition('draft', 'archived')).toBe('page:publish')
+  })
+
+  it('lets editors publish pages like other content, but only admins delete', () => {
+    expect(can('EDITOR', 'page:update')).toBe(true)
+    expect(can('EDITOR', 'page:publish')).toBe(true)
+    expect(can('AUTHOR', 'page:publish')).toBe(false)
+    expect(can('EDITOR', 'page:delete')).toBe(false)
+    expect(can('CONTENT_ADMIN', 'page:delete')).toBe(true)
   })
 
   it('validates ids and status bodies at the boundary', () => {

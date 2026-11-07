@@ -79,7 +79,7 @@ interface ConnectionStatus {
 type DimensionTab = 'queries' | 'pages' | 'dates' | 'devices' | 'countries'
 
 export function StudioGscDashboard() {
-  const { role } = useAuth()
+  const { can } = useAuth()
   const [siteUrl, setSiteUrl] = useState('https://spatium.id')
   const [overview, setOverview] = useState<GscData | null>(null)
   const [queries, setQueries] = useState<QueryItem[]>([])
@@ -95,7 +95,7 @@ export function StudioGscDashboard() {
   const [copiedText, setCopiedText] = useState<string | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
 
-  const canSync = ['SUPER_ADMIN', 'CONTENT_ADMIN', 'SEO_MANAGER'].includes(role || '')
+  const canSync = can('seo:manage')
 
   const loadGscData = async () => {
     try {
@@ -319,17 +319,19 @@ export function StudioGscDashboard() {
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
-          <button
-            type="button"
-            disabled={syncing || !canSync}
-            onClick={handleSync}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#4d8bff] hover:bg-[#6fb0ff] active:bg-[#B29279] text-[#191919] font-bold text-xs shadow-md transition-all hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
-          >
-            <RefreshCw className={`w-3.5 h-3.5 ${syncing ? 'animate-spin' : ''}`} />
-            <span>{syncing ? 'Menyinkronkan...' : 'Sinkronkan Data GSC'}</span>
-          </button>
-        </div>
+        {canSync && (
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              disabled={syncing}
+              onClick={handleSync}
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#4d8bff] hover:bg-[#6fb0ff] active:bg-[#B29279] text-[#191919] font-bold text-xs shadow-md transition-all hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${syncing ? 'animate-spin' : ''}`} />
+              <span>{syncing ? 'Menyinkronkan...' : 'Sinkronkan Data GSC'}</span>
+            </button>
+          </div>
+        )}
       </div>
 
       {/* ─── Feedback Alerts ────────────────────────────────────────── */}

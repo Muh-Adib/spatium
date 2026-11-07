@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { runPageSpeedAudit, getPageSpeedHistory, getRumAggregates } from '@/lib/seo/pagespeed'
-import { requireUser, requireRole } from '@/lib/auth/rbac'
+import { requireUser } from '@/lib/auth/rbac'
 import { getSiteProfile } from '@/lib/db/siteProfile'
-import { SEO_TOOL_ROLES } from '@/lib/seo/access'
+import { requireCan } from '@/lib/auth/capabilities'
 import { resolveSameSiteUrl } from '@/lib/seo/site-url'
 import { publicMessage } from '@/lib/http/errors'
 
@@ -40,7 +40,7 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const auth = await requireRole(request, SEO_TOOL_ROLES)
+  const auth = await requireCan(request, 'seo:manage')
   if (auth.error) return auth.error
 
   const raw = await request.json().catch(() => ({}))

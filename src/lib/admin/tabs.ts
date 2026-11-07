@@ -29,6 +29,7 @@ import {
   Clapperboard,
 } from 'lucide-react'
 import type { Role } from '@/lib/auth/types'
+import { can, type Capability } from '@/lib/auth/capability-matrix'
 
 /**
  * Single source of truth for Studio Admin tabs.
@@ -79,15 +80,13 @@ export interface TabMeta {
   label: string
   description: string
   icon: LucideIcon
-  /** When set, only these roles see the tab in the nav (the API still enforces access). */
-  roles?: readonly Role[]
+  /** When set, only roles holding this capability see the tab (the API still enforces access). */
+  capability?: Capability
 }
-
-const USER_ADMIN_ROLES: readonly Role[] = ['SUPER_ADMIN', 'CONTENT_ADMIN']
 
 export const TAB_META: Record<AdminTab, TabMeta> = {
   overview: { label: 'Ringkasan', description: 'Jumlah konten dan status database saat ini.', icon: LayoutDashboard },
-  articles: { label: 'Artikel', description: 'Kelola artikel, status editorial, metadata, dan tautan internal.', icon: FileText },
+  articles: { label: 'Artikel', description: 'Kelola artikel, status editorial, metadata, dan tautan internal.', icon: FileText, capability: 'article:read' },
   pages: { label: 'Halaman', description: 'Susun halaman situs dari blok konten.', icon: Files },
   portfolio: { label: 'Portofolio', description: 'Studi kasus dan katalog proyek.', icon: Briefcase },
   services: { label: 'Layanan', description: 'Kategori layanan beserta layanan turunannya.', icon: Boxes },
@@ -103,12 +102,12 @@ export const TAB_META: Record<AdminTab, TabMeta> = {
   redirects: { label: 'Redirect', description: 'Aturan 301 untuk URL yang dipindahkan.', icon: ArrowRightLeft },
   migration: { label: 'URL lama', description: 'Pemetaan URL lama ke rute baru.', icon: History },
   system: { label: 'Sistem', description: 'Koneksi PostgreSQL dan jumlah data per tabel.', icon: Server },
-  mcp: { label: 'MCP', description: 'Server MCP dan konfigurasi klien agen.', icon: Plug },
+  mcp: { label: 'MCP', description: 'Server MCP dan konfigurasi klien agen.', icon: Plug, capability: 'mcp:manage' },
   users: {
     label: 'Pengguna',
     description: 'Akun studio, peran tim editorial, dan hak akses.',
     icon: Users,
-    roles: USER_ADMIN_ROLES,
+    capability: 'user:manage',
   },
   settings: { label: 'Pengaturan', description: 'Konfigurasi global situs dan SEO.', icon: Settings },
 }
@@ -134,8 +133,8 @@ export const NAV_GROUPS: NavGroup[] = [
 ]
 
 export const canSeeTab = (tab: AdminTab, role: Role | null | undefined): boolean => {
-  const allowed = TAB_META[tab].roles
-  return !allowed || (role != null && allowed.includes(role))
+  const capability = TAB_META[tab].capability
+  return !capability || can(role, capability)
 }
 
 export const tabHref = (tab: AdminTab) => (tab === 'overview' ? '/admin' : `/admin?tab=${tab}`)

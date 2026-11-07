@@ -28,7 +28,6 @@ import { BlockEditor } from '../blocks/BlockEditor'
 import { useLocalDraft, useModKeyLabel, useUnsavedGuard } from '../blocks/hooks'
 import { ensureBlockIds, formatIssue, type EditorBlock } from '../blocks/model'
 import { Badge, Button, Dialog, FOCUS_RING, FieldError, FieldHelp, describedBy, inputClass } from '../blocks/ui'
-import { PAGE_ROLES } from '@/lib/pages/http'
 import { pagesApi, type PageDto, type RevisionDto } from './client'
 import { DateTime, StatusBadge } from './shared'
 
@@ -60,10 +59,6 @@ const ROBOTS: { value: Form['robots']; label: string }[] = [
   { value: 'noindex, follow', label: 'Sembunyikan dari pencarian, ikuti tautan (noindex, follow)' },
   { value: 'noindex, nofollow', label: 'Sembunyikan sepenuhnya (noindex, nofollow)' },
 ]
-
-// Same policy the API enforces (src/lib/pages/http.ts), so the UI never offers a forbidden action.
-const PUBLISHER_ROLES: ReadonlySet<string> = new Set(PAGE_ROLES.publish)
-const DELETE_ROLES: ReadonlySet<string> = new Set(PAGE_ROLES.delete)
 
 function toForm(page: PageDto): Form {
   const robots = ROBOTS.some((r) => r.value === page.robots) ? (page.robots as Form['robots']) : 'index, follow'
@@ -144,9 +139,11 @@ export function PageEditor({ pageId, onBack, onChanged, onDeleted }: Props) {
   versionRef.current = version
   const pendingFocus = useRef<string | null>(null)
   const bannerRef = useRef<HTMLDivElement>(null)
-  const { role } = useAuth()
-  const canPublish = PUBLISHER_ROLES.has(role)
-  const canDelete = DELETE_ROLES.has(role)
+  // Same capabilities the API enforces, so the UI never offers a forbidden action.
+  const { can } = useAuth()
+  const canEdit = can('page:update')
+  const canPublish = can('page:publish')
+  const canDelete = can('page:delete')
   const modKey = useModKeyLabel()
 
   const load = useCallback(async () => {
@@ -416,6 +413,8 @@ export function PageEditor({ pageId, onBack, onChanged, onDeleted }: Props) {
   }
 
   const published = page.status === 'published'
+  // Editing a live page is a publishing decision (PATCH /api/pages/:id needs page:publish then).
+  const canSave = canEdit && (!published || canPublish)
   const saveState = saving ? 'Menyimpan…' : dirty ? 'Perubahan belum disimpan' : lastSavedAt ? 'Semua perubahan tersimpan' : ''
 
   const lifecycle: { to: PageStatus; label: string; icon: typeof Globe; needsPublisher: boolean }[] =
@@ -519,7 +518,7 @@ export function PageEditor({ pageId, onBack, onChanged, onDeleted }: Props) {
             </a>
           ) : null}
           {lifecycle.map((a) =>
-            a.needsPublisher && !canPublish ? null : (
+            !canEdit || (a.needsPublisher && !canPublish) ? null : (
               <Button key={a.to} icon={a.icon} busy={statusBusy === a.to} onClick={() => void changeStatus(a.to)}>
                 {statusBusy === a.to ? 'Memproses…' : a.label}
               </Button>
@@ -528,20 +527,24 @@ export function PageEditor({ pageId, onBack, onChanged, onDeleted }: Props) {
           <MoreMenu
             items={[
               ...secondary
-                .filter((a) => !a.needsPublisher || canPublish)
+                .filter((a) => canEdit && (!a.needsPublisher || canPublish))
                 .map((a) => ({ label: a.label, icon: a.icon, onSelect: () => void changeStatus(a.to) })),
               ...(canDelete ? [{ label: 'Hapus halaman…', icon: Trash2, danger: true, onSelect: () => setDeleteOpen(true) }] : []),
             ]}
           />
-          <Button variant="primary" icon={Save} busy={saving} onClick={() => void save()} aria-keyshortcuts="Control+S Meta+S">
-            {saving ? 'Menyimpan…' : 'Simpan'}
-            <span className="hidden font-mono text-xs font-normal xl:inline" aria-hidden="true">
-              {modKey}S
-            </span>
-          </Button>
+          {canSave ? (
+            <Button variant="primary" icon={Save} busy={saving} onClick={() => void save()} aria-keyshortcuts="Control+S Meta+S">
+              {saving ? 'Menyimpan…' : 'Simpan'}
+              <span className="hidden font-mono text-xs font-normal xl:inline" aria-hidden="true">
+                {modKey}S
+              </span>
+            </Button>
+          ) : null}
         </div>
-        {!canPublish ? (
-          <p className="w-full text-xs text-neutral-400">Peran Anda dapat menyunting draf. Menerbitkan, menarik, dan mengarsipkan dilakukan oleh Content Admin atau Super Admin.</p>
+        {!canEdit ? (
+          <p className="w-full text-xs text-neutral-400">Peran Anda hanya dapat melihat halaman ini.</p>
+        ) : !canPublish ? (
+          <p className="w-full text-xs text-neutral-400">Peran Anda dapat menyunting draf. Menerbitkan, menarik, dan mengarsipkan dilakukan oleh peran yang berwenang menerbitkan.</p>
         ) : null}
       </header>
 

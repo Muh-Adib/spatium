@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { runInternalDatabaseAudit, getLatestAuditReport } from '@/lib/seo/site-audit'
 import { runLiveCrawler } from '@/lib/seo/crawler'
-import { requireUser, requireRole } from '@/lib/auth/rbac'
-import { SEO_TOOL_ROLES } from '@/lib/seo/access'
+import { requireUser } from '@/lib/auth/rbac'
+import { requireCan } from '@/lib/auth/capabilities'
 import { publicMessage } from '@/lib/http/errors'
 
 /**
@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const auth = await requireRole(request, SEO_TOOL_ROLES)
+  const auth = await requireCan(request, 'seo:manage')
   if (auth.error) return auth.error
 
   const raw = await request.json().catch(() => ({}))

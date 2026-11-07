@@ -36,6 +36,7 @@ import StudioSeoInspector from './StudioSeoInspector'
 import MediaPickerModal from './MediaPickerModal'
 import { Tooltip } from '@/components/ui/Tooltip'
 import { Locale } from '@/lib/seo/schema'
+import { useAuth } from '@/lib/auth/AuthContext'
 
 function blocksToPlainText(blocks: any[]): string {
   if (!blocks || !Array.isArray(blocks)) return ''
@@ -73,6 +74,8 @@ function apiErrorMessage(json: { error?: string; message?: string; issues?: unkn
 
 export function StudioServicesManager() {
   const fieldId = useId()
+  // Same capabilities the API enforces, so the UI never offers a forbidden action.
+  const { can } = useAuth()
   const [activeTab, setActiveTab] = useState<'departments' | 'services'>('departments')
   const [categories, setCategories] = useState<any[]>([])
   const [services, setServices] = useState<any[]>([])
@@ -928,7 +931,15 @@ export function StudioServicesManager() {
                           <option value="draft">Draft</option>
                           <option value="in_review">In Review</option>
                           <option value="approved">Approved</option>
-                          <option value="published">Published</option>
+                          <option
+                            value="published"
+                            disabled={
+                              !can(editingType === 'department' ? 'service-category:publish' : 'service:publish') &&
+                              (editingType === 'department' ? depStatus : svcStatus) !== 'published'
+                            }
+                          >
+                            Published
+                          </option>
                           <option value="archived">Archived</option>
                         </select>
                       </div>
@@ -1061,6 +1072,7 @@ export function StudioServicesManager() {
         {/* Action Button */}
         <div>
           {activeTab === 'departments' ? (
+            can('service-category:create') && (
             <Tooltip label="Tambah Departemen" hint="Buat kategori departemen spesialisasi baru">
               <button
                 type="button"
@@ -1071,7 +1083,9 @@ export function StudioServicesManager() {
                 <span>Tambah Departemen</span>
               </button>
             </Tooltip>
+            )
           ) : (
+            can('service:create') && (
             <Tooltip label="Tambah Layanan" hint="Buat layanan rekayasa baru di bawah departemen">
               <button
                 type="button"
@@ -1082,6 +1096,7 @@ export function StudioServicesManager() {
                 <span>Tambah Layanan</span>
               </button>
             </Tooltip>
+            )
           )}
         </div>
       </div>
@@ -1147,6 +1162,7 @@ export function StudioServicesManager() {
                   </a>
 
                   <div className="flex items-center gap-2">
+                    {can('service-category:update') && (
                     <button
                       type="button"
                       onClick={() => handleEditDepartment(cat)}
@@ -1155,7 +1171,9 @@ export function StudioServicesManager() {
                       <Edit className="w-3.5 h-3.5" />
                       <span>Edit & Blok</span>
                     </button>
-                    <button aria-label="Hapus Departemen"
+                    )}
+                    {can('service-category:delete') && (
+                    <button aria-label={`Hapus departemen ${cat.title}`}
                       type="button"
                       onClick={() => handleDeleteDepartment(cat.id, cat.title)}
                       className="p-1.5 rounded-xl text-neutral-500 hover:text-rose-400 hover:bg-rose-500/10"
@@ -1163,6 +1181,7 @@ export function StudioServicesManager() {
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
+                    )}
                   </div>
                 </div>
               </div>
@@ -1229,6 +1248,7 @@ export function StudioServicesManager() {
                             <ExternalLink className="w-3.5 h-3.5" />
                           </a>
                           <div className="flex items-center gap-1.5">
+                            {can('service:update') && (
                             <button
                               type="button"
                               onClick={() => handleEditService(svc)}
@@ -1236,6 +1256,8 @@ export function StudioServicesManager() {
                             >
                               Edit
                             </button>
+                            )}
+                            {can('service:delete') && (
                             <button aria-label={`Hapus layanan ${svc.name}`}
                               type="button"
                               onClick={() => handleDeleteService(svc.id, svc.name)}
@@ -1243,6 +1265,7 @@ export function StudioServicesManager() {
                             >
                               <Trash2 className="w-3.5 h-3.5" />
                             </button>
+                            )}
                           </div>
                         </div>
                       </div>

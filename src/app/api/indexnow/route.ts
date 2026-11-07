@@ -2,9 +2,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { getOrCreateIndexNowKey, submitToIndexNow } from '@/lib/seo/indexnow'
 import { siteConfig } from '@/config/site'
-import { requireUser, requireRole } from '@/lib/auth/rbac'
+import { requireUser } from '@/lib/auth/rbac'
 import { getSiteProfile } from '@/lib/db/siteProfile'
-import { SEO_TOOL_ROLES } from '@/lib/seo/access'
+import { requireCan } from '@/lib/auth/capabilities'
 import { normalizeIndexingUrl } from '@/lib/seo/indexing-rate-limit'
 import { isSameSiteHost } from '@/lib/seo/site-url'
 import { publicMessage } from '@/lib/http/errors'
@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const auth = await requireRole(request, SEO_TOOL_ROLES)
+  const auth = await requireCan(request, 'seo:manage')
   if (auth.error) return auth.error
 
   const raw = await request.json().catch(() => null)

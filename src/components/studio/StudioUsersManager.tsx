@@ -4,7 +4,8 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { z } from 'zod'
 import { Check, Copy, Edit3, KeyRound, Lock, RefreshCw, Search, Trash2, UserPlus, X } from 'lucide-react'
 import { ROLE_META, ROLE_ORDER, isRole, roleMetaFor } from '@/lib/admin/tabs'
-import { ROLE_PERMISSIONS, type Role, type RolePermissions } from '@/lib/auth/types'
+import type { Role } from '@/lib/auth/types'
+import { can as roleCan, type Capability } from '@/lib/auth/capability-matrix'
 import { FormField, IconButton, Modal, StatusMessage, TextButton, fieldCls, type StatusTone } from '@/components/admin/AdminUi'
 import { useAuth } from '@/lib/auth/AuthContext'
 import { fetchJson, jsonHeaders } from '@/components/studio/admin/fetchJson'
@@ -20,8 +21,6 @@ const userSchema = z.object({
 type UserItem = z.infer<typeof userSchema>
 const listSchema = z.object({ users: z.array(userSchema) })
 const messageSchema = z.object({ message: z.string().optional() }).passthrough()
-
-const USER_ADMINS: readonly Role[] = ['SUPER_ADMIN', 'CONTENT_ADMIN']
 
 /** Cryptographically random initial password (no ambiguous characters). */
 function generatePassword(len = 16): string {
@@ -44,14 +43,17 @@ type FormErrors = Partial<Record<'name' | 'email' | 'password', string>>
 /* Role & permission matrix (formerly the "roles" tab)                 */
 /* ------------------------------------------------------------------ */
 
-const PERMISSION_COLUMNS: { key: keyof RolePermissions; label: string }[] = [
-  { key: 'canCreateArticle', label: 'Buat draf' },
-  { key: 'canSubmitForReview', label: 'Ajukan review' },
-  { key: 'canApprove', label: 'Setujui' },
-  { key: 'canPublish', label: 'Terbitkan' },
-  { key: 'canArchive', label: 'Arsipkan' },
-  { key: 'canDeleteArticle', label: 'Hapus' },
-  { key: 'canManageSeo', label: 'SEO & redirect' },
+const PERMISSION_COLUMNS: { key: Capability; label: string }[] = [
+  { key: 'article:create', label: 'Buat draf' },
+  { key: 'article:submit', label: 'Ajukan review' },
+  { key: 'article:review', label: 'Setujui' },
+  { key: 'article:publish', label: 'Terbitkan' },
+  { key: 'article:delete', label: 'Hapus konten' },
+  { key: 'seo:manage', label: 'Alat SEO & redirect' },
+  { key: 'redirect:delete', label: 'Hapus redirect' },
+  { key: 'media:manage', label: 'Kelola media' },
+  { key: 'media:delete', label: 'Hapus media' },
+  { key: 'user:manage', label: 'Pengguna, pengaturan, MCP' },
 ]
 
 function RolesMatrix({ currentRole }: { currentRole: Role }) {
@@ -67,10 +69,10 @@ function RolesMatrix({ currentRole }: { currentRole: Role }) {
       <div className="space-y-3 border-t border-white/10 p-5">
         <p className="text-xs text-neutral-300">
           Alur editorial: Draf → Ditinjau → Disetujui → Terbit → Arsip. Hak di bawah ini ditegakkan di server
-          (<code className="font-mono">src/lib/auth/types.ts</code>).
+          (<code className="font-mono">src/lib/auth/capability-matrix.ts</code>). Terbitkan dan hapus berlaku sama untuk artikel, halaman, portofolio, dan layanan.
         </p>
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[40rem] text-left text-xs">
+          <table className="w-full min-w-[52rem] text-left text-xs">
             <caption className="sr-only">Hak akses per peran</caption>
             <thead>
               <tr className="border-b border-white/10 text-neutral-200">
@@ -85,7 +87,6 @@ function RolesMatrix({ currentRole }: { currentRole: Role }) {
             <tbody>
               {ROLE_ORDER.map((r) => {
                 const meta = ROLE_META[r]
-                const perms = ROLE_PERMISSIONS[r]
                 return (
                   <tr key={r} className="border-b border-white/[0.06]">
                     <th scope="row" className="py-2 pr-3 text-left font-normal">
@@ -95,7 +96,7 @@ function RolesMatrix({ currentRole }: { currentRole: Role }) {
                     </th>
                     {PERMISSION_COLUMNS.map((c) => (
                       <td key={c.key} className="px-2 py-2 text-center">
-                        {perms[c.key] ? (
+                        {roleCan(r, c.key) ? (
                           <>
                             <Check className="mx-auto h-4 w-4 text-emerald-300" aria-hidden="true" />
                             <span className="sr-only">Ya</span>
@@ -122,8 +123,8 @@ function RolesMatrix({ currentRole }: { currentRole: Role }) {
 /* ------------------------------------------------------------------ */
 
 export function StudioUsersManager() {
-  const { role: myRole, email: myEmail, userId } = useAuth()
-  const canManage = USER_ADMINS.includes(myRole)
+  const { role: myRole, email: myEmail, userId, can } = useAuth()
+  const canManage = can('user:manage')
   const isSuperAdmin = myRole === 'SUPER_ADMIN'
 
   const [users, setUsers] = useState<UserItem[]>([])

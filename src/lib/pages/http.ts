@@ -4,30 +4,18 @@
  * Next.js and database imports so they can be unit-tested directly.
  */
 import { z } from 'zod'
-import type { Role } from '@/lib/auth/types'
+import type { Capability } from '@/lib/auth/capability-matrix'
 import type { BlockIssue } from '@/lib/blocks/catalog'
 import { PAGE_STATUSES, type PageStatus } from './page-schema'
 
-/** Who may do what with dynamic pages. */
-export const PAGE_ROLES = {
-  /** Create pages and edit drafts (title, slug, SEO, blocks). */
-  edit: ['SUPER_ADMIN', 'CONTENT_ADMIN', 'EDITOR'],
-  /** Publish, unpublish and archive. */
-  publish: ['SUPER_ADMIN', 'CONTENT_ADMIN'],
-  delete: ['SUPER_ADMIN', 'CONTENT_ADMIN'],
-} as const satisfies Record<string, readonly Role[]>
-
-export function canPublishPages(role: Role): boolean {
-  return (PAGE_ROLES.publish as readonly Role[]).includes(role)
-}
-
 /**
- * Roles allowed to move a page from `from` to `to`. Going live, leaving the
- * live state or archiving is a publishing decision; draft ⇄ review is editing.
+ * Capability needed to move a page from `from` to `to`. Going live, leaving
+ * the live state or archiving is a publishing decision (`page:publish`);
+ * draft ⇄ review is editing (`page:update`). Roles: capability matrix.
  */
-export function rolesForTransition(from: PageStatus, to: PageStatus): readonly Role[] {
-  if (to === 'published' || to === 'archived' || from === 'published') return PAGE_ROLES.publish
-  return PAGE_ROLES.edit
+export function capabilityForTransition(from: PageStatus, to: PageStatus): Capability {
+  if (to === 'published' || to === 'archived' || from === 'published') return 'page:publish'
+  return 'page:update'
 }
 
 export const pageIdSchema = z.coerce.number().int().positive()

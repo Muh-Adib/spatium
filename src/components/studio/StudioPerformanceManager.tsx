@@ -25,7 +25,6 @@ import {
 } from 'lucide-react'
 import { useIndexingCooldown } from '@/hooks/useIndexingCooldown'
 import { useAuth } from '@/lib/auth/AuthContext'
-import { SEO_TOOL_ROLES } from '@/lib/seo/access'
 
 /** Readable message from an API error body (`message`, `error`, or `errors[0]`). */
 function apiErrorMessage(json: unknown, fallback: string): string {
@@ -77,10 +76,12 @@ interface SubmissionResultSummary {
 }
 
 export function StudioPerformanceManager() {
-  const { role } = useAuth()
-  const canUseSeoTools = SEO_TOOL_ROLES.includes(role)
+  const { can } = useAuth()
+  const canUseSeoTools = can('seo:manage')
   // ─── Sub-Tab Navigation ──────────────────────────────────────────────────────
   const [activeTab, setActiveTab] = useState<'indexing' | 'pagespeed'>(canUseSeoTools ? 'indexing' : 'pagespeed')
+  // Roles without SEO tools only ever see the PageSpeed history.
+  const currentTab = canUseSeoTools ? activeTab : 'pagespeed'
 
   // ─── Unified Quick Submitter State ───────────────────────────────────────────
   const [submitUrl, setSubmitUrl] = useState<string>('')
@@ -296,10 +297,10 @@ export function StudioPerformanceManager() {
   }
 
   useEffect(() => {
-    if (activeTab === 'pagespeed') {
+    if (currentTab === 'pagespeed') {
       fetchPageSpeedHistory()
     }
-  }, [activeTab])
+  }, [currentTab])
 
   const handleRunAudit = async () => {
     setRunningAudit(true)
@@ -401,26 +402,28 @@ export function StudioPerformanceManager() {
 
         {/* Sub-Tab Navigation Switcher */}
         <div className="flex items-center p-1 rounded-xl bg-black/40 border border-white/10 text-xs font-medium">
-          <button
-            type="button"
-            aria-pressed={activeTab === 'indexing'}
-            onClick={() => setActiveTab('indexing')}
-            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg transition-all ${
-              activeTab === 'indexing'
-                ? 'bg-white/15 text-white font-bold shadow-sm'
-                : 'text-neutral-400 hover:text-white'
-            }`}
-          >
-            <Send className="w-3.5 h-3.5 text-info" />
-            <span>Pengindeksan &amp; Riwayat</span>
-          </button>
+          {canUseSeoTools && (
+            <button
+              type="button"
+              aria-pressed={currentTab === 'indexing'}
+              onClick={() => setActiveTab('indexing')}
+              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg transition-all ${
+                currentTab === 'indexing'
+                  ? 'bg-white/15 text-white font-bold shadow-sm'
+                  : 'text-neutral-400 hover:text-white'
+              }`}
+            >
+              <Send className="w-3.5 h-3.5 text-info" />
+              <span>Pengindeksan &amp; Riwayat</span>
+            </button>
+          )}
 
           <button
             type="button"
-            aria-pressed={activeTab === 'pagespeed'}
+            aria-pressed={currentTab === 'pagespeed'}
             onClick={() => setActiveTab('pagespeed')}
             className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg transition-all ${
-              activeTab === 'pagespeed'
+              currentTab === 'pagespeed'
                 ? 'bg-white/15 text-white font-bold shadow-sm'
                 : 'text-neutral-400 hover:text-white'
             }`}
@@ -433,12 +436,12 @@ export function StudioPerformanceManager() {
 
       {!canUseSeoTools && (
         <p className="text-xs text-neutral-400">
-          Pengindeksan dan audit PageSpeed hanya untuk Super Admin, Content Admin, Editor, dan SEO Manager. Anda tetap dapat melihat riwayat PageSpeed.
+          Peran Anda tidak dapat mengirim pengindeksan atau menjalankan PageSpeed. Anda tetap dapat melihat riwayat PageSpeed.
         </p>
       )}
 
       {/* ─── TAB 1: REAL-TIME INDEXING (QUICK SUBMITTER & HISTORY TABLE) ─── */}
-      {activeTab === 'indexing' && canUseSeoTools && (
+      {currentTab === 'indexing' && canUseSeoTools && (
         <div className="space-y-6">
           {/* 1. Unified Quick Submitter Card */}
           <div className="p-5 rounded-2xl bg-neutral-900/60 border border-white/10 space-y-4">
@@ -820,9 +823,10 @@ export function StudioPerformanceManager() {
       )}
 
       {/* ─── TAB 2: AUDIT PAGESPEED & CORE WEB VITALS ───────────────────── */}
-      {activeTab === 'pagespeed' && (
+      {currentTab === 'pagespeed' && (
         <div className="space-y-6">
-          {/* Controls Bar */}
+          {/* Controls Bar (only for roles that may run PageSpeed) */}
+          {canUseSeoTools && (
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-neutral-900/60 border border-white/10 p-3 rounded-2xl">
             <div className="flex items-center gap-2.5 flex-1">
               <Globe className="w-4 h-4 text-neutral-400 shrink-0" />
@@ -850,7 +854,7 @@ export function StudioPerformanceManager() {
               <button
                 type="button"
                 onClick={handleRunAudit}
-                disabled={runningAudit || !canUseSeoTools}
+                disabled={runningAudit}
                 className="flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-black font-semibold rounded-lg text-xs transition-all shadow-md disabled:opacity-50"
               >
                 {runningAudit ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Gauge className="w-4 h-4" />}
@@ -858,6 +862,7 @@ export function StudioPerformanceManager() {
               </button>
             </div>
           </div>
+          )}
 
           {/* Disconnected / Audit Error Alert */}
           {auditError && (

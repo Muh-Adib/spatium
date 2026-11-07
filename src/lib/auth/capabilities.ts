@@ -1,76 +1,34 @@
 /**
- * Capability-Based Authorization Contract (K-1)
+ * Capability-based authorization (server side).
  *
- * Implements fine-grained capability checks (ADR-0014) mapped to
- * current RBAC roles until full permission tables ship in G2.
+ * The role matrix itself lives in `./capability-matrix` (pure, also used by
+ * the Studio UI). API routes call `requireCan(request, '<capability>')` instead
+ * of listing roles; the role is re-read from the database on every request.
  */
-import type { NextRequest } from 'next/server'
-import { requireRole, AuthResult } from './rbac'
+import { NextResponse, type NextRequest } from 'next/server'
+import { requireRole, type AuthResult } from './rbac'
+import { can, rolesFor, type Capability } from './capability-matrix'
 import type { Role } from './types'
 
-export type Capability =
-  | 'article:create'
-  | 'article:update'
-  | 'article:delete'
-  | 'article:publish'
-  | 'service:create'
-  | 'service:update'
-  | 'service:delete'
-  | 'service:publish'
-  | 'category:create'
-  | 'category:update'
-  | 'category:delete'
-  | 'template:create'
-  | 'template:update'
-  | 'template:delete'
-  | 'template:manage'
-  | 'portfolio:create'
-  | 'portfolio:update'
-  | 'portfolio:delete'
-  | 'landing:manage'
-  | 'cta:manage'
-  | 'redirect:manage'
-  | 'seo:manage'
-  | 'media:manage'
-  | 'system:manage'
-  | 'theme:manage'
-  | 'catalog:publish'
-
-const CAPABILITY_ROLE_MAP: Record<Capability, Role[]> = {
-  'article:create': ['SUPER_ADMIN', 'CONTENT_ADMIN', 'EDITOR', 'AUTHOR'],
-  'article:update': ['SUPER_ADMIN', 'CONTENT_ADMIN', 'EDITOR', 'AUTHOR'],
-  'article:delete': ['SUPER_ADMIN', 'CONTENT_ADMIN', 'EDITOR'],
-  'article:publish': ['SUPER_ADMIN', 'CONTENT_ADMIN', 'EDITOR'],
-
-  'service:create': ['SUPER_ADMIN', 'CONTENT_ADMIN', 'EDITOR'],
-  'service:update': ['SUPER_ADMIN', 'CONTENT_ADMIN', 'EDITOR'],
-  'service:delete': ['SUPER_ADMIN', 'CONTENT_ADMIN'],
-  'service:publish': ['SUPER_ADMIN', 'CONTENT_ADMIN', 'EDITOR'],
-
-  'category:create': ['SUPER_ADMIN', 'CONTENT_ADMIN', 'EDITOR'],
-  'category:update': ['SUPER_ADMIN', 'CONTENT_ADMIN', 'EDITOR'],
-  'category:delete': ['SUPER_ADMIN', 'CONTENT_ADMIN'],
-
-  'template:create': ['SUPER_ADMIN', 'CONTENT_ADMIN', 'EDITOR'],
-  'template:update': ['SUPER_ADMIN', 'CONTENT_ADMIN', 'EDITOR'],
-  'template:delete': ['SUPER_ADMIN', 'CONTENT_ADMIN'],
-  'template:manage': ['SUPER_ADMIN', 'CONTENT_ADMIN', 'EDITOR'],
-
-  'portfolio:create': ['SUPER_ADMIN', 'CONTENT_ADMIN', 'EDITOR'],
-  'portfolio:update': ['SUPER_ADMIN', 'CONTENT_ADMIN', 'EDITOR'],
-  'portfolio:delete': ['SUPER_ADMIN', 'CONTENT_ADMIN'],
-
-  'landing:manage': ['SUPER_ADMIN', 'CONTENT_ADMIN', 'EDITOR'],
-  'cta:manage': ['SUPER_ADMIN', 'CONTENT_ADMIN', 'EDITOR'],
-  'redirect:manage': ['SUPER_ADMIN', 'CONTENT_ADMIN', 'SEO_MANAGER'],
-  'seo:manage': ['SUPER_ADMIN', 'CONTENT_ADMIN', 'SEO_MANAGER'],
-  'media:manage': ['SUPER_ADMIN', 'CONTENT_ADMIN', 'EDITOR', 'MEDIA_MANAGER'],
-  'system:manage': ['SUPER_ADMIN'],
-  'theme:manage': ['SUPER_ADMIN', 'CONTENT_ADMIN'],
-  'catalog:publish': ['SUPER_ADMIN', 'CONTENT_ADMIN', 'EDITOR'],
-}
+export * from './capability-matrix'
 
 export async function requireCan(request: NextRequest, capability: Capability): Promise<AuthResult> {
-  const allowedRoles = CAPABILITY_ROLE_MAP[capability] || ['SUPER_ADMIN']
-  return requireRole(request, allowedRoles)
+  return requireRole(request, [...rolesFor(capability)])
+}
+
+/**
+ * Second check inside a handler that already authenticated the user, for an
+ * action that needs more than the route's base capability (e.g. publishing
+ * through the save endpoint). Returns a 403 response, or null when allowed.
+ */
+export function forbidUnless(role: Role, capability: Capability): NextResponse | null {
+  if (can(role, capability)) return null
+  return NextResponse.json(
+    {
+      error: 'Forbidden',
+      message: `Peran '${role}' tidak memiliki wewenang untuk tindakan ini.`,
+      requiredRoles: rolesFor(capability),
+    },
+    { status: 403 },
+  )
 }

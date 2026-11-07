@@ -1,10 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { revalidateTag, revalidatePath } from 'next/cache'
 import crypto from 'crypto'
-import { requireRole } from '@/lib/auth/rbac'
-
-/** Studio roles that may flush the cache from Settings with their session. */
-const STUDIO_FLUSH_ROLES = ['SUPER_ADMIN', 'CONTENT_ADMIN'] as const
+import { requireCan } from '@/lib/auth/capabilities'
 
 /**
  * The proxy lists this route as public (webhook), so it skips the same-origin
@@ -78,7 +75,7 @@ export async function POST(request: NextRequest) {
     if (!isSameOrigin(request)) {
       return NextResponse.json({ error: 'Origin permintaan tidak diizinkan.' }, { status: 403 })
     }
-    const auth = await requireRole(request, [...STUDIO_FLUSH_ROLES])
+    const auth = await requireCan(request, 'system:manage')
     if (auth.error) return auth.error
   }
 

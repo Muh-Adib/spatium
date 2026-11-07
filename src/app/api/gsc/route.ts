@@ -8,7 +8,8 @@ import {
 } from '@/lib/gsc/queries'
 import { getSiteProfile } from '@/lib/db/siteProfile'
 import { syncGscDaily } from '@/lib/gsc/sync'
-import { requireUser, requireRole } from '@/lib/auth/rbac'
+import { requireUser } from '@/lib/auth/rbac'
+import { requireCan } from '@/lib/auth/capabilities'
 import { publicMessage } from '@/lib/http/errors'
 
 export async function GET(req: NextRequest) {
@@ -70,7 +71,7 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  const auth = await requireRole(req, ['SUPER_ADMIN', 'CONTENT_ADMIN', 'SEO_MANAGER'])
+  const auth = await requireCan(req, 'seo:manage')
   if (auth.error) return auth.error
 
   try {

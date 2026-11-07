@@ -38,7 +38,7 @@ export function StudioCategoryManager({
   onClose,
   onCategoriesChanged,
 }: StudioCategoryManagerProps) {
-  const { getAuthHeaders } = useAuth()
+  const { getAuthHeaders, can } = useAuth()
   const [categories, setCategories] = useState<CategoryData[]>([])
   const [loading, setLoading] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
@@ -328,6 +328,7 @@ export function StudioCategoryManager({
                 spinning={loading}
                 onClick={fetchCategories}
               />
+              {can('article-category:create') && (
               <TextButton
                 tone={isCreating ? 'neutral' : 'primary'}
                 onClick={() => {
@@ -344,6 +345,7 @@ export function StudioCategoryManager({
                   </span>
                 )}
               </TextButton>
+              )}
             </div>
           </div>
 
@@ -538,20 +540,24 @@ export function StudioCategoryManager({
                         </td>
                         <td className="px-4 py-3 text-right">
                           <div className="inline-flex items-center gap-1">
-                            <IconButton
-                              icon={Pencil}
-                              label="Edit kategori"
-                              size="sm"
-                              onClick={() => startEdit(cat)}
-                            />
-                            <IconButton
-                              icon={Trash2}
-                              label="Hapus kategori aman"
-                              hint="Hapus kategori dengan perlindungan pengalihan artikel"
-                              tone="danger"
-                              size="sm"
-                              onClick={() => startSafeDelete(cat)}
-                            />
+                            {can('article-category:update') && (
+                              <IconButton
+                                icon={Pencil}
+                                label={`Edit kategori ${cat.name}`}
+                                size="sm"
+                                onClick={() => startEdit(cat)}
+                              />
+                            )}
+                            {can('article-category:delete') && (
+                              <IconButton
+                                icon={Trash2}
+                                label={`Hapus kategori ${cat.name}`}
+                                hint="Hapus kategori dengan perlindungan pengalihan artikel"
+                                tone="danger"
+                                size="sm"
+                                onClick={() => startSafeDelete(cat)}
+                              />
+                            )}
                           </div>
                         </td>
                       </tr>

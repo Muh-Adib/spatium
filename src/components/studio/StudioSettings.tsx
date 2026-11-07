@@ -2,7 +2,6 @@
 
 import React, { useCallback, useEffect, useId, useRef, useState } from 'react'
 import { useAuth } from '@/lib/auth/AuthContext'
-import type { Role } from '@/lib/auth/types'
 import { Settings, Globe, Phone, Share2, Database, Save, RefreshCw, Lock } from 'lucide-react'
 import { buildWhatsappHref } from '@/lib/contact/public-contact'
 
@@ -15,8 +14,6 @@ import { buildWhatsappHref } from '@/lib/contact/public-contact'
  * address, opening hours, socials) is the only source of contact details on
  * the public site — empty fields are hidden there.
  */
-
-const SETTINGS_ADMINS: readonly Role[] = ['SUPER_ADMIN', 'CONTENT_ADMIN']
 
 const SOCIAL_FIELDS = [
   { key: 'instagram', label: 'Instagram' },
@@ -133,8 +130,8 @@ function Field({ id, label, hint, error, children }: FieldProps) {
 }
 
 export function StudioSettings() {
-  const { role, actorName } = useAuth()
-  const canEdit = SETTINGS_ADMINS.includes(role)
+  const { role, actorName, can } = useAuth()
+  const canEdit = can('settings:manage')
   const baseId = useId()
   const fieldId = (key: FieldKey) => `${baseId}-${key.replace('.', '-')}`
 
@@ -416,7 +413,7 @@ export function StudioSettings() {
           </div>
         </fieldset>
 
-        {canEdit && (
+        {can('system:manage') && (
           <section className="rounded-2xl border border-white/10 bg-[var(--studio-bg)] p-5 space-y-4 min-w-0" aria-labelledby={`${baseId}-cache`}>
             <div className="flex items-center gap-2 pb-2 border-b border-white/10">
               <Database className="w-4 h-4 text-emerald-400" aria-hidden="true" />

@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import React, { useState, useEffect, useRef } from 'react'
+import { useAuth } from '@/lib/auth/AuthContext'
 import {
   TrendingUp,
   Search,
@@ -52,6 +53,8 @@ interface KeywordBankItem {
 }
 
 export function StudioKeywordPlanner() {
+  // Writing to the keyword bank needs seo:manage (POST /api/keywords).
+  const canManage = useAuth().can('seo:manage')
   const [activeTab, setActiveTab] = useState<'opportunities' | 'bank' | 'cannibalization'>('opportunities')
   const [locale, setLocale] = useState<'id' | 'en'>('id')
   const [opportunities, setOpportunities] = useState<KeywordOpportunity[]>([])
@@ -259,7 +262,9 @@ export function StudioKeywordPlanner() {
                         </div>
                       </td>
                       <td className="py-3 px-4 text-right">
+                        {canManage && (
                         <button
+                          type="button"
                           onClick={() => handleAddToBank(opp.query)}
                           className="px-2.5 py-1 bg-white/10 hover:bg-white/20 text-neutral-200 rounded-md text-[11px] font-medium transition-all"
                         >
@@ -271,6 +276,7 @@ export function StudioKeywordPlanner() {
                             <span>+ Simpan ke Bank</span>
                           )}
                         </button>
+                        )}
                       </td>
                     </tr>
                   ))
@@ -318,6 +324,7 @@ export function StudioKeywordPlanner() {
       ) : (
         /* Keyword Bank View */
         <div className="space-y-4">
+          {canManage && (
           <div className="flex items-center gap-2">
             <input
               type="text"
@@ -339,6 +346,7 @@ export function StudioKeywordPlanner() {
               <span>Tambah Kata Kunci</span>
             </button>
           </div>
+          )}
 
           <div className="max-w-full overflow-x-auto bg-neutral-900/70 border border-white/10 rounded-xl">
             <table className="w-full text-left text-xs text-neutral-300">

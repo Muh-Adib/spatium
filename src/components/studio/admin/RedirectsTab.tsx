@@ -28,8 +28,9 @@ const normalizePath = (v: string) => {
 type FormErrors = Partial<Record<'source' | 'dest', string>>
 
 export default function RedirectsTab() {
-  const { role } = useAuth()
-  const canDelete = role === 'SUPER_ADMIN' || role === 'CONTENT_ADMIN'
+  const { can } = useAuth()
+  const canDelete = can('redirect:delete')
+  const canEdit = can('redirect:manage')
 
   const [rules, setRules] = useState<RedirectRule[]>([])
   const [total, setTotal] = useState(0)
@@ -128,6 +129,7 @@ export default function RedirectsTab() {
     <div className="space-y-6">
       <StatusMessage message={notice?.message ?? null} tone={notice?.tone} onDismiss={() => setNotice(null)} />
 
+      {canEdit && (
       <form onSubmit={handleAdd} noValidate aria-labelledby="redirect-add" className="space-y-4 rounded-2xl border border-white/10 bg-[var(--studio-bg)] p-5">
         <h2 id="redirect-add" className="text-sm font-semibold">
           Tambah aturan 301
@@ -151,6 +153,7 @@ export default function RedirectsTab() {
           {saving ? 'Menyimpan…' : 'Simpan aturan'}
         </TextButton>
       </form>
+      )}
 
       <section aria-labelledby="redirect-test" className="space-y-3 rounded-2xl border border-white/10 bg-[var(--studio-bg)] p-5">
         <h2 id="redirect-test" className="text-sm font-semibold">

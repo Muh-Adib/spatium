@@ -2,13 +2,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { getCtaPresets, getCtaPreset, createCtaPreset, updateCtaPreset, deleteCtaPreset } from '@/lib/db/cta'
 import { CtaContentSchema, CtaPresetSchema, LocaleSchema } from '@/lib/seo/schema'
-import { requireUser, requireRole } from '@/lib/auth/rbac'
+import { requireUser } from '@/lib/auth/rbac'
+import { requireCan } from '@/lib/auth/capabilities'
 import { PublicError } from '@/lib/http/errors'
-
-/** Same roles as capability `cta:manage`. */
-const CTA_ROLES = ['SUPER_ADMIN', 'CONTENT_ADMIN', 'EDITOR'] as const
-/** Deleting follows the other catalogs: admins only. */
-const CTA_DELETE_ROLES = ['SUPER_ADMIN', 'CONTENT_ADMIN'] as const
 
 /** Internal path, https URL, mailto: or tel: — never javascript: or protocol-relative. */
 const ctaHrefSchema = z
@@ -86,7 +82,7 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const auth = await requireRole(request, [...CTA_ROLES])
+  const auth = await requireCan(request, 'cta:manage')
   if (auth.error) return auth.error
   const actor = auth.user.email ?? auth.user.name
 
@@ -129,7 +125,7 @@ export async function POST(request: NextRequest) {
 }
 
 export async function DELETE(request: NextRequest) {
-  const auth = await requireRole(request, [...CTA_DELETE_ROLES])
+  const auth = await requireCan(request, 'cta:delete')
   if (auth.error) return auth.error
 
   const id = z.coerce.number().int().positive().safeParse(request.nextUrl.searchParams.get('id'))

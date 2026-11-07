@@ -58,12 +58,10 @@ const FIELD_IDS = {
   order: 'client-order',
 } as const
 
-/** Mirrors DELETE /api/clients: editors may add and edit logos, not delete them. */
-const DELETE_ROLES: ReadonlySet<string> = new Set(['SUPER_ADMIN', 'CONTENT_ADMIN'])
-
 export function StudioClientsManager() {
-  const { role } = useAuth()
-  const canDelete = DELETE_ROLES.has(role)
+  const { can } = useAuth()
+  const canDelete = can('client:delete')
+  const canEdit = can('client:manage')
   const [logos, setLogos] = useState<ClientLogo[]>([])
   const [loading, setLoading] = useState<boolean>(true)
   const [searchQuery, setSearchQuery] = useState<string>('')
@@ -287,14 +285,16 @@ export function StudioClientsManager() {
               <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'motion-safe:animate-spin' : ''}`} aria-hidden="true" />
               <span>Segarkan</span>
             </button>
-            <button
-              type="button"
-              onClick={handleOpenAddModal}
-              className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#F68609] to-[#d96f00] hover:from-[#ff9f2e] hover:to-[#F68609] text-white font-bold text-xs shadow-md transition-all inline-flex items-center gap-1.5"
-            >
-              <Plus className="w-4 h-4" aria-hidden="true" />
-              <span>Tambah Logo Klien</span>
-            </button>
+            {canEdit && (
+              <button
+                type="button"
+                onClick={handleOpenAddModal}
+                className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#F68609] to-[#d96f00] hover:from-[#ff9f2e] hover:to-[#F68609] text-white font-bold text-xs shadow-md transition-all inline-flex items-center gap-1.5"
+              >
+                <Plus className="w-4 h-4" aria-hidden="true" />
+                <span>Tambah Logo Klien</span>
+              </button>
+            )}
           </div>
         </div>
 
@@ -376,6 +376,7 @@ export function StudioClientsManager() {
                     <button
                       type="button"
                       onClick={() => handleToggleActive(item)}
+                      disabled={!canEdit}
                       aria-label={`${item.name}: ${item.isActive !== false ? 'Aktif' : 'Nonaktif'}. Klik untuk ${item.isActive !== false ? 'menonaktifkan' : 'mengaktifkan'}`}
                       className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-mono font-semibold transition-colors ${
                         item.isActive !== false
@@ -388,6 +389,7 @@ export function StudioClientsManager() {
                     </button>
                   </td>
                   <td className="py-3.5 px-4 text-right space-x-2">
+                    {canEdit && (
                     <button
                       type="button"
                       onClick={() => handleOpenEditModal(item)}
@@ -397,6 +399,7 @@ export function StudioClientsManager() {
                     >
                       <Edit2 className="w-3.5 h-3.5" aria-hidden="true" />
                     </button>
+                    )}
                     {canDelete && (
                     <button
                       type="button"

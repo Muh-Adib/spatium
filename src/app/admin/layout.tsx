@@ -142,7 +142,7 @@ function NavGroups({
 function AdminNavContent({ children }: AdminLayoutProps) {
   const pathname = usePathname()
   const searchParams = useSearchParams()
-  const { role, actorName, email, logout, isAuthenticated, permissions } = useAuth()
+  const { role, actorName, email, logout, isAuthenticated, permissions, can } = useAuth()
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [logoutOpen, setLogoutOpen] = useState(false)
@@ -455,15 +455,17 @@ function AdminNavContent({ children }: AdminLayoutProps) {
             </h1>
             <p className="mt-0.5 hidden text-xs text-neutral-300 lg:block">{meta.description}</p>
           </div>
-          <Link
-            href="/admin/buat-artikel"
-            className="inline-flex h-10 shrink-0 items-center gap-2 rounded-xl bg-accent-500 px-3.5 text-xs font-semibold text-accent-950 transition-colors hover:bg-accent-300"
-          >
-            <PenSquare className="h-4 w-4" aria-hidden="true" />
-            <span>
-              Tulis<span className="hidden sm:inline"> artikel</span>
-            </span>
-          </Link>
+          {can('article:create') && (
+            <Link
+              href="/admin/buat-artikel"
+              className="inline-flex h-10 shrink-0 items-center gap-2 rounded-xl bg-accent-500 px-3.5 text-xs font-semibold text-accent-950 transition-colors hover:bg-accent-300"
+            >
+              <PenSquare className="h-4 w-4" aria-hidden="true" />
+              <span>
+                Tulis<span className="hidden sm:inline"> artikel</span>
+              </span>
+            </Link>
+          )}
         </header>
 
         <main

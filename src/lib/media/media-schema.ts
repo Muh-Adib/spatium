@@ -1,18 +1,10 @@
 /**
- * Input contracts and role policy for the Studio media library (`/api/media`,
- * `/api/upload`). Pure and client-safe so it can be unit-tested directly.
+ * Input contracts for the Studio media library (`/api/media`, `/api/upload`).
+ * Pure and client-safe so it can be unit-tested directly. Who may upload,
+ * manage or delete media: capabilities `media:upload`, `media:manage` and
+ * `media:delete` in `src/lib/auth/capability-matrix.ts`.
  */
 import { z } from 'zod'
-import type { Role } from '@/lib/auth/types'
-
-/** Manage the media library: upload, edit metadata, rename, delete (capability `media:manage`). */
-export const MEDIA_MANAGE_ROLES = ['SUPER_ADMIN', 'CONTENT_ADMIN', 'EDITOR', 'MEDIA_MANAGER'] as const satisfies readonly Role[]
-
-/**
- * Upload images through the picker (`/api/upload`). Authors need it for the
- * cover and inline images of their own articles; reviewers and SEO managers do not upload.
- */
-export const MEDIA_UPLOAD_ROLES = [...MEDIA_MANAGE_ROLES, 'AUTHOR'] as const satisfies readonly Role[]
 
 /** Largest accepted upload, before optimisation. */
 export const MAX_UPLOAD_BYTES = 5 * 1024 * 1024

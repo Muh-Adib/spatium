@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react'
 import { EditorDialog, dialogButton } from '@/components/studio/editor/EditorDialog'
+import { useAuth } from '@/lib/auth/AuthContext'
 import Image from 'next/image'
 import {
   Image as ImageIcon,
@@ -67,6 +68,10 @@ function errorText(json: unknown, fallback: string): string {
 }
 
 export function StudioMediaManager() {
+  // Same capabilities the API enforces, so the UI never offers a forbidden action.
+  const { can } = useAuth()
+  const canManage = can('media:manage')
+  const canDelete = can('media:delete')
   const [activeTab, setActiveTab] = useState<'library' | 'audit'>('library')
   const [items, setItems] = useState<MediaItem[]>([])
   const [loading, setLoading] = useState<boolean>(true)
@@ -332,6 +337,7 @@ export function StudioMediaManager() {
             tabIndex={-1}
             aria-hidden="true"
           />
+          {canManage && (
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
@@ -341,6 +347,7 @@ export function StudioMediaManager() {
             {isUploading ? <RefreshCw className="w-4 h-4 motion-safe:animate-spin" aria-hidden="true" /> : <Upload className="w-4 h-4" aria-hidden="true" />}
             <span>{isUploading ? 'Mengunggah…' : 'Upload Media'}</span>
           </button>
+          )}
         </div>
       </div>
 
@@ -651,13 +658,17 @@ export function StudioMediaManager() {
                   `ID: ${selectedMedia.id}`
                 )}
               </span>
-              <button type="button" onClick={handleDelete} disabled={saving || deleting} className={dialogButton.danger}>
-                <Trash2 className="w-3.5 h-3.5" aria-hidden="true" />
-                {deleting ? 'Menghapus…' : 'Hapus'}
-              </button>
-              <button type="button" onClick={handleSaveMetadata} disabled={saving || deleting} className={dialogButton.primary}>
-                {saving ? 'Menyimpan…' : 'Simpan Metadata'}
-              </button>
+              {canDelete && (
+                <button type="button" onClick={handleDelete} disabled={saving || deleting} className={dialogButton.danger}>
+                  <Trash2 className="w-3.5 h-3.5" aria-hidden="true" />
+                  {deleting ? 'Menghapus…' : 'Hapus'}
+                </button>
+              )}
+              {canManage && (
+                <button type="button" onClick={handleSaveMetadata} disabled={saving || deleting} className={dialogButton.primary}>
+                  {saving ? 'Menyimpan…' : 'Simpan Metadata'}
+                </button>
+              )}
             </>
           ) : null
         }
@@ -714,6 +725,7 @@ export function StudioMediaManager() {
                   aria-describedby="media-rename-help"
                   className="min-w-0 flex-1 px-3 py-1.5 bg-black/50 border border-white/10 rounded-lg text-xs font-mono text-neutral-200 focus:outline-none focus:border-accent-500"
                 />
+                {canManage && (
                 <button
                   type="button"
                   onClick={handleRename}
@@ -722,6 +734,7 @@ export function StudioMediaManager() {
                 >
                   Rename &amp; 301
                 </button>
+                )}
               </div>
               <p id="media-rename-help" className="text-[11px] text-neutral-400">
                 Ekstensi file tetap. URL lama dialihkan 301 ke URL baru.

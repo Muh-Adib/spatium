@@ -1,32 +1,9 @@
 import { describe, expect, it } from 'vitest'
 import {
-  MEDIA_MANAGE_ROLES,
-  MEDIA_UPLOAD_ROLES,
   mediaActionBodySchema,
   mediaPatchBodySchema,
   zodIssueMessages,
 } from '@/lib/media/media-schema'
-import type { Role } from '@/lib/auth/types'
-
-describe('media role policy', () => {
-  const manage = new Set<Role>(MEDIA_MANAGE_ROLES)
-  const upload = new Set<Role>(MEDIA_UPLOAD_ROLES)
-
-  it('lets media managers and editors manage the library', () => {
-    for (const r of ['SUPER_ADMIN', 'CONTENT_ADMIN', 'EDITOR', 'MEDIA_MANAGER'] as const) expect(manage.has(r)).toBe(true)
-  })
-
-  it('keeps authors, reviewers and SEO managers out of library management', () => {
-    for (const r of ['AUTHOR', 'REVIEWER', 'SEO_MANAGER'] as const) expect(manage.has(r)).toBe(false)
-  })
-
-  it('lets authors upload article images but not reviewers or SEO managers', () => {
-    expect(upload.has('AUTHOR')).toBe(true)
-    expect(upload.has('REVIEWER')).toBe(false)
-    expect(upload.has('SEO_MANAGER')).toBe(false)
-    for (const r of MEDIA_MANAGE_ROLES) expect(upload.has(r)).toBe(true)
-  })
-})
 
 describe('mediaPatchBodySchema', () => {
   it('accepts a partial metadata update', () => {

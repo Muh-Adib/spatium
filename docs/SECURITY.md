@@ -21,24 +21,34 @@
 
 ## Hak akses per fitur
 
-Role dan izin editorial: `src/lib/auth/types.ts` (`ROLE_PERMISSIONS`) dan `src/lib/auth/capabilities.ts` (`requireCan`). Ringkasan yang diuji per role:
+Satu sumber: `src/lib/auth/capability-matrix.ts` (murni, aman untuk klien). Setiap rute API memeriksa kapabilitas dengan `requireCan(request, '<kapabilitas>')` (`src/lib/auth/capabilities.ts`; role dibaca ulang dari database per permintaan) — tidak ada daftar role di rute. Aksi tambahan di dalam handler (mis. menerbitkan lewat endpoint simpan) memakai `forbidUnless(role, '<kapabilitas>')`. `ROLE_PERMISSIONS` (alur editorial artikel, `src/lib/auth/types.ts`) diturunkan dari matriks yang sama. UI Studio memakai `useAuth().can('<kapabilitas>')` untuk menampilkan tombol, tab, dan aksi; role diambil segar dari `GET /api/auth/me` (`{ role, capabilities }`) sehingga penurunan role langsung terlihat tanpa masuk ulang. `tests/rbac-route-enforcement.test.ts` memanggil setiap rute untuk setiap role dan memastikan 403 muncul tepat ketika matriks menolak.
 
-| Fitur | Membuat / mengubah | Menghapus |
-|---|---|---|
-| Artikel | SUPER_ADMIN, CONTENT_ADMIN, EDITOR, AUTHOR (draft sendiri) · REVIEWER hanya mengubah status review | SUPER_ADMIN, CONTENT_ADMIN |
-| Menarik artikel terbit ke draft | Hanya role yang boleh menerbitkan (SUPER_ADMIN, CONTENT_ADMIN, EDITOR) | – |
-| Kategori artikel | Membuat: role yang boleh membuat artikel · mengubah: SUPER_ADMIN, CONTENT_ADMIN, EDITOR | SUPER_ADMIN, CONTENT_ADMIN |
-| Portofolio, layanan, kategori layanan | SUPER_ADMIN, CONTENT_ADMIN, EDITOR | SUPER_ADMIN, CONTENT_ADMIN |
-| Halaman dinamis | SUPER_ADMIN, CONTENT_ADMIN, EDITOR (terbit/arsip: SUPER_ADMIN, CONTENT_ADMIN) | SUPER_ADMIN, CONTENT_ADMIN |
-| Logo klien, preset CTA | SUPER_ADMIN, CONTENT_ADMIN, EDITOR | SUPER_ADMIN, CONTENT_ADMIN (`DELETE /api/cta?id=`) |
-| Pustaka media (`/api/media`: unggah, metadata, ganti nama) | SUPER_ADMIN, CONTENT_ADMIN, EDITOR, MEDIA_MANAGER | Sama |
-| Unggah gambar (`/api/upload`, dipakai editor artikel & pemilih media) | Role media + AUTHOR | – |
-| Alat SEO (audit situs, PageSpeed, pengindeksan, IndexNow, keyword) | SUPER_ADMIN, CONTENT_ADMIN, EDITOR, SEO_MANAGER (`SEO_TOOL_ROLES`, `src/lib/seo/access.ts`) | – |
-| Sinkronisasi Search Console | SUPER_ADMIN, CONTENT_ADMIN, SEO_MANAGER | – |
-| Redirect | SUPER_ADMIN, CONTENT_ADMIN, SEO_MANAGER, EDITOR | SUPER_ADMIN, CONTENT_ADMIN |
-| Pengaturan situs, pengguna, kunci MCP, perbarui cache dari Studio | SUPER_ADMIN, CONTENT_ADMIN | Sama |
+Prinsip: menghapus konten hanya SUPER_ADMIN dan CONTENT_ADMIN; menerbitkan (artikel, halaman, portofolio, layanan) SUPER_ADMIN, CONTENT_ADMIN, EDITOR; REVIEWER menyetujui artikel dan AUTHOR mengajukan review; role pemilik domain boleh menghapus di domainnya (SEO_MANAGER → redirect, MEDIA_MANAGER → media); pengguna, pengaturan, kunci MCP, dan aksi sistem hanya SUPER_ADMIN dan CONTENT_ADMIN.
 
-Membaca (GET) terbuka untuk semua pengguna Studio yang masuk, kecuali konten editorial untuk MEDIA_MANAGER, serta pengguna dan kunci MCP (SUPER_ADMIN, CONTENT_ADMIN).
+SA = SUPER_ADMIN, CA = CONTENT_ADMIN, ED = EDITOR, AU = AUTHOR, RV = REVIEWER, SEO = SEO_MANAGER, MM = MEDIA_MANAGER.
+
+| Fitur (kapabilitas) | SA | CA | ED | AU | RV | SEO | MM |
+|---|---|---|---|---|---|---|---|
+| Membaca konten editorial (`article:read`) | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | – |
+| Artikel: buat, ubah draf, ajukan review (`article:create`, `article:update`, `article:submit`) | ✓ | ✓ | ✓ | draf sendiri | – | – | – |
+| Artikel: ubah draf siapa pun (`article:update-any`) | ✓ | ✓ | ✓ | – | – | – | – |
+| Artikel: setujui / kembalikan ke draf (`article:review`) | ✓ | ✓ | ✓ | – | ✓ | – | – |
+| Artikel: terbit, jadwal, tarik, arsip (`article:publish`) | ✓ | ✓ | ✓ | – | – | – | – |
+| Kategori artikel: buat (`article-category:create`) | ✓ | ✓ | ✓ | ✓ | – | – | – |
+| Kategori artikel: ubah (`article-category:update`) | ✓ | ✓ | ✓ | – | – | – | – |
+| Halaman dinamis, portofolio, layanan, kategori layanan: buat, ubah (`page:*`, `portfolio:*`, `service:*`, `service-category:*` create/update) | ✓ | ✓ | ✓ | – | – | – | – |
+| …terbit, tarik, arsip (`*:publish`) | ✓ | ✓ | ✓ | – | – | – | – |
+| Logo klien, preset CTA, template: buat, ubah (`client:manage`, `cta:manage`, `template:create`/`update`) | ✓ | ✓ | ✓ | – | – | – | – |
+| **Menghapus konten** (artikel, kategori, halaman, portofolio, layanan, kategori layanan, logo klien, CTA, template — `*:delete`) | ✓ | ✓ | – | – | – | – | – |
+| Unggah gambar lewat pemilih (`/api/upload`, `media:upload`) | ✓ | ✓ | ✓ | ✓ | – | – | ✓ |
+| Pustaka media: unggah, metadata, ganti nama (`media:manage`) | ✓ | ✓ | ✓ | – | – | – | ✓ |
+| Hapus media (`media:delete`) | ✓ | ✓ | – | – | – | – | ✓ |
+| Alat SEO: audit, PageSpeed, pengindeksan, IndexNow, bank keyword, sinkronisasi Search Console (`seo:manage`) | ✓ | ✓ | ✓ | – | – | ✓ | – |
+| Redirect: buat, ubah (`redirect:manage`) | ✓ | ✓ | ✓ | – | – | ✓ | – |
+| Hapus redirect (`redirect:delete`) | ✓ | ✓ | – | – | – | ✓ | – |
+| Pengguna (`user:manage`), pengaturan situs (`settings:manage`), kunci MCP (`mcp:manage`), tema (`theme:manage`), perbarui cache & aksi sistem (`system:manage`) | ✓ | ✓ | – | – | – | – | – |
+
+Membaca (GET) lainnya terbuka untuk semua pengguna Studio yang masuk. Tab Studio ikut matriks: Artikel butuh `article:read`, MCP butuh `mcp:manage`, Pengguna butuh `user:manage`; membuka `?tab=` yang tidak diizinkan menampilkan pesan, bukan panel. Menambah aksi baru: tambahkan kapabilitas di matriks, pakai `requireCan` di rute dan `can()` di UI, lalu tambahkan kasusnya di `tests/rbac-route-enforcement.test.ts` (test gagal bila ada kapabilitas tanpa rute teruji).
 
 ## Permintaan keluar (SSRF) & kuota
 

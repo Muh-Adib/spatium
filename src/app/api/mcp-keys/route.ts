@@ -1,15 +1,14 @@
 import { NextResponse, type NextRequest } from 'next/server'
-import { requireRole } from '@/lib/auth/rbac'
+import { requireCan } from '@/lib/auth/capabilities'
 import { siteConfig } from '@/config/site'
 import { createMcpApiKey, createMcpKeySchema, listMcpApiKeys } from '@/lib/mcp/keys'
 
 /** Studio → MCP: list and create per-client MCP API keys (plaintext returned once). */
 export const dynamic = 'force-dynamic'
 
-const MANAGERS = ['SUPER_ADMIN', 'CONTENT_ADMIN'] as const
 
 export async function GET(request: NextRequest) {
-  const auth = await requireRole(request, [...MANAGERS])
+  const auth = await requireCan(request, 'mcp:manage')
   if (auth.error) return auth.error
   try {
     return NextResponse.json({ keys: await listMcpApiKeys(), endpoint: `${siteConfig.url.replace(/\/+$/, '')}/api/mcp` }, { headers: { 'Cache-Control': 'no-store' } })
@@ -20,7 +19,7 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const auth = await requireRole(request, [...MANAGERS])
+  const auth = await requireCan(request, 'mcp:manage')
   if (auth.error) return auth.error
 
   let body: unknown

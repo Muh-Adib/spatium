@@ -56,9 +56,6 @@ const API_FIELD: Record<string, FieldKey> = {
   'placement.index': 'paragraphIndex',
 }
 
-/** Mirrors DELETE /api/cta. */
-const DELETE_ROLES: ReadonlySet<string> = new Set(['SUPER_ADMIN', 'CONTENT_ADMIN'])
-
 function slugify(text: string): string {
   return text
     .toLowerCase()
@@ -85,8 +82,9 @@ const inputClass =
   'w-full px-3 py-1.5 bg-black/50 border border-white/10 rounded-lg text-neutral-200 placeholder:text-neutral-500 aria-[invalid=true]:border-red-400'
 
 export function StudioCtaManager() {
-  const { role } = useAuth()
-  const canDelete = DELETE_ROLES.has(role)
+  const { can } = useAuth()
+  const canDelete = can('cta:delete')
+  const canEdit = can('cta:manage')
   const [presets, setPresets] = useState<CtaPreset[]>([])
   const [loading, setLoading] = useState<boolean>(true)
   const [locale, setLocale] = useState<'id' | 'en'>('id')
@@ -313,16 +311,18 @@ export function StudioCtaManager() {
             ))}
           </div>
 
-          <Tooltip label="Buat Preset CTA" hint="Tambahkan blok call-to-action baru yang dapat disisipkan di konten">
-            <button
-              type="button"
-              onClick={openCreateModal}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-accent-500 hover:bg-accent-300 text-accent-950 rounded-xl text-xs font-semibold transition-all shadow-sm"
-            >
-              <Plus className="w-3.5 h-3.5" aria-hidden="true" />
-              <span>Buat Preset</span>
-            </button>
-          </Tooltip>
+          {canEdit && (
+            <Tooltip label="Buat Preset CTA" hint="Tambahkan blok call-to-action baru yang dapat disisipkan di konten">
+              <button
+                type="button"
+                onClick={openCreateModal}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-accent-500 hover:bg-accent-300 text-accent-950 rounded-xl text-xs font-semibold transition-all shadow-sm"
+              >
+                <Plus className="w-3.5 h-3.5" aria-hidden="true" />
+                <span>Buat Preset</span>
+              </button>
+            </Tooltip>
+          )}
         </div>
       </div>
 
@@ -367,14 +367,16 @@ export function StudioCtaManager() {
                   <span className="px-2 py-0.5 rounded text-[10px] font-mono uppercase bg-info/10 text-info border border-info/20">
                     {preset.style.variant}
                   </span>
-                  <button
-                    type="button"
-                    onClick={() => openEditModal(preset)}
-                    aria-label={`Edit preset ${preset.name}`}
-                    className="p-1.5 text-neutral-300 hover:text-white rounded-lg hover:bg-white/10 transition-colors"
-                  >
-                    <Edit2 className="w-4 h-4" aria-hidden="true" />
-                  </button>
+                  {canEdit && (
+                    <button
+                      type="button"
+                      onClick={() => openEditModal(preset)}
+                      aria-label={`Edit preset ${preset.name}`}
+                      className="p-1.5 text-neutral-300 hover:text-white rounded-lg hover:bg-white/10 transition-colors"
+                    >
+                      <Edit2 className="w-4 h-4" aria-hidden="true" />
+                    </button>
+                  )}
                 </div>
               </div>
 

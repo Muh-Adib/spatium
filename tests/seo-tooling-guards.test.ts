@@ -1,13 +1,13 @@
 import { describe, it, expect } from 'vitest'
-import { SEO_TOOL_ROLES } from '../src/lib/seo/access'
+import { rolesFor } from '../src/lib/auth/capability-matrix'
 import { isSameSiteHost, resolveSameSiteUrl } from '../src/lib/seo/site-url'
 import { findImagesMissingAlt, sameOriginUrl } from '../src/lib/seo/crawler'
 
 describe('SEO tooling guards', () => {
-  it('limits SEO tools to roles with canManageSeo', () => {
-    expect([...SEO_TOOL_ROLES].sort()).toEqual(['CONTENT_ADMIN', 'EDITOR', 'SEO_MANAGER', 'SUPER_ADMIN'])
+  it('limits SEO tools (seo:manage) to admins, editors and SEO managers', () => {
+    expect([...rolesFor('seo:manage')].sort()).toEqual(['CONTENT_ADMIN', 'EDITOR', 'SEO_MANAGER', 'SUPER_ADMIN'])
     for (const role of ['AUTHOR', 'REVIEWER', 'MEDIA_MANAGER'] as const) {
-      expect(SEO_TOOL_ROLES).not.toContain(role)
+      expect(rolesFor('seo:manage')).not.toContain(role)
     }
   })
 

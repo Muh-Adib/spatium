@@ -11,7 +11,8 @@ import {
   registerMediaItem,
   deleteMediaItem,
 } from '@/lib/db/media'
-import { requireUser, requireRole } from '@/lib/auth/rbac'
+import { requireUser } from '@/lib/auth/rbac'
+import { requireCan } from '@/lib/auth/capabilities'
 import { PublicError } from '@/lib/http/errors'
 import { revalidateCatalog } from '@/lib/cache/revalidate'
 import { checkRateLimit, clientKey, rateLimitResponse } from '@/lib/security/rate-limit'
@@ -23,7 +24,6 @@ import {
 } from '@/lib/media/upload-guard'
 import {
   MAX_UPLOAD_BYTES,
-  MEDIA_MANAGE_ROLES,
   mediaActionBodySchema,
   mediaPatchBodySchema,
   oversizeMessage,
@@ -100,7 +100,7 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const auth = await requireRole(request, [...MEDIA_MANAGE_ROLES])
+  const auth = await requireCan(request, 'media:manage')
   if (auth.error) return auth.error
   const actor = actorOf(auth.user)
 
@@ -249,7 +249,7 @@ export async function POST(request: NextRequest) {
 }
 
 export async function PATCH(request: NextRequest) {
-  const auth = await requireRole(request, [...MEDIA_MANAGE_ROLES])
+  const auth = await requireCan(request, 'media:manage')
   if (auth.error) return auth.error
 
   try {
@@ -278,7 +278,7 @@ export async function PATCH(request: NextRequest) {
 }
 
 export async function DELETE(request: NextRequest) {
-  const auth = await requireRole(request, [...MEDIA_MANAGE_ROLES])
+  const auth = await requireCan(request, 'media:delete')
   if (auth.error) return auth.error
 
   try {

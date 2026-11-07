@@ -9,7 +9,8 @@ import {
 import { getVerifiedKeywordDataset } from '@/lib/gsc/keyword-data'
 import { createKeywordSchema, validateBody } from '@/lib/validation/api-schemas'
 import { Locale } from '@/lib/seo/schema'
-import { requireUser, requireRole } from '@/lib/auth/rbac'
+import { requireUser } from '@/lib/auth/rbac'
+import { requireCan } from '@/lib/auth/capabilities'
 
 export async function GET(request: NextRequest) {
   const auth = await requireUser(request)
@@ -68,7 +69,7 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const auth = await requireRole(request, ['SUPER_ADMIN', 'CONTENT_ADMIN', 'EDITOR', 'SEO_MANAGER'])
+  const auth = await requireCan(request, 'seo:manage')
   if (auth.error) return auth.error
 
   try {

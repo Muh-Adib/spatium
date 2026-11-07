@@ -40,6 +40,7 @@ import MediaPickerModal from './MediaPickerModal'
 import { EditorDialog, dialogButton } from './editor/EditorDialog'
 import { Tooltip } from '@/components/ui/Tooltip'
 import { Locale } from '@/lib/seo/schema'
+import { useAuth } from '@/lib/auth/AuthContext'
 
 export interface PortfolioItem {
   id?: number
@@ -170,6 +171,12 @@ function generateDefaultPortfolioBlocks(title: string, client: string, summary: 
 
 export function StudioPortfolioManager() {
   const fieldId = useId()
+  // Same capabilities the API enforces, so the UI never offers a forbidden action.
+  const { can } = useAuth()
+  const canCreate = can('portfolio:create')
+  const canUpdate = can('portfolio:update')
+  const canPublish = can('portfolio:publish')
+  const canDelete = can('portfolio:delete')
   const [items, setItems] = useState<PortfolioItem[]>([])
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
@@ -1381,7 +1388,7 @@ export function StudioPortfolioManager() {
                             <option value="draft">Draft (Draf Internal)</option>
                             <option value="in_review">In Review (Sedang Direview)</option>
                             <option value="approved">Approved (Disetujui)</option>
-                            <option value="published">Published (Publik Aktif)</option>
+                            <option value="published" disabled={!canPublish && formStatus !== 'published'}>Published (Publik Aktif)</option>
                             <option value="archived">Archived (Diarsipkan)</option>
                           </select>
                         </div>
@@ -1513,6 +1520,7 @@ export function StudioPortfolioManager() {
             </button>
           </Tooltip>
 
+          {canCreate && (
           <Tooltip label="Upload Spatial Tour (.zip / HTML)" hint="Unggah paket tur .zip / file HTML jadi atau embed SuperSplat">
             <button
               type="button"
@@ -1527,17 +1535,20 @@ export function StudioPortfolioManager() {
               <span>Upload Tour (.zip)</span>
             </button>
           </Tooltip>
+          )}
 
-          <Tooltip label="Tambah Portofolio" hint="Buat studi kasus atau entri portofolio baru">
-            <button
-              type="button"
-              onClick={handleAddNew}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#4d8bff] text-[#191919] font-medium text-xs font-mono uppercase tracking-wider hover:bg-[#6fb0ff] transition-all shadow-sm"
-            >
-              <Plus className="w-3.5 h-3.5" />
-              <span>Tambah</span>
-            </button>
-          </Tooltip>
+          {canCreate && (
+            <Tooltip label="Tambah Portofolio" hint="Buat studi kasus atau entri portofolio baru">
+              <button
+                type="button"
+                onClick={handleAddNew}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#4d8bff] text-[#191919] font-medium text-xs font-mono uppercase tracking-wider hover:bg-[#6fb0ff] transition-all shadow-sm"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>Tambah</span>
+              </button>
+            </Tooltip>
+          )}
         </div>
       </div>
 
@@ -1705,6 +1716,7 @@ export function StudioPortfolioManager() {
                   </a>
 
                   <div className="flex items-center gap-2">
+                    {canUpdate && (
                     <button
                       type="button"
                       onClick={() => handleEditItem(item)}
@@ -1713,7 +1725,9 @@ export function StudioPortfolioManager() {
                       <Edit className="w-3.5 h-3.5" />
                       <span>Edit Studi Kasus &amp; Blok</span>
                     </button>
-                    <button aria-label="Hapus Portofolio"
+                    )}
+                    {canDelete && (
+                    <button aria-label={`Hapus portofolio ${item.title}`}
                       type="button"
                       onClick={() => handleDeleteItem(item)}
                       className="p-1.5 rounded-lg text-neutral-500 hover:text-rose-400 hover:bg-rose-500/10 transition-colors"
@@ -1721,6 +1735,7 @@ export function StudioPortfolioManager() {
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
+                    )}
                   </div>
                 </div>
               </div>

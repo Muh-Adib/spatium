@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db/prisma'
-import { requireCan } from '@/lib/auth/capabilities'
+import { forbidUnless, requireCan } from '@/lib/auth/capabilities'
 import { portfolioMutationSchema, validateCatalogBody } from '@/lib/validation/api-schemas'
 import { revalidateCatalog } from '@/lib/cache/revalidate'
 import { errorResponse, PublicError } from '@/lib/http/errors'
@@ -110,6 +110,12 @@ export async function POST(request: NextRequest) {
       // New items start as DRAFT; publishing must pass the gate below (AGENTS.md §3.5).
       status: data.status ?? existing?.status ?? 'draft',
     })
+
+    // Going live or leaving the live state is a publishing decision.
+    if (values.status !== existing?.status && (values.status === 'published' || existing?.status === 'published')) {
+      const denied = forbidUnless(auth.user.role, 'portfolio:publish')
+      if (denied) return denied
+    }
 
     if (values.status === 'published') {
       const merged = { ...existing, ...values }

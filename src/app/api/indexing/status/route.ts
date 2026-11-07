@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db/prisma'
 import { getSiteProfile } from '@/lib/db/siteProfile'
-import { requireRole, type Role } from '@/lib/auth/rbac'
-import { SEO_TOOL_ROLES } from '@/lib/seo/access'
+import { requireCan } from '@/lib/auth/capabilities'
 import { indexingStatusQuerySchema } from '@/lib/validation/api-schemas'
 import { checkIndexingCooldown, normalizeIndexingUrl } from '@/lib/seo/indexing-rate-limit'
 import { getLatestSubmissionsForUrl } from '@/lib/db/indexing'
@@ -10,7 +9,6 @@ import { getLatestSubmissionsForUrl } from '@/lib/db/indexing'
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
-const ALLOWED_ROLES: Role[] = SEO_TOOL_ROLES
 
 function safeJsonParse(payload: string | null | undefined) {
   if (!payload) return null
@@ -23,7 +21,7 @@ function safeJsonParse(payload: string | null | undefined) {
 
 export async function GET(request: NextRequest) {
   // 1. Auth & RBAC Gate
-  const auth = await requireRole(request, ALLOWED_ROLES)
+  const auth = await requireCan(request, 'seo:manage')
   if (auth.error) {
     return auth.error
   }

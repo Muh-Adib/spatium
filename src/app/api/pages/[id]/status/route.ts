@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { requireRole } from '@/lib/auth/rbac'
+import { can, requireCan } from '@/lib/auth/capabilities'
 import { getPageById, setPageStatus } from '@/lib/pages/repository'
-import { PAGE_ROLES, pageStatusBodySchema, pathsToRevalidate, rolesForTransition } from '@/lib/pages/http'
+import { capabilityForTransition, pageStatusBodySchema, pathsToRevalidate } from '@/lib/pages/http'
 import { pageErrorResponse, parsePageId, readJsonBody, revalidatePublicPaths } from '@/lib/pages/route-helpers'
 
 type Ctx = { params: Promise<{ id: string }> }
@@ -11,7 +11,7 @@ type Ctx = { params: Promise<{ id: string }> }
  * publication gate (422 with `issues` / `blockIssues` when it fails).
  */
 export async function POST(request: NextRequest, ctx: Ctx) {
-  const auth = await requireRole(request, [...PAGE_ROLES.edit])
+  const auth = await requireCan(request, 'page:update')
   if (auth.error) return auth.error
   const id = parsePageId((await ctx.params).id)
   if (!id.ok) return id.response
@@ -29,7 +29,7 @@ export async function POST(request: NextRequest, ctx: Ctx) {
   try {
     const before = await getPageById(id.id)
     if (!before) return NextResponse.json({ error: 'Halaman tidak ditemukan.', code: 'not_found' }, { status: 404 })
-    if (!rolesForTransition(before.status, parsed.data.status).includes(auth.user.role)) {
+    if (!can(auth.user.role, capabilityForTransition(before.status, parsed.data.status))) {
       return NextResponse.json(
         { error: 'Peran Anda tidak dapat menerbitkan, menarik, atau mengarsipkan halaman.', code: 'forbidden' },
         { status: 403 },

@@ -6,6 +6,7 @@ import { PAGE_STATUSES, type PageStatus } from '@/lib/pages/page-schema'
 import { Button, FOCUS_RING, inputClass } from '../blocks/ui'
 import type { ApiFailure, PageSummaryDto } from './client'
 import { DateTime, STATUS_META, StatusBadge } from './shared'
+import { useAuth } from '@/lib/auth/AuthContext'
 
 type Props = {
   pages: PageSummaryDto[] | null
@@ -16,6 +17,7 @@ type Props = {
 }
 
 export function PagesList({ pages, failure, onRetry, onCreate, onOpen }: Props) {
+  const canCreate = useAuth().can('page:create')
   const [query, setQuery] = useState('')
   const [status, setStatus] = useState<PageStatus | 'all'>('all')
 
@@ -47,7 +49,7 @@ export function PagesList({ pages, failure, onRetry, onCreate, onOpen }: Props) 
           </p>
         </div>
         {/* When the list is empty, the empty state carries the single primary action. */}
-        {empty ? null : (
+        {empty || !canCreate ? null : (
           <Button variant="primary" icon={Plus} onClick={onCreate}>
             Buat halaman
           </Button>
@@ -96,9 +98,11 @@ export function PagesList({ pages, failure, onRetry, onCreate, onOpen }: Props) 
             <p className="mx-auto mt-1 max-w-md text-sm text-neutral-300">
               Buat halaman kampanye, landing page, atau halaman informasi. Mulai dari judul; slug dibuat otomatis.
             </p>
+            {canCreate && (
             <Button variant="primary" icon={Plus} className="mt-4" onClick={onCreate}>
               Buat halaman pertama
             </Button>
+            )}
           </div>
         ) : filtered.length === 0 ? (
           <div className="rounded-xl border border-white/10 p-6 text-sm text-neutral-300">

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback, useId, useRef } from 'react'
 import { createPortal } from 'react-dom'
+import { useAuth } from '@/lib/auth/AuthContext'
 import Image from 'next/image'
 import {
   Image as ImageIcon,
@@ -41,6 +42,8 @@ export default function MediaPickerModal({
   title = 'Pilih Media Visual & Cover',
 }: MediaPickerModalProps) {
   const [activeTab, setActiveTab] = useState<'library' | 'upload' | 'url'>('library')
+  // Uploading needs media:upload (POST /api/upload); other roles pick from the library or a URL.
+  const canUpload = useAuth().can('media:upload')
   const [search, setSearch] = useState('')
   const [folder, setFolder] = useState<'all' | 'uploads' | 'articles' | 'brand'>('all')
   const [page, setPage] = useState(1)
@@ -230,6 +233,7 @@ export default function MediaPickerModal({
                 <Folder className="w-3.5 h-3.5" aria-hidden="true" />
                 <span>Pustaka Media</span>
               </button>
+              {canUpload && (
               <button
                 type="button"
                 aria-pressed={activeTab === 'upload'}
@@ -243,6 +247,7 @@ export default function MediaPickerModal({
                 <Upload className="w-3.5 h-3.5" aria-hidden="true" />
                 <span>Upload Baru</span>
               </button>
+              )}
               <button
                 type="button"
                 aria-pressed={activeTab === 'url'}
@@ -441,7 +446,7 @@ export default function MediaPickerModal({
           )}
 
           {/* TAB 2: UPLOAD BARU */}
-          {activeTab === 'upload' && (
+          {activeTab === 'upload' && canUpload && (
             <div className="flex-1 p-8 flex flex-col items-center justify-center">
               <div className="w-full max-w-xl p-8 rounded-3xl border-2 border-dashed border-white/20 hover:border-accent-400/60 bg-black/30 text-center transition-colors">
                 <div className="w-16 h-16 rounded-2xl bg-accent-500/15 text-accent-400 border border-accent-500/20 flex items-center justify-center mx-auto mb-4">

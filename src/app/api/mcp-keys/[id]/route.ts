@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { z } from 'zod'
-import { requireRole } from '@/lib/auth/rbac'
+import { requireCan } from '@/lib/auth/capabilities'
 import { revokeMcpApiKey } from '@/lib/mcp/keys'
 
 /** Studio → MCP: revoke one key. Revocation is immediate and permanent. */
@@ -9,7 +9,7 @@ export const dynamic = 'force-dynamic'
 const idParam = z.coerce.number().int().positive()
 
 export async function DELETE(request: NextRequest, context: { params: Promise<{ id: string }> }) {
-  const auth = await requireRole(request, ['SUPER_ADMIN', 'CONTENT_ADMIN'])
+  const auth = await requireCan(request, 'mcp:manage')
   if (auth.error) return auth.error
 
   const id = idParam.safeParse((await context.params).id)

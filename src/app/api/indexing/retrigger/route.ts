@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db/prisma'
 import { getSiteProfile } from '@/lib/db/siteProfile'
-import { requireRole, type Role } from '@/lib/auth/rbac'
+import { requireCan } from '@/lib/auth/capabilities'
 import { validateBody, retriggerIndexingSchema } from '@/lib/validation/api-schemas'
 import {
   checkIndexingCooldown,
@@ -10,14 +10,12 @@ import {
 } from '@/lib/seo/indexing-rate-limit'
 import { createIndexingSubmission } from '@/lib/db/indexing'
 import { submitToIndexNow } from '@/lib/seo/indexnow'
-import { SEO_TOOL_ROLES } from '@/lib/seo/access'
 import { isSameSiteHost } from '@/lib/seo/site-url'
 import { errorResponse } from '@/lib/http/errors'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
-const ALLOWED_ROLES: Role[] = SEO_TOOL_ROLES
 
 interface InspectUrlGoogleResult {
   connected: boolean
@@ -104,7 +102,7 @@ export async function POST(request: NextRequest) {
 
 async function handleRetrigger(request: NextRequest): Promise<NextResponse> {
   // 1. Auth & RBAC Gate
-  const auth = await requireRole(request, ALLOWED_ROLES)
+  const auth = await requireCan(request, 'seo:manage')
   if (auth.error) {
     return auth.error
   }

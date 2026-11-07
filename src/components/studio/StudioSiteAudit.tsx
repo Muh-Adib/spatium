@@ -4,7 +4,6 @@ import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { siteConfig } from '@/config/site'
 import { useAuth } from '@/lib/auth/AuthContext'
-import { SEO_TOOL_ROLES } from '@/lib/seo/access'
 import {
   ShieldCheck,
   AlertTriangle,
@@ -63,8 +62,8 @@ function responseError(json: unknown, fallback: string): string {
 }
 
 export function StudioSiteAudit() {
-  const { role } = useAuth()
-  const canRun = SEO_TOOL_ROLES.includes(role)
+  const { can } = useAuth()
+  const canRun = can('seo:manage')
   const [error, setError] = useState<string | null>(null)
   const [notice, setNotice] = useState<string | null>(null)
   const [summary, setSummary] = useState<SiteAuditSummary | null>(null)
@@ -144,11 +143,12 @@ export function StudioSiteAudit() {
           </p>
         </div>
 
+        {canRun && (
         <div className="flex items-center gap-2.5">
           <button
             type="button"
             onClick={() => runAudit('internal_db')}
-            disabled={!canRun || runningType !== null}
+            disabled={runningType !== null}
             aria-busy={runningType === 'internal_db'}
             className="flex items-center gap-1.5 px-3.5 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg text-xs font-medium transition-all disabled:opacity-50"
           >
@@ -163,7 +163,7 @@ export function StudioSiteAudit() {
           <button
             type="button"
             onClick={() => runAudit('live_crawl')}
-            disabled={!canRun || runningType !== null}
+            disabled={runningType !== null}
             aria-busy={runningType === 'live_crawl'}
             className="flex items-center gap-1.5 px-3.5 py-2 bg-accent-500 hover:bg-accent-300 text-accent-950 rounded-lg text-xs font-semibold transition-all shadow-md disabled:opacity-50"
           >
@@ -175,11 +175,12 @@ export function StudioSiteAudit() {
             <span>Live Crawler (Live Web)</span>
           </button>
         </div>
+        )}
       </div>
 
       {!canRun && (
         <p className="text-xs text-neutral-400">
-          Menjalankan audit hanya untuk Super Admin, Content Admin, Editor, dan SEO Manager. Anda tetap dapat melihat hasil audit terakhir.
+          Peran Anda tidak dapat menjalankan audit. Anda tetap dapat melihat hasil audit terakhir.
         </p>
       )}
 

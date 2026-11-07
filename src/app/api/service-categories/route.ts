@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db/prisma'
 import { getServiceCategories, mapCategoryRow } from '@/lib/db/serviceCategories'
-import { requireCan } from '@/lib/auth/capabilities'
+import { forbidUnless, requireCan } from '@/lib/auth/capabilities'
 import { parseBlocks } from '@/lib/blocks/schema'
 import { revalidateCatalog } from '@/lib/cache/revalidate'
 import { serviceCategoryMutationSchema, validateCatalogBody } from '@/lib/validation/api-schemas'
@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
   }
 
   const isUpdate = 'id' in rawBody && Boolean((rawBody as { id?: unknown }).id)
-  const auth = await requireCan(request, isUpdate ? 'category:update' : 'category:create')
+  const auth = await requireCan(request, isUpdate ? 'service-category:update' : 'service-category:create')
   if (auth.error) return auth.error
 
   const validation = validateCatalogBody(serviceCategoryMutationSchema, rawBody)
@@ -104,6 +104,12 @@ export async function POST(request: NextRequest) {
       status: data.status ?? existing?.status ?? 'draft',
     })
 
+    // Going live or leaving the live state is a publishing decision.
+    if (values.status !== existing?.status && (values.status === 'published' || existing?.status === 'published')) {
+      const denied = forbidUnless(auth.user.role, 'service-category:publish')
+      if (denied) return denied
+    }
+
     if (values.status === 'published') {
       const merged = { ...existing, ...values }
       const gate = catalogGateResponse({
@@ -148,7 +154,7 @@ export async function POST(request: NextRequest) {
 }
 
 export async function DELETE(request: NextRequest) {
-  const auth = await requireCan(request, 'category:delete')
+  const auth = await requireCan(request, 'service-category:delete')
   if (auth.error) return auth.error
 
   const idParam = new URL(request.url).searchParams.get('id')

@@ -76,10 +76,10 @@ export async function GET(request: NextRequest) {
   }, { headers: { 'Cache-Control': 'no-store' } })
 }
 
-import { requireRole } from '@/lib/auth/rbac'
+import { requireCan } from '@/lib/auth/capabilities'
 
 export async function POST(request: NextRequest) {
-  const auth = await requireRole(request, ['SUPER_ADMIN', 'CONTENT_ADMIN'])
+  const auth = await requireCan(request, 'system:manage')
   if (auth.error) return auth.error
 
   try {

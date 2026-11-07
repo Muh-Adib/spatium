@@ -2,6 +2,7 @@
  * SPATIUM Platform — Role & Editorial Lifecycle Definitions
  * Shared between Server and Client Components.
  */
+import { can } from './capability-matrix'
 
 // --- 1. Canonical Roles --------------------------------------------------------
 export type Role =
@@ -47,98 +48,31 @@ export interface RolePermissions {
   canManageSeo: boolean
 }
 
+/** Article workflow flags, derived from the capability matrix (single source). */
+function permissionsFor(role: Role): RolePermissions {
+  return {
+    canCreateArticle: can(role, 'article:create'),
+    canEditOwnDraft: can(role, 'article:update'),
+    canEditAnyDraft: can(role, 'article:update-any'),
+    canSubmitForReview: can(role, 'article:submit'),
+    canReview: can(role, 'article:review'),
+    canApprove: can(role, 'article:review'),
+    canPublish: can(role, 'article:publish'),
+    canArchive: can(role, 'article:publish'),
+    canDeleteArticle: can(role, 'article:delete'),
+    canManageRedirects: can(role, 'redirect:manage'),
+    canManageSeo: can(role, 'seo:manage'),
+  }
+}
+
 export const ROLE_PERMISSIONS: Record<Role, RolePermissions> = {
-  SUPER_ADMIN: {
-    canCreateArticle: true,
-    canEditOwnDraft: true,
-    canEditAnyDraft: true,
-    canSubmitForReview: true,
-    canReview: true,
-    canApprove: true,
-    canPublish: true,
-    canArchive: true,
-    canDeleteArticle: true,
-    canManageRedirects: true,
-    canManageSeo: true,
-  },
-  CONTENT_ADMIN: {
-    canCreateArticle: true,
-    canEditOwnDraft: true,
-    canEditAnyDraft: true,
-    canSubmitForReview: true,
-    canReview: true,
-    canApprove: true,
-    canPublish: true,
-    canArchive: true,
-    canDeleteArticle: true,
-    canManageRedirects: true,
-    canManageSeo: true,
-  },
-  EDITOR: {
-    canCreateArticle: true,
-    canEditOwnDraft: true,
-    canEditAnyDraft: true,
-    canSubmitForReview: true,
-    canReview: true,
-    canApprove: true,
-    canPublish: true,
-    canArchive: true,
-    canDeleteArticle: false,
-    canManageRedirects: true,
-    canManageSeo: true,
-  },
-  REVIEWER: {
-    canCreateArticle: false,
-    canEditOwnDraft: false,
-    canEditAnyDraft: false,
-    canSubmitForReview: false,
-    canReview: true,
-    canApprove: true,
-    canPublish: false,
-    canArchive: false,
-    canDeleteArticle: false,
-    canManageRedirects: false,
-    canManageSeo: false,
-  },
-  AUTHOR: {
-    canCreateArticle: true,
-    canEditOwnDraft: true,
-    canEditAnyDraft: false,
-    canSubmitForReview: true,
-    canApprove: false,
-    canReview: false,
-    canPublish: false,
-    canArchive: false,
-    canDeleteArticle: false,
-    canManageRedirects: false,
-    canManageSeo: false,
-  },
-  SEO_MANAGER: {
-    canCreateArticle: false,
-    canEditOwnDraft: false,
-    canEditAnyDraft: false,
-    canSubmitForReview: false,
-    canReview: false,
-    canApprove: false,
-    canPublish: false,
-    canArchive: false,
-    canDeleteArticle: false,
-    canManageRedirects: true,
-    canManageSeo: true,
-  },
-  MEDIA_MANAGER: {
-    canCreateArticle: false,
-    canEditOwnDraft: false,
-    canEditAnyDraft: false,
-    canSubmitForReview: false,
-    canReview: false,
-    canApprove: false,
-    canPublish: false,
-    canArchive: false,
-    canDeleteArticle: false,
-    canManageRedirects: false,
-    canManageSeo: false,
-  },
+  SUPER_ADMIN: permissionsFor('SUPER_ADMIN'),
+  CONTENT_ADMIN: permissionsFor('CONTENT_ADMIN'),
+  EDITOR: permissionsFor('EDITOR'),
+  REVIEWER: permissionsFor('REVIEWER'),
+  AUTHOR: permissionsFor('AUTHOR'),
+  SEO_MANAGER: permissionsFor('SEO_MANAGER'),
+  MEDIA_MANAGER: permissionsFor('MEDIA_MANAGER'),
 }
 
 export interface TransitionResult {
