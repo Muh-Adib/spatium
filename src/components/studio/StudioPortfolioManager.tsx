@@ -287,12 +287,13 @@ export function StudioPortfolioManager() {
   const deepLinkSlug = searchParams?.get('slug') ?? null
   const deepLinkHandled = useRef(false)
   useEffect(() => {
-    if (!deepLinkSlug || deepLinkHandled.current) return
+    // Only roles that can save edits get the editor; others just see the list.
+    if (!deepLinkSlug || deepLinkHandled.current || !canUpdate) return
     const match = items.find((entry) => entry.slug === deepLinkSlug)
     if (!match) return
     deepLinkHandled.current = true
     handleEditItem(match)
-  }, [deepLinkSlug, items])
+  }, [deepLinkSlug, items, canUpdate])
 
   // Create New Portfolio
   const handleAddNew = () => {

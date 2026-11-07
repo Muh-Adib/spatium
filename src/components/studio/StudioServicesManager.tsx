@@ -176,12 +176,13 @@ export function StudioServicesManager() {
   const deepLinkSlug = searchParams?.get('slug') ?? null
   const deepLinkHandled = useRef(false)
   useEffect(() => {
-    if (!deepLinkSlug || deepLinkHandled.current) return
+    // Only roles that can save edits get the editor; others just see the list.
+    if (!deepLinkSlug || deepLinkHandled.current || !can('service:update')) return
     const match = services.find((entry) => entry.slug === deepLinkSlug)
     if (!match) return
     deepLinkHandled.current = true
     handleEditService(match)
-  }, [deepLinkSlug, services])
+  }, [deepLinkSlug, services, can])
 
   // Open Editor for Department
   const handleEditDepartment = (cat?: any) => {
