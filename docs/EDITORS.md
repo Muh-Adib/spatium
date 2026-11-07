@@ -199,4 +199,3 @@ Audit situs, PageSpeed, pengindeksan ulang, IndexNow, dan keyword untuk SUPER_AD
 - Riwayat halaman belum punya tombol pulihkan versi.
 - Pustaka template blok lama (`/api/templates`) tidak lagi dipakai editor.
 - Editor entitas belum mendeteksi konflik: API katalog tidak menerima `expectedUpdatedAt`, jadi simpan terakhir menang. Belum ada tab Riwayat (tidak ada endpoint revisi katalog).
-- Unggah tur (`/api/portfolio/upload-tour`) menulis metrik berlabel `Point Count` / `Spatial Accuracy`, sedangkan halaman dan editor membaca `pointCount` / `accuracy`; isi ulang angkanya di editor.

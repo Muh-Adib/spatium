@@ -176,8 +176,8 @@ export async function POST(request: NextRequest) {
   }
 
   const metrics = [
-    input.pointCount ? { label: 'Point Count', value: input.pointCount } : null,
-    input.accuracy ? { label: 'Spatial Accuracy', value: input.accuracy } : null,
+    input.pointCount ? { label: 'pointCount', value: input.pointCount } : null,
+    input.accuracy ? { label: 'accuracy', value: input.accuracy } : null,
   ].filter((m): m is { label: string; value: string } => m !== null)
 
   // Uploads land as DRAFT: publishing goes through the Studio publication gate (AGENTS.md §3.5).
