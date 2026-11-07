@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from 'react'
-import { AlertCircle, Archive, ArrowLeft, CheckCircle2, ExternalLink, Eye, Globe, History, RotateCcw, Save, Send, Trash2, Undo2 } from 'lucide-react'
+import { AlertCircle, Archive, ArrowLeft, CheckCircle2, ExternalLink, Eye, Globe, History, RotateCcw, Save, Send, Trash2, Undo2, Upload } from 'lucide-react'
 import { buildPreset } from '@/blocks/presets'
 import type { BlockIssue } from '@/lib/blocks/catalog'
 import { validateCatalogPublication } from '@/lib/blocks/publication-gate'
@@ -15,6 +15,7 @@ import { DateTime, StatusBadge } from '../pages/shared'
 import type { EditorialStatus } from '../pages/status'
 import { entityApi, type EntityApiFailure } from './client'
 import { CategoryContent, PortfolioContent, ServiceContent, type EditorContext } from './content'
+import { HistoryPanel } from './HistoryPanel'
 import { PreviewFrame } from './PreviewFrame'
 import { SeoPanel } from './SeoPanel'
 import {
@@ -22,6 +23,8 @@ import {
   FIELD_TAB,
   STATUS_SUCCESS,
   fieldDomId,
+  formFromSnapshot,
+  formatHistoryTime,
   gateInput,
   gateIssueTarget,
   gateIssueText,
@@ -33,6 +36,7 @@ import {
   statusOf,
   titleOf,
   toSavePayload,
+  updatedAtOf,
   validateForm,
   type EntityForm,
   type EntityKind,
@@ -49,7 +53,12 @@ type Banner = {
   aboutBlocks?: boolean
   /** Focus stays where it was sent (e.g. the first invalid field). */
   keepFocus?: boolean
+  /** Buttons under the message (e.g. conflict resolution). */
+  actions?: React.ReactNode
 }
+
+/** A save refused with 409 `conflict`: what to retry and against which stored version. */
+type Conflict = { currentUpdatedAt: string | null; status?: EditorialStatus }
 
 type Props = {
   kind: EntityKind
@@ -98,7 +107,8 @@ export function EntityEditor({ kind, id, context, onBack, onChanged, onDeleted }
   const [savedAt, setSavedAt] = useState<Date | null>(null)
   const [banner, setBanner] = useState<Banner | null>(null)
   const [errors, setErrors] = useState<FieldErrors>({})
-  const [dialog, setDialog] = useState<'delete' | 'leave' | 'preset' | null>(null)
+  const [dialog, setDialog] = useState<'delete' | 'leave' | 'preset' | 'reload' | 'overwrite' | null>(null)
+  const [conflict, setConflict] = useState<Conflict | null>(null)
   const [deleting, setDeleting] = useState(false)
   const versionRef = useRef(0)
   versionRef.current = version
@@ -129,6 +139,7 @@ export function EntityEditor({ kind, id, context, onBack, onChanged, onDeleted }
     setVersion(0)
     setSavedVersion(0)
     setErrors({})
+    setConflict(null)
   }, [fetchRow, kind])
 
   useEffect(() => {
@@ -143,6 +154,8 @@ export function EntityEditor({ kind, id, context, onBack, onChanged, onDeleted }
   })
 
   const dirty = version !== savedVersion
+  const dirtyRef = useRef(dirty)
+  dirtyRef.current = dirty
   useUnsavedGuard(dirty)
   const draft = useLocalDraft<EntityForm | null>(row ? `spatium:entity-draft:${kind}:${row.id}` : null, form, baseline)
 
@@ -221,7 +234,7 @@ export function EntityEditor({ kind, id, context, onBack, onChanged, onDeleted }
         items.push({ text: gateIssueText(kind, issue), fixLabel: target?.kind === 'blocks' ? 'Buka blok' : 'Perbaiki', onFix: target ? () => goTo(target) : undefined })
       }
     }
-    if (failure.status === 409) fieldErrors.slug = failure.error
+    if (failure.code === 'slug_taken' || (failure.status === 409 && !failure.code)) fieldErrors.slug = failure.error
     setErrors(fieldErrors)
     return { tone: 'error', title, items }
   }
@@ -263,18 +276,43 @@ export function EntityEditor({ kind, id, context, onBack, onChanged, onDeleted }
     return true
   }
 
-  /** Saves the form (changed fields only), optionally with a status change, in one request. */
-  const persist = async (status?: EditorialStatus): Promise<boolean> => {
+  /**
+   * Saves the form (changed fields only), optionally with a status change, in
+   * one request. Sends the loaded `updatedAt` so a save over someone else's
+   * newer change is refused (409) instead of silently winning; `overwriteAt`
+   * is the newer `updatedAt` the user chose to overwrite.
+   */
+  const persist = async (status?: EditorialStatus, overwriteAt?: string | null): Promise<boolean> => {
     if (!form || !row || busy) return false
     if (!checkLocally(form, status === 'published')) return false
     setBusy(status ?? 'save')
     const versionAtSave = version
-    const res = await entityApi.save(kind, toSavePayload(form, baseline, row, status ? { status } : {}))
+    const expectedUpdatedAt = overwriteAt === undefined ? updatedAtOf(row) : overwriteAt
+    const res = await entityApi.save(kind, toSavePayload(form, baseline, row, { ...(status ? { status } : {}), expectedUpdatedAt }))
     if (!res.ok) {
       setBusy(null)
+      if (res.failure.code === 'conflict') {
+        setConflict({ currentUpdatedAt: res.failure.currentUpdatedAt ?? null, status })
+        setBanner({
+          tone: 'warning',
+          title: res.failure.error,
+          actions: (
+            <>
+              <Button size="sm" icon={RotateCcw} onClick={() => (dirtyRef.current ? setDialog('reload') : void reloadLatest())}>
+                Muat versi terbaru
+              </Button>
+              <Button size="sm" variant="danger" icon={Upload} onClick={() => setDialog('overwrite')}>
+                Timpa
+              </Button>
+            </>
+          ),
+        })
+        return false
+      }
       setBanner(failureBanner(`${status ? 'Status belum berubah' : 'Belum tersimpan'}: ${res.failure.error}`, res.failure, form))
       return false
     }
+    setConflict(null)
     const fresh = await fetchRow()
     setBusy(null)
     if (!fresh) return false
@@ -288,7 +326,7 @@ export function EntityEditor({ kind, id, context, onBack, onChanged, onDeleted }
     }
     setSavedAt(new Date())
     draft.clear()
-    setBanner(status ? { tone: 'success', title: STATUS_SUCCESS[status] } : null)
+    setBanner(status ? { tone: 'success', title: STATUS_SUCCESS[status] } : overwriteAt !== undefined ? { tone: 'success', title: 'Perubahan disimpan.' } : null)
     onChanged()
     return true
   }
@@ -305,6 +343,35 @@ export function EntityEditor({ kind, id, context, onBack, onChanged, onDeleted }
       return
     }
     setBanner({ tone: 'error', title: `Belum terhapus: ${res.failure.error}` })
+  }
+
+  /** "Muat versi terbaru": drops local changes and reloads the stored row. */
+  const reloadLatest = async () => {
+    setDialog(null)
+    draft.clear()
+    await load()
+    setBanner({ tone: 'success', title: 'Versi terbaru dimuat. Perubahan Anda yang belum disimpan dibuang.' })
+    // The banner button that triggered this is gone; keep focus in the editor.
+    headingRef.current?.focus()
+  }
+
+  /** "Timpa": re-sends the same save against the newer stored version. */
+  const overwrite = async () => {
+    const c = conflict
+    setDialog(null)
+    if (!c) return
+    await persist(c.status, c.currentUpdatedAt)
+  }
+
+  /** Riwayat → "Pulihkan versi ini": the version's content becomes unsaved changes. */
+  const restoreVersion = (snapshot: Record<string, unknown>, entry: { createdAt: string }) => {
+    if (!form) return
+    patch(formFromSnapshot(kind, snapshot, form))
+    setSelectedBlock(null)
+    setBanner({
+      tone: 'success',
+      title: `Versi ${formatHistoryTime(entry.createdAt)} dimuat ke editor. Periksa isinya lalu tekan Simpan; status tidak berubah.`,
+    })
   }
 
   const restorePreset = () => {
@@ -505,6 +572,7 @@ export function EntityEditor({ kind, id, context, onBack, onChanged, onDeleted }
                   ))}
                 </ul>
               ) : null}
+              {banner.actions ? <div className="flex flex-wrap gap-2">{banner.actions}</div> : null}
             </div>
             <Button size="sm" variant="ghost" onClick={() => setBanner(null)}>
               Tutup
@@ -531,6 +599,10 @@ export function EntityEditor({ kind, id, context, onBack, onChanged, onDeleted }
             { id: 'content', label: 'Konten', content: contentPanel, badge: contentErrors ? `${contentErrors} perlu diperbaiki` : undefined },
             { id: 'blocks', label: 'Blok', content: null },
             { id: 'seo', label: 'SEO & berbagi', content: <SeoPanel form={form} gate={gate} errors={errors} onPatch={patch} onFix={goTo} />, badge: gate.issues.length ? `${gate.issues.length} syarat` : undefined },
+            // Revisions need `<entity>:update` (same as restoring), so view-only roles don't get the tab.
+            ...(canEdit
+              ? [{ id: 'history', label: 'Riwayat', content: <HistoryPanel kind={kind} id={row.id} refreshKey={String(row.updatedAt ?? '')} canRestore={canEdit} onRestore={restoreVersion} /> }]
+              : []),
           ]}
           renderPreview={({ selectedId, onSelect }) =>
             deferredForm ? <PreviewFrame form={deferredForm} row={row} title={title} selectedId={selectedId} onSelect={onSelect} /> : null
@@ -573,6 +645,40 @@ export function EntityEditor({ kind, id, context, onBack, onChanged, onDeleted }
             </Button>
             <Button variant="danger" icon={RotateCcw} onClick={restorePreset}>
               Ganti dengan preset
+            </Button>
+          </>
+        }
+      />
+
+      <Dialog
+        open={dialog === 'reload'}
+        onClose={() => setDialog(null)}
+        title="Buang perubahan Anda dan muat versi terbaru?"
+        description={`Perubahan yang belum Anda simpan di ${label.one} ini akan dibuang, lalu editor menampilkan versi yang baru disimpan orang lain.`}
+        footer={
+          <>
+            <Button autoFocus onClick={() => setDialog(null)}>
+              Batal
+            </Button>
+            <Button variant="danger" icon={RotateCcw} onClick={() => void reloadLatest()}>
+              Buang dan muat versi terbaru
+            </Button>
+          </>
+        }
+      />
+
+      <Dialog
+        open={dialog === 'overwrite'}
+        onClose={() => setDialog(null)}
+        title="Timpa perubahan orang lain?"
+        description={`Orang lain menyimpan ${label.one} ini setelah Anda membukanya. Kolom dan blok yang Anda ubah akan menimpa versi mereka; kolom yang tidak Anda ubah tetap memakai versi mereka. Versi mereka tetap bisa dipulihkan dari tab Riwayat.`}
+        footer={
+          <>
+            <Button autoFocus onClick={() => setDialog(null)}>
+              Batal
+            </Button>
+            <Button variant="danger" icon={Upload} busy={busy !== null} onClick={() => void overwrite()}>
+              Timpa dengan perubahan saya
             </Button>
           </>
         }

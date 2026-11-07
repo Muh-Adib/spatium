@@ -2,6 +2,10 @@
  * SPATIUM Publication Gate (L3-T7 / Section 3.4)
  * Strict validation rule preventing catalog content from publishing if critical SEO
  * or accessibility requirements (alt text, meta tags, schema validity) are violated.
+ *
+ * Every issue starts with the thing to fix (`Judul:`, `Slug:`, `Meta title:`,
+ * `Meta description:`, `Teks alternatif gambar sampul:`, `Blok …` / `Daftar blok:`);
+ * the editors map issues to fields by that prefix (`gateIssueTarget`).
  */
 
 import { parseBlocks } from './schema'
@@ -33,32 +37,32 @@ export function validateCatalogPublication(input: PublicationGateInput): Publica
 
   // 1. Title
   if (!input.title || typeof input.title !== 'string' || input.title.trim().length < 3) {
-    issues.push('Judul halaman wajib diisi minimal 3 karakter.')
+    issues.push('Judul: isi minimal 3 karakter.')
   }
 
   // 2. Slug
   if (!input.slug || typeof input.slug !== 'string' || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(input.slug.trim())) {
-    issues.push('Slug wajib diisi dengan format huruf kecil dan tanda hubung valid (misal: "pengembangan-aplikasi-web").')
+    issues.push('Slug: gunakan huruf kecil, angka, dan tanda hubung saja, mis. pemindaian-gedung.')
   }
 
   // 3. Meta Title
   if (!input.metaTitle || typeof input.metaTitle !== 'string' || input.metaTitle.trim().length < 10) {
-    issues.push('Meta Title (SEO) wajib diisi minimal 10 karakter untuk mesin pencari.')
+    issues.push('Meta title: isi minimal 10 karakter agar judul tampil di hasil pencarian.')
   } else if (input.metaTitle.trim().length > 70) {
-    warnings.push('Meta Title melebihi 70 karakter dan berpotensi terpotong di SERP Google.')
+    warnings.push('Meta title lebih dari 70 karakter dan bisa terpotong di hasil pencarian. Persingkat bila memungkinkan.')
   }
 
   // 4. Meta Description
   if (!input.metaDescription || typeof input.metaDescription !== 'string' || input.metaDescription.trim().length < 20) {
-    issues.push('Meta Description (SEO) wajib diisi minimal 20 karakter untuk ringkasan di hasil pencarian.')
+    issues.push('Meta description: isi minimal 20 karakter sebagai ringkasan di hasil pencarian.')
   } else if (input.metaDescription.trim().length > 165) {
-    warnings.push('Meta Description melebihi 165 karakter dan berpotensi terpotong di SERP Google.')
+    warnings.push('Meta description lebih dari 165 karakter dan bisa terpotong di hasil pencarian. Persingkat bila memungkinkan.')
   }
 
   // 5. Hero Image Alt
   if (input.heroImage && typeof input.heroImage === 'string' && input.heroImage.trim()) {
     if (!input.heroImageAlt || typeof input.heroImageAlt !== 'string' || input.heroImageAlt.trim().length < 3) {
-      issues.push('Hero image wajib memiliki Alt Text deskriptif untuk aksesibilitas dan SEO gambar.')
+      issues.push('Teks alternatif gambar sampul: jelaskan isi gambar (minimal 3 karakter) untuk pembaca layar.')
     }
   }
 
@@ -69,12 +73,12 @@ export function validateCatalogPublication(input: PublicationGateInput): Publica
     const schemaCheck = parseBlocks(blocks)
     if (!schemaCheck.ok && schemaCheck.issues) {
       for (const issue of schemaCheck.issues) {
-        issues.push(`Skema Blok: ${issue}`)
+        issues.push(issue)
       }
     } else if (input.target) {
       const targetCheck = validateBlockListFor(input.target, blocks)
       for (const issue of targetCheck.issues) {
-        issues.push(`Skema Blok: [Block ${issue.index}] ${issue.message}`)
+        issues.push(`Blok ${issue.index + 1}${issue.type ? ` (${issue.type})` : ''}: ${issue.message}`)
       }
     }
 
@@ -82,7 +86,7 @@ export function validateCatalogPublication(input: PublicationGateInput): Publica
     const seoText = blocksToSeoText(blocks)
     if (seoText.imagesWithoutAlt.length > 0) {
       for (const imgContext of seoText.imagesWithoutAlt) {
-        issues.push(`Aksesibilitas: Gambar pada "${imgContext}" tidak memiliki Alt Text.`)
+        issues.push(`Blok "${imgContext}": gambar belum punya teks alternatif. Isi teks alternatifnya di blok tersebut.`)
       }
     }
   }

@@ -6,6 +6,11 @@ import { revalidateCatalog } from '@/lib/cache/revalidate'
 import { errorResponse, PublicError } from '@/lib/http/errors'
 import {
   actorOf,
+  assertCatalogFresh,
+  catalogNotFound,
+  catalogSlugTaken,
+  payloadTooLargeResponse,
+  readCatalogBody,
   catalogBlocksColumn,
   catalogGateResponse,
   coverAltFrom,
@@ -35,28 +40,19 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ success: true, data: rows, total: rows.length })
   } catch (error) {
-    return errorResponse('API portfolio GET', error, 'Gagal mengambil data portofolio.')
+    return errorResponse('API portfolio GET', error, 'Daftar portofolio gagal dimuat. Coba lagi sebentar lagi.')
   }
 }
 
 export async function POST(request: NextRequest) {
   const contentLength = Number(request.headers.get('content-length') || 0)
-  if (contentLength > MAX_PAYLOAD_BYTES) {
-    return NextResponse.json({ success: false, error: 'Ukuran payload melebihi batas 2MB.' }, { status: 413 })
-  }
+  if (contentLength > MAX_PAYLOAD_BYTES) return payloadTooLargeResponse(2)
 
-  let rawBody: unknown
-  try {
-    rawBody = await request.json()
-  } catch (err) {
-    console.warn('[API portfolio] invalid JSON body:', err)
-    rawBody = null
-  }
-  if (!rawBody || typeof rawBody !== 'object') {
-    return NextResponse.json({ success: false, error: 'Body JSON wajib diisi.' }, { status: 400 })
-  }
+  const read = await readCatalogBody(request, 'API portfolio')
+  if (!read.ok) return read.response
+  const rawBody = read.body
 
-  const isUpdate = 'id' in rawBody && Boolean((rawBody as { id?: unknown }).id)
+  const isUpdate = Boolean(rawBody.id)
   const auth = await requireCan(request, isUpdate ? 'portfolio:update' : 'portfolio:create')
   if (auth.error) return auth.error
 
@@ -66,7 +62,10 @@ export async function POST(request: NextRequest) {
 
   const slug = normalizeCatalogSlug(data.slug)
   if (!slug) {
-    return NextResponse.json({ success: false, error: 'Slug portofolio tidak valid.' }, { status: 400 })
+    return NextResponse.json(
+      { success: false, code: 'invalid', error: 'Slug portofolio tidak valid. Gunakan huruf kecil, angka, dan tanda hubung, mis. pemindaian-gedung.', issues: [{ field: 'slug', message: 'Gunakan huruf kecil, angka, dan tanda hubung, mis. pemindaian-gedung.' }] },
+      { status: 400 },
+    )
   }
 
   // Target-aware validation; creating without blocks stores the portfolio preset.
@@ -75,11 +74,11 @@ export async function POST(request: NextRequest) {
 
   try {
     const existing = data.id ? await prisma.orm.public.Portfolio.where({ id: data.id }).first() : null
-    if (data.id && !existing) throw new PublicError('Portofolio tidak ditemukan.', 404)
+    if (data.id && !existing) throw catalogNotFound('portfolio')
 
     const clash = await prisma.orm.public.Portfolio.where({ slug }).first()
     if (clash && clash.id !== existing?.id) {
-      throw new PublicError(`Slug "${slug}" sudah dipakai portofolio lain.`, 409)
+      throw catalogSlugTaken('portfolio', slug)
     }
 
     // Only fields present in the request are written, so partial updates keep the rest.
@@ -136,13 +135,15 @@ export async function POST(request: NextRequest) {
     const actor = actorOf(auth.user)
     const saved = await prisma.transaction(async (tx) => {
       if (existing) {
+        // Lock the row, then refuse a stale save (optimistic concurrency).
+        const before = assertCatalogFresh('portfolio', await tx.orm.public.Portfolio.where({ id: existing.id }).forUpdate().first(), data.expectedUpdatedAt)
         await tx.orm.public.Portfolio.where({ id: existing.id }).update(values)
         const row = await tx.orm.public.Portfolio.where({ id: existing.id }).first()
-        if (!row) throw new PublicError('Portofolio tidak ditemukan.', 404)
-        await redirectRenamedSlug(tx, '/portfolio', existing, row.slug)
-        await recordCatalogHistory(tx, 'portfolio', row.id, actor, 'update', existing, {
+        if (!row) throw catalogNotFound('portfolio')
+        await redirectRenamedSlug(tx, '/portfolio', before, row.slug)
+        await recordCatalogHistory(tx, 'portfolio', row.id, actor, 'update', before, {
           fields: Object.keys(values),
-          from: existing.status,
+          from: before.status,
           to: row.status,
         })
         return row
@@ -157,13 +158,14 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: 'Portofolio berhasil disimpan.',
+      message: 'Perubahan disimpan.',
       id: saved.id,
       slug: saved.slug,
       status: saved.status,
+      updatedAt: saved.updatedAt,
     })
   } catch (error) {
-    return errorResponse('API portfolio POST', error, 'Gagal menyimpan portofolio.')
+    return errorResponse('API portfolio POST', error, 'Portofolio belum tersimpan karena galat server. Coba simpan lagi sebentar lagi.')
   }
 }
 
@@ -177,7 +179,7 @@ export async function DELETE(request: NextRequest) {
   const slugParam = searchParams.get('slug')
   const id = idParam && /^\d+$/.test(idParam) ? Number(idParam) : null
   if (!id && !slugParam) {
-    return NextResponse.json({ success: false, error: 'ID atau slug portofolio wajib disertakan.' }, { status: 400 })
+    return NextResponse.json({ success: false, code: 'invalid', error: 'ID portofolio tidak valid. Muat ulang daftar lalu coba lagi.' }, { status: 400 })
   }
 
   try {
@@ -185,7 +187,7 @@ export async function DELETE(request: NextRequest) {
     const removed = await prisma.transaction(async (tx) => {
       const where = id ? { id } : { slug: slugParam ?? '' }
       const current = await tx.orm.public.Portfolio.where(where).forUpdate().first()
-      if (!current) throw new PublicError('Portofolio tidak ditemukan.', 404)
+      if (!current) throw catalogNotFound('portfolio')
       await recordCatalogHistory(tx, 'portfolio', current.id, actor, 'delete', current)
       await tx.orm.public.Portfolio.where({ id: current.id }).delete()
       return current
@@ -193,8 +195,8 @@ export async function DELETE(request: NextRequest) {
 
     await revalidateCatalog('portfolio', removed.slug)
 
-    return NextResponse.json({ success: true, message: 'Portofolio berhasil dihapus.' })
+    return NextResponse.json({ success: true, message: 'Portofolio dihapus.' })
   } catch (error) {
-    return errorResponse('API portfolio DELETE', error, 'Gagal menghapus portofolio.')
+    return errorResponse('API portfolio DELETE', error, 'Portofolio belum terhapus karena galat server. Coba lagi sebentar lagi.')
   }
 }

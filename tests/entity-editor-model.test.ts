@@ -266,7 +266,8 @@ describe('entity editor: validation and issue mapping', () => {
       ]),
     )
     expect(targets.every((t) => t !== null)).toBe(true)
-    expect(gateIssueTarget('portfolio', 'Skema Blok: [Block 2] tidak valid')).toEqual({ kind: 'blocks', index: 2 })
+    expect(gateIssueTarget('portfolio', 'Blok 3 (portfolio-hero): tidak valid')).toEqual({ kind: 'blocks', index: 2 })
+    expect(gateIssueTarget('portfolio', 'Daftar blok: terlalu banyak blok')).toEqual({ kind: 'blocks' })
   })
 
   it('maps API body fields to form fields and tabs', () => {

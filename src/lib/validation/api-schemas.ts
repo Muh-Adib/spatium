@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import { NextResponse } from 'next/server'
 import { normaliseWhatsappNumber } from '@/lib/contact/public-contact'
+import { ZOD_ID_ERRORS } from './zod-id'
 
 // --- 1. Articles Mutation Schemas --------------------------------------------
 export const createArticleSchema = z.object({
@@ -123,23 +124,26 @@ export const createKeywordSchema = z.object({
 // Shared building blocks. JSON-ish fields (metrics, features, …) stay loose here
 // and are serialised by the route; blocks are validated by the block schema.
 const catalogStatusSchema = z.enum(['draft', 'in_review', 'approved', 'published', 'archived'])
-const nullableText = (max: number) => z.string().max(max, `Teks melebihi ${max} karakter.`).nullish()
-const catalogSlugSchema = z.string().trim().min(1, 'Slug wajib diisi.').max(200, 'Slug terlalu panjang.')
+const nullableText = (max: number) => z.string().max(max, `Persingkat teks menjadi maksimal ${max} karakter.`).nullish()
+const catalogSlugSchema = z.string({ error: 'Isi slug, mis. pemindaian-gedung.' }).trim().min(1, 'Isi slug, mis. pemindaian-gedung.').max(200, 'Persingkat slug menjadi maksimal 200 karakter.')
 const positiveIdSchema = z.union([
   z.number().int().positive(),
-  z.string().regex(/^\d+$/, 'ID harus berupa angka.').transform(Number),
+  z.string().regex(/^\d+$/, 'ID tidak valid. Muat ulang daftar lalu coba lagi.').transform(Number),
 ])
 const intLikeSchema = z.union([
   z.number().int(),
-  z.string().trim().regex(/^-?\d*$/, 'Nilai harus berupa angka bulat.'),
+  z.string().trim().regex(/^-?\d*$/, 'Isi dengan angka bulat, mis. 1.'),
 ])
 const jsonObjectOrStringSchema = z.union([z.record(z.string(), z.unknown()), z.string().max(20000)]).nullish()
 const keyphrasesSchema = z.union([z.array(z.string().max(200)).max(50), z.string().max(5000)]).nullish()
 const linkedIdsSchema = z.array(positiveIdSchema).max(200).optional()
+/** `updatedAt` the editor loaded; a stale value makes the save fail with 409 `conflict`. */
+const expectedUpdatedAtSchema = z.string().trim().min(1).max(64).optional()
 
 export const serviceMutationSchema = z.object({
   id: positiveIdSchema.nullish(),
-  name: z.string().trim().min(1, 'Nama layanan wajib diisi.').max(200),
+  expectedUpdatedAt: expectedUpdatedAtSchema,
+  name: z.string({ error: 'Isi nama layanan.' }).trim().min(1, 'Isi nama layanan.').max(200, 'Persingkat nama layanan menjadi maksimal 200 karakter.'),
   slug: catalogSlugSchema,
   categoryId: positiveIdSchema.nullish(),
   indexNumber: nullableText(20),
@@ -172,8 +176,9 @@ export type ServiceMutationInput = z.infer<typeof serviceMutationSchema>
 
 export const serviceCategoryMutationSchema = z.object({
   id: positiveIdSchema.nullish(),
+  expectedUpdatedAt: expectedUpdatedAtSchema,
   slug: catalogSlugSchema,
-  title: z.string().trim().min(1, 'Isi judul kategori layanan.').max(200),
+  title: z.string({ error: 'Isi judul kategori layanan.' }).trim().min(1, 'Isi judul kategori layanan.').max(200, 'Persingkat judul menjadi maksimal 200 karakter.'),
   tag: nullableText(200),
   shortDescription: nullableText(1000),
   heroImage: nullableText(1000),
@@ -193,14 +198,15 @@ export type ServiceCategoryMutationInput = z.infer<typeof serviceCategoryMutatio
 
 export const portfolioMutationSchema = z.object({
   id: positiveIdSchema.nullish(),
-  title: z.string().trim().min(1, 'Judul portofolio wajib diisi.').max(200),
+  expectedUpdatedAt: expectedUpdatedAtSchema,
+  title: z.string({ error: 'Isi judul portofolio.' }).trim().min(1, 'Isi judul portofolio.').max(200, 'Persingkat judul menjadi maksimal 200 karakter.'),
   slug: catalogSlugSchema,
   client: nullableText(200),
   summary: nullableText(2000),
   category: nullableText(100),
   heroImage: nullableText(1000),
   featured: z.boolean().optional(),
-  year: z.union([z.number().int().min(1900).max(2200), z.string().trim().regex(/^(\d{4})?$/, 'Tahun harus 4 digit.')]).nullish(),
+  year: z.union([z.number().int('Isi tahun 4 digit, mis. 2025, atau kosongkan.').min(1900, 'Isi tahun antara 1900 dan 2200.').max(2200, 'Isi tahun antara 1900 dan 2200.'), z.string().trim().regex(/^(\d{4})?$/, 'Isi tahun 4 digit, mis. 2025, atau kosongkan.')]).nullish(),
   status: catalogStatusSchema.optional(),
   challenge: nullableText(20000),
   approach: nullableText(20000),
@@ -226,7 +232,8 @@ export type PortfolioMutationInput = z.infer<typeof portfolioMutationSchema>
 export function validateCatalogBody<T>(schema: z.ZodType<T>, body: unknown):
   | { success: true; data: T }
   | { success: false; response: NextResponse } {
-  const result = schema.safeParse(body)
+  // Zod's built-in messages in Indonesian; the schemas' own messages win.
+  const result = schema.safeParse(body, { error: ZOD_ID_ERRORS })
   if (result.success) return { success: true, data: result.data }
   const issues = result.error.issues.map((i) => ({ field: i.path.join('.'), message: i.message }))
   const first = issues[0]
@@ -235,7 +242,11 @@ export function validateCatalogBody<T>(schema: z.ZodType<T>, body: unknown):
     response: NextResponse.json(
       {
         success: false,
-        error: first ? `${first.field ? `${first.field}: ` : ''}${first.message}` : 'Data request tidak valid.',
+        code: 'invalid',
+        error:
+          issues.length > 1
+            ? `Ada ${issues.length} isian yang perlu diperbaiki. Perbaiki kolom yang ditandai lalu simpan lagi.`
+            : first?.message ?? 'Data yang dikirim tidak valid. Periksa isian lalu simpan lagi.',
         issues,
       },
       { status: 400 },

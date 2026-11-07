@@ -9,7 +9,7 @@
    - Rate limit percobaan login (429 + `Retry-After`).
    - Header: CSP (termasuk `frame-src` dari `src/lib/media/embedValidator.ts`), `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`, HSTS di HTTPS.
 2. **Handler route**: `requireUser` / `requireRole` dan validasi Zod di setiap mutasi. Respons galat tidak pernah memuat stack trace atau pesan galat mentah: galat dicatat di server dan klien menerima pesan umum. Pesan yang memang ditujukan ke editor (validasi, slug bentrok) dilempar sebagai `PublicError` dan diteruskan apa adanya (`src/lib/http/errors.ts`).
-3. **Data**: mutasi multi-tabel dalam transaksi, dengan revisi dan audit log.
+3. **Data**: mutasi multi-tabel dalam transaksi, dengan revisi dan audit log. Simpan katalog (`POST /api/portfolio`, `/api/services`, `/api/service-categories`) menerima `expectedUpdatedAt` dan menolak simpan basi dengan `409 conflict` (dicek pada baris yang dikunci), sama seperti halaman dan tool MCP.
 
 ## Akun & sesi
 
@@ -48,7 +48,7 @@ SA = SUPER_ADMIN, CA = CONTENT_ADMIN, ED = EDITOR, AU = AUTHOR, RV = REVIEWER, S
 | Hapus redirect (`redirect:delete`) | ✓ | ✓ | – | – | – | ✓ | – |
 | Pengguna (`user:manage`), pengaturan situs (`settings:manage`), kunci MCP (`mcp:manage`), tema (`theme:manage`), perbarui cache & aksi sistem (`system:manage`) | ✓ | ✓ | – | – | – | – | – |
 
-Membaca (GET) lainnya terbuka untuk semua pengguna Studio yang masuk. Tab Studio ikut matriks: Artikel butuh `article:read`, MCP butuh `mcp:manage`, Pengguna butuh `user:manage`; membuka `?tab=` yang tidak diizinkan menampilkan pesan, bukan panel. Menambah aksi baru: tambahkan kapabilitas di matriks, pakai `requireCan` di rute dan `can()` di UI, lalu tambahkan kasusnya di `tests/rbac-route-enforcement.test.ts` (test gagal bila ada kapabilitas tanpa rute teruji).
+Riwayat revisi katalog (`GET /api/portfolio/:id/revisions`, `/api/services/:id/revisions`, `/api/service-categories/:id/revisions`) hanya baca, tetapi memuat snapshot lengkap, jadi butuh kapabilitas `<entitas>:update` (role yang bisa memulihkan versi). Membaca (GET) lainnya terbuka untuk semua pengguna Studio yang masuk. Tab Studio ikut matriks: Artikel butuh `article:read`, MCP butuh `mcp:manage`, Pengguna butuh `user:manage`; membuka `?tab=` yang tidak diizinkan menampilkan pesan, bukan panel. Menambah aksi baru: tambahkan kapabilitas di matriks, pakai `requireCan` di rute dan `can()` di UI, lalu tambahkan kasusnya di `tests/rbac-route-enforcement.test.ts` (test gagal bila ada kapabilitas tanpa rute teruji).
 
 ## Permintaan keluar (SSRF) & kuota
 

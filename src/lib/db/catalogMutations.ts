@@ -6,6 +6,7 @@ import { validateCatalogPublication, type PublicationGateInput } from '@/lib/blo
 import { validateBlockListFor } from '@/lib/blocks/catalog'
 import type { EntityTarget } from '@/lib/blocks/define'
 import { buildPreset } from '@/blocks/presets'
+import { PublicError } from '@/lib/http/errors'
 
 /**
  * Shared helpers for the catalog mutation routes (portfolio, service, service
@@ -17,6 +18,79 @@ import { buildPreset } from '@/blocks/presets'
 export type CatalogTx = Parameters<Parameters<typeof prisma.transaction>[0]>[0]
 
 export type CatalogHistoryEntity = 'portfolio' | 'service' | 'service_category'
+
+/** Glossary names (docs/EDITORS.md) used in user-facing messages. */
+export const CATALOG_LABEL: Record<CatalogHistoryEntity, { one: string; title: string }> = {
+  portfolio: { one: 'portofolio', title: 'Portofolio' },
+  service: { one: 'layanan', title: 'Layanan' },
+  service_category: { one: 'kategori layanan', title: 'Kategori layanan' },
+}
+
+/** 413 for a body over the route limit. */
+export function payloadTooLargeResponse(limitMb: number): NextResponse {
+  return NextResponse.json(
+    { success: false, code: 'too_large', error: `Data terlalu besar (maksimal ${limitMb} MB). Kurangi isi blok lalu simpan lagi.` },
+    { status: 413 },
+  )
+}
+
+/** Reads a JSON object body; 400 with a readable message otherwise. */
+export async function readCatalogBody(
+  request: Request,
+  context: string,
+): Promise<{ ok: true; body: Record<string, unknown> } | { ok: false; response: NextResponse }> {
+  let raw: unknown = null
+  try {
+    raw = await request.json()
+  } catch (err) {
+    console.warn(`[${context}] invalid JSON body:`, err)
+  }
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) {
+    return {
+      ok: false,
+      response: NextResponse.json(
+        { success: false, code: 'invalid', error: 'Data yang dikirim tidak terbaca. Muat ulang halaman lalu coba lagi.' },
+        { status: 400 },
+      ),
+    }
+  }
+  return { ok: true, body: raw as Record<string, unknown> }
+}
+
+/** 404 thrown inside a catalog handler when the row is gone. */
+export function catalogNotFound(entity: CatalogHistoryEntity): PublicError {
+  return new PublicError(`${CATALOG_LABEL[entity].title} ini tidak ditemukan. Mungkin sudah dihapus; kembali ke daftar lalu muat ulang.`, 404, {
+    code: 'not_found',
+  })
+}
+
+/** 409 when the slug belongs to another row of the same entity. */
+export function catalogSlugTaken(entity: CatalogHistoryEntity, slug: string): PublicError {
+  return new PublicError(`Slug "${slug}" sudah dipakai ${CATALOG_LABEL[entity].one} lain. Pilih slug lain.`, 409, { code: 'slug_taken' })
+}
+
+/**
+ * Optimistic concurrency for catalog updates. Call inside the transaction on
+ * the row read with `forUpdate()`: throws 404 when it is gone and 409
+ * (`code: 'conflict'`, `currentUpdatedAt`) when `expectedUpdatedAt` was sent
+ * and the row changed since. Without `expectedUpdatedAt` the save proceeds
+ * (older clients, scripts).
+ */
+export function assertCatalogFresh<T extends { updatedAt: string }>(
+  entity: CatalogHistoryEntity,
+  current: T | null,
+  expectedUpdatedAt: string | null | undefined,
+): T {
+  if (!current) throw catalogNotFound(entity)
+  if (expectedUpdatedAt && expectedUpdatedAt !== current.updatedAt) {
+    throw new PublicError(
+      `${CATALOG_LABEL[entity].title} ini sudah diubah orang lain sejak Anda membukanya. Muat versi terbaru, atau timpa dengan perubahan Anda.`,
+      409,
+      { code: 'conflict', details: { currentUpdatedAt: current.updatedAt } },
+    )
+  }
+  return current
+}
 
 export function actorOf(user: AuthenticatedUser): string {
   return user.email || user.name || user.id
@@ -112,7 +186,8 @@ export function catalogGateResponse(input: PublicationGateInput): NextResponse |
   return NextResponse.json(
     {
       success: false,
-      error: `Publikasi ditolak: ${gate.issues.join(' ')}`,
+      code: 'gate',
+      error: 'Belum bisa diterbitkan. Lengkapi syarat publikasi yang ditandai lalu terbitkan lagi.',
       issues: gate.issues,
       warnings: gate.warnings,
     },
@@ -137,7 +212,13 @@ export function catalogBlocksColumn(
   if (raw === null || raw === '') return { ok: true, value: mode === 'create' ? preset() : null }
   const list = parseJsonArray(raw)
   if (list === undefined) {
-    return { ok: false, response: NextResponse.json({ success: false, error: 'Blok harus berupa daftar (array).' }, { status: 400 }) }
+    return {
+      ok: false,
+      response: NextResponse.json(
+        { success: false, code: 'invalid', error: 'Format blok tidak valid: blok harus dikirim sebagai daftar. Muat ulang editor lalu simpan lagi.' },
+        { status: 400 },
+      ),
+    }
   }
   const check = validateBlockListFor(target, list)
   if (!check.ok) {
@@ -146,8 +227,12 @@ export function catalogBlocksColumn(
       response: NextResponse.json(
         {
           success: false,
-          error: 'Validasi blok katalog gagal.',
-          issues: check.issues.map((i) => `[Blok ${i.index + 1}${i.type ? ` ${i.type}` : ''}] ${i.message}`),
+          code: 'invalid',
+          error:
+            check.issues.length === 1
+              ? 'Ada 1 masalah pada blok. Perbaiki blok yang ditandai lalu simpan lagi.'
+              : `Ada ${check.issues.length} masalah pada blok. Perbaiki blok yang ditandai lalu simpan lagi.`,
+          issues: check.issues.map((i) => (i.index >= 0 ? `Blok ${i.index + 1}${i.type ? ` (${i.type})` : ''}: ${i.message}` : i.message)),
           blockIssues: check.issues,
         },
         { status: 422 },

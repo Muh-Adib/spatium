@@ -244,7 +244,7 @@ describe('MCP portfolio drafts (live DB)', () => {
     expect(portfolio.editUrl).toMatch(/\/admin\?tab=portfolio&slug=/)
     expect(portfolio.outline[0].id).toEqual(expect.any(String))
     expect(portfolio.publication.ready).toBe(false)
-    expect(portfolio.publication.issues.join(' ')).toMatch(/Alt Text/)
+    expect(portfolio.publication.issues.join(' ')).toMatch(/teks alternatif/i)
     expect((await prisma.orm.public.Portfolio.where({ id }).first())?.status).toBe('draft')
     const audit = await prisma.orm.public.SeoAuditLog.where({ entityType: 'portfolio', entityId: String(id) }).first()
     expect(audit?.actor).toBe(`mcp:vitest-content-${RUN}`)

@@ -70,6 +70,9 @@ const CASES: Case[] = [
   { capability: 'service-category:create', name: 'POST /api/service-categories', load: async () => (await import('@/app/api/service-categories/route')).POST, method: 'POST', path: '/api/service-categories', body: {} },
   { capability: 'service-category:update', name: 'POST /api/service-categories (update)', load: async () => (await import('@/app/api/service-categories/route')).POST, method: 'POST', path: '/api/service-categories', body: { id: 'not-a-number' } },
   { capability: 'service-category:delete', name: 'DELETE /api/service-categories', load: async () => (await import('@/app/api/service-categories/route')).DELETE, method: 'DELETE', path: '/api/service-categories' },
+  { capability: 'portfolio:update', name: 'GET /api/portfolio/:id/revisions', load: async () => (await import('@/app/api/portfolio/[id]/revisions/route')).GET, method: 'GET', path: '/api/portfolio/x/revisions', params: { id: 'x' } },
+  { capability: 'service:update', name: 'GET /api/services/:id/revisions', load: async () => (await import('@/app/api/services/[id]/revisions/route')).GET, method: 'GET', path: '/api/services/x/revisions', params: { id: 'x' } },
+  { capability: 'service-category:update', name: 'GET /api/service-categories/:id/revisions', load: async () => (await import('@/app/api/service-categories/[id]/revisions/route')).GET, method: 'GET', path: '/api/service-categories/x/revisions', params: { id: 'x' } },
 
   // Reusable content
   { capability: 'client:manage', name: 'POST /api/clients', load: async () => (await import('@/app/api/clients/route')).POST, method: 'POST', path: '/api/clients', body: {} },
