@@ -5,10 +5,15 @@
  * lists the editor maps to fields and blocks.
  */
 import type { BlockIssue } from '@/lib/blocks/catalog'
+import type { CatalogHistoryEntry } from '@/lib/catalog/history'
 import { API_PATH, type EntityKind, type EntityRow } from './model'
 
 export type EntityApiFailure = {
   status: number
+  /** Server machine code (`conflict`, `slug_taken`, `gate`, `invalid`, `not_found`, …) when sent. */
+  code?: string
+  /** On `conflict`: the stored row's `updatedAt`, to overwrite deliberately. */
+  currentUpdatedAt?: string
   error: string
   /** Gate / block issues as text. */
   issues: string[]
@@ -53,6 +58,8 @@ async function request(url: string, init?: RequestInit): Promise<EntityApiResult
     ok: false,
     failure: {
       status: res.status,
+      ...(typeof b.code === 'string' ? { code: b.code } : {}),
+      ...(typeof b.currentUpdatedAt === 'string' ? { currentUpdatedAt: b.currentUpdatedAt } : {}),
       error,
       issues: rawIssues.filter((i): i is string => typeof i === 'string'),
       fieldIssues: rawIssues.flatMap((i) =>
@@ -85,6 +92,18 @@ export const entityApi = {
       return { ok: false, failure: { status: 200, error: 'Server tidak mengembalikan ID. Muat ulang daftar lalu coba lagi.', issues: [], fieldIssues: [], blockIssues: [] } }
     }
     return { ok: true, data: { id } }
+  },
+
+  /** Version history for the Riwayat tab (`GET /api/<entity>/<id>/revisions`). */
+  async revisions(kind: EntityKind, id: number): Promise<EntityApiResult<{ revisions: CatalogHistoryEntry[]; truncated: boolean }>> {
+    const res = await request(`${API_PATH[kind]}/${id}/revisions`)
+    if (!res.ok) return res
+    const data = isObject(res.data.data) ? res.data.data : {}
+    const list = Array.isArray(data.revisions) ? data.revisions : []
+    const revisions = list.filter(
+      (r): r is CatalogHistoryEntry => isObject(r) && typeof r.id === 'number' && typeof r.action === 'string' && typeof r.createdAt === 'string',
+    )
+    return { ok: true, data: { revisions, truncated: data.truncated === true } }
   },
 
   async remove(kind: EntityKind, id: number): Promise<EntityApiResult<null>> {

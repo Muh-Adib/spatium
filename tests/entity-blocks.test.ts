@@ -102,7 +102,7 @@ describe('data-bound entity blocks', () => {
     }
     const misplaced = validateBlockListFor('portfolio', [{ id: 'x', type: 'category-hero' }])
     expect(misplaced.ok).toBe(false)
-    expect(misplaced.issues[0].message).toMatch(/tidak tersedia untuk portfolio/)
+    expect(misplaced.issues[0].message).toMatch(/tidak tersedia untuk portofolio/)
     expect(validateBlockListFor('page', buildPreset('service')).ok).toBe(false)
     const gate = validateCatalogPublication({
       title: 'Judul uji',

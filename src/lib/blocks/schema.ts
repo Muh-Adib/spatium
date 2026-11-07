@@ -12,6 +12,7 @@
 import { z } from 'zod'
 import { blockUnionSchema } from '@/blocks/registry'
 import { MAX_BLOCKS_PER_PAGE } from './primitives'
+import { ZOD_ID_ERRORS } from '@/lib/validation/zod-id'
 
 export { BLOCK_SCHEMA_VERSION, MAX_BLOCKS_PER_PAGE, iconNameSchema, safeUrlSchema } from './primitives'
 export { splatIdSchema } from '@/blocks/splat-viewer/definition'
@@ -42,13 +43,14 @@ export function parseBlocks(rawInput: unknown): ParseBlocksResult {
   if (typeof rawInput === 'string') {
     try {
       parsedData = JSON.parse(rawInput)
-    } catch (err: any) {
-      return { ok: false, blocks: [], issues: [`Invalid JSON string: ${err.message}`] }
+    } catch (err) {
+      console.warn('[blocks] block list is not valid JSON:', err)
+      return { ok: false, blocks: [], issues: ['Data blok bukan JSON yang valid. Muat ulang editor lalu coba lagi.'] }
     }
   }
 
   if (!Array.isArray(parsedData)) {
-    return { ok: false, blocks: [], issues: ['Blocks payload must be an array'] }
+    return { ok: false, blocks: [], issues: ['Blok harus dikirim sebagai daftar. Muat ulang editor lalu coba lagi.'] }
   }
 
   // Pre-normalize legacy Strapi '__component' to 'type'
@@ -59,11 +61,14 @@ export function parseBlocks(rawInput: unknown): ParseBlocksResult {
     return b
   })
 
-  const result = blocksListSchema.safeParse(normalized)
+  const result = blocksListSchema.safeParse(normalized, { error: ZOD_ID_ERRORS })
   if (!result.success) {
-    const issues = result.error.issues.map(
-      (iss) => `[Block ${iss.path.join('.') || 'root'}] ${iss.message}`
-    )
+    // `Blok 2, kolom title: …` (1-based, like the editor's block list).
+    const issues = result.error.issues.map((iss) => {
+      const [index, ...field] = iss.path
+      if (typeof index !== 'number') return `Daftar blok: ${iss.message}`
+      return `Blok ${index + 1}${field.length ? `, kolom ${field.map(String).join('.')}` : ''}: ${iss.message}`
+    })
     return { ok: false, blocks: [], issues }
   }
 

@@ -50,7 +50,7 @@ const uploadFieldsSchema = z.object({
     .trim()
     .max(1000)
     .refine((v) => v === '' || v.startsWith('https://') || v.startsWith('/tours/'), {
-      message: 'URL eksternal harus https:// atau /tours/...',
+      message: 'Gunakan URL https:// atau path tur lokal /tours/….',
     })
     .optional()
     .transform((v) => (v ? v : undefined)),
@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
     formData = await request.formData()
   } catch (err) {
     console.warn('[TourUpload] Invalid multipart body:', err)
-    return NextResponse.json({ success: false, error: 'Body multipart tidak valid.' }, { status: 400 })
+    return NextResponse.json({ success: false, error: 'Data unggahan tidak terbaca. Muat ulang halaman lalu unggah lagi.' }, { status: 400 })
   }
 
   const parsed = uploadFieldsSchema.safeParse({
@@ -88,21 +88,21 @@ export async function POST(request: NextRequest) {
   })
   if (!parsed.success) {
     return NextResponse.json(
-      { success: false, error: parsed.error.issues[0]?.message ?? 'Input tidak valid.' },
+      { success: false, error: parsed.error.issues[0]?.message ?? 'Data unggahan tidak valid. Periksa isian lalu unggah lagi.' },
       { status: 400 },
     )
   }
   const input = parsed.data
   const safeSlug = slugify(input.slug ?? input.title)
   if (!safeSlug) {
-    return NextResponse.json({ success: false, error: 'Slug tidak valid.' }, { status: 400 })
+    return NextResponse.json({ success: false, error: 'Slug tidak valid. Gunakan huruf kecil, angka, dan tanda hubung, mis. pemindaian-gedung.' }, { status: 400 })
   }
   const featured = formData.get('featured') === 'true' || formData.get('featured') === 'on'
 
   const fileEntry = formData.get('file')
   const file = fileEntry instanceof File && fileEntry.size > 0 ? fileEntry : null
   if (file && file.size > MAX_UPLOAD_BYTES) {
-    return NextResponse.json({ success: false, error: 'Ukuran berkas melebihi batas 250 MB.' }, { status: 413 })
+    return NextResponse.json({ success: false, error: 'Berkas terlalu besar (maksimal 250 MB). Kompres arsip tur lalu unggah lagi.' }, { status: 413 })
   }
 
   let liveUrl = input.externalUrl ?? ''
@@ -146,7 +146,7 @@ export async function POST(request: NextRequest) {
         if (!entryPointHtmlRel) {
           fs.rmSync(targetDir, { recursive: true, force: true })
           return NextResponse.json(
-            { success: false, error: 'Arsip .zip tidak berisi berkas .html sebagai titik masuk tur.' },
+            { success: false, error: 'Arsip .zip tidak berisi berkas .html. Sertakan index.html sebagai halaman awal tur lalu unggah lagi.' },
             { status: 400 },
           )
         }
@@ -164,7 +164,7 @@ export async function POST(request: NextRequest) {
     }
   } catch (err) {
     console.error('[TourUpload] Failed to store tour bundle:', err)
-    return NextResponse.json({ success: false, error: 'Gagal menyimpan berkas tur spasial.' }, { status: 500 })
+    return NextResponse.json({ success: false, error: 'Berkas tur belum tersimpan karena galat server. Coba unggah lagi sebentar lagi.' }, { status: 500 })
   }
 
   if (!liveUrl && input.splatId) liveUrl = `https://superspl.at/s?id=${input.splatId}`
@@ -222,7 +222,7 @@ export async function POST(request: NextRequest) {
   } catch (err) {
     console.error('[TourUpload] Portfolio upsert failed:', err)
     return NextResponse.json(
-      { success: false, error: 'Berkas tersimpan, tetapi gagal mendaftarkan portofolio ke database.' },
+      { success: false, error: 'Berkas tersimpan, tetapi portofolio belum tercatat karena galat server. Coba unggah lagi sebentar lagi.' },
       { status: 500 },
     )
   }
@@ -233,8 +233,8 @@ export async function POST(request: NextRequest) {
     success: true,
     message:
       savedStatus === 'draft'
-        ? 'Tur spasial tersimpan sebagai draft. Tinjau lalu publikasikan dari Portfolio Manager.'
-        : `Tur spasial diperbarui pada portofolio "${safeSlug}" (status: ${savedStatus}).`,
+        ? 'Tur spasial tersimpan sebagai draf portofolio. Buka portofolionya untuk melengkapi isi lalu terbitkan.'
+        : `Tur spasial diperbarui pada portofolio "${safeSlug}". Statusnya tidak berubah.`,
     slug: safeSlug,
     liveUrl,
     portfolio: { slug: safeSlug, title: input.title, status: savedStatus, liveUrl },

@@ -42,6 +42,6 @@ export function gateIssueTarget(issue: string): GateTarget {
   if (s.startsWith('slug')) return 'slug'
   if (s.startsWith('meta title')) return 'metaTitle'
   if (s.startsWith('meta description')) return 'metaDescription'
-  if (s.startsWith('hero image')) return 'ogImageAlt'
+  if (s.startsWith('teks alternatif gambar')) return 'ogImageAlt'
   return 'blocks'
 }

@@ -68,6 +68,14 @@ export function createBlock(type: string): Block | null {
   return parsed.success ? parsed.data : null
 }
 
+/** Where a block list lives, as named in Studio copy. */
+const TARGET_LABEL: Record<BlockTarget, string> = {
+  page: 'halaman',
+  portfolio: 'portofolio',
+  service: 'layanan',
+  'service-category': 'kategori layanan',
+}
+
 export type BlockIssue = { index: number; blockId?: string; type?: string; message: string }
 
 /**
@@ -84,23 +92,24 @@ export function validateBlockList(raw: unknown): { ok: boolean; blocks: Block[];
     const type = typeof rec.type === 'string' ? rec.type : undefined
     const blockId = typeof rec.id === 'string' ? rec.id : undefined
     if (type && !KNOWN_TYPES.has(type)) {
-      issues.push({ index, blockId, type, message: `Tipe blok tidak dikenal: "${type}". Lihat daftar tipe di katalog blok.` })
+      issues.push({ index, blockId, type, message: `Tipe blok "${type}" tidak dikenal. Hapus blok ini atau ganti dengan blok dari katalog.` })
       return
     }
     if (!type) {
-      issues.push({ index, blockId, message: 'Blok wajib punya field "type".' })
+      issues.push({ index, blockId, message: 'Blok ini tidak punya tipe. Hapus blok ini lalu tambahkan lagi dari katalog.' })
       return
     }
     const one = blockSchema.safeParse(item)
     if (!one.success) {
       for (const iss of one.error.issues) {
+        // `path: message` — the editor splits on it and humanizes Zod's wording (blocks/model.ts).
         const where = iss.path.length ? `${iss.path.join('.')}: ` : ''
         issues.push({ index, blockId, type, message: `${where}${iss.message}` })
       }
     }
   })
   if (issues.length === 0) {
-    for (const message of parsed.issues ?? ['Daftar blok tidak valid.']) issues.push({ index: -1, message })
+    for (const message of parsed.issues ?? ['Daftar blok tidak valid. Muat ulang editor lalu coba lagi.']) issues.push({ index: -1, message })
   }
   return { ok: false, blocks: [], issues }
 }
@@ -123,7 +132,7 @@ export function validateBlockListFor(target: BlockTarget, raw: unknown): { ok: b
         index,
         blockId: typeof rec.id === 'string' ? rec.id : undefined,
         type,
-        message: `Tipe blok "${type}" tidak tersedia untuk ${target}.`,
+        message: `Blok "${type}" tidak tersedia untuk ${TARGET_LABEL[target]}. Hapus blok ini atau ganti dengan blok yang tersedia.`,
       })
     }
   })

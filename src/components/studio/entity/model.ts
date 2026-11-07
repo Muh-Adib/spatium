@@ -352,7 +352,12 @@ function changedWriters<F extends EntityForm>(form: F, baseline: F | null, write
  * shape); identity fields (`id`, title/name, slug) are always sent because
  * the schema requires them. `baseline: null` sends everything.
  */
-export function toSavePayload(form: EntityForm, baseline: EntityForm | null, row: EntityRow | null, extra: { status?: EditorialStatus } = {}): Payload {
+export function toSavePayload(
+  form: EntityForm,
+  baseline: EntityForm | null,
+  row: EntityRow | null,
+  extra: { status?: EditorialStatus; expectedUpdatedAt?: string | null } = {},
+): Payload {
   const base = baseline && baseline.kind === form.kind ? baseline : null
   const identity: Payload = { ...(row ? { id: row.id } : {}), slug: form.slug.trim() }
   let fields: Payload
@@ -370,7 +375,98 @@ export function toSavePayload(form: EntityForm, baseline: EntityForm | null, row
       fields = changedWriters(form, base?.kind === 'portfolio' ? base : null, { ...COMMON_WRITERS, ...PORTFOLIO_WRITERS }, row)
       break
   }
-  return { ...identity, ...fields, ...(extra.status ? { status: extra.status } : {}) }
+  return {
+    ...identity,
+    ...fields,
+    ...(extra.status ? { status: extra.status } : {}),
+    // Optimistic concurrency: the server answers 409 `conflict` when the row changed since.
+    ...(row && extra.expectedUpdatedAt ? { expectedUpdatedAt: extra.expectedUpdatedAt } : {}),
+  }
+}
+
+/** `updatedAt` of a stored row as the list API returned it (sent back as `expectedUpdatedAt`). */
+export function updatedAtOf(row: EntityRow | null): string | null {
+  return row && typeof row.updatedAt === 'string' && row.updatedAt ? row.updatedAt : null
+}
+
+/* ------------------------------ Riwayat ----------------------------------- */
+
+/**
+ * Form for "Pulihkan versi ini": the snapshot's content fields and blocks,
+ * applied over the open form as unsaved changes. Kept from the open form:
+ * the slug (restoring must not move the public URL) and a service's linked
+ * portfolios (not part of revision snapshots). Status is not a form field,
+ * so it never changes here.
+ */
+export function formFromSnapshot(kind: EntityKind, snapshot: Readonly<Record<string, unknown>>, current: EntityForm): EntityForm {
+  const restored = rowToForm(kind, { ...snapshot, id: typeof snapshot.id === 'number' ? snapshot.id : 0, slug: current.slug })
+  restored.slug = current.slug
+  if (restored.kind === 'service' && current.kind === 'service') restored.portfolioIds = [...current.portfolioIds]
+  return restored
+}
+
+/** Column names in revision snapshots → Studio labels (glossary in docs/EDITORS.md). */
+const COLUMN_LABEL: Record<string, string> = {
+  title: 'Judul',
+  name: 'Nama',
+  slug: 'Slug',
+  tag: 'Tagline',
+  shortDescription: 'Deskripsi singkat',
+  longDescription: 'Deskripsi lengkap',
+  description: 'Deskripsi lengkap',
+  summary: 'Ringkasan',
+  heroImage: 'Gambar sampul',
+  seoData: 'Teks alternatif gambar sampul',
+  metaTitle: 'Meta title',
+  metaDescription: 'Meta description',
+  focusKeyphrase: 'Frasa kunci utama',
+  relatedKeyphrases: 'Frasa kunci terkait',
+  blocks: 'Blok',
+  keyOutcomes: 'Keluaran & alat',
+  deliverables: 'Keluaran',
+  technologies: 'Teknologi',
+  metrics: 'Metrik',
+  order: 'Urutan',
+  showInNav: 'Tampil di menu header',
+  featured: 'Unggulan',
+  categoryId: 'Kategori induk',
+  indexNumber: 'Nomor tampilan',
+  themePreset: 'Ilustrasi',
+  client: 'Klien',
+  year: 'Tahun',
+  category: 'Kategori',
+  liveUrl: 'Scene 3D',
+  challenge: 'Tantangan',
+  approach: 'Langkah capture',
+  solution: 'Solusi',
+  process: 'Proses',
+  result: 'Keluaran',
+}
+
+/** Readable, de-duplicated labels for changed columns. */
+export function changedFieldLabels(columns: readonly string[]): string[] {
+  return [...new Set(columns.map((c) => COLUMN_LABEL[c] ?? c))]
+}
+
+const ACTION_LABEL: Record<string, string> = {
+  create: 'Dibuat',
+  'create:tour-upload': 'Dibuat dari unggahan tur',
+  update: 'Diubah',
+  'update:tour-upload': 'Tur diunggah ulang',
+  delete: 'Dihapus',
+  baseline: 'Versi tertua yang tercatat',
+}
+
+const HISTORY_TIME = new Intl.DateTimeFormat('id-ID', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+
+/** `7 Nov 2026 16.20` for messages about a version. */
+export function formatHistoryTime(iso: string): string {
+  const d = new Date(iso)
+  return Number.isNaN(d.getTime()) ? iso : HISTORY_TIME.format(d)
+}
+
+export function historyActionLabel(action: string): string {
+  return ACTION_LABEL[action] ?? action
 }
 
 export function isDirty(form: EntityForm | null, baseline: EntityForm | null): boolean {
@@ -537,15 +633,16 @@ export function gateInput(form: EntityForm): PublicationGateInput {
 
 /** Gate message (Indonesian, from publication-gate.ts) → where to fix it. */
 export function gateIssueTarget(kind: EntityKind, issue: string): IssueTarget | null {
-  if (issue.startsWith('Judul')) return { kind: 'field', field: kind === 'service' ? 'name' : 'title' }
-  if (issue.startsWith('Slug')) return { kind: 'field', field: 'slug' }
-  if (issue.startsWith('Meta Title')) return { kind: 'field', field: 'metaTitle' }
-  if (issue.startsWith('Meta Description')) return { kind: 'field', field: 'metaDescription' }
-  if (issue.startsWith('Hero image')) return { kind: 'field', field: 'coverAlt' }
-  const blockIndex = /\[(?:Block|Blok) (\d+)/.exec(issue)
-  if (issue.startsWith('Skema Blok') || issue.startsWith('Aksesibilitas')) {
-    return { kind: 'blocks', index: blockIndex ? Number(blockIndex[1]) : undefined }
-  }
+  const s = issue.toLowerCase()
+  if (s.startsWith('judul')) return { kind: 'field', field: kind === 'service' ? 'name' : 'title' }
+  if (s.startsWith('slug')) return { kind: 'field', field: 'slug' }
+  if (s.startsWith('meta title')) return { kind: 'field', field: 'metaTitle' }
+  if (s.startsWith('meta description')) return { kind: 'field', field: 'metaDescription' }
+  if (s.startsWith('teks alternatif gambar sampul')) return { kind: 'field', field: 'coverAlt' }
+  // `Blok 3 (type): …` is 1-based; the editor's list is 0-based.
+  const blockNumber = /^blok (\d+)/.exec(s)
+  if (blockNumber) return { kind: 'blocks', index: Number(blockNumber[1]) - 1 }
+  if (s.startsWith('blok') || s.startsWith('daftar blok')) return { kind: 'blocks' }
   return null
 }
 

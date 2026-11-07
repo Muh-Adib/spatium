@@ -7,6 +7,11 @@ import { serviceCategoryMutationSchema, validateCatalogBody } from '@/lib/valida
 import { errorResponse, PublicError } from '@/lib/http/errors'
 import {
   actorOf,
+  assertCatalogFresh,
+  catalogNotFound,
+  catalogSlugTaken,
+  payloadTooLargeResponse,
+  readCatalogBody,
   catalogBlocksColumn,
   catalogGateResponse,
   coverAltFrom,
@@ -28,28 +33,19 @@ export async function GET() {
     const list = await getServiceCategories()
     return NextResponse.json({ success: true, data: list })
   } catch (error) {
-    return errorResponse('API service-categories GET', error, 'Gagal mengambil data kategori layanan.')
+    return errorResponse('API service-categories GET', error, 'Daftar kategori layanan gagal dimuat. Coba lagi sebentar lagi.')
   }
 }
 
 export async function POST(request: NextRequest) {
   const contentLength = Number(request.headers.get('content-length') || 0)
-  if (contentLength > MAX_PAYLOAD_BYTES) {
-    return NextResponse.json({ success: false, error: 'Ukuran payload melebihi batas 1MB.' }, { status: 413 })
-  }
+  if (contentLength > MAX_PAYLOAD_BYTES) return payloadTooLargeResponse(1)
 
-  let rawBody: unknown
-  try {
-    rawBody = await request.json()
-  } catch (err) {
-    console.warn('[API service-categories] invalid JSON body:', err)
-    rawBody = null
-  }
-  if (!rawBody || typeof rawBody !== 'object') {
-    return NextResponse.json({ success: false, error: 'Body JSON wajib diisi.' }, { status: 400 })
-  }
+  const read = await readCatalogBody(request, 'API service-categories')
+  if (!read.ok) return read.response
+  const rawBody = read.body
 
-  const isUpdate = 'id' in rawBody && Boolean((rawBody as { id?: unknown }).id)
+  const isUpdate = Boolean(rawBody.id)
   const auth = await requireCan(request, isUpdate ? 'service-category:update' : 'service-category:create')
   if (auth.error) return auth.error
 
@@ -59,7 +55,10 @@ export async function POST(request: NextRequest) {
 
   const slug = normalizeCatalogSlug(data.slug)
   if (!slug) {
-    return NextResponse.json({ success: false, error: 'Slug kategori layanan tidak valid.' }, { status: 400 })
+    return NextResponse.json(
+      { success: false, code: 'invalid', error: 'Slug kategori layanan tidak valid. Gunakan huruf kecil, angka, dan tanda hubung, mis. pemindaian-gedung.', issues: [{ field: 'slug', message: 'Gunakan huruf kecil, angka, dan tanda hubung, mis. pemindaian-gedung.' }] },
+      { status: 400 },
+    )
   }
 
   // Target-aware validation; creating without blocks stores the category preset.
@@ -69,11 +68,11 @@ export async function POST(request: NextRequest) {
 
   try {
     const existing = data.id ? await prisma.orm.public.ServiceCategory.where({ id: data.id }).first() : null
-    if (data.id && !existing) throw new PublicError('Kategori layanan tidak ditemukan.', 404)
+    if (data.id && !existing) throw catalogNotFound('service_category')
 
     const clash = await prisma.orm.public.ServiceCategory.where({ slug }).first()
     if (clash && clash.id !== existing?.id) {
-      throw new PublicError(`Slug "${slug}" sudah dipakai kategori layanan lain.`, 409)
+      throw catalogSlugTaken('service_category', slug)
     }
 
     const text = (v: string | null | undefined) => (v === undefined ? undefined : v || null)
@@ -121,13 +120,19 @@ export async function POST(request: NextRequest) {
     const actor = actorOf(auth.user)
     const saved = await prisma.transaction(async (tx) => {
       if (existing) {
+        // Lock the row, then refuse a stale save (optimistic concurrency).
+        const before = assertCatalogFresh(
+          'service_category',
+          await tx.orm.public.ServiceCategory.where({ id: existing.id }).forUpdate().first(),
+          data.expectedUpdatedAt,
+        )
         await tx.orm.public.ServiceCategory.where({ id: existing.id }).update(values)
         const row = await tx.orm.public.ServiceCategory.where({ id: existing.id }).first()
-        if (!row) throw new PublicError('Kategori layanan tidak ditemukan.', 404)
-        await redirectRenamedSlug(tx, '/services', existing, row.slug)
-        await recordCatalogHistory(tx, 'service_category', row.id, actor, 'update', existing, {
+        if (!row) throw catalogNotFound('service_category')
+        await redirectRenamedSlug(tx, '/services', before, row.slug)
+        await recordCatalogHistory(tx, 'service_category', row.id, actor, 'update', before, {
           fields: Object.keys(values),
-          from: existing.status,
+          from: before.status,
           to: row.status,
         })
         return row
@@ -141,9 +146,9 @@ export async function POST(request: NextRequest) {
     await revalidateCatalog('category', saved.slug, childSlugs)
     if (existing && existing.slug !== saved.slug) await revalidateCatalog('category', existing.slug)
 
-    return NextResponse.json({ success: true, data: mapCategoryRow(saved) })
+    return NextResponse.json({ success: true, message: 'Perubahan disimpan.', data: mapCategoryRow(saved), updatedAt: saved.updatedAt })
   } catch (error) {
-    return errorResponse('API service-categories POST', error, 'Gagal menyimpan kategori layanan.')
+    return errorResponse('API service-categories POST', error, 'Kategori layanan belum tersimpan karena galat server. Coba simpan lagi sebentar lagi.')
   }
 }
 
@@ -153,7 +158,7 @@ export async function DELETE(request: NextRequest) {
 
   const idParam = new URL(request.url).searchParams.get('id')
   if (!idParam || !/^\d+$/.test(idParam)) {
-    return NextResponse.json({ success: false, error: 'ID kategori layanan wajib disertakan.' }, { status: 400 })
+    return NextResponse.json({ success: false, code: 'invalid', error: 'ID kategori layanan tidak valid. Muat ulang daftar lalu coba lagi.' }, { status: 400 })
   }
   const id = Number(idParam)
 
@@ -161,7 +166,7 @@ export async function DELETE(request: NextRequest) {
     const actor = actorOf(auth.user)
     const { removed, childSlugs } = await prisma.transaction(async (tx) => {
       const current = await tx.orm.public.ServiceCategory.where({ id }).forUpdate().first()
-      if (!current) throw new PublicError('Kategori layanan tidak ditemukan.', 404)
+      if (!current) throw catalogNotFound('service_category')
       // Services keep existing but lose their department (the UI warns about this).
       const children = await tx.orm.public.Service.where({ categoryId: id }).all()
       if (children.length > 0) {
@@ -176,8 +181,8 @@ export async function DELETE(request: NextRequest) {
 
     await revalidateCatalog('category', removed.slug, childSlugs)
 
-    return NextResponse.json({ success: true, message: 'Kategori layanan berhasil dihapus.' })
+    return NextResponse.json({ success: true, message: 'Kategori layanan dihapus.' })
   } catch (error) {
-    return errorResponse('API service-categories DELETE', error, 'Gagal menghapus kategori layanan.')
+    return errorResponse('API service-categories DELETE', error, 'Kategori layanan belum terhapus karena galat server. Coba lagi sebentar lagi.')
   }
 }

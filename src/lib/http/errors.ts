@@ -10,11 +10,21 @@ import { NextResponse } from 'next/server'
 /** An error whose message is written for Studio users and safe to return. */
 export class PublicError extends Error {
   readonly status: number
+  /** Machine-readable code for clients (e.g. `conflict`, `slug_taken`). */
+  readonly code?: string
+  /** Extra JSON-safe fields merged into the response body (e.g. `currentUpdatedAt`). */
+  readonly details?: Record<string, string | number | boolean | null>
 
-  constructor(message: string, status = 400) {
+  constructor(
+    message: string,
+    status = 400,
+    options: { code?: string; details?: Record<string, string | number | boolean | null> } = {},
+  ) {
     super(message)
     this.name = 'PublicError'
     this.status = status
+    this.code = options.code
+    this.details = options.details
   }
 }
 
@@ -35,7 +45,10 @@ export function errorResponse(
   status = 500,
 ): NextResponse {
   if (error instanceof PublicError) {
-    return NextResponse.json({ success: false, error: error.message }, { status: error.status })
+    return NextResponse.json(
+      { ...error.details, success: false, error: error.message, ...(error.code ? { code: error.code } : {}) },
+      { status: error.status },
+    )
   }
   console.error(`[${context}]`, error)
   return NextResponse.json({ success: false, error: fallback }, { status })

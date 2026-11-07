@@ -6,6 +6,11 @@ import { serviceMutationSchema, validateCatalogBody } from '@/lib/validation/api
 import { errorResponse, PublicError } from '@/lib/http/errors'
 import {
   actorOf,
+  assertCatalogFresh,
+  catalogNotFound,
+  catalogSlugTaken,
+  payloadTooLargeResponse,
+  readCatalogBody,
   catalogBlocksColumn,
   catalogGateResponse,
   coverAltFrom,
@@ -54,28 +59,19 @@ export async function GET(request: NextRequest) {
     const data = rows.map((row) => ({ ...row, portfolioIds: linkedByService.get(row.id) ?? [] }))
     return NextResponse.json({ success: true, data, total: data.length })
   } catch (error) {
-    return errorResponse('API services GET', error, 'Gagal mengambil data layanan.')
+    return errorResponse('API services GET', error, 'Daftar layanan gagal dimuat. Coba lagi sebentar lagi.')
   }
 }
 
 export async function POST(request: NextRequest) {
   const contentLength = Number(request.headers.get('content-length') || 0)
-  if (contentLength > MAX_PAYLOAD_BYTES) {
-    return NextResponse.json({ success: false, error: 'Ukuran payload melebihi batas 1MB.' }, { status: 413 })
-  }
+  if (contentLength > MAX_PAYLOAD_BYTES) return payloadTooLargeResponse(1)
 
-  let rawBody: unknown
-  try {
-    rawBody = await request.json()
-  } catch (err) {
-    console.warn('[API services] invalid JSON body:', err)
-    rawBody = null
-  }
-  if (!rawBody || typeof rawBody !== 'object') {
-    return NextResponse.json({ success: false, error: 'Body JSON wajib diisi.' }, { status: 400 })
-  }
+  const read = await readCatalogBody(request, 'API services')
+  if (!read.ok) return read.response
+  const rawBody = read.body
 
-  const isUpdate = 'id' in rawBody && Boolean((rawBody as { id?: unknown }).id)
+  const isUpdate = Boolean(rawBody.id)
   const auth = await requireCan(request, isUpdate ? 'service:update' : 'service:create')
   if (auth.error) return auth.error
 
@@ -85,7 +81,10 @@ export async function POST(request: NextRequest) {
 
   const slug = normalizeCatalogSlug(data.slug)
   if (!slug) {
-    return NextResponse.json({ success: false, error: 'Slug layanan tidak valid.' }, { status: 400 })
+    return NextResponse.json(
+      { success: false, code: 'invalid', error: 'Slug layanan tidak valid. Gunakan huruf kecil, angka, dan tanda hubung, mis. pemindaian-gedung.', issues: [{ field: 'slug', message: 'Gunakan huruf kecil, angka, dan tanda hubung, mis. pemindaian-gedung.' }] },
+      { status: 400 },
+    )
   }
 
   // Target-aware validation; creating without blocks stores the service preset.
@@ -95,15 +94,15 @@ export async function POST(request: NextRequest) {
 
   try {
     const existing = data.id ? await prisma.orm.public.Service.where({ id: data.id }).first() : null
-    if (data.id && !existing) throw new PublicError('Layanan tidak ditemukan.', 404)
+    if (data.id && !existing) throw catalogNotFound('service')
 
     const clash = await prisma.orm.public.Service.where({ slug }).first()
     if (clash && clash.id !== existing?.id) {
-      throw new PublicError(`Slug "${slug}" sudah dipakai layanan lain.`, 409)
+      throw catalogSlugTaken('service', slug)
     }
     if (data.categoryId) {
       const category = await prisma.orm.public.ServiceCategory.where({ id: data.categoryId }).first()
-      if (!category) throw new PublicError('Kategori induk yang dipilih tidak ditemukan. Pilih kategori lain.', 400)
+      if (!category) throw new PublicError('Kategori induk yang dipilih sudah tidak ada. Pilih kategori induk lain.', 400, { code: 'invalid' })
     }
 
     const text = (v: string | null | undefined) => (v === undefined ? undefined : v || null)
@@ -165,11 +164,14 @@ export async function POST(request: NextRequest) {
     const actor = actorOf(auth.user)
     const saved = await prisma.transaction(async (tx) => {
       let row
+      let before = existing
       if (existing) {
+        // Lock the row, then refuse a stale save (optimistic concurrency).
+        before = assertCatalogFresh('service', await tx.orm.public.Service.where({ id: existing.id }).forUpdate().first(), data.expectedUpdatedAt)
         await tx.orm.public.Service.where({ id: existing.id }).update(values)
         row = await tx.orm.public.Service.where({ id: existing.id }).first()
-        if (!row) throw new PublicError('Layanan tidak ditemukan.', 404)
-        await redirectRenamedSlug(tx, '/services', existing, row.slug)
+        if (!row) throw catalogNotFound('service')
+        await redirectRenamedSlug(tx, '/services', before, row.slug)
       } else {
         row = await tx.orm.public.Service.create({ ...values, documentId: `svc-${slug}` })
       }
@@ -179,7 +181,7 @@ export async function POST(request: NextRequest) {
         const ids = [...new Set(data.portfolioIds)]
         if (ids.length > 0) {
           const found = await tx.orm.public.Portfolio.where((p) => p.id.in(ids)).all()
-          if (found.length !== ids.length) throw new PublicError('Ada portofolio terkait yang tidak ditemukan.', 400)
+          if (found.length !== ids.length) throw new PublicError('Ada portofolio terkait yang sudah tidak ada. Perbarui pilihan Portofolio terkait lalu simpan lagi.', 400, { code: 'invalid' })
         }
         await tx.orm.public.ServicePortfolio.where({ serviceId: row.id }).deleteAll()
         let displayOrder = 1
@@ -188,10 +190,10 @@ export async function POST(request: NextRequest) {
         }
       }
 
-      if (existing) {
-        await recordCatalogHistory(tx, 'service', row.id, actor, 'update', existing, {
+      if (before) {
+        await recordCatalogHistory(tx, 'service', row.id, actor, 'update', before, {
           fields: Object.keys(values),
-          from: existing.status,
+          from: before.status,
           to: row.status,
           portfolioIds: data.portfolioIds,
         })
@@ -207,13 +209,14 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: 'Layanan berhasil disimpan.',
+      message: 'Perubahan disimpan.',
       id: saved.id,
       slug: saved.slug,
       status: saved.status,
+      updatedAt: saved.updatedAt,
     })
   } catch (error) {
-    return errorResponse('API services POST', error, 'Gagal menyimpan layanan.')
+    return errorResponse('API services POST', error, 'Layanan belum tersimpan karena galat server. Coba simpan lagi sebentar lagi.')
   }
 }
 
@@ -223,7 +226,7 @@ export async function DELETE(request: NextRequest) {
 
   const idParam = new URL(request.url).searchParams.get('id')
   if (!idParam || !/^\d+$/.test(idParam)) {
-    return NextResponse.json({ success: false, error: 'ID layanan wajib disertakan.' }, { status: 400 })
+    return NextResponse.json({ success: false, code: 'invalid', error: 'ID layanan tidak valid. Muat ulang daftar lalu coba lagi.' }, { status: 400 })
   }
   const id = Number(idParam)
 
@@ -231,7 +234,7 @@ export async function DELETE(request: NextRequest) {
     const actor = actorOf(auth.user)
     const removed = await prisma.transaction(async (tx) => {
       const current = await tx.orm.public.Service.where({ id }).forUpdate().first()
-      if (!current) throw new PublicError('Layanan tidak ditemukan.', 404)
+      if (!current) throw catalogNotFound('service')
       await recordCatalogHistory(tx, 'service', id, actor, 'delete', current)
       await tx.orm.public.Service.where({ id }).delete()
       return current
@@ -239,8 +242,8 @@ export async function DELETE(request: NextRequest) {
 
     await revalidateCatalog('service', removed.slug, await categorySlugsOf([removed.categoryId]))
 
-    return NextResponse.json({ success: true, message: 'Layanan berhasil dihapus.' })
+    return NextResponse.json({ success: true, message: 'Layanan dihapus.' })
   } catch (error) {
-    return errorResponse('API services DELETE', error, 'Gagal menghapus layanan.')
+    return errorResponse('API services DELETE', error, 'Layanan belum terhapus karena galat server. Coba lagi sebentar lagi.')
   }
 }
