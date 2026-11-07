@@ -16,7 +16,6 @@ const ENTITIES = [
   { type: 'service', model: 'Service', label: 'Layanan' },
   { type: 'serviceCategory', model: 'ServiceCategory', label: 'Kategori Layanan' },
   { type: 'portfolio', model: 'Portfolio', label: 'Portofolio' },
-  { type: 'solution', model: 'Solution', label: 'Solusi' },
 ] as const
 
 export async function GET(request: NextRequest) {

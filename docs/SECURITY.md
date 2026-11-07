@@ -28,7 +28,7 @@ Role dan izin editorial: `src/lib/auth/types.ts` (`ROLE_PERMISSIONS`) dan `src/l
 | Artikel | SUPER_ADMIN, CONTENT_ADMIN, EDITOR, AUTHOR (draft sendiri) · REVIEWER hanya mengubah status review | SUPER_ADMIN, CONTENT_ADMIN |
 | Menarik artikel terbit ke draft | Hanya role yang boleh menerbitkan (SUPER_ADMIN, CONTENT_ADMIN, EDITOR) | – |
 | Kategori artikel | Membuat: role yang boleh membuat artikel · mengubah: SUPER_ADMIN, CONTENT_ADMIN, EDITOR | SUPER_ADMIN, CONTENT_ADMIN |
-| Portofolio, layanan, kategori layanan, solusi, konfigurasi pencari solusi | SUPER_ADMIN, CONTENT_ADMIN, EDITOR | SUPER_ADMIN, CONTENT_ADMIN |
+| Portofolio, layanan, kategori layanan | SUPER_ADMIN, CONTENT_ADMIN, EDITOR | SUPER_ADMIN, CONTENT_ADMIN |
 | Halaman dinamis | SUPER_ADMIN, CONTENT_ADMIN, EDITOR (terbit/arsip: SUPER_ADMIN, CONTENT_ADMIN) | SUPER_ADMIN, CONTENT_ADMIN |
 | Logo klien, preset CTA | SUPER_ADMIN, CONTENT_ADMIN, EDITOR | SUPER_ADMIN, CONTENT_ADMIN (`DELETE /api/cta?id=`) |
 | Pustaka media (`/api/media`: unggah, metadata, ganti nama) | SUPER_ADMIN, CONTENT_ADMIN, EDITOR, MEDIA_MANAGER | Sama |

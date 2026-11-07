@@ -67,7 +67,7 @@ function fromPageError(err: PageError): ToolResult {
 
 // ─── Shared schemas ───────────────────────────────────────────────────────────
 
-const TARGETS = ['page', 'portfolio', 'service', 'solution'] as const satisfies readonly BlockTarget[]
+const TARGETS = ['page', 'portfolio', 'service'] as const satisfies readonly BlockTarget[]
 const CATEGORIES = Object.keys(BLOCK_CATEGORY_LABEL) as [BlockCategory, ...BlockCategory[]]
 const EDITABLE_STATUSES = new Set(EDITABLE_STATUS_LIST)
 

@@ -20,10 +20,6 @@ export type Capability =
   | 'category:create'
   | 'category:update'
   | 'category:delete'
-  | 'solution:create'
-  | 'solution:update'
-  | 'solution:delete'
-  | 'solution:manage'
   | 'template:create'
   | 'template:update'
   | 'template:delete'
@@ -54,11 +50,6 @@ const CAPABILITY_ROLE_MAP: Record<Capability, Role[]> = {
   'category:create': ['SUPER_ADMIN', 'CONTENT_ADMIN', 'EDITOR'],
   'category:update': ['SUPER_ADMIN', 'CONTENT_ADMIN', 'EDITOR'],
   'category:delete': ['SUPER_ADMIN', 'CONTENT_ADMIN'],
-
-  'solution:create': ['SUPER_ADMIN', 'CONTENT_ADMIN', 'EDITOR'],
-  'solution:update': ['SUPER_ADMIN', 'CONTENT_ADMIN', 'EDITOR'],
-  'solution:delete': ['SUPER_ADMIN', 'CONTENT_ADMIN'],
-  'solution:manage': ['SUPER_ADMIN', 'CONTENT_ADMIN', 'EDITOR'],
 
   'template:create': ['SUPER_ADMIN', 'CONTENT_ADMIN', 'EDITOR'],
   'template:update': ['SUPER_ADMIN', 'CONTENT_ADMIN', 'EDITOR'],

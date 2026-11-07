@@ -9,7 +9,7 @@ import type { EditorBlock } from './model'
 /** Narrowest layout width used for the scaled desktop preview. */
 const MIN_DESIGN_WIDTH = 1024
 
-export type ContextData = { portfolios?: unknown[]; subServices?: unknown[]; services?: unknown[]; solutions?: unknown[] }
+export type ContextData = { portfolios?: unknown[]; subServices?: unknown[]; services?: unknown[] }
 
 type BoundaryProps = { label: string; resetKey: unknown; children: React.ReactNode }
 

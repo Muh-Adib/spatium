@@ -4,7 +4,7 @@
  * Validation for every block type. The per-type Zod schemas live next to their
  * renderer in `src/blocks/<type>/definition.ts`; `src/blocks/registry.ts`
  * assembles them into the discriminated union exported here. Used for strict
- * validation of content blocks across pages, portfolios, services, solutions
+ * validation of content blocks across pages, portfolios, services
  * and templates (Studio, Delivery API, MCP, publication gate).
  *
  * Server-safe: no React.

@@ -34,7 +34,7 @@ export interface StudioLivePreviewProps {
   }
   title?: string
   slug?: string
-  targetType?: 'department' | 'service' | 'portfolio' | 'solution'
+  targetType?: 'department' | 'service' | 'portfolio'
   onClose?: () => void
   onSwitchToCanvas?: () => void
 }
@@ -60,8 +60,6 @@ export default function StudioLivePreview({
   const previewBasePath =
     targetType === 'department' || targetType === 'service'
       ? 'layanan'
-      : targetType === 'solution'
-      ? 'solusi'
       : 'portofolio'
 
   const previewUrl = `${siteConfig.url}/${previewBasePath}/${slug || 'preview'}`
@@ -81,8 +79,6 @@ export default function StudioLivePreview({
       ? 'Departemen Layanan'
       : targetType === 'service'
       ? 'Layanan Rekayasa'
-      : targetType === 'solution'
-      ? 'Solusi Bisnis'
       : 'Studi Kasus Portofolio'
 
   return (
@@ -250,15 +246,6 @@ export default function StudioLivePreview({
                   }`}
                 >
                   Layanan
-                </span>
-                <span
-                  className={`transition-colors hover:text-[#4d8bff] cursor-pointer ${
-                    targetType === 'solution'
-                      ? 'text-[#4d8bff] font-bold underline underline-offset-4 decoration-[#4d8bff]/50'
-                      : ''
-                  }`}
-                >
-                  Solusi
                 </span>
                 <span
                   className={`transition-colors hover:text-[#4d8bff] cursor-pointer ${

@@ -100,7 +100,7 @@ export interface StudioSeoInspectorProps {
   articleId?: number
   /**
    * Precomputed analysis (the article editor computes it once, debounced). When omitted the
-   * inspector analyses the content itself (portfolio / services / solutions managers).
+   * inspector analyses the content itself (portfolio / services managers).
    */
   analysis?: DetailedSeoAnalysisResult
   /** Ask the inspector to reveal and focus one of its fields (e.g. from the publication gate). */

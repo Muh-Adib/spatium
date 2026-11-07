@@ -60,7 +60,6 @@ export interface BlockRenderContext {
   portfolios?: any[]
   subServices?: any[]
   services?: any[]
-  solutions?: any[]
 }
 
 /** Builds the element for one block. Most blocks only receive `block`; a few also read the page context. */

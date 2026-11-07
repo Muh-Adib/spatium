@@ -147,13 +147,6 @@ export interface RelatedServiceSummary {
   iconName?: string | null
 }
 
-export interface RelatedSolutionSummary {
-  id: number
-  slug: string
-  title: string
-  shortDescription?: string | null
-}
-
 export async function getRelatedServicesForPortfolio(portfolioId: number): Promise<RelatedServiceSummary[]> {
   try {
     const rels = await prisma.orm.public.ServicePortfolio
@@ -168,26 +161,6 @@ export async function getRelatedServicesForPortfolio(portfolioId: number): Promi
       name: r.service.name,
       shortDescription: r.service.shortDescription,
       iconName: r.service.icon,
-    }))
-  } catch (err) {
-    console.error('[db/portfolio] read failed:', err)
-    return []
-  }
-}
-
-export async function getRelatedSolutionsForPortfolio(portfolioId: number): Promise<RelatedSolutionSummary[]> {
-  try {
-    const rels = await prisma.orm.public.SolutionPortfolio
-      .where({ portfolioId })
-      .orderBy((r: any) => r.displayOrder.asc())
-      .include('solution')
-      .all()
-
-    return rels.map((r: any) => ({
-      id: r.solution.id,
-      slug: r.solution.slug,
-      title: r.solution.title,
-      shortDescription: r.solution.shortDescription,
     }))
   } catch (err) {
     console.error('[db/portfolio] read failed:', err)

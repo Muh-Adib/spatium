@@ -36,7 +36,7 @@ src/lib/** (domain & data access) ── prisma/db.ts ── PostgreSQL 16
 | `/[slug]` | `Page` terbit → `BlockRenderer` | Lalu: artikel lama (308) → redirect DB → 404 |
 | `/sitemap.xml` | Semua di atas | Revalidasi tiap jam + saat Studio menerbitkan |
 
-Rute lama (`/layanan`, `/portofolio`, `/artikel`, `/solusi`, `/solutions`, `/kontak`, `/tentang`) di-308 di `next.config.mjs`. Redirect yang dikelola di Studio (tabel `redirects`) diterapkan oleh halaman detail sebelum mengembalikan 404 (`src/lib/redirects/resolve.ts`).
+Rute lama (`/layanan`, `/portofolio`, `/artikel`, `/solusi`, `/solutions`, `/kontak`, `/tentang`) di-308 di `next.config.mjs`; `/solusi` dan `/solutions` (fitur Solusi sudah dihapus) diarahkan ke `/services`. Redirect yang dikelola di Studio (tabel `redirects`) diterapkan oleh halaman detail sebelum mengembalikan 404 (`src/lib/redirects/resolve.ts`).
 
 Header dan footer (root layout) membaca use case terbit dengan `show_in_nav` (`getUseCaseMenu`) dan profil sosial dari `site_configs.social_links` (`getSocialLinks`, hanya URL https); keduanya disembunyikan bila kosong. Sektor di `/about` dan `/services` diturunkan dari kategori portofolio terbit (`projectSectors`) — tidak ada sektor tanpa scene. Kontak publik berasal dari env `NEXT_PUBLIC_*` (`src/data/site.ts`) dan disembunyikan bila kosong.
 
@@ -46,7 +46,7 @@ Narasi brand yang bukan konten CMS (pipeline, manfaat, perbandingan media, cerit
 
 - Shell: `src/app/admin/layout.tsx`. Daftar tab dan grup navigasi satu sumber di `src/lib/admin/tabs.ts`; `?tab=` di URL adalah state-nya.
 - Tiap tab adalah komponen sendiri yang dimuat saat dibuka (`src/components/studio/admin/tabRegistry.tsx`) dan mengambil datanya sendiri.
-- Grup tab: **Konten** (ringkasan, artikel, halaman, portofolio, layanan, solusi, blok, klien, media, CTA, kalender), **SEO** (kata kunci, audit, performa, GSC, redirect, URL lama), **Sistem & integrasi** (sistem, MCP), **Tata kelola** (pengguna, pengaturan).
+- Grup tab: **Konten** (ringkasan, artikel, halaman, portofolio, layanan, blok, klien, media, CTA, kalender), **SEO** (kata kunci, audit, performa, GSC, redirect, URL lama), **Sistem & integrasi** (sistem, MCP), **Tata kelola** (pengguna, pengaturan).
 - Editor: lihat [EDITORS.md](EDITORS.md).
 - Komponen UI bersama: `src/components/admin/AdminUi.tsx` (dialog native `<dialog>`, field form, pesan status, tombol).
 

@@ -232,6 +232,7 @@ model ServicePortfolio {
   @@map("service_portfolios")
 }
 
+// Deprecated: Solusi feature removed 2026-11-07; drop via planned migration (ROADMAP 2.7)
 model Solution {
   id                 Int                 @id @default(autoincrement())
   slug               String              @unique
@@ -266,6 +267,7 @@ model Solution {
   @@map("solutions")
 }
 
+// Deprecated: Solusi feature removed 2026-11-07; drop via planned migration (ROADMAP 2.7)
 model SolutionPortfolio {
   solutionId   Int       @map("solution_id")
   solution     Solution  @relation(fields: [solutionId], references: [id], onDelete: Cascade)
@@ -277,6 +279,7 @@ model SolutionPortfolio {
   @@map("solution_portfolios")
 }
 
+// Deprecated: Solusi feature removed 2026-11-07; drop via planned migration (ROADMAP 2.7)
 model SolutionService {
   solutionId Int      @map("solution_id")
   solution   Solution @relation(fields: [solutionId], references: [id], onDelete: Cascade)
@@ -287,6 +290,7 @@ model SolutionService {
   @@map("solution_services")
 }
 
+// Deprecated: Solusi feature removed 2026-11-07; drop via planned migration (ROADMAP 2.7)
 model SolutionFinderConfig {
   id                   Int       @id @default(autoincrement())
   configKey            String    @unique @default("default") @map("config_key")

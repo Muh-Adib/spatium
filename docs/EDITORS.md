@@ -4,9 +4,9 @@ Studio punya dua editor dengan model data yang berbeda:
 
 | | Editor artikel | Editor blok |
 |---|---|---|
-| Untuk | Artikel jurnal (`/journal/<slug>`) | Halaman dinamis (`/<slug>`), portofolio, layanan, solusi |
+| Untuk | Artikel jurnal (`/journal/<slug>`) | Halaman dinamis (`/<slug>`), portofolio, layanan |
 | Disimpan sebagai | HTML (`Article.content`) | JSON blok (`blocks`) |
-| Dibuka dari | `/admin/buat-artikel` | Tab **Halaman** (`/admin?tab=pages&page=<id>`) dan manajer portofolio/layanan/solusi |
+| Dibuka dari | `/admin/buat-artikel` | Tab **Halaman** (`/admin?tab=pages&page=<id>`) dan manajer portofolio/layanan |
 | Kode | `src/app/admin/buat-artikel/page.tsx`, `src/components/studio/editor/*`, `src/lib/articles/*` | `src/components/studio/blocks/*`, `src/components/studio/pages/*`, `src/blocks/*`, `src/lib/blocks/catalog.ts` |
 
 ## Editor artikel
@@ -74,9 +74,9 @@ Tab **Halaman** (`src/components/studio/pages/`) mengelola baris `Page` yang tay
 
 API: `GET/POST /api/pages`, `GET/PATCH/DELETE /api/pages/:id`, `POST /api/pages/:id/status`, `GET /api/pages/:id/revisions`. Galat berbentuk `{ error, code?, issues?, blockIssues? }`: `not_found` 404, `conflict` / `slug_taken` 409, `invalid` / `gate` 422, `forbidden` 403.
 
-## Katalog: portofolio, layanan, kategori layanan, solusi
+## Katalog: portofolio, layanan, kategori layanan
 
-Manajer di tab **Portofolio**, **Layanan**, dan **Solusi** memakai aturan yang sama (`src/lib/db/catalogMutations.ts`, skema di `src/lib/validation/api-schemas.ts`):
+Manajer di tab **Portofolio** dan **Layanan** memakai aturan yang sama (`src/lib/db/catalogMutations.ts`, skema di `src/lib/validation/api-schemas.ts`):
 
 - **Item baru selalu draft.** Tidak ada lagi default `published`.
 - **Gerbang publikasi** berjalan saat item disimpan sebagai `published`, terhadap data gabungan (yang tersimpan + yang dikirim): judul, slug, meta title & description, dan **alt text gambar sampul**. Galat 422 berisi `error` dan `issues` per kolom. Alt sampul disimpan di `seoData.coverAlt`.
@@ -86,7 +86,6 @@ Manajer di tab **Portofolio**, **Layanan**, dan **Solusi** memakai aturan yang s
 - Setiap simpan/hapus menulis `ContentRevision` + `SeoAuditLog` dalam satu transaksi dan me-revalidate rute publik terkait serta `/sitemap.xml` (`revalidateCatalog`).
 - Tidak ada angka, tech stack, tahun, atau alt text yang diisi otomatis (AGENTS.md §3.3).
 - Hapus: SUPER_ADMIN dan CONTENT_ADMIN saja; item yang tidak ada → 404.
-- Konfigurasi pencari solusi bisa dibuat dari keadaan kosong; daftar JSON divalidasi per daftar dengan galat inline.
 
 ## Media, logo klien, CTA
 

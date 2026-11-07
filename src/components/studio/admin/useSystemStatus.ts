@@ -9,7 +9,6 @@ const countsSchema = z.object({
   portfolios: z.number(),
   services: z.number(),
   serviceCategories: z.number(),
-  solutions: z.number(),
   pages: z.number(),
   redirects: z.number(),
 })

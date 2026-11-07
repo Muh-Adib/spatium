@@ -11,7 +11,7 @@ import { Button } from './blocks/ui'
 
 export type StudioViewMode = 'canvas' | 'split-preview' | 'full-preview'
 
-/** Block as stored on portfolio / service / solution rows (legacy shape: free-form props). */
+/** Block as stored on portfolio / service rows (legacy shape: free-form props). */
 export interface StudioBlock {
   id: string
   type: string
@@ -25,7 +25,7 @@ interface StudioVisualEditorProps {
   onChangeBlocks: (newBlocks: StudioBlock[]) => void
   selectedBlockId: string | null
   onSelectBlock: (id: string | null) => void
-  targetType?: 'department' | 'service' | 'portfolio' | 'solution'
+  targetType?: 'department' | 'service' | 'portfolio'
   contextData?: ContextData
   /** Identifies the record for local draft autosave (slug or id). */
   draftId?: string
@@ -42,7 +42,7 @@ const LAYOUT: Record<StudioViewMode, BlockEditorLayout> = {
 }
 
 /**
- * Block editor embedded by the portfolio, service and solution managers.
+ * Block editor embedded by the portfolio and service managers.
  * Thin adapter over the catalogue-driven `BlockEditor` that keeps the
  * managers' existing props, adds local draft autosave and reports validation
  * as display strings.

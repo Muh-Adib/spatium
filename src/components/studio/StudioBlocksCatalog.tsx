@@ -20,7 +20,6 @@ const TARGET_LABEL: Record<BlockTarget, string> = {
   page: 'Halaman',
   portfolio: 'Portofolio',
   service: 'Layanan',
-  solution: 'Solusi',
 }
 
 const KIND_LABEL: Record<BlockField['kind'], string> = {

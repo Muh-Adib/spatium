@@ -91,7 +91,7 @@ export const createKeywordSchema = z.object({
   priorityScore: z.number().min(0).max(100).optional().default(50),
 })
 
-// --- 4-6. Catalog Mutation Schemas (portfolio, service, category, solution) --
+// --- 4-6. Catalog Mutation Schemas (portfolio, service, category) ------------
 // Shared building blocks. JSON-ish fields (metrics, features, …) stay loose here
 // and are serialised by the route; blocks are validated by the block schema.
 const catalogStatusSchema = z.enum(['draft', 'in_review', 'approved', 'published', 'archived'])
@@ -162,39 +162,6 @@ export const serviceCategoryMutationSchema = z.object({
   seoData: jsonObjectOrStringSchema,
 })
 export type ServiceCategoryMutationInput = z.infer<typeof serviceCategoryMutationSchema>
-
-export const solutionMutationSchema = z.object({
-  id: positiveIdSchema.nullish(),
-  slug: catalogSlugSchema,
-  title: z.string().trim().min(1, 'Judul solusi wajib diisi.').max(200),
-  category: nullableText(100),
-  shortDescription: nullableText(1000),
-  description: nullableText(20000),
-  heroImage: nullableText(1000),
-  blocks: z.unknown().optional(),
-  keyBenefits: z.unknown().optional(),
-  technologies: z.unknown().optional(),
-  order: intLikeSchema.nullish(),
-  featured: z.boolean().optional(),
-  status: catalogStatusSchema.optional(),
-  metaTitle: nullableText(300),
-  metaDescription: nullableText(500),
-  focusKeyphrase: nullableText(200),
-  relatedKeyphrases: keyphrasesSchema,
-  seoData: jsonObjectOrStringSchema,
-  portfolioIds: linkedIdsSchema,
-})
-export type SolutionMutationInput = z.infer<typeof solutionMutationSchema>
-
-/** Each finder list is a JSON array (or its serialised string form). */
-const finderListSchema = z.union([z.array(z.unknown()).max(500), z.string().max(200000)]).nullish()
-export const solutionFinderConfigSchema = z.object({
-  businessGoals: finderListSchema,
-  industries: finderListSchema,
-  questions: finderListSchema,
-  recommendationMatrix: finderListSchema,
-})
-export type SolutionFinderConfigInput = z.infer<typeof solutionFinderConfigSchema>
 
 export const portfolioMutationSchema = z.object({
   id: positiveIdSchema.nullish(),

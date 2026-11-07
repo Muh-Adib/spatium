@@ -4,10 +4,8 @@ import { dispatchRevalidationWebhook } from '@/lib/webhooks/dispatcher'
 export type CatalogEntity =
   | 'category'
   | 'service'
-  | 'solution'
   | 'portfolio'
   | 'template'
-  | 'config'
   | 'article'
 
 /**
@@ -50,13 +48,6 @@ export async function revalidateCatalog(
         revalidatePath('/sitemap.xml')
         break
 
-      case 'solution':
-        // Solutions have no public route anymore (legacy /solusi → /services).
-        revalidatePath('/services')
-        revalidatePath('/')
-        revalidatePath('/sitemap.xml')
-        break
-
       case 'portfolio':
         revalidatePath('/portfolio')
         if (slug) {
@@ -67,7 +58,6 @@ export async function revalidateCatalog(
         break
 
       case 'template':
-      case 'config':
         revalidatePath('/services')
         break
 
@@ -102,8 +92,6 @@ export async function revalidateCatalog(
           ? `/portfolio/${slug}`
           : entity === 'article'
           ? `/journal/${slug}`
-          : entity === 'solution'
-          ? '/services'
           : undefined
         : undefined
 

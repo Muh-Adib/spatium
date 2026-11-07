@@ -3,7 +3,7 @@
 import React from 'react'
 import Link from 'next/link'
 import type { LucideIcon } from 'lucide-react'
-import { AlertTriangle, ArrowRightLeft, Boxes, Briefcase, CheckCircle2, FileText, Files, RefreshCw, Sparkles } from 'lucide-react'
+import { AlertTriangle, ArrowRightLeft, Boxes, Briefcase, CheckCircle2, FileText, Files, RefreshCw } from 'lucide-react'
 import { TextButton } from '@/components/admin/AdminUi'
 import { tabHref, type AdminTab } from '@/lib/admin/tabs'
 import { formatCheckedAt, useSystemStatus, type ContentCounts } from './useSystemStatus'
@@ -13,7 +13,6 @@ const CARDS: { key: keyof ContentCounts; label: string; tab: AdminTab; icon: Luc
   { key: 'pages', label: 'Halaman', tab: 'pages', icon: Files },
   { key: 'portfolios', label: 'Portofolio', tab: 'portfolio', icon: Briefcase },
   { key: 'services', label: 'Layanan', tab: 'services', icon: Boxes },
-  { key: 'solutions', label: 'Solusi', tab: 'solutions', icon: Sparkles },
   { key: 'redirects', label: 'Aturan redirect', tab: 'redirects', icon: ArrowRightLeft },
 ]
 

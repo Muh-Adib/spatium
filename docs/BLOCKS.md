@@ -43,7 +43,7 @@ Katalog hanya berisi tipe yang relevan untuk SPATIUM. Skema masih menerima tipe 
 
 ### Target
 
-Setiap entri katalog punya `targets`: `page` (halaman dinamis di `/<slug>`), `portfolio`, `service`, `solution`. `listBlocksFor(target)` mengembalikan blok untuk konteks itu.
+Setiap entri katalog punya `targets`: `page` (halaman dinamis di `/<slug>`), `portfolio`, `service`. `listBlocksFor(target)` mengembalikan blok untuk konteks itu.
 
 ## API katalog
 

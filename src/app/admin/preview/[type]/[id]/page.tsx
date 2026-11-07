@@ -3,7 +3,6 @@ import { notFound, redirect } from 'next/navigation'
 import { siteConfig } from '@/config/site'
 import { getServiceCategoryBySlug } from '@/lib/db/serviceCategories'
 import { getServiceBySlug } from '@/lib/db/services'
-import { getSolutionBySlug } from '@/lib/db/solutions'
 import { getPortfolioBySlug } from '@/lib/db/portfolio'
 import StudioLivePreview from '@/components/studio/StudioLivePreview'
 import { DynamicPageView } from '@/components/blocks/DynamicPageView'
@@ -65,12 +64,6 @@ export default async function AdminEntityPreviewPage({ params }: Props) {
       entityTitle = entity.name
       contextData = { portfolios: entity.portfolioItems || [] }
     }
-  } else if (type === 'solution') {
-    entity = await getSolutionBySlug(decodedId)
-    if (entity) {
-      entityTitle = entity.title
-      contextData = { portfolios: entity.relatedPortfolios || [] }
-    }
   } else if (type === 'portfolio') {
     entity = await getPortfolioBySlug(decodedId)
     if (entity) {
@@ -109,11 +102,9 @@ export default async function AdminEntityPreviewPage({ params }: Props) {
     }
   }
 
-  const previewTargetType: 'department' | 'service' | 'portfolio' | 'solution' =
-    type === 'category' ? 'department' :
+  const previewTargetType: 'department' | 'service' | 'portfolio' =
     type === 'service' ? 'service' :
-    type === 'portfolio' ? 'portfolio' :
-    type === 'solution' ? 'solution' : 'department'
+    type === 'portfolio' ? 'portfolio' : 'department'
 
   return (
     <div className="min-h-screen bg-[#0A0A0A] text-white">

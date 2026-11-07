@@ -6,7 +6,6 @@ import {
   Briefcase,
   Boxes,
   Blocks,
-  Sparkles,
   Image as ImageIcon,
   Megaphone,
   Target,
@@ -42,7 +41,6 @@ export const ADMIN_TABS = [
   'pages',
   'portfolio',
   'services',
-  'solutions',
   'blocks',
   'clients',
   'media',
@@ -93,7 +91,6 @@ export const TAB_META: Record<AdminTab, TabMeta> = {
   pages: { label: 'Halaman', description: 'Susun halaman situs dari blok konten.', icon: Files },
   portfolio: { label: 'Portofolio', description: 'Studi kasus dan katalog proyek.', icon: Briefcase },
   services: { label: 'Layanan', description: 'Kategori layanan beserta layanan turunannya.', icon: Boxes },
-  solutions: { label: 'Solusi', description: 'Solusi bisnis dan konfigurasi pencari solusi.', icon: Sparkles },
   blocks: { label: 'Blok', description: 'Katalog blok konten beserta skemanya.', icon: Blocks },
   clients: { label: 'Logo klien', description: 'Logo klien dan mitra yang tampil di situs.', icon: Building2 },
   media: { label: 'Media', description: 'Pustaka gambar, teks alternatif, dan optimasi WebP.', icon: ImageIcon },
@@ -130,7 +127,7 @@ export interface NavGroup {
 }
 
 export const NAV_GROUPS: NavGroup[] = [
-  { id: 'content', label: 'Konten', tabs: ['overview', 'articles', 'pages', 'portfolio', 'services', 'solutions', 'blocks', 'clients', 'media', 'cta', 'calendar'] },
+  { id: 'content', label: 'Konten', tabs: ['overview', 'articles', 'pages', 'portfolio', 'services', 'blocks', 'clients', 'media', 'cta', 'calendar'] },
   { id: 'seo', label: 'SEO', tabs: ['keywords', 'audit', 'perf', 'gsc', 'redirects', 'migration'] },
   { id: 'engine', label: 'Sistem & integrasi', tabs: ['system', 'mcp'] },
   { id: 'governance', label: 'Tata kelola', tabs: ['users', 'settings'] },

@@ -6,14 +6,14 @@ import { validateCatalogPublication, type PublicationGateInput } from '@/lib/blo
 
 /**
  * Shared helpers for the catalog mutation routes (portfolio, service, service
- * category, solution, finder config).
+ * category).
  *
  * History rows are written inside the same transaction as the data change so the
  * revision trail and audit log never drift from the row (AGENTS.md §3.6).
  */
 export type CatalogTx = Parameters<Parameters<typeof prisma.transaction>[0]>[0]
 
-export type CatalogHistoryEntity = 'portfolio' | 'service' | 'service_category' | 'solution' | 'solution_finder_config'
+export type CatalogHistoryEntity = 'portfolio' | 'service' | 'service_category'
 
 export function actorOf(user: AuthenticatedUser): string {
   return user.email || user.name || user.id

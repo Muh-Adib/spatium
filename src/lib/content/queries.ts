@@ -7,7 +7,6 @@ import { siteConfig } from '@/config/site'
  */
 
 import type { Article, Category, Portfolio, Service, Redirect, SiteSetting } from './types'
-import type { SolutionEntity } from '@/lib/db/solutions'
 
 // --- Site Settings ----------------------------------------------------------
 
@@ -117,27 +116,7 @@ export async function getPortfolioItems(): Promise<Portfolio[]> {
   }
 }
 
-// --- Solutions & Taxonomy ---------------------------------------------------
-
-export async function getSolution(slug: string): Promise<SolutionEntity | null> {
-  try {
-    const { getSolutionBySlug } = await import('@/lib/db/solutions')
-    return await getSolutionBySlug(slug)
-  } catch (err) {
-    console.error('[content] getSolution failed:', err)
-    return null
-  }
-}
-
-export async function getSolutions(): Promise<SolutionEntity[]> {
-  try {
-    const { getSolutions: getSolutionsFromDb } = await import('@/lib/db/solutions')
-    return await getSolutionsFromDb()
-  } catch (err) {
-    console.error('[content] getSolutions failed:', err)
-    return []
-  }
-}
+// --- Taxonomy -------------------------------------------------------------
 
 export async function getCategories(): Promise<Category[]> {
   try {

@@ -504,7 +504,6 @@ export interface Service {
   heroImage?: MediaImage
   primaryMedia?: any
   metrics?: { label: string; value: string; detail?: string }[]
-  solutionTypes?: string[]
   industries?: Industry[]
   features?: { title: string; description?: string; icon?: string }[]
   deliverables?: string[]
@@ -558,7 +557,6 @@ export interface Portfolio {
   externalUrl?: string
   relatedArticles?: Article[]
   relatedServices?: Service[]
-  relatedSolutions?: { id: number; slug: string; title: string; shortDescription?: string | null }[]
   seo?: SEOComponent
   blocks?: any[]
   status?: string
@@ -572,32 +570,10 @@ export interface Portfolio {
   isCornerstone?: boolean
 }
 
-export interface Solution {
-  id: number
-  documentId?: string
-  name: string
-  slug: string
-  description?: string
-  industries?: Industry[]
-  services?: Service[]
-  portfolio?: Portfolio[]
-  solutionFinderTriggers?: Record<string, string[]>
-  seo?: SEOComponent
-  blocks?: PageBlock[]
-  publishedAt: string | null
-  createdAt: string
-  updatedAt: string
-  locale?: 'id' | 'en'
-  translationGroupId?: string
-  focusKeyphrase?: string
-  relatedKeyphrases?: string[]
-  isCornerstone?: boolean
-}
-
-// --- Search & Solution Finder -----------------------------------------------
+// --- Search -----------------------------------------------------------------
 
 export interface SearchResult {
-  type: 'article' | 'service' | 'portfolio' | 'solution' | 'page'
+  type: 'article' | 'service' | 'portfolio' | 'page'
   id: number
   title: string
   slug: string

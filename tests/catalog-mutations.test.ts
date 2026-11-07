@@ -13,8 +13,6 @@ import {
   portfolioMutationSchema,
   serviceMutationSchema,
   serviceCategoryMutationSchema,
-  solutionMutationSchema,
-  solutionFinderConfigSchema,
   validateCatalogBody,
 } from '../src/lib/validation/api-schemas'
 
@@ -93,15 +91,8 @@ describe('catalog mutation schemas', () => {
     expect(serviceMutationSchema.safeParse({ name: 'QA', slug: 'qa', order: 'abc' }).success).toBe(false)
   })
 
-  it('category and solution require a title and slug', () => {
+  it('category requires a title', () => {
     expect(serviceCategoryMutationSchema.safeParse({ slug: 'qa' }).success).toBe(false)
-    expect(solutionMutationSchema.safeParse({ title: 'QA', slug: '' }).success).toBe(false)
-  })
-
-  it('finder config accepts arrays or JSON strings and strips unknown keys', () => {
-    const parsed = solutionFinderConfigSchema.parse({ businessGoals: [{ id: 'a' }], id: 1, updatedAt: 'x' })
-    expect(parsed).toEqual({ businessGoals: [{ id: 'a' }] })
-    expect(solutionFinderConfigSchema.safeParse({ industries: { not: 'array' } }).success).toBe(false)
   })
 
   it('validateCatalogBody returns a readable first issue in the UI shape', async () => {

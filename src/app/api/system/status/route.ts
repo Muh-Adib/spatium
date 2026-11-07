@@ -13,17 +13,15 @@ export async function GET(request: NextRequest) {
   let portfolioCount = 0
   let serviceCount = 0
   let serviceCategoryCount = 0
-  let solutionCount = 0
   let pageCount = 0
   let redirectCount = 0
 
   try {
-    const [artRes, portRes, svcRes, catRes, solRes, pageRes, redRes] = await Promise.all([
+    const [artRes, portRes, svcRes, catRes, pageRes, redRes] = await Promise.all([
       prisma.orm.public.Article.aggregate((a: any) => ({ count: a.count() })),
       prisma.orm.public.Portfolio.aggregate((a: any) => ({ count: a.count() })),
       prisma.orm.public.Service.aggregate((a: any) => ({ count: a.count() })),
       prisma.orm.public.ServiceCategory.aggregate((a: any) => ({ count: a.count() })),
-      prisma.orm.public.Solution.aggregate((a: any) => ({ count: a.count() })),
       prisma.orm.public.Page.aggregate((a: any) => ({ count: a.count() })),
       prisma.orm.public.Redirect.aggregate((a: any) => ({ count: a.count() })),
     ])
@@ -32,7 +30,6 @@ export async function GET(request: NextRequest) {
     portfolioCount = Number(portRes?.count || 0)
     serviceCount = Number(svcRes?.count || 0)
     serviceCategoryCount = Number(catRes?.count || 0)
-    solutionCount = Number(solRes?.count || 0)
     pageCount = Number(pageRes?.count || 0)
     redirectCount = Number(redRes?.count || 0)
 
@@ -61,7 +58,6 @@ export async function GET(request: NextRequest) {
       portfolios: portfolioCount,
       services: serviceCount,
       serviceCategories: serviceCategoryCount,
-      solutions: solutionCount,
       pages: pageCount,
       redirects: redirectCount,
     },
@@ -70,7 +66,6 @@ export async function GET(request: NextRequest) {
       { name: 'Portfolios', count: portfolioCount, status: 'Active (PostgreSQL)' },
       { name: 'Services', count: serviceCount, status: 'Active (PostgreSQL)' },
       { name: 'ServiceCategories', count: serviceCategoryCount, status: 'Active (PostgreSQL)' },
-      { name: 'Solutions', count: solutionCount, status: 'Active (PostgreSQL)' },
       { name: 'Pages', count: pageCount, status: 'Active (PostgreSQL)' },
       { name: 'Redirects', count: redirectCount, status: 'Active (PostgreSQL)' },
     ],

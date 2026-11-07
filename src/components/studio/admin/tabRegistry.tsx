@@ -23,7 +23,6 @@ export const TAB_COMPONENTS: Record<AdminTab, React.ComponentType> = {
   pages: dynamic(() => import('@/components/studio/pages/StudioPagesManager'), { loading: TabLoading }),
   portfolio: dynamic(() => import('@/components/studio/StudioPortfolioManager').then((m) => m.StudioPortfolioManager), { loading: TabLoading }),
   services: dynamic(() => import('@/components/studio/StudioServicesManager').then((m) => m.StudioServicesManager), { loading: TabLoading }),
-  solutions: dynamic(() => import('@/components/studio/StudioSolutionsManager').then((m) => m.StudioSolutionsManager), { loading: TabLoading }),
   blocks: dynamic(() => import('@/components/studio/StudioBlocksCatalog').then((m) => m.StudioBlocksCatalog), { loading: TabLoading }),
   clients: dynamic(() => import('@/components/studio/StudioClientsManager').then((m) => m.StudioClientsManager), { loading: TabLoading }),
   media: dynamic(() => import('@/components/studio/StudioMediaManager').then((m) => m.StudioMediaManager), { loading: TabLoading }),

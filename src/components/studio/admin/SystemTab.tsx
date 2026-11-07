@@ -11,7 +11,6 @@ const TABLES: { key: keyof ContentCounts; table: string; label: string }[] = [
   { key: 'portfolios', table: 'portfolios', label: 'Portofolio' },
   { key: 'services', table: 'services', label: 'Layanan' },
   { key: 'serviceCategories', table: 'service_categories', label: 'Kategori layanan' },
-  { key: 'solutions', table: 'solutions', label: 'Solusi' },
   { key: 'redirects', table: 'redirects', label: 'Aturan redirect' },
 ]
 

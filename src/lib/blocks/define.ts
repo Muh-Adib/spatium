@@ -13,7 +13,7 @@
 import type { z } from 'zod'
 
 /** Where a block may be placed. `page` = dynamic pages at `/<slug>`. */
-export type BlockTarget = 'page' | 'portfolio' | 'service' | 'solution'
+export type BlockTarget = 'page' | 'portfolio' | 'service'
 
 export type BlockCategory = 'hero' | 'spatial' | 'content' | 'media' | 'proof' | 'conversion' | 'navigation'
 
@@ -28,7 +28,7 @@ export const BLOCK_CATEGORY_LABEL: Record<BlockCategory, string> = {
 }
 
 /** Every target: the default for blocks usable anywhere. */
-export const ALL_TARGETS: readonly BlockTarget[] = ['page', 'portfolio', 'service', 'solution']
+export const ALL_TARGETS: readonly BlockTarget[] = ['page', 'portfolio', 'service']
 
 /** Editable field description used to generate property forms and MCP docs. */
 export type BlockField =
