@@ -235,7 +235,8 @@ async function seedArticles() {
         create: {
           name: a.author.name,
           slug: a.author.slug,
-          email: 'hello@spatium.id',
+          // No invented contact: author email stays empty until the owner sets one.
+          email: null,
           bio: 'Tim editorial SPATIUM — Spatial Technology Studio.',
         },
         update: { name: a.author.name },
@@ -328,7 +329,8 @@ async function seedSiteDefaults() {
       description:
         'SPATIUM adalah Spatial Technology Studio: digital twin untuk industri kreatif — laser scan, point cloud, 3D geometry, dan 3D Gaussian Splat.',
       url: 'https://spatium.id',
-      email: 'hello@spatium.id',
+      // Public contact is set by the owner in Studio → Settings (AGENTS.md §3.3).
+      email: null,
       whatsapp: null,
       phone: null,
     })
