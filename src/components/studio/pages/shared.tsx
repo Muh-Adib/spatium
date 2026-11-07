@@ -1,19 +1,27 @@
 'use client'
 
 import React from 'react'
-import { Archive, Clock, FilePen, Globe } from 'lucide-react'
-import type { PageStatus } from '@/lib/pages/page-schema'
+import { Archive, CircleHelp, Clock, FilePen, Globe, ThumbsUp } from 'lucide-react'
 import { Badge } from '../blocks/ui'
+import { isEditorialStatus, type EditorialStatus } from './status'
 
-export const STATUS_META: Record<PageStatus, { label: string; tone: 'neutral' | 'success' | 'warning' | 'info'; icon: typeof Globe }> = {
+export { isEditorialStatus, type EditorialStatus } from './status'
+
+type StatusMeta = { label: string; tone: 'neutral' | 'success' | 'warning' | 'info'; icon: typeof Globe }
+
+export const STATUS_META: Record<EditorialStatus, StatusMeta> = {
   draft: { label: 'Draf', tone: 'neutral', icon: FilePen },
   in_review: { label: 'Menunggu review', tone: 'warning', icon: Clock },
+  approved: { label: 'Disetujui', tone: 'info', icon: ThumbsUp },
   published: { label: 'Terbit', tone: 'success', icon: Globe },
   archived: { label: 'Diarsipkan', tone: 'info', icon: Archive },
 }
 
-export function StatusBadge({ status }: { status: PageStatus }) {
-  const meta = STATUS_META[status]
+const UNKNOWN_STATUS: StatusMeta = { label: 'Status tidak diketahui', tone: 'neutral', icon: CircleHelp }
+
+/** Status pill with icon + text. Unknown or missing statuses say so (no guessed status). */
+export function StatusBadge({ status }: { status: EditorialStatus | string | null | undefined }) {
+  const meta = isEditorialStatus(status) ? STATUS_META[status] : UNKNOWN_STATUS
   return (
     <Badge tone={meta.tone} icon={meta.icon}>
       {meta.label}

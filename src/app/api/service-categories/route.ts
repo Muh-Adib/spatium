@@ -28,7 +28,7 @@ export async function GET() {
     const list = await getServiceCategories()
     return NextResponse.json({ success: true, data: list })
   } catch (error) {
-    return errorResponse('API service-categories GET', error, 'Gagal mengambil data departemen.')
+    return errorResponse('API service-categories GET', error, 'Gagal mengambil data kategori layanan.')
   }
 }
 
@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
 
   const slug = normalizeCatalogSlug(data.slug)
   if (!slug) {
-    return NextResponse.json({ success: false, error: 'Slug departemen tidak valid.' }, { status: 400 })
+    return NextResponse.json({ success: false, error: 'Slug kategori layanan tidak valid.' }, { status: 400 })
   }
 
   // Target-aware validation; creating without blocks stores the category preset.
@@ -69,11 +69,11 @@ export async function POST(request: NextRequest) {
 
   try {
     const existing = data.id ? await prisma.orm.public.ServiceCategory.where({ id: data.id }).first() : null
-    if (data.id && !existing) throw new PublicError('Departemen tidak ditemukan.', 404)
+    if (data.id && !existing) throw new PublicError('Kategori layanan tidak ditemukan.', 404)
 
     const clash = await prisma.orm.public.ServiceCategory.where({ slug }).first()
     if (clash && clash.id !== existing?.id) {
-      throw new PublicError(`Slug "${slug}" sudah dipakai departemen lain.`, 409)
+      throw new PublicError(`Slug "${slug}" sudah dipakai kategori layanan lain.`, 409)
     }
 
     const text = (v: string | null | undefined) => (v === undefined ? undefined : v || null)
@@ -123,7 +123,7 @@ export async function POST(request: NextRequest) {
       if (existing) {
         await tx.orm.public.ServiceCategory.where({ id: existing.id }).update(values)
         const row = await tx.orm.public.ServiceCategory.where({ id: existing.id }).first()
-        if (!row) throw new PublicError('Departemen tidak ditemukan.', 404)
+        if (!row) throw new PublicError('Kategori layanan tidak ditemukan.', 404)
         await redirectRenamedSlug(tx, '/services', existing, row.slug)
         await recordCatalogHistory(tx, 'service_category', row.id, actor, 'update', existing, {
           fields: Object.keys(values),
@@ -143,7 +143,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true, data: mapCategoryRow(saved) })
   } catch (error) {
-    return errorResponse('API service-categories POST', error, 'Gagal menyimpan departemen.')
+    return errorResponse('API service-categories POST', error, 'Gagal menyimpan kategori layanan.')
   }
 }
 
@@ -153,7 +153,7 @@ export async function DELETE(request: NextRequest) {
 
   const idParam = new URL(request.url).searchParams.get('id')
   if (!idParam || !/^\d+$/.test(idParam)) {
-    return NextResponse.json({ success: false, error: 'ID departemen wajib disertakan.' }, { status: 400 })
+    return NextResponse.json({ success: false, error: 'ID kategori layanan wajib disertakan.' }, { status: 400 })
   }
   const id = Number(idParam)
 
@@ -161,7 +161,7 @@ export async function DELETE(request: NextRequest) {
     const actor = actorOf(auth.user)
     const { removed, childSlugs } = await prisma.transaction(async (tx) => {
       const current = await tx.orm.public.ServiceCategory.where({ id }).forUpdate().first()
-      if (!current) throw new PublicError('Departemen tidak ditemukan.', 404)
+      if (!current) throw new PublicError('Kategori layanan tidak ditemukan.', 404)
       // Services keep existing but lose their department (the UI warns about this).
       const children = await tx.orm.public.Service.where({ categoryId: id }).all()
       if (children.length > 0) {
@@ -176,8 +176,8 @@ export async function DELETE(request: NextRequest) {
 
     await revalidateCatalog('category', removed.slug, childSlugs)
 
-    return NextResponse.json({ success: true, message: 'Departemen berhasil dihapus.' })
+    return NextResponse.json({ success: true, message: 'Kategori layanan berhasil dihapus.' })
   } catch (error) {
-    return errorResponse('API service-categories DELETE', error, 'Gagal menghapus departemen.')
+    return errorResponse('API service-categories DELETE', error, 'Gagal menghapus kategori layanan.')
   }
 }

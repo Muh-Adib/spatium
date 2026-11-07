@@ -103,7 +103,7 @@ export async function POST(request: NextRequest) {
     }
     if (data.categoryId) {
       const category = await prisma.orm.public.ServiceCategory.where({ id: data.categoryId }).first()
-      if (!category) throw new PublicError('Departemen yang dipilih tidak ditemukan.', 400)
+      if (!category) throw new PublicError('Kategori induk yang dipilih tidak ditemukan. Pilih kategori lain.', 400)
     }
 
     const text = (v: string | null | undefined) => (v === undefined ? undefined : v || null)

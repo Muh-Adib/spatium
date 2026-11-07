@@ -72,6 +72,8 @@ export const PREVIEW_MESSAGES = {
   draft: 'spatium:preview:draft',
   /** iframe → parent after applying a draft: `{ type, entity, id, blockIssues, fieldIssues, blockCount }`. */
   applied: 'spatium:preview:applied',
+  /** iframe → parent when a block is clicked in the embedded preview: `{ type, entity, id, blockId }`. */
+  select: 'spatium:preview:select',
 } as const
 
 const text = z.string().max(20_000).nullable()
@@ -131,11 +133,31 @@ export const previewDraftMessageSchema = z.object({
   blocks: z.array(z.unknown()).max(MAX_BLOCKS_PER_PAGE).optional(),
   /** Unsaved entity fields (see DRAFT_FIELD_SCHEMAS). */
   fields: z.record(z.string(), z.unknown()).optional(),
+  /** Block selected in the editor: highlighted and scrolled into view (`null` clears). */
+  selectedBlockId: z.string().max(200).nullable().optional(),
 })
 
 export type PreviewDraftMessage = z.infer<typeof previewDraftMessageSchema>
 
 export type PreviewDraft = { blocks?: unknown[]; fields?: Record<string, unknown> }
+
+/** iframe → parent: a block was clicked in the embedded preview. */
+export const previewSelectMessageSchema = z.object({
+  type: z.literal(PREVIEW_MESSAGES.select),
+  entity: z.enum(PREVIEW_KINDS),
+  id: z.union([z.number(), z.string()]),
+  blockId: z.string().min(1).max(200),
+})
+
+/** iframe → parent: what the preview rendered for the last draft. */
+export const previewAppliedMessageSchema = z.object({
+  type: z.literal(PREVIEW_MESSAGES.applied),
+  entity: z.enum(PREVIEW_KINDS),
+  id: z.union([z.number(), z.string()]),
+  blockIssues: z.array(z.object({ index: z.number(), blockId: z.string().optional(), type: z.string().optional(), message: z.string() })),
+  fieldIssues: z.array(z.object({ field: z.string(), message: z.string() })),
+  blockCount: z.number(),
+})
 
 export type FieldIssue = { field: string; message: string }
 

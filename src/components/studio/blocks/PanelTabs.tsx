@@ -4,7 +4,19 @@ import type React from 'react'
 import type { BlockEditorPanel } from './BlockEditor'
 
 /** Tab list for the editor column (Blok, SEO, …): arrow keys, Home and End move between tabs. */
-export function PanelTabs({ baseId, panels, active, onChange }: { baseId: string; panels: BlockEditorPanel[]; active: string; onChange: (id: string) => void }) {
+export function PanelTabs({
+  baseId,
+  panels,
+  active,
+  onChange,
+  label = 'Bagian editor',
+}: {
+  baseId: string
+  panels: Pick<BlockEditorPanel, 'id' | 'label' | 'badge'>[]
+  active: string
+  onChange: (id: string) => void
+  label?: string
+}) {
   const onKeyDown = (e: React.KeyboardEvent<HTMLButtonElement>, index: number) => {
     let next = -1
     if (e.key === 'ArrowRight') next = (index + 1) % panels.length
@@ -17,7 +29,7 @@ export function PanelTabs({ baseId, panels, active, onChange }: { baseId: string
     document.getElementById(`${baseId}-tab-${panels[next].id}`)?.focus()
   }
   return (
-    <div role="tablist" aria-label="Bagian editor" className="flex shrink-0 gap-1 overflow-x-auto border-b border-white/10 px-3 pt-2">
+    <div role="tablist" aria-label={label} className="flex shrink-0 gap-1 overflow-x-auto border-b border-white/10 px-3 pt-2">
       {panels.map((p, i) => {
         const selected = p.id === active
         return (

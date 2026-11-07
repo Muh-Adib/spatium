@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useScrollReveal } from '@/hooks'
 import { PortfolioView, ServiceCategoryView, ServiceView } from './EntityViews'
 import {
@@ -29,6 +29,9 @@ type Props = {
  */
 export function EntityPreview({ payload, id, status, publicPath, contact }: Props) {
   const [draft, setDraft] = useState<PreviewDraft | null>(null)
+  const [selectedBlockId, setSelectedBlockId] = useState<string | null>(null)
+  const [embedded, setEmbedded] = useState(false)
+  const mainRef = useRef<HTMLElement>(null)
   useScrollReveal()
 
   const page = useMemo(() => buildPreviewPage(payload, draft), [payload, draft])
@@ -49,7 +52,9 @@ export function EntityPreview({ payload, id, status, publicPath, contact }: Prop
       if (parsed.data.entity !== payload.kind) return
       if (parsed.data.id !== undefined && String(parsed.data.id) !== id) return
       setDraft({ blocks: parsed.data.blocks, fields: parsed.data.fields })
+      if (parsed.data.selectedBlockId !== undefined) setSelectedBlockId(parsed.data.selectedBlockId)
     }
+    setEmbedded(true)
     window.addEventListener('message', onMessage)
     window.parent.postMessage({ type: PREVIEW_MESSAGES.ready, entity: payload.kind, id }, origin)
     return () => window.removeEventListener('message', onMessage)
@@ -71,6 +76,45 @@ export function EntityPreview({ payload, id, status, publicPath, contact }: Prop
     )
   }, [draft, page, payload.kind, id])
 
+  /** Last selection scrolled into view (a click in the preview is already in view). */
+  const revealed = useRef<string | null>(null)
+
+  // Embedded in the editor: a click selects the block in the editor's outline
+  // instead of following links (the editor preview must not navigate away).
+  useEffect(() => {
+    const root = mainRef.current
+    if (!embedded || !root) return
+    const onClick = (event: MouseEvent) => {
+      const target = event.target instanceof Element ? event.target : null
+      if (!target) return
+      if (target.closest('a[href], form')) event.preventDefault()
+      const blockId = target.closest('[data-block-id]')?.getAttribute('data-block-id')
+      if (!blockId) return
+      revealed.current = blockId
+      window.parent.postMessage({ type: PREVIEW_MESSAGES.select, entity: payload.kind, id, blockId }, window.location.origin)
+    }
+    root.addEventListener('click', onClick)
+    return () => root.removeEventListener('click', onClick)
+  }, [embedded, payload.kind, id])
+
+  // Highlight the block selected in the editor; reveal it once per new selection.
+  useEffect(() => {
+    const root = mainRef.current
+    if (!root) return
+    for (const el of root.querySelectorAll('[data-preview-selected]')) el.removeAttribute('data-preview-selected')
+    if (!selectedBlockId) {
+      revealed.current = null
+      return
+    }
+    const el = root.querySelector(`[data-block-id="${CSS.escape(selectedBlockId)}"]`)
+    if (!el) return
+    el.setAttribute('data-preview-selected', '')
+    if (revealed.current === selectedBlockId) return
+    revealed.current = selectedBlockId
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    el.scrollIntoView({ block: 'start', behavior: reduce ? 'auto' : 'smooth' })
+  }, [selectedBlockId, page])
+
   const issueCount = page.blockIssues.length + page.fieldIssues.length
 
   return (
@@ -84,7 +128,10 @@ export function EntityPreview({ payload, id, status, publicPath, contact }: Prop
         {status === 'published' ? '' : ' (belum tampil di situs)'}
         {issueCount > 0 ? ` · ${issueCount} masalah dilewati` : ''}
       </p>
-      <main id="main" className="app-main">
+      {embedded ? (
+        <style>{'[data-preview-selected]{outline:3px solid #f5c400;outline-offset:-3px}[data-block-id]{cursor:pointer}'}</style>
+      ) : null}
+      <main ref={mainRef} id="main" className="app-main">
         {page.entity.kind === 'service-category' ? (
           <ServiceCategoryView entity={page.entity} blocks={page.blocks} contact={contact} />
         ) : page.entity.kind === 'service' ? (

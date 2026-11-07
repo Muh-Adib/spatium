@@ -51,7 +51,7 @@ Halaman kategori layanan, layanan, dan portofolio **seluruhnya tersusun dari blo
 
 ### Blok data-bound
 
-Blok data-bound (`dataBound: true` di definisi) merender **data entri** dari konteks render (`BlockRenderContext.entity`, tipe `EntityContext` di `src/lib/content/spatium-types.ts`). JSON blok hanya menyimpan opsi tampilan (eyebrow/judul pengganti, batas jumlah, toggle). Markup dan CSS-nya adalah markup template lama (`src/components/entity/sections.tsx`), sehingga preset tampil sama persis seperti sebelumnya. Tanpa konteks entri (mis. pratinjau blok di manajer lama) blok menampilkan placeholder, bukan data.
+Blok data-bound (`dataBound: true` di definisi) merender **data entri** dari konteks render (`BlockRenderContext.entity`, tipe `EntityContext` di `src/lib/content/spatium-types.ts`). JSON blok hanya menyimpan opsi tampilan (eyebrow/judul pengganti, batas jumlah, toggle). Markup dan CSS-nya adalah markup template lama (`src/components/entity/sections.tsx`), sehingga preset tampil sama persis seperti sebelumnya. Tanpa konteks entri (mis. katalog blok di Studio) blok menampilkan placeholder, bukan data. Di editor entitas, baris blok data-bound diberi label **Isi dari tab Konten** dan tombol untuk membuka tab itu.
 
 | Target | Tipe | Isi (dari entri) | Opsi blok |
 |---|---|---|---|

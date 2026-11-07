@@ -173,7 +173,7 @@ export type ServiceMutationInput = z.infer<typeof serviceMutationSchema>
 export const serviceCategoryMutationSchema = z.object({
   id: positiveIdSchema.nullish(),
   slug: catalogSlugSchema,
-  title: z.string().trim().min(1, 'Judul departemen wajib diisi.').max(200),
+  title: z.string().trim().min(1, 'Isi judul kategori layanan.').max(200),
   tag: nullableText(200),
   shortDescription: nullableText(1000),
   heroImage: nullableText(1000),
