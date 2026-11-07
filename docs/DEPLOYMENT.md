@@ -45,9 +45,10 @@ Isi `SITE_API_KEY` (≥32 karakter acak) **sebelum** deploy pertama: seed menyim
 
 ## Coolify
 
-Aplikasi `spatium` (project **WEB UDP**, environment `production`), build pack *Docker Compose*, sumber GitHub App ke `Muh-Adib/spatium`, branch `feat/spatium-rebuild`, compose `/docker-compose.yml`, domain service `app`: `https://spatium.id,https://www.spatium.id`.
+Aplikasi `spatium` (project **WEB UDP**, environment `production`), build pack *Docker Compose*, sumber GitHub App ke `Muh-Adib/spatium`, branch `main`, compose `/docker-compose.yml`, domain service `app`: `https://spatium.id,https://www.spatium.id`.
 
-- **Auto-deploy aktif**: setiap push ke branch tersebut memicu build + deploy. Ganti branch di Coolify setelah merge ke `main`.
+- **Auto-deploy aktif**: setiap push ke `main` memicu build + deploy.
+- `main` dilindungi: check CI `verify` wajib hijau (strict), tanpa force-push. Admin repo masih bisa push langsung; alur yang dianjurkan: branch fitur → PR → merge setelah CI hijau.
 - `SERVICE_PASSWORD_POSTGRES` dibuat otomatis oleh Coolify; tidak ada password DB di repo.
 - Env rahasia (`AUTH_SECRET`, `API_BEARER_TOKEN`, `SITE_API_KEY`, `REVALIDATE_SECRET`, `WEBHOOK_SECRET`, `BOOTSTRAP_ADMIN_*`) diisi di Coolify, ditandai *literal*. Salinan lokal pemilik ada di `.env.coolify.local` (gitignored).
 - `NEXT_PUBLIC_*` adalah build-time: mengubahnya butuh redeploy.

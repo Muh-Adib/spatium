@@ -64,7 +64,7 @@ Prioritas: **P0** = wajib sebelum deploy produksi · **P1** = sebaiknya sebelum 
 
 | # | Prioritas | Item | Selesai bila |
 |---|---|---|---|
-| 4.1 | P0 | ✅ CI `.github/workflows/ci.yml`: typecheck, vitest (service Postgres, DB kosong), `audit:senior` (kini gagal bila ada temuan), build, cek kontrak Prisma ter-commit | Pipeline hijau wajib untuk merge — **sisa**: aktifkan branch protection `main` dengan check `CI / verify` |
+| 4.1 | P0 | ✅ CI `.github/workflows/ci.yml`: typecheck, vitest (service Postgres, DB kosong), `audit:senior` (kini gagal bila ada temuan), build, cek kontrak Prisma ter-commit | Pipeline hijau wajib untuk merge — ✅ branch protection `main` aktif (check `verify`, 2026-11-07) |
 | 4.2 | P0 | Uji alur kritis di staging: login, tulis & terbitkan artikel, jadwalkan artikel (penjadwal), buat & terbitkan halaman `/<slug>`, ganti slug (redirect 301), upload media, kelola redirect, kelola pengguna | Checklist ditandatangani |
 | 4.3 | P0 | ✅ (2026-11-06 di spatium.id: halaman, artikel, portofolio, layanan dibuat sebagai draft; publish & edit konten terbit ditolak; key dicabut → 401) Uji MCP di staging: buat API key, `tools/list`, `create_page_draft`, edit blok, pastikan publish ditolak, cabut key | Sesuai MCP.md |
 | 4.4 | P0 | Viewer SuperSplat tampil di domain staging (CSP `frame-src`) di beranda, portofolio, blok `splat-viewer` | Ke-10 scene termuat |
