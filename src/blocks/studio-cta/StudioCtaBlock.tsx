@@ -1,13 +1,18 @@
 import Link from 'next/link'
 import { MessageSquare, ArrowRight } from 'lucide-react'
-import { siteConfig, whatsappHref } from '@/config/site'
+import type { PublicContact } from '@/lib/contact/public-contact'
 
-/** Headline and subheadline come only from the block; nothing is rendered in their place when empty. */
+/**
+ * Headline and subheadline come only from the block; nothing is rendered in
+ * their place when empty. WhatsApp and email come from Studio settings
+ * (`contact`); each is hidden when not set.
+ */
 export interface StudioCTAProps {
   headline?: string
   subheadline?: string
   secondaryLabel?: string
   secondaryHref?: string
+  contact?: PublicContact
 }
 
 export function StudioCTA({
@@ -15,8 +20,10 @@ export function StudioCTA({
   subheadline,
   secondaryLabel = 'Jelajahi Layanan',
   secondaryHref = '/services',
+  contact,
 }: StudioCTAProps) {
-  const whatsappUrl = whatsappHref(siteConfig.whatsapp, 'Halo SPATIUM, saya ingin berkonsultasi mengenai proyek digital twin.')
+  const whatsappUrl = contact?.whatsappHref ?? null
+  const email = contact?.mailtoHref && contact.email ? { href: contact.mailtoHref, label: contact.email } : null
 
   return (
     <section className="section-py relative overflow-hidden bg-[var(--surface-2)] text-white border-t border-[var(--card-border)]" aria-label="Ajakan Bertindak">
@@ -46,6 +53,7 @@ export function StudioCTA({
                   <MessageSquare className="w-4 h-4" />
                 </span>
                 <span>Konsultasi Proyek (WhatsApp)</span>
+                <span className="sr-only"> (tab baru)</span>
               </a>
             ) : (
               <Link href="/contact" className="btn btn--primary w-full sm:w-auto">
@@ -65,19 +73,21 @@ export function StudioCTA({
               </span>
             </Link>
           </div>
-          <div className="mt-8 text-xs font-mono text-[var(--text-dim)]">
-            Atau kirimkan brief proyek via email ke{' '}
-            <a href={`mailto:${siteConfig.email}`} className="text-accent hover:underline font-semibold">
-              {siteConfig.email}
-            </a>
-          </div>
+          {email ? (
+            <div className="mt-8 text-xs font-mono text-[var(--text-dim)]">
+              Atau kirimkan brief proyek via email ke{' '}
+              <a href={email.href} className="text-accent hover:underline font-semibold">
+                {email.label}
+              </a>
+            </div>
+          ) : null}
         </div>
       </div>
     </section>
   )
 }
 
-export function StudioCtaBlock({ block }: { block: any }) {
+export function StudioCtaBlock({ block, contact }: { block: any; contact?: PublicContact }) {
   const data = block?.data || block || {}
   return (
     <StudioCTA
@@ -85,6 +95,7 @@ export function StudioCtaBlock({ block }: { block: any }) {
       subheadline={block?.subheadline || data.subheadline || block?.description || data.description || undefined}
       secondaryLabel={block?.buttonText || data.buttonText || block?.ctaText || data.ctaText || 'Konsultasi Sekarang'}
       secondaryHref={block?.buttonUrl || data.buttonUrl || block?.ctaUrl || data.ctaUrl || '/contact'}
+      contact={contact}
     />
   )
 }

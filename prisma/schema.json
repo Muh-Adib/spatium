@@ -5762,6 +5762,13 @@
                   "kind": "scalar"
                 }
               },
+              "openingHours": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
               "outputSpec": {
                 "nullable": true,
                 "type": {
@@ -5838,6 +5845,13 @@
                   "codecId": "pg/text@1",
                   "kind": "scalar"
                 }
+              },
+              "whatsappMessage": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
               }
             },
             "relations": {},
@@ -5885,6 +5899,9 @@
                 "name": {
                   "column": "name"
                 },
+                "openingHours": {
+                  "column": "opening_hours"
+                },
                 "outputSpec": {
                   "column": "output_spec"
                 },
@@ -5917,6 +5934,9 @@
                 },
                 "whatsapp": {
                   "column": "whatsapp"
+                },
+                "whatsappMessage": {
+                  "column": "whatsapp_message"
                 }
               },
               "namespaceId": "public",
@@ -10923,6 +10943,11 @@
                   },
                   "nullable": false
                 },
+                "opening_hours": {
+                  "codecId": "pg/text@1",
+                  "dataType": "pg/text",
+                  "nullable": true
+                },
                 "output_spec": {
                   "codecId": "pg/text@1",
                   "dataType": "pg/text",
@@ -10982,6 +11007,11 @@
                   "nullable": false
                 },
                 "whatsapp": {
+                  "codecId": "pg/text@1",
+                  "dataType": "pg/text",
+                  "nullable": true
+                },
+                "whatsapp_message": {
                   "codecId": "pg/text@1",
                   "dataType": "pg/text",
                   "nullable": true
@@ -11918,7 +11948,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "af752f8eb4487e6fcfe71ac8733f0ecc14520cd64fa1f34f2a25ac513aa62c03"
+    "storageHash": "a1bb06d9e6c6d701e23778775af5935ff35866ae9bba2076f0ab44fc016e1889"
   },
   "execution": {
     "executionHash": "a4bae7ed4fcf0d801cf9d3f4f45277365b2bd42215bc891a0834b89dbb28f9be",

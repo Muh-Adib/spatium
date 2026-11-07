@@ -2,7 +2,8 @@ import type { Metadata, Viewport } from 'next'
 import { Plus_Jakarta_Sans, DM_Mono, Montserrat, Inter } from 'next/font/google'
 import { SiteShell } from '@/components/layout/SiteShell'
 import { siteConfig } from '@/config/site'
-import { getSocialLinks, getUseCaseMenu } from '@/lib/content/spatium'
+import { getUseCaseMenu } from '@/lib/content/spatium'
+import { getPublicContact } from '@/lib/content/contact'
 import '@/styles/tokens.css'
 import '@/styles/globals.css'
 import '@/components/layout/layout.css'
@@ -90,16 +91,17 @@ export default async function RootLayout({
   children: React.ReactNode
 }) {
   // Header/footer content is Studio-managed: use cases (service_categories with
-  // show_in_nav) and social profiles (site_configs.social_links). Both resolve
-  // to [] on failure, which hides the corresponding menu or list.
-  const [useCases, socials] = await Promise.all([getUseCaseMenu(), getSocialLinks()])
+  // show_in_nav) and the public contact profile (site_configs: email, phone,
+  // WhatsApp, address, hours, socials). Failures resolve to empty values, which
+  // hide the corresponding menu or item.
+  const [useCases, contact] = await Promise.all([getUseCaseMenu(), getPublicContact()])
   return (
     <html
       lang="id"
       className={`${plusJakartaSans.variable} ${dmMono.variable} ${montserrat.variable} ${inter.variable}`}
     >
       <body>
-        <SiteShell useCases={useCases} socials={socials}>
+        <SiteShell useCases={useCases} contact={contact}>
           {children}
         </SiteShell>
       </body>

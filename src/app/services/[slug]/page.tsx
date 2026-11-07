@@ -11,6 +11,7 @@ import { Icon } from '@/components/Icon'
 import { SPATIAL_PIPELINE } from '@/config/spatium-story'
 import { getParentUseCaseSlug, getProjects, getUseCases } from '@/lib/content/spatium'
 import { BlockRenderer } from '@/components/blocks/BlockRenderer'
+import { getPublicContact } from '@/lib/content/contact'
 import { siteConfig } from '@/config/site'
 import '@/pages/service-detail.css'
 import { redirectIfMoved } from '@/lib/redirects/resolve'
@@ -253,7 +254,7 @@ export default async function ServiceDetailPage({
         </div>
       </section>
 
-      {view.extraBlocks.length > 0 ? <BlockRenderer blocks={view.extraBlocks} /> : null}
+      {view.extraBlocks.length > 0 ? <BlockRenderer blocks={view.extraBlocks} contextData={{ contact: await getPublicContact() }} /> : null}
 
       {view.faqs.length > 0 ? (
         <section className="section detail-faq" aria-labelledby="faq-heading">

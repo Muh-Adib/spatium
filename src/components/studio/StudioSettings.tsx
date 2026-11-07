@@ -1,14 +1,19 @@
 'use client'
 
-import React, { useEffect, useId, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useId, useRef, useState } from 'react'
 import { useAuth } from '@/lib/auth/AuthContext'
 import type { Role } from '@/lib/auth/types'
 import { Settings, Globe, Phone, Share2, Database, Save, RefreshCw, Lock } from 'lucide-react'
+import { buildWhatsappHref } from '@/lib/contact/public-contact'
 
 /**
  * Site settings editor. Every field here maps to a column of `site_configs`
  * (see `/api/settings`); there are no client-only toggles. Saving sends only
  * the fields shown, so values managed elsewhere are never wiped.
+ *
+ * The public contact block (email, phone, WhatsApp + default message,
+ * address, opening hours, socials) is the only source of contact details on
+ * the public site — empty fields are hidden there.
  */
 
 const SETTINGS_ADMINS: readonly Role[] = ['SUPER_ADMIN', 'CONTENT_ADMIN']
@@ -34,7 +39,9 @@ interface SettingsForm {
   email: string
   phone: string
   whatsapp: string
+  whatsappMessage: string
   address: string
+  openingHours: string
   logoUrl: string
   faviconUrl: string
   socialLinks: Record<SocialKey, string>
@@ -52,7 +59,9 @@ const EMPTY_FORM: SettingsForm = {
   email: '',
   phone: '',
   whatsapp: '',
+  whatsappMessage: '',
   address: '',
+  openingHours: '',
   logoUrl: '',
   faviconUrl: '',
   socialLinks: EMPTY_SOCIAL,
@@ -61,7 +70,7 @@ const EMPTY_FORM: SettingsForm = {
 /** Order used to move focus to the first invalid field. */
 const FIELD_ORDER: FieldKey[] = [
   'name', 'tagline', 'url', 'description', 'logoUrl', 'faviconUrl',
-  'email', 'phone', 'whatsapp', 'address',
+  'email', 'phone', 'whatsapp', 'whatsappMessage', 'address', 'openingHours',
   ...SOCIAL_FIELDS.map((f) => `socialLinks.${f.key}` as const),
 ]
 
@@ -79,7 +88,9 @@ function toForm(data: Record<string, unknown>): SettingsForm {
     email: str(data.email),
     phone: str(data.phone),
     whatsapp: str(data.whatsapp),
+    whatsappMessage: str(data.whatsappMessage),
     address: str(data.address),
+    openingHours: str(data.openingHours),
     logoUrl: str(data.logoUrl),
     faviconUrl: str(data.faviconUrl),
     socialLinks,
@@ -136,9 +147,8 @@ export function StudioSettings() {
   const [flushStatus, setFlushStatus] = useState<{ tone: 'ok' | 'error'; text: string } | null>(null)
   const pendingFocus = useRef<FieldKey | null>(null)
 
-  useEffect(() => {
-    const controller = new AbortController()
-    fetch('/api/settings', { signal: controller.signal })
+  const loadSettings = useCallback((signal?: AbortSignal) => {
+    return fetch('/api/settings', { signal, cache: 'no-store' })
       .then(async (res) => {
         const json: unknown = await res.json()
         if (!res.ok || !json || typeof json !== 'object' || !('data' in json) || !json.data || typeof json.data !== 'object') {
@@ -152,8 +162,13 @@ export function StudioSettings() {
         console.warn('[settings] Could not load site settings:', err)
         setLoadState('error')
       })
-    return () => controller.abort()
   }, [])
+
+  useEffect(() => {
+    const controller = new AbortController()
+    void loadSettings(controller.signal)
+    return () => controller.abort()
+  }, [loadSettings])
 
   useEffect(() => {
     const key = pendingFocus.current
@@ -197,6 +212,8 @@ export function StudioSettings() {
       if (res.ok && result.success) {
         setErrors({})
         setStatus({ tone: 'ok', text: `Pengaturan tersimpan oleh ${actorName}.` })
+        // Reload so the form shows the stored (normalised) values, e.g. the WhatsApp number.
+        void loadSettings()
         return
       }
       const fieldErrors: Partial<Record<FieldKey, string>> = {}
@@ -255,6 +272,23 @@ export function StudioSettings() {
       )}
     </Field>
   )
+
+  const textarea = (key: 'whatsappMessage' | 'address' | 'openingHours', label: string, rows: number, hint?: string) => (
+    <Field id={fieldId(key)} label={label} hint={hint} error={errors[key]}>
+      {(props) => (
+        <textarea
+          {...props}
+          rows={rows}
+          disabled={disabled}
+          value={form[key]}
+          onChange={(e) => setField(key, e.target.value)}
+          className={inputClass}
+        />
+      )}
+    </Field>
+  )
+
+  const whatsappPreview = buildWhatsappHref(form.whatsapp)
 
   const cardTitle = (icon: React.ReactNode, title: string) => (
     <div className="flex items-center gap-2 pb-2 border-b border-white/10">
@@ -342,21 +376,17 @@ export function StudioSettings() {
           <legend className="sr-only">Kontak publik</legend>
           {cardTitle(<Phone className="w-4 h-4 text-info" aria-hidden="true" />, 'Kontak publik')}
           <div className="space-y-3">
-            {text('email', 'Email', { type: 'email' })}
-            {text('phone', 'Telepon', { type: 'tel' })}
-            {text('whatsapp', 'WhatsApp', { type: 'tel', hint: 'Angka saja, boleh diawali +. Contoh: +62 812 0000 0000' })}
-            <Field id={fieldId('address')} label="Alamat" error={errors.address}>
-              {(props) => (
-                <textarea
-                  {...props}
-                  rows={2}
-                  disabled={disabled}
-                  value={form.address}
-                  onChange={(e) => setField('address', e.target.value)}
-                  className={inputClass}
-                />
-              )}
-            </Field>
+            {text('email', 'Email publik', { type: 'email', hint: 'Tampil di footer, menu, halaman kontak, dan tombol kirim brief lewat email.' })}
+            {text('phone', 'Telepon', { type: 'tel', hint: 'Ditampilkan apa adanya dan dipakai untuk tautan tel:. Contoh: +62 21 1234 5678' })}
+            {text('whatsapp', 'Nomor WhatsApp', {
+              type: 'tel',
+              hint: `Disimpan dalam format internasional tanpa spasi; awalan 0 dibaca sebagai +62. ${
+                whatsappPreview ? `Tautan: ${whatsappPreview}` : 'Kosongkan untuk menyembunyikan tombol WhatsApp.'
+              }`,
+            })}
+            {textarea('whatsappMessage', 'Pesan awal WhatsApp', 2, 'Opsional. Teks yang terisi otomatis saat pengunjung membuka WhatsApp dari tombol situs.')}
+            {textarea('address', 'Alamat', 2)}
+            {textarea('openingHours', 'Jam operasional', 2, 'Teks bebas, mis. "Senin–Jumat, 09.00–17.00 WIB".')}
           </div>
         </fieldset>
 

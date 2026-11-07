@@ -10,6 +10,7 @@ import { SectionHead } from '@/components/ui/SectionHead'
 import { Icon } from '@/components/Icon'
 import { getProjectBySlug, getProjects } from '@/lib/content/spatium'
 import { BlockRenderer } from '@/components/blocks/BlockRenderer'
+import { getPublicContact } from '@/lib/content/contact'
 import { GaussianSplatViewer } from '@/components/spatial/GaussianSplatViewer'
 import { siteConfig } from '@/config/site'
 import { MapPin, ArrowRight } from 'lucide-react'
@@ -104,7 +105,7 @@ export default async function ProjectDetailPage({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
-        <BlockRenderer blocks={view.blocks} />
+        <BlockRenderer blocks={view.blocks} contextData={{ contact: await getPublicContact() }} />
       </main>
     )
   }

@@ -7,6 +7,7 @@ import { getPublishedPage, listPublishedSlugs } from '@/lib/pages/repository'
 import { parseRobots } from '@/lib/pages/render'
 import { siteConfig } from '@/config/site'
 import { DynamicPageView } from '@/components/blocks/DynamicPageView'
+import { getPublicContact } from '@/lib/content/contact'
 
 /**
  * Root-level `/<slug>` resolution, in order:
@@ -51,7 +52,7 @@ export default async function RootSlugPage({ params }: { params: Promise<{ slug:
   const { slug } = await params
 
   const page = await loadPage(slug)
-  if (page) return <DynamicPageView title={page.title} slug={page.slug} blocks={page.blocks} />
+  if (page) return <DynamicPageView title={page.title} slug={page.slug} blocks={page.blocks} contact={await getPublicContact()} />
 
   const article = await getCoreArticleBySlug(slug)
   if (article) permanentRedirect(`/journal/${encodeURIComponent(article.slug)}`)

@@ -8,7 +8,7 @@ import { siteConfig } from '@/config/site'
 type JsonLdSchema = Record<string, unknown>
 
 // Social profiles are Studio settings (DB); the static default has none.
-export function createSchemaGenerators(site: SeoSite = { ...siteConfig, social: {} }) {
+export function createSchemaGenerators(site: SeoSite = { ...siteConfig, email: null, phone: null, social: {} }) {
 function generateOrganizationSchema(): JsonLdSchema {
   return {
     '@context': 'https://schema.org',
@@ -16,14 +16,19 @@ function generateOrganizationSchema(): JsonLdSchema {
     name: site.name,
     url: site.url,
     description: site.description,
-    contactPoint: {
-      '@type': 'ContactPoint',
-      ...(site.phone ? { telephone: site.phone } : {}),
-      contactType: 'customer service',
-      email: site.email,
-      areaServed: 'ID',
-      availableLanguage: ['Indonesian', 'English'],
-    },
+    // A ContactPoint only exists when Studio settings hold a phone or email.
+    ...(site.phone || site.email
+      ? {
+          contactPoint: {
+            '@type': 'ContactPoint',
+            ...(site.phone ? { telephone: site.phone } : {}),
+            contactType: 'customer service',
+            ...(site.email ? { email: site.email } : {}),
+            areaServed: 'ID',
+            availableLanguage: ['Indonesian', 'English'],
+          },
+        }
+      : {}),
     sameAs: Object.values(site.social).filter(Boolean),
     ...(site.address ? { address: { '@type': 'PostalAddress', streetAddress: site.address } } : {}),
   }
@@ -143,7 +148,7 @@ function generateLocalBusinessSchema(): JsonLdSchema {
     name: site.name,
     url: site.url,
     ...(site.phone ? { telephone: site.phone } : {}),
-    email: site.email,
+    ...(site.email ? { email: site.email } : {}),
     ...(site.address ? { address: { '@type': 'PostalAddress', streetAddress: site.address } } : {}),
     sameAs: Object.values(site.social).filter(Boolean),
   }

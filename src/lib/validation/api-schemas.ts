@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { NextResponse } from 'next/server'
+import { normaliseWhatsappNumber } from '@/lib/contact/public-contact'
 
 // --- 1. Articles Mutation Schemas --------------------------------------------
 export const createArticleSchema = z.object({
@@ -61,6 +62,31 @@ const assetPathOrUrl = z
   .refine((value) => !value || (/^\/(?!\/)[\w\-./]+$/.test(value) && !value.includes('..')) || httpsUrlOrEmpty.safeParse(value).success, 'Gunakan path lokal (mis. /brand/logo.svg) atau URL https://.')
 
 /**
+ * WhatsApp number: '' clears it; otherwise normalised to E.164 digits without
+ * "+" (spaces/dashes removed, leading 0 → 62) and rejected when not 8–15 digits.
+ */
+const whatsappNumberOrEmpty = z
+  .string()
+  .trim()
+  .max(30, 'Nomor WhatsApp maksimal 30 karakter.')
+  .transform((value, ctx) => {
+    if (!value) return ''
+    const digits = normaliseWhatsappNumber(value)
+    if (!digits) {
+      ctx.addIssue({ code: 'custom', message: 'Nomor WhatsApp tidak valid. Gunakan format internasional, mis. +62 812 3456 7890.' })
+      return z.NEVER
+    }
+    return digits
+  })
+
+/** Phone for display and tel: links: digits, spaces, + ( ) - . only. */
+const phoneOrEmpty = z
+  .string()
+  .trim()
+  .max(30, 'Telepon maksimal 30 karakter.')
+  .refine((value) => !value || (/^\+?[\d\s().-]+$/.test(value) && (value.match(/\d/g) ?? []).length >= 6), 'Telepon hanya angka, spasi, +, (, ), - dan minimal 6 digit.')
+
+/**
  * Site settings (`site_configs`, single row). Every field is optional: only
  * keys present in the request are written, so omitted fields keep their value.
  */
@@ -70,10 +96,12 @@ export const settingsMutationSchema = z
     tagline: optionalText(300, 'Tagline'),
     description: optionalText(500, 'Deskripsi'),
     url: z.string().trim().min(1, 'URL situs wajib diisi.').max(300).optional(),
-    email: z.union([z.literal(''), z.string().trim().email('Format email tidak valid.')]).nullish(),
-    phone: optionalText(50, 'Telepon'),
-    whatsapp: z.union([z.literal(''), z.string().trim().regex(/^\+?[0-9 ]{6,20}$/, 'Nomor WhatsApp hanya angka, boleh diawali +.')]).nullish(),
+    email: z.string().trim().toLowerCase().max(200, 'Email maksimal 200 karakter.').refine((value) => !value || z.email().safeParse(value).success, 'Format email tidak valid.').nullish(),
+    phone: phoneOrEmpty.nullish(),
+    whatsapp: whatsappNumberOrEmpty.nullish(),
+    whatsappMessage: optionalText(500, 'Pesan WhatsApp'),
     address: optionalText(500, 'Alamat'),
+    openingHours: optionalText(300, 'Jam operasional'),
     logoUrl: assetPathOrUrl.nullish(),
     faviconUrl: assetPathOrUrl.nullish(),
     socialLinks: z.partialRecord(z.enum(SOCIAL_NETWORKS), httpsUrlOrEmpty).optional(),

@@ -53,7 +53,7 @@ tests/                   # Vitest (sebagian memakai database lokal)
 ### 3.3 Konten jujur (Zero-Mock)
 - Konten yang dikelola Studio (artikel, halaman, portofolio, layanan, redirect, pengaturan) **hanya** dibaca dari database. UI, sitemap, dan Delivery API tidak boleh mengimpor `src/data/seed/*`.
 - Tidak ada fallback palsu (`dbData || MOCK`). Galat database dicatat; tampilkan state kosong yang jujur (`[]`/`null`).
-- Tidak ada angka, klien, testimoni, kontak, atau klaim yang tidak bisa dibuktikan — termasuk nilai default form dan contoh blok. Kontak publik berasal dari env dan disembunyikan bila kosong.
+- Tidak ada angka, klien, testimoni, kontak, atau klaim yang tidak bisa dibuktikan — termasuk nilai default form dan contoh blok. Kontak publik berasal dari Pengaturan Studio (database, `getPublicContact()`) dan disembunyikan bila kosong.
 - Narasi brand statis (pipeline, manfaat) hanya di `src/config/spatium-story.ts`, bersumber dari deck.
 
 ### 3.4 Blok

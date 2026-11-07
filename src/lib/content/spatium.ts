@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { prisma } from '@/lib/db/prisma'
 import { coverAltFrom } from '@/lib/db/catalogMutations'
 import { getArticleBySlug, getArticles } from '@/lib/db/articles'
+import { getPublicContact } from './contact'
 import type { Article as CmsArticle } from './types'
 import {
   isServiceVisual,
@@ -319,50 +320,13 @@ export async function getUseCaseMenu(): Promise<UseCaseMenuItem[]> {
 
 /* --------------------------------- Socials -------------------------------- */
 
-const SOCIAL_LABELS: Record<string, string> = {
-  instagram: 'Instagram',
-  linkedin: 'LinkedIn',
-  youtube: 'YouTube',
-  tiktok: 'TikTok',
-  facebook: 'Facebook',
-  x: 'X',
-  twitter: 'X',
-  vimeo: 'Vimeo',
-  behance: 'Behance',
-}
-const socialLinksColumn = z.record(z.string(), z.string())
-
 /**
- * Social profiles set in Studio settings (`site_configs.social_links`, a JSON
- * object `{ "<network>": "<https url>" }`). Only absolute https URLs are kept;
- * [] when unset so the UI hides the list instead of inventing handles.
+ * Social profiles set in Studio settings (`site_configs.social_links`); only
+ * absolute https URLs are kept, [] when unset. Part of the public contact
+ * profile — see getPublicContact().
  */
 export async function getSocialLinks(): Promise<SocialLink[]> {
-  if (!hasDb()) return []
-  try {
-    const row = await prisma.orm.public.SiteConfig.where({ id: 1 }).first()
-    const links = parseJsonColumn(row?.socialLinks, socialLinksColumn, 'site_configs.social_links') ?? {}
-    return Object.entries(links).flatMap(([network, raw]) => {
-      const href = raw.trim()
-      if (!href) return []
-      let url: URL
-      try {
-        url = new URL(href)
-      } catch (err) {
-        console.warn(`[content] social link "${network}" is not a URL — skipped.`, err)
-        return []
-      }
-      if (url.protocol !== 'https:') {
-        console.warn(`[content] social link "${network}" is not https — skipped.`)
-        return []
-      }
-      const key = network.trim().toLowerCase()
-      return [{ label: SOCIAL_LABELS[key] ?? network.trim(), href: url.href }]
-    })
-  } catch (err) {
-    console.error('[content] getSocialLinks failed:', err)
-    return []
-  }
+  return (await getPublicContact()).socials
 }
 
 /**

@@ -10,7 +10,7 @@ export const getSeoSite = cache(async (): Promise<SeoSite> => {
   const profile = await getSiteProfile()
   return {
     name: profile.name, url: profile.url, tagline: profile.tagline || '', description: profile.description || '',
-    phone: profile.phone || null, email: profile.email || '', social: profile.socialLinks,
+    phone: profile.phone || null, email: profile.email || null, social: profile.socialLinks,
     address: profile.address || undefined, defaultOgImage: siteConfig.defaultOgImage,
     locale: profile.defaultLocale === 'en' ? 'en_US' : 'id_ID',
   }

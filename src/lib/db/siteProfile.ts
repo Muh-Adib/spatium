@@ -53,10 +53,11 @@ export async function getSiteProfile(): Promise<SiteProfileEntity> {
       tagline: siteConfig.tagline,
       description: siteConfig.description,
       url: siteConfig.url,
-      whatsapp: siteConfig.whatsapp,
-      email: siteConfig.email,
-      phone: siteConfig.phone,
-      address: siteConfig.address,
+      // Contact channels exist only in Studio settings — none without a row.
+      whatsapp: null,
+      email: null,
+      phone: null,
+      address: null,
       // No invented assets: logo/favicon stay empty until set in Studio settings.
       logoUrl: null,
       faviconUrl: null,

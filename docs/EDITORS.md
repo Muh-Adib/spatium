@@ -95,11 +95,25 @@ Manajer di tab **Portofolio** dan **Layanan** memakai aturan yang sama (`src/lib
 
 ## Pengaturan situs
 
-Tab **Pengaturan** hanya menampilkan kolom yang benar-benar tersimpan di `site_configs`: nama, tagline, URL produksi, deskripsi, logo, favicon, email, telepon, WhatsApp, alamat, dan akun sosial (Instagram, LinkedIn, YouTube, TikTok, Facebook, X, Vimeo, Behance — URL `https://` lengkap). Kolom kosong disembunyikan di situs.
+Tab **Pengaturan** hanya menampilkan kolom yang benar-benar tersimpan di `site_configs`: nama, tagline, URL produksi, deskripsi, logo, favicon, kontak publik, dan akun sosial (Instagram, LinkedIn, YouTube, TikTok, Facebook, X, Vimeo, Behance — URL `https://` lengkap). Kolom kosong disembunyikan di situs.
+
+**Kontak publik** adalah satu-satunya sumber kontak di situs — tidak ada nilai dari env atau bawaan:
+
+| Kolom | Tampil di |
+|---|---|
+| Email publik | Footer, menu mobile, halaman kontak, tombol "Send by email" formulir brief, blok `studio-cta`, JSON-LD |
+| Telepon | Footer, halaman kontak (tautan `tel:`), JSON-LD |
+| Nomor WhatsApp + pesan awal | Footer, halaman kontak, tombol WhatsApp blok `studio-cta`, tombol "Kirim via WhatsApp" formulir brief; blok `hero-service` memakai nomornya dengan pesan dari kolom `whatsappPrompt` blok |
+| Alamat | Footer, halaman kontak, JSON-LD |
+| Jam operasional | Footer, halaman kontak |
+
+- Nomor WhatsApp dinormalisasi ke format E.164 tanpa `+` (`+62 812-3456-7890` → `6281234567890`; awalan `0` dibaca sebagai `+62`). Nomor di luar 8–15 digit ditolak. Tautan: `https://wa.me/<nomor>?text=<pesan awal>`, dibuka di tab baru.
+- Kosongkan nomor WhatsApp untuk menyembunyikan semua tombol WhatsApp; blok `studio-cta` lalu menautkan ke `/contact`.
 
 - Hanya SUPER_ADMIN dan CONTENT_ADMIN yang bisa menyimpan; role lain melihat mode baca.
 - Simpan bersifat parsial: kolom yang dikelola di tempat lain tidak ikut terhapus.
 - Galat tampil inline per kolom, fokus pindah ke kolom pertama yang salah.
+- Simpan me-revalidate layout (semua halaman), `/contact`, `/about`, halaman layanan/portofolio/halaman dinamis, dan `/sitemap.xml`.
 - Tombol **Perbarui cache halaman publik** me-revalidate `/` dan `/sitemap.xml` dan melaporkan hasil sebenarnya.
 
 ## Redirect

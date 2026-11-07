@@ -58,6 +58,8 @@ Membaca (GET) terbuka untuk semua pengguna Studio yang masuk, kecuali konten edi
 
 - `POST /api/settings` memakai skema Zod ketat (kunci tak dikenal ditolak) dan **pembaruan parsial**: hanya kolom yang dikirim yang ditulis; string kosong mengosongkan kolom. Kolom yang tidak dikirim tidak lagi ikut terhapus.
 - Akun sosial (`instagram`, `linkedin`, `youtube`, `tiktok`, `facebook`, `x`, `vimeo`, `behance`) hanya menerima URL `https://`. Logo dan favicon: path lokal atau URL `https://`.
+- Kontak publik: email divalidasi; telepon hanya angka, spasi, `+ ( ) - .` (≥6 digit); WhatsApp dinormalisasi ke E.164 (8–15 digit, tanpa `+`) sebelum disimpan; pesan awal WhatsApp ≤500 karakter, jam operasional ≤300. Situs hanya membangun tautan `mailto:`, `tel:`, dan `https://wa.me/` dari nilai tervalidasi ini (`src/lib/contact/public-contact.ts`); tautan WhatsApp memakai `target="_blank"` + `rel="noopener noreferrer"`.
+- Kontak publik hanya dibaca dari database lewat `getPublicContact()` (`src/lib/content/contact.ts`); tidak ada variabel env atau alamat bawaan. Galat database → profil kosong (semua kanal disembunyikan) dan dicatat.
 - Setiap simpan menulis `ContentRevision` (sebelum + perubahan) dan `SeoAuditLog` dalam satu transaksi.
 - Tidak ada nilai bawaan palsu: logo/favicon kosong sampai diisi di Studio.
 

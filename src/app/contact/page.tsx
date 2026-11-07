@@ -1,12 +1,13 @@
 import type { Metadata } from 'next'
 import { PageHero } from '@/components/ui/PageHero'
 import { InquiryForm } from '@/components/forms/InquiryForm'
-import { getSocialLinks, getUseCaseNav } from '@/lib/content/spatium'
+import { getUseCaseNav } from '@/lib/content/spatium'
+import { getPublicContact } from '@/lib/content/contact'
 import { Reveal } from '@/components/ui/Reveal'
 import { Icon } from '@/components/Icon'
-import { CONTACT } from '@/data/site'
 import { CONTACT_FAQS, CONTACT_STEPS } from '@/config/spatium-story'
-import { siteConfig, telHref, whatsappHref } from '@/config/site'
+import { siteConfig } from '@/config/site'
+import type { PublicContact } from '@/lib/contact/public-contact'
 import '@/pages/contact.css'
 
 const SITE_URL = siteConfig.url
@@ -20,28 +21,36 @@ export const metadata: Metadata = {
   },
 }
 
-const jsonLd = [
-  {
-    '@context': 'https://schema.org',
-    '@type': 'ContactPage',
-    name: 'Kontak SPATIUM',
-    url: `${SITE_URL}/contact`,
-    mainEntity: {
-      '@type': 'Organization',
-      name: 'SPATIUM Spatial Technology Studio',
-      url: SITE_URL,
-      email: CONTACT.email,
+/** Contact channels in JSON-LD come from Studio settings; empty ones are omitted. */
+function contactJsonLd(contact: PublicContact) {
+  return [
+    {
+      '@context': 'https://schema.org',
+      '@type': 'ContactPage',
+      name: 'Kontak SPATIUM',
+      url: `${SITE_URL}/contact`,
+      mainEntity: {
+        '@type': 'Organization',
+        name: 'SPATIUM Spatial Technology Studio',
+        url: SITE_URL,
+        ...(contact.email ? { email: contact.email } : {}),
+        ...(contact.phone ? { telephone: contact.phone } : {}),
+        ...(contact.address ? { address: { '@type': 'PostalAddress', streetAddress: contact.address } } : {}),
+        ...(contact.socials.length ? { sameAs: contact.socials.map((s) => s.href) } : {}),
+      },
     },
-  },
-]
+  ]
+}
 
 export default async function ContactPage() {
-  const [services, socials] = await Promise.all([getUseCaseNav(), getSocialLinks()])
+  const [services, contact] = await Promise.all([getUseCaseNav(), getPublicContact()])
+  const socials = contact.socials
+  const hasDetails = Boolean(contact.mailtoHref || contact.telHref || contact.whatsappHref || contact.address || contact.hours)
   return (
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(contactJsonLd(contact)) }}
       />
 
       <PageHero
@@ -55,11 +64,11 @@ export default async function ContactPage() {
         crumbs={[{ label: 'Home', to: '/' }, { label: 'Kontak' }]}
         meta={
           <>
-            {CONTACT.location && (
+            {contact.address ? (
               <span className="pill">
-                <Icon name="globe" size={13} /> {CONTACT.location}
+                <Icon name="globe" size={13} /> {contact.address}
               </span>
-            )}
+            ) : null}
           </>
         }
       />
@@ -85,46 +94,46 @@ export default async function ContactPage() {
               ))}
             </ul>
 
-            <div className="contact__details">
-              <h3 className="mono contact__details-title text-cyan-400">Rincian Studio</h3>
-              <ul>
-                <li>
-                  <Icon name="mail" size={16} />
-                  <a href={`mailto:${CONTACT.email}`} className="text-white hover:text-cyan-400">{CONTACT.email}</a>
-                </li>
-                {CONTACT.phone && telHref(CONTACT.phone) && (
-                  <li>
-                    <Icon name="phone" size={16} />
-                    <a href={telHref(CONTACT.phone) ?? undefined} className="text-white hover:text-cyan-400">{CONTACT.phone}</a>
-                  </li>
-                )}
-                {whatsappHref(CONTACT.whatsapp, 'Halo SPATIUM, saya ingin berkonsultasi.') && (
-                  <li>
-                    <Icon name="phone" size={16} />
-                    <a
-                      href={whatsappHref(CONTACT.whatsapp, 'Halo SPATIUM, saya ingin berkonsultasi.') ?? undefined}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-white hover:text-cyan-400"
-                    >
-                      WhatsApp
-                    </a>
-                  </li>
-                )}
-                {CONTACT.location && (
-                  <li>
-                    <Icon name="pin" size={16} />
-                    <span className="text-neutral-300">{CONTACT.location}</span>
-                  </li>
-                )}
-                {CONTACT.hours && (
-                  <li>
-                    <Icon name="clock" size={16} />
-                    <span className="text-neutral-300">{CONTACT.hours}</span>
-                  </li>
-                )}
-              </ul>
-            </div>
+            {hasDetails ? (
+              <div className="contact__details">
+                <h3 className="mono contact__details-title text-cyan-400">Rincian Studio</h3>
+                <ul>
+                  {contact.mailtoHref && contact.email ? (
+                    <li>
+                      <Icon name="mail" size={16} />
+                      <a href={contact.mailtoHref} className="text-white hover:text-cyan-400">{contact.email}</a>
+                    </li>
+                  ) : null}
+                  {contact.telHref && contact.phone ? (
+                    <li>
+                      <Icon name="phone" size={16} />
+                      <a href={contact.telHref} className="text-white hover:text-cyan-400">{contact.phone}</a>
+                    </li>
+                  ) : null}
+                  {contact.whatsappHref ? (
+                    <li>
+                      <Icon name="phone" size={16} />
+                      <a href={contact.whatsappHref} target="_blank" rel="noopener noreferrer" className="text-white hover:text-cyan-400">
+                        WhatsApp
+                        <span className="sr-only"> (tab baru)</span>
+                      </a>
+                    </li>
+                  ) : null}
+                  {contact.address ? (
+                    <li>
+                      <Icon name="pin" size={16} />
+                      <span className="text-neutral-300 whitespace-pre-line">{contact.address}</span>
+                    </li>
+                  ) : null}
+                  {contact.hours ? (
+                    <li>
+                      <Icon name="clock" size={16} />
+                      <span className="text-neutral-300 whitespace-pre-line">{contact.hours}</span>
+                    </li>
+                  ) : null}
+                </ul>
+              </div>
+            ) : null}
 
             {socials.length > 0 ? (
               <div className="contact__socials">
@@ -144,7 +153,7 @@ export default async function ContactPage() {
           </Reveal>
 
           <Reveal className="contact__main" delay={100} variant="scale">
-            <InquiryForm services={services} />
+            <InquiryForm services={services} email={contact.email} whatsapp={contact.whatsapp} />
           </Reveal>
         </div>
       </section>

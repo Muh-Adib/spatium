@@ -372,6 +372,10 @@ model SiteConfig {
   email                   String?
   phone                   String?
   address                 String?
+  /// Free-text opening hours shown on the public site (hidden when null).
+  openingHours            String?   @map("opening_hours")
+  /// Optional pre-filled text for wa.me links.
+  whatsappMessage         String?   @map("whatsapp_message")
   logoUrl                 String?   @map("logo_url")
   faviconUrl              String?   @map("favicon_url")
   socialLinks             String?   @map("social_links")

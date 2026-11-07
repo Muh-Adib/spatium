@@ -6,6 +6,7 @@ import { getServiceBySlug } from '@/lib/db/services'
 import { getPortfolioBySlug } from '@/lib/db/portfolio'
 import StudioLivePreview from '@/components/studio/StudioLivePreview'
 import { DynamicPageView } from '@/components/blocks/DynamicPageView'
+import { getPublicContact } from '@/lib/content/contact'
 import { getPageById } from '@/lib/pages/repository'
 import { pageIdSchema } from '@/lib/pages/http'
 import { AlertCircle } from 'lucide-react'
@@ -42,7 +43,7 @@ export default async function AdminEntityPreviewPage({ params }: Props) {
           {page.status === 'published' ? '' : ' (belum tampil di situs)'}
         </p>
         <main id="main">
-          <DynamicPageView title={page.title} slug={page.slug} blocks={page.blocks} />
+          <DynamicPageView title={page.title} slug={page.slug} blocks={page.blocks} contact={await getPublicContact()} />
         </main>
       </>
     )

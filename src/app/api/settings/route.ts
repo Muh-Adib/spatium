@@ -33,9 +33,11 @@ export async function GET() {
           description: row.description || '',
           url: row.url,
           whatsapp: row.whatsapp || '',
+          whatsappMessage: row.whatsappMessage || '',
           email: row.email || '',
           phone: row.phone || '',
           address: row.address || '',
+          openingHours: row.openingHours || '',
           logoUrl: row.logoUrl || '',
           faviconUrl: row.faviconUrl || '',
           socialLinks: parseSocialLinks(row.socialLinks),
@@ -50,11 +52,13 @@ export async function GET() {
         description:
           'SPATIUM adalah studio teknologi spasial: laser scan, point cloud, geometri 3D, dan 3D Gaussian Splat untuk digital twin industri kreatif.',
         url: 'https://spatium.id',
-        whatsapp: process.env.NEXT_PUBLIC_WHATSAPP || '',
-        // AGENTS.md §3.3: public contact comes from env and stays empty when unset.
-        email: process.env.NEXT_PUBLIC_STUDIO_EMAIL || '',
-        phone: process.env.NEXT_PUBLIC_PHONE || '',
+        // AGENTS.md §3.3: public contact exists only once saved in Studio settings.
+        whatsapp: '',
+        whatsappMessage: '',
+        email: '',
+        phone: '',
         address: '',
+        openingHours: '',
         logoUrl: '/brand/mark-spatium.svg',
         faviconUrl: '/favicon.svg',
         socialLinks: {},
@@ -95,9 +99,11 @@ export async function POST(request: NextRequest) {
       description: string | null
       url: string
       whatsapp: string | null
+      whatsappMessage: string | null
       email: string | null
       phone: string | null
       address: string | null
+      openingHours: string | null
       logoUrl: string | null
       faviconUrl: string | null
       socialLinks: string | null
@@ -106,6 +112,8 @@ export async function POST(request: NextRequest) {
     if (body.tagline !== undefined) payload.tagline = nullable(body.tagline)
     if (body.description !== undefined) payload.description = nullable(body.description)
     if (body.whatsapp !== undefined) payload.whatsapp = nullable(body.whatsapp)
+    if (body.whatsappMessage !== undefined) payload.whatsappMessage = nullable(body.whatsappMessage)
+    if (body.openingHours !== undefined) payload.openingHours = nullable(body.openingHours)
     if (body.email !== undefined) payload.email = nullable(body.email)
     if (body.phone !== undefined) payload.phone = nullable(body.phone)
     if (body.address !== undefined) payload.address = nullable(body.address)
@@ -153,11 +161,15 @@ export async function POST(request: NextRequest) {
       })
     })
 
-    // Site name, contact and social links render in the shared layout on every page.
+    // Site name, contact details (footer, header, contact page, WhatsApp CTAs in
+    // blocks) and social links render from the shared layout down on every page.
     try {
       revalidatePath('/', 'layout')
       revalidatePath('/contact')
       revalidatePath('/about')
+      revalidatePath('/services/[slug]', 'page')
+      revalidatePath('/portfolio/[slug]', 'page')
+      revalidatePath('/[slug]', 'page')
       revalidatePath('/sitemap.xml')
     } catch (err) {
       console.warn('[api/settings] revalidatePath failed:', err)

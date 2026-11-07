@@ -2,7 +2,7 @@
 
 import { useId, useMemo, useRef, useState } from 'react'
 import type { ServiceNavItem } from '@/lib/content/spatium-types'
-import { CONTACT } from '@/data/site'
+import { buildMailtoHref, buildWhatsappHref } from '@/lib/contact/public-contact'
 import { Icon } from '@/components/Icon'
 import './inquiry-form.css'
 
@@ -57,7 +57,19 @@ function buildEmailBody(values: Fields): string {
   ].join('\n')
 }
 
-export function InquiryForm({ services = [] }: { services?: ServiceNavItem[] }) {
+/**
+ * `email` and `whatsapp` come from Studio settings (getPublicContact()); the
+ * matching hand-off button is hidden when the value is empty.
+ */
+export function InquiryForm({
+  services = [],
+  email = null,
+  whatsapp = null,
+}: {
+  services?: ServiceNavItem[]
+  email?: string | null
+  whatsapp?: string | null
+}) {
   const uid = useId()
   const [values, setValues] = useState<Fields>(EMPTY)
   const [errors, setErrors] = useState<Errors>({})
@@ -66,12 +78,15 @@ export function InquiryForm({ services = [] }: { services?: ServiceNavItem[] }) 
   const [copied, setCopied] = useState(false)
   const summaryRef = useRef<HTMLDivElement | null>(null)
 
-  const mailtoHref = useMemo(() => {
-    const subject = `Project inquiry — ${values.service || 'SPATIUM'}`
-    return `mailto:${CONTACT.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(
-      buildEmailBody(values),
-    )}`
-  }, [values])
+  const mailtoHref = useMemo(
+    () =>
+      buildMailtoHref(email, {
+        subject: `Project inquiry — ${values.service || 'SPATIUM'}`,
+        body: buildEmailBody(values),
+      }),
+    [email, values],
+  )
+  const whatsappHref = useMemo(() => buildWhatsappHref(whatsapp, buildEmailBody(values)), [whatsapp, values])
 
   const update = (key: keyof Fields) => (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setValues((v) => ({ ...v, [key]: event.target.value }))
@@ -279,16 +294,27 @@ export function InquiryForm({ services = [] }: { services?: ServiceNavItem[] }) 
           <p>
             {ENDPOINT
               ? 'Terima kasih — brief Anda sudah kami terima dan tim SPATIUM akan menghubungi Anda.'
-              : 'Formulir ini belum terhubung ke server, jadi belum ada data yang terkirim. Ringkasan brief Anda ada di bawah — kirim lewat email dengan satu klik, atau salin ke email Anda.'}
+              : mailtoHref || whatsappHref
+                ? 'Formulir ini belum terhubung ke server, jadi belum ada data yang terkirim. Ringkasan brief Anda ada di bawah — kirim dengan satu klik, atau salin ringkasannya.'
+                : 'Formulir ini belum terhubung ke server, jadi belum ada data yang terkirim. Salin ringkasan brief di bawah untuk dikirim lewat kanal resmi SPATIUM.'}
           </p>
 
           <pre className="inquiry__summary">{buildEmailBody(values)}</pre>
 
           <div className="inquiry__success-actions">
-            <a className="btn btn--primary" href={mailtoHref}>
-              <Icon name="mail" size={16} />
-              Send by email
-            </a>
+            {mailtoHref ? (
+              <a className="btn btn--primary" href={mailtoHref}>
+                <Icon name="mail" size={16} />
+                Send by email
+              </a>
+            ) : null}
+            {whatsappHref ? (
+              <a className="btn btn--ghost" href={whatsappHref} target="_blank" rel="noopener noreferrer">
+                <Icon name="phone" size={16} />
+                Kirim via WhatsApp
+                <span className="sr-only"> (tab baru)</span>
+              </a>
+            ) : null}
             <button type="button" className="btn btn--ghost" onClick={copySummary}>
               <Icon name={copied ? 'check' : 'download'} size={16} />
               {copied ? 'Copied' : 'Copy summary'}

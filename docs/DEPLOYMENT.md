@@ -7,7 +7,7 @@ SPATIUM dideploy sebagai satu image Docker (Next.js 16 `output: 'standalone'`) b
 `Dockerfile` bertingkat: `deps` → `builder` → `runner`.
 
 - `builder` menjalankan `prisma contract emit` lalu `pnpm run build`. Kegagalan emit menghentikan build.
-- Variabel `NEXT_PUBLIC_*` di-inline saat build. Kirim lewat build args: `NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_GA_ID`, `NEXT_PUBLIC_GTM_ID`, `NEXT_PUBLIC_WHATSAPP`, `NEXT_PUBLIC_PHONE`, `NEXT_PUBLIC_STUDIO_ADDRESS`, `NEXT_PUBLIC_STUDIO_HOURS`. Mengubahnya butuh rebuild.
+- Variabel `NEXT_PUBLIC_*` di-inline saat build. Kirim lewat build args: `NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_GA_ID`, `NEXT_PUBLIC_GTM_ID`, `NEXT_PUBLIC_INQUIRY_ENDPOINT`. Mengubahnya butuh rebuild.
 - Runtime berjalan sebagai user `nextjs` di port 3000.
 - Healthcheck (`Dockerfile` dan `docker-compose.yml`) memanggil `GET /api/health`: 200 bila proses hidup dan database menjawab dalam 3 detik, 503 bila tidak — container ditandai *unhealthy* saat database mati.
 
@@ -24,9 +24,9 @@ Wajib di produksi:
 | `REVALIDATE_SECRET` | Webhook revalidasi ISR (`x-revalidate-secret`) |
 | `API_BEARER_TOKEN` | Token servis internal (≥32 karakter). Bukan untuk klien MCP. |
 
-Opsional: `BOOTSTRAP_ADMIN_EMAIL` + `BOOTSTRAP_ADMIN_PASSWORD_HASH` (akun pemulihan), `WEBHOOK_SECRET`, `GSC_CLIENT_EMAIL` + `GSC_PRIVATE_KEY` (Search Console), `PAGESPEED_API_KEY`, `NEXT_PUBLIC_STUDIO_EMAIL`, `NEXT_PUBLIC_INQUIRY_ENDPOINT`.
+Opsional: `BOOTSTRAP_ADMIN_EMAIL` + `BOOTSTRAP_ADMIN_PASSWORD_HASH` (akun pemulihan), `WEBHOOK_SECRET`, `GSC_CLIENT_EMAIL` + `GSC_PRIVATE_KEY` (Search Console), `PAGESPEED_API_KEY`, `NEXT_PUBLIC_INQUIRY_ENDPOINT`.
 
-Kontak publik (`NEXT_PUBLIC_PHONE`, `NEXT_PUBLIC_WHATSAPP`, `NEXT_PUBLIC_STUDIO_ADDRESS`, `NEXT_PUBLIC_STUDIO_HOURS`) disembunyikan dari situs bila kosong — jangan isi dengan placeholder.
+Kontak publik (email, telepon, WhatsApp + pesan awal, alamat, jam operasional, akun sosial) **bukan** variabel env: kelola di Studio → Pengaturan (tabel `site_configs`); berlaku tanpa rebuild dan disembunyikan bila kosong. `NEXT_PUBLIC_PHONE`, `NEXT_PUBLIC_WHATSAPP`, `NEXT_PUBLIC_STUDIO_ADDRESS`, `NEXT_PUBLIC_STUDIO_HOURS`, dan `NEXT_PUBLIC_STUDIO_EMAIL` sudah tidak dibaca — hapus dari Coolify setelah nilainya dipindahkan ke Pengaturan.
 
 Klien MCP **tidak** memakai variabel env; mereka memakai API key per klien yang dibuat di Studio (lihat [MCP.md](MCP.md)).
 

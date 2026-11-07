@@ -5,16 +5,17 @@ import { usePathname } from 'next/navigation'
 import { Header } from '@/components/layout/Header'
 import { Footer } from '@/components/layout/Footer'
 import { ScrollProgress, ClientLayoutEffects } from '@/components/layout/ScrollProgress'
-import type { SocialLink, UseCaseMenuItem } from '@/lib/content/spatium-types'
+import type { UseCaseMenuItem } from '@/lib/content/spatium-types'
+import type { PublicContact } from '@/lib/contact/public-contact'
 
 export function SiteShell({
   children,
   useCases,
-  socials,
+  contact,
 }: {
   children: React.ReactNode
   useCases: UseCaseMenuItem[]
-  socials: SocialLink[]
+  contact: PublicContact
 }) {
   const pathname = usePathname()
   const isAdmin = pathname?.startsWith('/admin')
@@ -26,12 +27,12 @@ export function SiteShell({
   return (
     <div className="app-shell">
       <ClientLayoutEffects />
-      <Header useCases={useCases} />
+      <Header useCases={useCases} contact={contact} />
       <ScrollProgress />
       <main id="main" className="app-main">
         {children}
       </main>
-      <Footer useCases={useCases} socials={socials} />
+      <Footer useCases={useCases} contact={contact} />
     </div>
   )
 }

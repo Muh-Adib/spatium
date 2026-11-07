@@ -9,6 +9,7 @@
  */
 import type React from 'react'
 import type { BlockType } from './registry'
+import type { PublicContact } from '@/lib/contact/public-contact'
 import { HeroCinemaBlock } from './hero-cinema/HeroCinemaBlock'
 import { SplatViewerBlock } from './splat-viewer/SplatViewerBlock'
 import { EditorialHeadingBlock } from './heading/EditorialHeadingBlock'
@@ -60,6 +61,8 @@ export interface BlockRenderContext {
   portfolios?: any[]
   subServices?: any[]
   services?: any[]
+  /** Public contact profile from Studio settings; contact CTAs hide when absent. */
+  contact?: PublicContact
 }
 
 /** Builds the element for one block. Most blocks only receive `block`; a few also read the page context. */
@@ -97,14 +100,14 @@ export const BLOCK_RENDERERS: { readonly [T in BlockType]: RenderBlock } = {
   table: blockOnly(TableBlock),
   'internal-links': blockOnly(InternalLinksBlock),
   'interactive-cta': blockOnly(InteractiveCtaBlock),
-  'studio-cta': blockOnly(StudioCtaBlock),
+  'studio-cta': (block, context) => <StudioCtaBlock block={block} contact={context?.contact} />,
   'deliverables-checklist': blockOnly(DeliverablesChecklistBlock),
   'workflow-phases': blockOnly(WorkflowPhasesBlock),
   'hero-portfolio': blockOnly(HeroPortfolioBlock),
   'hero-case-study': blockOnly(HeroPortfolioBlock),
   'portfolio-case-study': blockOnly(PortfolioCaseStudyBlock),
   'hero-department': blockOnly(HeroDepartmentBlock),
-  'hero-service': blockOnly(HeroServiceBlock),
+  'hero-service': (block, context) => <HeroServiceBlock block={block} contact={context?.contact} />,
   'tech-stack-chips': blockOnly(TechStackChipsBlock),
   'executive-quote-card': blockOnly(ExecutiveQuoteCardBlock),
   'engineering-pillars': blockOnly(EngineeringPillarsBlock),

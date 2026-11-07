@@ -24,10 +24,7 @@ export async function getSiteSettings(): Promise<SiteSetting> {
     siteName: process.env.NEXT_PUBLIC_SITE_NAME || siteConfig.name,
     siteDescription: siteConfig.description,
     siteUrl: process.env.NEXT_PUBLIC_SITE_URL || siteConfig.url,
-    whatsapp: process.env.NEXT_PUBLIC_WHATSAPP || siteConfig.whatsapp || undefined,
-    email: siteConfig.email || undefined,
-    phone: siteConfig.phone || undefined,
-    address: siteConfig.address || undefined,
+    // Contact channels live only in Studio settings (site_configs); none here.
   }
 }
 

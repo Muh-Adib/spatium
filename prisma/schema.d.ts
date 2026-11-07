@@ -23,7 +23,7 @@ import type {
 } from '@prisma/orm-postgres/contract/types';
 
 export type StorageHash =
-  StorageHashBase<'af752f8eb4487e6fcfe71ac8733f0ecc14520cd64fa1f34f2a25ac513aa62c03'>;
+  StorageHashBase<'a1bb06d9e6c6d701e23778775af5935ff35866ae9bba2076f0ab44fc016e1889'>;
 export type ExecutionHash =
   ExecutionHashBase<'a4bae7ed4fcf0d801cf9d3f4f45277365b2bd42215bc891a0834b89dbb28f9be'>;
 export type ProfileHash =
@@ -923,6 +923,7 @@ export namespace Models {
     indexNowKey: FieldOutputTypes['public']['SiteConfig']['indexNowKey'];
     logoUrl: FieldOutputTypes['public']['SiteConfig']['logoUrl'];
     name: FieldOutputTypes['public']['SiteConfig']['name'];
+    openingHours: FieldOutputTypes['public']['SiteConfig']['openingHours'];
     outputSpec: FieldOutputTypes['public']['SiteConfig']['outputSpec'];
     phone: FieldOutputTypes['public']['SiteConfig']['phone'];
     primaryPersona: FieldOutputTypes['public']['SiteConfig']['primaryPersona'];
@@ -934,6 +935,7 @@ export namespace Models {
     updatedAt: FieldOutputTypes['public']['SiteConfig']['updatedAt'];
     url: FieldOutputTypes['public']['SiteConfig']['url'];
     whatsapp: FieldOutputTypes['public']['SiteConfig']['whatsapp'];
+    whatsappMessage: FieldOutputTypes['public']['SiteConfig']['whatsappMessage'];
     readonly [RelationKeys]?: never;
   };
   export type public_SiteStat = {
@@ -4955,6 +4957,12 @@ type ContractBase = Omit<
                   };
                   readonly many: false;
                 };
+                readonly opening_hours: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: true;
+                  readonly many: false;
+                };
                 readonly output_spec: {
                   readonly dataType: 'pg/text';
                   readonly codecId: 'pg/text@1';
@@ -5024,6 +5032,12 @@ type ContractBase = Omit<
                   readonly many: false;
                 };
                 readonly whatsapp: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: true;
+                  readonly many: false;
+                };
+                readonly whatsapp_message: {
                   readonly dataType: 'pg/text';
                   readonly codecId: 'pg/text@1';
                   readonly nullable: true;
@@ -9311,6 +9325,10 @@ type ContractBase = Omit<
                 readonly nullable: false;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
               };
+              readonly openingHours: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
               readonly outputSpec: {
                 readonly nullable: true;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
@@ -9358,6 +9376,10 @@ type ContractBase = Omit<
                 readonly nullable: true;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
               };
+              readonly whatsappMessage: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
             };
             readonly relations: Record<string, never>;
             readonly storage: {
@@ -9378,6 +9400,7 @@ type ContractBase = Omit<
                 readonly indexNowKey: { readonly column: 'indexnow_key' };
                 readonly logoUrl: { readonly column: 'logo_url' };
                 readonly name: { readonly column: 'name' };
+                readonly openingHours: { readonly column: 'opening_hours' };
                 readonly outputSpec: { readonly column: 'output_spec' };
                 readonly phone: { readonly column: 'phone' };
                 readonly primaryPersona: { readonly column: 'primary_persona' };
@@ -9389,6 +9412,7 @@ type ContractBase = Omit<
                 readonly updatedAt: { readonly column: 'updated_at' };
                 readonly url: { readonly column: 'url' };
                 readonly whatsapp: { readonly column: 'whatsapp' };
+                readonly whatsappMessage: { readonly column: 'whatsapp_message' };
               };
             };
           };

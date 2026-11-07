@@ -1,11 +1,11 @@
 import Image from 'next/image'
-import Link from 'next/link'
 import { Zap, MessageSquare } from 'lucide-react'
-import { siteConfig, whatsappHref } from '@/config/site'
+import { buildWhatsappHref, type PublicContact } from '@/lib/contact/public-contact'
 import { ThematicWave } from '@/components/ui/ThematicWave'
 import { IframeEmbed } from '@/components/ui/IframeEmbed'
 
-export function HeroServiceBlock({ block }: { block: any }) {
+/** The WhatsApp CTA uses the number from Studio settings (`contact`) and is hidden without one. */
+export function HeroServiceBlock({ block, contact }: { block: any; contact?: PublicContact }) {
   const data = block?.data || block || {}
   const metrics = Array.isArray(block?.metrics)
     ? block.metrics
@@ -43,6 +43,8 @@ export function HeroServiceBlock({ block }: { block: any }) {
   const subtitle = block?.subtitle || data.subtitle
   const client = block?.client || data.client
   const whatsappPrompt = block?.whatsappPrompt || data.whatsappPrompt
+  // Shown only when the block sets a prompt and Studio settings have a number.
+  const whatsappUrl = whatsappPrompt ? buildWhatsappHref(contact?.whatsapp, whatsappPrompt) : null
 
   return (
     <section className="pt-28 pb-20 sm:pt-36 sm:pb-24 lg:pt-40 lg:pb-32 relative overflow-hidden bg-[var(--color-background)] text-white border-b border-[var(--card-border)] w-full">
@@ -87,21 +89,22 @@ export function HeroServiceBlock({ block }: { block: any }) {
         )}
 
         {/* WhatsApp CTA button */}
-        {whatsappPrompt && whatsappHref(siteConfig.whatsapp, whatsappPrompt) && (
+        {whatsappUrl ? (
           <div className="mt-8 flex flex-wrap gap-4 items-center">
-            <Link
-              href={whatsappHref(siteConfig.whatsapp, whatsappPrompt) ?? '/contact'}
+            <a
+              href={whatsappUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="btn btn--primary"
             >
-              <span className="btn__icon">
+              <span className="btn__icon" aria-hidden="true">
                 <MessageSquare className="w-4 h-4" />
               </span>
-              <span>Konsultasikan Spesifikasi</span>
-            </Link>
+              <span>Konsultasikan Spesifikasi via WhatsApp</span>
+              <span className="sr-only"> (tab baru)</span>
+            </a>
           </div>
-        )}
+        ) : null}
 
         {/* Primary Media & Metrics */}
         {(heroImageUrl || primaryMedia?.videoUrl || metrics.length > 0) && (

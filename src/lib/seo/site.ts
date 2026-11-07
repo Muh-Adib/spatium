@@ -5,7 +5,8 @@ export interface SeoSite {
   tagline: string
   /** Null/empty when unconfigured — JSON-LD omits the field instead of emitting a placeholder. */
   phone: string | null
-  email: string
+  /** Null/empty when unconfigured — omitted from JSON-LD. */
+  email: string | null
   social: Record<string, string>
   address?: string | null
   defaultOgImage: string

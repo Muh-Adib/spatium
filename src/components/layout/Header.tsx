@@ -5,8 +5,8 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { NAV, type NavItem } from '@/data/site'
-import { siteConfig } from '@/config/site'
 import type { UseCaseMenuItem } from '@/lib/content/spatium-types'
+import type { PublicContact } from '@/lib/contact/public-contact'
 import { Icon } from '@/components/Icon'
 import { BrandLogo } from '@/components/ui/BrandLogo'
 import { useBodyScrollLock } from '@/hooks'
@@ -31,8 +31,12 @@ function Logo() {
   )
 }
 
-/** `useCases` comes from the DB (published `service_categories` with `show_in_nav`). */
-export function Header({ useCases }: { useCases: UseCaseMenuItem[] }) {
+/**
+ * `useCases` comes from the DB (published `service_categories` with
+ * `show_in_nav`); `contact` from Studio settings — the mail link is hidden
+ * when no email is set.
+ */
+export function Header({ useCases, contact }: { useCases: UseCaseMenuItem[]; contact: PublicContact }) {
   const pathname = usePathname()
   const menuId = useId()
   const [scrolled, setScrolled] = useState(false)
@@ -269,9 +273,11 @@ export function Header({ useCases }: { useCases: UseCaseMenuItem[] }) {
           <Link href="/contact" className="sh-cta sh-cta--block">
             Mulai proyek <Icon name="arrow-right" size={15} />
           </Link>
-          <a className="sh-mobile__mail" href={`mailto:${siteConfig.email}`}>
-            {siteConfig.email}
-          </a>
+          {contact.mailtoHref && contact.email ? (
+            <a className="sh-mobile__mail" href={contact.mailtoHref}>
+              {contact.email}
+            </a>
+          ) : null}
         </div>
       </div>
     </>

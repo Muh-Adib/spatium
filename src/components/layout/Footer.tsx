@@ -1,14 +1,18 @@
 import Link from 'next/link'
-import { CONTACT } from '@/data/site'
-import { telHref, whatsappHref } from '@/config/site'
 import { Icon } from '@/components/Icon'
 import { BrandLogo } from '@/components/ui/BrandLogo'
-import type { SocialLink, UseCaseMenuItem } from '@/lib/content/spatium-types'
+import type { UseCaseMenuItem } from '@/lib/content/spatium-types'
+import type { PublicContact } from '@/lib/contact/public-contact'
 import './footer.css'
 
-/** `useCases` and `socials` are read from the DB by the root layout. */
-export function Footer({ useCases, socials }: { useCases: UseCaseMenuItem[]; socials: SocialLink[] }) {
+/**
+ * `useCases` and `contact` are read from the DB by the root layout. Each
+ * contact item is hidden when its Studio setting is empty.
+ */
+export function Footer({ useCases, contact }: { useCases: UseCaseMenuItem[]; contact: PublicContact }) {
   const year = new Date().getFullYear()
+  const socials = contact.socials
+  const hasContact = Boolean(contact.mailtoHref || contact.telHref || contact.whatsappHref || contact.address || contact.hours)
 
   return (
     <footer className="site-footer grain">
@@ -69,54 +73,61 @@ export function Footer({ useCases, socials }: { useCases: UseCaseMenuItem[]; soc
             </ul>
           </nav>
 
-          <div className="site-footer__col">
-            <h2 className="site-footer__heading">Get in touch</h2>
-            <ul className="site-footer__contact">
-              <li>
-                <Icon name="mail" size={16} />
-                <a href={`mailto:${CONTACT.email}`}>{CONTACT.email}</a>
-              </li>
-              {CONTACT.phone && telHref(CONTACT.phone) && (
-                <li>
-                  <Icon name="phone" size={16} />
-                  <a href={telHref(CONTACT.phone) ?? undefined}>{CONTACT.phone}</a>
-                </li>
-              )}
-              {whatsappHref(CONTACT.whatsapp) && (
-                <li>
-                  <Icon name="phone" size={16} />
-                  <a href={whatsappHref(CONTACT.whatsapp) ?? undefined} target="_blank" rel="noreferrer noopener">
-                    WhatsApp
-                  </a>
-                </li>
-              )}
-              {CONTACT.location && (
-                <li>
-                  <Icon name="pin" size={16} />
-                  <span>{CONTACT.location}</span>
-                </li>
-              )}
-              {CONTACT.hours && (
-                <li>
-                  <Icon name="clock" size={16} />
-                  <span>{CONTACT.hours}</span>
-                </li>
-              )}
-            </ul>
-            {socials.length > 0 ? (
-              <ul className="site-footer__socials">
-                {socials.map((social) => (
-                  <li key={social.href}>
-                    <a href={social.href} target="_blank" rel="noreferrer noopener">
-                      {social.label}
-                      <Icon name="external" size={14} aria-hidden="true" />
-                      <span className="sr-only"> (tab baru)</span>
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            ) : null}
-          </div>
+          {hasContact || socials.length > 0 ? (
+            <div className="site-footer__col">
+              <h2 className="site-footer__heading">Get in touch</h2>
+              {hasContact ? (
+                <ul className="site-footer__contact">
+                  {contact.mailtoHref && contact.email ? (
+                    <li>
+                      <Icon name="mail" size={16} />
+                      <a href={contact.mailtoHref}>{contact.email}</a>
+                    </li>
+                  ) : null}
+                  {contact.telHref && contact.phone ? (
+                    <li>
+                      <Icon name="phone" size={16} />
+                      <a href={contact.telHref}>{contact.phone}</a>
+                    </li>
+                  ) : null}
+                  {contact.whatsappHref ? (
+                    <li>
+                      <Icon name="phone" size={16} />
+                      <a href={contact.whatsappHref} target="_blank" rel="noopener noreferrer">
+                        WhatsApp
+                        <span className="sr-only"> (tab baru)</span>
+                      </a>
+                    </li>
+                  ) : null}
+                  {contact.address ? (
+                    <li>
+                      <Icon name="pin" size={16} />
+                      <span>{contact.address}</span>
+                    </li>
+                  ) : null}
+                  {contact.hours ? (
+                    <li>
+                      <Icon name="clock" size={16} />
+                      <span>{contact.hours}</span>
+                    </li>
+                  ) : null}
+                </ul>
+              ) : null}
+              {socials.length > 0 ? (
+                <ul className="site-footer__socials">
+                  {socials.map((social) => (
+                    <li key={social.href}>
+                      <a href={social.href} target="_blank" rel="noopener noreferrer">
+                        {social.label}
+                        <Icon name="external" size={14} aria-hidden="true" />
+                        <span className="sr-only"> (tab baru)</span>
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
+            </div>
+          ) : null}
         </div>
 
         <div className="site-footer__bottom">

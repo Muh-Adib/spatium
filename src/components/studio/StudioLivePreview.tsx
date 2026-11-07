@@ -265,15 +265,16 @@ export default function StudioLivePreview({
               </nav>
 
               <div className="flex items-center gap-3">
+                {/* Mirrors the public header CTA (contact page); contact channels come from Studio settings. */}
                 <a
-                  href={siteConfig.whatsapp ? `https://wa.me/${siteConfig.whatsapp}?text=Halo%20SPATIUM,%20saya%20tertarik%20dengan%20layanan%20Anda` : '/contact'}
+                  href="/contact"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#4d8bff] text-[#060A17] font-mono text-[11px] font-bold shadow hover:bg-[#6fb0ff] transition-all"
                 >
-                  <MessageCircle className="w-3.5 h-3.5 text-[#060A17]" />
-                  <span className="hidden sm:inline">Konsultasi WhatsApp</span>
-                  <span className="sm:hidden">WhatsApp</span>
+                  <MessageCircle className="w-3.5 h-3.5 text-[#060A17]" aria-hidden="true" />
+                  <span>Mulai proyek</span>
+                  <span className="sr-only"> (tab baru)</span>
                 </a>
               </div>
             </div>
