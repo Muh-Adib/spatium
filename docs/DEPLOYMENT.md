@@ -36,6 +36,7 @@ Compose punya tiga service: `postgres`, `migrate` (sekali jalan) dan `app`.
 
 - `migrate` dibangun dari stage `migrate` di `Dockerfile` dan menjalankan `prisma db update --yes` pada **setiap** deploy, lalu `scripts/seed-if-empty.ts`.
 - Seed hanya berjalan bila database belum punya portofolio, artikel, halaman, dan layanan — `db:seed` melakukan upsert, jadi menjalankannya di database berisi akan menimpa editan Studio. Matikan dengan `SEED_ON_EMPTY=false`.
+- Lalu `scripts/backfill-data.ts`: backfill data idempoten (hanya mengisi nilai yang kosong, tidak menimpa editan), mis. alt text cover kategori layanan ke `seoData.coverAlt`.
 - `app` baru start setelah `migrate` selesai sukses. Perubahan skema yang destruktif ditolak `db update` → deploy berhenti dan versi lama tetap jalan. Untuk itu: backup, lalu jalankan migrasi terencana secara manual.
 
 Akun pertama: login di `/pawon` dengan `BOOTSTRAP_ADMIN_EMAIL` + password yang hash-nya ada di `BOOTSTRAP_ADMIN_PASSWORD_HASH` (`pnpm exec tsx scripts/hash-password.ts`), lalu buat akun editor sungguhan dari tab **Pengguna**.

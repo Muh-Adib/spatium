@@ -183,6 +183,8 @@ async function seedServiceCatalogue() {
         metaDescription: c.metaDescription,
         keyOutcomes: JSON.stringify(c.keyOutcomes),
         blocks: JSON.stringify(c.blocks),
+        // The publication gate and Studio read cover alt from seoData.coverAlt.
+        seoData: JSON.stringify({ coverAlt: c.keyOutcomes.find((o) => o.label === 'imageAlt')?.value ?? c.title }),
       }
       const row = await tx.orm.public.ServiceCategory.upsert({
         conflictOn: { slug: c.slug },

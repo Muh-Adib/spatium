@@ -1,6 +1,7 @@
 import 'server-only'
 import { z } from 'zod'
 import { prisma } from '@/lib/db/prisma'
+import { coverAltFrom } from '@/lib/db/catalogMutations'
 import { getArticleBySlug, getArticles } from '@/lib/db/articles'
 import type { Article as CmsArticle } from './types'
 import {
@@ -182,6 +183,15 @@ type CategoryRow = {
   order: number | null
   metaTitle: string | null
   metaDescription: string | null
+  seoData: string | null
+}
+
+/**
+ * Cover alt: `seoData.coverAlt` is what Studio edits and the publication gate checks;
+ * the legacy `imageAlt` key outcome is only a fallback for rows not yet re-saved.
+ */
+function categoryCoverAlt(row: Pick<CategoryRow, 'seoData' | 'title'>, outcomes: LabelledList | null): string {
+  return coverAltFrom(row.seoData) ?? pick(outcomes, 'imageAlt')?.value ?? row.title
 }
 
 type ServiceRow = {
@@ -237,7 +247,7 @@ function toService(row: CategoryRow, children: ServiceRow[], position: number): 
     tools: pickAll(outcomes, 'tool'),
     visual: isServiceVisual(row.themePreset) ? row.themePreset : 'marketing',
     image: row.heroImage ?? undefined,
-    imageAlt: pick(outcomes, 'imageAlt')?.value ?? row.title,
+    imageAlt: categoryCoverAlt(row, outcomes),
     faqs,
     related,
     extraBlocks,
@@ -298,7 +308,7 @@ export async function getUseCaseMenu(): Promise<UseCaseMenuItem[]> {
           name: row.title,
           tagline: row.tag ?? '',
           image: row.heroImage ?? undefined,
-          imageAlt: pick(outcomes, 'imageAlt')?.value ?? row.title,
+          imageAlt: categoryCoverAlt(row, outcomes),
         }
       })
   } catch (err) {

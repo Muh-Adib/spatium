@@ -50,7 +50,7 @@ WORKDIR /app
 ENV NODE_ENV=production NEXT_TELEMETRY_DISABLED=1
 COPY . .
 RUN pnpm exec prisma contract emit
-CMD ["sh", "-c", "pnpm exec prisma db update --yes && pnpm exec tsx --conditions=react-server scripts/seed-if-empty.ts"]
+CMD ["sh", "-c", "pnpm exec prisma db update --yes && pnpm exec tsx --conditions=react-server scripts/seed-if-empty.ts && pnpm exec tsx --conditions=react-server scripts/backfill-data.ts"]
 
 FROM node:22-alpine AS runner
 WORKDIR /app
