@@ -12,8 +12,16 @@
  */
 import type { z } from 'zod'
 
-/** Where a block may be placed. `page` = dynamic pages at `/<slug>`. */
-export type BlockTarget = 'page' | 'portfolio' | 'service'
+/**
+ * Where a block may be placed. `page` = dynamic pages at `/<slug>`;
+ * `service-category` = use-case pages at `/services/<slug>`; `service` = child
+ * service pages at `/services/<category>/<slug>`; `portfolio` = `/portfolio/<slug>`.
+ */
+export type BlockTarget = 'page' | 'service-category' | 'service' | 'portfolio'
+
+/** Targets whose page is an entity (data-bound blocks read the entity from the render context). */
+export type EntityTarget = Exclude<BlockTarget, 'page'>
+export const ENTITY_TARGETS: readonly EntityTarget[] = ['service-category', 'service', 'portfolio']
 
 export type BlockCategory = 'hero' | 'spatial' | 'content' | 'media' | 'proof' | 'conversion' | 'navigation'
 
@@ -28,7 +36,7 @@ export const BLOCK_CATEGORY_LABEL: Record<BlockCategory, string> = {
 }
 
 /** Every target: the default for blocks usable anywhere. */
-export const ALL_TARGETS: readonly BlockTarget[] = ['page', 'portfolio', 'service']
+export const ALL_TARGETS: readonly BlockTarget[] = ['page', 'service-category', 'service', 'portfolio']
 
 /** Editable field description used to generate property forms and MCP docs. */
 export type BlockField =
@@ -80,6 +88,13 @@ export interface BlockDefinition<S extends BlockMemberSchema = BlockMemberSchema
   catalog?: readonly BlockCatalogMeta<TypesOf<S>>[]
   /** True when the block renders the page's own `<h1>` hero, so pages skip their fallback title. */
   pageHero?: boolean
+  /**
+   * Data-bound block: renders the entity of its catalogue targets from the
+   * render context (the block JSON only holds presentation options). A stored
+   * list containing one is "explicit" (see `resolveEntityBlocks` in
+   * `src/blocks/presets.ts`).
+   */
+  dataBound?: boolean
 }
 
 /** Identity helper that type-checks a definition (catalogue types must belong to the schema). */

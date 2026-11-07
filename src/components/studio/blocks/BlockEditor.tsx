@@ -25,6 +25,15 @@ export type BlockEditorLayout = 'split' | 'editor' | 'preview'
 
 export type BlockEditorPanel = { id: string; label: string; content: React.ReactNode; badge?: React.ReactNode }
 
+/** What a custom preview receives (e.g. the entity preview iframe). */
+export type BlockEditorPreviewProps = {
+  blocks: readonly EditorBlock[]
+  selectedId: string | null
+  onSelect: (id: string) => void
+  /** True when the selection came from the outline (the preview should reveal it). */
+  scrollToSelected: boolean
+}
+
 export type BlockEditorProps = {
   target: BlockTarget
   blocks: EditorBlock[]
@@ -40,12 +49,19 @@ export type BlockEditorProps = {
   contextData?: ContextData
   /** Rendered above the outline (e.g. draft-recovery notice). */
   notice?: React.ReactNode
-  /** Extra tabs next to "Blok" in the editing column (e.g. SEO, history). */
+  /**
+   * Extra tabs next to "Blok" in the editing column (e.g. SEO, history). Include
+   * an entry with id `blocks` to place the block list tab yourself (its content is ignored).
+   */
   panels?: BlockEditorPanel[]
   activePanel?: string
   onActivePanelChange?: (id: string) => void
   /** Accessible name for the block list, e.g. "Blok halaman". */
   label?: string
+  /** Replaces the built-in block preview (receives the deferred blocks and selection). */
+  renderPreview?: (props: BlockEditorPreviewProps) => React.ReactNode
+  /** Data-bound blocks offer a button to open the tab where the entity content is edited. */
+  onOpenContent?: () => void
 }
 
 type FocusRequest = { kind: 'header' | 'field'; id: string } | { kind: 'add' } | null
@@ -75,6 +91,8 @@ export function BlockEditor({
   activePanel: activePanelProp,
   onActivePanelChange,
   label = 'Blok',
+  renderPreview,
+  onOpenContent,
 }: BlockEditorProps) {
   const rootRef = useRef<HTMLDivElement>(null)
   const addButtonRef = useRef<HTMLButtonElement>(null)
@@ -109,6 +127,10 @@ export function BlockEditor({
     onActivePanelChange?.(id)
   }
   const focusRequest = useRef<FocusRequest>(null)
+  // A tab opened from outside (issue links, "Perbaiki") must be visible on small screens.
+  useEffect(() => {
+    if (activePanelProp !== undefined) setMobilePane('edit')
+  }, [activePanelProp])
 
   const announce = useCallback((msg: string) => {
     // Toggle a trailing zero-width space so repeating the same message is still announced.
@@ -288,6 +310,11 @@ export function BlockEditor({
     return () => window.removeEventListener('keydown', handler)
   }, [])
 
+  const selectFromPreview = (id: string) => {
+    select(id, 'preview')
+    setActivePanel('blocks')
+  }
+
   const goToFirstIssue = () => {
     const id = invalidBlockIds[0]
     if (!id) return
@@ -304,7 +331,10 @@ export function BlockEditor({
   const showEditor = layout !== 'preview'
   const showPreview = layout !== 'editor'
   const split = showEditor && showPreview
-  const allPanels: BlockEditorPanel[] = [{ id: 'blocks', label: 'Blok', content: null, badge: blocks.length }, ...(panels ?? [])]
+  const blocksPanel: BlockEditorPanel = { id: 'blocks', label: 'Blok', content: null, badge: blocks.length }
+  const allPanels: BlockEditorPanel[] = panels?.some((p) => p.id === 'blocks')
+    ? panels.map((p) => (p.id === 'blocks' ? { ...blocksPanel, label: p.label, badge: p.badge ?? blocks.length } : p))
+    : [blocksPanel, ...(panels ?? [])]
   const hasTabs = allPanels.length > 1
 
   const outline = (
@@ -321,7 +351,16 @@ export function BlockEditor({
           <p className="mt-1 text-sm text-neutral-300">Mulai dengan hero atau viewer 3D, lalu tambahkan teks dan ajakan.</p>
         </div>
       ) : (
-        <BlockOutline blocks={blocks} selectedId={selectedId} issues={grouped} issueKeys={issueKeys} actions={actions} modKey={modKey} label={label} />
+        <BlockOutline
+          blocks={blocks}
+          selectedId={selectedId}
+          issues={grouped}
+          issueKeys={issueKeys}
+          actions={actions}
+          modKey={modKey}
+          label={label}
+          onOpenContent={onOpenContent}
+        />
       )}
       <Button ref={addButtonRef} icon={Plus} className="w-full" onClick={() => setPaletteAt(blocks.length)} aria-keyshortcuts="Control+K Meta+K">
         Tambah blok
@@ -417,16 +456,17 @@ export function BlockEditor({
             aria-label="Pratinjau langsung"
             className={`min-h-0 min-w-0 overflow-y-auto bg-[#030611] ${split && mobilePane !== 'preview' ? 'hidden lg:block' : ''}`}
           >
-            <BlockPreview
-              blocks={deferredBlocks}
-              selectedId={selectedId}
-              onSelect={(id) => {
-                select(id, 'preview')
-                setActivePanel('blocks')
-              }}
-              contextData={contextData}
-              scrollToSelected={selectSource === 'outline'}
-            />
+            {renderPreview ? (
+              renderPreview({ blocks: deferredBlocks, selectedId, onSelect: selectFromPreview, scrollToSelected: selectSource === 'outline' })
+            ) : (
+              <BlockPreview
+                blocks={deferredBlocks}
+                selectedId={selectedId}
+                onSelect={selectFromPreview}
+                contextData={contextData}
+                scrollToSelected={selectSource === 'outline'}
+              />
+            )}
           </section>
         ) : null}
       </div>

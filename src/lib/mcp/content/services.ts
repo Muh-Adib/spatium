@@ -2,6 +2,7 @@ import 'server-only'
 import { z } from 'zod'
 import { prisma } from '@/lib/db/prisma'
 import { validateCatalogPublication } from '@/lib/blocks/publication-gate'
+import { buildPreset, hasDataBoundBlocks, resolveEntityBlocks, type StoredBlock } from '@/blocks/presets'
 import { serviceMutationSchema } from '@/lib/validation/api-schemas'
 import { slugify } from '@/lib/pages/page-schema'
 import {
@@ -24,8 +25,8 @@ import {
 import { asArray, asRecord, assertEditable, parseJson, recordHistory } from './history'
 
 /**
- * MCP tools for services (the capabilities listed under a published use case
- * at /services/<category>). Studio saves services inline in /api/services, so
+ * MCP tools for services (the capabilities listed under a use case, each with
+ * its own page at /services/<category>/<service>). Studio saves services inline in /api/services, so
  * the draft repository lives here: one transaction per write with
  * ContentRevision + SeoAuditLog. Gate: the Studio catalogue gate
  * (`validateCatalogPublication`). Service categories (use cases) are read-only.
@@ -36,12 +37,21 @@ const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
 
 type ServiceRow = NonNullable<Awaited<ReturnType<typeof prisma.orm.public.Service.first>>>
 
-export function serviceUrls(row: { slug: string; status: string | null }) {
+export function serviceUrls(
+  row: { id: number; slug: string; status: string | null },
+  category?: { slug: string; status: string } | null,
+) {
+  const live = (row.status ?? 'published') === 'published' && category?.status === 'published'
   return {
     editUrl: `${siteUrl()}/admin?tab=services&slug=${encodeURIComponent(row.slug)}`,
-    // Capability URLs redirect to their parent use-case page.
-    publicUrl: (row.status ?? 'published') === 'published' ? `${siteUrl()}/services/${row.slug}` : null,
+    previewUrl: `${siteUrl()}/admin/preview/service/${row.id}`,
+    // Live only when the service and its category are both published.
+    publicUrl: live && category ? `${siteUrl()}/services/${category.slug}/${row.slug}` : null,
   }
+}
+
+function storedOnly(blocks: unknown[]): StoredBlock[] {
+  return blocks.filter((b): b is StoredBlock => b !== null && typeof b === 'object' && typeof (b as StoredBlock).type === 'string')
 }
 
 function blocksOf(row: ServiceRow): unknown[] {
@@ -55,6 +65,7 @@ export function serviceGate(row: ServiceRow) {
     metaTitle: row.metaTitle ?? undefined,
     metaDescription: row.metaDescription ?? undefined,
     blocks: blocksOf(row),
+    target: 'service',
   })
   const warnings = [...gate.warnings]
   if (row.categoryId === null) warnings.push('Not linked to a service category: it will not appear on any use-case page.')
@@ -86,10 +97,11 @@ function serviceView(row: ServiceRow, categories: Map<number, { slug: string; ti
     focusKeyphrase: row.focusKeyphrase,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
-    ...serviceUrls(row),
+    ...serviceUrls(row, category),
     blockCount: blocks.length,
+    blocksMode: blocks.length === 0 ? 'preset' : hasDataBoundBlocks(blocks) ? 'explicit' : 'legacy',
     ...(options.includeBlocks
-      ? { blocks }
+      ? { blocks, resolvedBlocks: resolveEntityBlocks('service', storedOnly(blocks)) }
       : { outline: blocks.map((b, index) => ({ index, id: asRecord(b).id ?? null, type: asRecord(b).type ?? null })) }),
     publication: serviceGate(row),
   }
@@ -114,7 +126,7 @@ const createInput = z.strictObject({
   name: shape.name.describe('Service name.'),
   slug: z.string().optional().describe('URL slug. Omit to derive from the name. Fixed after creation.'),
   ...serviceFields,
-  blocks: blockList.default([]).describe('Optional catalogue blocks (target "service").'),
+  blocks: blockList.optional().describe('Page blocks (target "service"). Omit to start from the preset (get_block_preset).'),
 })
 
 const updateInput = z.strictObject({
@@ -122,7 +134,7 @@ const updateInput = z.strictObject({
   expectedUpdatedAt: expectedUpdatedAtField,
   name: shape.name.optional(),
   ...serviceFields,
-  blocks: blockList.optional().describe('Replaces the entire block list when provided.'),
+  blocks: blockList.optional().describe('Replaces the entire block list when provided. [] reverts the page to the preset.'),
 })
 
 type Values = Record<string, unknown>
@@ -160,10 +172,15 @@ async function toValues(
       values.categoryId = category.id
     }
   }
-  if (args.blocks !== undefined) {
+  if (args.blocks !== undefined && args.blocks.length > 0) {
     const check = checkBlocksFor('service', args.blocks)
     if (!check.ok) return check
-    values.blocks = check.blocks.length ? JSON.stringify(check.blocks) : null
+    values.blocks = JSON.stringify(check.blocks)
+  } else if (previous === null) {
+    // New services start from the service preset (data-bound sections).
+    values.blocks = JSON.stringify(buildPreset('service', { ids: 'fresh' }))
+  } else if (args.blocks !== undefined) {
+    values.blocks = null
   }
   return { ok: true, values }
 }
@@ -217,8 +234,8 @@ export const SERVICE_TOOLS: readonly McpTool[] = [
     title: 'List services',
     scope: 'services:read',
     description:
-      'Lists services (capabilities) with id, slug, name, status, category, updatedAt, editUrl and publicUrl, plus the existing service categories ' +
-      '(use cases) a service can be linked to. Filter by status or category slug.',
+      'Lists services (capabilities) with id, slug, name, status, category, updatedAt, editUrl, previewUrl and publicUrl, plus the existing service categories ' +
+      '(use cases) a service can be linked to (manage them with list_service_categories / *_service_category_draft). Filter by status or category slug.',
     input: z.strictObject({
       status: z.enum(SERVICE_STATUSES).optional().describe('Only services with this status.'),
       category: z.string().trim().min(1).optional().describe('Only services in this category (slug).'),
@@ -237,7 +254,7 @@ export const SERVICE_TOOLS: readonly McpTool[] = [
           status: row.status,
           category: c?.slug ?? null,
           updatedAt: row.updatedAt,
-          ...serviceUrls(row),
+          ...serviceUrls(row, c),
         }))
       return ok({
         count: services.length,
@@ -269,7 +286,8 @@ export const SERVICE_TOOLS: readonly McpTool[] = [
     title: 'Create service draft',
     scope: 'services:draft',
     description:
-      'Creates a new DRAFT service, optionally linked to an existing service category (use case). Use only facts the user gave you. ' +
+      'Creates a new DRAFT service, optionally linked to an existing service category (use case). Without blocks the page starts from the preset ' +
+      '(hero, description, deliverables, related work, sibling services, CTA). Use only facts the user gave you. ' +
       'Returns the service (updatedAt for further edits), editUrl and the publication checklist. Never publishes.',
     input: createInput,
     annotations: write,

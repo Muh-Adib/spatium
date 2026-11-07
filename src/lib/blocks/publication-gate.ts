@@ -5,6 +5,8 @@
  */
 
 import { parseBlocks } from './schema'
+import { validateBlockListFor } from './catalog'
+import type { BlockTarget } from './define'
 import { blocksToSeoText } from './seo-text'
 
 export interface PublicationGateInput {
@@ -15,6 +17,8 @@ export interface PublicationGateInput {
   heroImage?: string
   heroImageAlt?: string
   blocks?: any[]
+  /** Where the blocks are placed: catalogue types not offered there are refused. */
+  target?: BlockTarget
 }
 
 export interface PublicationGateResult {
@@ -66,6 +70,11 @@ export function validateCatalogPublication(input: PublicationGateInput): Publica
     if (!schemaCheck.ok && schemaCheck.issues) {
       for (const issue of schemaCheck.issues) {
         issues.push(`Skema Blok: ${issue}`)
+      }
+    } else if (input.target) {
+      const targetCheck = validateBlockListFor(input.target, blocks)
+      for (const issue of targetCheck.issues) {
+        issues.push(`Skema Blok: [Block ${issue.index}] ${issue.message}`)
       }
     }
 

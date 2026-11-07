@@ -1,11 +1,12 @@
 'use client'
 
 import React, { memo, useCallback } from 'react'
-import { AlertCircle, ArrowDown, ArrowUp, ChevronDown, Copy, History, Plus, Trash2 } from 'lucide-react'
+import { AlertCircle, ArrowDown, ArrowUp, ChevronDown, Copy, Database, History, Plus, Trash2 } from 'lucide-react'
+import { DATA_BOUND_TYPES } from '@/blocks/registry'
 import { getBlockEntry, type BlockCatalogEntry } from '@/lib/blocks/catalog'
 import { BlockFieldsForm, type FieldChange, type FieldChangeOptions } from './BlockFieldsForm'
 import { JsonField } from './JsonField'
-import { Badge, IconButton } from './ui'
+import { Badge, Button, IconButton } from './ui'
 import { CategoryIcon } from './icons'
 import { type BlockIssueGroup, type EditorBlock, type FieldPath, blockSummary, extraKeys, issuesForForm } from './model'
 
@@ -30,6 +31,8 @@ type RowProps = {
   issuesKey: string
   actions: RowActions
   modKey: string
+  /** Shown on data-bound blocks: opens the tab where the entity's content is edited. */
+  onOpenContent?: () => void
 }
 
 export const headerSelector = (id: string) => `[data-block-header="${CSS.escape(id)}"]`
@@ -44,8 +47,9 @@ function focusSibling(current: HTMLElement, delta: number | 'first' | 'last') {
   target?.focus()
 }
 
-function BlockRowImpl({ block, index, count, selected, issues, actions, modKey }: RowProps) {
+function BlockRowImpl({ block, index, count, selected, issues, actions, modKey, onOpenContent }: RowProps) {
   const entry: BlockCatalogEntry | undefined = getBlockEntry(block.type)
+  const dataBound = DATA_BOUND_TYPES.has(block.type)
   const label = entry?.label ?? block.type
   const summary = blockSummary(block)
   const panelId = `blk-panel-${block.id}`
@@ -120,6 +124,11 @@ function BlockRowImpl({ block, index, count, selected, issues, actions, modKey }
                 <span className="sr-only">Blok {index + 1}: </span>
                 {label}
               </span>
+              {dataBound ? (
+                <Badge tone="info" icon={Database}>
+                  Isi dari tab Konten
+                </Badge>
+              ) : null}
               {!entry ? (
                 <Badge tone="warning" icon={History}>
                   Tipe lama
@@ -151,7 +160,17 @@ function BlockRowImpl({ block, index, count, selected, issues, actions, modKey }
             <IconButton icon={Trash2} size="sm" tone="danger" label="Hapus blok" shortcut="Delete pada judul blok · bisa diurungkan" onClick={() => actions.remove(block.id)} />
           </div>
 
-          {entry ? <p className="text-xs leading-relaxed text-neutral-400">{entry.description}</p> : null}
+          {entry ? <p className="text-xs leading-relaxed text-neutral-300">{entry.description}</p> : null}
+          {dataBound ? (
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-2 rounded-lg border border-info/30 bg-info/10 p-3 text-sm text-info-300">
+              <p className="min-w-0 flex-1">Teks, gambar, dan daftar di blok ini diambil dari tab Konten. Di sini Anda hanya mengatur tampilannya.</p>
+              {onOpenContent ? (
+                <Button size="sm" onClick={onOpenContent}>
+                  Buka tab Konten
+                </Button>
+              ) : null}
+            </div>
+          ) : null}
 
           {formIssues?.general.length ? (
             <div className="rounded-lg border border-red-400/40 bg-red-500/10 p-3 text-sm text-red-100">
@@ -220,7 +239,8 @@ const BlockRow = memo(
     a.selected === b.selected &&
     a.issuesKey === b.issuesKey &&
     a.actions === b.actions &&
-    a.modKey === b.modKey,
+    a.modKey === b.modKey &&
+    a.onOpenContent === b.onOpenContent,
 )
 
 type OutlineProps = {
@@ -231,9 +251,10 @@ type OutlineProps = {
   actions: RowActions
   modKey: string
   label: string
+  onOpenContent?: () => void
 }
 
-export function BlockOutline({ blocks, selectedId, issues, issueKeys, actions, modKey, label }: OutlineProps) {
+export function BlockOutline({ blocks, selectedId, issues, issueKeys, actions, modKey, label, onOpenContent }: OutlineProps) {
   return (
     <ol data-block-outline="" aria-label={label} className="space-y-2">
       {blocks.map((block, index) => (
@@ -247,6 +268,7 @@ export function BlockOutline({ blocks, selectedId, issues, issueKeys, actions, m
           issuesKey={issueKeys.get(block.id) ?? ''}
           actions={actions}
           modKey={modKey}
+          onOpenContent={onOpenContent}
         />
       ))}
     </ol>

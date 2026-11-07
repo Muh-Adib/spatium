@@ -111,7 +111,7 @@ export function FieldError({ id, messages }: { id: string; messages: readonly st
 
 export function FieldHelp({ id, children }: { id: string; children: React.ReactNode }) {
   return (
-    <p id={id} className="mt-1.5 text-xs leading-relaxed text-neutral-400">
+    <p id={id} className="mt-1.5 text-xs leading-relaxed text-neutral-300">
       {children}
     </p>
   )

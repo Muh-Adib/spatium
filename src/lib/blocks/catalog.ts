@@ -104,3 +104,28 @@ export function validateBlockList(raw: unknown): { ok: boolean; blocks: Block[];
   }
   return { ok: false, blocks: [], issues }
 }
+
+/**
+ * `validateBlockList` plus "is this catalogue type offered for `target`"
+ * (e.g. `category-hero` only on service categories). Legacy types without a
+ * catalogue entry stay accepted so stored content keeps saving.
+ */
+export function validateBlockListFor(target: BlockTarget, raw: unknown): { ok: boolean; blocks: Block[]; issues: BlockIssue[] } {
+  const check = validateBlockList(raw)
+  const issues: BlockIssue[] = [...check.issues]
+  const list: unknown[] = Array.isArray(raw) ? raw : []
+  list.forEach((item, index) => {
+    const rec = item && typeof item === 'object' ? (item as Record<string, unknown>) : {}
+    const type = typeof rec.type === 'string' ? rec.type : undefined
+    const entry = type ? BY_TYPE.get(type) : undefined
+    if (entry && !entry.targets.includes(target)) {
+      issues.push({
+        index,
+        blockId: typeof rec.id === 'string' ? rec.id : undefined,
+        type,
+        message: `Tipe blok "${type}" tidak tersedia untuk ${target}.`,
+      })
+    }
+  })
+  return { ok: check.ok && issues.length === 0, blocks: issues.length === 0 ? check.blocks : [], issues }
+}

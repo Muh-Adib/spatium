@@ -1,7 +1,7 @@
 import 'server-only'
 import { z } from 'zod'
 import { siteConfig } from '@/config/site'
-import { getBlockEntry, newBlockId, validateBlockList, type BlockIssue, type BlockTarget } from '@/lib/blocks/catalog'
+import { newBlockId, validateBlockListFor, type BlockIssue, type BlockTarget } from '@/lib/blocks/catalog'
 import type { Block } from '@/lib/blocks/schema'
 import { getMediaItem } from '@/lib/db/media'
 import type { McpScope } from './scopes'
@@ -152,16 +152,7 @@ export function blockIssuesResult(issues: BlockIssue[], target: BlockTarget = 'p
 
 /** Catalogue validation plus "is this type offered for `target`" (blocks must already carry ids). */
 export function validateBlocksFor(target: BlockTarget, withId: readonly Record<string, unknown>[]): { ok: boolean; blocks: Block[]; issues: BlockIssue[] } {
-  const check = validateBlockList(withId)
-  const issues: BlockIssue[] = [...check.issues]
-  withId.forEach((b, index) => {
-    const type = typeof b.type === 'string' ? b.type : undefined
-    const entry = type ? getBlockEntry(type) : undefined
-    if (entry && !entry.targets.includes(target)) {
-      issues.push({ index, blockId: typeof b.id === 'string' ? b.id : undefined, type, message: `Block type "${type}" is not available for ${target}.` })
-    }
-  })
-  return { ok: check.ok && issues.length === 0, blocks: check.blocks, issues }
+  return validateBlockListFor(target, withId)
 }
 
 /** Assigns ids, validates for `target`, and returns either clean blocks or a tool error. */

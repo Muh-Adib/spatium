@@ -6,8 +6,8 @@ Studio punya dua editor dengan model data yang berbeda:
 |---|---|---|
 | Untuk | Artikel jurnal (`/journal/<slug>`) | Halaman dinamis (`/<slug>`), portofolio, layanan |
 | Disimpan sebagai | HTML (`Article.content`) | JSON blok (`blocks`) |
-| Dibuka dari | `/admin/buat-artikel` | Tab **Halaman** (`/admin?tab=pages&page=<id>`) dan manajer portofolio/layanan |
-| Kode | `src/app/admin/buat-artikel/page.tsx`, `src/components/studio/editor/*`, `src/lib/articles/*` | `src/components/studio/blocks/*`, `src/components/studio/pages/*`, `src/blocks/*`, `src/lib/blocks/catalog.ts` |
+| Dibuka dari | `/admin/buat-artikel` | Tab **Halaman** (`/admin?tab=pages&page=<id>`), **Layanan** dan **Portofolio** (editor entitas, lihat di bawah) |
+| Kode | `src/app/admin/buat-artikel/page.tsx`, `src/components/studio/editor/*`, `src/lib/articles/*` | `src/components/studio/blocks/*`, `src/components/studio/pages/*`, `src/components/studio/entity/*`, `src/blocks/*`, `src/lib/blocks/catalog.ts` |
 
 ## Editor artikel
 
@@ -85,7 +85,76 @@ Manajer di tab **Portofolio** dan **Layanan** memakai aturan yang sama (`src/lib
 - Pembaruan parsial: kolom yang tidak dikirim tetap. Tautan layanan ↔ portofolio dibaca dari database dan diganti di dalam transaksi (dulu menyunting layanan bisa menghapus semua tautannya).
 - Setiap simpan/hapus menulis `ContentRevision` + `SeoAuditLog` dalam satu transaksi dan me-revalidate rute publik terkait serta `/sitemap.xml` (`revalidateCatalog`).
 - Tidak ada angka, tech stack, tahun, atau alt text yang diisi otomatis (AGENTS.md §3.3).
+- **Blok** divalidasi per target (`service-category`, `service`, `portfolio`) — tipe yang tidak ditawarkan untuk entri itu ditolak 422 dengan `issues` dan `blockIssues` (`{ index, blockId, type, message }`); gerbang publikasi juga memeriksanya. **Membuat entri tanpa blok** (tanpa `blocks`, `null`, atau `[]`) menyimpan preset entri (lihat [BLOCKS.md](BLOCKS.md#preset-srcblockspresetsts)).
+- Halaman publik: `/services/<kategori>`, `/services/<kategori>/<layanan>` (layanan dan kategori induk harus terbit; URL lama `/services/<layanan>` → 308), `/portfolio/<slug>`. Simpan me-revalidate halaman kategori, halaman layanan di bawah induknya, dan `/sitemap.xml`.
+
+### Pratinjau entri (dan draf yang belum disimpan)
+
+`/admin/preview/<type>/<id-atau-slug>` — `type`: `service-category` (alias `category`, `department`), `service`, `portfolio`. Halaman merender entri dalam status apa pun lewat **view yang sama dengan situs publik**. Server memeriksa kapabilitas `<entitas>:update` (`userWithCapability`, `src/lib/auth/server-component.ts`); tanpa izin → 404. Tidak ada yang disimpan dan halaman `noindex`.
+
+Kontrak untuk editor (sematkan pratinjau sebagai `<iframe src="/admin/preview/service/12">` dari origin yang sama):
+
+1. Iframe mengirim ke `window.parent`: `{ type: 'spatium:preview:ready', entity, id }` setelah siap menerima.
+2. Editor mengirim ke iframe (`iframe.contentWindow.postMessage(msg, window.location.origin)`), setiap kali state berubah (sebaiknya di-debounce ±150 ms):
+   ```ts
+   {
+     type: 'spatium:preview:draft',
+     entity: 'service-category' | 'service' | 'portfolio',   // harus sama dengan type di URL
+     id?: number | string,                                    // bila diisi harus sama dengan segmen URL
+     blocks?: unknown[],   // daftar blok lengkap di editor; tanpa field = blok tersimpan; [] = preset
+     selectedBlockId?: string | null,  // blok yang dipilih di editor: disorot dan digulir ke tampilan
+     fields?: {            // nilai belum disimpan, nama sama dengan body POST /api/<entitas>
+       // service-category: title, tag, shortDescription, heroImage, themePreset, keyOutcomes, order, metaTitle, metaDescription, seoData
+       // service: name, indexNumber, shortDescription, longDescription, description, heroImage, deliverables, technologies, metaTitle, metaDescription, seoData
+       // portfolio: title, client, year, category, summary, challenge, approach, result, heroImage, liveUrl, metrics, technologies
+     }
+   }
+   ```
+   Skema: `previewDraftMessageSchema` + `DRAFT_FIELD_SCHEMAS` di `src/lib/content/entity-preview-model.ts`. Pesan dari origin lain atau bukan dari jendela induk diabaikan.
+3. Iframe merender ulang (blok data-bound membaca entri yang sudah ditambal field draf; `resolveEntityBlocks` berlaku) lalu membalas `{ type: 'spatium:preview:applied', entity, id, blockIssues, fieldIssues, blockCount }`. Blok yang tidak valid untuk target dilewati dan dilaporkan di `blockIssues` (`{ index, blockId, type, message }`); field tak dikenal/salah bentuk dilaporkan di `fieldIssues` dan diabaikan.
+4. Saat tersemat, klik di dalam blok mengirim `{ type: 'spatium:preview:select', entity, id, blockId }` ke induk (skema `previewSelectMessageSchema`) dan tautan tidak diikuti.
+
+Konteks (layanan turunan, portofolio terkait, use case lain) selalu data **terbit**, sama dengan yang akan tampil di situs. Untuk mengedit entri lama, muat `resolveEntityBlocks(target, blocks)` (MCP: `resolvedBlocks`) sebagai daftar awal editor — menyimpannya tidak mengubah tampilan.
 - Hapus: SUPER_ADMIN dan CONTENT_ADMIN saja; item yang tidak ada → 404.
+
+## Editor entitas: kategori layanan, layanan, portofolio
+
+Satu editor (`src/components/studio/entity/EntityEditor.tsx`) untuk ketiga entitas, diturunkan dari editor halaman. Tampil di alur normal `#studio-main` (bukan overlay); fokus pindah ke judul editor saat dibuka dan kembali ke tombol **Edit** baris asalnya saat ditutup.
+
+| Entitas | Daftar | URL editor |
+|---|---|---|
+| Kategori layanan | Tab **Layanan** → tab daftar *Kategori layanan* | `/admin?tab=services&type=category&id=<id>` |
+| Layanan | Tab **Layanan** → tab daftar *Layanan* (dikelompokkan per kategori induk) | `/admin?tab=services&type=service&id=<id>` |
+| Portofolio | Tab **Portofolio** (cari + filter kategori, unggah tur) | `/admin?tab=portfolio&id=<id>` |
+
+Tautan lama dari MCP (`?tab=services&slug=<layanan>`, `?tab=services&category=<kategori>`, `?tab=portfolio&slug=<slug>`) diterjemahkan ke URL di atas, hanya untuk role yang boleh menyunting.
+
+**Membuat**: dialog judul/nama + slug (+ kategori induk untuk layanan) langsung menyimpan **draf** lewat `POST /api/<entitas>` tanpa `blocks`, sehingga server menyimpan preset entri; editor lalu terbuka pada ID itu. Dengan begitu pratinjau selalu punya ID untuk dimuat (tidak ada mode "belum tersimpan" terpisah).
+
+### Tata letak
+
+- **Header** (membungkus di layar sempit): "← Semua kategori/layanan/portofolio" (dengan penjaga perubahan belum disimpan), judul, alamat publik (layanan: `/services/<induk>/<slug>`), status (ikon + teks), status simpan yang selalu ada (`role="status"`: *Belum disimpan* / *Menyimpan…* / *Perubahan disimpan · <jam>*), **Pratinjau** (versi tersimpan, tab baru), **Lihat di situs** (hanya bila terbit; layanan juga butuh induk terbit), tombol siklus, menu **Lainnya**, dan **Simpan** (Ctrl/⌘ + S, tidak pernah dinonaktifkan).
+- **Siklus** (dari `useAuth().can(...)`, sama dengan API): draf → *Terbitkan* / *Kirim ke review*; menunggu review atau disetujui → *Terbitkan* / *Kembalikan ke draf*; terbit → *Tarik dari situs*; diarsipkan → *Pulihkan ke draf*; *Arsipkan* dan *Hapus…* (dialog konfirmasi) di menu Lainnya. Status tidak pernah berupa select. Perubahan status dikirim bersama perubahan form yang belum disimpan dalam satu permintaan.
+- **Banner** di bawah header: setiap masalah satu baris dengan tombol *Ke kolom* / *Perbaiki* / *Buka blok* yang membuka tab yang benar dan memfokuskan kolomnya. Galat validasi lokal memfokuskan kolom pertama yang salah (`aria-invalid` + `aria-describedby`); galat server memfokuskan banner. Galat Zod dari API (`issues: [{ field, message }]`) dan pesan gerbang dipetakan ke kolom (`payloadFieldTarget`, `gateIssueTarget` di `entity/model.ts`).
+- **Badan**: dua kolom ≥ 1024 px (kolom edit bertab | pratinjau langsung); di bawahnya tombol *Edit / Pratinjau*. Tidak ada kolom ketiga.
+
+### Tab
+
+1. **Konten** (bawaan): hanya kolom yang dibaca halaman publik, urut seperti halamannya, satu tempat per konsep. Nilai cadangan tampil sebagai placeholder (mis. "Kosong = memakai deskripsi singkat"); tidak ada kolom yang disalin ke kolom lain.
+   - *Kategori layanan*: Judul, Slug (`/services/`, catatan 301 bila sudah terbit), Tagline, Ringkasan, Ilustrasi (`themePreset`), Urutan, Tampilkan di menu header, Gambar sampul, Keluaran & alat (`keyOutcomes` berlabel `deliverable`/`tool`; label lain dipertahankan), Layanan turunan (baca saja, tautan ke editornya).
+   - *Layanan*: Nama, Kategori induk, Slug, Deskripsi singkat, Deskripsi lengkap (`longDescription`; API menyalinnya ke `description`), Urutan, Nomor tampilan (`indexNumber`), Unggulan, Keluaran & teknologi, Portofolio terkait (kotak centang), Gambar sampul.
+   - *Portofolio*: Judul, Slug, Kategori (datalist), Klien dan Tahun (opsional), Ringkasan, Scene 3D (URL scene divalidasi seperti blok scene: ID SuperSplat atau domain `embedValidator`; tur lokal `/tours/…` diterima tetapi tidak disematkan), metrik terukur (jumlah titik, akurasi, lokasi — label metrik lain seperti `scenePair` dipertahankan), Gambar sampul, Narasi (tantangan, langkah capture, keluaran), Teknologi, Unggulan.
+   - **Gambar sampul** (`CoverField`) adalah satu-satunya UI sampul: URL, *Pilih atau unggah* (pustaka media), *Hapus gambar*, dan teks alternatif (wajib bila ada gambar, penghitung n/125, tidak pernah diisi otomatis; fokus pindah ke kolom alt setelah memilih gambar). Disimpan sebagai `heroImage` + `seoData.coverAlt`.
+2. **Blok**: editor blok dengan target entitas (palet = blok data-bound entitas itu + blok generik). Daftar awal = `resolveEntityBlocks(target, blok tersimpan)`, jadi menyimpan tanpa perubahan tidak mengubah tampilan. *Pulihkan preset* (dengan konfirmasi) mengganti semua blok dengan `buildPreset(target)`; belum tersimpan sampai *Simpan*.
+3. **SEO & berbagi**: daftar periksa publikasi di atas (gerbang yang sama dengan server, `validateCatalogPublication`), tiap syarat dengan *Perbaiki*; meta title dan meta description dengan penghitung; frasa kunci utama; gambar berbagi = gambar sampul (diubah di tab Konten). Robots/canonical tidak ditampilkan karena API katalog tidak menyimpannya.
+
+Tidak ada tab *Riwayat*: API katalog belum punya endpoint revisi (riwayat tetap tercatat di `ContentRevision`).
+
+### Pratinjau langsung
+
+Kolom pratinjau menyematkan `/admin/preview/<entitas>/<id>` (view yang sama dengan situs publik) dan mengirim state form + blok yang belum disimpan lewat kontrak postMessage di bawah (debounce 150 ms). Lebar *Desktop / Tablet / Seluler* (diskalakan agar muat; layar kecil mulai di Seluler) dan tombol muat ulang ada di atas pratinjau; baris status menyebut blok/kolom yang dilewati pratinjau (`blockIssues`/`fieldIssues`). Klik sebuah blok di pratinjau memilihnya di daftar blok; blok yang dipilih di daftar disorot dan digulir ke tampilan di pratinjau. Di dalam editor, tautan di pratinjau tidak dinavigasikan.
+
+Kode murni (dipakai test `tests/entity-editor-model.test.ts`): `src/components/studio/entity/model.ts` — baris → form, form → body API (hanya kolom yang berubah), form → pesan pratinjau, gerbang, pemetaan masalah, aksi siklus.
 
 ## Media, logo klien, CTA
 
@@ -129,3 +198,4 @@ Audit situs, PageSpeed, pengindeksan ulang, IndexNow, dan keyword untuk SUPER_AD
 - Kunci editor artikel belum disimpan di database (lihat di atas).
 - Riwayat halaman belum punya tombol pulihkan versi.
 - Pustaka template blok lama (`/api/templates`) tidak lagi dipakai editor.
+- Editor entitas belum mendeteksi konflik: API katalog tidak menerima `expectedUpdatedAt`, jadi simpan terakhir menang. Belum ada tab Riwayat (tidak ada endpoint revisi katalog).

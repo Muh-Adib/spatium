@@ -138,7 +138,7 @@ export function BlockPreview({ blocks, selectedId, onSelect, contextData, scroll
   })
 
   return (
-    <div ref={frameRef} className="w-full">
+    <div ref={frameRef} className="studio-block-preview w-full">
       {blocks.length === 0 ? (
         <p className="m-6 rounded-xl border border-dashed border-white/15 p-8 text-center text-sm text-neutral-300">
           Pratinjau muncul di sini setelah Anda menambahkan blok.

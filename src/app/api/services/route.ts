@@ -2,11 +2,11 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db/prisma'
 import { revalidateCatalog } from '@/lib/cache/revalidate'
 import { forbidUnless, requireCan } from '@/lib/auth/capabilities'
-import { parseBlocks } from '@/lib/blocks/schema'
 import { serviceMutationSchema, validateCatalogBody } from '@/lib/validation/api-schemas'
 import { errorResponse, PublicError } from '@/lib/http/errors'
 import {
   actorOf,
+  catalogBlocksColumn,
   catalogGateResponse,
   coverAltFrom,
   jsonColumn,
@@ -20,6 +20,14 @@ import {
 } from '@/lib/db/catalogMutations'
 
 const MAX_PAYLOAD_BYTES = 1024 * 1024
+
+/** Slugs of the given category ids (current and previous parent), for revalidation. */
+async function categorySlugsOf(ids: readonly (number | null | undefined)[]): Promise<string[]> {
+  const wanted = [...new Set(ids.filter((id): id is number => typeof id === 'number'))]
+  if (wanted.length === 0) return []
+  const rows = await prisma.orm.public.ServiceCategory.where((c) => c.id.in(wanted)).all()
+  return rows.map((r) => r.slug)
+}
 
 /**
  * Studio list of every service (all statuses), each with the ids of its linked
@@ -80,17 +88,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: false, error: 'Slug layanan tidak valid.' }, { status: 400 })
   }
 
-  let blocksJson: string | null | undefined
-  if (data.blocks !== undefined) {
-    const parsed = parseBlocks(data.blocks)
-    if (!parsed.ok) {
-      return NextResponse.json(
-        { success: false, error: 'Validasi blok katalog gagal.', issues: parsed.issues },
-        { status: 422 },
-      )
-    }
-    blocksJson = parsed.blocks.length > 0 ? JSON.stringify(parsed.blocks) : null
-  }
+  // Target-aware validation; creating without blocks stores the service preset.
+  const blocksColumn = catalogBlocksColumn('service', data.blocks, data.id ? 'update' : 'create')
+  if (!blocksColumn.ok) return blocksColumn.response
+  const blocksJson = blocksColumn.value
 
   try {
     const existing = data.id ? await prisma.orm.public.Service.where({ id: data.id }).first() : null
@@ -102,7 +103,7 @@ export async function POST(request: NextRequest) {
     }
     if (data.categoryId) {
       const category = await prisma.orm.public.ServiceCategory.where({ id: data.categoryId }).first()
-      if (!category) throw new PublicError('Departemen yang dipilih tidak ditemukan.', 400)
+      if (!category) throw new PublicError('Kategori induk yang dipilih tidak ditemukan. Pilih kategori lain.', 400)
     }
 
     const text = (v: string | null | undefined) => (v === undefined ? undefined : v || null)
@@ -156,6 +157,7 @@ export async function POST(request: NextRequest) {
         heroImage: merged.heroImage ?? undefined,
         heroImageAlt: coverAltFrom(merged.seoData),
         blocks: parseJsonArray(merged.blocks),
+        target: 'service',
       })
       if (gate) return gate
     }
@@ -199,8 +201,9 @@ export async function POST(request: NextRequest) {
       return row
     })
 
-    await revalidateCatalog('service', saved.slug)
-    if (existing && existing.slug !== saved.slug) await revalidateCatalog('service', existing.slug)
+    const parentSlugs = await categorySlugsOf([saved.categoryId, existing?.categoryId])
+    await revalidateCatalog('service', saved.slug, parentSlugs)
+    if (existing && existing.slug !== saved.slug) await revalidateCatalog('service', existing.slug, parentSlugs)
 
     return NextResponse.json({
       success: true,
@@ -234,7 +237,7 @@ export async function DELETE(request: NextRequest) {
       return current
     })
 
-    await revalidateCatalog('service', removed.slug)
+    await revalidateCatalog('service', removed.slug, await categorySlugsOf([removed.categoryId]))
 
     return NextResponse.json({ success: true, message: 'Layanan berhasil dihapus.' })
   } catch (error) {

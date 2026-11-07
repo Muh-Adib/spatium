@@ -30,11 +30,14 @@ src/lib/** (domain & data access) ── prisma/db.ts ── PostgreSQL 16
 | Rute | Sumber data | Catatan |
 |---|---|---|
 | `/` | `Portfolio`, `ServiceCategory` + narasi brand (`src/config/spatium-story.ts`) | Hero 3D Gaussian Splat (Three.js) |
-| `/services`, `/services/[slug]` | `ServiceCategory` (use case) + `Service` (kapabilitas) | Konten tambahan dari `blocks` |
-| `/portfolio`, `/portfolio/[slug]` | `Portfolio` | Viewer SuperSplat |
+| `/services`, `/services/[slug]` | `ServiceCategory` (use case) + `Service` (kapabilitas) terbit | Seluruh halaman dari blok: `resolveEntityBlocks('service-category', blocks)` → `ServiceCategoryView`. `/services/<layanan>` lama → 308 ke halaman bersarang |
+| `/services/[slug]/[service]` | `Service` terbit di bawah `ServiceCategory` terbit | `ServiceView` (preset `service`) |
+| `/portfolio`, `/portfolio/[slug]` | `Portfolio` | `PortfolioView` (preset `portfolio`, viewer SuperSplat di blok `portfolio-scene`) |
 | `/journal`, `/journal/[slug]` | `Article` | Sanitasi HTML |
 | `/[slug]` | `Page` terbit → `BlockRenderer` | Lalu: artikel lama (308) → redirect DB → 404 |
 | `/sitemap.xml` | Semua di atas | Revalidasi tiap jam + saat Studio menerbitkan |
+
+Halaman entri (kategori layanan, layanan, portofolio) dan pratinjau Studio `/admin/preview/<type>/<id>` merender view yang sama (`src/components/entity/EntityViews.tsx`) dari model murni `src/lib/content/entity-model.ts`; pratinjau juga menerima draf yang belum disimpan lewat `postMessage` (kontrak di [EDITORS.md](EDITORS.md)). Lihat [BLOCKS.md](BLOCKS.md) untuk blok data-bound dan preset.
 
 Rute lama (`/layanan`, `/portofolio`, `/artikel`, `/solusi`, `/solutions`, `/kontak`, `/tentang`) di-308 di `next.config.mjs`; `/solusi` dan `/solutions` (fitur Solusi sudah dihapus) diarahkan ke `/services`. Redirect yang dikelola di Studio (tabel `redirects`) diterapkan oleh halaman detail sebelum mengembalikan 404 (`src/lib/redirects/resolve.ts`).
 

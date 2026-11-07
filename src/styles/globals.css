@@ -579,6 +579,13 @@ p {
   transform: none;
 }
 
+/* The Studio block preview is static (inert, zoomed): show revealed content as-is. */
+.studio-block-preview [data-reveal] {
+  opacity: 1;
+  transform: none;
+  transition: none;
+}
+
 /* ==========================================================================
    Utilities
    ========================================================================== */

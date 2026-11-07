@@ -2,6 +2,7 @@ import 'server-only'
 import { z } from 'zod'
 import { prisma } from '@/lib/db/prisma'
 import { validateCatalogPublication } from '@/lib/blocks/publication-gate'
+import { buildPreset, hasDataBoundBlocks, resolveEntityBlocks, type StoredBlock } from '@/blocks/presets'
 import { portfolioMutationSchema } from '@/lib/validation/api-schemas'
 import { slugify } from '@/lib/pages/page-schema'
 import {
@@ -39,9 +40,10 @@ const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
 
 type PortfolioRow = NonNullable<Awaited<ReturnType<typeof prisma.orm.public.Portfolio.first>>>
 
-export function portfolioUrls(row: { slug: string; status: string | null }) {
+export function portfolioUrls(row: { id: number; slug: string; status: string | null }) {
   return {
     editUrl: `${siteUrl()}/admin?tab=portfolio&slug=${encodeURIComponent(row.slug)}`,
+    previewUrl: `${siteUrl()}/admin/preview/portfolio/${row.id}`,
     publicUrl: (row.status ?? 'published') === 'published' ? `${siteUrl()}/portfolio/${row.slug}` : null,
   }
 }
@@ -64,6 +66,7 @@ export function portfolioGate(row: PortfolioRow) {
     heroImage: row.heroImage ?? undefined,
     heroImageAlt: heroAltOf(row) ?? undefined,
     blocks: blocksOf(row),
+    target: 'portfolio',
   })
   return {
     ready: gate.canPublish,
@@ -71,6 +74,10 @@ export function portfolioGate(row: PortfolioRow) {
     warnings: gate.warnings,
     note: 'Only a human editor can publish, from the Studio (editUrl).',
   }
+}
+
+function storedOnly(blocks: unknown[]): StoredBlock[] {
+  return blocks.filter((b): b is StoredBlock => b !== null && typeof b === 'object' && typeof (b as StoredBlock).type === 'string')
 }
 
 function portfolioView(row: PortfolioRow, options: { includeBlocks: boolean }) {
@@ -103,8 +110,9 @@ function portfolioView(row: PortfolioRow, options: { includeBlocks: boolean }) {
     updatedAt: row.updatedAt,
     ...portfolioUrls(row),
     blockCount: blocks.length,
+    blocksMode: blocks.length === 0 ? 'preset' : hasDataBoundBlocks(blocks) ? 'explicit' : 'legacy',
     ...(options.includeBlocks
-      ? { blocks }
+      ? { blocks, resolvedBlocks: resolveEntityBlocks('portfolio', storedOnly(blocks)) }
       : { outline: blocks.map((b, index) => ({ index, id: asRecord(b).id ?? null, type: asRecord(b).type ?? null })) }),
     publication: portfolioGate(row),
   }
@@ -153,7 +161,7 @@ const createInput = z.strictObject({
   slug: z.string().optional().describe('URL slug at /portfolio/<slug>. Omit to derive from the title. Fixed after creation.'),
   heroImage: imageUrlField.optional().describe('Poster image: site path (Media library) or https URL. Never invent image URLs.'),
   ...portfolioFields,
-  blocks: blockList.default([]).describe('Optional catalogue blocks (target "portfolio").'),
+  blocks: blockList.optional().describe('Page blocks (target "portfolio"). Omit to start from the preset (get_block_preset).'),
 })
 
 const updateInput = z.strictObject({
@@ -162,7 +170,7 @@ const updateInput = z.strictObject({
   title: shape.title.optional(),
   heroImage: imageUrlField.nullable().optional().describe('New poster image; null removes it.'),
   ...portfolioFields,
-  blocks: blockList.optional().describe('Replaces the entire block list when provided.'),
+  blocks: blockList.optional().describe('Replaces the entire block list when provided. [] reverts the page to the preset.'),
 })
 
 type Values = Record<string, unknown>
@@ -171,6 +179,7 @@ type Values = Record<string, unknown>
 async function toValues(
   args: z.output<typeof createInput> | z.output<typeof updateInput>,
   previousSeo: Record<string, unknown>,
+  mode: 'create' | 'update',
 ): Promise<{ ok: true; values: Values } | { ok: false; result: ToolResult }> {
   const values: Values = {}
   if (args.title !== undefined) values.title = args.title
@@ -181,10 +190,15 @@ async function toValues(
   if (args.year !== undefined) values.year = args.year
   if (args.technologies !== undefined) values.technologies = args.technologies.length ? JSON.stringify(args.technologies) : null
   if (args.metrics !== undefined) values.metrics = args.metrics.length ? JSON.stringify(args.metrics) : null
-  if (args.blocks !== undefined) {
+  if (args.blocks !== undefined && args.blocks.length > 0) {
     const check = checkBlocksFor('portfolio', args.blocks)
     if (!check.ok) return check
-    values.blocks = check.blocks.length ? JSON.stringify(check.blocks) : null
+    values.blocks = JSON.stringify(check.blocks)
+  } else if (mode === 'create') {
+    // New entries start from the portfolio preset (data-bound sections).
+    values.blocks = JSON.stringify(buildPreset('portfolio', { ids: 'fresh' }))
+  } else if (args.blocks !== undefined) {
+    values.blocks = null
   }
 
   const seo = { ...previousSeo }
@@ -294,14 +308,15 @@ export const PORTFOLIO_TOOLS: readonly McpTool[] = [
     title: 'Create portfolio draft',
     scope: 'portfolio:draft',
     description:
-      'Creates a new DRAFT portfolio entry at /portfolio/<slug>. Use only facts the user gave you: leave client, year, metrics and images out when unknown. ' +
+      'Creates a new DRAFT portfolio entry at /portfolio/<slug>. Without blocks the page starts from the preset (hero, scene viewer, brief + facts, related work, CTA) ' +
+      'that renders the entry fields. Use only facts the user gave you: leave client, year, metrics and images out when unknown. ' +
       'Returns the entry (updatedAt for further edits), editUrl and the publication checklist. Never publishes.',
     input: createInput,
     annotations: write,
     run: async (args, ctx) => {
       const slug = slugify(args.slug ?? args.title)
       if (slug.length < 2 || !SLUG_PATTERN.test(slug)) return fail('Could not derive a valid slug. Pass slug explicitly (e.g. "candi-plaosan-scan").')
-      const mapped = await toValues(args, {})
+      const mapped = await toValues(args, {}, 'create')
       if (!mapped.ok) return mapped.result
       try {
         const row = await createPortfolioDraft(slug, mapped.values, ctx.actor)
@@ -324,7 +339,7 @@ export const PORTFOLIO_TOOLS: readonly McpTool[] = [
     run: async (args, ctx) => {
       const current = await prisma.orm.public.Portfolio.where({ id: args.id }).first()
       if (!current) return fail(`Portfolio ${args.id} not found.`, { hint: 'Call list_portfolios to find a valid id.' })
-      const mapped = await toValues(args, asRecord(parseJson(current.seoData, `portfolios.seo_data#${current.slug}`)))
+      const mapped = await toValues(args, asRecord(parseJson(current.seoData, `portfolios.seo_data#${current.slug}`)), 'update')
       if (!mapped.ok) return mapped.result
       if (Object.keys(mapped.values).length === 0) return fail('Nothing to update: pass at least one field to change.')
       try {

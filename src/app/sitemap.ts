@@ -67,6 +67,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.9,
   }))
 
+  // Published child services under published use cases (capabilities carry their page path).
+  const childServiceRoutes: MetadataRoute.Sitemap = services.flatMap((service) =>
+    service.capabilities.map((cap) => ({
+      url: `${SITE_URL}${cap.href}`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly' as const,
+      priority: 0.7,
+    })),
+  )
+
   const projectRoutes: MetadataRoute.Sitemap = projects.map((project) => ({
     url: `${SITE_URL}/portfolio/${project.slug}`,
     lastModified: new Date(),
@@ -94,5 +104,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.7,
     }))
 
-  return [...staticRoutes, ...serviceRoutes, ...projectRoutes, ...postRoutes, ...pageRoutes]
+  return [...staticRoutes, ...serviceRoutes, ...childServiceRoutes, ...projectRoutes, ...postRoutes, ...pageRoutes]
 }

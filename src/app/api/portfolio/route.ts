@@ -6,6 +6,7 @@ import { revalidateCatalog } from '@/lib/cache/revalidate'
 import { errorResponse, PublicError } from '@/lib/http/errors'
 import {
   actorOf,
+  catalogBlocksColumn,
   catalogGateResponse,
   coverAltFrom,
   jsonColumn,
@@ -68,9 +69,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: false, error: 'Slug portofolio tidak valid.' }, { status: 400 })
   }
 
-  if (data.blocks !== undefined && data.blocks !== null && parseJsonArray(data.blocks) === undefined) {
-    return NextResponse.json({ success: false, error: 'Blok harus berupa daftar (array).' }, { status: 400 })
-  }
+  // Target-aware validation; creating without blocks stores the portfolio preset.
+  const blocksColumn = catalogBlocksColumn('portfolio', data.blocks, data.id ? 'update' : 'create')
+  if (!blocksColumn.ok) return blocksColumn.response
 
   try {
     const existing = data.id ? await prisma.orm.public.Portfolio.where({ id: data.id }).first() : null
@@ -101,7 +102,7 @@ export async function POST(request: NextRequest) {
       featured: data.featured,
       metrics: data.metrics === undefined ? undefined : jsonColumn(data.metrics),
       technologies: data.technologies === undefined ? undefined : jsonColumn(data.technologies),
-      blocks: data.blocks === undefined ? undefined : jsonColumn(data.blocks),
+      blocks: blocksColumn.value,
       metaTitle: data.metaTitle === undefined ? undefined : data.metaTitle || null,
       metaDescription: data.metaDescription === undefined ? undefined : data.metaDescription || null,
       focusKeyphrase: data.focusKeyphrase === undefined ? undefined : data.focusKeyphrase || null,
@@ -127,6 +128,7 @@ export async function POST(request: NextRequest) {
         heroImage: merged.heroImage ?? undefined,
         heroImageAlt: coverAltFrom(merged.seoData),
         blocks: parseJsonArray(merged.blocks),
+        target: 'portfolio',
       })
       if (gate) return gate
     }

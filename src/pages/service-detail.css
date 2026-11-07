@@ -96,6 +96,42 @@
   font-size: 0.92rem;
 }
 
+/* The card links to the service page; the title link covers the whole card. */
+.detail-capability--link {
+  position: relative;
+}
+
+.detail-capability__link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.detail-capability__link::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+}
+
+.detail-capability--link:hover .detail-capability__link {
+  color: var(--blue-300, #8fb5ff);
+}
+
+.detail-capability__link:focus-visible {
+  outline: none;
+}
+
+.detail-capability--link:has(.detail-capability__link:focus-visible) {
+  outline: 2px solid var(--blue-400, #4d8bff);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .detail-capability:hover {
+    transform: none;
+  }
+}
+
 /* --- Deliverables --- */
 .detail-deliverables__inner {
   display: grid;

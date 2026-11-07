@@ -48,6 +48,23 @@ import { interactiveTechMatrixBlock } from './interactive-tech-matrix/definition
 import { departmentServiceListBlock } from './department-service-list/definition'
 import { heroSolutionBlock } from './hero-solution/definition'
 import { caseStudyChapterBlock } from './case-study-chapter/definition'
+import { categoryHeroBlock } from './category-hero/definition'
+import { categoryIntroBlock } from './category-intro/definition'
+import { categoryCapabilitiesBlock } from './category-capabilities/definition'
+import { categoryDeliverablesBlock } from './category-deliverables/definition'
+import { categoryFaqBlock } from './category-faq/definition'
+import { categoryRelatedWorkBlock } from './category-related-work/definition'
+import { categoryNextBlock } from './category-next/definition'
+import { serviceHeroBlock } from './service-hero/definition'
+import { serviceDescriptionBlock } from './service-description/definition'
+import { serviceDeliverablesBlock } from './service-deliverables/definition'
+import { serviceRelatedWorkBlock } from './service-related-work/definition'
+import { serviceSiblingsBlock } from './service-siblings/definition'
+import { portfolioHeroBlock } from './portfolio-hero/definition'
+import { portfolioSceneBlock } from './portfolio-scene/definition'
+import { portfolioBriefBlock } from './portfolio-brief/definition'
+import { portfolioRelatedBlock } from './portfolio-related/definition'
+import { entityCtaBlock } from './entity-cta/definition'
 import {
   legacyCtaSectionBlock,
   legacyFaqSectionBlock,
@@ -84,6 +101,24 @@ export const BLOCK_DEFINITIONS = [
   workflowPhasesBlock,
   heroPortfolioBlock,
   portfolioCaseStudyBlock,
+  // Data-bound entity sections (service category, service, portfolio pages).
+  categoryHeroBlock,
+  categoryIntroBlock,
+  categoryCapabilitiesBlock,
+  categoryDeliverablesBlock,
+  categoryFaqBlock,
+  categoryRelatedWorkBlock,
+  categoryNextBlock,
+  serviceHeroBlock,
+  serviceDescriptionBlock,
+  serviceDeliverablesBlock,
+  serviceRelatedWorkBlock,
+  serviceSiblingsBlock,
+  portfolioHeroBlock,
+  portfolioSceneBlock,
+  portfolioBriefBlock,
+  portfolioRelatedBlock,
+  entityCtaBlock,
   // Legacy: still validated and rendered, not offered for new content.
   heroDepartmentBlock,
   heroServiceBlock,
@@ -131,6 +166,11 @@ export const BLOCK_TYPES: readonly BlockType[] = BLOCK_DEFINITIONS.flatMap((d) =
 /** Catalogue entries (metadata + schema), in registry order. */
 export const CATALOG_ENTRIES: readonly BlockCatalogEntry[] = BLOCK_DEFINITIONS.flatMap((d: BlockDefinition) =>
   (d.catalog ?? []).map((meta): BlockCatalogEntry => ({ ...meta, schema: d.schema })),
+)
+
+/** Data-bound types: they render the entity from the render context (see `src/blocks/presets.ts`). */
+export const DATA_BOUND_TYPES: ReadonlySet<string> = new Set(
+  BLOCK_DEFINITIONS.flatMap((d: BlockDefinition) => (d.dataBound ? schemaTypes(d.schema) : [])),
 )
 
 /** Types whose block renders the page's own `<h1>` hero. */

@@ -1,16 +1,21 @@
 import 'server-only'
-import { z } from 'zod'
 import { prisma } from '@/lib/db/prisma'
-import { coverAltFrom } from '@/lib/db/catalogMutations'
+import { resolveEntityBlocks, type StoredBlock } from '@/blocks/presets'
 import { getArticleBySlug, getArticles } from '@/lib/db/articles'
 import { getPublicContact } from './contact'
 import type { Article as CmsArticle } from './types'
 import {
-  isServiceVisual,
-  type SduiBlock,
-  mapProjectCategory,
-  superSplatIdFromUrl,
-  superSplatSceneUrl,
+  categoryEntity,
+  categoryImageAlt,
+  portfolioEntity,
+  serviceEntity,
+  toProject,
+  toServiceDetail,
+  toUseCase,
+  type ServiceRow,
+} from './entity-model'
+import {
+  type EntityContext,
   type JournalArticle,
   type Project,
   type Service,
@@ -43,11 +48,16 @@ import {
 //   theme_preset  ServiceVisual kind used for the illustration
 //   key_outcomes  JSON [{ label, value }] keyed by `label`:
 //                   deliverable | tool | imageAlt
-//   blocks        SDUI ontology blocks rendered into the page layout:
-//                   paragraph → intro paragraphs, faq-accordion → FAQs,
-//                   internal-links → related links
-// services (derivative capabilities) — linked through category_id; rendered as
-//   the capability grid of their parent use case.
+//   blocks        page blocks (data-bound sections + generic blocks). Rows
+//                 saved before data-bound blocks hold legacy carriers
+//                 (paragraph → intro, faq-accordion → FAQ, internal-links →
+//                 related scenes); `resolveEntityBlocks` folds them into the
+//                 preset (src/blocks/presets.ts).
+// services (derivative capabilities) — linked through category_id; listed on
+//   their parent use case and rendered at /services/<category>/<slug>.
+//
+// Every entity page renders resolveEntityBlocks(<target>, stored blocks) with
+// the entity context (src/lib/content/entity-model.ts) — see docs/BLOCKS.md.
 // -----------------------------------------------------------------------------
 
 const hasDb = () => {
@@ -56,98 +66,29 @@ const hasDb = () => {
   return false
 }
 
-const labelledList = z.array(
-  z.object({ label: z.string(), value: z.string(), detail: z.string().optional().nullable() }),
-)
-type LabelledList = z.infer<typeof labelledList>
-const anyBlockList = z.array(z.object({ type: z.string() }).catchall(z.unknown()))
-
-function parseJsonColumn<T>(raw: string | null | undefined, schema: z.ZodType<T>, ctx: string): T | null {
-  if (!raw) return null
-  let parsed: unknown
-  try {
-    parsed = JSON.parse(raw)
-  } catch (err) {
-    console.warn(`[content] invalid JSON in ${ctx}:`, err)
-    return null
-  }
-  const result = schema.safeParse(parsed)
-  if (!result.success) {
-    console.warn(`[content] unexpected JSON shape in ${ctx}:`, result.error.message)
-    return null
-  }
-  return result.data
-}
-
-const pick = (list: LabelledList | null, label: string) => list?.find((m) => m.label === label)
-const pickAll = (list: LabelledList | null, label: string) =>
-  (list ?? []).filter((m) => m.label === label).map((m) => m.value)
-const lines = (text: string | null | undefined) =>
-  (text ?? '')
-    .split(/\n+/)
-    .map((l) => l.trim())
-    .filter(Boolean)
-
 /* -------------------------------- Portfolio ------------------------------- */
 
-type PortfolioRow = {
-  id: number
-  slug: string
-  title: string
-  client: string | null
-  year: number | null
-  category: string | null
-  summary: string | null
-  challenge: string | null
-  approach: string | null
-  result: string | null
-  heroImage: string | null
-  liveUrl: string | null
-  metrics: string | null
-  technologies: string | null
-  blocks: string | null
-}
+type PublishedProjects = { projects: Project[]; byId: Map<number, Project> }
 
-function toProject(row: PortfolioRow, index: number): Project {
-  const metrics = parseJsonColumn(row.metrics, labelledList, `portfolios.metrics#${row.slug}`)
-  const technologies = parseJsonColumn(row.technologies, z.array(z.string()), `portfolios.technologies#${row.slug}`)
-  const splatId = superSplatIdFromUrl(row.liveUrl)
-  const pair = pick(metrics, 'scenePair')
-  const discipline = row.category ?? ''
-  return {
-    slug: row.slug,
-    title: row.title,
-    client: row.client ?? undefined,
-    category: mapProjectCategory(discipline),
-    discipline,
-    year: row.year ? String(row.year) : undefined,
-    tagline: row.summary ?? '',
-    brief: row.challenge ?? row.summary ?? '',
-    approach: lines(row.approach),
-    delivered: lines(row.result),
-    variant: (index % 3) + 1,
-    posterUrl: row.heroImage ?? undefined,
-    liveUrl: row.liveUrl ?? undefined,
-    sceneUrl: pick(metrics, 'sceneUrl')?.value ?? (splatId ? superSplatSceneUrl(splatId) : undefined),
-    splatId,
-    pointCount: pick(metrics, 'pointCount')?.value,
-    accuracy: pick(metrics, 'accuracy')?.value,
-    captureMethod: technologies?.[0],
-    location: pick(metrics, 'location')?.value,
-    scenePairSlug: pair?.value,
-    scenePairLabel: pair?.detail ?? undefined,
-    blocks: parseJsonColumn(row.blocks, anyBlockList, `portfolios.blocks#${row.slug}`) ?? [],
-  }
+async function loadPublishedProjects(): Promise<PublishedProjects> {
+  const rows = await prisma.orm.public.Portfolio.where({ status: 'published' })
+    .orderBy((p) => p.id.asc())
+    .all()
+  const projects: Project[] = []
+  const byId = new Map<number, Project>()
+  rows.forEach((row, i) => {
+    const project = toProject(row, i)
+    projects.push(project)
+    byId.set(row.id, project)
+  })
+  return { projects, byId }
 }
 
 /** Published scenes in catalogue order. Returns [] (logged) on DB failure. */
 export async function getProjects(): Promise<Project[]> {
   if (!hasDb()) return []
   try {
-    const rows = await prisma.orm.public.Portfolio.where({ status: 'published' })
-      .orderBy((p) => p.id.asc())
-      .all()
-    return rows.map(toProject)
+    return (await loadPublishedProjects()).projects
   } catch (err) {
     console.error('[content] getProjects failed:', err)
     return []
@@ -161,119 +102,30 @@ export async function getProjectBySlug(slug: string): Promise<Project | null> {
 
 /* -------------------------------- Services -------------------------------- */
 
-const paragraphBlock = z.object({ type: z.literal('paragraph'), text: z.string() })
-const faqBlock = z.object({
-  type: z.literal('faq-accordion'),
-  items: z.array(z.object({ question: z.string(), answer: z.string() })),
-})
-const linksBlock = z.object({
-  type: z.literal('internal-links'),
-  links: z.array(z.object({ title: z.string(), url: z.string() })),
-})
-
-type CategoryRow = {
-  id: number
-  slug: string
-  title: string
-  tag: string | null
-  shortDescription: string | null
-  heroImage: string | null
-  themePreset: string | null
-  keyOutcomes: string | null
-  blocks: string | null
-  order: number | null
-  metaTitle: string | null
-  metaDescription: string | null
-  seoData: string | null
-}
-
-/**
- * Cover alt: `seoData.coverAlt` is what Studio edits and the publication gate checks;
- * the legacy `imageAlt` key outcome is only a fallback for rows not yet re-saved.
- */
-function categoryCoverAlt(row: Pick<CategoryRow, 'seoData' | 'title'>, outcomes: LabelledList | null): string {
-  return coverAltFrom(row.seoData) ?? pick(outcomes, 'imageAlt')?.value ?? row.title
-}
-
-type ServiceRow = {
-  slug: string
-  name: string
-  categoryId: number | null
-  shortDescription: string | null
-  description: string | null
-}
-
-function toService(row: CategoryRow, children: ServiceRow[], position: number): Service {
-  const outcomes = parseJsonColumn(row.keyOutcomes, labelledList, `service_categories.key_outcomes#${row.slug}`)
-  const blocks = parseJsonColumn(row.blocks, anyBlockList, `service_categories.blocks#${row.slug}`) ?? []
-  const intro: string[] = []
-  const faqs: Service['faqs'] = []
-  const related: Service['related'] = []
-  const extraBlocks: Service['extraBlocks'] = []
-  for (const block of blocks) {
-    const p = paragraphBlock.safeParse(block)
-    if (p.success) {
-      intro.push(p.data.text)
-      continue
-    }
-    const f = faqBlock.safeParse(block)
-    if (f.success) {
-      faqs.push(...f.data.items.map((i) => ({ q: i.question, a: i.answer })))
-      continue
-    }
-    const l = linksBlock.safeParse(block)
-    if (l.success) {
-      related.push(...l.data.links.map((link) => ({ label: link.title, to: link.url })))
-      continue
-    }
-    extraBlocks.push(block)
-  }
-  const summary = row.shortDescription ?? ''
-  return {
-    slug: row.slug,
-    index: String(row.order ?? position + 1).padStart(2, '0'),
-    name: row.title,
-    shortName: row.title.split(' & ')[0] ?? row.title,
-    tagline: row.tag ?? '',
-    summary,
-    metaTitle: row.metaTitle ?? row.title,
-    metaDescription: row.metaDescription ?? summary,
-    intro: intro.length > 0 ? intro : summary ? [summary] : [],
-    capabilities: children.map((c) => ({
-      slug: c.slug,
-      title: c.name,
-      description: c.shortDescription ?? c.description ?? '',
-    })),
-    deliverables: pickAll(outcomes, 'deliverable'),
-    tools: pickAll(outcomes, 'tool'),
-    visual: isServiceVisual(row.themePreset) ? row.themePreset : 'marketing',
-    image: row.heroImage ?? undefined,
-    imageAlt: categoryCoverAlt(row, outcomes),
-    faqs,
-    related,
-    extraBlocks,
-  }
+async function loadPublishedUseCases(): Promise<{ useCases: Service[]; services: ServiceRow[] }> {
+  const [categories, services] = await Promise.all([
+    prisma.orm.public.ServiceCategory.where({ status: 'published' })
+      .orderBy((c) => c.order.asc())
+      .all(),
+    prisma.orm.public.Service.where({ status: 'published' })
+      .orderBy((s) => s.order.asc())
+      .all(),
+  ])
+  const useCases = categories.map((cat, i) =>
+    toUseCase(
+      cat,
+      services.filter((s) => s.categoryId === cat.id),
+      i,
+    ),
+  )
+  return { useCases, services: services.filter((s) => categories.some((c) => c.id === s.categoryId)) }
 }
 
 /** Published core use cases with their published capabilities. [] on failure. */
 export async function getUseCases(): Promise<Service[]> {
   if (!hasDb()) return []
   try {
-    const [categories, services] = await Promise.all([
-      prisma.orm.public.ServiceCategory.where({ status: 'published' })
-        .orderBy((c) => c.order.asc())
-        .all(),
-      prisma.orm.public.Service.where({ status: 'published' })
-        .orderBy((s) => s.order.asc())
-        .all(),
-    ])
-    return categories.map((cat, i) =>
-      toService(
-        cat,
-        services.filter((s) => s.categoryId === cat.id),
-        i,
-      ),
-    )
+    return (await loadPublishedUseCases()).useCases
   } catch (err) {
     console.error('[content] getUseCases failed:', err)
     return []
@@ -302,20 +154,87 @@ export async function getUseCaseMenu(): Promise<UseCaseMenuItem[]> {
       .all()
     return rows
       .filter((row) => row.showInNav === true)
-      .map((row) => {
-        const outcomes = parseJsonColumn(row.keyOutcomes, labelledList, `service_categories.key_outcomes#${row.slug}`)
-        return {
-          slug: row.slug,
-          name: row.title,
-          tagline: row.tag ?? '',
-          image: row.heroImage ?? undefined,
-          imageAlt: categoryCoverAlt(row, outcomes),
-        }
-      })
+      .map((row) => ({
+        slug: row.slug,
+        name: row.title,
+        tagline: row.tag ?? '',
+        image: row.heroImage ?? undefined,
+        imageAlt: categoryImageAlt(row),
+      }))
   } catch (err) {
     console.error('[content] getUseCaseMenu failed:', err)
     return []
   }
+}
+
+/* ------------------------------ Entity pages ------------------------------ */
+
+/** What an entity page renders: the entity context and the resolved blocks. */
+export type EntityPage<K extends EntityContext['kind']> = {
+  entity: Extract<EntityContext, { kind: K }>
+  blocks: StoredBlock[]
+}
+
+/** A published use case page. null when missing/unpublished or on DB failure (logged). */
+export async function getServiceCategoryPage(slug: string): Promise<EntityPage<'service-category'> | null> {
+  if (!hasDb()) return null
+  try {
+    const [{ useCases }, { projects }] = await Promise.all([loadPublishedUseCases(), loadPublishedProjects()])
+    const category = useCases.find((s) => s.slug === slug)
+    if (!category) return null
+    return {
+      entity: categoryEntity(category, projects, useCases),
+      blocks: resolveEntityBlocks('service-category', category.blocks),
+    }
+  } catch (err) {
+    console.error('[content] getServiceCategoryPage failed:', err)
+    return null
+  }
+}
+
+/** A published child service page under its published use case. null otherwise. */
+export async function getServicePage(categorySlug: string, serviceSlug: string): Promise<EntityPage<'service'> | null> {
+  if (!hasDb()) return null
+  try {
+    const [{ useCases, services }, published] = await Promise.all([loadPublishedUseCases(), loadPublishedProjects()])
+    const parent = useCases.find((s) => s.slug === categorySlug)
+    if (!parent) return null
+    const position = parent.capabilities.findIndex((c) => c.slug === serviceSlug)
+    const row = services.find((s) => s.slug === serviceSlug)
+    if (!row || position < 0) return null
+    const links = await prisma.orm.public.ServicePortfolio.where({ serviceId: row.id })
+      .orderBy((l) => l.displayOrder.asc())
+      .all()
+    const linked = links.flatMap((l) => {
+      const project = published.byId.get(l.portfolioId)
+      return project ? [project] : []
+    })
+    const detail = toServiceDetail(row, parent, position)
+    return { entity: serviceEntity(detail, parent, linked), blocks: resolveEntityBlocks('service', detail.blocks) }
+  } catch (err) {
+    console.error('[content] getServicePage failed:', err)
+    return null
+  }
+}
+
+/** A published scene page. null when missing/unpublished or on DB failure. */
+export async function getPortfolioPage(slug: string): Promise<EntityPage<'portfolio'> | null> {
+  if (!hasDb()) return null
+  try {
+    const { projects } = await loadPublishedProjects()
+    const project = projects.find((p) => p.slug === slug)
+    if (!project) return null
+    return { entity: portfolioEntity(project, projects), blocks: resolveEntityBlocks('portfolio', project.blocks) }
+  } catch (err) {
+    console.error('[content] getPortfolioPage failed:', err)
+    return null
+  }
+}
+
+/** Public paths of every published child service under a published use case (sitemap). */
+export async function getPublishedServicePaths(): Promise<{ path: string; categorySlug: string; slug: string }[]> {
+  const useCases = await getUseCases()
+  return useCases.flatMap((u) => u.capabilities.map((c) => ({ path: c.href, categorySlug: u.slug, slug: c.slug })))
 }
 
 /* --------------------------------- Socials -------------------------------- */
@@ -330,18 +249,16 @@ export async function getSocialLinks(): Promise<SocialLink[]> {
 }
 
 /**
- * Resolves a derivative service slug to its parent use case slug, so
- * `/services/<capability>` can redirect to the use-case page. null if unknown.
+ * Public path of a published child service (`/services/<category>/<slug>`),
+ * so the former `/services/<service>` URL can redirect. null if unknown.
  */
-export async function getParentUseCaseSlug(serviceSlug: string): Promise<string | null> {
+export async function getServicePathBySlug(serviceSlug: string): Promise<string | null> {
   if (!hasDb()) return null
   try {
-    const svc = await prisma.orm.public.Service.where({ slug: serviceSlug, status: 'published' }).first()
-    if (!svc || svc.categoryId === null) return null
-    const cat = await prisma.orm.public.ServiceCategory.where({ id: svc.categoryId, status: 'published' }).first()
-    return cat?.slug ?? null
+    const paths = await getPublishedServicePaths()
+    return paths.find((p) => p.slug === serviceSlug)?.path ?? null
   } catch (err) {
-    console.error('[content] getParentUseCaseSlug failed:', err)
+    console.error('[content] getServicePathBySlug failed:', err)
     return null
   }
 }
