@@ -270,7 +270,7 @@ function AdminNavContent({ children }: AdminLayoutProps) {
         <div className={`flex h-16 shrink-0 items-center ${collapsed ? 'justify-center' : 'px-4'}`}>
           <Link href="/admin" className="flex items-center gap-3 rounded-xl" aria-label={`${siteConfig.name} Studio, ringkasan`}>
             <span className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-xl border border-white/15 bg-white/5">
-              <Image src="/favicon.svg" alt="" width={26} height={26} className="object-contain p-0.5" />
+              <Image src="/brand/mark-spatium-white.svg" alt="" width={26} height={16} className="object-contain p-0.5" />
             </span>
             {!collapsed && <span className="text-sm font-semibold tracking-tight">{siteConfig.name} Studio</span>}
           </Link>

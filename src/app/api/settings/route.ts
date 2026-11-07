@@ -56,7 +56,7 @@ export async function GET() {
         phone: process.env.NEXT_PUBLIC_PHONE || '',
         address: '',
         logoUrl: '/brand/mark-spatium.svg',
-        faviconUrl: '/brand/mark-spatium.svg',
+        faviconUrl: '/favicon.svg',
         socialLinks: {},
       },
     })
