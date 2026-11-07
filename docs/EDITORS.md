@@ -85,6 +85,34 @@ Manajer di tab **Portofolio** dan **Layanan** memakai aturan yang sama (`src/lib
 - Pembaruan parsial: kolom yang tidak dikirim tetap. Tautan layanan ↔ portofolio dibaca dari database dan diganti di dalam transaksi (dulu menyunting layanan bisa menghapus semua tautannya).
 - Setiap simpan/hapus menulis `ContentRevision` + `SeoAuditLog` dalam satu transaksi dan me-revalidate rute publik terkait serta `/sitemap.xml` (`revalidateCatalog`).
 - Tidak ada angka, tech stack, tahun, atau alt text yang diisi otomatis (AGENTS.md §3.3).
+- **Blok** divalidasi per target (`service-category`, `service`, `portfolio`) — tipe yang tidak ditawarkan untuk entri itu ditolak 422 dengan `issues` dan `blockIssues` (`{ index, blockId, type, message }`); gerbang publikasi juga memeriksanya. **Membuat entri tanpa blok** (tanpa `blocks`, `null`, atau `[]`) menyimpan preset entri (lihat [BLOCKS.md](BLOCKS.md#preset-srcblockspresetsts)). Manajer lama tetap bisa menyimpan blok lamanya; palet kategori sekarang memakai target `service-category`.
+- Halaman publik: `/services/<kategori>`, `/services/<kategori>/<layanan>` (layanan dan kategori induk harus terbit; URL lama `/services/<layanan>` → 308), `/portfolio/<slug>`. Simpan me-revalidate halaman kategori, halaman layanan di bawah induknya, dan `/sitemap.xml`.
+
+### Pratinjau entri (dan draf yang belum disimpan)
+
+`/admin/preview/<type>/<id-atau-slug>` — `type`: `service-category` (alias `category`, `department`), `service`, `portfolio`. Halaman merender entri dalam status apa pun lewat **view yang sama dengan situs publik**. Server memeriksa kapabilitas `<entitas>:update` (`userWithCapability`, `src/lib/auth/server-component.ts`); tanpa izin → 404. Tidak ada yang disimpan dan halaman `noindex`.
+
+Kontrak untuk editor (sematkan pratinjau sebagai `<iframe src="/admin/preview/service/12">` dari origin yang sama):
+
+1. Iframe mengirim ke `window.parent`: `{ type: 'spatium:preview:ready', entity, id }` setelah siap menerima.
+2. Editor mengirim ke iframe (`iframe.contentWindow.postMessage(msg, window.location.origin)`), setiap kali state berubah (sebaiknya di-debounce ±150 ms):
+   ```ts
+   {
+     type: 'spatium:preview:draft',
+     entity: 'service-category' | 'service' | 'portfolio',   // harus sama dengan type di URL
+     id?: number | string,                                    // bila diisi harus sama dengan segmen URL
+     blocks?: unknown[],   // daftar blok lengkap di editor; tanpa field = blok tersimpan; [] = preset
+     fields?: {            // nilai belum disimpan, nama sama dengan body POST /api/<entitas>
+       // service-category: title, tag, shortDescription, heroImage, themePreset, keyOutcomes, order, metaTitle, metaDescription, seoData
+       // service: name, indexNumber, shortDescription, longDescription, description, heroImage, deliverables, technologies, metaTitle, metaDescription, seoData
+       // portfolio: title, client, year, category, summary, challenge, approach, result, heroImage, liveUrl, metrics, technologies
+     }
+   }
+   ```
+   Skema: `previewDraftMessageSchema` + `DRAFT_FIELD_SCHEMAS` di `src/lib/content/entity-preview-model.ts`. Pesan dari origin lain atau bukan dari jendela induk diabaikan.
+3. Iframe merender ulang (blok data-bound membaca entri yang sudah ditambal field draf; `resolveEntityBlocks` berlaku) lalu membalas `{ type: 'spatium:preview:applied', entity, id, blockIssues, fieldIssues, blockCount }`. Blok yang tidak valid untuk target dilewati dan dilaporkan di `blockIssues` (`{ index, blockId, type, message }`); field tak dikenal/salah bentuk dilaporkan di `fieldIssues` dan diabaikan.
+
+Konteks (layanan turunan, portofolio terkait, use case lain) selalu data **terbit**, sama dengan yang akan tampil di situs. Untuk mengedit entri lama, muat `resolveEntityBlocks(target, blocks)` (MCP: `resolvedBlocks`) sebagai daftar awal editor — menyimpannya tidak mengubah tampilan.
 - Hapus: SUPER_ADMIN dan CONTENT_ADMIN saja; item yang tidak ada → 404.
 
 ## Media, logo klien, CTA

@@ -22,6 +22,19 @@ export const safeUrlSchema = z.string().refine(
   { message: 'URL harus diawali dengan /, https://, http://, mailto:, tel:, atau #' }
 )
 
-export const iconNameSchema = z.string().regex(/^[a-z0-9-]+$/i, {
+/** Optional presentation override (heading, eyebrow…): empty means "use the default". */
+export const overrideTextSchema = (max = 300) => z.string().trim().max(max).optional()
+
+/** Optional item cap for data-bound lists. */
+export const itemLimitSchema = z.number().int().min(1).max(24).optional()
+
+/** A slug reference (portfolio, service…). */
+export const slugRefSchema = z
+  .string()
+  .trim()
+  .max(200)
+  .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, { message: 'Slug hanya huruf kecil, angka, dan tanda hubung.' })
+
+export const iconNameSchema =z.string().regex(/^[a-z0-9-]+$/i, {
   message: 'Nama ikon hanya boleh berupa huruf, angka, dan tanda hubung (-)',
 })

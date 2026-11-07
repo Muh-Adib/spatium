@@ -42,6 +42,25 @@ import { InteractiveTechMatrixBlock } from './interactive-tech-matrix/Interactiv
 import { DepartmentServiceListBlock } from './department-service-list/DepartmentServiceListBlock'
 import { HeroSolutionBlock } from './hero-solution/HeroSolutionBlock'
 import { CaseStudyChapterBlock } from './case-study-chapter/CaseStudyChapterBlock'
+import { CategoryHeroBlock } from './category-hero/CategoryHeroBlock'
+import { CategoryIntroBlock } from './category-intro/CategoryIntroBlock'
+import { CategoryCapabilitiesBlock } from './category-capabilities/CategoryCapabilitiesBlock'
+import { CategoryDeliverablesBlock } from './category-deliverables/CategoryDeliverablesBlock'
+import { CategoryFaqBlock } from './category-faq/CategoryFaqBlock'
+import { CategoryRelatedWorkBlock } from './category-related-work/CategoryRelatedWorkBlock'
+import { CategoryNextBlock } from './category-next/CategoryNextBlock'
+import { ServiceHeroBlock } from './service-hero/ServiceHeroBlock'
+import { ServiceDescriptionBlock } from './service-description/ServiceDescriptionBlock'
+import { ServiceDeliverablesBlock } from './service-deliverables/ServiceDeliverablesBlock'
+import { ServiceRelatedWorkBlock } from './service-related-work/ServiceRelatedWorkBlock'
+import { ServiceSiblingsBlock } from './service-siblings/ServiceSiblingsBlock'
+import { PortfolioHeroBlock } from './portfolio-hero/PortfolioHeroBlock'
+import { PortfolioSceneBlock } from './portfolio-scene/PortfolioSceneBlock'
+import { PortfolioBriefBlock } from './portfolio-brief/PortfolioBriefBlock'
+import { PortfolioRelatedBlock } from './portfolio-related/PortfolioRelatedBlock'
+import { EntityCtaBlock } from './entity-cta/EntityCtaBlock'
+import { EntityBlockPlaceholder } from '@/components/entity/EntityBlockPlaceholder'
+import { isEntityOf, type EntityContext, type EntityKind, type EntityOf } from './entity-context'
 import {
   CTABlockComponent,
   FAQBlockComponent,
@@ -63,6 +82,8 @@ export interface BlockRenderContext {
   services?: any[]
   /** Public contact profile from Studio settings; contact CTAs hide when absent. */
   contact?: PublicContact
+  /** The page's entity, read by data-bound blocks (service category, service, portfolio). */
+  entity?: EntityContext
 }
 
 /** Builds the element for one block. Most blocks only receive `block`; a few also read the page context. */
@@ -72,6 +93,20 @@ export type RenderBlock = (block: any, context?: BlockRenderContext) => React.Re
 const blockOnly =
   (Component: React.ComponentType<{ block: any }>): RenderBlock =>
   (block) => <Component block={block} />
+
+/** A data-bound renderer: gets the entity of one of `kinds`, or a placeholder without it. */
+function forEntity<K extends EntityKind>(
+  kinds: readonly K[],
+  Component: React.ComponentType<{ block: any; entity: EntityOf<K> }>,
+): RenderBlock {
+  return (block, context) => {
+    const entity = context?.entity
+    if (isEntityOf(entity, kinds)) return <Component block={block} entity={entity} />
+    return <EntityBlockPlaceholder type={String(block?.type ?? '')} />
+  }
+}
+
+const ALL_ENTITIES: readonly EntityKind[] = ['service-category', 'service', 'portfolio']
 
 export const BLOCK_RENDERERS: { readonly [T in BlockType]: RenderBlock } = {
   'hero-cinema': blockOnly(HeroCinemaBlock),
@@ -106,6 +141,23 @@ export const BLOCK_RENDERERS: { readonly [T in BlockType]: RenderBlock } = {
   'hero-portfolio': blockOnly(HeroPortfolioBlock),
   'hero-case-study': blockOnly(HeroPortfolioBlock),
   'portfolio-case-study': blockOnly(PortfolioCaseStudyBlock),
+  'category-hero': forEntity(['service-category'], CategoryHeroBlock),
+  'category-intro': forEntity(['service-category'], CategoryIntroBlock),
+  'category-capabilities': forEntity(['service-category'], CategoryCapabilitiesBlock),
+  'category-deliverables': forEntity(['service-category'], CategoryDeliverablesBlock),
+  'category-faq': blockOnly(CategoryFaqBlock),
+  'category-related-work': forEntity(['service-category'], CategoryRelatedWorkBlock),
+  'category-next': forEntity(['service-category'], CategoryNextBlock),
+  'service-hero': forEntity(['service'], ServiceHeroBlock),
+  'service-description': forEntity(['service'], ServiceDescriptionBlock),
+  'service-deliverables': forEntity(['service'], ServiceDeliverablesBlock),
+  'service-related-work': forEntity(['service'], ServiceRelatedWorkBlock),
+  'service-siblings': forEntity(['service'], ServiceSiblingsBlock),
+  'portfolio-hero': forEntity(['portfolio'], PortfolioHeroBlock),
+  'portfolio-scene': forEntity(['portfolio'], PortfolioSceneBlock),
+  'portfolio-brief': forEntity(['portfolio'], PortfolioBriefBlock),
+  'portfolio-related': forEntity(['portfolio'], PortfolioRelatedBlock),
+  'entity-cta': forEntity(ALL_ENTITIES, EntityCtaBlock),
   'hero-department': blockOnly(HeroDepartmentBlock),
   'hero-service': (block, context) => <HeroServiceBlock block={block} contact={context?.contact} />,
   'tech-stack-chips': blockOnly(TechStackChipsBlock),

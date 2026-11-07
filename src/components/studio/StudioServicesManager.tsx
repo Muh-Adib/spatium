@@ -184,6 +184,17 @@ export function StudioServicesManager() {
     handleEditService(match)
   }, [deepLinkSlug, services, can])
 
+  // Same for categories: /admin?tab=services&category=<slug> (MCP service-category editUrl).
+  const deepLinkCategory = searchParams?.get('category') ?? null
+  const categoryDeepLinkHandled = useRef(false)
+  useEffect(() => {
+    if (!deepLinkCategory || categoryDeepLinkHandled.current || !can('service-category:update')) return
+    const match = categories.find((entry) => entry.slug === deepLinkCategory)
+    if (!match) return
+    categoryDeepLinkHandled.current = true
+    handleEditDepartment(match)
+  }, [deepLinkCategory, categories, can])
+
   // Open Editor for Department
   const handleEditDepartment = (cat?: any) => {
     setEditingType('department')

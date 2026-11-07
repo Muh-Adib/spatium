@@ -33,7 +33,10 @@ export const MCP_SCOPE_INFO: Record<McpScope, { label: string; description: stri
   'portfolio:read': { label: 'Baca portofolio', description: 'Melihat entri portofolio (scene) dan syarat publikasinya.' },
   'portfolio:draft': { label: 'Tulis draf portofolio', description: 'Membuat dan mengubah portofolio draf. Tidak bisa menerbitkan atau menghapus.' },
   'services:read': { label: 'Baca layanan', description: 'Melihat layanan, kategori layanan, dan syarat publikasinya.' },
-  'services:draft': { label: 'Tulis draf layanan', description: 'Membuat dan mengubah layanan draf. Tidak bisa menerbitkan atau menghapus.' },
+  'services:draft': {
+    label: 'Tulis draf layanan',
+    description: 'Membuat dan mengubah layanan dan kategori layanan draf. Tidak bisa menerbitkan atau menghapus.',
+  },
 }
 
 export const mcpScopeSchema = z.enum(MCP_SCOPES)

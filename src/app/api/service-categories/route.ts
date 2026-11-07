@@ -2,12 +2,12 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db/prisma'
 import { getServiceCategories, mapCategoryRow } from '@/lib/db/serviceCategories'
 import { forbidUnless, requireCan } from '@/lib/auth/capabilities'
-import { parseBlocks } from '@/lib/blocks/schema'
 import { revalidateCatalog } from '@/lib/cache/revalidate'
 import { serviceCategoryMutationSchema, validateCatalogBody } from '@/lib/validation/api-schemas'
 import { errorResponse, PublicError } from '@/lib/http/errors'
 import {
   actorOf,
+  catalogBlocksColumn,
   catalogGateResponse,
   coverAltFrom,
   jsonColumn,
@@ -62,17 +62,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: false, error: 'Slug departemen tidak valid.' }, { status: 400 })
   }
 
-  let blocksJson: string | undefined
-  if (data.blocks !== undefined) {
-    const parsed = parseBlocks(data.blocks)
-    if (!parsed.ok) {
-      return NextResponse.json(
-        { success: false, error: 'Validasi blok katalog gagal.', issues: parsed.issues },
-        { status: 422 },
-      )
-    }
-    blocksJson = JSON.stringify(parsed.blocks)
-  }
+  // Target-aware validation; creating without blocks stores the category preset.
+  const blocksColumn = catalogBlocksColumn('service-category', data.blocks, data.id ? 'update' : 'create')
+  if (!blocksColumn.ok) return blocksColumn.response
+  const blocksJson = blocksColumn.value
 
   try {
     const existing = data.id ? await prisma.orm.public.ServiceCategory.where({ id: data.id }).first() : null
@@ -120,6 +113,7 @@ export async function POST(request: NextRequest) {
         heroImage: merged.heroImage ?? undefined,
         heroImageAlt: coverAltFrom(merged.seoData),
         blocks: parseJsonArray(merged.blocks),
+        target: 'service-category',
       })
       if (gate) return gate
     }

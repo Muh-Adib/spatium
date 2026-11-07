@@ -18,8 +18,9 @@ import { Badge, Button, FOCUS_RING, inputClass } from './blocks/ui'
 
 const TARGET_LABEL: Record<BlockTarget, string> = {
   page: 'Halaman',
-  portfolio: 'Portofolio',
+  'service-category': 'Kategori layanan',
   service: 'Layanan',
+  portfolio: 'Portofolio',
 }
 
 const KIND_LABEL: Record<BlockField['kind'], string> = {

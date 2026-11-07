@@ -1,6 +1,6 @@
 # Server MCP
 
-SPATIUM menyediakan server [Model Context Protocol](https://modelcontextprotocol.io) di **`/api/mcp`**. Klien MCP (Claude Code, Claude Desktop, Cursor, Windsurf, VS Code, Codex) bisa membaca katalog blok dan menulis **halaman dinamis, artikel jurnal, portofolio (scene), dan layanan sebagai draft**. Klien MCP tidak pernah bisa mempublikasikan, menjadwalkan, mengarsipkan, atau menghapus konten — publikasi selalu dilakukan manusia di Studio.
+SPATIUM menyediakan server [Model Context Protocol](https://modelcontextprotocol.io) di **`/api/mcp`**. Klien MCP (Claude Code, Claude Desktop, Cursor, Windsurf, VS Code, Codex) bisa membaca katalog blok dan menulis **halaman dinamis, artikel jurnal, portofolio (scene), kategori layanan, dan layanan sebagai draft**. Klien MCP tidak pernah bisa mempublikasikan, menjadwalkan, mengarsipkan, atau menghapus konten — publikasi selalu dilakukan manusia di Studio.
 
 ## Transport
 
@@ -34,8 +34,8 @@ Authorization: Bearer spm_…
 | `articles:draft` | `create_article_draft`, `update_article_draft` |
 | `portfolio:read` | `list_portfolios`, `get_portfolio` |
 | `portfolio:draft` | `create_portfolio_draft`, `update_portfolio_draft` |
-| `services:read` | `list_services`, `get_service` |
-| `services:draft` | `create_service_draft`, `update_service_draft` |
+| `services:read` | `list_services`, `get_service`, `list_service_categories`, `get_service_category` |
+| `services:draft` | `create_service_draft`, `update_service_draft`, `create_service_category_draft`, `update_service_category_draft` |
 
 Kunci baru di Studio otomatis mencentang `blocks:read`, `pages:read`, `pages:draft`; scope konten lain dipilih manual. Kunci lama tetap memakai scope yang tersimpan.
 
@@ -47,7 +47,7 @@ Kunci baru di Studio otomatis mencentang `blocks:read`, `pages:read`, `pages:dra
 
 1. `list_block_types` (target `page`) → pilih blok.
 2. `get_block_type` → field, contoh, dan JSON Schema lengkap.
-3. `validate_blocks` → cek susunan blok sebelum menyimpan (`target` bisa `portfolio`/`service`).
+3. `validate_blocks` → cek susunan blok sebelum menyimpan (`target`: `page`, `service-category`, `service`, `portfolio`).
 4. `create_page_draft` → judul, slug, meta, dan blok. ID blok dibuat otomatis bila kosong.
 5. Perbaikan bertahap: `insert_blocks`, `update_block`, `move_block`, `remove_block` (tanpa mengirim ulang seluruh halaman).
 6. `get_page` → lihat `publication`, yaitu hal yang harus dilengkapi manusia sebelum publikasi.
@@ -66,8 +66,10 @@ Isi artikel disimpan sebagai HTML yang sama dengan keluaran editor artikel, disa
 ### Portofolio dan layanan
 
 - `create_portfolio_draft` → `title`, `slug?`, `client`, `year`, `category`, `summary`, `challenge`, `approach` (satu langkah per baris), `solution`, `process`, `result` (satu hasil per baris), `heroImage`/`heroMediaId` + `heroImageAlt`, `liveUrl` (https), `technologies`, `metrics` (`{label, value, detail?}` — hanya fakta terukur), `blocks` (target `portfolio`), `metaTitle`, `metaDescription`, `focusKeyphrase`. `update_portfolio_draft` menerima field yang sama (`null` mengosongkan).
-- `list_services` juga mengembalikan kategori layanan (use case). `create_service_draft` → `name`, `slug?`, `category` (slug kategori yang sudah ada), `shortDescription`, `longDescription`, `highlightWord`, `blocks` (target `service`), `metaTitle`, `metaDescription`, `focusKeyphrase`. Kategori layanan sendiri tidak bisa dibuat/diubah lewat MCP.
-- `editUrl`: `/admin?tab=portfolio&slug=<slug>` dan `/admin?tab=services&slug=<slug>`.
+- `list_services` juga mengembalikan kategori layanan (use case). `create_service_draft` → `name`, `slug?`, `category` (slug kategori yang sudah ada), `shortDescription`, `longDescription`, `highlightWord`, `blocks` (target `service`), `metaTitle`, `metaDescription`, `focusKeyphrase`.
+- Kategori layanan: `list_service_categories` (filter `status`), `get_service_category` (`id` atau `slug`; berisi `services`, `blocks`, `resolvedBlocks`, `blocksMode`), `create_service_category_draft` → `title`, `slug?`, `tag`, `shortDescription`, `heroImage`/`heroMediaId` + `heroImageAlt`, `visual` (ilustrasi `ServiceVisual`), `deliverables[]`, `tools[]` (mengganti daftar di `key_outcomes`, label lain dipertahankan), `blocks` (target `service-category`), `metaTitle`, `metaDescription`, `focusKeyphrase`. Kategori baru selalu `draft` dan tersembunyi dari menu (`showInNav: false`). `update_service_category_draft` menerima field yang sama + `id` + `expectedUpdatedAt`; riwayat ditulis sebagai `service_category` (sama dengan Studio).
+- **Halaman entri tersusun dari blok.** `get_block_preset({ target })` (scope `blocks:read`) mengembalikan preset `service-category` / `service` / `portfolio` beserta field tiap blok. `create_*_draft` tanpa `blocks` menyimpan preset itu; `blocks: []` saat update mengembalikan halaman ke preset. Blok data-bound (`list_block_types` menandai `dataBound: true`) merender field entri sendiri dan hanya menyimpan opsi tampilan. Untuk menyesuaikan, ambil `resolvedBlocks` dari `get_*`, ubah/urutkan/hapus atau sisipkan blok generik, lalu kirim seluruh daftar sebagai `blocks`. Blok untuk target lain ditolak.
+- `editUrl`: `/admin?tab=portfolio&slug=<slug>`, `/admin?tab=services&slug=<slug>`, `/admin?tab=services&category=<slug>`. `previewUrl`: `/admin/preview/<portfolio|service|service-category>/<id>` (login Studio). `publicUrl` layanan: `/services/<kategori>/<slug>`, hanya bila layanan dan kategorinya terbit.
 
 ### Gerbang publikasi yang dilaporkan (`publication`)
 
@@ -120,9 +122,10 @@ curl -s https://spatium.id/api/mcp \
 | `src/lib/mcp/server.ts` | Dispatcher JSON-RPC, negosiasi versi, cek Origin |
 | `src/lib/mcp/tools.ts` | Tool halaman/blok, registri tool, `callTool` (Zod → JSON Schema) |
 | `src/lib/mcp/tool-kit.ts` | Tipe tool, helper hasil, guard draft-only, validasi blok & gambar |
-| `src/lib/mcp/content/*.ts` | Tool artikel, portofolio, layanan; repositori draft portofolio/layanan (`history.ts`: transaksi + riwayat) |
+| `src/lib/mcp/content/*.ts` | Tool artikel, portofolio, kategori layanan, layanan; repositori draft (`history.ts`: transaksi + riwayat) |
 | `src/lib/mcp/keys.ts`, `scopes.ts`, `rate-limit.ts` | Kunci API, scope, batas laju |
 | `src/app/api/mcp-keys/**` | API pengelolaan kunci untuk Studio |
 | `src/components/studio/mcp/StudioMcpManager.tsx` | Tab MCP di Studio |
 | `tests/mcp-server.test.ts` | Test protokol, auth, dan alur end-to-end halaman |
 | `tests/mcp-content.test.ts` | Test scope dan alur draft artikel, portofolio, layanan (database lokal) |
+| `tests/mcp-entity-blocks.test.ts` | `get_block_preset`, tool kategori layanan, preset saat create, validasi target (database lokal) |

@@ -14,11 +14,19 @@ export type CatalogEntity =
  * Enforces centralized, deterministic cache revalidation rules across all
  * catalog mutation routes. Avoids scattered revalidatePath calls.
  */
+/**
+ * `related`: for a category, its child service slugs (their pages at
+ * `/services/<category>/<child>` show the category); for a service, its
+ * parent category slug(s) (the service page lives under it and the parent
+ * lists it).
+ */
 export async function revalidateCatalog(
   entity: CatalogEntity,
   slug?: string | null,
-  childSlugs?: string[]
+  related?: readonly string[]
 ): Promise<void> {
+  const childSlugs = entity === 'category' ? related : undefined
+  const parentSlugs = entity === 'service' ? related ?? [] : []
   try {
     switch (entity) {
       case 'category':
@@ -29,6 +37,8 @@ export async function revalidateCatalog(
         }
         if (childSlugs && childSlugs.length > 0) {
           for (const cSlug of childSlugs) {
+            if (slug) revalidatePath(`/services/${slug}/${cSlug}`)
+            // Former flat URL (now a redirect to the nested page).
             revalidatePath(`/services/${cSlug}`)
           }
         }
@@ -42,7 +52,9 @@ export async function revalidateCatalog(
         revalidatePath('/services')
         if (slug) {
           revalidatePath(`/services/${slug}`)
+          for (const parent of parentSlugs) revalidatePath(`/services/${parent}/${slug}`)
         }
+        for (const parent of parentSlugs) revalidatePath(`/services/${parent}`)
         // Services and portfolios also feed the navigation in the root layout.
         revalidatePath('/', 'layout')
         revalidatePath('/sitemap.xml')
@@ -87,7 +99,7 @@ export async function revalidateCatalog(
 
       const entityPath = slug
         ? entity === 'service'
-          ? `/services/${slug}`
+          ? parentSlugs[0] ? `/services/${parentSlugs[0]}/${slug}` : `/services/${slug}`
           : entity === 'portfolio'
           ? `/portfolio/${slug}`
           : entity === 'article'

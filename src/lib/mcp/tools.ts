@@ -11,6 +11,7 @@ import {
   type BlockTarget,
 } from '@/lib/blocks/catalog'
 import { PAGE_STATUSES, slugify } from '@/lib/pages/page-schema'
+import { DATA_BOUND_TYPES } from '@/blocks/registry'
 import {
   createPage,
   getPageById,
@@ -43,6 +44,9 @@ import {
 import { ARTICLE_TOOLS } from './content/articles'
 import { PORTFOLIO_TOOLS } from './content/portfolio'
 import { SERVICE_TOOLS } from './content/services'
+import { SERVICE_CATEGORY_TOOLS } from './content/service-categories'
+import { BLOCK_PRESETS, PRESET_TYPES } from '@/blocks/presets'
+import { ENTITY_TARGETS } from '@/lib/blocks/define'
 
 export type { ToolContext, ToolResult } from './tool-kit'
 
@@ -67,7 +71,7 @@ function fromPageError(err: PageError): ToolResult {
 
 // ─── Shared schemas ───────────────────────────────────────────────────────────
 
-const TARGETS = ['page', 'portfolio', 'service'] as const satisfies readonly BlockTarget[]
+const TARGETS = ['page', 'service-category', 'service', 'portfolio'] as const satisfies readonly BlockTarget[]
 const CATEGORIES = Object.keys(BLOCK_CATEGORY_LABEL) as [BlockCategory, ...BlockCategory[]]
 const EDITABLE_STATUSES = new Set(EDITABLE_STATUS_LIST)
 
@@ -207,6 +211,7 @@ const blockSummary = z.object({
   description: z.string(),
   category: z.string(),
   targets: z.array(z.string()),
+  dataBound: z.boolean(),
 })
 
 const PAGE_TOOLS: readonly McpTool[] = [
@@ -215,10 +220,14 @@ const PAGE_TOOLS: readonly McpTool[] = [
     title: 'List block types',
     scope: 'blocks:read',
     description:
-      'Step 1 of building a page. Lists the block types available for a target (default "page"): type, label, description, category and targets. ' +
+      'Step 1 of building a page. Lists the block types available for a target (default "page"): type, label, description, category, targets and dataBound. ' +
+      'dataBound blocks (service-category / service / portfolio) render the entry\'s own data and only store presentation options. ' +
       'Pick blocks from here, then call get_block_type for the exact fields of each type you use.',
     input: z.strictObject({
-      target: z.enum(TARGETS).default('page').describe('Where the blocks will be placed. Dynamic pages use "page".'),
+      target: z
+        .enum(TARGETS)
+        .default('page')
+        .describe('Where the blocks will be placed: "page" (dynamic pages), "service-category", "service" or "portfolio".'),
       category: z.enum(CATEGORIES).optional().describe('Only return blocks of this category.'),
     }),
     output: z.object({ target: z.string(), count: z.number(), blocks: z.array(blockSummary) }),
@@ -226,7 +235,14 @@ const PAGE_TOOLS: readonly McpTool[] = [
     run: async ({ target, category }) => {
       const blocks = listBlocksFor(target)
         .filter((e) => !category || e.category === category)
-        .map((e) => ({ type: e.type, label: e.label, description: e.description, category: e.category, targets: [...e.targets] }))
+        .map((e) => ({
+          type: e.type,
+          label: e.label,
+          description: e.description,
+          category: e.category,
+          targets: [...e.targets],
+          dataBound: DATA_BOUND_TYPES.has(e.type),
+        }))
       return ok({ target, count: blocks.length, blocks })
     },
   }),
@@ -254,6 +270,33 @@ const PAGE_TOOLS: readonly McpTool[] = [
         fields: entry.fields,
         example: entry.example,
         jsonSchema: blockJsonSchema(type),
+      })
+    },
+  }),
+
+  defineTool({
+    name: 'get_block_preset',
+    title: 'Get block preset',
+    scope: 'blocks:read',
+    description:
+      'Returns the default page of a service category, service or portfolio entry: the preset block list (what an entry without stored blocks renders, ' +
+      'and what create_*_draft stores when blocks are omitted) with each block\'s fields. Data-bound blocks render the entry\'s own data; their fields are ' +
+      'optional presentation overrides (eyebrow, heading, limits, toggles). Customise by editing, reordering, removing, or inserting generic blocks.',
+    input: z.strictObject({ target: z.enum(ENTITY_TARGETS).describe('"service-category", "service" or "portfolio".') }),
+    annotations: readOnly,
+    run: async ({ target }) => {
+      const blocks = BLOCK_PRESETS[target].map(({ id: _presetId, ...block }) => block)
+      return ok({
+        target,
+        types: [...PRESET_TYPES[target]],
+        blocks,
+        fields: Object.fromEntries(
+          PRESET_TYPES[target].map((type) => {
+            const entry = getBlockEntry(type)
+            return [type, { label: entry?.label ?? type, description: entry?.description ?? '', fields: entry?.fields ?? [] }]
+          }),
+        ),
+        note: 'Ids are assigned on save. Pass these blocks (edited) as blocks to create_*_draft / update_*_draft.',
       })
     },
   }),
@@ -565,7 +608,7 @@ const PAGE_TOOLS: readonly McpTool[] = [
   }),
 ]
 
-export const MCP_TOOLS: readonly McpTool[] = [...PAGE_TOOLS, ...ARTICLE_TOOLS, ...PORTFOLIO_TOOLS, ...SERVICE_TOOLS]
+export const MCP_TOOLS: readonly McpTool[] = [...PAGE_TOOLS, ...ARTICLE_TOOLS, ...PORTFOLIO_TOOLS, ...SERVICE_CATEGORY_TOOLS, ...SERVICE_TOOLS]
 
 const BY_NAME = new Map(MCP_TOOLS.map((t) => [t.name, t]))
 
@@ -639,7 +682,8 @@ export async function callTool(name: string, rawArgs: unknown, ctx: ToolContext)
 export const MCP_INSTRUCTIONS = [
   'SPATIUM content studio. You write pages, journal articles, portfolio entries and services as DRAFTS; a human editor reviews and publishes them in the Studio. You cannot publish, schedule, archive or delete, and any status/publishedAt/scheduledAt argument is refused.',
   'Pages: 1) list_block_types → 2) get_block_type for each type you use (start from its example) → 3) optional validate_blocks → 4) create_page_draft (title, metaTitle, metaDescription, blocks) → 5) refine with insert_blocks / update_block / move_block / remove_block, or update_page_draft for bulk changes → 6) get_page to read publication issues and report the editUrl to the user.',
-  'Articles: list_article_taxonomy (existing categories/authors) → create_article_draft (title, HTML or markdown content, excerpt, metaTitle, metaDescription) → get_article → update_article_draft. Portfolio: create_portfolio_draft / update_portfolio_draft. Services: list_services (categories) → create_service_draft / update_service_draft. Blocks for portfolio/service use list_block_types with target "portfolio"/"service".',
+  'Articles: list_article_taxonomy (existing categories/authors) → create_article_draft (title, HTML or markdown content, excerpt, metaTitle, metaDescription) → get_article → update_article_draft. Portfolio: create_portfolio_draft / update_portfolio_draft. Service categories (use cases): list_service_categories → create_service_category_draft / update_service_category_draft. Services: list_services → create_service_draft / update_service_draft.',
+  'Entity pages (service-category, service, portfolio) are made of blocks too. Every section is a block; data-bound blocks (e.g. category-hero, service-description, portfolio-scene) render the entry\'s own fields and only store presentation options. Creating without blocks stores the default preset (get_block_preset). To customise, read get_* resolvedBlocks, edit/reorder/remove or insert generic blocks (list_block_types with that target), and send the whole list as blocks. Give the user the previewUrl/editUrl.',
   'Edits need fresh state: every write returns the new updatedAt; pass it as expectedUpdatedAt. On a conflict, read again and retry. Unknown arguments are rejected, not ignored.',
   'Content rules: write in the site language (Indonesian unless asked otherwise), keep headings in order (H2 then H3), give every image alt text, and never invent metrics, client names, testimonials, quotes or image URLs. Always end by giving the user the editUrl and the remaining publication issues.',
 ].join('\n')

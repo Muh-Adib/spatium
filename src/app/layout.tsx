@@ -101,6 +101,10 @@ export default async function RootLayout({
       className={`${plusJakartaSans.variable} ${dmMono.variable} ${montserrat.variable} ${inter.variable}`}
     >
       <body>
+        {/* Without JS the reveal observer never runs: show [data-reveal] content immediately. */}
+        <noscript>
+          <style>{'[data-reveal]{opacity:1!important;transform:none!important}'}</style>
+        </noscript>
         <SiteShell useCases={useCases} contact={contact}>
           {children}
         </SiteShell>

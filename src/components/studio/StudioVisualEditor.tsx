@@ -59,7 +59,7 @@ export default function StudioVisualEditor({
   viewMode = 'split-preview',
   onSave,
 }: StudioVisualEditorProps) {
-  const target: BlockTarget = targetType === 'department' ? 'service' : targetType
+  const target: BlockTarget = targetType === 'department' ? 'service-category' : targetType
 
   // Legacy rows may lack ids; the editor needs a stable, unique id per block.
   const normalized = useMemo(() => ensureBlockIds(blocks), [blocks])

@@ -3,6 +3,9 @@ import { NextResponse } from 'next/server'
 import { prisma } from './prisma'
 import type { AuthenticatedUser } from '@/lib/auth/rbac'
 import { validateCatalogPublication, type PublicationGateInput } from '@/lib/blocks/publication-gate'
+import { validateBlockListFor } from '@/lib/blocks/catalog'
+import type { EntityTarget } from '@/lib/blocks/define'
+import { buildPreset } from '@/blocks/presets'
 
 /**
  * Shared helpers for the catalog mutation routes (portfolio, service, service
@@ -115,6 +118,44 @@ export function catalogGateResponse(input: PublicationGateInput): NextResponse |
     },
     { status: 422 },
   )
+}
+
+/**
+ * Validates the `blocks` of a catalog save against its target (unknown or
+ * misplaced types → 422 with per-block issues) and returns the column value:
+ * `undefined` = leave unchanged, `null` = clear (the page then renders its
+ * preset), a JSON string otherwise. Creating without blocks (absent, null or
+ * `[]`) stores the target's preset, so new entries start from the default page.
+ */
+export function catalogBlocksColumn(
+  target: EntityTarget,
+  raw: unknown,
+  mode: 'create' | 'update',
+): { ok: true; value: string | null | undefined } | { ok: false; response: NextResponse } {
+  const preset = () => JSON.stringify(buildPreset(target, { ids: 'fresh' }))
+  if (raw === undefined) return { ok: true, value: mode === 'create' ? preset() : undefined }
+  if (raw === null || raw === '') return { ok: true, value: mode === 'create' ? preset() : null }
+  const list = parseJsonArray(raw)
+  if (list === undefined) {
+    return { ok: false, response: NextResponse.json({ success: false, error: 'Blok harus berupa daftar (array).' }, { status: 400 }) }
+  }
+  const check = validateBlockListFor(target, list)
+  if (!check.ok) {
+    return {
+      ok: false,
+      response: NextResponse.json(
+        {
+          success: false,
+          error: 'Validasi blok katalog gagal.',
+          issues: check.issues.map((i) => `[Blok ${i.index + 1}${i.type ? ` ${i.type}` : ''}] ${i.message}`),
+          blockIssues: check.issues,
+        },
+        { status: 422 },
+      ),
+    }
+  }
+  if (check.blocks.length === 0) return { ok: true, value: mode === 'create' ? preset() : null }
+  return { ok: true, value: JSON.stringify(check.blocks) }
 }
 
 type DefinedKeys<T> = { [K in keyof T]-?: undefined extends T[K] ? never : K }[keyof T]

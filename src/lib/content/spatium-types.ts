@@ -164,7 +164,8 @@ export function isServiceVisual(value: unknown): value is ServiceVisual {
   return typeof value === 'string' && (SERVICE_VISUALS as readonly string[]).includes(value)
 }
 
-export type Capability = { slug: string; title: string; description: string }
+/** A child service listed on its use case; `href` is its own page. */
+export type Capability = { slug: string; title: string; description: string; href: string }
 
 /** A core use case (DB `service_categories` row + its child `services`). */
 export type Service = {
@@ -185,9 +186,61 @@ export type Service = {
   imageAlt: string
   faqs: { q: string; a: string }[]
   related: { label: string; to: string }[]
-  /** Blocks other than paragraph / faq-accordion / internal-links, rendered as-is. */
+  /** Legacy: blocks other than paragraph / faq-accordion / internal-links (rendered after the deliverables). */
   extraBlocks: SduiBlock[]
+  /** The stored block list as-is (resolve with `resolveEntityBlocks('service-category', …)`). */
+  blocks: SduiBlock[]
 }
+
+/** A child service page (`/services/<category>/<slug>`): DB `services` row + its published parent. */
+export type ServiceDetail = {
+  slug: string
+  index: string
+  name: string
+  summary: string
+  /** Long description, one paragraph per line. */
+  paragraphs: string[]
+  deliverables: string[]
+  tools: string[]
+  image?: string
+  imageAlt: string
+  metaTitle: string
+  metaDescription: string
+  href: string
+  parent: { slug: string; name: string; shortName: string; index: string; visual: ServiceVisual }
+  /** The stored block list as-is (resolve with `resolveEntityBlocks('service', …)`). */
+  blocks: SduiBlock[]
+}
+
+/**
+ * Entity data available to data-bound blocks (`BlockRenderContext.entity`).
+ * Lists hold published records only, exactly what the public page shows.
+ */
+export type EntityContext =
+  | {
+      kind: 'service-category'
+      category: Service
+      /** Published portfolios (related work is picked from these by slug). */
+      projects: Project[]
+      /** Other published use cases. */
+      others: Service[]
+    }
+  | {
+      kind: 'service'
+      service: ServiceDetail
+      /** Other published services of the same use case. */
+      siblings: Capability[]
+      /** Published portfolios linked to this service. */
+      projects: Project[]
+    }
+  | {
+      kind: 'portfolio'
+      project: Project
+      /** Other published scenes, in catalogue order. */
+      related: Project[]
+    }
+
+export type EntityKind = EntityContext['kind']
 
 /** Lightweight shape for nav lists and selects. */
 export type ServiceNavItem = { slug: string; name: string }

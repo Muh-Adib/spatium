@@ -182,6 +182,7 @@ function landingPromptText(topic: string, audience?: string): string {
     '3. Use only facts the user gave you. Never invent metrics, client names, testimonials or image URLs; leave images out rather than guessing.',
     '4. Call create_page_draft with a clear title, metaTitle (≤ 60 chars) and metaDescription (120–160 chars).',
     '5. Call get_page, fix what you can from publication.issues, and give the user the editUrl so a human can review and publish.',
+    'For a service category, service or portfolio page (not a /<slug> page): call get_block_preset with that target instead. The preset\'s data-bound blocks render the entry\'s own fields; add generic blocks (list_block_types with the same target) where they help, and pass the list as blocks to create_service_category_draft / create_service_draft / create_portfolio_draft (omit blocks to keep the preset).',
   ].join('\n')
 }
 
