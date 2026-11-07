@@ -107,7 +107,8 @@ export async function requireRole(request: NextRequest, allowedRoles: Role[]): P
       user: null,
       error: NextResponse.json(
         {
-          error: 'Forbidden',
+          error: 'Akses ditolak.',
+          code: 'forbidden',
           message: `Peran '${auth.user.role}' tidak memiliki wewenang untuk tindakan ini.`,
           requiredRoles: allowedRoles,
         },

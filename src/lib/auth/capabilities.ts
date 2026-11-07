@@ -25,7 +25,8 @@ export function forbidUnless(role: Role, capability: Capability): NextResponse |
   if (can(role, capability)) return null
   return NextResponse.json(
     {
-      error: 'Forbidden',
+      error: 'Akses ditolak.',
+      code: 'forbidden',
       message: `Peran '${role}' tidak memiliki wewenang untuk tindakan ini.`,
       requiredRoles: rolesFor(capability),
     },
